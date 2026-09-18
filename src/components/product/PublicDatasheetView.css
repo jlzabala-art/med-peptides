@@ -242,6 +242,40 @@
   border-radius: 9999px;
 }
 
+.pds-version-tag {
+  background: #f0fdfa;
+  color: #0d9488;
+  border: 1px solid #99f6e4;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.02em;
+}
+
+.pds-version-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0d9488;
+  display: inline-block;
+}
+
+.pds-updated-tag {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .pds-title {
   font-size: 2.25rem;
   font-weight: 800;
@@ -853,91 +887,123 @@
 }
 
 .pds-label-type-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-top: auto;
 }
 
-.pds-label-type-buttons .pds-btn {
-  flex: 1;
-  min-width: 120px;
-  justify-content: center;
-  font-size: 0.76rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 7px;
-  font-weight: 700;
+.pds-label-type-buttons .pds-btn-gcp {
+  height: 38px;
+  min-height: 38px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 7px;
   text-decoration: none;
-  transition: all 0.15s ease;
-  min-height: 34px;
+  cursor: pointer;
+  box-sizing: border-box;
+  padding: 0 10px;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Shipping Primary Button (Deep Blue) */
-.pds-label-type-buttons .pds-btn-barcode {
+.pds-label-type-buttons .pds-btn-gcp:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+.pds-label-type-buttons .pds-btn-icon {
+  flex-shrink: 0;
+}
+
+.pds-label-type-buttons .pds-btn-gcp span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Primary CTA Button — Full width across top row so text NEVER clips */
+.pds-label-type-buttons .pds-btn-primary-action {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 40px;
+  height: 40px;
+  font-size: 0.85rem;
+}
+
+/* Primary CTA Button — Shipping (Deep Corporate Navy) */
+.pds-label-type-buttons .pds-btn-primary-action.pds-btn-barcode {
   background: #003666 !important;
   color: #ffffff !important;
   border: 1px solid #002244 !important;
-  box-shadow: 0 1px 2px rgba(0, 34, 68, 0.12);
+  box-shadow: 0 1px 2px 0 rgba(0, 34, 68, 0.22), 0 1px 3px 1px rgba(0, 34, 68, 0.12);
 }
 
-.pds-label-type-buttons .pds-btn-barcode:hover {
-  background: #002244 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(0, 34, 68, 0.22);
+.pds-label-type-buttons .pds-btn-primary-action.pds-btn-barcode:hover {
+  background: #002547 !important;
+  border-color: #001830 !important;
+  box-shadow: 0 2px 6px 0 rgba(0, 34, 68, 0.32);
+  transform: translateY(-1px);
 }
 
-/* Client Vial Primary Button (Teal Medical) */
-.pds-label-type-buttons .pds-btn-pdf {
+/* Primary CTA Button — Client Vial (Medical Clinical Teal) */
+.pds-label-type-buttons .pds-btn-primary-action.pds-btn-pdf {
   background: #0d9488 !important;
   color: #ffffff !important;
   border: 1px solid #0f766e !important;
-  box-shadow: 0 1px 2px rgba(13, 148, 136, 0.15);
+  box-shadow: 0 1px 2px 0 rgba(13, 148, 136, 0.25), 0 1px 3px 1px rgba(13, 148, 136, 0.12);
 }
 
-.pds-label-type-buttons .pds-btn-pdf:hover {
+.pds-label-type-buttons .pds-btn-primary-action.pds-btn-pdf:hover {
   background: #0f766e !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+  border-color: #115e59 !important;
+  box-shadow: 0 2px 6px 0 rgba(13, 148, 136, 0.35);
+  transform: translateY(-1px);
 }
 
-/* Sheet A4 Button (Neutral White with Crisp Border) */
-.pds-label-type-buttons .pds-btn-ghost {
+/* Secondary Action Button — Sheet A4 ×8 (GCP Outlined Style) */
+.pds-label-type-buttons .pds-btn-secondary-action {
+  width: 100%;
+  min-height: 38px;
+  height: 38px;
   background: #ffffff !important;
   color: #334155 !important;
-  border: 1px solid #cbd5e1 !important;
-  font-weight: 600;
+  border: 1px solid #dadce0 !important;
 }
 
-.pds-label-type-buttons .pds-btn-ghost:hover {
+.pds-label-type-buttons .pds-btn-secondary-action:hover {
   background: #f8fafc !important;
   color: #0f172a !important;
   border-color: #94a3b8 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-/* Non-Intrusive Copy Link Button */
-.pds-label-type-buttons .pds-btn-copy-label {
-  background: #f8fafc;
-  color: #475569;
-  border: 1px dashed #cbd5e1;
-  font-weight: 650;
-  font-size: 0.74rem;
-  padding: 0.45rem 0.65rem;
-  border-radius: 7px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.15s ease;
-  min-height: 34px;
+/* Tertiary / Utility Action — Copy Link */
+.pds-label-type-buttons .pds-btn-copy-action {
+  width: 100%;
+  min-height: 38px;
+  height: 38px;
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid #dadce0 !important;
 }
 
-.pds-label-type-buttons .pds-btn-copy-label:hover {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #003666;
+.pds-label-type-buttons .pds-btn-copy-action:hover {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  color: #003666 !important;
+}
+
+.pds-label-type-buttons .pds-btn-copy-action.copied {
+  background: #f0fdf4 !important;
+  border-color: #86efac !important;
+  color: #166534 !important;
 }
 
 .pds-vial-label-preview-wrap {
@@ -1022,6 +1088,44 @@
   }
   .pds-detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Dual label cards & buttons mobile layout (GCP Mobile Standards) */
+  .pds-dual-labels-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pds-label-type-card {
+    padding: 1.1rem;
+  }
+
+  .pds-label-type-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .pds-label-type-buttons .pds-btn-primary-action {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 46px;
+    height: 46px;
+    font-size: 0.86rem;
+    padding: 0 16px;
+    justify-content: center;
+  }
+
+  .pds-label-type-buttons .pds-btn-secondary-action,
+  .pds-label-type-buttons .pds-btn-copy-action {
+    width: 100%;
+    min-height: 44px;
+    height: 44px;
+    font-size: 0.80rem;
+    padding: 0 8px;
+    justify-content: center;
+    white-space: nowrap;
   }
 }
 
@@ -1308,6 +1412,7 @@
   .pds-top-bar,
   .pds-mobile-bar,
   .pds-actions-group,
+  .pds-label-type-buttons,
   button:not(.pds-print-keep) {
     display: none !important;
   }

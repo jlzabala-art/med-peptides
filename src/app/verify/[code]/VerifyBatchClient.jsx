@@ -68,7 +68,7 @@ export default function VerifyBatchClient({ code, verification, baseUrl }) {
             fontSize: '0.75rem',
             fontWeight: 700,
           }}>
-            ISO 9001 / cGMP
+            Dual RP-HPLC &amp; ESI-MS Verified
           </div>
         </div>
 

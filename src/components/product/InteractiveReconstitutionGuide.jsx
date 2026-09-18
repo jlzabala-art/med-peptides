@@ -10,8 +10,10 @@ import {
   Info,
   Sparkles,
   Droplets,
-  ShieldCheck
+  ShieldCheck,
+  ShieldAlert
 } from '@/lib/icons';
+import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
 
@@ -93,7 +95,7 @@ export default function InteractiveReconstitutionGuide({
     return match ? parseFloat(match[1]) : 10;
   }, [selectedStrength, product]);
 
-  // Dynamic clinical default dose calculation (prevents overfill/red warning on low-strength vials like 2mg)
+  // Dynamic clinical default dose calculation — aligned with monograph table reference baseline
   const getClinicalDefaultDose = (mgVal, blendMode = false, unit = 'mg') => {
     const mg = Number(mgVal) || 10;
     if (unit === 'mcg') {
@@ -102,44 +104,92 @@ export default function InteractiveReconstitutionGuide({
       return 1000;
     }
     if (blendMode) return 2.0;
-    if (mg <= 2) return 0.5; // 0.5 mg @ 1.0 mg/mL = 0.50 mL = 50 Units (calm clinical blue)
-    if (mg <= 5) return 1.0; // 1.0 mg @ 2.5 mg/mL = 0.40 mL = 40 Units
-    if (mg <= 10) return 2.0; // 2.0 mg @ 5.0 mg/mL = 0.40 mL = 40 Units
-    return 2.5;
+    if (mg <= 2) return 0.5; // 0.5 mg @ 1.0 mg/mL = 0.50 mL = 50 Units
+    if (mg <= 5) return 2.5; // Exactly matches 2.5 mg/mL baseline table concentration (1.0 mL = 100 Units)
+    if (mg <= 10) return 2.5; // Standard 2.5 mg initial clinical titration
+    if (mg <= 15) return 5.0;
+    return 5.0;
   };
+
+  // Determine the authoritative protocol baseline for this vial strength
+  const baselineState = useMemo(() => {
+    const baseMg = initialVialMg || 5;
+    let baseBac = 2.0;
+    if (isBlend) {
+      const rawVol = baseMg / 10.0;
+      baseBac = Math.max(2.0, Math.round(rawVol * 2) / 2);
+    } else if (baseMg <= 2) {
+      baseBac = 1.0;  // 1.0 mL -> 2.0 mg/mL baseline
+    } else if (baseMg <= 5) {
+      baseBac = 2.0;  // 2.0 mL -> 2.5 mg/mL baseline
+    } else if (baseMg <= 10) {
+      baseBac = 2.0;  // 2.0 mL -> 5.0 mg/mL baseline
+    } else if (baseMg <= 15) {
+      baseBac = 3.0;  // 3.0 mL -> 5.0 mg/mL baseline
+    } else if (baseMg <= 20) {
+      baseBac = 3.0;  // 3.0 mL -> 6.7 mg/mL baseline
+    } else if (baseMg <= 30) {
+      baseBac = 4.0;  // 4.0 mL -> 7.5 mg/mL baseline
+    } else if (baseMg <= 40) {
+      baseBac = 5.0;  // 5.0 mL -> 8.0 mg/mL baseline
+    } else if (baseMg <= 50) {
+      baseBac = 5.0;  // 5.0 mL -> 10.0 mg/mL baseline
+    } else {
+      baseBac = Math.max(5.0, Math.round((baseMg / 10.0) * 2) / 2);
+    }
+    const baseDose = getClinicalDefaultDose(baseMg, isBlend, 'mg');
+    return { baseMg, baseBac, baseDose, baseUnit: 'mg' };
+  }, [initialVialMg, isBlend]);
 
   // Interactive state
   const [vialMg, setVialMg] = useState(initialVialMg);
-  const [bacWaterMl, setBacWaterMl] = useState(2.0); // 2.0 mL standard clinical benchmark
+  const [bacWaterMl, setBacWaterMl] = useState(() => baselineState.baseBac);
   const [doseUnit, setDoseUnit] = useState('mg'); // 'mg' | 'mcg'
-  const [doseValue, setDoseValue] = useState(() => getClinicalDefaultDose(initialVialMg, isBlend, 'mg'));
+  const [doseValue, setDoseValue] = useState(() => baselineState.baseDose);
 
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
     if (initialVialMg && initialVialMg > 0) {
       setVialMg(initialVialMg);
-      // Auto-tune solvent recommendation based on total active content
-      let newBac = 2.0;
-      if (isBlend) {
-        const rawVol = initialVialMg / 15.0;
-        newBac = Math.min(10.0, Math.max(1.0, Math.round(rawVol * 2) / 2));
-      } else if (initialVialMg <= 5) {
-        newBac = 2.0;  // easy low-dose titration
-      } else if (initialVialMg <= 15) {
-        newBac = 2.0;
-      } else if (initialVialMg <= 30) {
-        newBac = 4.0;
-      } else if (initialVialMg <= 50) {
-        newBac = 5.0;
-      } else {
-        const rawVol = initialVialMg / 15.0;
-        newBac = Math.min(10.0, Math.round(rawVol * 2) / 2);
-      }
-      setBacWaterMl(newBac);
-      // Auto-reset dose to safe clinical level for this vial strength
-      setDoseValue(getClinicalDefaultDose(initialVialMg, isBlend, doseUnit));
+      setBacWaterMl(baselineState.baseBac);
+      setDoseUnit('mg');
+      setDoseValue(baselineState.baseDose);
     }
-  }, [initialVialMg, isBlend]);
+  }, [initialVialMg, baselineState]);
+
+  // Detect whether active parameters differ from official monograph baseline
+  const isModifiedFromBaseline = useMemo(() => {
+    if (!baselineState) return false;
+    const vialChanged = Math.abs(vialMg - baselineState.baseMg) > 0.01;
+    const bacChanged = Math.abs(bacWaterMl - baselineState.baseBac) > 0.01;
+    const doseChanged = doseUnit !== baselineState.baseUnit || Math.abs(doseValue - baselineState.baseDose) > 0.01;
+    return vialChanged || bacChanged || doseChanged;
+  }, [baselineState, vialMg, bacWaterMl, doseUnit, doseValue]);
+
+  // Notify on modification transition
+  const prevModifiedRef = React.useRef(false);
+  useEffect(() => {
+    if (isModifiedFromBaseline && !prevModifiedRef.current) {
+      const msg = lang === 'es'
+        ? 'Aviso de protocolo clínico: Parámetros de referencia modificados. Los valores son exclusivamente orientativos; el médico prescriptor debe establecer la dosis terapéutica y dilución definitivas.'
+        : 'Clinical Protocol Notice: Reference reconstitution parameters modified. Default values are for indicative clinical simulation only; the prescribing physician must determine the final patient-specific dose and reconstitution volume.';
+      notifier.warning(msg);
+    }
+    prevModifiedRef.current = isModifiedFromBaseline;
+  }, [isModifiedFromBaseline, lang]);
+
+  const handleResetToBaseline = () => {
+    if (!baselineState) return;
+    triggerHaptic('success');
+    setVialMg(baselineState.baseMg);
+    setBacWaterMl(baselineState.baseBac);
+    setDoseUnit(baselineState.baseUnit);
+    setDoseValue(baselineState.baseDose);
+    const msg = lang === 'es'
+      ? 'Parámetros de reconstitución restaurados a la línea base de la monografía.'
+      : 'Reconstitution parameters restored to monograph protocol baseline.';
+    notifier.success(msg);
+  };
 
   // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded
   useEffect(() => {
@@ -778,6 +828,44 @@ export default function InteractiveReconstitutionGuide({
         </div>
       </div>
 
+      {/* ── Protocol Baseline Tracking Bar ── */}
+      <div className={`irg-baseline-bar ${isModifiedFromBaseline ? 'modified' : 'standard'}`}>
+        <div className="irg-baseline-info">
+          {isModifiedFromBaseline ? (
+            <>
+              <span className="irg-baseline-icon-warn">⚠️</span>
+              <div className="irg-baseline-text">
+                <strong>{lang === 'es' ? 'Parámetros modificados (Simulación clínica orientativa):' : 'Reference Parameters Modified (Clinical Simulation Model):'}</strong>
+                <span> {lang === 'es' ? 'Dosis a extraer' : 'Target Draw'}: {doseValue} {doseUnit} · {lang === 'es' ? 'Diluyente' : 'Diluent'}: {safeBacMl.toFixed(1)} mL BAC · {lang === 'es' ? 'Vial' : 'Vial'}: {safeVialMg} mg</span>
+                <span className="irg-baseline-origin">
+                  {lang === 'es'
+                    ? `Línea base estándar de monografía: ${baselineState.baseDose} mg dosis · ${baselineState.baseBac.toFixed(1)} mL agua BAC (${((baselineState.baseMg) / (baselineState.baseBac)).toFixed(1)} mg/mL). Advertencia: Los valores del simulador son orientativos. El médico prescriptor es el único responsable de determinar la dosificación adecuada y pauta definitiva.`
+                    : `Standard Monograph Baseline: ${baselineState.baseDose} mg target dose · ${baselineState.baseBac.toFixed(1)} mL BAC Water (${((baselineState.baseMg) / (baselineState.baseBac)).toFixed(1)} mg/mL). Notice: Simulator values are strictly indicative. The prescribing physician must establish the final adequate therapeutic dosage and administration protocol.`}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="irg-baseline-icon-check">●</span>
+              <div className="irg-baseline-text">
+                <strong>{lang === 'es' ? 'Línea base de referencia de la monografía (Orientativo):' : 'Monograph Baseline Reference Model (Indicative):'}</strong>
+                <span> {lang === 'es' ? `Sincronizado con la tabla analítica (${safeVialMg} mg vial · ${safeBacMl.toFixed(1)} mL diluyente BAC · ${concentrationMgMl.toFixed(1)} mg/mL). Sujeto a prescripción médica final.` : `Synchronized with monograph table (${safeVialMg} mg vial · ${safeBacMl.toFixed(1)} mL BAC diluent · ${concentrationMgMl.toFixed(1)} mg/mL concentration). Subject to prescribing physician clinical authorization.`}</span>
+              </div>
+            </>
+          )}
+        </div>
+        {isModifiedFromBaseline && (
+          <button
+            type="button"
+            onClick={handleResetToBaseline}
+            className="irg-baseline-reset-btn"
+            title={lang === 'es' ? 'Restablecer todos los parámetros a la línea base oficial' : 'Reset all parameters to official monograph baseline'}
+          >
+            {lang === 'es' ? '↺ Restablecer a línea base' : '↺ Reset to Standard Baseline'}
+          </button>
+        )}
+      </div>
+
       {/* ── Interactive Workspace Grid ── */}
       <div className="irg-workspace">
         
@@ -978,6 +1066,7 @@ export default function InteractiveReconstitutionGuide({
                 <span className="irg-mb-val font-mono text-emerald-800">
                   ~{totalDosesInVial} <small className="text-emerald-700">doses</small>
                 </span>
+                <span className="irg-mb-subtext">{lang === 'es' ? `a ${doseValue} ${doseUnit}/dosis` : `at ${doseValue} ${doseUnit}/dose`}</span>
               </div>
             </div>
 
@@ -1116,10 +1205,17 @@ export default function InteractiveReconstitutionGuide({
         </div>
       </div>
 
-      {/* ── Educational & Clinical Disclaimer ── */}
-      <div className="irg-disclaimer">
-        <p>
-          <strong>Clinical Verification Notice:</strong> This interactive simulator is provided for precision volumetric calibration and clinical laboratory handling reference. Standard U-100 insulin syringes (31G × 8 mm needle) are calibrated at 100 units per 1.0 mL. Individual dosing regimens must be confirmed by a licensed medical practitioner.
+      {/* ── Prescriber Directive & Clinical Governance Notice (Pharma English) ── */}
+      <div className="irg-prescriber-notice">
+        <div className="irg-pn-header">
+          <ShieldAlert size={16} color="#003666" />
+          <span className="irg-pn-title">Clinical Pharmacopeial Directive &amp; Prescriber Responsibility Notice</span>
+        </div>
+        <p className="irg-pn-body">
+          All reconstitution volumes, diluent ratios, nominal concentration values, and volumetric syringe calibrations displayed within this simulator represent theoretical compounding and laboratory reference models based on pharmacopeial standards. They are provided solely for clinical calculation and orientation purposes.
+        </p>
+        <p className="irg-pn-highlight">
+          <strong>Mandatory Prescriber Directive:</strong> The licensed attending physician holds sole medical and legal responsibility for determining, calibrating, and prescribing the final therapeutic dosage, titration cadence, reconstitution diluent volume, and volumetric administration tailored to individual patient clinical requirements and biomarker profiles. This module does not constitute automated prescribing instructions or direct patient self-administration guidance.
         </p>
       </div>
     </div>

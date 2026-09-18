@@ -339,6 +339,16 @@
   font-weight: 600;
 }
 
+.irg-mb-subtext {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Alerts */
 .irg-alert {
   display: flex;
@@ -922,5 +932,137 @@
   .irg-pen-stage {
     touch-action: pan-y;
     padding: 1.25rem 0.75rem 1rem;
+  }
+}
+
+/* ── Protocol Baseline Tracking Bar ── */
+.irg-baseline-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  transition: all 0.25s ease;
+}
+
+.irg-baseline-bar.standard {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.irg-baseline-bar.modified {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.irg-baseline-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.irg-baseline-icon-check {
+  color: #16a34a;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.irg-baseline-icon-warn {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.irg-baseline-text strong {
+  color: #0f172a;
+  margin-right: 0.35rem;
+}
+
+.irg-baseline-text span {
+  color: #334155;
+}
+
+.irg-baseline-origin {
+  display: block;
+  font-size: 0.76rem;
+  color: #b45309;
+  font-style: italic;
+  margin-top: 0.15rem;
+}
+
+.irg-baseline-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ffffff;
+  color: #b45309;
+  border: 1px solid #f59e0b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.irg-baseline-reset-btn:hover {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #d97706;
+}
+
+/* ── Clinical Prescriber Directive Card ── */
+.irg-prescriber-notice {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #003666;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.irg-pn-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.irg-pn-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #003666;
+  text-transform: uppercase;
+}
+
+.irg-pn-body {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #475569;
+  margin: 0 0 0.5rem 0;
+}
+
+.irg-pn-highlight {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #1e293b;
+  margin: 0;
+  background: rgba(0, 54, 102, 0.04);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+}
+
+@media (max-width: 640px) {
+  .irg-baseline-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
   }
 }

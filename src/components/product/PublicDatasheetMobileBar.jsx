@@ -58,8 +58,8 @@ export default function PublicDatasheetMobileBar({
         await navigator.share({
           title: `${name} (${formatName}) | ATLAS HEALTH`,
           text: isEs
-            ? `Ficha técnica analítica de ${name} (${doseName}, ${formatName}) sintetizado bajo cGMP por ${supplierName}.`
-            : `Analytical technical monograph for ${name} (${doseName}, ${formatName}) synthesized under cGMP by ${supplierName}.`,
+            ? `Ficha técnica analítica de ${name} (${doseName}, ${formatName}) fuente de laboratorio autorizado ${supplierName}.`
+            : `Analytical technical monograph for ${name} (${doseName}, ${formatName}) sourced through authorized synthesis partner ${supplierName}.`,
           url: dynamicPublicUrl,
         });
         return;

@@ -18,9 +18,11 @@ export const KNOWN_PEPTIDE_DATA = {
     casNumber: '2023788-19-2',
     molecularFormula: 'C225H348N48O68',
     molecularWeight: '4813.45',
-    pubchemCid: 163378128,
-    targetSystem: 'Dual GLP-1 / GIP Co-Agonist',
-    mechanismOfAction: 'Glucose-dependent insulinotropic polypeptide and GLP-1 receptor agonist'
+    pubchemCid: 156588324,
+    targetSystem: 'Dual GIP / GLP-1 Receptor Co-Agonist (Twincretin)',
+    mechanismOfAction: 'Synergistic dual co-agonism of GIP and GLP-1 receptors enhancing glucose-dependent insulin secretion, suppressing glucagon, delaying gastric emptying, and regulating hypothalamic satiety',
+    sequence: 'Y-Aib-EGTFTSDYSI-Aib-LDKIAQKAFVQWLIAGGPSSGAPPPS-NH2 (C20-diacid)',
+    halfLife: '120 hours (5 days)'
   },
   'semaglutide': {
     casNumber: '910463-68-2',
@@ -28,7 +30,9 @@ export const KNOWN_PEPTIDE_DATA = {
     molecularWeight: '4113.58',
     pubchemCid: 56843331,
     targetSystem: 'GLP-1 Receptor Agonist',
-    mechanismOfAction: 'Selective glucagon-like peptide-1 receptor stimulation'
+    mechanismOfAction: 'Selective glucagon-like peptide-1 receptor stimulation enhancing glucose-dependent insulin secretion, suppressing inappropriate glucagon, and slowing gastric transit',
+    sequence: 'H-Aib-EGTFTSDVSSYLEGQAAK(AEEAc-AEEAc-γ-Glu-17-carboxyheptadecanoyl)EFIAWLVRGRG-OH',
+    halfLife: '168 hours (7 days)'
   },
   'liraglutide': {
     casNumber: '204656-20-2',

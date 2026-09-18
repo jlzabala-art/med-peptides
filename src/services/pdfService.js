@@ -1097,13 +1097,19 @@ export const generateClinicalPDF = async (protocol, formData = {}, optionsOrTier
 
 /**
  * Returns the recommended reconstitution volume (mL) based on vial strength.
+ * Targets 2.5–10 mg/mL concentration range for comfortable SubQ injection.
  */
 const getReconstitutionVolume = (strength) => {
   const mg = parseFloat(strength) || 5;
-  if (mg <= 1)  return '0.5 mL';
-  if (mg <= 5)  return '1.0 mL';
+  if (mg <= 2)  return '1.0 mL';
+  if (mg <= 5)  return '2.0 mL';
   if (mg <= 10) return '2.0 mL';
-  return '2.0 mL';
+  if (mg <= 15) return '3.0 mL';
+  if (mg <= 20) return '3.0 mL';
+  if (mg <= 30) return '4.0 mL';
+  if (mg <= 40) return '5.0 mL';
+  if (mg <= 50) return '5.0 mL';
+  return `${Math.max(5.0, Math.round((mg / 10.0) * 2) / 2).toFixed(1)} mL`;
 };
 
 /**

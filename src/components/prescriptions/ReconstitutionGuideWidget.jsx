@@ -286,11 +286,14 @@ export default function ReconstitutionGuideWidget({
         </div>
         <ol style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.75rem', color: '#475569', lineHeight: 1.5 }}>
           <li>Swab the rubber stopper of both the <strong>{compoundName}</strong> vial and bacteriostatic water vial with 70% alcohol.</li>
-          <li>Draw exactly <strong>{bacWaterMl} ml</strong> of bacteriostatic water into a mixing syringe.</li>
+          <li>Draw the designated volume (<strong>{bacWaterMl} mL</strong> reference BAC water or as prescribed) into a sterile reconstitution syringe.</li>
           <li>Slowly inject the liquid down the inner glass wall of the peptide vial to avoid shearing delicate peptide chains.</li>
           <li>Gently swirl the vial until fully dissolved (<strong>never shake vigorously</strong>). Store in refrigerator at 2–8°C (36–46°F).</li>
           <li>For each dose, draw up to the <strong>{mathResults.syringeUnits} mark</strong> ({mathResults.syringeUnits} units) on a standard U-100 syringe.</li>
         </ol>
+        <div style={{ marginTop: '0.5rem', paddingTop: '0.4rem', borderTop: '1px solid #e2e8f0', fontSize: '0.7rem', color: '#64748b' }}>
+          <em>Clinical Guidance: Default parameters are indicative. The licensed treating physician must determine the final patient-specific dosage and dilution volume.</em>
+        </div>
       </div>
     </div>
   );

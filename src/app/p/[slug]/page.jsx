@@ -182,7 +182,7 @@ export async function generateMetadata({ params, searchParams }) {
   const name = product.canonicalName || product.name || product.title || slug;
   const isLotus = (product.supplierName || product.supplier || '').toLowerCase().includes('lotusland');
   const supplierName = product.isSingleSupplierLocked
-    ? (isLotus ? 'Lotusland (cGMP / ISO 9001:2015)' : (product.supplierName || product.supplier || supplierFilter || 'Official Laboratory'))
+    ? (product.supplierName || product.supplier || supplierFilter || 'Official Laboratory')
     : 'Certified Clinical Laboratories';
   const purity = product.purity || '≥ 99.0% (RP-HPLC & ESI-MS)';
 
@@ -190,7 +190,7 @@ export async function generateMetadata({ params, searchParams }) {
   const doseSuffix = doseParam ? ` (${doseParam.replace(/_/g, ' ')})` : '';
 
   const pharmaTitle = `${name}${doseSuffix}${formatSuffix} — Official Clinical Monograph & Specs | Atlas Services`;
-  const pharmaDesc = `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated and synthesized under certified cGMP standards by ${supplierName} for Atlas Services. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
+  const pharmaDesc = `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Sourced through authorized synthesis partner ${supplierName} for Atlas Services. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
 
   // Universal dynamic scannable barcode/QR image directing to this page for WhatsApp & social platforms
   const barcodeImageUrl = `${BASE_URL}/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(supplierFilter || product.supplierId || 'lotusland')}`;
@@ -228,7 +228,7 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:height': '630',
       'og:image:alt': `Barcode & QR Direct Link for ${name} — Official Clinical Monograph`,
       'article:section': 'Pharmaceutical & Clinical Peptides',
-      'article:tag': `${name}, ${supplierName}, cGMP, Peptide Monograph, Atlas Services`,
+      'article:tag': `${name}, ${supplierName}, RP-HPLC, Peptide Monograph, Atlas Services`,
     },
     robots: { index: true, follow: true },
   };

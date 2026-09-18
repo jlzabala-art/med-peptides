@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { X, Printer, Download, Eye, FileText, Check, ShieldCheck, Tag, Box, Copy } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
+import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 
 /**
  * MonographPreviewModal
@@ -32,6 +33,9 @@ export default function MonographPreviewModal({
   sortedStrengths = [],
   dynamicPublicUrl,
   labelQueryString = '',
+  initialBatch = null,
+  version = null,
+  updatedAtDate = null,
 }) {
   const [activeTab, setActiveTab] = useState('monograph'); // 'monograph' | 'shipping' | 'client'
   const [copied, setCopied] = useState(false);
@@ -46,17 +50,18 @@ export default function MonographPreviewModal({
 
   if (!isOpen || !product) return null;
 
+  const docVersion = version || (product.version ? (String(product.version).startsWith('v') ? product.version : `v${product.version}`) : 'v2.4');
+  const docUpdatedDate = updatedAtDate || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
   const name = product.canonicalName || product.name || 'Clinical Peptide';
   const category = (product.category || 'Metabolic & Endocrine Axis').toUpperCase();
   const targetSystem = product.targetSystem || product.primaryReceptor || product.target || 'GLP-1 / GIP / Glucagon Tri-Agonist';
-  const cas = product.cas || product.casNumber || product.molecular?.casNumber || 'N/A';
-  const formula = product.molecular?.formula || product.formula || 'C225H348N48O68';
-  const mw = product.molecular?.molecularWeight || product.molecularWeight || '4731.3';
+  const cas = product.cas || product.casNumber || product.molecular?.casNumber || '2381089-83-2';
+  const formula = product.molecularFormula || product.molecular?.molecularFormula || product.molecular?.formula || product.formula || 'C221H342N46O68';
+  const mw = product.molecularWeight || product.molecular?.molecularWeight || '4731.33';
+  const purity = (product.purity || '99.0').replace(/[^0-9.]/g, '') || '99.0';
   const formatName = activeFormat?.name || 'Vial (Lyophilized)';
-  const doseName = selectedStrength?.name || '10 mg';
-  const suppCode = (supplierName || 'LOTUS').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
-  const doseCode = (doseName || '10MG').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  const lot = `RP-${suppCode}-${doseCode}-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const lot = product.batchNumber || product.batch || (typeof initialBatch !== 'undefined' && initialBatch ? initialBatch : null) || generateDiscreetBatchCode({ slug, dose: doseName, supplier: supplierName });
 
   // Direct PDF Download Endpoints
   const monographPdfUrl = `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`;
@@ -65,6 +70,10 @@ export default function MonographPreviewModal({
   const clientLabelPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`;
   const clientSheetPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`;
 
+  const clean = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
+  const suppCode = supplierName || product?.supplierName || product?.supplier || 'lotusland';
+  const vSuffix = `${clean(slug)}_${clean(doseName)}_${clean(formatName)}_${clean(suppCode)}_${clean(lot)}`;
+
   const currentDownloadUrl = activeTab === 'shipping'
     ? shippingLabelPdfUrl
     : activeTab === 'client'
@@ -72,10 +81,10 @@ export default function MonographPreviewModal({
       : monographPdfUrl;
 
   const currentFilename = activeTab === 'shipping'
-    ? `shipping_label_${slug}_38x90.pdf`
+    ? `shipping_label_${vSuffix}_38x90.pdf`
     : activeTab === 'client'
-      ? `client_label_${slug}_38x90.pdf`
-      : `${slug}_monograph_a4.pdf`;
+      ? `client_vial_label_${vSuffix}_38x90.pdf`
+      : `${vSuffix}_monograph_a4.pdf`;
 
   const handlePrint = () => {
     triggerHaptic('medium');
@@ -181,7 +190,7 @@ export default function MonographPreviewModal({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <span className="mpm-brand-label">ATLAS SERVICES PHARMACEUTICAL GROUP</span>
                       <span style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '3px', fontFamily: 'monospace' }}>
-                        cGMP 21 CFR 211
+                        Analytical Monograph
                       </span>
                     </div>
                     <h1 className="mpm-doc-title">{name}</h1>
@@ -189,8 +198,11 @@ export default function MonographPreviewModal({
                   </div>
 
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <span style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', display: 'block', fontFamily: 'monospace' }}>Controlled Doc</span>
+                    <span style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', display: 'block', fontFamily: 'monospace' }}>Controlled Doc · {docVersion}</span>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', display: 'block', fontFamily: 'monospace' }}>PDS-{slug.toUpperCase()}</span>
+                    <span style={{ fontSize: '0.62rem', color: '#475569', display: 'block', marginTop: '2px' }}>
+                      Updated: {docUpdatedDate}
+                    </span>
                     <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0f766e', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '0.1rem 0.4rem', borderRadius: '3px', display: 'inline-block', marginTop: '0.2rem' }}>
                       {supplierName} Qualified
                     </span>
@@ -299,12 +311,12 @@ export default function MonographPreviewModal({
                   <div className="mpm-section-heading">3. Reconstitution &amp; Storage Directives</div>
                   <div className="mpm-directives-box">
                     <div>
-                      <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Lyophilized Solid Storage:</strong>
-                      <span style={{ color: '#475569', lineHeight: 1.3 }}>Store at −20°C (± 5°C) in dry, dark conditions. Desiccated vials remain stable up to 24 months.</span>
+                      <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Lyophilized Solid Storage (Unopened):</strong>
+                      <span style={{ color: '#475569', lineHeight: 1.3 }}>Store in a cool, dry place or 2°C–8°C (stable up to 24 months). Ambient transit/delivery is completely safe.</span>
                     </div>
                     <div>
                       <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Reconstituted Solution:</strong>
-                      <span style={{ color: '#475569', lineHeight: 1.3 }}>Reconstitute with 2.0 mL Bacteriostatic Water. Maintain at 2°C to 8°C. Do not freeze. Stable 28 days.</span>
+                      <span style={{ color: '#475569', lineHeight: 1.3 }}>Reconstitute with Bacteriostatic Water. Maintain refrigerated at 2°C to 8°C. Do not freeze. Stable 28 days.</span>
                     </div>
                   </div>
                 </div>
@@ -332,7 +344,7 @@ export default function MonographPreviewModal({
 
                 <div style={{ textAlign: 'right', fontSize: '0.65rem', color: '#64748b' }}>
                   <strong style={{ color: '#334155', display: 'block' }}>Atlas Services Clinical Group</strong>
-                  <span>Quality Systems ISO 9001:2015 &amp; cGMP 21 CFR 211</span>
+                  <span>Dual RP-HPLC &amp; LC-MS Analytical Standard</span>
                 </div>
               </div>
             </div>
@@ -383,14 +395,14 @@ export default function MonographPreviewModal({
 
                 <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '0.4rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', color: '#64748b', fontFamily: 'sans-serif' }}>
                   <span>Authorized Cold-Chain Logistics</span>
-                  <span>Store Desiccated −20°C</span>
+                  <span>Reconstituted: Store at 2–8°C</span>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <a
                   href={shippingSheetPdfUrl}
-                  download={`shipping_sheet_${slug}_a4.pdf`}
+                  download={`shipping_sheet_${vSuffix}_a4.pdf`}
                   className="mpm-btn-download"
                   style={{ background: '#ffffff', color: '#334155', border: '1px solid #cbd5e1' }}
                   title="Download A4 Printable Sheet (×8 Labels)"
@@ -458,7 +470,7 @@ export default function MonographPreviewModal({
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <a
                   href={clientSheetPdfUrl}
-                  download={`client_sheet_${slug}_a4.pdf`}
+                  download={`client_sheet_${vSuffix}_a4.pdf`}
                   className="mpm-btn-download"
                   style={{ background: '#ffffff', color: '#334155', border: '1px solid #cbd5e1' }}
                   title="Download A4 Printable Sheet (×8 Client Labels)"

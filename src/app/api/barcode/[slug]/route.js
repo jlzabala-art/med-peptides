@@ -1,5 +1,10 @@
 import QRCode from 'qrcode';
 import { adminDb } from '../../../../lib/firebaseAdmin.js';
+import { 
+  generateDiscreetBatchCode, 
+  getDiscreetProductPrefix, 
+  getSupplierCode 
+} from '../../../../utils/discreetBatchHelper.js';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,8 +82,13 @@ async function fetchProductData(slug) {
 
   const purity = data?.purity || '≥ 99.0% (RP-HPLC Verified)';
   const targetAxis = data?.targetSystem || data?.target || 'Clinical Research Reference Standard';
-  const lotNumber = `LOT-${target.toUpperCase()}-2026`;
-  const skuNumber = `RP-LOT-${target.toUpperCase()}`;
+  const supp = data?.supplierId || data?.supplierName || data?.supplier || 'supplier-lotusland';
+  const lotNumber = generateDiscreetBatchCode({
+    slug: target,
+    dose: data?.dosage || '10 mg',
+    supplier: supp
+  });
+  const skuNumber = `RP-${getSupplierCode(supp)}-${getDiscreetProductPrefix(target)}`;
 
   return {
     name: cleanName,
@@ -86,7 +96,7 @@ async function fetchProductData(slug) {
     targetAxis,
     lotNumber,
     skuNumber,
-    supplier: 'Lotusland (cGMP / ISO 9001:2015)',
+    supplier: data?.supplierName || data?.supplier || 'Authorized Synthesis Partner',
   };
 }
 
@@ -105,10 +115,37 @@ export async function GET(request, { params }) {
     const supplier = searchParams.get('supplier') || 'lotusland';
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
-    const targetUrl = `${baseUrl}/p/${slug}${supplier ? `?supplier=${encodeURIComponent(supplier)}` : ''}`;
+    const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
+    let targetUrl = explicitUrl;
+
+    if (!targetUrl) {
+      const qParams = new URLSearchParams();
+      const dose = searchParams.get('dose') || searchParams.get('strength');
+      const presentation = searchParams.get('presentation') || searchParams.get('format');
+      const batch = searchParams.get('batch') || searchParams.get('vialCode');
+      const vialCode = searchParams.get('vialCode') || searchParams.get('batch');
+      const lang = searchParams.get('lang');
+
+      if (dose && dose !== 'all') qParams.set('dose', dose);
+      if (presentation && presentation !== 'all') qParams.set('presentation', presentation);
+      if (supplier && supplier !== 'all') qParams.set('supplier', supplier);
+      if (batch) qParams.set('batch', batch);
+      if (vialCode) qParams.set('vialCode', vialCode);
+      if (lang && lang !== 'en') qParams.set('lang', lang);
+
+      const qs = qParams.toString();
+      targetUrl = `${baseUrl}/p/${slug}${qs ? `?${qs}` : ''}`;
+    } else if (targetUrl.startsWith('/')) {
+      targetUrl = `${baseUrl}${targetUrl}`;
+    }
 
     // 1. Fetch Product Metadata
     const product = await fetchProductData(slug);
+    const customBatch = searchParams.get('batch') || searchParams.get('vialCode');
+    if (customBatch) {
+      product.lotNumber = customBatch;
+      product.skuNumber = `RP-${getSupplierCode(supplier || product.supplier)}-${customBatch.replace(/[^A-Z0-9-]/gi, '').slice(0, 16)}`;
+    }
 
     // 2. Generate Native QR SVG (pure JS — no native deps)
     const rawQrSvg = await QRCode.toString(targetUrl, {
@@ -153,7 +190,7 @@ export async function GET(request, { params }) {
   
   <!-- Brand & Alliance -->
   <text x="60" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="900" fill="#FFFFFF" letter-spacing="-0.02em">
-    ATLAS SERVICES <tspan fill="#38BDF8">×</tspan> LOTUSLAND
+    ATLAS SERVICES <tspan fill="#38BDF8">×</tspan> CLINICAL SCIENCES
   </text>
   <text x="60" y="88" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#94A3B8" letter-spacing="0.08em">
     OFFICIAL CLINICAL MONOGRAPH &amp; ANALYTICAL RELEASE STANDARD
@@ -163,7 +200,7 @@ export async function GET(request, { params }) {
   <rect x="870" y="44" width="266" height="38" rx="8" fill="rgba(255, 255, 255, 0.15)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1.5" />
   <circle cx="892" cy="63" r="6" fill="#10B981" />
   <text x="908" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#FFFFFF" letter-spacing="0.04em">
-    cGMP &amp; ISO 9001:2015
+    RP-HPLC &amp; LC-MS Verified
   </text>
 
   <!-- ── Left Column: Peptide Specs & 1D Barcode ── -->
@@ -223,8 +260,8 @@ export async function GET(request, { params }) {
     <text x="198" y="388" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#002244" letter-spacing="0.02em">
       SCAN WITH CAMERA TO OPEN SPECS
     </text>
-    <text x="198" y="408" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#64748B">
-      med-peptides.com/p/${escapeXml(slug)}
+    <text x="198" y="408" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#64748B">
+      ${escapeXml(targetUrl.replace(/^https?:\/\//, '').slice(0, 48))}${targetUrl.replace(/^https?:\/\//, '').length > 48 ? '...' : ''}
     </text>
   </g>
 

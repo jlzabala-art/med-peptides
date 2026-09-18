@@ -22,7 +22,7 @@ export default function VialLabelPrinter({ product, selectedVariant, onClose }) 
   if (!product) return null;
 
   const variantDosage = selectedVariant?.dosage || selectedVariant?.strength || product.dosage || '';
-  const storageTemp   = product.storage_conditions?.dry || '−20°C to −80°C';
+  const storageTemp   = '2–8°C once reconstituted';
   const mw            = product.molecular_weight ? `MW: ${product.molecular_weight} Da` : null;
   const lot           = `LOT-${new Date().getFullYear()}-${(product.id || product.name || '').slice(0, 4).toUpperCase()}`;
   const productUrl    = `https://med-peptides.com/p/${product.slug || product.name?.toLowerCase().replace(/\s+/g, '-')}`;

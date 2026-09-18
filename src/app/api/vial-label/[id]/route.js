@@ -3,6 +3,12 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import QRCode from 'qrcode';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { getCanonicalSupplierName } from '../../../../data/productConstants';
+import { 
+  generateDiscreetBatchCode, 
+  getDiscreetProductPrefix, 
+  getSupplierCode, 
+  formatDoseCode 
+} from '../../../../utils/discreetBatchHelper';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,55 +153,10 @@ function draw1DBarcode(page, originX, originY, maxW, height, text) {
   page.drawRectangle({ x, y: originY, width: 1, height, color: barColor });
 }
 
-const DISCREET_PREFIXES = {
-  retatrutide: 'RT',
-  tirzepatide: 'TZ',
-  semaglutide: 'SM',
-  cagrilintide: 'CG',
-  mazdutide: 'MZ',
-  survodutide: 'SV',
-  bpc157: 'BP',
-  'bpc-157': 'BP',
-  tb500: 'TB',
-  'tb-500': 'TB',
-  epithalon: 'EP',
-  ghkcu: 'GH',
-  'ghk-cu': 'GH',
-  ipamorelin: 'IP',
-  cjc1295: 'CJ',
-  'cjc-1295': 'CJ',
-  nad: 'ND',
-  nadplus: 'ND',
-  motsc: 'MC',
-  'mots-c': 'MC',
-  ss31: 'SS',
-  'ss-31': 'SS',
-  selank: 'SL',
-  semax: 'SX',
-  aod9604: 'AD',
-  'aod-9604': 'AD',
-  tesofensine: 'TS',
-  sermorelin: 'SR',
-  melanotan: 'MT',
-  'melanotan-2': 'MT',
-  pt141: 'PT',
-  'pt-141': 'PT',
-};
-
 function getDiscreetProductCode(product, customCode, uniqueSeq) {
   if (customCode) return String(customCode).toUpperCase();
   const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
-  
-  let prefix = DISCREET_PREFIXES[cleanSlug];
-  if (!prefix) {
-    const consonants = cleanSlug.replace(/[^bcdfghjklmnpqrstvwxyz]/g, '').toUpperCase();
-    if (consonants.length >= 2) {
-      prefix = consonants.slice(0, 2);
-    } else {
-      prefix = cleanSlug.slice(0, 2).toUpperCase();
-    }
-  }
-
+  const prefix = getDiscreetProductPrefix(cleanSlug);
   const num = uniqueSeq ? uniqueSeq.slice(0, 3) : '982';
   return `${prefix}-${num}`;
 }
@@ -218,31 +179,40 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   const purity = toSafePdfText(variant.purity || variant.grade || '>= 99.0% (HPLC)');
   const rawFormat = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
   const formatType = rawFormat.toLowerCase().includes('vial') ? rawFormat : `${rawFormat} (Vial)`;
-  const rawStorage = toSafePdfText(variant.storageInstructions || 'Store desiccated at -20C (2-8C once recon)');
-  const storage = rawStorage.length > 45 ? 'Store at -20C (2-8C once reconst.)' : rawStorage;
+  // Storage directive: Show practical post-reconstitution temperature (2-8°C).
+  // Avoid confusing -20°C deep-freeze warning on client/patient labels (unreconstituted vials are ambient-shipping stable).
+  const storage = '2-8C once reconstituted (Protect from light)';
 
   // ── Smart reconstitution volume calculator ────────────────────────────────
-  // Aligned with clinical standards: 2.0 mL standard for 5-15 mg vials
+  // Clinical target: 2.5–10 mg/mL concentration for comfortable SubQ injection
   const mgMatch = String(dosage).match(/(\d+(?:\.\d+)?)\s*mg/i);
   let concText = '2.0 mL BAC Water (Sterile Water alt.)';
   if (mgMatch) {
     const mg = parseFloat(mgMatch[1]);
     let volPrimary = 2.0;
-    if (mg <= 5) {
+    if (mg <= 2) {
+      volPrimary = 1.0;
+    } else if (mg <= 5) {
+      volPrimary = 2.0;
+    } else if (mg <= 10) {
       volPrimary = 2.0;
     } else if (mg <= 15) {
-      volPrimary = 2.0;
-    } else if (mg <= 30) {
       volPrimary = 3.0;
+    } else if (mg <= 20) {
+      volPrimary = 3.0;
+    } else if (mg <= 30) {
+      volPrimary = 4.0;
+    } else if (mg <= 40) {
+      volPrimary = 5.0;
     } else if (mg <= 50) {
       volPrimary = 5.0;
     } else {
-      volPrimary = Math.min(10.0, Math.round((mg / 15.0) * 2) / 2);
+      volPrimary = Math.max(5.0, Math.round((mg / 10.0) * 2) / 2);
     }
     const concPrimary = (mg / volPrimary).toFixed(1).replace(/\.0$/, '');
-    const volAlt = volPrimary === 2.0 ? '1.0' : (volPrimary / 2).toFixed(1).replace(/\.0$/, '');
+    const volAlt = volPrimary <= 2.0 ? '1.0' : (volPrimary / 2).toFixed(1).replace(/\.0$/, '');
     const concAlt = (mg / parseFloat(volAlt)).toFixed(1).replace(/\.0$/, '');
-    concText = `${volPrimary.toFixed(1)} mL BAC Water (${concPrimary} mg/mL) - Alt: ${volAlt} mL (${concAlt} mg/mL)`;
+    concText = `Ref. ${volPrimary.toFixed(1)} mL BAC (${concPrimary} mg/mL) - Alt: ${volAlt} mL (${concAlt} mg/mL) · Or per Physician`;
   }
 
   // Generate QR Code PNG Buffer pointing to specific variant/dose/supplier public page
@@ -366,12 +336,6 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     size: 4.8,
     font: fontB,
     color: BRAND_COLOR,
-  });
-
-  // Supplier under QR code with dynamic scaling so it is never truncated
-  fitText(page, supplierDisplay, font, 4.4, 3.2, qrSize + 8, qrX + (qrSize / 2), qrY - 12, {
-    align: 'center',
-    color: MUTED,
   });
 }
 
@@ -623,22 +587,32 @@ export async function GET(request, { params }) {
       if (varBatch && !varBatch.toLowerCase().includes(cleanSlug)) {
         batchNumber = varBatch;
       } else {
-        const suppClean = (resolvedSupplierName || 'LOTUS').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
-        const doseClean = String(targetDose || '10MG').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-        const yearMonth = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-        batchNumber = `RP-${suppClean}-${doseClean}-${yearMonth}`;
+        batchNumber = generateDiscreetBatchCode({
+          slug: product.slug || cleanSlug,
+          dose: targetDose,
+          supplier: rawSupplier || targetSupplier || resolvedSupplierName
+        });
       }
     }
 
     // Resolve target shared URL for the QR code
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetShareUrl = explicitUrl;
+    if (targetShareUrl && targetShareUrl.startsWith('/')) {
+      targetShareUrl = `${BASE_URL}${targetShareUrl}`;
+    }
     if (!targetShareUrl) {
       const qParams = new URLSearchParams();
       if (targetSupplier && targetSupplier !== 'all') qParams.set('supplier', targetSupplier);
       if (targetDose && targetDose !== 'all') qParams.set('dose', targetDose);
-      if (targetFormat && targetFormat !== 'all') qParams.set('format', targetFormat);
-      if (batchNumber) qParams.set('batch', batchNumber);
+      if (targetFormat && targetFormat !== 'all') {
+        qParams.set('presentation', targetFormat);
+        qParams.set('format', targetFormat);
+      }
+      if (batchNumber) {
+        qParams.set('batch', batchNumber);
+        qParams.set('vialCode', batchNumber);
+      }
       const lang = searchParams.get('lang');
       if (lang && lang !== 'en') qParams.set('lang', lang);
       const qs = qParams.toString();
@@ -703,13 +677,21 @@ export async function GET(request, { params }) {
     }
 
     const pdfBytes = await pdfDoc.save();
-    const safeName = toSafePdfText(product.name || id).replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-    const filename = isBarcodeOnly
-      ? `batch_label_${batchNumber.toLowerCase()}_${format}.pdf`
-      : `vial_label_${safeName}_full_${format}.pdf`;
+    const cleanFn = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
+    const fnSlug = cleanFn(product.slug || cleanSlug || id);
+    const fnDose = cleanFn(targetDose || 'dose');
+    const fnPres = cleanFn(targetFormat || 'vial');
+    const fnSupp = cleanFn(resolvedSupplierName || targetSupplier || 'lotusland');
+    const fnBatch = cleanFn(batchNumber || 'batch');
+    const fnType = isBarcodeOnly ? 'shipping' : (type === 'client' ? 'client_vial' : 'full');
+    const fnFormat = cleanFn(format || '38x90');
 
-    const isDownload = searchParams.get('download') === '1' || searchParams.get('download') === 'true';
-    const dispositionType = isDownload ? 'attachment' : (searchParams.get('disposition') || 'inline');
+    const filename = `${fnSlug}_${fnDose}_${fnPres}_${fnSupp}_${fnBatch}_${fnType}_${fnFormat}.pdf`;
+
+    const userAgent = request.headers.get('user-agent') || '';
+    const isMobile = /iPhone|iPad|iPod|Android|Mobile/i.test(userAgent);
+    const isDownload = (searchParams.get('download') === '1' || searchParams.get('download') === 'true') && !isMobile;
+    const dispositionType = isDownload ? 'attachment' : 'inline';
 
     return new NextResponse(pdfBytes, {
       status: 200,

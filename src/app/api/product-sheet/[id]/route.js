@@ -39,7 +39,7 @@ const PUBLIC_FIELDS = [
   'casNumber', 'cas', 'scientificName', 'molecularFormula', 'molecularWeight',
   'goals', 'mechanisms', 'tags', 'primary_goal', 'target', 'targetSystem',
   'pharmacology', 'aiContent', 'isProfessional', 'requiresPrescription',
-  'status', 'isActive',
+  'status', 'isActive', 'version', 'updatedAt',
 ];
 
 const VARIANT_PUBLIC_FIELDS = [
@@ -227,10 +227,19 @@ export async function GET(request, context) {
     const W = 595, H = 842; // A4
     const MRG = 40;
     const RIGHT = W - MRG;
-    const CONTENT_W = RIGHT - MRG;
+    const rawUpdated = product.updatedAt || product._updatedAt;
+    let updatedDate = new Date();
+    if (rawUpdated) {
+      if (typeof rawUpdated.toDate === 'function') updatedDate = rawUpdated.toDate();
+      else {
+        const d = new Date(rawUpdated);
+        if (!isNaN(d.getTime())) updatedDate = d;
+      }
+    }
+    const updatedDateStr = updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const versionStr = product.version ? (String(product.version).startsWith('v') ? product.version : `v${product.version}`) : 'v2.4';
 
     const docCode = `ATS-DS-${(casNumber.replace(/[^0-9A-Z]/gi, '') || id.slice(-6)).toUpperCase()}`;
-    const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
     function addPage() {
       const p = pdfDoc.addPage([W, H]);
@@ -242,17 +251,17 @@ export async function GET(request, context) {
         x: MRG, y: H - 46, size: 7.5, font: fontB, color: rgb(0.68, 0.85, 0.95),
       });
 
-      const refText = `DOC REF: ${docCode}`;
+      const refText = `DOC REF: ${docCode} · ${versionStr}`;
       const refW = font.widthOfTextAtSize(refText, 7.5);
       p.drawText(refText, { x: RIGHT - refW, y: H - 32, size: 7.5, font: fontB, color: rgb(1, 1, 1) });
 
-      const dateText = `DATE: ${dateStr}`;
+      const dateText = `REV DATE: ${updatedDateStr}`;
       const dateW = font.widthOfTextAtSize(dateText, 7.5);
       p.drawText(dateText, { x: RIGHT - dateW, y: H - 46, size: 7.5, font, color: rgb(0.8, 0.9, 0.98) });
 
       // Footer
       p.drawLine({ start: { x: MRG, y: 36 }, end: { x: RIGHT, y: 36 }, thickness: 0.5, color: BORDER_CLR });
-      p.drawText(`${BRAND_NAME}  ·  Medical & Pharmaceutical Intelligence  ·  Confidential — For Authorized Medical Use Only`, {
+      p.drawText(`${BRAND_NAME}  ·  Monograph ${versionStr} (Updated ${updatedDateStr})  ·  Confidential — For Authorized Medical Use Only`, {
         x: MRG, y: 24, size: 6.8, font, color: MUTED,
       });
 
@@ -491,7 +500,7 @@ export async function GET(request, context) {
         y -= 3;
 
         page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
-        page.drawText('Lyophilized powder: Store at -20C (or 2C - 8C). Reconstituted solution: 2C - 8C (stable 28 days). Do not freeze.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
+        page.drawText('Unopened vial: Cool, dry place or 2C - 8C (stable 24 mos). Once reconstituted: 2C - 8C (stable 28 days). Do not freeze.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
         y -= 16;
       }
     }

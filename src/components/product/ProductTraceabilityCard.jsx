@@ -33,7 +33,7 @@ import { getTranslations } from '../../utils/productTranslations';
  * - Dynamic QR code verification linking to /verify/[batchCode]
  * - Direct download of the clinical product monograph PDF (/api/product-sheet/[id])
  */
-export default function ProductTraceabilityCard({ product, className = '', baseUrl, lang = 'en' }) {
+export default function ProductTraceabilityCard({ product, className = '', baseUrl, lang = 'en', monographUrl = '', batchCode: customBatchCode = '' }) {
   const [copied, setCopied] = useState(false);
   const t = getTranslations(lang);
 
@@ -41,7 +41,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
 
   const rawName = product.name || product.canonicalName || product.displayName || 'Clinical Peptide';
   const slug = product.slug || product.id || 'peptide';
-  const batchCode = product.batchNumber || product.lotNumber || (product.slug ? `LOT-${product.slug.slice(0, 5).toUpperCase()}-2026` : 'LOT-VERIFIED-AUTH');
+  const batchCode = customBatchCode || product.batchNumber || product.lotNumber || (product.slug ? `LOT-${product.slug.slice(0, 5).toUpperCase()}-2026` : 'LOT-VERIFIED-AUTH');
   const casNumber = product.casNumber || product.cas || 'Available on monograph';
   const purity = product.purity || '≥ 99.4%';
   const mw = product.molecularWeight || product.molecular_weight ? `${product.molecularWeight || product.molecular_weight} Da` : null;
@@ -52,10 +52,11 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
 
   const origin = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com');
   const verifyUrl = `${origin}/verify/${encodeURIComponent(batchCode)}`;
+  const activeMonographUrl = monographUrl || verifyUrl;
   const pdfUrl = `/api/product-sheet/${product.id || slug}?format=vial`;
 
   const handleCopyHash = async () => {
-    await navigator.clipboard.writeText(verifyUrl).catch(() => {});
+    await navigator.clipboard.writeText(activeMonographUrl).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -135,7 +136,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
           gap: '0.4rem',
         }}>
           <Award size={14} color="#facc15" />
-          ISO 9001 / cGMP Certified Synthesis
+          Dual-Stage RP-HPLC &amp; LC-MS Certified Release
         </div>
       </div>
 
@@ -281,7 +282,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
       <div className="ptc-footer-verification">
         <div className="ptc-footer-qr-group">
           <div className="ptc-footer-qr-box">
-            <QRCodeSVG value={verifyUrl} size={62} level="M" />
+            <QRCodeSVG value={activeMonographUrl} size={62} level="M" />
           </div>
           <div className="ptc-footer-qr-text">
             <div className="ptc-footer-qr-title">

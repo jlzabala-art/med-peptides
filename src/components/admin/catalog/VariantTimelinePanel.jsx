@@ -86,7 +86,10 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const absoluteMonographUrl = `${origin}${canonicalMonographPath}`;
 
-  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}&vialCode=${batchParam}&url=${encodeURIComponent(canonicalMonographPath)}`;
+  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}&vialCode=${batchParam}&url=${encodeURIComponent(absoluteMonographUrl)}`;
+
+  const cleanStr = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
+  const vFileSuffix = `${cleanStr(rawSlug)}_${cleanStr(variant?.dosage || variant?.dose || '10mg')}_${cleanStr(variant?.presentation || 'vial')}_${cleanStr(variant?.supplierId || variant?.supplier || 'lotusland')}_${cleanStr(currentVialCode)}`;
 
   const shippingLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=shipping&${baseLabelQuery}&download=1`;
   const clientLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=client&${baseLabelQuery}&download=1`;
@@ -565,7 +568,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               href={shippingLabelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              download={`shipping_label_${currentVialCode}_38x90.pdf`}
+              download={`shipping_label_${vFileSuffix}_38x90.pdf`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -592,7 +595,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               href={clientLabelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              download={`client_label_${currentVialCode}_38x90.pdf`}
+              download={`client_label_${vFileSuffix}_38x90.pdf`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -619,7 +622,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               href={sheetLabelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              download={`vial_labels_sheet_${currentVialCode}_a4.pdf`}
+              download={`vial_labels_sheet_${vFileSuffix}_a4.pdf`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -1178,7 +1181,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
                 href={clientLabelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                download={`client_label_${currentVialCode}_38x90.pdf`}
+                download={`client_label_${vFileSuffix}_38x90.pdf`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

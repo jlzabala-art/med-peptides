@@ -34,7 +34,7 @@ export async function GET(request) {
     pill1 = '✓  HPLC Purity Assay';
     pill2 = '✓  Mass Spectrometry Match';
     pill3 = '✓  Sterility & Endotoxin Pass';
-    pill4 = '✓  cGMP Certified Batch';
+    pill4 = '✓  Certified Batch Release';
   }
 
   const svg = `
@@ -91,7 +91,7 @@ export async function GET(request) {
 
   <!-- Security & Clinical Guarantee Badges -->
   <rect x="100" y="405" width="180" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
-  <text x="118" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  cGMP ISO 9001:2015</text>
+  <text x="118" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  RP-HPLC &amp; ESI-MS Verified</text>
 
   <rect x="295" y="405" width="180" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
   <text x="313" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  RP-HPLC ≥ 99% Purity</text>

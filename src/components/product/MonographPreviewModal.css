@@ -554,3 +554,72 @@
     font-size: 0.72rem !important;
   }
 }
+
+/* ── Print Stylesheet for Modal Preview ── */
+@media print {
+  /* Hide the rest of the application when modal is active during print */
+  body > *:not(.mpm-overlay),
+  .public-datasheet-root > *:not(.mpm-overlay),
+  .pds-top-bar,
+  .pds-mobile-bar,
+  .pds-actions-group {
+    display: none !important;
+  }
+
+  .mpm-overlay {
+    position: static !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+  }
+
+  .mpm-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Hide modal interface controls in print mode */
+  .mpm-top-bar,
+  .mpm-tabs-bar,
+  .mpm-footer,
+  .mpm-close-btn,
+  [data-print-hide="true"] {
+    display: none !important;
+  }
+
+  .mpm-body-canvas {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .mpm-sheet,
+  [data-print-body="true"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    border: 1pt solid #cbd5e1 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 14pt !important;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+}

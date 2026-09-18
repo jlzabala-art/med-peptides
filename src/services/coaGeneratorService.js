@@ -20,7 +20,7 @@ export function generateCoaData(product, variant) {
   return {
     documentId: verificationCode,
     company: 'ATLAS SERVICES PHARMACEUTICAL BIOTECH',
-    labStandard: 'ISO/IEC 17025:2017 & cGMP 21 CFR Part 211',
+    labStandard: 'Dual-Stage RP-HPLC & ESI-MS Pharmacopeial Release Standard',
     productName,
     scientificName: product?.scientificName || 'Synthetic Oligopeptide',
     dosage: activeVariant?.dosage || '10 mg',

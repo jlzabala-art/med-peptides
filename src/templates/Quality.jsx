@@ -46,7 +46,7 @@ const features = [
 ];
 
 const TRUST_STATS = [
-  { icon: <Award size={20} />,      value: 'ISO 9001',  label: 'Certified'            },
+  { icon: <Award size={20} />,      value: 'CoA',       label: 'Every Batch'           },
   { icon: <ShieldCheck size={20} />, value: '≥ 99%',    label: 'Purity guarantee'     },
   { icon: <Microscope size={20} />,  value: 'HPLC / MS', label: 'Dual verification'   },
   { icon: <FileText size={20} />,    value: 'CoA',       label: 'Every batch'          },

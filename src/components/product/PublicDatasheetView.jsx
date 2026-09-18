@@ -35,6 +35,7 @@ import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicDatasheetMobileBar from './PublicDatasheetMobileBar';
 import MonographPreviewModal from './MonographPreviewModal';
+import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 
 function WaIcon() {
   return (
@@ -69,17 +70,56 @@ export default function PublicDatasheetView({
   const [dynamicTranslations, setDynamicTranslations] = useState({});
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedLabelType, setCopiedLabelType] = useState(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   const requestedLangs = useRef(new Set());
 
-  const handleCopyLabelUrl = (type) => {
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileDevice(
+        window.innerWidth <= 768 ||
+        /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent)
+      );
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleCopyLabelUrl = async (type) => {
     if (typeof window === 'undefined') return;
     const url = `${window.location.origin}/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=${type}${labelQueryString}`;
+    let success = false;
     if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        success = true;
+      } catch (err) {
+        console.warn('Clipboard writeText failed, trying fallback:', err);
+      }
+    }
+    if (!success) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr);
+      }
+    }
+    if (success) {
       setCopiedLabelType(type);
       triggerHaptic('success');
       toast.success(type === 'shipping' ? 'Shipping label link copied ✓' : 'Clinical label link copied ✓');
       setTimeout(() => setCopiedLabelType(null), 2500);
+    } else {
+      toast.error('Could not copy link to clipboard');
     }
   };
 
@@ -93,23 +133,6 @@ export default function PublicDatasheetView({
   const t = getTranslations(lang);
   const targetId = product?.id || slug;
   const pdfUrl = `/api/product-sheet/${encodeURIComponent(targetId)}?format=vial`;
-  const barcodeSupplier = product?.supplierId || product?.supplierName || product?.supplier || 'lotusland';
-  const barcodeImageUrl = `/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(barcodeSupplier)}`;
-
-  // Fetch SVG inline — <img> cannot render nested <svg> (QR inside label)
-  useEffect(() => {
-    if (!slug) return;
-    setSvgError(false);
-    setInlineSvg(null);
-    fetch(barcodeImageUrl)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.text();
-      })
-      .then(svg => setInlineSvg(svg))
-      .catch(() => setSvgError(true));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, barcodeImageUrl]);
 
   // On-demand translation for non-English languages if missing from product document
   useEffect(() => {
@@ -176,6 +199,26 @@ export default function PublicDatasheetView({
     || product?.desc 
     || product?.objective 
     || '';
+
+  // ─── Version & Update Date System ──────────────────────────────────────────
+  const versionInfo = useMemo(() => {
+    const rawUpdated = product?.updatedAt || product?._updatedAt;
+    let d = new Date();
+    if (rawUpdated) {
+      if (typeof rawUpdated.toDate === 'function') d = rawUpdated.toDate();
+      else {
+        const parsed = new Date(rawUpdated);
+        if (!isNaN(parsed.getTime())) d = parsed;
+      }
+    }
+    const updatedAtDate = d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    const version = product?.version ? (String(product.version).startsWith('v') ? product.version : `v${product.version}`) : 'v2.4';
+    return { version, updatedAtDate };
+  }, [product, lang]);
 
   // ─── Hierarchy, Formats & Strengths Matrix ─────────────────────────────────
   const hierarchy = product?.processedHierarchy || {};
@@ -253,6 +296,11 @@ export default function PublicDatasheetView({
 
   /**
    * Recommended BAC Water Reconstitution Volume by Vial Strength
+   * ─────────────────────────────────────────────────────────────
+   * Clinical target: keep final concentration between 2.5–10 mg/mL
+   * for comfortable SubQ injection volumes (0.1–0.6 mL per dose).
+   * Volume MUST increase proportionally with dose to avoid
+   * hyper-concentrated solutions that are painful to inject.
    */
   const getReconstitutionVolume = (strengthName) => {
     const mg = parseNum(strengthName);
@@ -267,16 +315,28 @@ export default function PublicDatasheetView({
       || String(name || '').toLowerCase().includes('glow');
 
     if (isBlendStrength) {
-      volumeNum = 2.0; // Standard 2.0 mL for multi-peptide blends
+      // Multi-peptide blends: scale proportionally, min 2.0 mL
+      const rawVol = mg / 10.0;
+      volumeNum = Math.max(2.0, Math.round(rawVol * 2) / 2);
+    } else if (mg <= 2) {
+      volumeNum = 1.0;  // → 2.0 mg/mL — precise low-dose titration
     } else if (mg <= 5) {
-      volumeNum = 2.0; // 2.5 mg/mL for precise low-dose titration
+      volumeNum = 2.0;  // → 2.5 mg/mL
+    } else if (mg <= 10) {
+      volumeNum = 2.0;  // → 5.0 mg/mL — standard clinical concentration
     } else if (mg <= 15) {
-      volumeNum = 2.0; // 5.0 - 7.5 mg/mL standard clinical concentration
+      volumeNum = 3.0;  // → 5.0 mg/mL
+    } else if (mg <= 20) {
+      volumeNum = 3.0;  // → 6.7 mg/mL
     } else if (mg <= 30) {
-      volumeNum = 3.0; // 3.0 mL fits standard 3 mL vial -> 10.0 mg/mL
+      volumeNum = 4.0;  // → 7.5 mg/mL
+    } else if (mg <= 40) {
+      volumeNum = 5.0;  // → 8.0 mg/mL
+    } else if (mg <= 50) {
+      volumeNum = 5.0;  // → 10.0 mg/mL
     } else {
-      // 40mg, 50mg, 60mg+: 2.0 mL to keep SubQ injection volume <= 0.6 mL
-      volumeNum = 2.0;
+      // 60mg+: scale to keep ≤10 mg/mL, rounded to nearest 0.5 mL
+      volumeNum = Math.max(5.0, Math.round((mg / 10.0) * 2) / 2);
     }
 
     const volume = volumeNum.toFixed(1);
@@ -376,6 +436,7 @@ export default function PublicDatasheetView({
       params.set('supplier', product.supplierId);
     }
     if (activeFormatId) {
+      params.set('presentation', activeFormatId);
       params.set('format', activeFormatId);
     }
     if (selectedStrengthId) {
@@ -401,15 +462,54 @@ export default function PublicDatasheetView({
     }
     const targetDose = selectedStrength?.name || selectedStrengthId;
     if (targetDose && targetDose !== 'all') p.set('dose', targetDose);
-    if (activeFormatId && activeFormatId !== 'all') p.set('presentation', activeFormatId);
+    if (activeFormatId && activeFormatId !== 'all') {
+      p.set('presentation', activeFormatId);
+      p.set('format', activeFormatId);
+    }
     if (lang && lang !== 'en') p.set('lang', lang);
     if (initialBatch) {
       p.set('batch', initialBatch);
       p.set('vialCode', initialBatch);
     }
+    if (dynamicPublicUrl) {
+      p.set('url', dynamicPublicUrl);
+    }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang, initialBatch]);
+  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang, initialBatch, dynamicPublicUrl]);
+
+  // Variant-specific file naming suffix so operators never confuse downloaded labels
+  const variantFileSuffix = useMemo(() => {
+    const clean = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
+    const d = clean(selectedStrength?.name || selectedStrengthId || '10mg');
+    const p = clean(activeFormat?.name || activeFormatId || 'vial');
+    const s = clean(supplierName || activeSupplierId || 'lotusland');
+    const b = clean(initialBatch || 'batch');
+    return `${clean(slug)}_${d}_${p}_${s}_${b}`;
+  }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, initialBatch]);
+
+  // Live Scannable 2D/3D Barcode SVG URL synced with current variant state
+  const barcodeSupplier = product?.supplierId || product?.supplierName || product?.supplier || 'lotusland';
+  const barcodeImageUrl = useMemo(() => {
+    const qs = new URLSearchParams();
+    if (barcodeSupplier) qs.set('supplier', barcodeSupplier);
+    if (dynamicPublicUrl) qs.set('url', dynamicPublicUrl);
+    return `/api/barcode/${encodeURIComponent(slug)}?${qs.toString()}`;
+  }, [slug, barcodeSupplier, dynamicPublicUrl]);
+
+  // Fetch SVG inline — <img> cannot render nested <svg> (QR inside label)
+  useEffect(() => {
+    if (!slug || !barcodeImageUrl) return;
+    setSvgError(false);
+    setInlineSvg(null);
+    fetch(barcodeImageUrl)
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.text();
+      })
+      .then(svg => setInlineSvg(svg))
+      .catch(() => setSvgError(true));
+  }, [slug, barcodeImageUrl]);
 
   // ⚡ Non-blocking Access Telemetry Beacon for Tracked Client Links
   useEffect(() => {
@@ -460,7 +560,7 @@ export default function PublicDatasheetView({
       try {
         await navigator.share({
           title: `${name} (${activeFormat?.name || 'Monograph'}) — Official Monograph | Atlas Services × ${supplierName}`,
-          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, synthesized under verified cGMP quality standards by ${supplierName} for Atlas Services. RP-HPLC Purity ≥ 99.0%.`,
+          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, sourced through authorized synthesis partner ${supplierName} for Atlas Services. RP-HPLC Purity ≥ 99.0%.`,
           url: dynamicPublicUrl,
         });
         return;
@@ -546,7 +646,7 @@ export default function PublicDatasheetView({
               href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=full${labelQueryString}`}
               target="_blank" 
               rel="noopener noreferrer" 
-              download={`vial_label_${slug}_full_38x90.pdf`}
+              download={`vial_label_${variantFileSuffix}_full_38x90.pdf`}
               className="pds-btn pds-btn-barcode"
               title="Download Complete Specification Vial Label 38x90mm (PDF)"
             >
@@ -557,7 +657,7 @@ export default function PublicDatasheetView({
               href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=barcode${labelQueryString}`}
               target="_blank" 
               rel="noopener noreferrer" 
-              download={`batch_label_${slug}_barcode_38x90.pdf`}
+              download={`batch_label_${variantFileSuffix}_barcode_38x90.pdf`}
               className="pds-btn pds-btn-barcode"
               title="Download Direct Monograph Barcode & QR Label (PDF)"
             >
@@ -616,6 +716,13 @@ export default function PublicDatasheetView({
               <span className="pds-cat-tag">{category}</span>
               <span className="pds-cgmp-tag">
                 {isStrictlyLotusland ? t.lotuslandVerified : `${supplierName} Quality Verified`}
+              </span>
+              <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
+                <span className="pds-version-dot" />
+                <span>Rev {versionInfo.version}</span>
+              </span>
+              <span className="pds-updated-tag" title="Verified pharmaceutical specification release date">
+                <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
               </span>
               {initialBatch && (
                 <span style={{
@@ -1026,7 +1133,13 @@ export default function PublicDatasheetView({
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}
         <section className="pds-specs-section">
-          <ProductTraceabilityCard product={product} baseUrl={baseUrl} lang={lang} />
+          <ProductTraceabilityCard
+            product={product}
+            baseUrl={baseUrl}
+            lang={lang}
+            monographUrl={dynamicPublicUrl}
+            batchCode={initialBatch}
+          />
         </section>
 
         {/* ── Block 4: Physical Labels & Dispensing Downloads ── */}
@@ -1065,32 +1178,32 @@ export default function PublicDatasheetView({
                     href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    download={`shipping_label_${slug}_38x90.pdf`}
-                    className="pds-btn pds-btn-barcode"
+                    download={isMobileDevice ? undefined : `shipping_label_${variantFileSuffix}_38x90.pdf`}
+                    className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode"
                     title="Download 38x90mm Shipping Label (PDF File)"
                   >
-                    <Download size={14} /> Download 38×90mm PDF
+                    <Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span>
                   </a>
                   <a 
                     href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    download={`shipping_labels_sheet_${slug}_a4.pdf`}
-                    className="pds-btn pds-btn-ghost"
+                    download={isMobileDevice ? undefined : `shipping_labels_sheet_${variantFileSuffix}_a4.pdf`}
+                    className="pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost"
                     title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
                   >
-                    <FileText size={14} /> Sheet (A4 ×8 PDF)
+                    <FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span>
                   </a>
                   <button
                     type="button"
                     onClick={() => handleCopyLabelUrl('shipping')}
-                    className="pds-btn pds-btn-copy-label"
+                    className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'shipping' ? 'copied' : ''}`}
                     title="Copy direct shareable link to this shipping label"
                   >
                     {copiedLabelType === 'shipping' ? (
-                      <><Check size={13} style={{ color: '#16a34a' }} /> <span>Copied Link</span></>
+                      <><Check size={14} className="pds-btn-icon text-success" /> <span>Copied Link</span></>
                     ) : (
-                      <><Copy size={13} /> <span>Copy Link</span></>
+                      <><Copy size={14} className="pds-btn-icon" /> <span>Copy Link</span></>
                     )}
                   </button>
                 </div>
@@ -1113,32 +1226,32 @@ export default function PublicDatasheetView({
                     href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    download={`client_vial_label_${slug}_38x90.pdf`}
-                    className="pds-btn pds-btn-pdf"
+                    download={isMobileDevice ? undefined : `client_vial_label_${variantFileSuffix}_38x90.pdf`}
+                    className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf"
                     title="Download 38x90mm Client Vial Label (PDF File)"
                   >
-                    <Download size={14} /> Download 38×90mm PDF
+                    <Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span>
                   </a>
                   <a 
                     href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    download={`client_vial_labels_sheet_${slug}_a4.pdf`}
-                    className="pds-btn pds-btn-ghost"
+                    download={isMobileDevice ? undefined : `client_vial_labels_sheet_${variantFileSuffix}_a4.pdf`}
+                    className="pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost"
                     title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
                   >
-                    <FileText size={14} /> Sheet (A4 ×8 PDF)
+                    <FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span>
                   </a>
                   <button
                     type="button"
                     onClick={() => handleCopyLabelUrl('client')}
-                    className="pds-btn pds-btn-copy-label"
+                    className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'client' ? 'copied' : ''}`}
                     title="Copy direct shareable link to this client vial label"
                   >
                     {copiedLabelType === 'client' ? (
-                      <><Check size={13} style={{ color: '#16a34a' }} /> <span>Copied Link</span></>
+                      <><Check size={14} className="pds-btn-icon text-success" /> <span>Copied Link</span></>
                     ) : (
-                      <><Copy size={13} /> <span>Copy Link</span></>
+                      <><Copy size={14} className="pds-btn-icon" /> <span>Copy Link</span></>
                     )}
                   </button>
                 </div>
@@ -1168,10 +1281,10 @@ export default function PublicDatasheetView({
         <footer className="pds-page-footer">
           <div className="pds-footer-box">
             <p className="pds-footer-text">
-              <strong>Quality & Regulatory Governance:</strong> Synthesized under certified ISO 9001:2015 and current Good Manufacturing Practice (cGMP) quality management systems. Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
+              <strong>Quality & Regulatory Governance:</strong> Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
             </p>
             <p className="pds-footer-meta">
-              Document Ref: PDS-{slug.toUpperCase()}-2026 • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
+              Document Ref: PDS-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
             </p>
           </div>
         </footer>
@@ -1216,6 +1329,9 @@ export default function PublicDatasheetView({
         sortedStrengths={sortedStrengths}
         dynamicPublicUrl={dynamicPublicUrl}
         labelQueryString={labelQueryString}
+        initialBatch={initialBatch || generateDiscreetBatchCode({ slug, dose: selectedStrength?.name, supplier: activeSupplierId || supplierName })}
+        version={versionInfo.version}
+        updatedAtDate={versionInfo.updatedAtDate}
       />
     </div>
   );

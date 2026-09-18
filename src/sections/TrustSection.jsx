@@ -17,7 +17,7 @@ export default function TrustSection() {
               In an industry often clouded by ambiguity, we prioritize transparency above all else. Every product undergoes rigorous analytical testing to ensure it meets the highest standards of peptide research.
             </p>
             <div className="badges">
-              <div className="badge">ISO 9001 Certified</div>
+              <div className="badge">CoA Batch Release</div>
               <div className="badge">USP Grade Materials</div>
               <div className="badge">Secure Checkout</div>
             </div>
