@@ -13,7 +13,7 @@
 export const getApprovalEmailHtml = ({
   fullName = 'User',
   clinicName = '',
-  loginUrl = 'https://Atlas Health-app-27a3a.web.app/',
+  loginUrl = 'https://med-peptides.com/login',
   role = 'guest',
 } = {}) => {
   // Configuración del Saludo

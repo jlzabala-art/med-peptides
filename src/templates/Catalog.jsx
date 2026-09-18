@@ -43,13 +43,13 @@ const Catalog = React.memo(function Catalog({
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://Atlas Health-app-27a3a.web.app/"
+            "item": "https://med-peptides.com/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Research Catalog",
-            "item": "https://Atlas Health-app-27a3a.web.app/catalog"
+            "item": "https://med-peptides.com/catalog"
           }
         ]
       },
@@ -60,7 +60,7 @@ const Catalog = React.memo(function Catalog({
         "itemListElement": (products || []).slice(0, 50).map((p, idx) => ({
           "@type": "ListItem",
           "position": idx + 1,
-          "url": `https://Atlas Health-app-27a3a.web.app/product/${p.slug || p.name.toLowerCase().replace(/\s+/g, '-')}`
+          "url": `https://med-peptides.com/product/${p.slug || p.name.toLowerCase().replace(/\s+/g, '-')}`
         }))
       }
     ]
@@ -69,7 +69,7 @@ const Catalog = React.memo(function Catalog({
   usePageMeta({
     title: 'High-Purity Research Peptide Catalog | Atlas Health',
     description: 'Explore our complete catalog of research-grade peptides organized by research pathway — verified purity, multiple formats, and global shipping.',
-    canonicalUrl: 'https://Atlas Health-app-27a3a.web.app/catalog',
+    canonicalUrl: 'https://med-peptides.com/catalog',
     structuredData
   });
 

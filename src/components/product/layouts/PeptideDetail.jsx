@@ -513,13 +513,14 @@ export default function PeptideDetail({
   const structuredData = useMemo(() => {
     if (!product) return null;
     const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, '-');
-    const productUrl = `https://Atlas Health-app-27a3a.web.app/product/${slug}`;
+    const canonicalBase = 'https://med-peptides.com';
+    const productUrl = `${canonicalBase}/product/${slug}`;
 
     const graph = [
       {
         "@type": "Product",
         "name": product.name,
-        "image": product.image ? [`https://Atlas Health-app-27a3a.web.app${product.image}`] : [],
+        "image": product.image ? [`${canonicalBase}${product.image}`] : [],
         "description": product.shortDesc || product.description,
         "brand": { "@type": "Brand", "name": "Atlas Health" },
         "sku": product.id || slug,
@@ -537,10 +538,10 @@ export default function PeptideDetail({
         "@type": "BreadcrumbList",
         "itemListElement": [
           { "@type": "ListItem", "position": 1, "name": "Home",
-            "item": "https://Atlas Health-app-27a3a.web.app/" },
+            "item": `${canonicalBase}/` },
           { "@type": "ListItem", "position": 2,
             "name": product.category || "Catalog",
-            "item": `https://Atlas Health-app-27a3a.web.app/collection/${(product.category || "peptides").toLowerCase().replace(/[^a-z0-9]+/g, '-')}` },
+            "item": `${canonicalBase}/collection/${(product.category || "peptides").toLowerCase().replace(/[^a-z0-9]+/g, '-')}` },
           { "@type": "ListItem", "position": 3, "name": product.name,
             "item": productUrl }
         ]
@@ -568,7 +569,7 @@ export default function PeptideDetail({
       ? `${product.shortDesc} — Research-grade ${product.name} with verified purity, available in multiple formats from Atlas Health.`
       : `Detailed technical profile for ${product?.name || 'this peptide'} — purity data, dosage formats, and research references.`,
     path: product?.name ? `/product/${product.slug || product.name.toLowerCase().replace(/\s+/g, '-')}` : '/products',
-    image: product?.image ? `https://Atlas Health-app-27a3a.web.app${product.image}` : undefined,
+    image: product?.image ? `https://med-peptides.com${product.image}` : undefined,
     structuredData
   });
 

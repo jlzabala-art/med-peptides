@@ -199,7 +199,7 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         },
         offers: {
           '@type': 'Offer',
-          url: `https://Atlas Health-app-27a3a.web.app${canonicalPath}`,
+          url: `https://med-peptides.com${canonicalPath}`,
           priceCurrency: 'USD',
           price: supplement.variants?.[0]?.pricing?.retail?.perUnit || supplement.pricing?.retail?.perUnit || '0.00',
           availability: 'https://schema.org/InStock',
