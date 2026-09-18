@@ -1385,11 +1385,14 @@ export default function InteractiveReconstitutionGuide({
                   ))}
                 </div>
 
-                {/* Active Alignment Callout Arrow */}
+                {/* Active Alignment Callout Arrow with dynamic safe clamping */}
                 {syringeUnits > 0 && (
                   <div 
                     className="irg-syringe-pointer"
-                    style={{ left: `${fillPct}%` }}
+                    style={{ 
+                      left: `${fillPct}%`,
+                      transform: fillPct > 80 ? 'translateX(-95%)' : fillPct < 15 ? 'translateX(-5%)' : 'translateX(-50%)'
+                    }}
                   >
                     <div className="irg-pointer-pill font-mono">
                       {isOverSyringe ? (

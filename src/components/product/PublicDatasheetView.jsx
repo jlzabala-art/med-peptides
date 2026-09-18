@@ -33,7 +33,6 @@ import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
-import PublicDatasheetMobileBar from './PublicDatasheetMobileBar';
 import MonographPreviewModal from './MonographPreviewModal';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -1306,22 +1305,6 @@ export default function PublicDatasheetView({
           </div>
         </footer>
       </main>
-
-      {/* ── High-Conversion Sticky Mobile Action Bar ── */}
-      <PublicDatasheetMobileBar
-        product={product}
-        name={name}
-        activeFormat={activeFormat}
-        selectedStrength={selectedStrength}
-        supplierName={supplierName}
-        dynamicPublicUrl={dynamicPublicUrl}
-        pdfUrl={pdfUrl}
-        onOpenPreview={() => {
-          triggerHaptic('light');
-          setIsPreviewModalOpen(true);
-        }}
-        lang={lang}
-      />
 
       {/* Dynamic Flexible Share Monograph Drawer */}
       <ShareProductMonographDrawer

@@ -1143,10 +1143,10 @@
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
   .public-datasheet-root {
-    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: 2rem !important;
   }
   .pds-mobile-bar {
-    display: flex;
+    display: none !important;
   }
   .pds-actions-group .pds-btn-pdf,
   .pds-actions-group .pds-btn-barcode,
