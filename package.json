@@ -13,7 +13,7 @@
     "lint": "eslint src",
     "analyze": "ANALYZE=true next build",
     "deploy": "node scripts/auto-deploy.mjs",
-    "clean:deploy": "rm -rf .next/dev .next/cache .next/diagnostics .firebase",
+    "clean:deploy": "rm -rf .next .firebase",
     "deploy:hosting": "npm run clean:deploy && node scripts/optimize-deploy.mjs && npx firebase-tools deploy --only hosting",
     "deploy:fast": "npm run clean:deploy && node scripts/optimize-deploy.mjs && npx firebase-tools deploy --only hosting",
     "deploy:cloudrun": "bash scripts/deploy-cloudrun.sh",
