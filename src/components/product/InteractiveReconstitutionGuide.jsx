@@ -86,9 +86,9 @@ export default function InteractiveReconstitutionGuide({
     if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
       return { dose: 0.25, unit: 'mg' };
     }
-    // 2. Tirzepatide: Clinical Phase 1 starts at 2.5 mg (or 1.25 mg if small vial <= 5mg)
+    // 2. Tirzepatide: Clinical Phase 1 starts at 2.5 mg (standard FDA/clinical starting titration)
     if (pName.includes('tirzepatide')) {
-      return { dose: mg <= 5 ? 1.25 : 2.5, unit: 'mg' };
+      return { dose: 2.5, unit: 'mg' };
     }
     // 3. Retatrutide & Tri-Agonist Metabolic Peptides: Clinical Phase 1 starts at 1.0 mg (or 2.0 mg for large vials > 10mg)
     if (pName.includes('retatrutide') || pName.includes('glp')) {
@@ -247,15 +247,15 @@ export default function InteractiveReconstitutionGuide({
       ];
     }
 
-    // 2. Tirzepatide (Titration: 2.5 mg -> 5.0 mg -> 7.5 mg)
+    // 2. Tirzepatide (Titration: 2.5 mg -> 5.0 mg -> 7.5 mg / 10.0 mg)
     if (pName.includes('tirzepatide')) {
-      const p1Dose = vMg <= 5 ? 1.25 : 2.5;
-      const p2Dose = vMg <= 5 ? 2.5 : 5.0;
+      const p1Dose = 2.5;
+      const p2Dose = 5.0;
       const p3Dose = vMg <= 10 ? 7.5 : 10.0;
 
       return [
-        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
-        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
+        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '2.5 mg'),
+        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '5.0 mg'),
         createPhase('phase_tirz_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
       ];
     }
@@ -374,8 +374,29 @@ export default function InteractiveReconstitutionGuide({
     const bacChanged = Math.abs(bacWaterMl - baselineState.baseBac) > 0.01;
     // Official clinical phases (Phase 1, 2, 3) conform to the protocol monograph
     const isCustomDose = activePhaseId === 'custom';
-    return vialChanged || bacChanged || isCustomDose;
   }, [baselineState, vialMg, bacWaterMl, activePhaseId]);
+
+  // ── Dynamic Dose Presets for Fine-Tuning Pills aligned with peptide dosimetry ──
+  const dynamicDosePresets = useMemo(() => {
+    if (doseUnit === 'mcg') return DOSE_PRESETS_MCG;
+    const pName = String(product?.name || product?.slug || product?.id || product?.title || '').toLowerCase();
+    if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
+      return [0.25, 0.5, 1.0, 1.7, 2.4];
+    }
+    if (pName.includes('tirzepatide')) {
+      return [2.5, 5.0, 7.5, 10.0, 12.5, 15.0];
+    }
+    if (pName.includes('retatrutide') || pName.includes('glp')) {
+      return [1.0, 2.0, 4.0, 6.0, 9.0, 12.0];
+    }
+    if (pName.includes('nad')) {
+      return [25, 50, 75, 100, 150, 200];
+    }
+    if (isBlend) {
+      return BLEND_DOSE_PRESETS_MG;
+    }
+    return [0.25, 0.5, 1.0, 2.0, 2.5, 5.0];
+  }, [doseUnit, product, isBlend]);
 
   const handleResetToBaseline = () => {
     if (!baselineState) return;
@@ -1300,7 +1321,7 @@ export default function InteractiveReconstitutionGuide({
             </div>
 
             <div className="irg-pills-row">
-              {(doseUnit === 'mg' ? (isBlend ? BLEND_DOSE_PRESETS_MG : DOSE_PRESETS_MG) : DOSE_PRESETS_MCG).map(val => (
+              {dynamicDosePresets.map(val => (
                 <button
                   key={val}
                   type="button"
