@@ -438,14 +438,6 @@ export default function PublicDatasheetView({
     }
   }, [filteredStrengths, selectedStrengthId, sortedStrengths]);
 
-  // Optional Reconstitution Section State (Respects ?reconstitution=false)
-  const [showReconstitutionSection, setShowReconstitutionSection] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search);
-      if (p.get('reconstitution') === 'false' || p.get('reconstitution') === '0') return false;
-    }
-    return true;
-  });
 
   const selectedStrength = useMemo(() => {
     return filteredStrengths.find(s => s.id === selectedStrengthId) 
@@ -1111,30 +1103,20 @@ export default function PublicDatasheetView({
                 <Droplets size={14} color="#38bdf8" />
                 <span>U-100 Standard (1.0 mL = 100 U)</span>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowReconstitutionSection(prev => !prev)}
-                className="pds-section-toggle-btn"
-                title={showReconstitutionSection ? (lang === 'es' ? 'Ocultar simulador' : 'Hide simulator') : (lang === 'es' ? 'Mostrar simulador' : 'Show simulator')}
-              >
-                {showReconstitutionSection ? (lang === 'es' ? 'Ocultar Simulador ✕' : 'Hide Simulator ✕') : (lang === 'es' ? 'Mostrar Simulador ▾' : 'Show Simulator ▾')}
-              </button>
             </div>
           </div>
 
-          {showReconstitutionSection && (
-            <div className="pds-section-card-body" style={{ padding: 0 }}>
-              <InteractiveReconstitutionGuide
-                product={product}
-                selectedStrength={selectedStrength}
-                availableStrengths={sortedStrengths}
-                activeFormatId={activeFormatId}
-                activeFormat={activeFormat}
-                supplierName={supplierName}
-                lang={lang}
-              />
-            </div>
-          )}
+          <div className="pds-section-card-body" style={{ padding: 0 }}>
+            <InteractiveReconstitutionGuide
+              product={product}
+              selectedStrength={selectedStrength}
+              availableStrengths={sortedStrengths}
+              activeFormatId={activeFormatId}
+              activeFormat={activeFormat}
+              supplierName={supplierName}
+              lang={lang}
+            />
+          </div>
         </section>
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}

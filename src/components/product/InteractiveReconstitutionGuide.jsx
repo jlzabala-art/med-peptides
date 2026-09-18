@@ -77,31 +77,64 @@ export default function InteractiveReconstitutionGuide({
     return parseMgFromPresentation(rawStr);
   }, [selectedStrength, product]);
 
-  // Dynamic clinical default dose calculation — always starts at safe Phase 1 titration dose
-  const getClinicalDefaultDose = (mgVal, blendMode = false, unit = 'mg') => {
+  // Dynamic clinical starting titration dose (Phase 1) tailored specifically to each peptide compound
+  const getClinicalPhase1Dose = (prod, mgVal = 10) => {
+    const pName = String(prod?.name || prod?.slug || prod?.id || '').toLowerCase();
     const mg = Number(mgVal) || 10;
-    if (unit === 'mcg') {
-      return 250;
+
+    // 1. Semaglutide & Cagrilintide: Clinical Phase 1 starts at 0.25 mg
+    if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
+      return { dose: 0.25, unit: 'mg' };
     }
-    const pName = String(product?.name || '').toLowerCase();
-    const isMicro = pName.includes('bpc') || pName.includes('epithalon') || pName.includes('ipamorelin') || pName.includes('cjc') || mg <= 2;
-    if (isMicro) return 0.25;
-    // Standard & metabolic titration starting dose (Phase 1) is always 1.0 mg (safe, calm, non-overflowing)
-    return 1.0;
+    // 2. Tirzepatide: Clinical Phase 1 starts at 2.5 mg (or 1.25 mg if small vial <= 5mg)
+    if (pName.includes('tirzepatide')) {
+      return { dose: mg <= 5 ? 1.25 : 2.5, unit: 'mg' };
+    }
+    // 3. Retatrutide & Tri-Agonist Metabolic Peptides: Clinical Phase 1 starts at 1.0 mg (or 2.0 mg for large vials > 10mg)
+    if (pName.includes('retatrutide') || pName.includes('glp')) {
+      return { dose: mg <= 10 ? 1.0 : 2.0, unit: 'mg' };
+    }
+    // 4. TB-500 / Thymosin Beta-4: 1.0 mg or 1.25 mg
+    if (pName.includes('tb-500') || pName.includes('tb500') || pName.includes('thymosin')) {
+      return { dose: mg <= 5 ? 1.0 : 1.25, unit: 'mg' };
+    }
+    // 5. GHK-Cu: 1.0 mg
+    if (pName.includes('ghk')) {
+      return { dose: 1.0, unit: 'mg' };
+    }
+    // 6. PT-141 / Bremelanotide & Tesamorelin: 1.0 mg
+    if (pName.includes('pt-141') || pName.includes('bremelanotide') || pName.includes('tesamorelin')) {
+      return { dose: 1.0, unit: 'mg' };
+    }
+    // 7. MOTS-c & SS-31: 2.0 mg / 2.5 mg
+    if (pName.includes('mots') || pName.includes('ss-31') || pName.includes('elamipretide')) {
+      return { dose: mg <= 5 ? 2.0 : 2.5, unit: 'mg' };
+    }
+    // 8. NAD+: 25 mg or 50 mg
+    if (pName.includes('nad')) {
+      return { dose: mg >= 500 ? 50 : 25, unit: 'mg' };
+    }
+    // 9. Micro-dosed compounds: BPC-157, Epithalon, CJC-1295, Ipamorelin, Sermorelin, MT-2 (250 mcg)
+    if (pName.includes('bpc') || pName.includes('epithalon') || pName.includes('ipamorelin') || pName.includes('cjc') || pName.includes('sermorelin') || pName.includes('mt2') || pName.includes('melanotan') || mg <= 2) {
+      return { dose: 250, unit: 'mcg' };
+    }
+    // Fallback: Safe titration at ~10-15% of vial (between 0.25 mg and 1.0 mg)
+    const fallbackDose = +(Math.max(0.25, Math.min(1.0, mg * 0.1)).toFixed(2));
+    return { dose: fallbackDose, unit: 'mg' };
   };
 
   // Determine the authoritative protocol baseline using O(1) table lookup
   const baselineState = useMemo(() => {
     const baseMg = initialVialMg || 5;
     const { baseBac } = getReconstitutionBaseline(baseMg, isBlend);
-    const baseDose = getClinicalDefaultDose(baseMg, isBlend, 'mg');
-    return { baseMg, baseBac, baseDose, baseUnit: 'mg' };
+    const p1 = getClinicalPhase1Dose(product, baseMg);
+    return { baseMg, baseBac, baseDose: p1.dose, baseUnit: p1.unit };
   }, [initialVialMg, isBlend, product]);
 
-  // Interactive state — strictly begins at Phase 1 protocol dose
+  // Interactive state — strictly begins at Phase 1 protocol dose of this specific peptide
   const [vialMg, setVialMg] = useState(initialVialMg);
   const [bacWaterMl, setBacWaterMl] = useState(() => baselineState.baseBac);
-  const [doseUnit, setDoseUnit] = useState('mg'); // 'mg' | 'mcg'
+  const [doseUnit, setDoseUnit] = useState(() => baselineState.baseUnit);
   const [doseValue, setDoseValue] = useState(() => baselineState.baseDose);
 
   // Update vial content whenever page changes selected active vial presentation
@@ -121,11 +154,11 @@ export default function InteractiveReconstitutionGuide({
     const units = reqVol * 100;
 
     if (units > 100 || (doseUnit === 'mg' && doseValue > vialMg)) {
-      setDoseValue(getClinicalDefaultDose(vialMg, isBlend, doseUnit));
-    } else if (doseUnit === 'mcg' && doseValue < 50) {
-      setDoseValue(getClinicalDefaultDose(vialMg, isBlend, 'mcg'));
+      const p1 = getClinicalPhase1Dose(product, vialMg);
+      setDoseUnit(p1.unit);
+      setDoseValue(p1.dose);
     }
-  }, [vialMg, bacWaterMl, doseUnit, isBlend]);
+  }, [vialMg, bacWaterMl, doseUnit, product]);
 
   // ── Precision Pharmacokinetic Calculations ─────────────────────────────────
   const {
@@ -178,8 +211,7 @@ export default function InteractiveReconstitutionGuide({
 
   // ── Clinical Phase Protocols (3 Phases: Titration, Maintenance, Optimization + Custom) ──
   const clinicalPhases = useMemo(() => {
-    const pName = String(product?.name || '').toLowerCase();
-    const isMetabolic = pName.includes('retatrutide') || pName.includes('tirzepatide') || pName.includes('semaglutide') || pName.includes('cagrilintide') || pName.includes('glp');
+    const pName = String(product?.name || product?.slug || product?.id || '').toLowerCase();
     const isTb500 = pName.includes('tb-500') || pName.includes('tb500') || pName.includes('thymosin');
     const vMg = safeVialMg;
     const conc = concentrationMgMl > 0 ? concentrationMgMl : (vMg / (safeBacMl || 2.0));
@@ -202,11 +234,50 @@ export default function InteractiveReconstitutionGuide({
       };
     };
 
-    // 1. TB-500 / Thymosin Beta-4 Protocol (1.0 mg - 2.0 mg - 2.5/3.0 mg)
+    // 1. Semaglutide & Cagrilintide (Titration: 0.25 mg -> 0.50 mg -> 1.00 mg)
+    if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
+      const p1Dose = 0.25;
+      const p2Dose = 0.50;
+      const p3Dose = vMg >= 10 ? 1.70 : 1.00;
+
+      return [
+        createPhase('phase_sema_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '0.25 mg'),
+        createPhase('phase_sema_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '0.50 mg'),
+        createPhase('phase_sema_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
+      ];
+    }
+
+    // 2. Tirzepatide (Titration: 2.5 mg -> 5.0 mg -> 7.5 mg)
+    if (pName.includes('tirzepatide')) {
+      const p1Dose = vMg <= 5 ? 1.25 : 2.5;
+      const p2Dose = vMg <= 5 ? 2.5 : 5.0;
+      const p3Dose = vMg <= 10 ? 7.5 : 10.0;
+
+      return [
+        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
+        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
+        createPhase('phase_tirz_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
+      ];
+    }
+
+    // 3. Retatrutide & Tri-Agonist Metabolic Peptides (Titration: 1.0 mg -> 2.0 mg -> 4.0 mg)
+    if (pName.includes('retatrutide') || pName.includes('glp')) {
+      const p1Dose = vMg <= 10 ? 1.0 : 2.0;
+      const p2Dose = vMg <= 10 ? 2.0 : 4.0;
+      const p3Dose = vMg <= 10 ? 4.0 : 6.0;
+
+      return [
+        createPhase('phase_met_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
+        createPhase('phase_met_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
+        createPhase('phase_met_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
+      ];
+    }
+
+    // 4. TB-500 / Thymosin Beta-4 Protocol (1.0 mg -> 2.0 mg -> 2.5/3.0 mg)
     if (isTb500) {
-      const p1Dose = vMg <= 5 ? 1.0 : (vMg <= 10 ? 1.25 : 2.0);
-      const p2Dose = vMg <= 5 ? 2.0 : 2.5;
-      const p3Dose = vMg <= 5 ? 2.5 : (vMg <= 10 ? 3.0 : 5.0);
+      const p1Dose = vMg <= 5 ? 1.0 : 1.25;
+      const p2Dose = 2.0;
+      const p3Dose = vMg <= 5 ? 2.5 : 3.0;
 
       return [
         createPhase('phase_tb_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
@@ -215,21 +286,38 @@ export default function InteractiveReconstitutionGuide({
       ];
     }
 
-    // 2. Metabolic Peptides (Retatrutide, Tirzepatide, Semaglutide)
-    if (isMetabolic) {
-      const p1Dose = vMg <= 5 ? 1.0 : (vMg <= 10 ? 1.0 : 2.0);
-      const p2Dose = vMg <= 5 ? 2.0 : (vMg <= 10 ? 2.0 : 4.0);
-      const p3Dose = vMg <= 5 ? 2.5 : (vMg <= 10 ? 2.5 : 5.0);
-
+    // 5. GHK-Cu (1.0 mg -> 2.0 mg -> 3.0 mg)
+    if (pName.includes('ghk')) {
       return [
-        createPhase('phase_met_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', lang === 'es' ? 'Inicio' : 'Initial'),
-        createPhase('phase_met_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', lang === 'es' ? 'Estándar' : 'Standard'),
-        createPhase('phase_met_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', lang === 'es' ? 'Avanzada' : 'Target')
+        createPhase('phase_ghk_p1', 1.0, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '1.0 mg'),
+        createPhase('phase_ghk_p2', 2.0, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '2.0 mg'),
+        createPhase('phase_ghk_p3', 3.0, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', '3.0 mg')
       ];
     }
 
-    // 3. Micro-dosed compounds (BPC-157, Epithalon, CJC-1295, Ipamorelin)
-    const isMicro = pName.includes('bpc') || pName.includes('epithalon') || pName.includes('ipamorelin') || pName.includes('cjc') || vMg <= 5;
+    // 6. PT-141 & Tesamorelin (1.0 mg -> 1.5 mg -> 2.0 mg)
+    if (pName.includes('pt-141') || pName.includes('bremelanotide') || pName.includes('tesamorelin')) {
+      return [
+        createPhase('phase_pt_p1', 1.0, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '1.0 mg'),
+        createPhase('phase_pt_p2', 1.5, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '1.5 mg'),
+        createPhase('phase_pt_p3', 2.0, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', '2.0 mg')
+      ];
+    }
+
+    // 7. MOTS-c & SS-31 (Mitochondrial Peptides)
+    if (pName.includes('mots') || pName.includes('ss-31') || pName.includes('elamipretide')) {
+      const p1Dose = vMg <= 5 ? 2.0 : 2.5;
+      const p2Dose = vMg <= 5 ? 3.0 : 5.0;
+      const p3Dose = vMg <= 5 ? 5.0 : 10.0;
+      return [
+        createPhase('phase_mito_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
+        createPhase('phase_mito_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
+        createPhase('phase_mito_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', `${p3Dose} mg`)
+      ];
+    }
+
+    // 8. Micro-dosed compounds: BPC-157, Epithalon, CJC-1295, Ipamorelin, Sermorelin, MT-2
+    const isMicro = pName.includes('bpc') || pName.includes('epithalon') || pName.includes('ipamorelin') || pName.includes('cjc') || pName.includes('sermorelin') || pName.includes('mt2') || pName.includes('melanotan') || vMg <= 5;
     if (isMicro) {
       const p1Dose = doseUnit === 'mcg' ? 250 : 0.25;
       const p2Dose = doseUnit === 'mcg' ? 500 : 0.50;
@@ -237,13 +325,13 @@ export default function InteractiveReconstitutionGuide({
       const u = doseUnit === 'mcg' ? 'mcg' : 'mg';
 
       return [
-        createPhase('phase_micro_low', p1Dose, u, lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol', '250 mcg'),
-        createPhase('phase_micro_std', p2Dose, u, lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Estándar' : 'Standard', lang === 'es' ? 'Pauta Estándar' : 'Standard Protocol', '500 mcg'),
-        createPhase('phase_micro_opt', p3Dose, u, lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Intensiva' : 'Intensive', lang === 'es' ? 'Pauta Intensiva' : 'Intensive Protocol', '750 mcg')
+        createPhase('phase_micro_low', p1Dose, u, lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol', doseUnit === 'mcg' ? '250 mcg' : '0.25 mg'),
+        createPhase('phase_micro_std', p2Dose, u, lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Estándar' : 'Standard', lang === 'es' ? 'Pauta Estándar' : 'Standard Protocol', doseUnit === 'mcg' ? '500 mcg' : '0.50 mg'),
+        createPhase('phase_micro_opt', p3Dose, u, lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Intensiva' : 'Intensive', lang === 'es' ? 'Pauta Intensiva' : 'Intensive Protocol', doseUnit === 'mcg' ? '750 mcg' : '0.75 mg')
       ];
     }
 
-    // 4. Standard Fallback scaled safely to concentration bounds (≤ 80 Units)
+    // 9. Standard Fallback scaled safely to concentration bounds (≤ 80 Units)
     const maxSafeDose = Math.min(vMg, conc * 0.85);
     const d1 = +(Math.max(0.25, Math.min(1.0, maxSafeDose * 0.35)).toFixed(2));
     const d2 = +(Math.max(d1, Math.min(2.0, maxSafeDose * 0.65)).toFixed(2));
