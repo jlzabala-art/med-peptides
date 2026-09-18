@@ -112,7 +112,10 @@ export async function GET(request, { params }) {
     const rawSlug = resolvedParams?.slug || 'retatrutide';
     const slug = decodeURIComponent(rawSlug).toLowerCase().trim();
     const { searchParams } = new URL(request.url);
-    const supplier = searchParams.get('supplier') || 'lotusland';
+    const rawSupp = searchParams.get('supplier');
+    const suppParam = (rawSupp && rawSupp !== 'all' && !rawSupp.includes('all-certified') && !rawSupp.includes('multi-source'))
+      ? (rawSupp.startsWith('supplier-') ? rawSupp : `supplier-${rawSupp.toLowerCase().replace(/[\s_]+/g, '-')}`)
+      : 'supplier-lotusland';
 
     const baseUrl = 'https://med-peptides.com';
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
@@ -126,15 +129,22 @@ export async function GET(request, { params }) {
       targetUrl = targetUrl.replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, baseUrl);
       targetUrl = targetUrl.replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg');
 
-      const suppParam = supplier.startsWith('supplier-') ? supplier : `supplier-${supplier}`;
+      // Replace any generic supplier with concrete supplier
+      targetUrl = targetUrl.replace(/supplier=(all|supplier-all[^&]*)/gi, `supplier=${suppParam}`);
+
       if (!targetUrl.includes('supplier=')) {
         targetUrl += (targetUrl.includes('?') ? '&' : '?') + `supplier=${encodeURIComponent(suppParam)}`;
+      }
+      if (!targetUrl.includes('presentation=')) {
+        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `presentation=vial`;
+      }
+      if (!targetUrl.includes('dose=')) {
+        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `dose=10%20mg`;
       }
     } else {
       const qParams = new URLSearchParams();
       const dose = searchParams.get('dose') || searchParams.get('strength') || '10 mg';
       const presentation = searchParams.get('presentation') || searchParams.get('format') || 'vial';
-      const suppParam = (supplier && supplier !== 'all') ? (supplier.startsWith('supplier-') ? supplier : `supplier-${supplier}`) : 'supplier-lotusland';
       const batch = searchParams.get('batch') || searchParams.get('vialCode');
       const vialCode = searchParams.get('vialCode') || searchParams.get('batch');
       const lang = searchParams.get('lang');
@@ -155,7 +165,7 @@ export async function GET(request, { params }) {
     const customBatch = searchParams.get('batch') || searchParams.get('vialCode');
     if (customBatch) {
       product.lotNumber = customBatch;
-      product.skuNumber = `RP-${getSupplierCode(supplier || product.supplier)}-${customBatch.replace(/[^A-Z0-9-]/gi, '').slice(0, 16)}`;
+      product.skuNumber = `RP-${getSupplierCode(suppParam || product.supplier)}-${customBatch.replace(/[^A-Z0-9-]/gi, '').slice(0, 16)}`;
     }
 
     // 2. Generate Native QR SVG (pure JS — no native deps)

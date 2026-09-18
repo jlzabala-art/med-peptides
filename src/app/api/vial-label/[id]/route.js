@@ -609,8 +609,12 @@ export async function GET(request, { params }) {
       // Force human-readable dose (10 mg instead of 10_mg)
       targetShareUrl = targetShareUrl.replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg');
 
-      // Guarantee supplier is present in QR url
-      const suppVal = targetSupplier || rawSupplier || 'supplier-lotusland';
+      // Guarantee concrete supplier is present in QR url
+      let suppVal = targetSupplier || rawSupplier || 'supplier-lotusland';
+      if (!suppVal || suppVal === 'all' || suppVal.includes('all-certified') || suppVal.includes('multi-source')) {
+        suppVal = 'supplier-lotusland';
+      }
+      targetShareUrl = targetShareUrl.replace(/supplier=(all|supplier-all[^&]*)/gi, `supplier=${suppVal}`);
       if (!targetShareUrl.includes('supplier=')) {
         targetShareUrl += (targetShareUrl.includes('?') ? '&' : '?') + `supplier=${encodeURIComponent(suppVal)}`;
       }
@@ -636,7 +640,11 @@ export async function GET(request, { params }) {
       const doseStr = (targetDose || '10 mg').replace(/_/g, ' ');
       qParams.set('dose', doseStr);
       qParams.set('presentation', targetFormat || 'vial');
-      qParams.set('supplier', targetSupplier || rawSupplier || 'supplier-lotusland');
+      let concreteSupp = targetSupplier || rawSupplier || 'supplier-lotusland';
+      if (!concreteSupp || concreteSupp === 'all' || concreteSupp.includes('all-certified') || concreteSupp.includes('multi-source')) {
+        concreteSupp = 'supplier-lotusland';
+      }
+      qParams.set('supplier', concreteSupp);
       if (batchNumber) {
         qParams.set('batch', batchNumber);
         qParams.set('vialCode', batchNumber);

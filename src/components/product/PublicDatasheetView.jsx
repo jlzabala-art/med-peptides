@@ -225,7 +225,24 @@ export default function PublicDatasheetView({
   const suppliersList = useMemo(() => Array.isArray(hierarchy.suppliers) ? hierarchy.suppliers : [], [hierarchy.suppliers]);
   const isMultiSupplierMode = !product?.isSingleSupplierLocked && suppliersList.length > 1;
 
-  // Active supplier state (if multi-supplier mode)
+  // Helper to ensure physical labels, QR codes, and URLs always bind to a concrete laboratory
+  const getConcreteSupplierId = (suppId, sName) => {
+    const raw = String(suppId || sName || '').trim();
+    if (!raw || raw === 'all' || raw.toLowerCase().includes('all certified') || raw.toLowerCase().includes('multi-source')) {
+      const firstHierarchySupp = suppliersList[0]?.id;
+      if (firstHierarchySupp && firstHierarchySupp !== 'all') {
+        return firstHierarchySupp.startsWith('supplier-') ? firstHierarchySupp : `supplier-${firstHierarchySupp}`;
+      }
+      const firstVariantSupp = product?.variants?.[0]?.supplierId || product?.variants?.[0]?.supplierName;
+      if (firstVariantSupp && firstVariantSupp !== 'all') {
+        return firstVariantSupp.startsWith('supplier-') ? firstVariantSupp : `supplier-${firstVariantSupp}`;
+      }
+      return 'supplier-lotusland';
+    }
+    return raw.startsWith('supplier-') ? raw : `supplier-${raw.toLowerCase().replace(/[\s_]+/g, '-')}`;
+  };
+
+  // Active supplier state: default to primary concrete laboratory (NEVER generic 'all')
   const [activeSupplierId, setActiveSupplierId] = useState(() => {
     if (initialSupplierFilter && initialSupplierFilter !== 'all') {
       const cleanTarget = String(initialSupplierFilter).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
@@ -235,7 +252,7 @@ export default function PublicDatasheetView({
       });
       if (matched) return matched.id;
     }
-    return 'all';
+    return suppliersList[0]?.id || product?.supplierId || 'supplier-lotusland';
   });
 
   const activeSupplierObj = useMemo(() => {
@@ -454,9 +471,7 @@ export default function PublicDatasheetView({
     params.set('presentation', currentFormat);
 
     // 3. Supplier: Always bind the concrete active or canonical supplier (e.g. "supplier-lotusland")
-    const targetSupplier = (activeSupplierId && activeSupplierId !== 'all')
-      ? activeSupplierId
-      : (product?.supplierId || (supplierName ? (supplierName.startsWith('supplier-') ? supplierName : `supplier-${supplierName.toLowerCase().replace(/[\s_]+/g, '-')}`) : 'supplier-lotusland'));
+    const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
     params.set('supplier', targetSupplier);
 
     // 4. Batch & VialCode: Synchronized authentic discreet lot code
@@ -471,7 +486,7 @@ export default function PublicDatasheetView({
     const q = params.toString();
     const canonicalDomain = 'https://med-peptides.com';
     return `${canonicalDomain}/p/${slug}${q ? `?${q}` : ''}`;
-  }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, product?.supplierId, supplierName, effectiveBatchCode, lang]);
+  }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang]);
 
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
@@ -482,12 +497,10 @@ export default function PublicDatasheetView({
     p.set('presentation', currentFormat);
     p.set('format', currentFormat);
 
-    const targetSupplier = (activeSupplierId && activeSupplierId !== 'all')
-      ? activeSupplierId
-      : (product?.supplierId || (supplierName ? (supplierName.startsWith('supplier-') ? supplierName : `supplier-${supplierName.toLowerCase().replace(/[\s_]+/g, '-')}`) : 'supplier-lotusland'));
+    const targetSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
     p.set('supplier', targetSupplier);
 
-    if (supplierName && !supplierName.includes('All Certified Laboratories')) {
+    if (supplierName && !supplierName.includes('All Certified Laboratories') && !supplierName.includes('Multi-Source')) {
       p.set('supplierName', supplierName);
     }
 
@@ -501,7 +514,7 @@ export default function PublicDatasheetView({
     }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, product?.supplierId, supplierName, effectiveBatchCode, lang, dynamicPublicUrl]);
+  }, [selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang, dynamicPublicUrl]);
 
   // Variant-specific file naming suffix so operators never confuse downloaded labels
   const variantFileSuffix = useMemo(() => {
@@ -514,9 +527,7 @@ export default function PublicDatasheetView({
   }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, effectiveBatchCode]);
 
   // Live Scannable 2D/3D Barcode SVG URL synced with current variant state
-  const barcodeSupplier = (activeSupplierId && activeSupplierId !== 'all')
-    ? activeSupplierId
-    : (product?.supplierId || product?.supplierName || product?.supplier || 'supplier-lotusland');
+  const barcodeSupplier = getConcreteSupplierId(activeSupplierId, supplierName);
   const barcodeImageUrl = useMemo(() => {
     const qs = new URLSearchParams();
     const currentDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');

@@ -70,6 +70,8 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
     ? monographUrl
         .replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, origin)
         .replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, origin)
+        .replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg')
+        .replace(/supplier=(all|supplier-all[^&]*)/gi, 'supplier=supplier-lotusland')
     : verifyUrl;
   const activeMonographUrl = cleanMonographUrl;
   const pdfUrl = `/api/product-sheet/${product.id || slug}?format=vial`;
