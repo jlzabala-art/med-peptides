@@ -242,7 +242,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const resolvedSearchParams = await searchParams;
   const slug = resolvedParams?.slug;
   const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
-  const initialFormat = resolvedSearchParams?.format || null;
+  const initialFormat = resolvedSearchParams?.format || resolvedSearchParams?.presentation || null;
   const initialStrength = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
   const initialLang = resolvedSearchParams?.lang || null;
   const initialBatch = resolvedSearchParams?.batch || resolvedSearchParams?.vialCode || null;

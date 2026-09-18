@@ -257,11 +257,8 @@ export async function GET(request, { params }) {
     </g>
 
     <!-- QR Instruction Label -->
-    <text x="198" y="388" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#002244" letter-spacing="0.02em">
+    <text x="198" y="395" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#002244" letter-spacing="0.04em">
       SCAN WITH CAMERA TO OPEN SPECS
-    </text>
-    <text x="198" y="408" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#64748B">
-      ${escapeXml(targetUrl.replace(/^https?:\/\//, '').slice(0, 48))}${targetUrl.replace(/^https?:\/\//, '').length > 48 ? '...' : ''}
     </text>
   </g>
 

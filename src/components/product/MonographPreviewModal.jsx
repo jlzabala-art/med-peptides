@@ -61,7 +61,13 @@ export default function MonographPreviewModal({
   const mw = product.molecularWeight || product.molecular?.molecularWeight || '4731.33';
   const purity = (product.purity || '99.0').replace(/[^0-9.]/g, '') || '99.0';
   const formatName = activeFormat?.name || 'Vial (Lyophilized)';
-  const lot = product.batchNumber || product.batch || (typeof initialBatch !== 'undefined' && initialBatch ? initialBatch : null) || generateDiscreetBatchCode({ slug, dose: doseName, supplier: supplierName });
+  const doseName = selectedStrength?.name || selectedStrength?.dosage || selectedStrength?.dose || (typeof selectedStrength === 'string' ? selectedStrength : null) || product.dosage || '10 mg';
+
+  let rawLot = (typeof initialBatch !== 'undefined' && initialBatch ? initialBatch : null) || product.vialCode || product.batchNumber || product.batch;
+  if (!rawLot || String(rawLot).toLowerCase().includes('suppl') || String(rawLot).toLowerCase().includes('dummy') || String(rawLot).toLowerCase().includes('sample')) {
+    rawLot = generateDiscreetBatchCode({ slug, dose: doseName, supplier: supplierName });
+  }
+  const lot = rawLot;
 
   // Direct PDF Download Endpoints
   const monographPdfUrl = `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`;

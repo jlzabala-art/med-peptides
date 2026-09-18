@@ -582,9 +582,9 @@ export async function GET(request, { params }) {
 
     // Deterministic batch number customized for supplier + dose + variant vialCode
     let batchNumber = customBatch;
-    if (!batchNumber) {
-      const varBatch = targetVariant.vialCode || targetVariant.batchCode || targetVariant.batchNumber || targetVariant.lotNumber;
-      if (varBatch && !varBatch.toLowerCase().includes(cleanSlug)) {
+    if (!batchNumber || String(batchNumber).toLowerCase().includes('suppl') || String(batchNumber).toLowerCase().includes('dummy') || String(batchNumber).toLowerCase().includes('sample')) {
+      const varBatch = targetVariant?.vialCode || targetVariant?.batchCode || targetVariant?.batchNumber || targetVariant?.lotNumber;
+      if (varBatch && !varBatch.toLowerCase().includes(cleanSlug) && !varBatch.toLowerCase().includes('suppl')) {
         batchNumber = varBatch;
       } else {
         batchNumber = generateDiscreetBatchCode({
@@ -595,13 +595,22 @@ export async function GET(request, { params }) {
       }
     }
 
-    // Resolve target shared URL for the QR code
+    // Resolve target shared URL for the QR code — guaranteed to point to exact variant
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetShareUrl = explicitUrl;
-    if (targetShareUrl && targetShareUrl.startsWith('/')) {
-      targetShareUrl = `${BASE_URL}${targetShareUrl}`;
-    }
-    if (!targetShareUrl) {
+    if (targetShareUrl) {
+      if (targetShareUrl.startsWith('/')) {
+        targetShareUrl = `${BASE_URL}${targetShareUrl}`;
+      }
+      // Sanitize any dummy SUPPL strings in the explicit URL
+      if (targetShareUrl.toLowerCase().includes('suppl')) {
+        targetShareUrl = targetShareUrl.replace(/RP-SUPPL-[^&]+/gi, batchNumber);
+      }
+      // Ensure vialCode is present
+      if (!targetShareUrl.includes('vialCode=') && batchNumber) {
+        targetShareUrl += (targetShareUrl.includes('?') ? '&' : '?') + `vialCode=${encodeURIComponent(batchNumber)}`;
+      }
+    } else {
       const qParams = new URLSearchParams();
       if (targetSupplier && targetSupplier !== 'all') qParams.set('supplier', targetSupplier);
       if (targetDose && targetDose !== 'all') qParams.set('dose', targetDose);

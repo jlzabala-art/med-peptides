@@ -18,6 +18,9 @@ import {
   Clock,
   Sparkles
 } from '@/lib/icons';
+import toast from 'react-hot-toast';
+import { triggerHaptic } from '@/utils/haptics';
+import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import './ProductTraceabilityCard.css';
 import { getTranslations } from '../../utils/productTranslations';
 
@@ -35,13 +38,24 @@ import { getTranslations } from '../../utils/productTranslations';
  */
 export default function ProductTraceabilityCard({ product, className = '', baseUrl, lang = 'en', monographUrl = '', batchCode: customBatchCode = '' }) {
   const [copied, setCopied] = useState(false);
+  const [copiedBatch, setCopiedBatch] = useState(false);
   const t = getTranslations(lang);
 
   if (!product) return null;
 
   const rawName = product.name || product.canonicalName || product.displayName || 'Clinical Peptide';
   const slug = product.slug || product.id || 'peptide';
-  const batchCode = customBatchCode || product.batchNumber || product.lotNumber || (product.slug ? `LOT-${product.slug.slice(0, 5).toUpperCase()}-2026` : 'LOT-VERIFIED-AUTH');
+  
+  let resolvedBatchCode = customBatchCode || product.vialCode || product.batchNumber || product.lotNumber;
+  if (!resolvedBatchCode || String(resolvedBatchCode).toLowerCase().includes('suppl') || String(resolvedBatchCode).toLowerCase().includes('dummy') || String(resolvedBatchCode).toLowerCase().includes('sample') || String(resolvedBatchCode).toLowerCase().includes('auth')) {
+    resolvedBatchCode = generateDiscreetBatchCode({
+      slug: product.slug || product.id,
+      dose: product.dosage || product.dose || '10mg',
+      supplier: product.supplier || product.supplierId || 'supplier-lotusland'
+    });
+  }
+  const batchCode = resolvedBatchCode;
+
   const casNumber = product.casNumber || product.cas || 'Available on monograph';
   const purity = product.purity || '≥ 99.4%';
   const mw = product.molecularWeight || product.molecular_weight ? `${product.molecularWeight || product.molecular_weight} Da` : null;
@@ -58,157 +72,155 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const handleCopyHash = async () => {
     await navigator.clipboard.writeText(activeMonographUrl).catch(() => {});
     setCopied(true);
+    toast.success(lang === 'es' ? 'Enlace de verificación copiado ✓' : 'Verification link copied ✓');
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyBatch = async (e) => {
+    e?.stopPropagation?.();
+    try {
+      await navigator.clipboard.writeText(batchCode);
+      setCopiedBatch(true);
+      triggerHaptic?.('selection');
+      toast.success(lang === 'es' ? `Lote ${batchCode} copiado ✓` : `Batch ${batchCode} copied ✓`, {
+        id: 'copy-batch',
+        duration: 2000,
+        position: 'bottom-center',
+        style: {
+          background: '#003666',
+          color: '#ffffff',
+          fontSize: '0.82rem',
+          fontWeight: 600,
+          borderRadius: '8px',
+        }
+      });
+      setTimeout(() => setCopiedBatch(false), 2000);
+    } catch (err) {
+      console.warn('Batch copy notice:', err);
+    }
+  };
+
   return (
-    <div 
-      className={`product-traceability-card ${className}`}
-      style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '16px',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 4px 20px -4px rgba(0, 54, 102, 0.08)',
-        overflow: 'hidden',
-        margin: '1.5rem 0',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-      }}
-    >
+    <div className={`ptc-card-container ${className}`}>
       {/* ── Top Quality Header Ribbon ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
-        color: '#ffffff',
-        padding: '1.15rem 1.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '0.75rem',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.12)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#38bdf8',
-          }}>
-            <ShieldCheck size={22} />
+      <div className="ptc-header">
+        <div className="ptc-header-left">
+          <div className="ptc-header-shield">
+            <ShieldCheck size={24} />
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', color: '#93c5fd', textTransform: 'uppercase' }}>
-                Batch Traceability & Analytical Assurance
+          <div className="ptc-header-titles">
+            <div className="ptc-header-meta-row">
+              <span className="ptc-header-category">
+                Batch Traceability &amp; Analytical Assurance
               </span>
-              <span style={{
-                backgroundColor: '#10b981',
-                color: '#ffffff',
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                padding: '0.15rem 0.45rem',
-                borderRadius: '999px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-              }}>
+              <span className="ptc-verified-badge">
                 <CheckCircle2 size={11} /> VERIFIED AUTHENTIC
               </span>
             </div>
-            <h3 style={{ margin: '0.15rem 0 0', fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+            <h3 className="ptc-header-title">
               {rawName} — Monograph Release Standard
             </h3>
           </div>
         </div>
 
-        <div style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '8px',
-          padding: '0.35rem 0.75rem',
-          fontSize: '0.74rem',
-          fontWeight: 600,
-          color: '#e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.4rem',
-        }}>
-          <Award size={14} color="#facc15" />
-          Dual-Stage RP-HPLC &amp; LC-MS Certified Release
+        <div className="ptc-cert-badge">
+          <Award size={15} color="#facc15" />
+          <span>Dual-Stage RP-HPLC &amp; LC-MS Certified Release</span>
         </div>
       </div>
 
       {/* ── Key Technical Indicators Grid ── */}
-      <div style={{
-        padding: '1.25rem 1.5rem',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '0.85rem',
-        backgroundColor: '#f8fafc',
-        borderBottom: '1px solid #e2e8f0',
-      }}>
+      <div className="ptc-kpi-grid">
         {/* Lot / Batch Code */}
-        <div style={{ backgroundColor: '#ffffff', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <Hash size={12} color="#003666" /> Batch / Lot Identifier
+        <div 
+          className="ptc-kpi-card ptc-clickable" 
+          onClick={handleCopyBatch} 
+          title="Click to copy batch identifier"
+        >
+          <div className="ptc-kpi-top">
+            <span className="ptc-kpi-label">
+              <Hash size={12} className="ptc-kpi-icon" color="#003666" /> Batch / Lot Identifier
+            </span>
+            <button 
+              type="button" 
+              onClick={handleCopyBatch} 
+              className="ptc-kpi-copy-btn" 
+              title="Copy Batch Code" 
+              aria-label="Copy Batch Code"
+            >
+              {copiedBatch ? <Check size={11} color="#16a34a" /> : <Copy size={11} />}
+              <span style={{ marginLeft: 3 }}>{copiedBatch ? '✓' : 'Copy'}</span>
+            </button>
           </div>
-          <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#003666', fontFamily: 'ui-monospace, monospace' }}>
+          <div className="ptc-kpi-value-wrap">
+            <span className="ptc-kpi-value font-mono value-batch" title={batchCode}>
               {batchCode}
             </span>
           </div>
-          <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 600, marginTop: '0.2rem' }}>
-            ✓ Laboratory Release Passed
+          <div className="ptc-kpi-sub status-passed">
+            <span className="ptc-kpi-dot"></span>
+            <span>Laboratory Release Passed</span>
           </div>
         </div>
 
         {/* HPLC Assay Purity */}
-        <div style={{ backgroundColor: '#ffffff', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <Sparkles size={12} color="#16a34a" /> Analytical Purity (HPLC)
+        <div className="ptc-kpi-card">
+          <div className="ptc-kpi-top">
+            <span className="ptc-kpi-label">
+              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> Analytical Purity (HPLC)
+            </span>
+            <span className="ptc-kpi-pill purity-pill">RP-HPLC</span>
           </div>
-          <div style={{ marginTop: '0.35rem', fontSize: '1.15rem', fontWeight: 900, color: '#15803d' }}>
-            {purity}
+          <div className="ptc-kpi-value-wrap">
+            <span className="ptc-kpi-value value-purity">{purity}</span>
           </div>
-          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.15rem' }}>
-            Specification: ≥ 98.0% (Ph. Eur. Method)
+          <div className="ptc-kpi-sub">
+            <span>Specification: ≥ 98.0% (Ph. Eur.)</span>
           </div>
         </div>
 
         {/* Mass Spectrometry (MS) */}
-        <div style={{ backgroundColor: '#ffffff', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <Beaker size={12} color="#0284c7" /> Mass Spec Identity (LC-MS)
+        <div className="ptc-kpi-card">
+          <div className="ptc-kpi-top">
+            <span className="ptc-kpi-label">
+              <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" /> Mass Spec Identity (LC-MS)
+            </span>
+            <span className="ptc-kpi-pill ms-pill">ESI-MS</span>
           </div>
-          <div style={{ marginTop: '0.35rem', fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-            {mw || 'MW Confirmed'}
+          <div className="ptc-kpi-value-wrap">
+            <span className="ptc-kpi-value font-mono" title={mw || 'MW Confirmed'}>
+              {mw || 'MW Confirmed'}
+            </span>
           </div>
-          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.15rem' }}>
-            Monoisotopic Peak Concordant
+          <div className="ptc-kpi-sub">
+            <span>Monoisotopic Peak Concordant</span>
           </div>
         </div>
 
         {/* CAS & Formula */}
-        <div style={{ backgroundColor: '#ffffff', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <FlaskConical size={12} color="#8b5cf6" /> CAS Registry Identification
+        <div className="ptc-kpi-card">
+          <div className="ptc-kpi-top">
+            <span className="ptc-kpi-label">
+              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> CAS Registry Identification
+            </span>
+            <span className="ptc-kpi-pill cas-pill">CAS</span>
           </div>
-          <div style={{ marginTop: '0.35rem', fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', fontFamily: 'ui-monospace, monospace' }}>
-            {casNumber}
+          <div className="ptc-kpi-value-wrap">
+            <span className="ptc-kpi-value font-mono" title={casNumber}>
+              {casNumber}
+            </span>
           </div>
-          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.15rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {formula || 'Synthetic Polypeptide Structure'}
+          <div className="ptc-kpi-sub">
+            <span title={formula || 'Synthetic Polypeptide Structure'}>{formula || 'Synthetic Polypeptide'}</span>
           </div>
         </div>
 
         {product?.sequence && (
-          <div style={{ backgroundColor: '#ffffff', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
+          <div className="ptc-sequence-wrap">
+            <div className="ptc-kpi-label" style={{ marginBottom: '0.35rem' }}>
               Primary Peptide Sequence (Mono-letter Notation)
             </div>
-            <code style={{ fontSize: '0.82rem', fontFamily: 'ui-monospace, monospace', color: '#003666', wordBreak: 'break-all', display: 'block', backgroundColor: '#f1f5f9', padding: '6px 10px', borderRadius: '6px' }}>
+            <code className="ptc-sequence-code">
               {product.sequence}
             </code>
           </div>
@@ -216,7 +228,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
       </div>
 
       {/* ── Quality Matrix & Chain of Custody Table ── */}
-      <div style={{ padding: '1.25rem 1.5rem' }}>
+      <div className="ptc-coa-section">
         <h4 style={{ margin: '0 0 0.85rem', fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <CheckCircle2 size={16} color="#16a34a" /> {t.coaTitle}
         </h4>

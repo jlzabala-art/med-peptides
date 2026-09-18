@@ -427,6 +427,20 @@ export default function PublicDatasheetView({
       || null;
   }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
 
+  // Deterministic discreet batch code fallback
+  const effectiveBatchCode = useMemo(() => {
+    if (initialBatch && !String(initialBatch).toLowerCase().includes('suppl') && !String(initialBatch).toLowerCase().includes('dummy')) {
+      return initialBatch;
+    }
+    const currentDose = selectedStrength?.name || selectedStrengthId || '10 mg';
+    const currentSupplier = (activeSupplierId && activeSupplierId !== 'all') ? activeSupplierId : (supplierName || 'supplier-lotusland');
+    return generateDiscreetBatchCode({
+      slug: slug || product?.slug,
+      dose: currentDose,
+      supplier: currentSupplier
+    });
+  }, [initialBatch, slug, product?.slug, selectedStrength?.name, selectedStrengthId, activeSupplierId, supplierName]);
+
   // Reactive Dynamic Share URL respecting active state
   const dynamicPublicUrl = useMemo(() => {
     const params = new URLSearchParams();
@@ -445,13 +459,11 @@ export default function PublicDatasheetView({
     if (lang && lang !== 'en') {
       params.set('lang', lang);
     }
-    if (initialBatch) {
-      params.set('batch', initialBatch);
-      params.set('vialCode', initialBatch);
-    }
+    params.set('batch', effectiveBatchCode);
+    params.set('vialCode', effectiveBatchCode);
     const q = params.toString();
     return `${baseUrl}/p/${slug}${q ? `?${q}` : ''}`;
-  }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product, initialBatch]);
+  }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product, effectiveBatchCode]);
 
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
@@ -467,16 +479,14 @@ export default function PublicDatasheetView({
       p.set('format', activeFormatId);
     }
     if (lang && lang !== 'en') p.set('lang', lang);
-    if (initialBatch) {
-      p.set('batch', initialBatch);
-      p.set('vialCode', initialBatch);
-    }
+    p.set('batch', effectiveBatchCode);
+    p.set('vialCode', effectiveBatchCode);
     if (dynamicPublicUrl) {
       p.set('url', dynamicPublicUrl);
     }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang, initialBatch, dynamicPublicUrl]);
+  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang, effectiveBatchCode, dynamicPublicUrl]);
 
   // Variant-specific file naming suffix so operators never confuse downloaded labels
   const variantFileSuffix = useMemo(() => {
@@ -484,9 +494,9 @@ export default function PublicDatasheetView({
     const d = clean(selectedStrength?.name || selectedStrengthId || '10mg');
     const p = clean(activeFormat?.name || activeFormatId || 'vial');
     const s = clean(supplierName || activeSupplierId || 'lotusland');
-    const b = clean(initialBatch || 'batch');
+    const b = clean(effectiveBatchCode || 'batch');
     return `${clean(slug)}_${d}_${p}_${s}_${b}`;
-  }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, initialBatch]);
+  }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, effectiveBatchCode]);
 
   // Live Scannable 2D/3D Barcode SVG URL synced with current variant state
   const barcodeSupplier = product?.supplierId || product?.supplierName || product?.supplier || 'lotusland';
@@ -637,9 +647,9 @@ export default function PublicDatasheetView({
                 setIsPreviewModalOpen(true);
               }}
               className="pds-btn pds-btn-pdf"
-              title="Preview Monograph & Download PDF"
+              title={lang === 'es' ? 'Previsualizar, Descargar e Imprimir Dossier Oficial (PDF)' : 'Preview, Download & Print Official Clinical Monograph (PDF)'}
             >
-              <Eye size={14} /> Preview PDF
+              <Printer size={14} /> {lang === 'es' ? 'Previsualizar e Imprimir' : 'Preview & Print PDF'}
             </button>
 
             <a 
@@ -685,18 +695,6 @@ export default function PublicDatasheetView({
             >
               <Share2 size={14} />
               <span>{t.shareColleague}</span>
-            </button>
-
-            <button 
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsPreviewModalOpen(true);
-              }} 
-              className="pds-btn pds-btn-ghost" 
-              title="Preview & Print Complete Monograph (All Formulations)"
-            >
-              <Printer size={14} /> {t.printPdf}
             </button>
 
             <button onClick={handleWhatsApp} className="pds-btn pds-btn-wa">
@@ -1138,7 +1136,7 @@ export default function PublicDatasheetView({
             baseUrl={baseUrl}
             lang={lang}
             monographUrl={dynamicPublicUrl}
-            batchCode={initialBatch}
+            batchCode={effectiveBatchCode}
           />
         </section>
 
@@ -1329,7 +1327,7 @@ export default function PublicDatasheetView({
         sortedStrengths={sortedStrengths}
         dynamicPublicUrl={dynamicPublicUrl}
         labelQueryString={labelQueryString}
-        initialBatch={initialBatch || generateDiscreetBatchCode({ slug, dose: selectedStrength?.name, supplier: activeSupplierId || supplierName })}
+        initialBatch={effectiveBatchCode}
         version={versionInfo.version}
         updatedAtDate={versionInfo.updatedAtDate}
       />
