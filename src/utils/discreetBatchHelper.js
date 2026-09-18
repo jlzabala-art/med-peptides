@@ -1,3 +1,5 @@
+import { BRAND_CONFIG } from '../config/brandConfig';
+
 /**
  * discreetBatchHelper.js
  * ─────────────────────────────────────────────────────────────────────────────
@@ -6,8 +8,8 @@
  * product, dose, and lot period without disclosing the full chemical name
  * on physical outer packaging.
  *
- * Format: RP-[SUPPLIER]-[PRODUCT_CODE][DOSE]-[YYMM]
- * Example: RP-LOT-RT10-2609 (Retatrutide 10mg, Lotusland, Sept 2026)
+ * Format: MP-[SUPPLIER]-[PRODUCT_CODE][DOSE]-[YYMM]
+ * Example: MP-LOT-RT10-2609 (Retatrutide 10mg, Lotusland, Sept 2026)
  */
 
 export const DISCREET_PRODUCT_CODES = {
@@ -95,7 +97,8 @@ export const SUPPLIER_CODES = {
 };
 
 export function getDiscreetProductPrefix(slug) {
-  if (!slug) return 'MP';
+  const brandCode = BRAND_CONFIG.shortCode || 'MP';
+  if (!slug) return brandCode;
   const clean = String(slug).toLowerCase().trim().replace(/^lotusland[-_]/i, '');
   if (DISCREET_PRODUCT_CODES[clean]) return DISCREET_PRODUCT_CODES[clean];
   
@@ -105,7 +108,7 @@ export function getDiscreetProductPrefix(slug) {
 
   const consonants = stripped.replace(/[^bcdfghjklmnpqrstvwxyz]/g, '').toUpperCase();
   if (consonants.length >= 2) return consonants.slice(0, 2);
-  return stripped.slice(0, 2).toUpperCase() || 'MP';
+  return stripped.slice(0, 2).toUpperCase() || brandCode;
 }
 
 export function getSupplierCode(supplierIdOrName) {
@@ -142,5 +145,6 @@ export function generateDiscreetBatchCode({ slug, dose, supplier, date } = {}) {
   const suppCode = getSupplierCode(supplier);
   const prodPrefix = getDiscreetProductPrefix(slug);
   const doseCode = formatDoseCode(dose);
-  return `MP-${suppCode}-${prodPrefix}${doseCode}-${yearMonth}`;
+  const brandPrefix = BRAND_CONFIG.shortCode || 'MP';
+  return `${brandPrefix}-${suppCode}-${prodPrefix}${doseCode}-${yearMonth}`;
 }

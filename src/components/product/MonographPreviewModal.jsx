@@ -7,71 +7,9 @@ import { X, Download, Eye, FileText, Check, ShieldCheck, Tag, Box, Copy } from '
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
+import { prefetchPdf } from '../../utils/pdfPrefetch';
 
-/**
- * MonographPreviewModal
- * ─────────────────────────────────────────────────────────────────────────────
- * Comprehensive Institutional Print & PDF Preview Modal.
- * Fully responsive on Mobile and Desktop.
- * 
- * Offers 3 Preview Tabs:
- *  1. 📄 Official Monograph Dossier (A4 PDF)
- *  2. 📦 Shipping & Batch Traceability Label (38×90mm Thermal PDF)
- *  3. 🏷️ Client Vial Application Label (38×90mm Thermal PDF)
- * 
- * Every tab provides direct "Download PDF" action.
- */
-
-function parseMgFromPresentation(str) {
-  const s = String(str || '');
-  const mgMatches = [...s.matchAll(/(\d+(?:\.\d+)?)\s*mg/gi)];
-  if (mgMatches.length > 0) {
-    return mgMatches.reduce((acc, m) => acc + parseFloat(m[1]), 0);
-  }
-  if (s.includes('|') || s.includes('+') || s.includes('/')) {
-    const parts = s.split(/[|+/]/);
-    let total = 0;
-    for (const part of parts) {
-      const m = part.match(/(\d+(?:\.\d+)?)/);
-      if (m) total += parseFloat(m[1]);
-    }
-    if (total > 0) return total;
-  }
-  const m = s.match(/(\d+(\.\d+)?)/);
-  return m ? parseFloat(m[1]) : 10;
-}
-
-function getReconstitutionBaseline(mgVal, isBlend = false) {
-  let baseBac = 2.0;
-  if (isBlend) {
-    const rawVol = mgVal / 10.0;
-    baseBac = Math.max(2.0, Math.round(rawVol * 2) / 2);
-  } else if (mgVal <= 2) {
-    baseBac = 1.0;
-  } else if (mgVal <= 5) {
-    baseBac = 2.0;
-  } else if (mgVal <= 10) {
-    baseBac = 2.0;
-  } else if (mgVal <= 15) {
-    baseBac = 3.0;
-  } else if (mgVal <= 20) {
-    baseBac = 3.0;
-  } else if (mgVal <= 30) {
-    baseBac = 4.0;
-  } else if (mgVal <= 40) {
-    baseBac = 5.0;
-  } else if (mgVal <= 50) {
-    baseBac = 5.0;
-  } else {
-    baseBac = Math.max(5.0, Math.round((mgVal / 10.0) * 2) / 2);
-  }
-
-  const conc = baseBac > 0 ? (mgVal / baseBac) : mgVal;
-  return {
-    diluent: `${baseBac.toFixed(1)} mL BAC Water`,
-    conc: `${conc.toFixed(1)} mg/mL`
-  };
-}
+import { getReconstitutionBaseline, parseMgFromPresentation } from '../../utils/reconstitutionBaseline';
 
 export default function MonographPreviewModal({
   isOpen,
@@ -144,10 +82,12 @@ export default function MonographPreviewModal({
       ? `client_vial_label_${vSuffix}_38x90.pdf`
       : `${vSuffix}_monograph_a4.pdf`;
 
-  const handlePrint = () => {
-    triggerHaptic('medium');
-    window.print();
-  };
+  // Low-priority background prefetch for the active tab's PDF
+  useEffect(() => {
+    if (isOpen && currentDownloadUrl) {
+      prefetchPdf(currentDownloadUrl);
+    }
+  }, [isOpen, currentDownloadUrl]);
 
   const handleCopyLink = async () => {
     triggerHaptic('light');
@@ -555,10 +495,12 @@ export default function MonographPreviewModal({
           </button>
 
           <div className="mpm-actions-cluster">
-            {/* Primary Download PDF Button */}
+            {/* Primary Download PDF Button with Zero-Latency Background Prefetch */}
             <a
               href={currentDownloadUrl}
               download={currentFilename}
+              onMouseEnter={() => prefetchPdf(currentDownloadUrl)}
+              onTouchStart={() => prefetchPdf(currentDownloadUrl)}
               className="mpm-btn-download"
               title="Download official PDF file directly to device"
             >

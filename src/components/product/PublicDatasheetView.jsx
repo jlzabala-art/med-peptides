@@ -36,6 +36,7 @@ import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMo
 import PublicDatasheetMobileBar from './PublicDatasheetMobileBar';
 import MonographPreviewModal from './MonographPreviewModal';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
+import { prefetchPdf } from '../../utils/pdfPrefetch';
 
 function WaIcon() {
   return (
@@ -456,7 +457,7 @@ export default function PublicDatasheetView({
 
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
-    if (initialBatch && !String(initialBatch).toLowerCase().includes('suppl') && !String(initialBatch).toLowerCase().includes('dummy')) {
+    if (initialBatch && String(initialBatch).trim().length > 0 && !String(initialBatch).toLowerCase().includes('dummy')) {
       return initialBatch;
     }
     const currentDose = selectedStrength?.name || selectedStrengthId || '10 mg';
@@ -685,9 +686,11 @@ export default function PublicDatasheetView({
               ))}
             </select>
 
-            {/* Primary Action CTA */}
+            {/* Primary Action CTA with Zero-Latency Background Prefetch */}
             <button 
               type="button"
+              onMouseEnter={() => prefetchPdf(`/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`)}
+              onTouchStart={() => prefetchPdf(`/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`)}
               onClick={() => {
                 triggerHaptic('light');
                 setIsPreviewModalOpen(true);

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { BRAND_CONFIG } from '../../../config/brandConfig';
 
 /**
  * GET /api/og-card?type=product|protocol|verify&title=...&badge=...&subtitle=...
@@ -9,7 +10,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || 'product';
-  const title = (searchParams.get('title') || 'Med-Peptides Clinical').substring(0, 50);
+  const title = (searchParams.get('title') || `${BRAND_CONFIG.name} Clinical`).substring(0, 50);
   const badge = (searchParams.get('badge') || (type === 'protocol' ? 'CLINICAL PROTOCOL' : type === 'verify' ? 'AUTHENTIC BATCH' : 'PEPTIDE')).substring(0, 30);
   const subtitle = (searchParams.get('subtitle') || (type === 'protocol' ? 'Phased Clinical Treatment Plan' : type === 'verify' ? 'Analytical CoA & Quality Release' : 'Clinical Product Information Sheet')).substring(0, 60);
 

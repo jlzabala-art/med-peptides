@@ -16,6 +16,7 @@ import {
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
+import { getReconstitutionBaseline, parseMgFromPresentation } from '../../utils/reconstitutionBaseline';
 
 // ── Static preset arrays — defined outside component to avoid re-allocation ───
 const BAC_PRESETS = Object.freeze([1.0, 2.0, 2.5, 3.0, 5.0]);
@@ -70,29 +71,10 @@ export default function InteractiveReconstitutionGuide({
     return s.includes('+') || s.includes('|') || s.includes('/') || pName.includes('klow') || pName.includes('glow') || pName.includes('blend');
   }, [selectedStrength, product]);
 
-  // Extract initial numeric vial content (mg) from selectedStrength or product
-  // For blends (e.g. "6 mg + 6 mg + 30 mg + 6 mg" or "10 mg | 10 mg | 75 mg | 10 mg"), sum ALL mg values
+  // Extract initial numeric vial content (mg) using O(1) centralized fast parser
   const initialVialMg = useMemo(() => {
     const rawStr = selectedStrength?.name || selectedStrength?.id || product?.name || '';
-    const s = String(rawStr);
-    // Match all instances of e.g. "6 mg", "30mg"
-    const mgMatches = [...s.matchAll(/(\d+(?:\.\d+)?)\s*mg/gi)];
-    if (mgMatches.length > 0) {
-      const sum = mgMatches.reduce((acc, m) => acc + parseFloat(m[1]), 0);
-      if (sum > 0) return sum;
-    }
-    // Blend with separators (+, |, /)
-    if (s.includes('|') || s.includes('+') || s.includes('/')) {
-      const parts = s.split(/[|+/]/);
-      let total = 0;
-      for (const part of parts) {
-        const m = part.match(/(\d+(?:\.\d+)?)/);
-        if (m) total += parseFloat(m[1]);
-      }
-      if (total > 0) return total;
-    }
-    const match = s.match(/(\d+(\.\d+)?)\s*mg/i) || s.match(/(\d+(\.\d+)?)/);
-    return match ? parseFloat(match[1]) : 10;
+    return parseMgFromPresentation(rawStr);
   }, [selectedStrength, product]);
 
   // Dynamic clinical default dose calculation — aligned with monograph table reference baseline
@@ -111,32 +93,10 @@ export default function InteractiveReconstitutionGuide({
     return 5.0;
   };
 
-  // Determine the authoritative protocol baseline for this vial strength
+  // Determine the authoritative protocol baseline using O(1) table lookup
   const baselineState = useMemo(() => {
     const baseMg = initialVialMg || 5;
-    let baseBac = 2.0;
-    if (isBlend) {
-      const rawVol = baseMg / 10.0;
-      baseBac = Math.max(2.0, Math.round(rawVol * 2) / 2);
-    } else if (baseMg <= 2) {
-      baseBac = 1.0;  // 1.0 mL -> 2.0 mg/mL baseline
-    } else if (baseMg <= 5) {
-      baseBac = 2.0;  // 2.0 mL -> 2.5 mg/mL baseline
-    } else if (baseMg <= 10) {
-      baseBac = 2.0;  // 2.0 mL -> 5.0 mg/mL baseline
-    } else if (baseMg <= 15) {
-      baseBac = 3.0;  // 3.0 mL -> 5.0 mg/mL baseline
-    } else if (baseMg <= 20) {
-      baseBac = 3.0;  // 3.0 mL -> 6.7 mg/mL baseline
-    } else if (baseMg <= 30) {
-      baseBac = 4.0;  // 4.0 mL -> 7.5 mg/mL baseline
-    } else if (baseMg <= 40) {
-      baseBac = 5.0;  // 5.0 mL -> 8.0 mg/mL baseline
-    } else if (baseMg <= 50) {
-      baseBac = 5.0;  // 5.0 mL -> 10.0 mg/mL baseline
-    } else {
-      baseBac = Math.max(5.0, Math.round((baseMg / 10.0) * 2) / 2);
-    }
+    const { baseBac } = getReconstitutionBaseline(baseMg, isBlend);
     const baseDose = getClinicalDefaultDose(baseMg, isBlend, 'mg');
     return { baseMg, baseBac, baseDose, baseUnit: 'mg' };
   }, [initialVialMg, isBlend]);
@@ -157,28 +117,6 @@ export default function InteractiveReconstitutionGuide({
     }
   }, [initialVialMg, baselineState]);
 
-  // Detect whether active parameters differ from official monograph protocol
-  const isModifiedFromBaseline = useMemo(() => {
-    if (!baselineState) return false;
-    const vialChanged = Math.abs(vialMg - baselineState.baseMg) > 0.01;
-    const bacChanged = Math.abs(bacWaterMl - baselineState.baseBac) > 0.01;
-    // Official clinical phases (Phase 1, 2, 3) conform to the protocol monograph
-    const isCustomDose = activePhaseId === 'custom';
-    return vialChanged || bacChanged || isCustomDose;
-  }, [baselineState, vialMg, bacWaterMl, activePhaseId]);
-
-  const handleResetToBaseline = () => {
-    if (!baselineState) return;
-    triggerHaptic('success');
-    setVialMg(baselineState.baseMg);
-    setBacWaterMl(baselineState.baseBac);
-    setDoseUnit(baselineState.baseUnit);
-    setDoseValue(baselineState.baseDose);
-    const msg = lang === 'es'
-      ? 'Parámetros de reconstitución restaurados a la línea base de la monografía.'
-      : 'Reconstitution parameters restored to monograph protocol baseline.';
-    notifier.success(msg);
-  };
 
   // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded
   useEffect(() => {
@@ -344,6 +282,83 @@ export default function InteractiveReconstitutionGuide({
       subtitle: `${syringeUnits.toFixed(0)} UI (${liquidVolumeMl.toFixed(2)} mL)`
     };
   }, [clinicalPhases, activePhaseId, doseValue, doseUnit, syringeUnits, liquidVolumeMl, lang]);
+
+  // Detect whether active parameters differ from official monograph protocol (declared after activePhaseId to avoid TDZ)
+  const isModifiedFromBaseline = useMemo(() => {
+    if (!baselineState) return false;
+    const vialChanged = Math.abs(vialMg - baselineState.baseMg) > 0.01;
+    const bacChanged = Math.abs(bacWaterMl - baselineState.baseBac) > 0.01;
+    // Official clinical phases (Phase 1, 2, 3) conform to the protocol monograph
+    const isCustomDose = activePhaseId === 'custom';
+    return vialChanged || bacChanged || isCustomDose;
+  }, [baselineState, vialMg, bacWaterMl, activePhaseId]);
+
+  const handleResetToBaseline = () => {
+    if (!baselineState) return;
+    triggerHaptic('success');
+    setVialMg(baselineState.baseMg);
+    setBacWaterMl(baselineState.baseBac);
+    setDoseUnit(baselineState.baseUnit);
+    setDoseValue(baselineState.baseDose);
+    const msg = lang === 'es'
+      ? 'Parámetros de reconstitución restaurados a la línea base de la monografía.'
+      : 'Reconstitution parameters restored to monograph protocol baseline.';
+    notifier.success(msg);
+  };
+
+  // ── URL Deep Linking synchronization ──
+  const updateUrlParams = (phaseId, doseVal, unitVal) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      if (phaseId && phaseId !== 'custom') {
+        url.searchParams.set('phase', phaseId);
+      } else {
+        url.searchParams.delete('phase');
+      }
+      if (doseVal) {
+        url.searchParams.set('dose', `${doseVal}${unitVal || 'mg'}`);
+      }
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      // Safe fallback
+    }
+  };
+
+  const handleSelectPhase = (phase) => {
+    triggerHaptic('selection');
+    setDoseUnit(phase.unit);
+    setDoseValue(phase.dose);
+    updateUrlParams(phase.id, phase.dose, phase.unit);
+  };
+
+  // Initial mount: load URL params if specified
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlPhase = params.get('phase');
+      const urlDose = params.get('dose');
+      if (urlPhase && clinicalPhases.length > 0) {
+        const matched = clinicalPhases.find(p => p.id === urlPhase || p.id.endsWith(urlPhase));
+        if (matched) {
+          setDoseUnit(matched.unit);
+          setDoseValue(matched.dose);
+          return;
+        }
+      }
+      if (urlDose) {
+        const numMatch = urlDose.match(/(\d+(?:\.\d+)?)/);
+        const unitMatch = urlDose.includes('mcg') ? 'mcg' : 'mg';
+        if (numMatch) {
+          setDoseValue(parseFloat(numMatch[1]));
+          setDoseUnit(unitMatch);
+        }
+      }
+    } catch {
+      // Safe fallback
+    }
+  }, [clinicalPhases]);
 
   // Preset arrays are defined as module-level frozen constants (above the component)
 
@@ -1075,11 +1090,7 @@ export default function InteractiveReconstitutionGuide({
                   <button
                     key={phase.id}
                     type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      setDoseUnit(phase.unit);
-                      setDoseValue(phase.dose);
-                    }}
+                    onClick={() => handleSelectPhase(phase)}
                     className={`irg-phase-card ${isActive ? 'active' : ''}`}
                     title={`${phase.phaseLabel}: ${phase.name} — ${phase.dose} ${phase.unit} (${phase.subtitle})`}
                   >
@@ -1115,11 +1126,7 @@ export default function InteractiveReconstitutionGuide({
                       type="button"
                       role="tab"
                       aria-selected={isActive}
-                      onClick={() => {
-                        triggerHaptic('selection');
-                        setDoseUnit(phase.unit);
-                        setDoseValue(phase.dose);
-                      }}
+                      onClick={() => handleSelectPhase(phase)}
                       className={`irg-mobile-tab-btn ${isActive ? 'active' : ''}`}
                     >
                       <span className="irg-mtb-label">{phase.phaseLabel}</span>

@@ -3,6 +3,8 @@
  * Internationalization dictionaries and helpers for public clinical datasheets.
  */
 
+import { BRAND_CONFIG } from '../config/brandConfig';
+
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'EN', name: 'English', flag: '🇺🇸' },
   { code: 'es', label: 'ES', name: 'Español', flag: '🇪🇸' },
@@ -14,7 +16,7 @@ export const SUPPORTED_LANGS = SUPPORTED_LANGUAGES;
 
 export const UI_I18N = {
   en: {
-    brandName: 'Med-Peptides',
+    brandName: BRAND_CONFIG.name,
     datasheetBadge: 'Product Information Sheet',
     scientificMonograph: 'Scientific Monograph',
     clinicalReference: 'Clinical Reference · Technical Datasheet',
@@ -74,7 +76,7 @@ export const UI_I18N = {
     storageStep: '4. Cold-Chain Storage & Stability',
     storageText: 'Store the reconstituted solution immediately in an upright position at 2°C to 8°C (36°F to 46°F), protected from direct UV light. Preserved with medical-grade benzyl alcohol, reconstituted peptides maintain clinical potency and sterility for the period indicated in your product documentation (typically 28–30 days).',
     provenanceNoticeTitle: 'Clinical & Analytical Monograph',
-    provenanceNoticeDesc: 'Verified pharmaceutical and analytical specifications for Med-Peptides. All batches undergo certified dual-stage analytical testing (RP-HPLC & ESI-MS).',
+    provenanceNoticeDesc: `Verified pharmaceutical and analytical specifications for ${BRAND_CONFIG.name}. All batches undergo certified dual-stage analytical testing (RP-HPLC & ESI-MS).`,
     penCalcTitle: 'Pre-filled Pen Dial Dosing & Administration Guide',
     penCalcSubtitle: 'Precision multi-dose dial pen delivery system. Calibrated for subcutaneous micro-dial administration without manual reconstitution.',
     penDialLabel: 'Dial Setting (Clicks / Units)',
@@ -105,7 +107,7 @@ export const UI_I18N = {
     translating: 'Translating...',
   },
   es: {
-    brandName: 'Med-Peptides',
+    brandName: BRAND_CONFIG.name,
     datasheetBadge: 'Ficha de Información de Producto',
     scientificMonograph: 'Monografía Científica',
     clinicalReference: 'Referencia Clínica · Ficha Técnica',
@@ -164,7 +166,7 @@ export const UI_I18N = {
     storageStep: '4. Cadena de Frío y Estabilidad Clínica',
     storageText: 'Almacene la solución reconstituida de inmediato en refrigeración vertical entre 2°C y 8°C (36°F a 46°F), protegida de la luz solar y radiación UV. Gracias al agente bacteriostático de grado médico, el péptido reconstituido mantiene su potencia y esterilidad clínica durante el período indicado en la documentación de su producto (típicamente 28–30 días).',
     provenanceNoticeTitle: 'Monografía Clínica y Analítica',
-    provenanceNoticeDesc: 'Especificaciones farmacéuticas y analíticas verificadas para Med-Peptides. Todos los lotes se someten a ensayos analíticos certificados (RP-HPLC y ESI-MS).',
+    provenanceNoticeDesc: `Especificaciones farmacéuticas y analíticas verificadas para ${BRAND_CONFIG.name}. Todos los lotes se someten a pruebas analíticas certificadas en doble etapa (RP-HPLC y ESI-MS).`,
     penCalcTitle: 'Guía de Dosificación en Pluma (Pen) y Administración',
     penCalcSubtitle: 'Sistema de administración mediante pluma multidosis de alta precisión. Calibrado para micro-dosificación subcutánea sin necesidad de reconstitución manual.',
     penDialLabel: 'Ajuste del Dial (Clics / Unidades)',
@@ -195,7 +197,7 @@ export const UI_I18N = {
     translating: 'Traduciendo...',
   },
   fr: {
-    brandName: 'Med-Peptides',
+    brandName: BRAND_CONFIG.name,
     datasheetBadge: 'Fiche d\'Information Produit',
     scientificMonograph: 'Monographie Scientifique',
     clinicalReference: 'Référence Clinique · Fiche Technique',
@@ -254,7 +256,7 @@ export const UI_I18N = {
     storageStep: '4. Chaîne du Froid et Stabilité Clinique',
     storageText: 'Conservez immédiatement la solution reconstituée au réfrigérateur entre 2°C et 8°C (36°F à 46°F) en position verticale, à l\'abri des UV. Grâce à l\'agent bactériostatique, la solution conserve son activité clinique pendant 28 à 30 jours.',
     provenanceNoticeTitle: 'Monographie Clinique et Analytique',
-    provenanceNoticeDesc: 'Spécifications pharmaceutiques et analytiques vérifiées pour Med-Peptides. Tous les lots subissent des tests analytiques certifiés (RP-HPLC et ESI-MS).',
+    provenanceNoticeDesc: `Spécifications pharmaceutiques et analytiques vérifiées pour ${BRAND_CONFIG.name}. Tous les lots subissent des tests analytiques certifiés en deux étapes (RP-HPLC et ESI-MS).`,
     penCalcTitle: 'Guide de Dosage et d\'Administration par Stylo Injecteur',
     penCalcSubtitle: 'Système de délivrance par stylo multidose de haute précision. Calibré pour une micro-administration sous-cutanée sans reconstitution manuelle.',
     penDialLabel: 'Réglage du Sélecteur (Clics / Unités)',
@@ -285,7 +287,7 @@ export const UI_I18N = {
     translating: 'Traduction en cours...',
   },
   de: {
-    brandName: 'Med-Peptides',
+    brandName: BRAND_CONFIG.name,
     datasheetBadge: 'Produktinformationsblatt',
     scientificMonograph: 'Wissenschaftliche Monographie',
     clinicalReference: 'Klinische Referenz · Technisches Datenblatt',
@@ -344,7 +346,7 @@ export const UI_I18N = {
     storageStep: '4. Kühlkette & Klinische Stabilität',
     storageText: 'Rekonstituierte Lösung sofort aufrecht bei 2°C bis 8°C (36°F bis 46°F) lichtgeschützt lagern. Durch das medizinische Konservierungsmittel behalten Peptide ihre volle Bioaktivität für 28–30 Tage.',
     provenanceNoticeTitle: 'Klinische & Analytische Monographie',
-    provenanceNoticeDesc: 'Verifizierte pharmazeutische und analytische Spezifikationen für Med-Peptides. Alle Chargen durchlaufen zertifizierte Doppelprüfungen (RP-HPLC & ESI-MS).',
+    provenanceNoticeDesc: `Verifizierte pharmazeutische und analytische Spezifikationen für ${BRAND_CONFIG.name}. Alle Chargen durchlaufen zertifizierte Doppelprüfungen (RP-HPLC & ESI-MS).`,
     penCalcTitle: 'Dosierungs- und Verabreichungsleitfaden für Fertigpen',
     penCalcSubtitle: 'Präzisions-Mehrdosis-Pen-Injektionssystem. Kalibriert für die subkutane Mikrodosierung ohne manuelle Rekonstitution.',
     penDialLabel: 'Dosiseinstellung (Klicks / Einheiten)',
