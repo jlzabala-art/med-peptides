@@ -1281,7 +1281,45 @@
 }
 
 .pds-strengths-table tr.pds-row-selected td {
-  background: #f0fdf4;
+  background: #f0fdf4 !important;
+  border-bottom-color: #bbf7d0;
+  color: #0f172a;
+}
+
+.pds-strengths-table tr.pds-row-selected td:first-child {
+  border-left: 3.5px solid #10b981;
+}
+
+.pds-strengths-table tr.pds-row-selected:hover td {
+  background: #e6fcf0 !important;
+}
+
+.pds-dose-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pds-active-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+  display: inline-block;
+  animation: pdsPulseDot 2.2s infinite ease-in-out;
+}
+
+@keyframes pdsPulseDot {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.12);
+  }
 }
 
 .pds-active-badge {

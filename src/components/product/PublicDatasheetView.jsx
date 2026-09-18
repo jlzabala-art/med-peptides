@@ -1034,7 +1034,7 @@ export default function PublicDatasheetView({
                         return (
                           <tr 
                             key={`${fmt.id}-${st.id}`}
-                            className={isCurrentlyActive ? 'pds-row-highlight' : ''}
+                            className={isCurrentlyActive ? 'pds-row-selected' : ''}
                             onClick={() => {
                               setActiveFormatId(fmt.id);
                               setSelectedStrengthId(st.id);
@@ -1044,10 +1044,12 @@ export default function PublicDatasheetView({
                             style={{ cursor: 'pointer' }}
                           >
                             <td data-label="Strength / Dose">
-                              <span className="pds-table-bold-spec">{st.name}</span>
-                              {isCurrentlyActive && (
-                                <span className="pds-table-active-indicator">Selected Active</span>
-                              )}
+                              <div className="pds-dose-cell">
+                                {isCurrentlyActive && (
+                                  <span className="pds-active-dot" aria-label="Active Presentation" title="Active Presentation" />
+                                )}
+                                <span className="pds-table-bold-spec">{st.name}</span>
+                              </div>
                             </td>
                             <td data-label="Presentation Format">
                               <span className={`pds-format-pill pds-format-${fmt.id}`}>
