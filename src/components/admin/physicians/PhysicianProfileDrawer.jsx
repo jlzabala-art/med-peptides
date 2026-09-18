@@ -410,7 +410,7 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
       doc.text(`${doctorName} • DHA-00013060-006`, 14, signY + 27);
 
       doc.text('Dispensing Pharmacist / QA Sign-Off', 120, signY + 23);
-      doc.text('RegenPept Analytical Verification • Batch Accredited', 120, signY + 27);
+      doc.text('Med-Peptides Analytical Verification • Batch Accredited', 120, signY + 27);
 
       doc.save(`Magistral_Protocol_${rx.code || rx.prescriptionNumber || rx.id}.pdf`);
       notifier.success('Compounding Protocol PDF generated successfully');

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import './MonographPreviewModal.css';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Printer, Download, Eye, FileText, Check, ShieldCheck, Tag, Box, Copy } from '@/lib/icons';
+import { X, Download, Eye, FileText, Check, ShieldCheck, Tag, Box, Copy } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
@@ -19,8 +19,60 @@ import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
  *  2. 📦 Shipping & Batch Traceability Label (38×90mm Thermal PDF)
  *  3. 🏷️ Client Vial Application Label (38×90mm Thermal PDF)
  * 
- * Every tab provides direct "Download PDF" and "Print / Save PDF" actions.
+ * Every tab provides direct "Download PDF" action.
  */
+
+function parseMgFromPresentation(str) {
+  const s = String(str || '');
+  const mgMatches = [...s.matchAll(/(\d+(?:\.\d+)?)\s*mg/gi)];
+  if (mgMatches.length > 0) {
+    return mgMatches.reduce((acc, m) => acc + parseFloat(m[1]), 0);
+  }
+  if (s.includes('|') || s.includes('+') || s.includes('/')) {
+    const parts = s.split(/[|+/]/);
+    let total = 0;
+    for (const part of parts) {
+      const m = part.match(/(\d+(?:\.\d+)?)/);
+      if (m) total += parseFloat(m[1]);
+    }
+    if (total > 0) return total;
+  }
+  const m = s.match(/(\d+(\.\d+)?)/);
+  return m ? parseFloat(m[1]) : 10;
+}
+
+function getReconstitutionBaseline(mgVal, isBlend = false) {
+  let baseBac = 2.0;
+  if (isBlend) {
+    const rawVol = mgVal / 10.0;
+    baseBac = Math.max(2.0, Math.round(rawVol * 2) / 2);
+  } else if (mgVal <= 2) {
+    baseBac = 1.0;
+  } else if (mgVal <= 5) {
+    baseBac = 2.0;
+  } else if (mgVal <= 10) {
+    baseBac = 2.0;
+  } else if (mgVal <= 15) {
+    baseBac = 3.0;
+  } else if (mgVal <= 20) {
+    baseBac = 3.0;
+  } else if (mgVal <= 30) {
+    baseBac = 4.0;
+  } else if (mgVal <= 40) {
+    baseBac = 5.0;
+  } else if (mgVal <= 50) {
+    baseBac = 5.0;
+  } else {
+    baseBac = Math.max(5.0, Math.round((mgVal / 10.0) * 2) / 2);
+  }
+
+  const conc = baseBac > 0 ? (mgVal / baseBac) : mgVal;
+  return {
+    diluent: `${baseBac.toFixed(1)} mL BAC Water`,
+    conc: `${conc.toFixed(1)} mg/mL`
+  };
+}
+
 export default function MonographPreviewModal({
   isOpen,
   onClose,
@@ -289,8 +341,11 @@ export default function MonographPreviewModal({
 
                           return list.map((st) => {
                             const isActive = fmt.id === activeFormat?.id && st.id === selectedStrength?.id;
-                            const diluent = isPenOrCart ? 'Pre-filled Solution' : isOral ? 'Solid Dose' : isSpray ? 'Metered Spray' : '2.0 mL BAC Water';
-                            const conc = isPenOrCart ? 'Pre-formulated' : isOral ? 'Unit Dose' : isSpray ? 'Metered' : st.name.includes('20') ? '10.0 mg/mL' : '5.0 mg/mL';
+                            const mgVal = parseMgFromPresentation(st.name || st.id);
+                            const baseline = getReconstitutionBaseline(mgVal, isBlend);
+
+                            const diluent = isPenOrCart ? 'Pre-filled Solution' : isOral ? 'Solid Dose' : isSpray ? 'Metered Spray' : baseline.diluent;
+                            const conc = isPenOrCart ? 'Pre-formulated' : isOral ? 'Unit Dose' : isSpray ? 'Metered Dose' : baseline.conc;
                             const route = isOral ? 'Oral' : isSpray ? 'Intranasal' : isPenOrCart ? 'SubQ Pen' : 'SubQ';
 
                             return (
@@ -511,18 +566,6 @@ export default function MonographPreviewModal({
               <span className="mpm-btn-label-long">Download PDF</span>
               <span className="mpm-btn-label-short">PDF</span>
             </a>
-
-            {/* Print / Save PDF Button */}
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="mpm-btn-print"
-              title="Print document or save as PDF via system dialog"
-            >
-              <Printer size={14} />
-              <span className="mpm-btn-label-long">Print / Save PDF</span>
-              <span className="mpm-btn-label-short">Print</span>
-            </button>
           </div>
         </div>
 

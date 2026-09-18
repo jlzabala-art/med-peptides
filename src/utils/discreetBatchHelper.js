@@ -95,7 +95,7 @@ export const SUPPLIER_CODES = {
 };
 
 export function getDiscreetProductPrefix(slug) {
-  if (!slug) return 'RP';
+  if (!slug) return 'MP';
   const clean = String(slug).toLowerCase().trim().replace(/^lotusland[-_]/i, '');
   if (DISCREET_PRODUCT_CODES[clean]) return DISCREET_PRODUCT_CODES[clean];
   
@@ -105,7 +105,7 @@ export function getDiscreetProductPrefix(slug) {
 
   const consonants = stripped.replace(/[^bcdfghjklmnpqrstvwxyz]/g, '').toUpperCase();
   if (consonants.length >= 2) return consonants.slice(0, 2);
-  return stripped.slice(0, 2).toUpperCase() || 'RP';
+  return stripped.slice(0, 2).toUpperCase() || 'MP';
 }
 
 export function getSupplierCode(supplierIdOrName) {
@@ -134,7 +134,7 @@ export function formatDoseCode(doseStr) {
 /**
  * Generates an institutional discreet batch code.
  * Example: generateDiscreetBatchCode({ slug: 'retatrutide', dose: '10 mg', supplier: 'supplier-lotusland' })
- * => "RP-LOT-RT10-2609"
+ * => "MP-LOT-RT10-2609"
  */
 export function generateDiscreetBatchCode({ slug, dose, supplier, date } = {}) {
   const d = date ? new Date(date) : new Date();
@@ -142,5 +142,5 @@ export function generateDiscreetBatchCode({ slug, dose, supplier, date } = {}) {
   const suppCode = getSupplierCode(supplier);
   const prodPrefix = getDiscreetProductPrefix(slug);
   const doseCode = formatDoseCode(dose);
-  return `RP-${suppCode}-${prodPrefix}${doseCode}-${yearMonth}`;
+  return `MP-${suppCode}-${prodPrefix}${doseCode}-${yearMonth}`;
 }

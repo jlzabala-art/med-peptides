@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { 
   FileText, 
   Download, 
-  Printer, 
   Share2, 
   Copy, 
   Check, 
@@ -661,11 +660,12 @@ export default function PublicDatasheetView({
 
   return (
     <div className="public-datasheet-root">
-      {/* ── Fixed Top Institutional Header ── */}
+      {/* ── Fixed Top Institutional Header (Google Cloud UX Pattern) ── */}
       <header className="pds-top-bar">
         <div className="pds-bar-inner">
           <div className="pds-brand-group">
             <span className="pds-brand-title">{t.brandName}</span>
+            <span className="pds-brand-divider" aria-hidden="true" />
             <span className="pds-badge-pill">{t.scientificMonograph}</span>
             <span className="pds-zero-price-badge">{t.clinicalReference}</span>
           </div>
@@ -685,6 +685,7 @@ export default function PublicDatasheetView({
               ))}
             </select>
 
+            {/* Primary Action CTA */}
             <button 
               type="button"
               onClick={() => {
@@ -692,58 +693,11 @@ export default function PublicDatasheetView({
                 setIsPreviewModalOpen(true);
               }}
               className="pds-btn pds-btn-pdf"
-              title={lang === 'es' ? 'Previsualizar, Descargar e Imprimir Dossier Oficial (PDF)' : 'Preview, Download & Print Official Clinical Monograph (PDF)'}
+              title={lang === 'es' ? 'Previsualizar y Descargar Dossier Oficial (PDF)' : 'Preview & Download Official Clinical Monograph (PDF)'}
             >
-              <Printer size={14} /> {lang === 'es' ? 'Previsualizar e Imprimir' : 'Preview & Print PDF'}
-            </button>
-
-            <a 
-              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=full${labelQueryString}`}
-              target="_blank" 
-              rel="noopener noreferrer" 
-              download={`vial_label_${variantFileSuffix}_full_38x90.pdf`}
-              className="pds-btn pds-btn-barcode"
-              title="Download Complete Specification Vial Label 38x90mm (PDF)"
-            >
-              <Tag size={14} /> Full Label
-            </a>
-
-            <a 
-              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=barcode${labelQueryString}`}
-              target="_blank" 
-              rel="noopener noreferrer" 
-              download={`batch_label_${variantFileSuffix}_barcode_38x90.pdf`}
-              className="pds-btn pds-btn-barcode"
-              title="Download Direct Monograph Barcode & QR Label (PDF)"
-            >
-              <QrCode size={14} /> Barcode Only
-            </a>
-
-            <button 
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                const el = document.getElementById('reconstitution-guide');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="pds-btn pds-btn-ghost"
-              title="Interactive Reconstitution Calculator & Syringe Visualizer"
-            >
-              <FlaskConical size={14} /> Reconstitution
-            </button>
-
-            <button 
-              type="button"
-              onClick={() => setIsShareDrawerOpen(true)} 
-              className="pds-btn pds-btn-ghost" 
-              title={t.shareColleague}
-            >
-              <Share2 size={14} />
-              <span>{t.shareColleague}</span>
-            </button>
-
-            <button onClick={handleWhatsApp} className="pds-btn pds-btn-wa">
-              <WaIcon /> WhatsApp
+              <Download size={14} />
+              <span className="pds-btn-label-desktop">{t.downloadPdf || 'Download Monograph PDF'}</span>
+              <span className="pds-btn-label-mobile">PDF</span>
             </button>
           </div>
         </div>

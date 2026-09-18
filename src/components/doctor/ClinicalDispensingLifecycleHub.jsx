@@ -407,7 +407,7 @@ export default function ClinicalDispensingLifecycleHub({
       doc.text(`${rx.doctorName || 'Dr. Hanieh Erdmann'} • DHA-00013060-006`, 14, signY + 29);
 
       doc.text('Dispensing Pharmacist / Quality Assurance Sign-Off', 120, signY + 25);
-      doc.text('RegenPept Analytical Verification • Batch Accredited', 120, signY + 29);
+      doc.text('Med-Peptides Analytical Verification • Batch Accredited', 120, signY + 29);
 
       doc.save(`Magistral_Protocol_${rx.rxCode}.pdf`);
       notifier.success('Compounding Protocol PDF downloaded');

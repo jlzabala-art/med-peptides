@@ -276,7 +276,7 @@ export default function IncomingOrderAcknowledgmentModal() {
     const clientName = order.customerName || 'Doctor';
     const code = order.orderCode || order.id;
     const total = order.currencySymbol ? `${order.currencySymbol}${Number(order.grandTotal || 0).toFixed(2)}` : `$${Number(order.grandTotal || 0).toFixed(2)} USD`;
-    const message = `Hello ${clientName}, this is RegenPept Clinical Operations. We have received your order inquiry (#${code}) totaling ${total}. Our dispatch team is reviewing delivery lead times for ${order.shippingDestination || 'your destination'}. Thank you!`;
+    const message = `Hello ${clientName}, this is Med-Peptides Clinical Operations. We have received your order inquiry (#${code}) totaling ${total}. Our dispatch team is reviewing delivery lead times for ${order.shippingDestination || 'your destination'}. Thank you!`;
     const encoded = encodeURIComponent(message);
     return cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
   };

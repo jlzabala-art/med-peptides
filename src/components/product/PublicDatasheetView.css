@@ -18,26 +18,25 @@
   z-index: 1000;
   background: #003666;
   color: #ffffff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.12);
 }
 
 .pds-bar-inner {
   max-width: 1140px;
   margin: 0 auto;
-  padding: 0.65rem 1.25rem;
+  padding: 0.55rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .pds-brand-group {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .pds-brand-title {
@@ -45,47 +44,61 @@
   font-size: 1.05rem;
   letter-spacing: -0.02em;
   color: #ffffff;
+  white-space: nowrap;
+}
+
+.pds-brand-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.22);
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .pds-badge-pill {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.14);
   color: #e0f2fe;
   padding: 0.2rem 0.65rem;
   border-radius: 9999px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .pds-zero-price-badge {
   font-size: 0.72rem;
   color: #93c5fd;
-  font-weight: 600;
-}
-
-@media (max-width: 768px) {
-  .pds-zero-price-badge {
-    display: none;
-  }
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pds-actions-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
 
 .pds-lang-select {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  padding: 0.3rem 0.6rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 6px;
   font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
   outline: none;
+  transition: all 0.15s ease;
+}
+
+.pds-lang-select:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .pds-lang-select option {
@@ -98,7 +111,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.38rem 0.85rem;
-  border-radius: 7px;
+  border-radius: 6px;
   font-size: 0.78rem;
   font-weight: 600;
   text-decoration: none;
@@ -110,12 +123,76 @@
 .pds-btn-pdf {
   background: #ffffff;
   color: #003666;
-  border-color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.8rem;
 }
 
 .pds-btn-pdf:hover {
   background: #f1f5f9;
+  color: #002244;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.pds-btn-label-desktop {
+  display: inline;
+}
+
+.pds-btn-label-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .pds-zero-price-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 580px) {
+  .pds-bar-inner {
+    padding: 0.5rem 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .pds-brand-title {
+    font-size: 0.95rem;
+  }
+
+  .pds-brand-divider {
+    display: none;
+  }
+
+  .pds-badge-pill {
+    display: none;
+  }
+
+  .pds-btn-label-desktop {
+    display: none;
+  }
+
+  .pds-btn-label-mobile {
+    display: inline;
+    font-weight: 700;
+  }
+
+  .pds-btn-pdf {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .pds-lang-select {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.72rem;
+  }
 }
 
 .pds-btn-ghost {
