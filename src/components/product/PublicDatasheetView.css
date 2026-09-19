@@ -1861,8 +1861,19 @@
   margin: 0;
 }
 
-/* ── Protocol Blueprint Responsive 2-Column Laptop & Mobile Grid ── */
-.proto-laptop-layout {
+/* ── Protocol Blueprint Responsive Tiered & Balanced Grid ── */
+.proto-tier-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  width: 100%;
+}
+
+.proto-tier-full {
+  width: 100%;
+}
+
+.proto-tier-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
@@ -1871,23 +1882,64 @@
 }
 
 @media (min-width: 1024px) {
-  .proto-laptop-layout {
-    grid-template-columns: minmax(0, 1.35fr) minmax(340px, 1fr) !important;
-  }
-  .proto-sticky-box {
-    position: sticky;
-    top: 4.5rem;
-    z-index: 20;
+  .proto-tier-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
   }
 }
 
-@media (max-width: 1023px) {
-  .proto-laptop-layout {
-    grid-template-columns: 1fr !important;
+/* ── GCP Verification Strip & QR Modal (Google Cloud Console Standard) ── */
+.proto-desktop-qr {
+  display: flex !important;
+}
+
+.proto-mobile-gcp-bar {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .proto-desktop-qr {
+    display: none !important;
   }
-  .proto-col-left,
-  .proto-col-right {
-    width: 100% !important;
+  .proto-mobile-gcp-bar {
+    display: flex !important;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 3px solid #0d9488;
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin-top: 0.75rem;
   }
 }
+
+.gcp-qr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.gcp-qr-modal-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  max-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
 

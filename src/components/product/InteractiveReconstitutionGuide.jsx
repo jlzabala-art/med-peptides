@@ -26,6 +26,116 @@ const BLEND_DOSE_PRESETS_MG = Object.freeze([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0])
 const DOSE_PRESETS_MCG = Object.freeze([100, 250, 500, 750, 1000]);
 
 /**
+ * Resolves dosage and unit specifically for the target peptide compound from a protocol phase
+ */
+function extractDoseFromProtocolPhase(phase, phaseIndex, totalPhases, product, vMg = 10) {
+  const pName = String(product?.name || product?.slug || product?.id || '').toLowerCase();
+  
+  // 1. Check phase compounds / items / products
+  const compoundsList = [
+    ...(Array.isArray(phase?.compounds) ? phase.compounds : []),
+    ...(Array.isArray(phase?.items) ? phase.items : []),
+    ...(Array.isArray(phase?.drugs_used) ? phase.drugs_used : []),
+    ...(Array.isArray(phase?.products) ? phase.products : [])
+  ];
+
+  let matchedCompound = compoundsList.find(c => {
+    const cName = String(c.name || c.product_name || c.title || c.compound || '').toLowerCase();
+    const cId = String(c.id || c.productId || '').toLowerCase();
+    return cName.includes(pName) || pName.includes(cName) || (cId && pName.includes(cId));
+  });
+
+  if (!matchedCompound && compoundsList.length === 1) {
+    matchedCompound = compoundsList[0];
+  }
+
+  const rawDose = matchedCompound?.dosage || matchedCompound?.dose || phase?.dose || phase?.dosage || '';
+  let dose = null;
+  let unit = phase?.unit || 'mg';
+
+  if (typeof rawDose === 'number') {
+    dose = rawDose;
+    unit = 'mg';
+  } else if (typeof rawDose === 'string' && rawDose.trim()) {
+    const trimmed = rawDose.trim();
+    // Direct match: e.g. "2.5 mg" or "250 mcg"
+    const directMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU|g)$/i);
+    if (directMatch) {
+      dose = parseFloat(directMatch[1]);
+      unit = directMatch[2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
+    } else if (/escalating|titrating/i.test(trimmed)) {
+      // Escalating sequence e.g. "2.5 mg subcutaneous weekly for 4 weeks, titrating to 5 mg weekly thereafter"
+      const doses = [...trimmed.matchAll(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)/gi)];
+      if (doses.length > 0) {
+        if (phaseIndex === 0) {
+          dose = parseFloat(doses[0][1]);
+          unit = doses[0][2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
+        } else if (phaseIndex < doses.length) {
+          dose = parseFloat(doses[phaseIndex][1]);
+          unit = doses[phaseIndex][2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
+        } else {
+          // If more phases than parsed doses (e.g. 5 phases), step up gracefully based on compound
+          if (pName.includes('tirzepatide')) {
+            const steps = [2.5, 5.0, 7.5, 10.0, 15.0];
+            dose = steps[Math.min(phaseIndex, steps.length - 1)];
+          } else if (pName.includes('semaglutide')) {
+            const steps = [0.25, 0.50, 1.0, 1.7, 2.4];
+            dose = steps[Math.min(phaseIndex, steps.length - 1)];
+          } else {
+            dose = parseFloat(doses[doses.length - 1][1]);
+          }
+          unit = doses[doses.length - 1][2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
+        }
+      }
+    } else {
+      // Range: e.g. "250 mcg to 500 mcg" or "2.5 - 5.0 mg"
+      const rangeMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)?\s*(?:to|-)\s*(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)/i);
+      if (rangeMatch) {
+        const u = (rangeMatch[4] || rangeMatch[2] || 'mg').toLowerCase() === 'mcg' ? 'mcg' : 'mg';
+        unit = u;
+        dose = phaseIndex === 0 ? parseFloat(rangeMatch[1]) : parseFloat(rangeMatch[3]);
+      } else {
+        const single = trimmed.match(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU|g)/i);
+        if (single) {
+          dose = parseFloat(single[1]);
+          unit = single[2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
+        }
+      }
+    }
+  }
+
+  // Compound-specific titration fallback when dose is missing or ambiguous
+  if (dose === null || isNaN(dose) || dose <= 0 || (phaseIndex > 0 && pName.includes('tirzepatide') && dose === 2.5)) {
+    if (pName.includes('tirzepatide')) {
+      const steps = [2.5, 5.0, 7.5, 10.0, 15.0];
+      dose = steps[Math.min(phaseIndex, steps.length - 1)];
+      unit = 'mg';
+    } else if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
+      const steps = [0.25, 0.50, 1.0, 1.7, 2.4];
+      dose = steps[Math.min(phaseIndex, steps.length - 1)];
+      unit = 'mg';
+    } else if (pName.includes('retatrutide')) {
+      const steps = [1.0, 2.0, 4.0, 6.0, 9.0];
+      dose = steps[Math.min(phaseIndex, steps.length - 1)];
+      unit = 'mg';
+    } else if (pName.includes('tb-500') || pName.includes('tb500')) {
+      const steps = [1.0, 2.0, 2.5];
+      dose = steps[Math.min(phaseIndex, steps.length - 1)];
+      unit = 'mg';
+    } else if (pName.includes('bpc') || pName.includes('ipamorelin') || pName.includes('cjc')) {
+      const steps = [250, 500, 750];
+      dose = steps[Math.min(phaseIndex, steps.length - 1)];
+      unit = 'mcg';
+    } else {
+      dose = +(Math.max(0.25, Math.min(2.5, (vMg || 10) * 0.1 * (phaseIndex + 1))).toFixed(2));
+      unit = 'mg';
+    }
+  }
+
+  return { dose, unit };
+}
+
+/**
  * InteractiveReconstitutionGuide
  * ─────────────────────────────────────────────────────────────────────────────
  * Zero-Trust Clinical Reconstitution Simulator & Precision U-100 Syringe Visualizer.
@@ -49,7 +159,7 @@ export default function InteractiveReconstitutionGuide({
   const t = getTranslations(lang);
 
   const [selectedProtocolId, setSelectedProtocolId] = useState(() => {
-    return primaryProtocol?.id || primaryProtocol?.slug || (associatedProtocols[0]?.id || null);
+    return primaryProtocol?.id || primaryProtocol?.slug || (associatedProtocols?.find(p => p.isPrimary)?.id || associatedProtocols[0]?.id || null);
   });
 
   const activeSelectedProtocol = useMemo(() => {
@@ -57,6 +167,18 @@ export default function InteractiveReconstitutionGuide({
     const found = associatedProtocols.find(p => (p.id === selectedProtocolId || p.slug === selectedProtocolId));
     return found || primaryProtocol || associatedProtocols[0];
   }, [associatedProtocols, selectedProtocolId, primaryProtocol]);
+
+  // Synchronize active protocol when props change
+  useEffect(() => {
+    if (primaryProtocol?.id || primaryProtocol?.slug) {
+      if (!selectedProtocolId) {
+        setSelectedProtocolId(primaryProtocol.id || primaryProtocol.slug);
+      }
+    } else if (associatedProtocols && associatedProtocols.length > 0 && !selectedProtocolId) {
+      const best = associatedProtocols.find(p => p.isPrimary) || associatedProtocols[0];
+      setSelectedProtocolId(best.id || best.slug);
+    }
+  }, [primaryProtocol, associatedProtocols, selectedProtocolId]);
 
   const isPenOrCartridge = useMemo(() => {
     const fId = String(activeFormatId || '').toLowerCase();
@@ -250,24 +372,31 @@ export default function InteractiveReconstitutionGuide({
       };
     };
 
-    // 0. Dynamic phases loaded directly from Firestore product record (if configured)
-    const rawPhases = Array.isArray(product?.clinical_phases) && product.clinical_phases.length > 0
-      ? product.clinical_phases
-      : (Array.isArray(product?.phases) && product.phases.length > 0 ? product.phases : null);
+    // 0. Dynamic phases loaded directly from activeSelectedProtocol (if configured)
+    const protocolPhases = Array.isArray(activeSelectedProtocol?.phases) && activeSelectedProtocol.phases.length > 0
+      ? activeSelectedProtocol.phases
+      : (Array.isArray(activeSelectedProtocol?.phasesSummary) && activeSelectedProtocol.phasesSummary.length > 0
+          ? activeSelectedProtocol.phasesSummary
+          : (Array.isArray(product?.clinical_phases) && product.clinical_phases.length > 0
+              ? product.clinical_phases
+              : (Array.isArray(product?.phases) && product.phases.length > 0 ? product.phases : null)));
 
-    if (rawPhases) {
-      return rawPhases.map((p, idx) => {
-        const d = parseFloat(p.dose) || 1;
-        const u = p.unit || 'mg';
+    if (protocolPhases) {
+      return protocolPhases.map((p, idx) => {
         const numLabel = idx + 1;
+        const phaseLabel = p.phaseLabel || p.label || (lang === 'es' ? `FASE ${numLabel}` : `PHASE ${numLabel}`);
+        const phaseName = p.name || p.title || p.label || (lang === 'es' ? `Fase ${numLabel}` : `Phase ${numLabel}`);
+        const extracted = extractDoseFromProtocolPhase(p, idx, protocolPhases.length, product, vMg);
+        const d = extracted.dose;
+        const u = extracted.unit;
         return createPhase(
-          p.id || `phase_dyn_${numLabel}`,
+          p.id || `phase_proto_${idx + 1}`,
           d,
           u,
-          p.phaseLabel || (lang === 'es' ? `FASE ${numLabel}` : `PHASE ${numLabel}`),
-          p.name || (lang === 'es' ? `Fase ${numLabel}` : `Phase ${numLabel}`),
-          p.title || (lang === 'es' ? `Fase ${numLabel}: ${p.name || ''}` : `Phase ${numLabel}: ${p.name || ''}`),
-          p.badge || `${d} ${u}`
+          phaseLabel,
+          phaseName,
+          `${phaseLabel}: ${phaseName}`,
+          `${d} ${u}`
         );
       });
     }
@@ -386,7 +515,34 @@ export default function InteractiveReconstitutionGuide({
       createPhase('phase_gen_p2', d2, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Pauta Regular' : 'Standard Protocol', `${d2} mg`),
       createPhase('phase_gen_p3', d3, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Pauta Óptima' : 'Optimized Protocol', `${d3} mg`)
     ];
-  }, [product, safeVialMg, safeBacMl, concentrationMgMl, doseUnit, lang]);
+  }, [product, safeVialMg, safeBacMl, concentrationMgMl, doseUnit, lang, activeSelectedProtocol]);
+
+  // Handler for user choosing a different protocol from the dropdown selector
+  const handleProtocolChange = (newProtoId) => {
+    triggerHaptic('selection');
+    setSelectedProtocolId(newProtoId);
+    const targetProto = (associatedProtocols || []).find(p => (p.id === newProtoId || p.slug === newProtoId));
+    if (targetProto) {
+      const phList = (targetProto.phases && targetProto.phases.length > 0) ? targetProto.phases : targetProto.phasesSummary;
+      if (Array.isArray(phList) && phList.length > 0) {
+        const first = phList[0];
+        const p1 = extractDoseFromProtocolPhase(first, 0, phList.length, product, safeVialMg);
+        setDoseUnit(p1.unit);
+        setDoseValue(p1.dose);
+        setSelectedPhaseId(first.id || 'phase_proto_1');
+      }
+    }
+  };
+
+  // Synchronize phase & doses whenever the selected protocol ID changes
+  useEffect(() => {
+    if (clinicalPhases && clinicalPhases.length > 0) {
+      const p1 = clinicalPhases[0];
+      setDoseUnit(p1.unit);
+      setDoseValue(p1.dose);
+      setSelectedPhaseId(p1.id);
+    }
+  }, [selectedProtocolId]);
 
   const activePhaseId = useMemo(() => {
     if (selectedPhaseId === 'custom') return 'custom';
@@ -1280,19 +1436,20 @@ export default function InteractiveReconstitutionGuide({
       <div className="irg-workspace">
         
         {/* 📋 Prominent Clinical Reference Protocol Hero Banner (Full-Width Span) */}
-        {activeSelectedProtocol && (
-          <div className="irg-protocol-hero-card" style={{
+        {(activeSelectedProtocol || primaryProtocol) && (
+          <div style={{
             gridColumn: '1 / -1',
-            background: 'linear-gradient(135deg, #002244 0%, #003666 100%)',
-            border: '1px solid rgba(56, 189, 248, 0.3)',
+            background: 'linear-gradient(135deg, #001e36 0%, #00335e 100%)',
             borderRadius: '12px',
-            padding: '14px 18px',
-            color: '#ffffff',
-            boxShadow: '0 4px 14px rgba(0, 34, 68, 0.15)',
+            padding: '16px 20px',
+            marginBottom: '20px',
+            border: '1px solid rgba(56, 189, 248, 0.35)',
+            boxShadow: '0 4px 16px rgba(0, 30, 54, 0.4)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '10px'
+            gap: '14px'
           }}>
+            {/* Header: Label, Badges & Explore Link Button */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -1302,8 +1459,8 @@ export default function InteractiveReconstitutionGuide({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                 <div style={{
-                  width: '38px',
-                  height: '38px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '8px',
                   background: 'rgba(56, 189, 248, 0.18)',
                   color: '#38bdf8',
@@ -1324,16 +1481,24 @@ export default function InteractiveReconstitutionGuide({
                     color: '#7dd3fc',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    flexWrap: 'wrap'
                   }}>
                     <span>{lang === 'es' ? 'VÍA CLÍNICA DE REFERENCIA & DOSIMETRÍA OPERATIVA' : 'STANDARDIZED CLINICAL PATHWAY REFERENCE'}</span>
                     <span style={{ background: 'rgba(56, 189, 248, 0.25)', color: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>
                       {activeSelectedProtocol.duration || '8 Weeks'}
                     </span>
+                    {activeSelectedProtocol.phasesCount && (
+                      <span style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>
+                        {activeSelectedProtocol.phasesCount} {lang === 'es' ? 'Fases' : 'Phases'}
+                      </span>
+                    )}
                   </div>
-                  <h3 style={{ margin: '2px 0 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em' }}>
-                    {activeSelectedProtocol.name}
-                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
+                    {lang === 'es'
+                      ? 'Resumen dosimétrico interactivo antes de consultar la guía clínica completa'
+                      : 'Interactive dosimetric summary before exploring full clinical blueprint'}
+                  </div>
                 </div>
               </div>
 
@@ -1344,67 +1509,110 @@ export default function InteractiveReconstitutionGuide({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '8px',
                   background: '#0284c7',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   color: '#ffffff',
-                  padding: '8px 16px',
+                  padding: '9px 18px',
                   borderRadius: '8px',
-                  fontSize: '0.80rem',
+                  fontSize: '0.82rem',
                   fontWeight: 800,
                   textDecoration: 'none',
-                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
                   transition: 'all 0.15s ease',
                   flexShrink: 0
                 }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0369a1'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#0284c7'; }}
               >
                 <span>{lang === 'es' ? 'Explorar Blueprint Completo (Gantt) ↗' : 'Explore Full Clinical Blueprint (Gantt) ↗'}</span>
               </a>
             </div>
 
-            {/* Protocol Switcher / Selector if multiple clinical protocols exist for this compound */}
-            {associatedProtocols && associatedProtocols.length > 1 && (
-              <div style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.12)',
-                paddingTop: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                flexWrap: 'wrap'
-              }}>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {lang === 'es' ? `Vías Clínicas Alternativas (${associatedProtocols.length}):` : `Available Clinical Pathways (${associatedProtocols.length}):`}
-                </span>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {associatedProtocols.map(proto => {
-                    const isSelected = (proto.id || proto.slug) === (activeSelectedProtocol.id || activeSelectedProtocol.slug);
+            {/* Protocol Switcher / Dropdown Selector (Institutional GCP Standard) */}
+            <div style={{
+              background: 'rgba(0, 17, 34, 0.55)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              borderRadius: '8px',
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                <label
+                  htmlFor="irg-protocol-dropdown"
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    color: '#7dd3fc',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Sparkles size={13} color="#38bdf8" />
+                  {lang === 'es' ? 'Protocolo Clínico Activo:' : 'Active Clinical Protocol:'}
+                </label>
+                {associatedProtocols && associatedProtocols.length > 1 && (
+                  <span style={{ fontSize: '0.70rem', color: '#94a3b8', fontWeight: 600 }}>
+                    {associatedProtocols.length} {lang === 'es' ? 'vías disponibles para este compuesto' : 'pathways available for this compound'}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ position: 'relative', width: '100%' }}>
+                <select
+                  id="irg-protocol-dropdown"
+                  value={activeSelectedProtocol.id || activeSelectedProtocol.slug}
+                  onChange={(e) => handleProtocolChange(e.target.value)}
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#002544',
+                    color: '#ffffff',
+                    fontSize: '0.94rem',
+                    fontWeight: 700,
+                    padding: '10px 38px 10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #0284c7',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 12px center',
+                    backgroundSize: '16px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  {(associatedProtocols && associatedProtocols.length > 0 ? associatedProtocols : [primaryProtocol]).filter(Boolean).map(proto => {
+                    const dur = proto.duration || '8 Weeks';
+                    const phCount = proto.phasesCount || (proto.phases ? proto.phases.length : 3);
+                    const isFlag = proto.isPrimary ? ' ★' : '';
                     return (
-                      <button
+                      <option
                         key={proto.id || proto.slug}
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('selection');
-                          setSelectedProtocolId(proto.id || proto.slug);
-                        }}
-                        style={{
-                          background: isSelected ? '#38bdf8' : 'rgba(255, 255, 255, 0.08)',
-                          color: isSelected ? '#002244' : '#e0f2fe',
-                          border: `1px solid ${isSelected ? '#38bdf8' : 'rgba(255, 255, 255, 0.18)'}`,
-                          borderRadius: '6px',
-                          padding: '4px 10px',
-                          fontSize: '0.74rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
+                        value={proto.id || proto.slug}
+                        style={{ backgroundColor: '#001e36', color: '#ffffff', padding: '8px' }}
                       >
-                        {proto.name} {proto.duration ? `(${proto.duration})` : ''}
-                      </button>
+                        {proto.name} ({dur} · {phCount} {lang === 'es' ? 'fases' : 'phases'}){isFlag}
+                      </option>
                     );
                   })}
-                </div>
+                </select>
               </div>
-            )}
+
+              {/* Protocol summary description */}
+              {activeSelectedProtocol.description && (
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#bae6fd', lineHeight: 1.45, opacity: 0.9 }}>
+                  {activeSelectedProtocol.description}
+                </p>
+              )}
+            </div>
           </div>
         )}
 

@@ -328,6 +328,9 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
           phasesCount,
           description: (data.overview_summary || data.summary || data.description || data.clinicalRationale || '').substring(0, 180),
           clinicalScore,
+          phases: Array.isArray(data.phases) ? data.phases : [],
+          bom: Array.isArray(data.bom) ? data.bom : [],
+          dosage_schedule: data.dosage_schedule || [],
           phasesSummary: Array.isArray(data.phases)
             ? data.phases.slice(0, 4).map((ph, idx) => ({
                 label: ph.phaseLabel || ph.name || `Phase ${idx + 1}`,

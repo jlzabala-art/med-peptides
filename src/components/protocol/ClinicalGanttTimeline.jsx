@@ -16,6 +16,95 @@ import { WarehouseOriginBadge, ColdChainBadge } from '../ui/WarehouseOriginBadge
  * Designed for Doctor calibration and Patient treatment journey tracking.
  * Works seamlessly on Laptop widescreen and Mobile touchscreens.
  */
+/**
+ * Resolves clean clinical dose, frequency cadence, and weekly total for any compound/phase/week
+ */
+function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, totalPhases = 3) {
+  if (!compound) return { unitDose: 'Active', shortCadence: '1x/wk', weeklyTotal: '', isStepUp: false };
+  const rawDose = compound?.dosage || compound?.dose || '';
+  const freq = compound?.frequency || '';
+  
+  let unitDose = 'Active';
+  let shortCadence = '1x/wk';
+  let timesPerWeek = 1;
+
+  if (/daily|nightly|fasted morning|cada día/i.test(freq)) {
+    shortCadence = 'Daily';
+    timesPerWeek = 7;
+  } else if (/3x|3 times|3 veces|mon\/wed\/fri/i.test(freq)) {
+    shortCadence = '3x/wk';
+    timesPerWeek = 3;
+  } else if (/2x|2 times|twice/i.test(freq)) {
+    shortCadence = '2x/wk';
+    timesPerWeek = 2;
+  } else if (/5 days on|5d/i.test(freq)) {
+    shortCadence = '5d/wk';
+    timesPerWeek = 5;
+  } else if (/once weekly|weekly|1x|semanal/i.test(freq)) {
+    shortCadence = '1x/wk';
+    timesPerWeek = 1;
+  }
+
+  if (typeof rawDose === 'number') {
+    unitDose = `${rawDose} mg`;
+  } else if (typeof rawDose === 'string') {
+    const trimmed = rawDose.trim();
+    if (/^\d+(\.\d+)?\s*(mg|mcg|µg|UI|IU|g)$/i.test(trimmed)) {
+      unitDose = trimmed;
+    } else if (/escalating|titrating/i.test(trimmed)) {
+      const doses = trimmed.match(/\d+(\.\d+)?\s*(mg|mcg|µg|UI|IU)/gi) || [];
+      if (doses.length > 0) {
+        if (phaseIndex === 0) unitDose = doses[0];
+        else if (phaseIndex < doses.length) unitDose = doses[phaseIndex];
+        else unitDose = doses[doses.length - 1];
+      }
+    } else {
+      const rangeMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)?\s*(?:to|-)\s*(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)/i);
+      if (rangeMatch) {
+        const unit = rangeMatch[4] || rangeMatch[2] || 'mg';
+        unitDose = phaseIndex === 0 ? `${rangeMatch[1]} ${unit}` : `${rangeMatch[3]} ${unit}`;
+      } else {
+        const single = trimmed.match(/\d+(?:\.\d+)?\s*(mg|mcg|µg|UI|IU|g)/i);
+        if (single) unitDose = single[0];
+      }
+    }
+  }
+
+  let weeklyTotal = '';
+  const numMatch = unitDose.match(/^(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU|g)/i);
+  if (numMatch) {
+    const val = parseFloat(numMatch[1]);
+    const unit = numMatch[2].toLowerCase();
+    const totalVal = Math.round((val * timesPerWeek) * 100) / 100;
+    if (unit === 'mcg' && totalVal >= 1000) {
+      const mgVal = Math.round((totalVal / 1000) * 10) / 10;
+      weeklyTotal = `${mgVal} mg/wk (${totalVal.toLocaleString()} mcg)`;
+    } else {
+      weeklyTotal = `${totalVal} ${numMatch[2]}/wk`;
+    }
+  }
+
+  let isStepUp = false;
+  if (phaseIndex > 0) {
+    const priorDose = resolveWeeklyCompoundDose(compound, null, 0, 1, totalPhases);
+    if (priorDose.unitDose !== unitDose && priorDose.unitDose !== 'Active') {
+      isStepUp = true;
+    }
+  }
+
+  return {
+    unitDose,
+    shortCadence,
+    timesPerWeek,
+    weeklyTotal,
+    isStepUp,
+    frequency: freq || `${shortCadence} (${compound.route || 'Subcutaneous'})`,
+    route: compound.route || 'Subcutaneous',
+    storage: compound.storage || '❄️ 2°C – 8°C Refrigerator',
+    format: compound.format || '🧪 Sterile Lyophilized Vial'
+  };
+}
+
 export default function ClinicalGanttTimeline({
   protocol,
   onDoseTaken
@@ -30,8 +119,6 @@ export default function ClinicalGanttTimeline({
       phaseNumber: 1,
       phaseName: 'Induction & Adaptation',
       type: 'induction',
-      startWeek: 1,
-      endWeek: 4,
       durationWeeks: 4,
       colorClass: 'gantt-bar-induction',
       instructions: 'Gradual cellular receptor up-regulation with weekly GI tolerance monitoring.',
@@ -59,8 +146,6 @@ export default function ClinicalGanttTimeline({
       phaseNumber: 2,
       phaseName: 'Therapeutic Titration',
       type: 'optimization',
-      startWeek: 5,
-      endWeek: 8,
       durationWeeks: 4,
       colorClass: 'gantt-bar-optimization',
       instructions: 'Target therapeutic window for optimal metabolic efficiency.',
@@ -88,8 +173,6 @@ export default function ClinicalGanttTimeline({
       phaseNumber: 3,
       phaseName: 'Peak Maintenance',
       type: 'maintenance',
-      startWeek: 9,
-      endWeek: 12,
       durationWeeks: 4,
       colorClass: 'gantt-bar-maintenance',
       instructions: 'Sustained metabolic equilibrium and lean mass retention.',
@@ -109,8 +192,6 @@ export default function ClinicalGanttTimeline({
       phaseNumber: 4,
       phaseName: 'Washout / Off-Cycle',
       type: 'washout',
-      startWeek: 13,
-      endWeek: 14,
       durationWeeks: 2,
       colorClass: 'gantt-bar-washout',
       instructions: 'Receptor clearance and baseline biological reset.',
@@ -128,26 +209,96 @@ export default function ClinicalGanttTimeline({
     }
   ], [protocol]);
 
-  const phases = (Array.isArray(protocol?.phases) && protocol.phases.length > 0)
+  const rawPhases = (Array.isArray(protocol?.phases) && protocol.phases.length > 0)
     ? protocol.phases
     : defaultPhases;
 
-  const totalWeeks = phases.reduce((acc, p) => acc + (Number(p.durationWeeks) || 0), 0);
+  // Normalized phases with accurate start/end week bounds
+  const normalizedPhases = useMemo(() => {
+    let currentStart = 1;
+    const colorClasses = ['gantt-bar-induction', 'gantt-bar-optimization', 'gantt-bar-maintenance', 'gantt-bar-washout'];
+    return rawPhases.map((p, idx) => {
+      const duration = Number(p.durationWeeks) || 4;
+      const start = currentStart;
+      const end = currentStart + duration - 1;
+      currentStart = end + 1;
+      return {
+        ...p,
+        phaseNumber: p.phaseNumber || (idx + 1),
+        phaseName: p.phaseName || p.name || `Phase ${idx + 1}`,
+        startWeek: start,
+        endWeek: end,
+        durationWeeks: duration,
+        colorClass: p.colorClass || colorClasses[idx % colorClasses.length]
+      };
+    });
+  }, [rawPhases]);
+
+  const totalWeeks = normalizedPhases.reduce((acc, p) => acc + (Number(p.durationWeeks) || 4), 0);
   const weeksArray = Array.from({ length: totalWeeks }, (_, i) => i + 1);
 
   // Active phase for the selected week
   const currentPhase = useMemo(() => {
-    let weekCount = 0;
-    for (const phase of phases) {
-      const start = weekCount + 1;
-      const end = weekCount + Number(phase.durationWeeks || 4);
-      if (selectedWeek >= start && selectedWeek <= end) {
-        return { ...phase, startWeek: start, endWeek: end };
+    for (const phase of normalizedPhases) {
+      if (selectedWeek >= phase.startWeek && selectedWeek <= phase.endWeek) {
+        return phase;
       }
-      weekCount = end;
     }
-    return phases[0];
-  }, [phases, selectedWeek]);
+    return normalizedPhases[0] || {};
+  }, [normalizedPhases, selectedWeek]);
+
+  // Distinct list of compounds across all phases or BOM
+  const distinctCompounds = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+    for (const p of normalizedPhases) {
+      for (const c of (p.compounds || [])) {
+        const key = (c.name || '').trim().toUpperCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          list.push(c);
+        }
+      }
+    }
+    if (list.length === 0) {
+      const source = Array.isArray(protocol?.bom) && protocol.bom.length > 0 
+        ? protocol.bom 
+        : (Array.isArray(protocol?.items) ? protocol.items : []);
+      for (const it of source) {
+        const name = it.product_name || it.name;
+        const key = (name || '').trim().toUpperCase();
+        if (key && !seen.has(key)) {
+          seen.add(key);
+          list.push({
+            name,
+            dosage: it.dosage,
+            dose: it.dosage,
+            frequency: it.frequency || 'Once weekly',
+            route: it.route || 'Subcutaneous',
+            format: it.format || '🧪 Sterile Lyophilized Vial',
+            storage: '❄️ 2°C – 8°C Refrigerator'
+          });
+        }
+      }
+    }
+    return list;
+  }, [normalizedPhases, protocol]);
+
+  // Active week compound dosage & cumulative metrics
+  const activeWeekCompounds = useMemo(() => {
+    const currentPhaseIndex = normalizedPhases.findIndex(p => selectedWeek >= p.startWeek && selectedWeek <= p.endWeek);
+    const p = currentPhaseIndex >= 0 ? normalizedPhases[currentPhaseIndex] : normalizedPhases[0];
+    
+    return distinctCompounds.map(comp => {
+      const cData = (p?.compounds || []).find(c => c.name?.toUpperCase() === comp.name?.toUpperCase()) || comp;
+      const doseInfo = resolveWeeklyCompoundDose(cData, p, currentPhaseIndex, selectedWeek, normalizedPhases.length);
+      return {
+        name: comp.name,
+        format: comp.format || cData.format || '🧪 Sterile Lyophilized Vial',
+        ...doseInfo
+      };
+    });
+  }, [distinctCompounds, normalizedPhases, selectedWeek]);
 
   const handleToggleDose = (key) => {
     setDosesTaken(prev => {
@@ -170,7 +321,7 @@ export default function ClinicalGanttTimeline({
               Interactive Clinical Pathway Engine
             </div>
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-              {protocol?.name || 'Metabolic & Longevity Protocol (14-Week Pathway)'}
+              {protocol?.name || 'Metabolic & Longevity Protocol'}
             </h3>
           </div>
         </div>
@@ -206,28 +357,35 @@ export default function ClinicalGanttTimeline({
 
         {/* Phase Jump Pills */}
         <div className="phase-jumper-pills">
-          {phases.map((phase, idx) => {
-            const start = phases.slice(0, idx).reduce((acc, curr) => acc + (Number(curr.durationWeeks) || 4), 0) + 1;
-            const end = start + (Number(phase.durationWeeks) || 4) - 1;
-            const isCurrentPhase = selectedWeek >= start && selectedWeek <= end;
+          {normalizedPhases.map((phase, idx) => {
+            const isCurrentPhase = selectedWeek >= phase.startWeek && selectedWeek <= phase.endWeek;
             return (
               <button
                 key={idx}
                 type="button"
                 className={`phase-jumper-btn ${isCurrentPhase ? 'active' : ''}`}
-                onClick={() => setSelectedWeek(start)}
+                onClick={() => setSelectedWeek(phase.startWeek)}
               >
-                <span>Phase {phase.phaseNumber || (idx + 1)}: {phase.phaseName}</span>
-                <span style={{ opacity: 0.75, fontSize: '0.68rem' }}>(W{start}–{end})</span>
+                <span>Phase {phase.phaseNumber}: {phase.phaseName}</span>
+                <span style={{ opacity: 0.75, fontSize: '0.68rem' }}>(W{phase.startWeek}–{phase.endWeek})</span>
               </button>
             );
           })}
         </div>
 
+        {/* Mobile Week Scroller with Micro-Dose Preview */}
         <div className="mobile-week-scroller">
           {weeksArray.map(w => {
             const isSelected = selectedWeek === w;
             const isTaken = dosesTaken[`w_${w}`];
+            const pForW = normalizedPhases.find(p => w >= p.startWeek && w <= p.endWeek) || normalizedPhases[0];
+            const pIdx = normalizedPhases.indexOf(pForW);
+            const primaryComp = distinctCompounds[0];
+            const primaryDose = primaryComp ? resolveWeeklyCompoundDose(
+              (pForW.compounds || []).find(c => c.name?.toUpperCase() === primaryComp.name?.toUpperCase()) || primaryComp,
+              pForW, pIdx, w, normalizedPhases.length
+            ) : null;
+
             return (
               <div
                 key={w}
@@ -236,10 +394,45 @@ export default function ClinicalGanttTimeline({
               >
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.8 }}>WK</span>
                 <span style={{ fontSize: '1rem', fontWeight: 800 }}>{w}</span>
+                {primaryDose && primaryDose.unitDose !== 'Active' && (
+                  <span style={{ fontSize: '0.62rem', fontWeight: 700, color: isSelected ? '#ffffff' : '#0d9488', marginTop: '1px' }}>
+                    {primaryDose.unitDose}
+                  </span>
+                )}
                 {isTaken && <CheckCircle2 size={10} style={{ color: '#10b981', marginTop: '1px' }} />}
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ── Weekly Peptide Payload Summary Strip ── */}
+      <div className="weekly-payload-strip">
+        <div className="payload-header">
+          <span className="payload-title">
+            <Sparkles size={14} style={{ color: '#0d9488' }} />
+            Week {selectedWeek} Prescribed Load & Weekly Totals
+          </span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', background: '#ccfbf1', padding: '2px 8px', borderRadius: '6px' }}>
+            Phase {currentPhase.phaseNumber || 1}: {currentPhase.phaseName} (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
+          </span>
+        </div>
+        
+        <div className="payload-chips-container">
+          {activeWeekCompounds.map((ac, idx) => (
+            <div key={idx} className="payload-compound-chip">
+              <div className="payload-chip-left">
+                <span className="payload-chip-name">{ac.name}</span>
+                <span className="payload-chip-cadence">{ac.frequency}</span>
+              </div>
+              <div className="payload-chip-right">
+                <span className="payload-chip-dose">{ac.unitDose} / inj</span>
+                {ac.weeklyTotal && (
+                  <span className="payload-chip-weekly-total">{ac.weeklyTotal}</span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -249,7 +442,7 @@ export default function ClinicalGanttTimeline({
           {/* Phase Header Row */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(44px, 1fr))`,
+            gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(56px, 1fr))`,
             background: '#f8fafc',
             borderBottom: '2px solid #cbd5e1'
           }}>
@@ -266,7 +459,7 @@ export default function ClinicalGanttTimeline({
             }}>
               TREATMENT PHASES
             </div>
-            {phases.map((phase, idx) => (
+            {normalizedPhases.map((phase, idx) => (
               <div
                 key={idx}
                 style={{
@@ -280,7 +473,7 @@ export default function ClinicalGanttTimeline({
                   background: idx % 2 === 0 ? 'rgba(13, 148, 136, 0.06)' : 'rgba(14, 165, 233, 0.06)'
                 }}
               >
-                Phase {phase.phaseNumber || (idx + 1)}: {phase.phaseName} ({phase.durationWeeks}w)
+                Phase {phase.phaseNumber}: {phase.phaseName} ({phase.durationWeeks}w)
               </div>
             ))}
           </div>
@@ -288,7 +481,7 @@ export default function ClinicalGanttTimeline({
           {/* Week Numbers Row */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(44px, 1fr))`,
+            gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(56px, 1fr))`,
             background: '#ffffff',
             borderBottom: '1px solid #e2e8f0',
             textAlign: 'center'
@@ -306,32 +499,36 @@ export default function ClinicalGanttTimeline({
             }}>
               Compound & Format
             </div>
-            {weeksArray.map(w => (
-              <div
-                key={w}
-                onClick={() => setSelectedWeek(w)}
-                style={{
-                  padding: '0.5rem 0',
-                  fontSize: '0.75rem',
-                  fontWeight: selectedWeek === w ? 800 : 600,
-                  color: selectedWeek === w ? '#0d9488' : '#64748b',
-                  backgroundColor: selectedWeek === w ? '#f0fdfa' : 'transparent',
-                  borderLeft: '1px solid #f1f5f9',
-                  cursor: 'pointer'
-                }}
-              >
-                W{w}
-              </div>
-            ))}
+            {weeksArray.map(w => {
+              const isSelected = selectedWeek === w;
+              return (
+                <div
+                  key={w}
+                  onClick={() => setSelectedWeek(w)}
+                  style={{
+                    padding: '0.5rem 0',
+                    fontSize: '0.75rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    color: isSelected ? '#0f766e' : '#64748b',
+                    backgroundColor: isSelected ? '#ccfbf1' : 'transparent',
+                    borderLeft: isSelected ? '2px solid #0d9488' : '1px solid #f1f5f9',
+                    borderRight: isSelected ? '2px solid #0d9488' : 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  W{w}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Compound Rows with Gantt Bars */}
-          {phases.flatMap(p => p.compounds || []).filter((v, i, a) => a.findIndex(t => t.name === v.name) === i).map((comp, compIdx) => (
+          {/* Compound Rows with Rich Weekly Amounts */}
+          {distinctCompounds.map((comp, compIdx) => (
             <div
               key={compIdx}
               style={{
                 display: 'grid',
-                gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(44px, 1fr))`,
+                gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(56px, 1fr))`,
                 borderBottom: '1px solid #f1f5f9',
                 alignItems: 'center'
               }}
@@ -339,28 +536,27 @@ export default function ClinicalGanttTimeline({
               <div className="gantt-compound-label">
                 <span>{comp.name}</span>
                 <span style={{ fontSize: '0.68rem', color: '#0d9488', fontWeight: 700 }}>
-                  {comp.format}
+                  {comp.format || 'Lyophilized Vial'}
                 </span>
               </div>
 
               {weeksArray.map(w => {
-                const phaseForWeek = phases.find((p, pIdx) => {
-                  const start = phases.slice(0, pIdx).reduce((acc, curr) => acc + (curr.durationWeeks || 4), 0) + 1;
-                  const end = start + (p.durationWeeks || 4) - 1;
-                  return w >= start && w <= end;
-                }) || phases[0];
-
-                const hasCompound = (phaseForWeek.compounds || []).some(c => c.name === comp.name);
-                const compoundData = (phaseForWeek.compounds || []).find(c => c.name === comp.name);
+                const phaseForWeek = normalizedPhases.find(p => w >= p.startWeek && w <= p.endWeek) || normalizedPhases[0];
+                const phaseIndex = normalizedPhases.indexOf(phaseForWeek);
+                const hasCompound = (phaseForWeek.compounds || []).some(c => c.name?.toUpperCase() === comp.name?.toUpperCase());
+                const compoundData = (phaseForWeek.compounds || []).find(c => c.name?.toUpperCase() === comp.name?.toUpperCase()) || comp;
+                const doseInfo = resolveWeeklyCompoundDose(compoundData, phaseForWeek, phaseIndex, w, normalizedPhases.length);
+                const isSelected = selectedWeek === w;
 
                 return (
                   <div
                     key={w}
                     onClick={() => setSelectedWeek(w)}
                     style={{
-                      padding: '4px',
-                      borderLeft: '1px solid #f8fafc',
-                      backgroundColor: selectedWeek === w ? 'rgba(13, 148, 136, 0.05)' : 'transparent',
+                      padding: '3px 2px',
+                      borderLeft: isSelected ? '2px solid #0d9488' : '1px solid #f8fafc',
+                      borderRight: isSelected ? '2px solid #0d9488' : 'none',
+                      backgroundColor: isSelected ? 'rgba(13, 148, 136, 0.08)' : 'transparent',
                       height: '100%',
                       display: 'flex',
                       alignItems: 'center',
@@ -368,8 +564,16 @@ export default function ClinicalGanttTimeline({
                     }}
                   >
                     {hasCompound && (
-                      <div className={`gantt-bar ${phaseForWeek.colorClass || 'gantt-bar-induction'}`} style={{ width: '100%', minHeight: '32px' }}>
-                        <span>{compoundData?.dosage || 'Active'}</span>
+                      <div 
+                        className={`gantt-bar ${phaseForWeek.colorClass || 'gantt-bar-induction'} ${isSelected ? 'selected-week-bar' : ''}`} 
+                        style={{ width: '100%' }}
+                        title={`Week ${w} · ${comp.name}: ${doseInfo.unitDose} (${doseInfo.weeklyTotal || doseInfo.shortCadence})`}
+                      >
+                        {doseInfo.isStepUp && w === phaseForWeek.startWeek && (
+                          <span className="gantt-step-up-badge">▲ Titration</span>
+                        )}
+                        <span className="gantt-dose-val">{doseInfo.unitDose}</span>
+                        <span className="gantt-dose-cadence">{doseInfo.shortCadence}</span>
                       </div>
                     )}
                   </div>
@@ -385,7 +589,7 @@ export default function ClinicalGanttTimeline({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>
-              {currentPhase.phaseNumber ? `Phase ${currentPhase.phaseNumber}` : (currentPhase.phaseLabel || 'Phase')}: {currentPhase.phaseName || currentPhase.name || 'Therapeutic Titration'}
+              Phase {currentPhase.phaseNumber}: {currentPhase.phaseName || 'Therapeutic Titration'}
             </div>
             <h4 style={{ margin: '2px 0 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
               Week {selectedWeek} Administration Instructions
@@ -394,7 +598,7 @@ export default function ClinicalGanttTimeline({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', backgroundColor: '#e2e8f0', padding: '3px 8px', borderRadius: '6px' }}>
-              Duration: {currentPhase.durationWeeks || 4} Weeks (Weeks {currentPhase.startWeek || 1}–{currentPhase.endWeek || (currentPhase.durationWeeks || 4)})
+              Duration: {currentPhase.durationWeeks || 4} Weeks (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
             </span>
           </div>
         </div>
@@ -406,30 +610,10 @@ export default function ClinicalGanttTimeline({
         {/* Compound Dosage Grid for this week */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '0.75rem'
         }}>
-          {((currentPhase.compounds && currentPhase.compounds.length > 0)
-            ? currentPhase.compounds
-            : (Array.isArray(protocol?.bom) && protocol.bom.length > 0
-                ? protocol.bom.map(b => ({
-                    name: b.product_name || b.name,
-                    dosage: b.dosage || 'Prescribed Dose',
-                    frequency: b.frequency || 'According to schedule',
-                    format: b.format || '🧪 Sterile Lyophilized Vial',
-                    route: b.route || 'Subcutaneous',
-                    storage: '❄️ 2°C – 8°C Refrigerator'
-                  }))
-                : (Array.isArray(protocol?.items) ? protocol.items.map(it => ({
-                    name: it.product_name || it.name,
-                    dosage: it.dosage || 'Prescribed Dose',
-                    frequency: it.frequency || 'According to schedule',
-                    format: it.format || '🧪 Sterile Lyophilized Vial',
-                    route: it.route || 'Subcutaneous',
-                    storage: '❄️ 2°C – 8°C Refrigerator'
-                  })) : [])
-              )
-          ).map((c, i) => (
+          {activeWeekCompounds.map((c, i) => (
             <div
               key={i}
               style={{
@@ -439,23 +623,29 @@ export default function ClinicalGanttTimeline({
                 padding: '0.85rem 1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
               }}
             >
               <div>
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a' }}>{c.name}</div>
+                <div style={{ fontWeight: 800, fontSize: '0.90rem', color: '#0f172a' }}>{c.name}</div>
                 <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-                  {c.frequency} • {c.route}
+                  {c.frequency}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 700, marginTop: '2px' }}>
                   {c.format}
                 </div>
               </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d9488' }}>
-                  {c.dosage}
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0d9488', letterSpacing: '-0.02em' }}>
+                  {c.unitDose}
                 </div>
+                {c.weeklyTotal && (
+                  <div style={{ fontSize: '0.70rem', color: '#0f172a', fontWeight: 700, background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
+                    {c.weeklyTotal}
+                  </div>
+                )}
                 <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
                   {c.storage}
                 </div>

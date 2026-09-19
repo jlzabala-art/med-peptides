@@ -174,23 +174,60 @@
 
 .gantt-bar {
   border-radius: 6px;
-  padding: 0.35rem 0.6rem;
-  margin: 2px 4px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #ffffff;
+  padding: 0.3rem 0.35rem;
+  margin: 2px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
+  line-height: 1.15;
+  text-align: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  min-height: 38px;
 }
 
 .gantt-bar:hover {
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+}
+
+.gantt-bar.selected-week-bar {
+  box-shadow: 0 0 0 2px #0f172a, 0 3px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 2;
+}
+
+.gantt-dose-val {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.gantt-dose-cadence {
+  font-size: 0.60rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  margin-top: 1px;
+  white-space: nowrap;
+}
+
+.gantt-step-up-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.28);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.56rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
 }
 
 .gantt-bar-induction {
@@ -207,6 +244,93 @@
 
 .gantt-bar-washout {
   background: #d97706;
+}
+
+/* Weekly Cumulative Payload Strip */
+.weekly-payload-strip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #0d9488;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.payload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.payload-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payload-chips-container {
+  display: grid;
+  grid-templateColumns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.6rem;
+}
+
+.payload-compound-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.payload-chip-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.payload-chip-name {
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.payload-chip-cadence {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.payload-chip-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.payload-chip-dose {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0d9488;
+}
+
+.payload-chip-weekly-total {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 /* Biomarker Checkpoint Pin */

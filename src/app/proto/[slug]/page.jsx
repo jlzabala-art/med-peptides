@@ -11,13 +11,20 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
 async function getPublicProtocol(slug) {
   if (!adminDb || !slug) return null;
-  const target = decodeURIComponent(slug).toLowerCase().trim();
+  const rawTarget = decodeURIComponent(slug).trim();
+  const target = rawTarget.toLowerCase();
 
   let doc = null;
 
-  // 1. Try by doc ID
-  const byId = await adminDb.collection('protocols').doc(target).get().catch(() => null);
-  if (byId?.exists) doc = byId;
+  // 1. Try by exact raw doc ID (Firestore doc IDs are case-sensitive!)
+  const byExactId = await adminDb.collection('protocols').doc(rawTarget).get().catch(() => null);
+  if (byExactId?.exists) doc = byExactId;
+
+  // 1b. Try by lowercased doc ID if different
+  if (!doc && rawTarget !== target) {
+    const byLowerId = await adminDb.collection('protocols').doc(target).get().catch(() => null);
+    if (byLowerId?.exists) doc = byLowerId;
+  }
 
   // 2. Try by slug field
   if (!doc) {
@@ -37,17 +44,28 @@ async function getPublicProtocol(slug) {
     if (byProtoId && !byProtoId.empty) doc = byProtoId.docs[0];
   }
 
-  // 3. Try prefix match
+  // 3. Fallback: Search all active/published protocols by slugified name or title
   if (!doc) {
-    const byPrefix = await adminDb.collection('protocols')
-      .where('slug', '>=', target).where('slug', '<=', target + '\uf8ff')
-      .limit(1).get().catch(() => null);
-    if (byPrefix && !byPrefix.empty) doc = byPrefix.docs[0];
+    const allActive = await adminDb.collection('protocols')
+      .where('status', 'in', ['active', 'published'])
+      .limit(100)
+      .get()
+      .catch(() => null);
+    if (allActive && !allActive.empty) {
+      for (const d of allActive.docs) {
+        const data = d.data();
+        const slugName = String(data.name || data.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        if (slugName === target || slugName.includes(target) || target.includes(slugName)) {
+          doc = d;
+          break;
+        }
+      }
+    }
   }
 
   if (!doc) return null;
 
-  const raw = { id: doc.id, ...doc.data() };
+  const raw = { id: doc.id, slug: doc.data()?.slug || doc.data()?.protocol_slug || doc.id, ...doc.data() };
   if (raw.status === 'archived' || raw.status === 'hidden') return null;
 
   // 🛡️ Zero-Trust Sanitization
