@@ -979,6 +979,124 @@ export default function SharedCatalogStyles() {
             font-size: 0.9rem !important;
           }
         }
+
+        /* ── Dual View Switcher (List vs Cards) ── */
+        .proto-view-switcher {
+          display: inline-flex;
+          align-items: center;
+          background: #f1f5f9;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          padding: 3px;
+          gap: 2px;
+        }
+
+        .proto-view-btn {
+          border: none;
+          background: transparent;
+          padding: 0.38rem 0.75rem;
+          min-height: 32px;
+          border-radius: 6px;
+          font-size: 0.76rem;
+          font-weight: 700;
+          color: #64748b;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          transition: all 0.15s ease;
+          white-space: nowrap;
+        }
+
+        .proto-view-btn:hover {
+          color: #0f172a;
+        }
+
+        .proto-view-btn.is-active {
+          background: #ffffff;
+          color: #003666;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ── Goal Section Headers ── */
+        .proto-goal-section {
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+        }
+
+        .proto-goal-section-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.75rem 1rem;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        /* ── List Mode Row Styles ── */
+        .proto-list-item {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          overflow: hidden;
+          transition: all 0.15s ease;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .proto-list-item:hover {
+          border-color: #cbd5e1;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .proto-list-item.is-expanded {
+          border-color: #0284c7;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
+        }
+
+        .proto-list-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.75rem 1rem;
+          cursor: pointer;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          transition: background 0.12s ease;
+        }
+
+        .proto-list-row:hover {
+          background: #f8fafc;
+        }
+
+        .proto-list-expand-btn {
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #475569;
+          flex-shrink: 0;
+          transition: all 0.12s ease;
+        }
+
+        .proto-list-expand-btn:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
+
+        .proto-list-expanded {
+          padding: 1rem;
+          background: #fafbfc;
+          border-top: 1px solid #f1f5f9;
+          animation: fadeIn 0.15s ease-out;
+        }
       `}</style>
   );
 }
