@@ -625,14 +625,10 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
           <ClinicalGanttTimeline protocol={protocol} />
         </section>
-          </div>
 
-          {/* ════ TIER 2: Clinical Preparation & Administration Cadence (Balanced 2 Columns) ════ */}
-          <div className="proto-tier-grid">
-            {/* Col Left: Interactive Reconstitution & Syringe Calibration Console */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
-              <section id="reconstitution-console" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+        {/* ── Section 3: Interactive Reconstitution & Syringe Calibration Console (Full Width 100%) ── */}
+        <section id="reconstitution-console" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Syringe size={18} />
@@ -675,7 +671,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
             {/* Dilution Specifications */}
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.65rem' }}>
@@ -726,11 +722,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
         </section>
-            </div>
 
-            {/* Col Right: Cycle Dispensing & Logistics Blueprint + Weekly Administration Roadmap */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
-              <section id="cycle-supplies" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #7c3aed', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(124, 58, 237, 0.08)', marginBottom: 0 }}>
+        {/* ── Section 4: Cycle Dispensing & Logistics Blueprint (Full Width 100%) ── */}
+        <section id="cycle-supplies" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #7c3aed', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(124, 58, 237, 0.08)', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -750,7 +744,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
             {/* Peptide Supply Breakdown */}
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.15rem' }}>
               <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -812,7 +806,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ℹ️ Note: Auxiliary supplies are automatically calculated based on exact weekly administration events and 28-day aqueous stability limits. Commercial prices and supply costs are strictly excluded.
           </div>
         </section>
-              <section id="weekly-calendar" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #ea580c', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(234, 88, 12, 0.08)', marginBottom: 0 }}>
+
+        {/* ── Section 5: Weekly Administration Roadmap (Full Width 100%) ── */}
+        <section id="weekly-calendar" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #ea580c', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(234, 88, 12, 0.08)', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <CalendarDays size={18} />
@@ -827,17 +823,17 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
             {weeklySchedule.map((ws, idx) => (
               <div key={idx} style={{
                 background: ws.rest ? '#f8fafc' : '#ffffff',
                 border: ws.rest ? '1px dashed #cbd5e1' : `1.5px solid ${ws.badgeColor}33`,
                 borderRadius: '10px',
-                padding: '0.75rem',
+                padding: '0.85rem',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                minHeight: '115px'
+                minHeight: '120px'
               }}>
                 <div>
                   <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
@@ -851,7 +847,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '5px' }}>
+                  <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '6px' }}>
                     {ws.time}
                   </div>
                   <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
@@ -862,14 +858,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ))}
           </div>
         </section>
-            </div>
-          </div>
 
-          {/* ════ TIER 3: Safety Monitoring & Clinical Pharmacology (Balanced 2 Columns) ════ */}
-          <div className="proto-tier-grid">
-            {/* Col Left: Laboratory Safety Biomarkers + Clinical Contraindications */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
-              <section id="biomarkers-safety" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #0284c7', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(2, 132, 199, 0.08)', marginBottom: '3rem' }}>
+        {/* ── Section 6: Laboratory Safety Biomarkers (Full Width 100%) ── */}
+        <section id="biomarkers-safety" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #0284c7', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(2, 132, 199, 0.08)', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Thermometer size={18} />
@@ -884,16 +875,16 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
             {biomarkers.map((b, idx) => (
               <div key={idx} style={{
                 background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '10px',
-                padding: '0.85rem',
+                padding: '0.95rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.25rem'
+                gap: '0.35rem'
               }}>
                 <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                   {b.phase || `Checkpoint ${idx + 1}`}
@@ -910,7 +901,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ))}
           </div>
         </section>
-              <section id="synergy-pk" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 0 }}>
+
+        {/* ── Section 7: Dual-Pathway Pharmacokinetics & Receptor Synergy (Full Width 100% - Single Instance) ── */}
+        <section id="synergy-pk" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Zap size={18} />
@@ -925,7 +918,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
             <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Retatrutide • Triple Incretin / Glucagon Agonist
@@ -950,8 +943,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </div>
         </section>
 
-        {/* ── Contraindications & Clinical Exclusions ── */}
-        <section className="pds-card" style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', marginBottom: 0 }}>
+        {/* ── Section 8: Contraindications & Clinical Exclusions (Full Width 100%) ── */}
+        <section className="pds-card" style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -998,52 +991,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ))}
           </div>
         </section>
-            </div>
-
-            {/* Col Right: Dual-Pathway Pharmacokinetics & Receptor Synergy */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
-              <section id="synergy-pk" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={18} />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                Dual-Pathway Pharmacokinetics & Receptor Synergy
-              </h2>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                Mechanistic rationale for co-administering Retatrutide and MOTS-c
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', padding: '1.25rem' }}>
-              <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Retatrutide • Triple Incretin / Glucagon Agonist
-              </div>
-              <p style={{ fontSize: '0.82rem', color: '#0f172a', lineHeight: 1.5, margin: '0.5rem 0' }}>
-                <strong>Receptors:</strong> GLP-1R, GIPR, and GCGR (Glucagon Receptor).<br />
-                <strong>Elimination Half-Life:</strong> ~6 Days (Steady-state achieved by Week 4).<br />
-                <strong>Clinical Effect:</strong> Suppresses central appetite, improves glycemic control, elevates resting energy expenditure, and promotes direct hepatic lipid oxidation via glucagon activation.
-              </p>
-            </div>
-
-            <div style={{ background: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: '12px', padding: '1.25rem' }}>
-              <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                MOTS-c • Mitochondrial-Derived Peptide (MDP)
-              </div>
-              <p style={{ fontSize: '0.82rem', color: '#0f172a', lineHeight: 1.5, margin: '0.5rem 0' }}>
-                <strong>Target Pathway:</strong> AMPK phosphorylation, GLUT4 translocation, Folate-Methionine cycle.<br />
-                <strong>Elimination Half-Life:</strong> ~4–5 Hours (Pulsatile intracellular signaling).<br />
-                <strong>Clinical Synergy:</strong> Counteracts skeletal muscle catabolism (sarcopenia) frequently observed during aggressive caloric deficits, while restoring mitochondrial ATP biogenesis.
-              </p>
-            </div>
-          </div>
-        </section>
-            </div>
-          </div>
-        </div>
+      </div>
+    </div>
 
         {/* ── Modal QR Code Dialog (Google Cloud Console Mobile Standard) ── */}
         {isQrModalOpen && (

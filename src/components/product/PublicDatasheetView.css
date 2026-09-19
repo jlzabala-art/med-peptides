@@ -1874,16 +1874,17 @@
 }
 
 .proto-tier-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
   width: 100%;
 }
 
 @media (min-width: 1024px) {
   .proto-tier-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 }
 
