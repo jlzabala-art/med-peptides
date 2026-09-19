@@ -18,6 +18,7 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   ArrowLeft,
+  ArrowRight,
   Info,
   Box,
   QrCode,
@@ -705,7 +706,7 @@ export default function PublicDatasheetView({
               value={lang} 
               onChange={(e) => {
                 const nextLang = e.target.value;
-                startTransition(() => setLang(nextLang));
+                setLang(nextLang);
                 if (typeof window !== 'undefined') {
                   try {
                     localStorage.setItem('atlas_portal_lang', nextLang);
