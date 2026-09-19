@@ -1,0 +1,602 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   PUBLIC PROTOCOLS CATALOG DIRECTORY (/proto, /protocols)
+   Aesthetics: Atlas Clinical Blue / GCP Console Standard / Glassmorphism
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.proto-catalog-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0f172a;
+}
+
+@media (max-width: 768px) {
+  .proto-catalog-container {
+    padding: 1.25rem 1rem 3rem;
+  }
+}
+
+/* ── Hero Banner ── */
+.proto-catalog-hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.proto-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  color: #0d9488;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.proto-catalog-title {
+  font-size: 2.35rem;
+  font-weight: 900;
+  color: #003666;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.65rem 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .proto-catalog-title {
+    font-size: 1.75rem;
+  }
+}
+
+.proto-catalog-subtitle {
+  font-size: 1.05rem;
+  color: #475569;
+  max-width: 780px;
+  margin: 0 auto;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .proto-catalog-subtitle {
+    font-size: 0.90rem;
+  }
+}
+
+/* ── KPI Header Strip ── */
+.proto-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .proto-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .proto-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.proto-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.proto-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.proto-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.proto-kpi-val {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.proto-kpi-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Scope Switcher Bar ── */
+.proto-scope-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+}
+
+.proto-scope-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0284c7;
+}
+
+/* ── Search & Filter Engine Card ── */
+.proto-search-engine-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-top: 3px solid #003666;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px -4px rgba(0, 54, 102, 0.08);
+  margin-bottom: 2rem;
+}
+
+.proto-search-input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.proto-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 3.5rem 0.85rem 3rem;
+  font-size: 1rem;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.proto-search-input:focus {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.proto-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+.proto-search-clear-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proto-search-clear-btn:hover {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+/* ── Goals Filter Ribbon ── */
+.proto-goals-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.proto-goals-ribbon::-webkit-scrollbar {
+  height: 4px;
+}
+
+.proto-goals-ribbon::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.proto-goal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 0.95rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.proto-goal-chip:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.proto-goal-chip.is-active {
+  background: #003666;
+  border-color: #003666;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25);
+}
+
+.proto-goal-count {
+  font-size: 0.70rem;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 800;
+}
+
+.proto-goal-chip.is-active .proto-goal-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* ── Secondary Controls Row ── */
+.proto-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1rem;
+}
+
+.proto-controls-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.proto-select-filter {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.80rem;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+}
+
+.proto-select-filter:focus {
+  border-color: #0284c7;
+}
+
+/* ── Active Filter Badges Strip ── */
+.proto-active-filters-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.proto-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.proto-filter-badge-remove {
+  cursor: pointer;
+  color: #3b82f6;
+  font-weight: 800;
+  margin-left: 2px;
+}
+
+.proto-filter-badge-remove:hover {
+  color: #1e3a8a;
+}
+
+/* ── Protocols Grid ── */
+.proto-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 640px) {
+  .proto-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Protocol Card ── */
+.proto-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.4rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.proto-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px -4px rgba(0, 54, 102, 0.12);
+  transform: translateY(-3px);
+}
+
+.proto-card-top {
+  margin-bottom: 1.15rem;
+}
+
+.proto-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.proto-card-code {
+  font-size: 0.70rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.proto-card-goal-pill {
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.proto-card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  text-decoration: none;
+  display: block;
+}
+
+.proto-card-title:hover {
+  color: #0284c7;
+}
+
+.proto-card-summary {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Peptides in Protocol Chips ── */
+.proto-card-peptides-label {
+  font-size: 0.70rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.proto-card-peptides-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.15rem;
+}
+
+.proto-compound-chip {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.proto-compound-chip:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+/* ── Mini Phases Stepper ── */
+.proto-card-specs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  margin-bottom: 1.15rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.proto-card-spec-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Card Footer Actions ── */
+.proto-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.85rem;
+}
+
+.proto-card-btn-primary {
+  flex: 1;
+  background: #003666;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.proto-card-btn-primary:hover {
+  background: #002244;
+}
+
+.proto-card-btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.proto-card-btn-icon:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+/* ── Empty State ── */
+.proto-empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  margin-bottom: 3rem;
+}
+
+.proto-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+}
+
+.proto-empty-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.proto-empty-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  max-width: 460px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.5;
+}
+
+.proto-empty-btn {
+  background: #003666;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}

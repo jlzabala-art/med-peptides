@@ -279,6 +279,33 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </div>
         </div>
 
+        {/* Navigation Breadcrumb back to /proto Directory */}
+        <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <Link
+            href="/proto"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              color: '#003666',
+              textDecoration: 'none',
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              padding: '4px 12px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>← {lang === 'es' ? 'Ver Todos los Protocolos' : 'Explore All Protocols'}</span>
+          </Link>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>/</span>
+          <span style={{ fontSize: '0.80rem', color: '#64748b', fontWeight: 600 }}>{category}</span>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>/</span>
+          <span style={{ fontSize: '0.80rem', color: '#0f172a', fontWeight: 700 }}>{name}</span>
+        </div>
+
         {/* Hero Section */}
         <section className="pds-hero">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>

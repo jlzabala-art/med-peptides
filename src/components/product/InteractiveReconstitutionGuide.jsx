@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import './InteractiveReconstitutionGuide.css';
 import { 
   FlaskConical, 
@@ -12,7 +13,8 @@ import {
   Droplets,
   ShieldCheck,
   ShieldAlert,
-  Activity
+  Activity,
+  ExternalLink
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
@@ -1526,12 +1528,52 @@ export default function InteractiveReconstitutionGuide({
                 </select>
               </div>
 
-              {/* Protocol summary description */}
-              {activeSelectedProtocol.description && (
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#bae6fd', lineHeight: 1.45, opacity: 0.9 }}>
-                  {activeSelectedProtocol.description}
-                </p>
-              )}
+              {/* Protocol summary description & action links */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginTop: '6px' }}>
+                {activeSelectedProtocol.description && (
+                  <p style={{ margin: 0, fontSize: '0.80rem', color: '#bae6fd', lineHeight: 1.45, opacity: 0.9, flex: '1 1 300px' }}>
+                    {activeSelectedProtocol.description}
+                  </p>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <Link
+                    href={`/proto/${activeSelectedProtocol.slug || activeSelectedProtocol.id}`}
+                    target="_blank"
+                    style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      background: 'rgba(56, 189, 248, 0.25)',
+                      border: '1px solid rgba(56, 189, 248, 0.4)',
+                      borderRadius: '6px',
+                      padding: '3px 8px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>{lang === 'es' ? 'Ver Timeline del Protocolo' : 'View Protocol Timeline'}</span>
+                    <ExternalLink size={11} />
+                  </Link>
+                  <Link
+                    href="/proto"
+                    target="_blank"
+                    style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      color: '#93c5fd',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px'
+                    }}
+                  >
+                    <span>{lang === 'es' ? 'Directorio' : 'Directory'}</span>
+                    <ExternalLink size={10} />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         )}
