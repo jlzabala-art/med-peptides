@@ -142,8 +142,29 @@ export const UI_I18N = {
     diluentLabel: 'Diluent',
     vialLabel: 'Vial',
     monographBaselineNotice: 'Monograph Baseline Reference Model (Indicative):',
-    monographBaselineDesc: 'Synchronized with monograph table. Subject to prescribing physician clinical authorization.',
     nominalVialConc: 'Nominal Vial Concentration:',
+    selectAvailableStrength: 'Select Available Strength / Dose:',
+    optionsAvailable: 'options available',
+    activeContent: 'Active Content',
+    adminRoute: 'Administration Route',
+    subqPeriumbilical: 'Subcutaneous (SubQ) Periumbilical',
+    deviceDelivery: 'Device Delivery',
+    recommendedRecon: 'Recommended Reconstitution',
+    preDissolvedLiquid: 'Pre-dissolved SubQ Liquid (Ready to Use)',
+    directDialInjection: 'Direct multi-dose dial injection (no BAC reconstitution required)',
+    finalConcentration: 'final concentration',
+    lyophilizationExcipient: 'Lyophilization / Excipient',
+    sterileIsotonicSolution: 'Sterile Isotonic Solution (pH 6.8–7.4)',
+    dMannitol: 'D-Mannitol (USP / EP Grade)',
+    sourcingBatchRelease: 'Sourcing & Batch Release',
+    verifiedClinicalQuality: 'Verified Clinical Quality',
+    analyticalPurity: 'Analytical Purity',
+    rpHplcVerified: 'RP-HPLC Verified',
+    formatSubVial: 'Lyophilized SubQ Cake (Sterile Vial)',
+    formatSubPen: 'Prefilled Multi-Dose Dial Device',
+    formatSubCart: '3 mL Multi-Dose Refill Cartridge',
+    formatSubSpray: 'Intranasal Spray Device',
+    formatSubOral: 'Oral Gastro-Resistant Formulation',
   },
   es: {
     brandName: BRAND_CONFIG.name,
@@ -273,8 +294,29 @@ export const UI_I18N = {
     diluentLabel: 'Diluyente',
     vialLabel: 'Vial',
     monographBaselineNotice: 'Línea base de referencia de la monografía (Orientativo):',
-    monographBaselineDesc: 'Sincronizado con la tabla analítica. Sujeto a prescripción médica final.',
     nominalVialConc: 'Concentración Nominal del Vial:',
+    selectAvailableStrength: 'Seleccionar Concentración / Dosis:',
+    optionsAvailable: 'opciones disponibles',
+    activeContent: 'Contenido Activo',
+    adminRoute: 'Vía de Administración',
+    subqPeriumbilical: 'Subcutánea (SubQ) Periumbilical',
+    deviceDelivery: 'Suministro por Dispositivo',
+    recommendedRecon: 'Reconstitución Recomendada',
+    preDissolvedLiquid: 'Líquido SubQ Pre-disuelto (Listo para Usar)',
+    directDialInjection: 'Inyección multidosis directa por dial (sin reconstitución BAC)',
+    finalConcentration: 'concentración final',
+    lyophilizationExcipient: 'Liofilización / Excipiente',
+    sterileIsotonicSolution: 'Solución Isotónica Estéril (pH 6.8–7.4)',
+    dMannitol: 'D-Manitol (Grado USP / EP)',
+    sourcingBatchRelease: 'Procedencia y Liberación de Lote',
+    verifiedClinicalQuality: 'Calidad Clínica Verificada',
+    analyticalPurity: 'Pureza Analítica',
+    rpHplcVerified: 'Verificado por RP-HPLC',
+    formatSubVial: 'Liofilizado SubQ Estéril (Vial Clínico)',
+    formatSubPen: 'Dispositivo Multidosis con Dial',
+    formatSubCart: 'Cartucho de Recarga Multidosis de 3 mL',
+    formatSubSpray: 'Dispositivo de Pulverización Intranasal',
+    formatSubOral: 'Formulación Oral Gastrorresistente',
   },
   fr: {
     brandName: BRAND_CONFIG.name,
@@ -648,6 +690,36 @@ export const CLINICAL_PEPTIDE_DESCRIPTIONS = {
     es: 'TB-500 es el segmento sintético activo de la Timosina Beta-4. Secuestra la actina celular para promover la migración celular, angiogénesis colateral y remodelación de matriz extracelular en tejidos lesionados.',
     fr: 'Le TB-500 est le fragment synthétique actif de la Thymosine Bêta-4. Il séquestre l\'actine pour stimuler la migration cellulaire et la régénération des tissus mous.',
     de: 'TB-500 ist das synthetische aktive Segment von Thymosin Beta-4. Es fördert die Zellmigration und die Regeneration von Muskel-, Sehnen- und Herzgewebe.'
+  },
+  'cjc-1295': {
+    es: 'CJC-1295 es un análogo sintético de la GHRH que estimula la secreción pulsátil fisiológica de hormona de crecimiento e IGF-1 sin elevar el cortisol ni la prolactina.',
+    fr: 'Le CJC-1295 est un analogue synthétique de la GHRH stimulant la libération d\'hormone de croissance et d\'IGF-1.',
+    de: 'CJC-1295 ist ein synthetisches GHRH-Analogon zur Stimulation der physiologischen GH- und IGF-1-Sekretion.'
+  },
+  ipamorelin: {
+    es: 'Ipamorelina es un agonista selectivo del receptor de grelina/secretagogo de GH (GHS-R1a) de alta especificidad, que promueve la síntesis proteica y la lipólisis.',
+    fr: 'L\'ipamoréline est un agoniste sélectif du récepteur de la ghréline stimulant la GH de manière propre et physiologique.',
+    de: 'Ipamorelin ist ein selektiver Ghrelin-Rezeptoragonist zur gezielten GH-Freisetzung ohne endokrine Nebenwirkungen.'
+  },
+  'ghk-cu': {
+    es: 'GHK-Cu es un tripéptido quelante de cobre con potente actividad bioregenerativa, estimulación de colágeno, modulación de TGF-beta y reparación dérmica y vascular.',
+    fr: 'Le GHK-Cu est un tripeptide complexé au cuivre favorisant la synthèse du collagène et la cicatrisation.',
+    de: 'GHK-Cu ist ein bioaktives Kupfertripeptid zur Förderung der Kollagensynthese und Geweberegeneration.'
+  },
+  epithalon: {
+    es: 'Epitalón (Epithalon) es un tetrapéptido bio-regulador pineal que activa la expresión de telomerasa, optimiza los ritmos circadianos y promueve la longevidad celular.',
+    fr: 'L\'épithalon est un peptide régulateur pinéal activant la télomérase et soutenant la longévité cellulaire.',
+    de: 'Epithalon ist ein bio-regulierendes Peptid zur Aktivierung der Telomerase und zellulären Verjüngung.'
+  },
+  'aod-9604': {
+    es: 'AOD-9604 es el fragmento lipolítico C-terminal de hGH (hGH 177-191) que estimula la oxidación de ácidos grasos sin alterar la glucemia ni inducir resistencia a la insulina.',
+    fr: 'L\'AOD-9604 est le fragment C-terminal lipolytique de l\'hormone de croissance stimulant la lipolyse sans impact glycémique.',
+    de: 'AOD-9604 ist das lipolytische hGH-Fragment zur gezielten Fettverbrennung ohne Einfluss auf den Blutzucker.'
+  },
+  'mots-c': {
+    es: 'MOTS-c es un péptido codificado en el genoma mitocondrial que actúa como mimético del ejercicio, activando AMPK y optimizando la captación de glucosa en el músculo esquelético.',
+    fr: 'MOTS-c est un peptide d\'origine mitochondriale régulant l\'homéostasie métabolique et l\'activation de l\'AMPK.',
+    de: 'MOTS-c ist ein mitochondrial kodiertes Peptid zur metabolischen Regulation und AMPK-Aktivierung.'
   }
 };
 

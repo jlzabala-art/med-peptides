@@ -42,11 +42,18 @@ export async function POST(request) {
     }
 
     const collectionName = targetType === 'protocol' ? 'protocols' : 'products';
-    const docRef = adminDb.collection(collectionName).doc(targetId);
-    const docSnap = await docRef.get().catch(() => null);
+    let docRef = adminDb.collection(collectionName).doc(targetId);
+    let docSnap = await docRef.get().catch(() => null);
 
     if (!docSnap || !docSnap.exists) {
-      return NextResponse.json({ ok: false, message: 'Document not found' }, { status: 404 });
+      // Try resolving by slug if direct doc lookup fails
+      const slugQuery = await adminDb.collection(collectionName).where('slug', '==', targetId).limit(1).get().catch(() => null);
+      if (slugQuery && !slugQuery.empty) {
+        docSnap = slugQuery.docs[0];
+        docRef = docSnap.ref;
+      } else {
+        return NextResponse.json({ ok: false, message: 'Document not found' }, { status: 404 });
+      }
     }
 
     const docData = docSnap.data() || {};
@@ -61,12 +68,12 @@ export async function POST(request) {
     let translatedFields = {};
 
     if (apiKey && (fields.description || fields.summary || fields.instructions)) {
+      const prompt = `You are an expert clinical pharmacologist and medical translator. Translate the following clinical content into language code "${targetLang}". Keep all scientific terminology accurate (e.g. SubQ, RP-HPLC, BAC, receptor names). Return ONLY valid JSON with the exact same keys:
+${JSON.stringify(fields, null, 2)}`;
+
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
-
-        const prompt = `You are a medical & peptide translation expert. Translate the following clinical content into language code "${targetLang}". Return ONLY valid JSON with the exact same keys:
-${JSON.stringify(fields, null, 2)}`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -80,19 +87,40 @@ ${JSON.stringify(fields, null, 2)}`;
           translatedFields = JSON.parse(response.text);
         }
       } catch (aiErr) {
-        console.warn('Gemini on-demand translation fallback notice:', aiErr.message);
+        console.warn('Gemini SDK on-demand translation failed, trying REST fallback:', aiErr.message);
+        try {
+          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: 'application/json' }
+            })
+          });
+          if (restRes.ok) {
+            const restData = await restRes.json();
+            const text = restData.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) translatedFields = JSON.parse(text);
+          }
+        } catch (restErr) {
+          console.warn('Gemini REST fallback failed:', restErr.message);
+        }
       }
     }
 
-    // Persist translation in Firestore if generated
+    // Persist translation in Firestore if generated (Golden Rule #2)
     if (Object.keys(translatedFields).length > 0) {
-      await docRef.set({
+      const updatePayload = {
         aiContent: {
           translations: {
             [targetLang]: translatedFields,
           },
         },
-      }, { merge: true }).catch(err => console.error('Error saving translation to Firestore:', err));
+      };
+      if (translatedFields.description) {
+        updatePayload[`description_${targetLang}`] = translatedFields.description;
+      }
+      await docRef.set(updatePayload, { merge: true }).catch(err => console.error('Error saving translation to Firestore:', err));
     }
 
     const jsonResponse = NextResponse.json({ ok: true, cached: false, translations: translatedFields });

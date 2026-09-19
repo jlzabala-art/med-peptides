@@ -69,6 +69,12 @@ export default function PublicDatasheetView({
     if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
       return initialLang;
     }
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
+      if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) {
+        return stored;
+      }
+    }
     return 'en';
   });
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
@@ -142,10 +148,18 @@ export default function PublicDatasheetView({
     }
   };
 
-  // Strictly default to English unless explicitly requested via initialLang param
+  // Sync language with initialLang param or localStorage preference
   useEffect(() => {
     if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
       setLang(initialLang);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('atlas_portal_lang', initialLang);
+      }
+    } else if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
+      if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) {
+        setLang(stored);
+      }
     }
   }, [initialLang]);
 
@@ -681,6 +695,10 @@ export default function PublicDatasheetView({
                 const nextLang = e.target.value;
                 startTransition(() => setLang(nextLang));
                 if (typeof window !== 'undefined') {
+                  try {
+                    localStorage.setItem('atlas_portal_lang', nextLang);
+                    localStorage.setItem('atlas_catalog_lang', nextLang);
+                  } catch {}
                   const url = new URL(window.location.href);
                   url.searchParams.set('lang', nextLang);
                   window.history.replaceState({}, '', url.toString());
@@ -868,19 +886,19 @@ export default function PublicDatasheetView({
               const isPen = fmt.id.includes('pen');
               const isCartridge = fmt.id.includes('cartridge');
               let icon = '🧪';
-              let subtitle = 'Lyophilized SubQ Cake (Sterile Vial)';
+              let subtitle = t.formatSubVial || 'Lyophilized SubQ Cake (Sterile Vial)';
               if (isPen) {
                 icon = '🖊️';
-                subtitle = 'Prefilled Multi-Dose Dial Device';
+                subtitle = t.formatSubPen || 'Prefilled Multi-Dose Dial Device';
               } else if (isCartridge) {
                 icon = '💉';
-                subtitle = '3 mL Multi-Dose Refill Cartridge';
+                subtitle = t.formatSubCart || '3 mL Multi-Dose Refill Cartridge';
               } else if (fmt.id.includes('spray')) {
                 icon = '💨';
-                subtitle = 'Intranasal Spray Device';
+                subtitle = t.formatSubSpray || 'Intranasal Spray Device';
               } else if (fmt.id.includes('capsule') || fmt.id.includes('tablet')) {
                 icon = '💊';
-                subtitle = 'Oral Gastro-Resistant Formulation';
+                subtitle = t.formatSubOral || 'Oral Gastro-Resistant Formulation';
               }
 
               return (
@@ -909,8 +927,8 @@ export default function PublicDatasheetView({
           {/* Strengths Chips */}
           <div className="pds-strengths-wrapper">
             <div className="pds-strengths-label-row">
-              <span className="pds-sublabel">Select Available Strength / Dose:</span>
-              <span className="pds-count-badge">{filteredStrengths.length} options available</span>
+              <span className="pds-sublabel">{t.selectAvailableStrength || 'Select Available Strength / Dose:'}</span>
+              <span className="pds-count-badge">{filteredStrengths.length} {t.optionsAvailable || 'options available'}</span>
             </div>
 
             <div className="pds-strength-chips">
@@ -934,52 +952,52 @@ export default function PublicDatasheetView({
           <div className="pds-selected-detail-card">
             <div className="pds-detail-grid">
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Active Content</span>
+                <span className="pds-dlabel">{t.activeContent || 'Active Content'}</span>
                 <span className="pds-dval font-bold text-sky-950">{selectedStrength?.name || '10 mg'}</span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Administration Route</span>
-                <span className="pds-dval">Subcutaneous (SubQ) Periumbilical</span>
+                <span className="pds-dlabel">{t.adminRoute || 'Administration Route'}</span>
+                <span className="pds-dval">{t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical'}</span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">
                   {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
-                    ? 'Device Delivery' 
-                    : 'Recommended Reconstitution'}
+                    ? (t.deviceDelivery || 'Device Delivery') 
+                    : (t.recommendedRecon || 'Recommended Reconstitution')}
                 </span>
                 <span className="pds-dval">
                   {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) ? (
                     <>
-                      Pre-dissolved SubQ Liquid (Ready to Use)
+                      {t.preDissolvedLiquid || 'Pre-dissolved SubQ Liquid (Ready to Use)'}
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                        → Direct multi-dose dial injection (no BAC reconstitution required)
+                        → {t.directDialInjection || 'Direct multi-dose dial injection (no BAC reconstitution required)'}
                       </span>
                     </>
                   ) : (
                     <>
                       {getReconstitutionVolume(selectedStrength?.name).volume} mL Bacteriostatic Water (BAC)
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                        → {getReconstitutionVolume(selectedStrength?.name).concentration} mg/mL final concentration
+                        → {getReconstitutionVolume(selectedStrength?.name).concentration} mg/mL {t.finalConcentration || 'final concentration'}
                       </span>
                     </>
                   )}
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Lyophilization / Excipient</span>
+                <span className="pds-dlabel">{t.lyophilizationExcipient || 'Lyophilization / Excipient'}</span>
                 <span className="pds-dval">
                   {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
-                    ? 'Sterile Isotonic Solution (pH 6.8–7.4)'
-                    : 'D-Mannitol (USP / EP Grade)'}
+                    ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
+                    : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Sourcing & Batch Release</span>
-                <span className="pds-dval">{supplierName} (Verified Clinical Quality)</span>
+                <span className="pds-dlabel">{t.sourcingBatchRelease || 'Sourcing & Batch Release'}</span>
+                <span className="pds-dval">{supplierName} ({t.verifiedClinicalQuality || 'Verified Clinical Quality'})</span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Analytical Purity</span>
-                <span className="pds-dval font-bold text-sky-950">≥ 99.0% (RP-HPLC Verified)</span>
+                <span className="pds-dlabel">{t.analyticalPurity || 'Analytical Purity'}</span>
+                <span className="pds-dval font-bold text-sky-950">≥ 99.0% ({t.rpHplcVerified || 'RP-HPLC Verified'})</span>
               </div>
             </div>
           </div>
