@@ -17,18 +17,18 @@ export default function SharedCatalogStyles() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.12);
           position: sticky;
           top: 0;
-          z-index: 50;
+          z-index: 1000;
           box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25);
           color: #ffffff;
         }
         .topbar-inner {
           max-width: 1160px;
           margin: 0 auto;
-          padding: 10px 16px;
+          padding: 0.55rem 1.25rem;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
           gap: 12px;
         }
         .topbar-brand {
@@ -60,8 +60,8 @@ export default function SharedCatalogStyles() {
         .topbar-actions {
           display: flex;
           align-items: center;
-          flex-wrap: wrap;
-          gap: 10px;
+          flex-wrap: nowrap;
+          gap: 8px;
         }
         .topbar-row-logistics {
           display: flex;

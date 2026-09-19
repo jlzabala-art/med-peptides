@@ -26,6 +26,16 @@ import {
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
+const DAY_LABELS_ES = {
+  Monday: 'Lunes',
+  Tuesday: 'Martes',
+  Wednesday: 'Miércoles',
+  Thursday: 'Jueves',
+  Friday: 'Viernes',
+  Saturday: 'Sábado',
+  Sunday: 'Domingo',
+};
+
 export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -886,6 +896,23 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               {weeklySchedule.map((ws, idx) => {
                 const isActiveAdmin = !ws.rest;
                 const activeBorderColor = ws.badgeColor || '#0284c7';
+                const displayDay = lang === 'es' ? (DAY_LABELS_ES[ws.day] || ws.day) : ws.day;
+                const displayCompound = (lang === 'es' && ws.compound === 'Receptor Rest & Cellular Assimilation')
+                  ? 'Descanso Receptorial y Asimilación Celular'
+                  : ws.compound;
+                const displayDose = (lang === 'es' && ws.dose === 'No peptide administration scheduled')
+                  ? 'Sin administración de péptidos programada'
+                  : ws.dose;
+                const displayTime = (lang === 'es' && ws.time === 'Clinical Rest Window')
+                  ? 'Ventana de Reposo Clínico'
+                  : (lang === 'es' && ws.time === 'Morning Administration')
+                  ? 'Administración Matutina'
+                  : (lang === 'es' && ws.time === 'Evening Administration')
+                  ? 'Administración Vespertina'
+                  : ws.time;
+                const displayRoute = (lang === 'es' && ws.route === 'Physiological Reset')
+                  ? 'Reinicio Fisiológico'
+                  : ws.route;
 
                 return (
                   <div
@@ -918,7 +945,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         border: `1px solid ${isActiveAdmin ? `${activeBorderColor}30` : '#e2e8f0'}`,
                         boxSizing: 'border-box'
                       }}>
-                        {ws.day}
+                        {displayDay}
                       </div>
                     </div>
 
@@ -934,7 +961,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         gap: '6px',
                         flexWrap: 'wrap'
                       }}>
-                        <span>{ws.compound}</span>
+                        <span>{displayCompound}</span>
                         {isActiveAdmin && (
                           <span style={{
                             fontSize: '0.62rem',
@@ -950,14 +977,14 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         )}
                       </div>
                       <div style={{ fontSize: '0.76rem', color: isActiveAdmin ? activeBorderColor : '#64748b', fontWeight: 600 }}>
-                        {ws.dose}
+                        {displayDose}
                       </div>
                     </div>
 
                     {/* Col 3: Timing / Schedule Note (Fixed Column for Vertical Alignment) */}
                     <div className="proto-roadmap-time-col" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#475569', fontWeight: 600, whiteSpace: 'nowrap' }}>
                       <Clock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
-                      <span>{ws.time}</span>
+                      <span>{displayTime}</span>
                     </div>
 
                     {/* Col 4: Route & Protocol Mode Tag (Right-aligned) */}
@@ -972,7 +999,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         border: `1px solid ${isActiveAdmin ? '#bfdbfe' : '#e2e8f0'}`,
                         whiteSpace: 'nowrap'
                       }}>
-                        {ws.route}
+                        {displayRoute}
                       </span>
                     </div>
                   </div>

@@ -208,6 +208,34 @@ export const CLINICAL_BENCHMARKS = Object.freeze({
     storage: 'Refrigerate at 2°C – 8°C. Delicate peptide bond; avoid rapid temperature fluctuations.',
     diluentMl: 2.0,
     indications: 'Pulsatile GHRH + GHRP Synergistic Secretagogue'
+  },
+  ta1: {
+    canonicalName: 'Thymosin Alpha-1',
+    steps: [1.5, 1.6],
+    unit: 'mg',
+    defaultVialMg: 5,
+    cadence: '2x weekly (Mon/Thu)',
+    shortCadence: '2x/wk',
+    timesPerWeek: 2,
+    route: 'Subcutaneous',
+    timing: 'Morning • Fasted',
+    storage: 'Refrigerate at 2°C – 8°C. Light-protected aqueous stability: 30 days.',
+    diluentMl: 2.0,
+    indications: 'Thymic Peptide • TLR-9 Activation & Adaptive T-Cell Modulation'
+  },
+  kpv: {
+    canonicalName: 'KPV',
+    steps: [250, 500],
+    unit: 'mcg',
+    defaultVialMg: 5,
+    cadence: 'Daily (morning or BID)',
+    shortCadence: 'Daily',
+    timesPerWeek: 7,
+    route: 'Subcutaneous or Oral',
+    timing: 'Morning or Evening',
+    storage: 'Refrigerate at 2°C – 8°C.',
+    diluentMl: 2.0,
+    indications: 'Tripeptide Alpha-MSH Analogue • Mucosal & Systemic Anti-Inflammation'
   }
 });
 
@@ -230,6 +258,8 @@ export function matchClinicalBenchmark(nameOrId = '') {
   if (s.includes('pt141') || s.includes('bremelanotide')) return CLINICAL_BENCHMARKS.pt141;
   if (s.includes('epithalon') || s.includes('epitalon')) return CLINICAL_BENCHMARKS.epithalon;
   if (s.includes('cjc') || s.includes('ipamorelin') || s.includes('sermorelin')) return CLINICAL_BENCHMARKS.cjc;
+  if (s.includes('ta1') || s.includes('thymosinalpha') || s.includes('thymosin1') || s.includes('zadaxin')) return CLINICAL_BENCHMARKS.ta1;
+  if (s.includes('kpv')) return CLINICAL_BENCHMARKS.kpv;
   return null;
 }
 
@@ -250,25 +280,25 @@ export function resolveClinicalCompoundDose(compound, phase, phaseIndex = 0, tot
   let shortCadence = benchmark?.shortCadence || '1x/wk';
   let timesPerWeek = benchmark?.timesPerWeek || 1;
 
-  // Cadence parsing
-  if (/daily|nightly|fasted morning|cada día/i.test(rawFreq)) {
-    shortCadence = 'Daily';
-    timesPerWeek = 7;
+  // Cadence parsing: check specific cadence frequencies before generic 'daily'
+  if (/2x|2 times|twice|dos veces|bi-weekly|biweekly/i.test(rawFreq)) {
+    shortCadence = '2x/wk';
+    timesPerWeek = 2;
   } else if (/3x|3 times|3 veces|mon\/wed\/fri/i.test(rawFreq)) {
     shortCadence = '3x/wk';
     timesPerWeek = 3;
-  } else if (/2x|2 times|twice/i.test(rawFreq)) {
-    shortCadence = '2x/wk';
-    timesPerWeek = 2;
-  } else if (/5 days on|5d/i.test(rawFreq)) {
+  } else if (/5 days on|5d|5 días/i.test(rawFreq)) {
     shortCadence = '5d/wk';
     timesPerWeek = 5;
-  } else if (/on-demand|prior to/i.test(rawFreq)) {
+  } else if (/on-demand|prior to|a demanda/i.test(rawFreq)) {
     shortCadence = 'On-Demand';
     timesPerWeek = 2;
-  } else if (/once weekly|weekly|1x|semanal/i.test(rawFreq)) {
+  } else if (/once weekly|1x\/wk|1x weekly|semanal/i.test(rawFreq)) {
     shortCadence = '1x/wk';
     timesPerWeek = 1;
+  } else if (/daily|nightly|fasted morning|cada día|diario/i.test(rawFreq)) {
+    shortCadence = 'Daily';
+    timesPerWeek = 7;
   }
 
   // Dose value parsing
@@ -455,7 +485,10 @@ export function generateDynamicReconData(protocol) {
         'Aim the needle toward the inner glass wall of the vial; inject slowly to prevent foaming and peptide degradation.',
         'Swirl smoothly in a gentle figure-eight motion until the lyophilized cake is fully dissolved. Do not shake vigorously.'
       ],
-      dosingScale
+      dosingScale,
+      cadence: bm?.shortCadence || '1x/wk',
+      shortCadence: bm?.shortCadence || '1x/wk',
+      timesPerWeek: bm?.timesPerWeek || 1
     });
   });
 
@@ -536,57 +569,115 @@ export function generateDynamicWeeklySchedule(protocol) {
   const reconData = generateDynamicReconData(protocol);
   if (!reconData || reconData.length === 0) {
     return [
-      { day: 'Monday', compound: 'Primary API', dose: 'Phased Dose', time: 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-      { day: 'Tuesday', compound: 'Metabolic Rest', dose: 'Hydration Focus', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Wednesday', compound: 'Metabolic Rest', dose: 'Hydration Focus', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Thursday', compound: 'Metabolic Rest', dose: 'Zone 2 Activity', time: 'All Day', route: 'Lifestyle', badgeColor: '#64748b', rest: true },
-      { day: 'Friday', compound: 'Metabolic Rest', dose: 'Hydration Focus', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Saturday', compound: 'Metabolic Rest', dose: 'Nutritional Support', time: 'All Day', route: 'Lifestyle', badgeColor: '#64748b', rest: true },
-      { day: 'Sunday', compound: 'Primary API', dose: 'Phased Dose', time: 'Evening • Pre-Sleep', route: 'SubQ', badgeColor: '#0284c7', rest: false }
+      { day: 'Monday', compound: 'Primary Protocol API', dose: 'Initiation Dose', time: 'Morning • Fasted', route: 'SubQ', badgeColor: '#0284c7', rest: false },
+      { day: 'Tuesday', compound: 'Non-Administration Day', dose: 'Cellular Assimilation', time: 'All Day', route: 'Receptor Rest', badgeColor: '#64748b', rest: true },
+      { day: 'Wednesday', compound: 'Non-Administration Day', dose: 'Cellular Assimilation', time: 'All Day', route: 'Receptor Rest', badgeColor: '#64748b', rest: true },
+      { day: 'Thursday', compound: 'Non-Administration Day', dose: 'Cellular Assimilation', time: 'All Day', route: 'Receptor Rest', badgeColor: '#64748b', rest: true },
+      { day: 'Friday', compound: 'Non-Administration Day', dose: 'Cellular Assimilation', time: 'All Day', route: 'Receptor Rest', badgeColor: '#64748b', rest: true },
+      { day: 'Saturday', compound: 'Non-Administration Day', dose: 'Cellular Assimilation', time: 'All Day', route: 'Receptor Rest', badgeColor: '#64748b', rest: true },
+      { day: 'Sunday', compound: 'Weekly Clinical Checkpoint', dose: 'Pre-Cycle Review', time: 'Evening', route: 'Clinical Evaluation', badgeColor: '#0d9488', rest: true }
     ];
   }
 
-  const c1 = reconData[0];
-  const c2 = reconData.length > 1 ? reconData[1] : null;
+  const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const bm1 = matchClinicalBenchmark(c1.name);
-  const bm2 = c2 ? matchClinicalBenchmark(c2.name) : null;
+  // Map each day to the list of administrations scheduled on that day
+  const scheduleMap = {
+    Monday: [],
+    Tuesday: [],
+    Wednesday: [],
+    Thursday: [],
+    Friday: [],
+    Saturday: [],
+    Sunday: []
+  };
 
-  const c1Daily = bm1?.timesPerWeek === 7;
-  const c2Frequent = bm2?.timesPerWeek >= 3;
+  const BADGE_COLORS = ['#0284c7', '#0d9488', '#ea580c', '#7c3aed', '#2563eb'];
 
-  if (c2Frequent && c2) {
-    // Dual protocol with frequent adjuvant (e.g. Tirzepatide weekly + MOTS-c 3x/wk)
-    return [
-      { day: 'Monday', compound: c2.name, dose: c2.dosingScale[0]?.dose || 'Target Dose', time: bm2?.timing || 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-      { day: 'Tuesday', compound: 'Metabolic Rest', dose: 'Hydration & Electrolytes', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Wednesday', compound: c2.name, dose: c2.dosingScale[0]?.dose || 'Target Dose', time: bm2?.timing || 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-      { day: 'Thursday', compound: 'Metabolic Rest', dose: 'Cellular Recovery', time: 'All Day', route: 'Lifestyle Calibration', badgeColor: '#64748b', rest: true },
-      { day: 'Friday', compound: c2.name, dose: c2.dosingScale[0]?.dose || 'Target Dose', time: bm2?.timing || 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-      { day: 'Saturday', compound: 'Metabolic Rest', dose: 'Nutritional Support', time: 'All Day', route: 'Nutritional Support', badgeColor: '#64748b', rest: true },
-      { day: 'Sunday', compound: c1.name, dose: c1.dosingScale[0]?.dose || 'Weekly Dose', time: bm1?.timing || 'Evening • Pre-Sleep', route: 'SubQ (Abdomen)', badgeColor: '#0284c7', rest: false }
-    ];
-  } else if (c1Daily) {
-    // Daily compound protocol (e.g. BPC-157 or AOD-9604)
-    return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => ({
-      day,
-      compound: c1.name,
-      dose: c1.dosingScale[0]?.dose || 'Daily Dose',
-      time: bm1?.timing || 'Morning Fasted',
-      route: 'SubQ',
-      badgeColor: '#0284c7',
-      rest: false
-    }));
-  } else {
-    // Standard weekly protocol
-    return [
-      { day: 'Monday', compound: c1.name, dose: c1.dosingScale[0]?.dose || 'Primary Dose', time: bm1?.timing || 'Morning • Fasted', route: 'SubQ', badgeColor: '#0284c7', rest: false },
-      { day: 'Tuesday', compound: 'Metabolic Assimilation', dose: 'Hydration Focus', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Wednesday', compound: 'Rest & Adaptation', dose: 'Recovery Protocol', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Thursday', compound: 'Zone 2 Metabolic Cardio', dose: 'Physical Conditioning', time: 'Morning', route: 'Exercise Protocol', badgeColor: '#64748b', rest: true },
-      { day: 'Friday', compound: 'Rest & Adaptation', dose: 'Hydration Focus', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Saturday', compound: 'Active Recovery', dose: 'Nutritional Micronutrients', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-      { day: 'Sunday', compound: 'Pre-Cycle Evaluation', dose: 'Weekly Checkpoint', time: 'Evening', route: 'Self-Assessment', badgeColor: '#0d9488', rest: true }
-    ];
-  }
+  reconData.forEach((comp, idx) => {
+    const bm = matchClinicalBenchmark(comp.name);
+    const color = BADGE_COLORS[idx % BADGE_COLORS.length];
+    const initialDose = comp.dosingScale && comp.dosingScale[0] ? comp.dosingScale[0].dose : (comp.dosage || 'Standard Dose');
+    const timing = bm?.timing || 'Morning • Fasted';
+    const route = bm?.route?.split(' ')[0] || comp.route || 'SubQ';
+
+    // Parse clean cadence & timesPerWeek
+    const cleanDoseStr = String(initialDose || '').toLowerCase();
+    const rawFreqStr = String(comp.frequency || comp.raw?.frequency || '').toLowerCase();
+    let times = comp.timesPerWeek || bm?.timesPerWeek;
+
+    if (!times) {
+      if (/daily|nightly|cada día/i.test(cleanDoseStr) || /daily/i.test(rawFreqStr)) times = 7;
+      else if (/3x|3 times|mon\/wed\/fri/i.test(cleanDoseStr) || /3x/i.test(rawFreqStr)) times = 3;
+      else if (/2x|twice|mon\/thu/i.test(cleanDoseStr) || /twice|2x/i.test(rawFreqStr)) times = 2;
+      else if (/5d|5 days/i.test(cleanDoseStr) || /5 days/i.test(rawFreqStr)) times = 5;
+      else times = 1;
+    }
+
+    let targetDays = [];
+    if (times === 7) {
+      targetDays = DAYS;
+    } else if (times === 5) {
+      targetDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    } else if (times === 3) {
+      targetDays = ['Monday', 'Wednesday', 'Friday'];
+    } else if (times === 2) {
+      targetDays = ['Monday', 'Thursday'];
+    } else {
+      // 1x/wk (e.g. GLP-1 agonists, Tirzepatide, Semaglutide)
+      targetDays = ['Monday'];
+    }
+
+    targetDays.forEach(d => {
+      scheduleMap[d].push({
+        compound: comp.name,
+        dose: initialDose,
+        time: timing,
+        route,
+        badgeColor: color
+      });
+    });
+  });
+
+  // Construct 7-day roadmap array with unified clinical standards
+  return DAYS.map(day => {
+    const admins = scheduleMap[day];
+    if (admins.length > 0) {
+      if (admins.length === 1) {
+        return {
+          day,
+          compound: admins[0].compound,
+          dose: admins[0].dose,
+          time: admins[0].time,
+          route: admins[0].route,
+          badgeColor: admins[0].badgeColor,
+          rest: false
+        };
+      } else {
+        // Multi-compound synergistic administration (e.g. TA1 + TB-500)
+        const compoundNames = admins.map(a => a.compound).join(' + ');
+        const doses = admins.map(a => `${a.compound.replace(/\(.*?\)/g, '').trim()}: ${a.dose}`).join(' • ');
+        return {
+          day,
+          compound: compoundNames,
+          dose: doses,
+          time: admins[0].time,
+          route: admins[0].route,
+          badgeColor: '#0284c7',
+          rest: false
+        };
+      }
+    } else {
+      // Non-administration recovery day
+      return {
+        day,
+        compound: day === 'Sunday' ? 'Weekly Clinical Checkpoint' : 'Non-Administration Day',
+        dose: day === 'Sunday' ? 'Progress & Tolerance Review' : 'Receptor Rest & Cellular Assimilation',
+        time: day === 'Sunday' ? 'Evening' : 'All Day',
+        route: day === 'Sunday' ? 'Self-Assessment' : 'Rest Phase',
+        badgeColor: day === 'Sunday' ? '#0d9488' : '#64748b',
+        rest: true
+      };
+    }
+  });
 }

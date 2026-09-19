@@ -46,155 +46,94 @@ export default function SharedCatalogTopNav({
   return (
     <header className="institutional-topbar">
       <div className="topbar-inner">
-        <div className="topbar-brand">
-          <img
-            src="/atlas-health-logo.png"
-            alt="Atlas Health"
-            style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <div className="topbar-brand-title">
-            <span>ATLAS HEALTH</span>
-            <span style={{ fontWeight: 400, color: '#94a3b8' }}>•</span>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#475569' }} className="mobile-hide">Clinical Formulations</span>
-          </div>
+        {/* Brand & Badge Group */}
+        <div className="pds-brand-group">
+          <span className="pds-brand-title">Med-Peptides</span>
+          <span className="pds-brand-divider" aria-hidden="true" />
+          <span className="pds-badge-pill">
+            {lang === 'es' ? 'CATÁLOGO OFICIAL' : 'OFFICIAL CATALOG'}
+          </span>
           <span className="portal-verified-badge">
             <ShieldCheck size={12} />
-            <span>Verified Portal</span>
+            <span>{lang === 'es' ? 'Portal Verificado' : 'Verified Portal'}</span>
           </span>
         </div>
 
+        {/* Compact Single-Row Action Controls */}
         <div className="topbar-actions">
-          {/* Line 1: Logistics Controls (Destination, Currency, Cart) */}
-          <div className="topbar-row-logistics">
-            {/* Destination Selector */}
-            <div className="topbar-destination">
-              <span>✈️</span>
-              <select
-                value={selectedShipping}
-                onChange={(e) => setSelectedShipping(e.target.value)}
-                style={{
-                  background: 'transparent',
-                  color: '#0f172a',
-                  border: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  outline: 'none',
-                  width: '100%',
-                  whiteSpace: 'nowrap'
-                }}
-                title={activeShipping.label}
-              >
-                {SHIPPING_DESTINATIONS.map(d => {
-                  const cost = currentCurrency === 'EUR' ? d.costEUR : currentCurrency === 'AED' ? (d.costAED || Math.round(d.costUSD * 3.6725)) : d.costUSD;
-                  return (
-                    <option key={d.id} value={d.id}>
-                      {d.flag} {d.code} (+{currencySymbol}{cost})
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Currency Toggle */}
-            <div className="topbar-currency-toggle">
-              <button
-                type="button"
-                onClick={() => setCurrentCurrency('USD')}
-                className={`currency-btn ${currentCurrency === 'USD' ? 'active' : 'inactive'}`}
-              >
-                $ USD
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentCurrency('EUR')}
-                className={`currency-btn ${currentCurrency === 'EUR' ? 'active' : 'inactive'}`}
-              >
-                € EUR
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentCurrency('AED')}
-                className={`currency-btn ${currentCurrency === 'AED' ? 'active' : 'inactive'}`}
-              >
-                AED
-              </button>
-            </div>
-
-            {/* Top Cart Pill (if active) */}
-            {cartTotalUnits > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsCartOpen(!isCartOpen)}
-                className="topbar-cart-pill"
-                title={t('order.title', 'Review Order')}
-              >
-                <Package size={14} />
-                <span>{cartTotalUnits} Vials</span>
-                <span>•</span>
-                <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
-              </button>
-            )}
+          {/* Destination Selector */}
+          <div className="topbar-destination">
+            <span>✈️</span>
+            <select
+              value={selectedShipping}
+              onChange={(e) => setSelectedShipping(e.target.value)}
+              style={{
+                background: 'transparent',
+                color: '#0f172a',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                outline: 'none',
+                whiteSpace: 'nowrap'
+              }}
+              title={activeShipping?.label}
+              aria-label="Shipping Destination"
+            >
+              {SHIPPING_DESTINATIONS.map(d => {
+                const cost = currentCurrency === 'EUR' ? d.costEUR : currentCurrency === 'AED' ? (d.costAED || Math.round(d.costUSD * 3.6725)) : d.costUSD;
+                return (
+                  <option key={d.id} value={d.id}>
+                    {d.flag} {d.code} (+{currencySymbol}{cost})
+                  </option>
+                );
+              })}
+            </select>
           </div>
 
-          {/* Language toggle EN / ES */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
-            {SUPPORTED_LANGS.map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => handleLangToggle(l)}
-                style={{
-                  padding: '3px 9px',
-                  borderRadius: '6px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  transition: 'all 0.15s ease',
-                  backgroundColor: lang === l ? '#003666' : 'transparent',
-                  color:           lang === l ? '#ffffff' : '#64748b',
-                  borderColor:     lang === l ? '#003666' : '#cbd5e1',
-                  letterSpacing: '0.03em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {l === 'en' ? '🇬🇧 EN' : '🇪🇸 ES'}
-              </button>
-            ))}
-          </div>
+          {/* Compact Currency Dropdown */}
+          <select
+            value={currentCurrency}
+            onChange={(e) => setCurrentCurrency(e.target.value)}
+            className="pds-lang-select"
+            style={{ minWidth: '65px', background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)', borderRadius: '6px', padding: '3px 6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+            aria-label="Currency"
+          >
+            <option value="USD" style={{ background: '#002544', color: '#ffffff' }}>$ USD</option>
+            <option value="EUR" style={{ background: '#002544', color: '#ffffff' }}>€ EUR</option>
+            <option value="AED" style={{ background: '#002544', color: '#ffffff' }}>AED</option>
+          </select>
 
-          {/* Line 2: Clinical Provider Access & Registration / Sign Out */}
-          <div className="topbar-row-access">
-            {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    await logout();
-                  } catch (e) {
-                    console.error('Sign out error:', e);
-                  }
-                }}
-                className="topbar-signin-btn"
-                title={`Sign Out (${user?.email || 'Provider'})`}
-              >
-                <LogOut size={13} color="#b91c1c" />
-                <span>Sign Out</span>
-              </button>
-            ) : (
-              <a
-                href="/login"
-                className="topbar-signin-btn"
-                title="Provider Authentication"
-              >
-                <Lock size={13} color="#003666" />
-                <span>Sign In</span>
-              </a>
-            )}
+          {/* Harmonized Language Dropdown */}
+          <select
+            value={lang}
+            onChange={(e) => handleLangToggle(e.target.value)}
+            className="pds-lang-select"
+            style={{ background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)', borderRadius: '6px', padding: '3px 6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+            aria-label="Language"
+          >
+            <option value="en" style={{ background: '#002544', color: '#ffffff' }}>🇺🇸 EN</option>
+            <option value="es" style={{ background: '#002544', color: '#ffffff' }}>🇪🇸 ES</option>
+          </select>
 
-            {isAuthenticated ? (
+          {/* Cart Pill (Active only when items selected) */}
+          {cartTotalUnits > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsCartOpen(!isCartOpen)}
+              className="topbar-cart-pill"
+              title={t('order.title', 'Review Order')}
+            >
+              <Package size={14} />
+              <span>{cartTotalUnits} Vials</span>
+              <span>•</span>
+              <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
+            </button>
+          )}
+
+          {/* Clinical Provider Auth / Portal Access */}
+          {isAuthenticated ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <a
                 href={
                   activeRole === 'admin' ? '/admin' :
@@ -207,21 +146,46 @@ export default function SharedCatalogTopNav({
                 style={{ textDecoration: 'none' }}
               >
                 <Building2 size={13} />
-                <span className="access-label-full">Open My Portal</span>
-                <span className="access-label-compact">My Portal</span>
+                <span className="access-label-full">{lang === 'es' ? 'Mi Portal' : 'My Portal'}</span>
+                <span className="access-label-compact">Portal</span>
               </a>
-            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await logout();
+                  } catch (e) {
+                    console.error('Sign out error:', e);
+                  }
+                }}
+                className="topbar-signin-btn"
+                style={{ padding: '4px 8px' }}
+                title={`Sign Out (${user?.email || 'Provider'})`}
+              >
+                <LogOut size={13} color="#f87171" />
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <a
+                href="/login"
+                className="topbar-signin-btn"
+                title="Provider Authentication"
+              >
+                <Lock size={13} color="#ffffff" />
+                <span>{lang === 'es' ? 'Acceder' : 'Sign In'}</span>
+              </a>
               <button
                 type="button"
                 onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
                 className="topbar-apply-btn"
               >
                 <Building2 size={13} />
-                <span className="access-label-full">Apply for Portal Access</span>
-                <span className="access-label-compact">Portal Access</span>
+                <span className="access-label-full">{lang === 'es' ? 'Solicitar Acceso' : 'Apply'}</span>
+                <span className="access-label-compact">{lang === 'es' ? 'Acceso' : 'Apply'}</span>
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
