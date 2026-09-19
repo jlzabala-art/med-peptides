@@ -42,9 +42,20 @@ export default function InteractiveReconstitutionGuide({
   activeFormat = null,
   supplierName = '',
   lang = 'en',
-  primaryProtocol = null
+  primaryProtocol = null,
+  associatedProtocols = []
 }) {
   const t = getTranslations(lang);
+
+  const [selectedProtocolId, setSelectedProtocolId] = useState(() => {
+    return primaryProtocol?.id || primaryProtocol?.slug || (associatedProtocols[0]?.id || null);
+  });
+
+  const activeSelectedProtocol = useMemo(() => {
+    if (!Array.isArray(associatedProtocols) || associatedProtocols.length === 0) return primaryProtocol;
+    const found = associatedProtocols.find(p => (p.id === selectedProtocolId || p.slug === selectedProtocolId));
+    return found || primaryProtocol || associatedProtocols[0];
+  }, [associatedProtocols, selectedProtocolId, primaryProtocol]);
 
   const isPenOrCartridge = useMemo(() => {
     const fId = String(activeFormatId || '').toLowerCase();
@@ -1267,6 +1278,135 @@ export default function InteractiveReconstitutionGuide({
       {/* ── 2. Target Dose & Precision Syringe Calibration Workspace ── */}
       <div className="irg-workspace">
         
+        {/* 📋 Prominent Clinical Reference Protocol Hero Banner (Full-Width Span) */}
+        {activeSelectedProtocol && (
+          <div className="irg-protocol-hero-card" style={{
+            gridColumn: '1 / -1',
+            background: 'linear-gradient(135deg, #002244 0%, #003666 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            borderRadius: '12px',
+            padding: '14px 18px',
+            color: '#ffffff',
+            boxShadow: '0 4px 14px rgba(0, 34, 68, 0.15)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '8px',
+                  background: 'rgba(56, 189, 248, 0.18)',
+                  color: '#38bdf8',
+                  border: '1px solid rgba(56, 189, 248, 0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Activity size={20} />
+                </div>
+                <div>
+                  <div style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: '#7dd3fc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <span>{lang === 'es' ? 'VÍA CLÍNICA DE REFERENCIA & DOSIMETRÍA OPERATIVA' : 'STANDARDIZED CLINICAL PATHWAY REFERENCE'}</span>
+                    <span style={{ background: 'rgba(56, 189, 248, 0.25)', color: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>
+                      {activeSelectedProtocol.duration || '8 Weeks'}
+                    </span>
+                  </div>
+                  <h3 style={{ margin: '2px 0 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                    {activeSelectedProtocol.name}
+                  </h3>
+                </div>
+              </div>
+
+              <a
+                href={`/proto/${activeSelectedProtocol.slug || activeSelectedProtocol.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#0284c7',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  color: '#ffffff',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.80rem',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
+                }}
+              >
+                <span>{lang === 'es' ? 'Explorar Blueprint Completo (Gantt) ↗' : 'Explore Full Clinical Blueprint (Gantt) ↗'}</span>
+              </a>
+            </div>
+
+            {/* Protocol Switcher / Selector if multiple clinical protocols exist for this compound */}
+            {associatedProtocols && associatedProtocols.length > 1 && (
+              <div style={{
+                borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+                paddingTop: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap'
+              }}>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {lang === 'es' ? `Vías Clínicas Alternativas (${associatedProtocols.length}):` : `Available Clinical Pathways (${associatedProtocols.length}):`}
+                </span>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {associatedProtocols.map(proto => {
+                    const isSelected = (proto.id || proto.slug) === (activeSelectedProtocol.id || activeSelectedProtocol.slug);
+                    return (
+                      <button
+                        key={proto.id || proto.slug}
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('selection');
+                          setSelectedProtocolId(proto.id || proto.slug);
+                        }}
+                        style={{
+                          background: isSelected ? '#38bdf8' : 'rgba(255, 255, 255, 0.08)',
+                          color: isSelected ? '#002244' : '#e0f2fe',
+                          border: `1px solid ${isSelected ? '#38bdf8' : 'rgba(255, 255, 255, 0.18)'}`,
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {proto.name} {proto.duration ? `(${proto.duration})` : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Left Column: Target Dose Selector & Step Stepper */}
         <div className="irg-controls-panel">
           
@@ -1278,54 +1418,6 @@ export default function InteractiveReconstitutionGuide({
               </label>
               <span className="irg-val-badge font-mono">{doseValue} {doseUnit}</span>
             </div>
-
-            {/* 📋 Explicit Linkage to Primary Clinical Blueprint */}
-            {primaryProtocol && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '8px',
-                padding: '8px 12px',
-                backgroundColor: '#f0f9ff',
-                border: '1px solid #bae6fd',
-                borderRadius: '8px',
-                marginBottom: '10px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#0369a1' }}>
-                  <Info size={14} style={{ flexShrink: 0, color: '#0284c7' }} />
-                  <span>
-                    <strong>{lang === 'es' ? 'Vía Clínica de Referencia:' : 'Clinical Reference Blueprint:'}</strong>{' '}
-                    {lang === 'es'
-                      ? 'Fases de dosimetría resumidas del protocolo'
-                      : 'Dosimetry schedule summarized from the clinical blueprint'}{' '}
-                    <strong style={{ color: '#0f172a' }}>{primaryProtocol.name}</strong> ({primaryProtocol.duration}).
-                  </span>
-                </div>
-                <a
-                  href={`/proto/${primaryProtocol.slug || primaryProtocol.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#0284c7',
-                    textDecoration: 'none',
-                    padding: '3px 8px',
-                    borderRadius: '5px',
-                    background: '#ffffff',
-                    border: '1px solid #bae6fd',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <span>{lang === 'es' ? 'Ver Guía Completa (Gantt) →' : 'View Full Blueprint (Gantt) →'}</span>
-                </a>
-              </div>
-            )}
 
             {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Auto-fit Columns + Custom) */}
             <div className="irg-phase-cards-grid">
@@ -1677,6 +1769,75 @@ export default function InteractiveReconstitutionGuide({
             <div className="irg-syringe-caption">
               <ShieldCheck size={13} color="#0284c7" />
               <span>{t.syringeModelSpec || 'U-100 Insulin Syringe (1.0 mL = 100 Units · 1 Unit = 0.01 mL)'}</span>
+            </div>
+          </div>
+
+          {/* 📊 Clinical Administration & Vial Yield Matrix (Balances Right Column on Laptop) */}
+          <div className="irg-admin-yield-console" style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '14px 16px',
+            marginTop: '12px',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '10px',
+              borderBottom: '1px solid #f1f5f9',
+              paddingBottom: '8px'
+            }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FlaskConical size={14} color="#0284c7" />
+                {lang === 'es' ? 'Rendimiento Clínico y Posología' : 'Clinical Yield & Administration Profile'}
+              </span>
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 6px', borderRadius: '4px' }}>
+                {safeVialMg} mg / {safeBacMl.toFixed(1)} mL
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '10px'
+            }}>
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {lang === 'es' ? 'Carga por Inyección' : 'Draw Per Injection'}
+                </div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666', marginTop: '2px' }} className="font-mono">
+                  {doseValue} {doseUnit} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>({syringeUnits.toFixed(1)} UI)</span>
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {lang === 'es' ? 'Rendimiento del Vial' : 'Vial Longevity'}
+                </div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }} className="font-mono">
+                  ~{totalDosesInVial} {lang === 'es' ? 'dosis totales' : 'total doses'}
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {lang === 'es' ? 'Vía & Frecuencia' : 'Route & Cadence'}
+                </div>
+                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                  {lang === 'es' ? 'Subcutánea Semanal' : 'Weekly Subcutaneous'}
+                </div>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                  {lang === 'es' ? 'Conservación' : 'Storage Guard'}
+                </div>
+                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0284c7', marginTop: '2px' }}>
+                  ❄️ 2°C – 8°C Refrigerator
+                </div>
+              </div>
             </div>
           </div>
 

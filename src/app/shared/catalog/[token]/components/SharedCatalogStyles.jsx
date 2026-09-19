@@ -11,14 +11,15 @@ export default function SharedCatalogStyles() {
           margin: 0 auto;
           padding: 24px 16px;
         }
-        /* Sandboxed Institutional Topbar */
+        /* Sandboxed Institutional Topbar — Datasheet Deep Navy Blue (#003666) Theme */
         .institutional-topbar {
-          background-color: #ffffff;
-          border-bottom: 1px solid #e2e8f0;
+          background-color: #003666;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
           position: sticky;
           top: 0;
           z-index: 50;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+          box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25);
+          color: #ffffff;
         }
         .topbar-inner {
           max-width: 1160px;
@@ -38,7 +39,7 @@ export default function SharedCatalogStyles() {
         .topbar-brand-title {
           font-size: 0.95rem;
           font-weight: 800;
-          color: #003666;
+          color: #ffffff;
           letter-spacing: -0.01em;
           display: flex;
           align-items: center;
@@ -48,13 +49,13 @@ export default function SharedCatalogStyles() {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          background-color: #f0fdf4;
-          border: 1px solid #bbf7d0;
-          color: #166534;
+          background-color: rgba(255, 255, 255, 0.14);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          color: #e0f2fe;
           font-size: 0.72rem;
           font-weight: 700;
           padding: 2px 8px;
-          borderRadius: 6px;
+          border-radius: 6px;
         }
         .topbar-actions {
           display: flex;
@@ -74,10 +75,10 @@ export default function SharedCatalogStyles() {
         }
         .topbar-currency-toggle {
           display: inline-flex;
-          background-color: #f1f5f9;
+          background-color: rgba(255, 255, 255, 0.12);
           padding: 2px;
           border-radius: 8px;
-          border: 1px solid #e2e8f0;
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .currency-btn {
           padding: 4px 10px;
@@ -89,35 +90,35 @@ export default function SharedCatalogStyles() {
           transition: all 0.15s ease;
         }
         .currency-btn.active {
-          background-color: #003666;
-          color: #ffffff;
-          box-shadow: 0 1px 3px rgba(0, 54, 102, 0.2);
+          background-color: #38bdf8;
+          color: #002244;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
         .currency-btn.inactive {
           background: transparent;
-          color: #64748b;
+          color: #e0f2fe;
         }
         .topbar-destination {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background-color: #f8fafc;
+          background-color: rgba(255, 255, 255, 0.12);
           padding: 5px 12px;
           border-radius: 8px;
-          border: 1px solid #e2e8f0;
+          border: 1px solid rgba(255, 255, 255, 0.2);
           font-size: 0.8rem;
-          color: #334155;
+          color: #ffffff;
           min-width: 180px;
           flex-shrink: 0;
           transition: all 0.15s ease;
         }
         .topbar-destination:hover {
-          background-color: #f1f5f9;
-          border-color: #cbd5e1;
+          background-color: rgba(255, 255, 255, 0.18);
+          border-color: rgba(255, 255, 255, 0.35);
         }
         .topbar-destination select {
           background: transparent;
-          color: #0f172a;
+          color: #ffffff;
           border: none;
           font-size: 0.8rem;
           font-weight: 700;
@@ -126,13 +127,17 @@ export default function SharedCatalogStyles() {
           width: 100%;
           white-space: nowrap;
         }
+        .topbar-destination select option {
+          background: #002244;
+          color: #ffffff;
+        }
         .topbar-cart-pill {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background-color: #eff6ff;
-          border: 1px solid #bfdbfe;
-          color: #1e40af;
+          background-color: rgba(56, 189, 248, 0.2);
+          border: 1px solid rgba(56, 189, 248, 0.4);
+          color: #e0f2fe;
           padding: 6px 12px;
           border-radius: 8px;
           font-size: 0.8rem;
@@ -141,15 +146,15 @@ export default function SharedCatalogStyles() {
           transition: all 0.15s ease;
         }
         .topbar-cart-pill:hover {
-          background-color: #dbeafe;
+          background-color: rgba(56, 189, 248, 0.3);
         }
         .topbar-signin-btn {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background-color: #ffffff;
-          border: 1px solid #cbd5e1;
-          color: #334155;
+          background-color: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          color: #ffffff;
           padding: 6px 12px;
           border-radius: 8px;
           font-size: 0.8rem;
@@ -159,27 +164,27 @@ export default function SharedCatalogStyles() {
           transition: all 0.15s ease;
         }
         .topbar-signin-btn:hover {
-          background-color: #f8fafc;
-          border-color: #94a3b8;
+          background-color: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.4);
         }
         .topbar-apply-btn {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: linear-gradient(135deg, #003666 0%, #0284c7 100%);
-          border: none;
+          background: #0284c7;
+          border: 1px solid rgba(255, 255, 255, 0.3);
           color: #ffffff;
           padding: 7px 14px;
           border-radius: 8px;
           font-size: 0.8rem;
           font-weight: 800;
           cursor: pointer;
-          box-shadow: 0 2px 6px rgba(0, 54, 102, 0.25);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
           transition: all 0.15s ease;
         }
         .topbar-apply-btn:hover {
-          opacity: 0.95;
-          box-shadow: 0 3px 10px rgba(0, 54, 102, 0.35);
+          background: #0369a1;
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
         }
         .access-label-compact {
           display: none;

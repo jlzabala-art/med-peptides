@@ -221,9 +221,33 @@ const SECTION_SCHEMAS = {
  * @returns {Promise<Object>} - The generated patch that was saved
  */
 export async function enrichProtocolSection(protocolId, protocol, sectionId) {
+  // 1. Try server-side route first (uses server GEMINI_API_KEY, avoiding browser env issues)
+  try {
+    const res = await fetch('/api/admin/enrich-protocol', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ protocolId, protocol, sectionId })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.patch) {
+        if (protocolId) {
+          try {
+            await updateProtocolFull(protocolId, data.patch);
+          } catch (e) {
+            console.warn('[atlasProtocolEnricher] Firestore direct write fallback:', e);
+          }
+        }
+        return data.patch;
+      }
+    }
+  } catch (apiErr) {
+    console.warn('[atlasProtocolEnricher] Server route failed, trying direct client:', apiErr);
+  }
+
   if (!ai) {
     throw new Error(
-      'Atlas AI is not configured. Please set NEXT_PUBLIC_GEMINI_API_KEY in your .env.local file.'
+      'Atlas AI server is currently unreachable and NEXT_PUBLIC_GEMINI_API_KEY is not configured.'
     );
   }
 

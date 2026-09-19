@@ -41,6 +41,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
+import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -229,14 +230,34 @@ export default function PublicDatasheetView({
     };
   }, [lang, product]);
 
-  const name = product?.name || product?.displayName || 'Clinical Peptide';
-  const category = getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
-  const casNumber = product?.casNumber || product?.cas || 'Documented on Monograph';
-  const formula = product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null;
-  const mw = product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null;
-  const purity = product?.purity || '≥ 99.4% (RP-HPLC)';
-  const sequence = product?.sequence || product?.molecular?.sequence || null;
-  const targetSystem = getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
+  const isSolventProduct = useMemo(() => {
+    const slug = (product?.slug || product?.id || '').toLowerCase();
+    const cat = (product?.category || '').toLowerCase();
+    const pt = (product?.productType || '').toLowerCase();
+    const pName = (product?.name || product?.title || '').toLowerCase();
+    return Boolean(
+      product?.isSolvent || 
+      cat === 'solvent' || 
+      pt === 'solvent' || 
+      slug === 'bac-water' || 
+      slug === 'purified-water' || 
+      slug.includes('bacteriostatic') || 
+      pName.includes('bacteriostatic water')
+    );
+  }, [product]);
+
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : 'Clinical Peptide');
+  const category = isSolventProduct 
+    ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
+    : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
+  const casNumber = isSolventProduct ? '100-51-6 (Benzyl Alcohol USP)' : (product?.casNumber || product?.cas || 'Documented on Monograph');
+  const formula = isSolventProduct ? 'H₂O + C₇H₈O (0.9%)' : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
+  const mw = isSolventProduct ? '18.02 g/mol (H₂O)' : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
+  const purity = isSolventProduct ? 'USP Pharmacopeial Grade (Sterile)' : (product?.purity || '≥ 99.4% (RP-HPLC)');
+  const sequence = isSolventProduct ? null : (product?.sequence || product?.molecular?.sequence || null);
+  const targetSystem = isSolventProduct
+    ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
+    : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
   const description = dynamicTranslations[lang]?.description
     || getLocalizedField(product, 'description', lang) 
     || getLocalizedField(product, 'clinicalOverview', lang)
@@ -316,6 +337,14 @@ export default function PublicDatasheetView({
     }
     return 'All Certified Laboratories (Multi-Source)';
   }, [product, activeSupplierObj]);
+
+  const displaySupplierName = useMemo(() => {
+    const raw = supplierName || '';
+    if (raw.toLowerCase().includes('lotusland')) {
+      return 'Atlas Services';
+    }
+    return raw;
+  }, [supplierName]);
 
   const rawFormats = Array.isArray(hierarchy.formats) ? hierarchy.formats : [];
   const rawStrengths = Array.isArray(hierarchy.strengths) ? hierarchy.strengths : [];
@@ -782,7 +811,7 @@ export default function PublicDatasheetView({
             <div className="pds-tag-group">
               <span className="pds-cat-tag">{category}</span>
               <span className="pds-cgmp-tag">
-                {isStrictlyLotusland ? t.lotuslandVerified : `${supplierName} Quality Verified`}
+                {isStrictlyLotusland ? (t.lotuslandVerified || 'Atlas Services Certified') : `${displaySupplierName} Quality Verified`}
               </span>
               <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
                 <span className="pds-version-dot" />
@@ -812,7 +841,8 @@ export default function PublicDatasheetView({
             </div>
             <h1 className="pds-title">{name}</h1>
             <p className="pds-target">
-              <strong>{t.targetReceptorAxis || 'Target Receptor Axis:'}</strong> {targetSystem}
+              <strong>{isSolventProduct ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') : (t.targetReceptorAxis || 'Target Receptor Axis:')}</strong>{' '}
+              {targetSystem}
             </p>
           </div>
 
@@ -854,7 +884,7 @@ export default function PublicDatasheetView({
                   </span>
                 </div>
                 <h3 className="pds-section-header-title">
-                  {t.presentationsMatrix || 'Batch Availability & Presentations Matrix'} ({supplierName})
+                  {t.presentationsMatrix || 'Batch Availability & Presentations Matrix'} ({displaySupplierName})
                 </h3>
               </div>
             </div>
@@ -1010,20 +1040,33 @@ export default function PublicDatasheetView({
             <div className="pds-detail-grid">
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{t.activeContent || 'Active Content'}</span>
-                <span className="pds-dval font-bold text-sky-950">{selectedStrength?.name || '10 mg'}</span>
+                <span className="pds-dval font-bold text-sky-950">{selectedStrength?.name || (isSolventProduct ? '30 mL' : '10 mg')}</span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{t.adminRoute || 'Administration Route'}</span>
-                <span className="pds-dval">{t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical'}</span>
+                <span className="pds-dval">
+                  {isSolventProduct 
+                    ? (lang === 'es' ? 'Vehículo de Reconstitución (No Inyección Directa)' : 'Reconstitution Vehicle (Not for Direct Injection)')
+                    : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
+                </span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">
-                  {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
-                    ? (t.deviceDelivery || 'Device Delivery') 
-                    : (t.recommendedRecon || 'Recommended Reconstitution')}
+                  {isSolventProduct 
+                    ? (lang === 'es' ? 'Función Diluyente' : 'Diluent Function')
+                    : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
+                      ? (t.deviceDelivery || 'Device Delivery') 
+                      : (t.recommendedRecon || 'Recommended Reconstitution')}
                 </span>
                 <span className="pds-dval">
-                  {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) ? (
+                  {isSolventProduct ? (
+                    <>
+                      {lang === 'es' ? 'Solvente de Reconstitución Multidosis' : 'Universal Multi-Dose Peptide Diluent'}
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {lang === 'es' ? 'Diluir 1.0 – 3.0 mL en viales liofilizados' : 'Dilute 1.0 – 3.0 mL into lyophilized vials'}
+                      </span>
+                    </>
+                  ) : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) ? (
                     <>
                       {t.preDissolvedLiquid || 'Pre-dissolved SubQ Liquid (Ready to Use)'}
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
@@ -1043,18 +1086,22 @@ export default function PublicDatasheetView({
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{t.lyophilizationExcipient || 'Lyophilization / Excipient'}</span>
                 <span className="pds-dval">
-                  {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
-                    ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
-                    : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
+                  {isSolventProduct
+                    ? '0.9% Benzyl Alcohol USP (Antimicrobial Preservative)'
+                    : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
+                      ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
+                      : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
                 </span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{t.sourcingBatchRelease || 'Sourcing & Batch Release'}</span>
-                <span className="pds-dval">{supplierName} ({t.verifiedClinicalQuality || 'Verified Clinical Quality'})</span>
+                <span className="pds-dval">{displaySupplierName} ({t.verifiedClinicalQuality || 'Verified Clinical Quality'})</span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{t.analyticalPurity || 'Analytical Purity'}</span>
-                <span className="pds-dval font-bold text-sky-950">≥ 99.0% ({t.rpHplcVerified || 'RP-HPLC Verified'})</span>
+                <span className="pds-dval font-bold text-sky-950">
+                  {isSolventProduct ? 'USP Pharmacopeia (Sterile, Non-Pyrogenic)' : `≥ 99.0% (${t.rpHplcVerified || 'RP-HPLC Verified'})`}
+                </span>
               </div>
             </div>
           </div>
@@ -1102,29 +1149,35 @@ export default function PublicDatasheetView({
                         const recon = getReconstitutionVolume(st.name);
                         const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
 
-                        const diluentText = isPenOrCart 
-                          ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-                          : isOral 
-                            ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                            : isSpray
-                              ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
-                              : `${recon.volume} mL BAC Water`;
+                        const diluentText = isSolventProduct
+                          ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
+                          : isPenOrCart 
+                            ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
+                            : isOral 
+                              ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                              : isSpray
+                                ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
+                                : `${recon.volume} mL BAC Water`;
 
-                        const concText = isPenOrCart 
-                          ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-                          : isOral 
-                            ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                            : isSpray
-                              ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
-                              : `${recon.concentration} mg/mL`;
+                        const concText = isSolventProduct
+                          ? '0.9% Benzyl Alcohol USP'
+                          : isPenOrCart 
+                            ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
+                            : isOral 
+                              ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                              : isSpray
+                                ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
+                                : `${recon.concentration} mg/mL`;
 
-                        const adminText = isPenOrCart 
-                          ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                          : isOral 
-                            ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                            : isSpray
-                              ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
-                              : 'Subcutaneous / IM (U-100)';
+                        const adminText = isSolventProduct
+                          ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
+                          : isPenOrCart 
+                            ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+                            : isOral 
+                              ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                              : isSpray
+                                ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
+                                : 'Subcutaneous / IM (U-100)';
 
                         return (
                           <tr 
@@ -1153,7 +1206,7 @@ export default function PublicDatasheetView({
                             </td>
                             <td data-label="Reconstitution Diluent">{diluentText}</td>
                             <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
-                              {recon.volume > 0 && !isPenOrCart && !isOral && !isSpray ? (
+                              {recon.volume > 0 && !isPenOrCart && !isOral && !isSpray && !isSolventProduct ? (
                                 <span className="pds-conc-badge font-mono">
                                   {concText}
                                 </span>
@@ -1162,8 +1215,10 @@ export default function PublicDatasheetView({
                               )}
                             </td>
                             <td data-label="Administration">{adminText}</td>
-                            <td data-label="Analytical Grade" className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
-                            <td data-label="Laboratory Verification">{supplierName}</td>
+                            <td data-label="Analytical Grade" className="pds-purity-cell">
+                              {isSolventProduct ? 'USP Grade (Sterile)' : '≥ 99.0% (RP-HPLC)'}
+                            </td>
+                            <td data-label="Laboratory Verification">{displaySupplierName}</td>
                           </tr>
                         );
                       });
@@ -1175,48 +1230,55 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 2: Reconstitution Protocol & Interactive Simulator (Harmonized Navy Header) ── */}
-        <section id="reconstitution-guide" className="pds-section-card">
-          <div className="pds-section-header">
-            <div className="pds-section-header-left">
-              <div className="pds-section-header-shield">
-                <FlaskConical size={22} />
-              </div>
-              <div className="pds-section-header-titles">
-                <div className="pds-section-header-meta-row">
-                  <span className="pds-section-header-category">
-                    {t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY'}
-                  </span>
-                  <span className="pds-section-badge">
-                    <CheckCircle2 size={11} /> {t.interactiveCalcBadge || 'PRECISION SIMULATOR'}
-                  </span>
+        {/* ── Block 2: Reconstitution or Solvent Technical Specs ── */}
+        <section id="reconstitution-section" className="pds-section-card">
+          {isSolventProduct ? (
+            <SolventTechnicalSpecs product={product} lang={lang} />
+          ) : (
+            <>
+              <div className="pds-section-header">
+                <div className="pds-section-header-left">
+                  <div className="pds-section-header-shield">
+                    <FlaskConical size={22} />
+                  </div>
+                  <div className="pds-section-header-titles">
+                    <div className="pds-section-header-meta-row">
+                      <span className="pds-section-header-category">
+                        {t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY'}
+                      </span>
+                      <span className="pds-section-badge">
+                        <CheckCircle2 size={11} /> {t.interactiveCalcBadge || 'PRECISION SIMULATOR'}
+                      </span>
+                    </div>
+                    <h3 className="pds-section-header-title">
+                      {t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator'}
+                    </h3>
+                  </div>
                 </div>
-                <h3 className="pds-section-header-title">
-                  {t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator'}
-                </h3>
-              </div>
-            </div>
 
-            <div className="pds-section-header-right">
-              <div className="pds-section-cert-badge">
-                <Droplets size={14} color="#38bdf8" />
-                <span>U-100 Standard (1.0 mL = 100 U)</span>
+                <div className="pds-section-header-right">
+                  <div className="pds-section-cert-badge">
+                    <Droplets size={14} color="#38bdf8" />
+                    <span>U-100 Standard (1.0 mL = 100 U)</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="pds-section-card-body" style={{ padding: 0 }}>
-            <InteractiveReconstitutionGuide
-              product={product}
-              selectedStrength={selectedStrength}
-              availableStrengths={sortedStrengths}
-              activeFormatId={activeFormatId}
-              activeFormat={activeFormat}
-              supplierName={supplierName}
-              lang={lang}
-              primaryProtocol={primaryProtocol}
-            />
-          </div>
+              <div className="pds-section-card-body" style={{ padding: 0 }}>
+                <InteractiveReconstitutionGuide
+                  product={product}
+                  selectedStrength={selectedStrength}
+                  availableStrengths={sortedStrengths}
+                  activeFormatId={activeFormatId}
+                  activeFormat={activeFormat}
+                  supplierName={displaySupplierName}
+                  lang={lang}
+                  primaryProtocol={primaryProtocol}
+                  associatedProtocols={associatedProtocols}
+                />
+              </div>
+            </>
+          )}
         </section>
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
@@ -1670,10 +1732,10 @@ export default function PublicDatasheetView({
           molecular: product?.molecularWeight || product?.molecularFormula || 'N/A',
           sequence: product?.sequence || null,
           details: {
-            category: product?.category || 'Peptides',
-            storage: '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
-            reconstitution: '1.0mL - 2.0mL sterile bacteriostatic water',
-            activeSupplier: 'Lotusland Limited',
+            category: isSolventProduct ? 'Sterile Reconstitution Solvent' : (product?.category || 'Peptides'),
+            storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
+            reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : '1.0mL - 2.0mL sterile bacteriostatic water',
+            activeSupplier: displaySupplierName || 'Atlas Services',
           }
         }}
         storageKey={`monograph_${slug}`}

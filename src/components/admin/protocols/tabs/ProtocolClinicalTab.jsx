@@ -110,13 +110,13 @@ function ClinicalSection({ id, icon: Icon, title, subtitle, color = '#3b82f6', d
 
 // ── Progress bar across sections ──────────────────────────────────────────────
 function ClinicalCompletionBar({ protocol, onChipClick, aiWorkingStates = {} }) {
-  const { checks, pct, color } = calculateClinicalCompleteness(protocol);
+  const { checks, pct, color, isStale, daysSinceUpdate } = calculateClinicalCompleteness(protocol);
 
   return (
     <div style={{
       padding: '1.25rem',
       background: 'var(--surface)',
-      border: '1px solid var(--border)',
+      border: isStale ? '1px solid #f59e0b55' : '1px solid var(--border)',
       borderRadius: '16px',
       display: 'flex',
       flexDirection: 'column',
@@ -124,10 +124,42 @@ function ClinicalCompletionBar({ protocol, onChipClick, aiWorkingStates = {} }) 
       boxShadow: '0 8px 30px -12px rgba(0,0,0,0.06)',
       marginBottom: '1.5rem'
     }}>
+      {isStale && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '0.75rem 1rem',
+          background: '#fffbeb',
+          border: '1px solid #fde68a',
+          borderRadius: '12px',
+          color: '#92400e',
+          fontSize: '0.85rem',
+          fontWeight: 600
+        }}>
+          <span style={{ fontSize: '1.1rem' }}>⚠️</span>
+          <div style={{ flex: 1 }}>
+            <strong>Clinical Review Due ({daysSinceUpdate} days since last update):</strong> This protocol was last updated over 3 months ago. Data completeness is at {pct}%, but periodic clinical governance re-validation is recommended.
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.01em' }}>Clinical Completeness</h3>
+            {isStale && (
+              <span style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                background: '#fef3c7',
+                color: '#b45309',
+                padding: '2px 8px',
+                borderRadius: '99px',
+                border: '1px solid #fcd34d'
+              }}>
+                Review Due (&gt;90d)
+              </span>
+            )}
             <span 
               title="Calculated in real-time based on the amount of medical data provided."
               style={{ cursor: 'help', display: 'inline-flex', justifyContent: 'center', alignItems: 'center', width: '18px', height: '18px', borderRadius: '50%', background: 'var(--background-alt)', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 800 }}>

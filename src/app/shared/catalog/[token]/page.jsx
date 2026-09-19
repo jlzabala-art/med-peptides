@@ -42,7 +42,7 @@ export async function generateMetadata({ params }) {
   const validityDays = catalogData.validityDays || 30;
 
   const isLotusland = supplierId.includes('lotusland') || catalogueFilter.toLowerCase().includes('lotus');
-  const supplierTitle = isLotusland ? 'Lotusland Research Formulations' : 'Clinical Peptide Formulations';
+  const supplierTitle = 'Atlas Services Formulations';
 
   const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');
   const title = hasRecipient

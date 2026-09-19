@@ -212,7 +212,7 @@ export default function ProtocolExecutiveSummary({ protocol, onCardClick }) {
                 fontWeight: 500,
                 letterSpacing: '-0.01em'
               }}>
-                {protocol.overview_summary || 'No detailed overview provided for this protocol. Please add clinical rationale and objectives. This section should detail the pathophysiological target of the therapy, expected mechanisms of action, and rationale for the chosen peptide sequences and dosages.'}
+                {protocol.overview_summary || protocol.clinical_rationale || protocol.description || protocol.summary || protocol.overview || 'No detailed overview provided for this protocol. Please add clinical rationale and objectives. This section should detail the pathophysiological target of the therapy, expected mechanisms of action, and rationale for the chosen peptide sequences and dosages.'}
               </p>
             </div>
           </div>

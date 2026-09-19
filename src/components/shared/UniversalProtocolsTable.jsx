@@ -677,10 +677,10 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           width: '14%',
           align: 'center',
           render: (p) => {
-            const { pct, color } = calculateClinicalCompleteness(p);
+            const { pct, color, isStale, daysSinceUpdate } = calculateClinicalCompleteness(p);
             return (
               <span
-                title={`${pct}% Completed clinical dataset`}
+                title={isStale ? `Clinical Review Due: Last updated ${daysSinceUpdate} days ago (>3 months). Completeness: ${pct}%.` : `${pct}% Completed clinical dataset`}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -695,6 +695,11 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
               >
                 <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: color }} />
                 <span>{pct}%</span>
+                {isStale && (
+                  <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.03em', opacity: 0.9 }}>
+                    • Review Due
+                  </span>
+                )}
               </span>
             );
           }

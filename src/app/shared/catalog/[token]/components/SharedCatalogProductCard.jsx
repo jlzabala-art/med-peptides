@@ -106,14 +106,14 @@ export default function SharedCatalogProductCard({
                 {prod.category}
               </span>
               <a
-                href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=lotusland`}
+                href={`/p/${encodeURIComponent(prod.slug || prod.id)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pds-catalog-monograph-btn"
-                title={t ? t('product.officialMonograph', 'Official Monograph (Lotusland) ↗') : 'Official Monograph (Lotusland) ↗'}
+                title={t ? t('product.officialMonograph', 'Official Monograph (Atlas Services) ↗') : 'Official Monograph (Atlas Services) ↗'}
               >
                 <FileText size={13} />
-                <span>{t ? t('product.officialMonograph', 'Official Monograph (Lotusland) ↗') : 'Official Monograph (Lotusland) ↗'}</span>
+                <span>{t ? t('product.officialMonograph', 'Official Monograph (Atlas Services) ↗') : 'Official Monograph (Atlas Services) ↗'}</span>
               </a>
             </div>
             {prod.description && (
@@ -218,7 +218,7 @@ export default function SharedCatalogProductCard({
                       )}
                       <span>•</span>
                       <a
-                        href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=lotusland`}
+                        href={`/p/${encodeURIComponent(prod.slug || prod.id)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="pds-variant-protocol-pill"

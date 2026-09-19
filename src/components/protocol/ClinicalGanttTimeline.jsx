@@ -385,7 +385,7 @@ export default function ClinicalGanttTimeline({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>
-              Phase {currentPhase.phaseNumber}: {currentPhase.phaseName}
+              {currentPhase.phaseNumber ? `Phase ${currentPhase.phaseNumber}` : (currentPhase.phaseLabel || 'Phase')}: {currentPhase.phaseName || currentPhase.name || 'Therapeutic Titration'}
             </div>
             <h4 style={{ margin: '2px 0 0', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
               Week {selectedWeek} Administration Instructions
@@ -394,13 +394,13 @@ export default function ClinicalGanttTimeline({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', backgroundColor: '#e2e8f0', padding: '3px 8px', borderRadius: '6px' }}>
-              Duration: {currentPhase.durationWeeks} Weeks (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
+              Duration: {currentPhase.durationWeeks || 4} Weeks (Weeks {currentPhase.startWeek || 1}–{currentPhase.endWeek || (currentPhase.durationWeeks || 4)})
             </span>
           </div>
         </div>
 
         <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.4 }}>
-          {currentPhase.instructions}
+          {currentPhase.instructions || currentPhase.objective || 'Administer according to verified clinical titration schedule.'}
         </p>
 
         {/* Compound Dosage Grid for this week */}
@@ -409,7 +409,27 @@ export default function ClinicalGanttTimeline({
           gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
           gap: '0.75rem'
         }}>
-          {(currentPhase.compounds || []).map((c, i) => (
+          {((currentPhase.compounds && currentPhase.compounds.length > 0)
+            ? currentPhase.compounds
+            : (Array.isArray(protocol?.bom) && protocol.bom.length > 0
+                ? protocol.bom.map(b => ({
+                    name: b.product_name || b.name,
+                    dosage: b.dosage || 'Prescribed Dose',
+                    frequency: b.frequency || 'According to schedule',
+                    format: b.format || '🧪 Sterile Lyophilized Vial',
+                    route: b.route || 'Subcutaneous',
+                    storage: '❄️ 2°C – 8°C Refrigerator'
+                  }))
+                : (Array.isArray(protocol?.items) ? protocol.items.map(it => ({
+                    name: it.product_name || it.name,
+                    dosage: it.dosage || 'Prescribed Dose',
+                    frequency: it.frequency || 'According to schedule',
+                    format: it.format || '🧪 Sterile Lyophilized Vial',
+                    route: it.route || 'Subcutaneous',
+                    storage: '❄️ 2°C – 8°C Refrigerator'
+                  })) : [])
+              )
+          ).map((c, i) => (
             <div
               key={i}
               style={{
