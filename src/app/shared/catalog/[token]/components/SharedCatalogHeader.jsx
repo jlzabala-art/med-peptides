@@ -59,6 +59,7 @@ export default function SharedCatalogHeader({
   showProtocolsUnderProducts,
   setShowProtocolsUnderProducts,
   setActiveTab,
+  t,
 }) {
   const validity = useValidityCountdown(catalogMeta);
   const theme = pharmaMarginTheme || DEFAULT_PHARMA_MARGIN_THEME;
@@ -76,16 +77,21 @@ export default function SharedCatalogHeader({
         <div className="header-card-inner">
           <div className="header-card-left">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
-                Official Clinical Peptide Catalog
-              </h1>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Lotusland Limited • Official Compendium & Monograph Registry
+                </span>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
+                  Official Clinical Peptide Catalog
+                </h1>
+              </div>
               <span style={{
                 fontSize: '0.74rem',
                 fontWeight: 800,
                 color: theme.accentColor,
                 backgroundColor: theme.pillBg,
                 border: `1px solid ${theme.borderColor}`,
-                padding: '3px 10px',
+                padding: '4px 10px',
                 borderRadius: '12px',
                 letterSpacing: '0.02em',
                 display: 'inline-flex',
@@ -93,7 +99,7 @@ export default function SharedCatalogHeader({
                 gap: '5px',
               }}>
                 <ShieldCheck size={12} />
-                {isProtocolCatalog ? 'Peptides & Protocols' : theme.tierLabel}
+                Dual-Stage RP-HPLC & LC-MS Certified
               </span>
             </div>
             <p style={{ margin: '6px 0 0 0', fontSize: '0.84rem', color: '#e0f2fe', lineHeight: 1.4, maxWidth: '580px' }}>

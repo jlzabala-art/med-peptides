@@ -724,6 +724,7 @@ export default function SharedCatalogClientView({
           showProtocolsUnderProducts={showProtocolsUnderProducts}
           setShowProtocolsUnderProducts={setShowProtocolsUnderProducts}
           setActiveTab={setActiveTab}
+          t={t}
         />
 
         {/* Search, Goals & Format Controls */}
@@ -785,6 +786,7 @@ export default function SharedCatalogClientView({
                 protocols={protocols}
                 setSelectedPublicProtocol={setSelectedPublicProtocol}
                 catalogMeta={catalogMeta}
+                t={t}
               />
             ))
           )}

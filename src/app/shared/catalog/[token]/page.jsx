@@ -434,6 +434,7 @@ export default async function SharedCatalogPage({ params }) {
 
     products.push({
       id:               data.id,
+      slug:             data.slug || data.id,
       canonicalName:    data.canonicalName || data.name || 'Product',
       description:      data.aiDescription || data.description || '',
       category:         data.categoryId || data.category || 'Peptides',

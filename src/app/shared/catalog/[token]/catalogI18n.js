@@ -59,6 +59,8 @@ export const CATALOG_TRANSLATIONS = {
     'product.leadTime'      : 'Lead time',
     'product.viewSDS'       : 'View SDS / COA',
     'product.molecular'     : 'Molecular Weight',
+    'product.officialMonograph': 'Official Monograph (Lotusland) ↗',
+    'product.protocolDilution': 'Protocol & Dilution ↗',
 
     // ── Order / cart ──────────────────────────────────────────────────────
     'order.title'           : 'Your Order Request',
@@ -135,6 +137,8 @@ export const CATALOG_TRANSLATIONS = {
     'product.leadTime'      : 'Tiempo de entrega',
     'product.viewSDS'       : 'Ver FDS / COA',
     'product.molecular'     : 'Peso Molecular',
+    'product.officialMonograph': 'Monografía Oficial (Lotusland) ↗',
+    'product.protocolDilution': 'Protocolo & Dilución ↗',
 
     // ── Order / cart ──────────────────────────────────────────────────────
     'order.title'           : 'Tu Solicitud de Pedido',

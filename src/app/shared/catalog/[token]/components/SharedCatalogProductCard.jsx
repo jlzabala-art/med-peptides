@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Package, CheckCircle2, ClipboardList } from 'lucide-react';
+import { Package, CheckCircle2, ClipboardList, FileText, FlaskConical } from 'lucide-react';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import ClinicalInfoRequestPanel from './ClinicalInfoRequestPanel';
@@ -24,6 +24,7 @@ export default function SharedCatalogProductCard({
   protocols,
   setSelectedPublicProtocol,
   catalogMeta,
+  t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
 
@@ -104,6 +105,16 @@ export default function SharedCatalogProductCard({
               }}>
                 {prod.category}
               </span>
+              <a
+                href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=lotusland`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pds-catalog-monograph-btn"
+                title={t ? t('product.officialMonograph', 'Official Monograph (Lotusland) ↗') : 'Official Monograph (Lotusland) ↗'}
+              >
+                <FileText size={13} />
+                <span>{t ? t('product.officialMonograph', 'Official Monograph (Lotusland) ↗') : 'Official Monograph (Lotusland) ↗'}</span>
+              </a>
             </div>
             {prod.description && (
               <p className="product-desc-clamp">{prod.description}</p>
@@ -205,6 +216,17 @@ export default function SharedCatalogProductCard({
                       ) : (
                         <span style={{ color: '#16a34a', fontWeight: 600 }}>🟢 In Stock</span>
                       )}
+                      <span>•</span>
+                      <a
+                        href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=lotusland`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pds-variant-protocol-pill"
+                        title={t ? t('product.protocolDilution', 'Protocol & Dilution ↗') : 'Protocol & Dilution ↗'}
+                      >
+                        <FlaskConical size={11} />
+                        <span>{t ? t('product.protocolDilution', 'Protocol & Dilution ↗') : 'Protocol & Dilution ↗'}</span>
+                      </a>
                     </div>
                   </div>
                 </div>

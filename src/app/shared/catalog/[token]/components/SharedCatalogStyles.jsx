@@ -326,15 +326,64 @@ export default function SharedCatalogStyles() {
         .product-card {
           background: #ffffff;
           border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 18px 20px;
-          margin-bottom: 14px;
-          transition: all 0.15s ease;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          border-radius: 14px;
+          padding: 20px 22px;
+          margin-bottom: 16px;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 4px 16px -4px rgba(0, 54, 102, 0.06), 0 1px 3px rgba(0,0,0,0.02);
         }
         .product-card:hover {
-          border-color: #cbd5e1;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+          border-color: #bae6fd;
+          box-shadow: 0 8px 24px -4px rgba(0, 54, 102, 0.12), 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .pds-catalog-monograph-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: linear-gradient(135deg, #003666 0%, #002244 100%);
+          color: #ffffff !important;
+          border: 1px solid rgba(56, 189, 248, 0.4);
+          border-radius: 8px;
+          padding: 4px 10px;
+          font-size: 0.74rem;
+          font-weight: 700;
+          text-decoration: none;
+          transition: all 0.18s ease;
+          box-shadow: 0 2px 6px rgba(0, 54, 102, 0.25);
+          letter-spacing: 0.01em;
+          flex-shrink: 0;
+        }
+        .pds-catalog-monograph-btn:hover {
+          background: linear-gradient(135deg, #004080 0%, #002b55 100%);
+          border-color: #38bdf8;
+          color: #ffffff !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 54, 102, 0.35);
+        }
+        .pds-catalog-monograph-btn:active {
+          transform: translateY(0);
+        }
+        .pds-variant-protocol-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background-color: #f0f9ff;
+          border: 1px solid #bae6fd;
+          color: #0284c7 !important;
+          border-radius: 6px;
+          padding: 2px 7px;
+          font-size: 0.70rem;
+          font-weight: 700;
+          text-decoration: none;
+          transition: all 0.15s ease;
+          letter-spacing: 0.01em;
+          white-space: nowrap;
+        }
+        .pds-variant-protocol-pill:hover {
+          background-color: #e0f2fe;
+          border-color: #7dd3fc;
+          color: #0369a1 !important;
+          transform: translateY(-0.5px);
         }
         .category-chip {
           padding: 6px 14px;
