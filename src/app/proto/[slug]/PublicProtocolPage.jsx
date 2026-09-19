@@ -467,44 +467,39 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         </section>
 
         {/* ── 4 Executive KPI Metric Cards (Scope: Full Protocol) ── */}
-        <section style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
-          margin: '1.5rem 0'
-        }}>
+        <section className="proto-kpis-grid">
           {/* KPI 1: Duration */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div className="proto-kpi-card-box">
+            <div className="proto-kpi-card-icon" style={{ background: '#eff6ff', color: '#0284c7' }}>
               <Clock size={20} />
             </div>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t.kpiDurationTitle}</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{displayDuration}</div>
-              <div style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600 }}>{phases.length || 3} {t.kpiDurationSubtitle}</div>
+            <div className="proto-kpi-card-body">
+              <div className="proto-kpi-card-title">{t.kpiDurationTitle}</div>
+              <div className="proto-kpi-card-value">{displayDuration}</div>
+              <div className="proto-kpi-card-sub" style={{ color: '#0284c7' }}>{phases.length || 3} {t.kpiDurationSubtitle}</div>
             </div>
           </div>
 
           {/* KPI 2: Active Peptides */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div className="proto-kpi-card-box">
+            <div className="proto-kpi-card-icon" style={{ background: '#f0fdfa', color: '#0d9488' }}>
               <FlaskConical size={20} />
             </div>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t.kpiPeptidesTitle}</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{items.length || 1} {items.length === 1 ? t.kpiFormulation : t.kpiFormulations}</div>
-              <div style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 600 }}>{items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle}</div>
+            <div className="proto-kpi-card-body">
+              <div className="proto-kpi-card-title">{t.kpiPeptidesTitle}</div>
+              <div className="proto-kpi-card-value">{items.length || 1} {items.length === 1 ? t.kpiFormulation : t.kpiFormulations}</div>
+              <div className="proto-kpi-card-sub" style={{ color: '#0d9488' }}>{items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle}</div>
             </div>
           </div>
 
           {/* KPI 3: Full Cycle Vials (No mention of price! Breakdown by peptide type) */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div className="proto-kpi-card-box">
+            <div className="proto-kpi-card-icon" style={{ background: '#faf5ff', color: '#7c3aed' }}>
               <Package size={20} />
             </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t.kpiVialsTitle}</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{supplySummary.totalVials} {t.kpiVialsUnit}</div>
+            <div className="proto-kpi-card-body">
+              <div className="proto-kpi-card-title">{t.kpiVialsTitle}</div>
+              <div className="proto-kpi-card-value">{supplySummary.totalVials} {t.kpiVialsUnit}</div>
               {supplySummary.compounds.length > 1 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.2rem' }}>
                   {supplySummary.compounds.map((c, i) => (
@@ -526,7 +521,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   ))}
                 </div>
               ) : (
-                <div style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600, marginTop: '0.1rem', whiteSpace: 'normal', lineHeight: 1.3 }}>
+                <div className="proto-kpi-card-sub" style={{ color: '#7c3aed' }}>
                   {vialBreakdownText}
                 </div>
               )}
@@ -534,71 +529,77 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </div>
 
           {/* KPI 4: Administration Events */}
-          <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.85rem', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fff7ed', color: '#c2410c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div className="proto-kpi-card-box">
+            <div className="proto-kpi-card-icon" style={{ background: '#fff7ed', color: '#c2410c' }}>
               <Syringe size={20} />
             </div>
-            <div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t.kpiInjectionsTitle}</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{supplySummary.totalInjections} {t.kpiInjectionsUnit}</div>
-              <div style={{ fontSize: '0.70rem', color: '#c2410c', fontWeight: 600 }}>{t.kpiInjectionsSubtitle}</div>
+            <div className="proto-kpi-card-body">
+              <div className="proto-kpi-card-title">{t.kpiInjectionsTitle}</div>
+              <div className="proto-kpi-card-value">{supplySummary.totalInjections} {t.kpiInjectionsUnit}</div>
+              <div className="proto-kpi-card-sub" style={{ color: '#c2410c' }}>{t.kpiInjectionsSubtitle}</div>
             </div>
           </div>
         </section>
 
-        {/* ── Sticky Anchor Quick Navigation Strip ── */}
-        <nav style={{
-          position: 'sticky',
-          top: '56px',
-          zIndex: 800,
-          background: 'rgba(255, 255, 255, 0.92)',
-          backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid #e2e8f0',
-          margin: '0 -1.5rem 1.5rem -1.5rem',
-          padding: '0.65rem 1.5rem',
-          display: 'flex',
-          gap: '0.5rem',
-          overflowX: 'auto',
-          scrollbarWidth: 'none'
-        }}>
-          {[
-            { label: lang === 'es' ? '🧬 Péptidos Incluidos' : '🧬 Included Peptides', href: '#included-compounds' },
-            { label: lang === 'es' ? '📊 Cronograma & Fases' : '📊 Pathway Timeline', href: '#pathway-timeline' },
-            { label: lang === 'es' ? '💉 Reconstitución & Jeringa' : '💉 Reconstitution & Syringe', href: '#reconstitution-console' },
-            { label: lang === 'es' ? '📦 Suministros & Viales' : '📦 Cycle Supplies & Vials', href: '#cycle-supplies' },
-            { label: lang === 'es' ? '📅 Calendario Semanal' : '📅 Weekly Roadmap', href: '#weekly-calendar' },
-            { label: lang === 'es' ? '🔬 Biomarcadores' : '🔬 Clinical Biomarkers', href: '#biomarkers-safety' },
-            { label: lang === 'es' ? '🛡️ Seguridad & Exclusiones' : '🛡️ Safety & Exclusions', href: '#safety-governance' },
-          ].map((nav, i) => (
-            <a
-              key={i}
-              href={nav.href}
-              style={{
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                color: '#334155',
-                textDecoration: 'none',
-                padding: '4px 12px',
-                borderRadius: '9999px',
-                background: '#f1f5f9',
-                border: '1px solid #cbd5e1',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
+        {/* ── Sticky Anchor Quick Navigation Strip (Mobile-First / Zero Overflow) ── */}
+        <nav className="proto-quick-nav">
+          {/* Mobile section jump selector (Regla #23) */}
+          <div className="proto-mobile-section-wrapper">
+            <select
+              className="proto-mobile-section-select"
+              aria-label={lang === 'es' ? 'Saltar a sección' : 'Jump to section'}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const target = document.querySelector(e.target.value);
+                  if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }
               }}
+              defaultValue=""
             >
-              {nav.label}
-            </a>
-          ))}
+              <option value="" disabled>
+                {lang === 'es' ? '📑 Saltar a sección...' : '📑 Jump to section...'}
+              </option>
+              <option value="#included-compounds">{lang === 'es' ? '🧬 Péptidos Incluidos' : '🧬 Included Peptides'}</option>
+              <option value="#pathway-timeline">{lang === 'es' ? '📊 Cronograma & Fases' : '📊 Pathway Timeline'}</option>
+              <option value="#reconstitution-console">{lang === 'es' ? '💉 Reconstitución & Jeringa' : '💉 Reconstitution & Syringe'}</option>
+              <option value="#cycle-supplies">{lang === 'es' ? '📦 Suministros & Viales' : '📦 Cycle Supplies & Vials'}</option>
+              <option value="#weekly-calendar">{lang === 'es' ? '📅 Calendario Semanal' : '📅 Weekly Roadmap'}</option>
+              <option value="#biomarkers-safety">{lang === 'es' ? '🔬 Biomarcadores' : '🔬 Clinical Biomarkers'}</option>
+              <option value="#safety-governance">{lang === 'es' ? '🛡️ Seguridad & Exclusiones' : '🛡️ Safety & Exclusions'}</option>
+            </select>
+          </div>
+
+          <div className="proto-quick-nav-pills">
+            {[
+              { label: lang === 'es' ? '🧬 Compuestos' : '🧬 Compounds', href: '#included-compounds' },
+              { label: lang === 'es' ? '📊 Timeline' : '📊 Timeline', href: '#pathway-timeline' },
+              { label: lang === 'es' ? '💉 Reconstitución' : '💉 Reconstitution', href: '#reconstitution-console' },
+              { label: lang === 'es' ? '📦 Suministros' : '📦 Supplies', href: '#cycle-supplies' },
+              { label: lang === 'es' ? '📅 Calendario' : '📅 Roadmap', href: '#weekly-calendar' },
+              { label: lang === 'es' ? '🔬 Biomarcadores' : '🔬 Biomarkers', href: '#biomarkers-safety' },
+              { label: lang === 'es' ? '🛡️ Seguridad' : '🛡️ Safety', href: '#safety-governance' },
+            ].map((nav, i) => (
+              <a
+                key={i}
+                href={nav.href}
+                className="proto-quick-nav-pill"
+              >
+                {nav.label}
+              </a>
+            ))}
+          </div>
         </nav>
 
         {/* ── Core Pathway & Sections ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           
           {/* Section 1: Included Compounds */}
-          <section id="included-compounds" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #003666', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(0, 54, 102, 0.07)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          <section id="included-compounds" className="pds-card proto-section-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #003666', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(0, 54, 102, 0.07)' }}>
+            <div className="proto-section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <FlaskConical size={18} />
                 </div>
                 <div>
@@ -615,13 +616,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem' }}>
+            <div className="proto-compounds-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem' }}>
               {items.map((item, idx) => {
                 const itemSlug = item.slug || item.productId || item.productSlug || (item.id && !item.id.startsWith('item-') ? item.id : null);
                 const itemName = item.product_name || item.name || item.title || 'Compound';
                 const itemDosage = item.dosage || item.dose || (item.quantity ? `${item.quantity} ${item.unit || (lang === 'es' ? 'Viales' : 'Vials')}` : null);
                 return (
-                  <div key={idx} style={{
+                  <div key={idx} className="proto-compound-card" style={{
                     border: '1px solid #e2e8f0',
                     borderRadius: '12px',
                     padding: '1.15rem',
@@ -632,12 +633,12 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                     boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
                   }}>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <div className="proto-compound-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                         <strong style={{ color: '#0f172a', fontSize: '1rem', fontWeight: 800 }}>
                           {itemName}
                         </strong>
                         {itemDosage && (
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 8px', borderRadius: '6px' }}>
+                          <span className="proto-compound-dosage-badge" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 8px', borderRadius: '6px' }}>
                             {itemDosage}
                           </span>
                         )}

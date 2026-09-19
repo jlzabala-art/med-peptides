@@ -1943,4 +1943,246 @@
   text-align: center;
 }
 
+/* ── Public Protocol Responsive Overrides & GCP Card Standards ── */
+.public-datasheet-root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+.pds-container {
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.proto-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+  width: 100%;
+}
+
+.proto-kpi-card-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.proto-kpi-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.proto-kpi-card-body {
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+}
+
+.proto-kpi-card-title {
+  font-size: 0.70rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proto-kpi-card-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.proto-kpi-card-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-top: 0.1rem;
+  line-height: 1.25;
+}
+
+.proto-quick-nav {
+  position: sticky;
+  top: 56px;
+  z-index: 800;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem 0;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.proto-mobile-section-wrapper {
+  display: none;
+}
+
+.proto-mobile-section-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 2.2rem 0.65rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 16px;
+}
+
+.proto-quick-nav-pills {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+  width: 100%;
+}
+
+.proto-quick-nav-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.proto-quick-nav-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  text-decoration: none;
+  padding: 5px 13px;
+  border-radius: 9999px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.proto-quick-nav-pill:hover {
+  background: #003666;
+  color: #ffffff;
+  border-color: #003666;
+  transform: translateY(-1px);
+}
+
+.proto-compounds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.proto-compound-card {
+  box-sizing: border-box;
+}
+
+.proto-compound-dosage-badge {
+  white-space: normal;
+  line-height: 1.3;
+}
+
+@media (max-width: 1024px) {
+  .proto-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .pds-container {
+    padding: 0 0.85rem !important;
+    gap: 1.25rem !important;
+  }
+
+  .proto-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+    margin: 1rem 0;
+  }
+
+  .proto-kpi-card-box {
+    padding: 0.85rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    border-radius: 10px;
+  }
+
+  .proto-kpi-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .proto-kpi-card-value {
+    font-size: 1.1rem;
+  }
+
+  .proto-quick-nav {
+    top: 48px;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .proto-mobile-section-wrapper {
+    display: block;
+    margin-bottom: 0.55rem;
+  }
+
+  .proto-section-card {
+    padding: 1.1rem 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  .proto-compounds-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .proto-compound-card {
+    padding: 0.95rem !important;
+    border-radius: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .proto-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .proto-kpi-card-box {
+    padding: 0.75rem 0.65rem;
+  }
+
+  .proto-kpi-card-value {
+    font-size: 1.02rem;
+  }
+}
+
+
 
