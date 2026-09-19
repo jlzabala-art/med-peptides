@@ -1271,8 +1271,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           onClose={() => setShareDrawerConfig(null)}
           shareUrl={shareDrawerConfig.shareUrl || 'https://med-peptides.com/catalog'}
           docType={shareDrawerConfig.docType || 'catalog'}
-          title={`Compartir con ${getUserFullName(shareDrawerConfig.user)}`}
-          subtitle="Genera un enlace corto para WhatsApp o Email con seguimiento individual."
+          title={`Share with ${getUserFullName(shareDrawerConfig.user)}`}
+          subtitle="Generate a tracked short link for WhatsApp or Email with individual tracking."
           recipientName={getUserFullName(shareDrawerConfig.user)}
           recipientEmail={shareDrawerConfig.user?.email || ''}
           recipientPhone={shareDrawerConfig.user?.phone || shareDrawerConfig.user?.phoneNumber || ''}

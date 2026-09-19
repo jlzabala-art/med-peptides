@@ -4,11 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { User, Building2, Stethoscope, Factory, Globe, Search, Plus, Check, Loader2, FileText } from 'lucide-react';
 
 const RECIPIENT_TYPES = [
-  { id: 'doctor', label: 'Clínica / Médico', icon: Stethoscope, color: '#0d9488', bg: '#f0fdfa' },
-  { id: 'patient', label: 'Paciente', icon: User, color: '#7c3aed', bg: '#f5f3ff' },
-  { id: 'wholeseller', label: 'Wholesaler / Mayorista', icon: Building2, color: '#c2410c', bg: '#fff7ed' },
-  { id: 'supplier', label: 'Proveedor', icon: Factory, color: '#2563eb', bg: '#eff6ff' },
-  { id: 'external', label: 'Externo / Nuevo', icon: Globe, color: '#475569', bg: '#f8fafc' },
+  { id: 'doctor', label: 'Clinic / Doctor', icon: Stethoscope, color: '#0d9488', bg: '#f0fdfa' },
+  { id: 'patient', label: 'Patient', icon: User, color: '#7c3aed', bg: '#f5f3ff' },
+  { id: 'wholeseller', label: 'Wholesaler', icon: Building2, color: '#c2410c', bg: '#fff7ed' },
+  { id: 'supplier', label: 'Supplier', icon: Factory, color: '#2563eb', bg: '#eff6ff' },
+  { id: 'external', label: 'External / Custom', icon: Globe, color: '#475569', bg: '#f8fafc' },
 ];
 
 /**
@@ -153,7 +153,7 @@ export default function RecipientHierarchySelector({
           textTransform: 'uppercase',
           letterSpacing: '0.04em'
         }}>
-          1. ¿Para quién es el recurso compartido?
+          1. WHO IS THIS SHARED WITH?
         </label>
         <div style={{ 
           display: 'flex', 
@@ -202,11 +202,11 @@ export default function RecipientHierarchySelector({
           <label style={{ 
             fontSize: '0.75rem', 
             fontWeight: 700, 
-            color: '#475569',
+            color: '#475569', 
             textTransform: 'uppercase',
             letterSpacing: '0.04em'
           }}>
-            2. Seleccionar contacto / Destinatario
+            2. SELECT RECIPIENT / CONTACT
           </label>
           {selectedType !== 'external' && (
             <button
@@ -227,7 +227,7 @@ export default function RecipientHierarchySelector({
                 padding: '0 2px'
               }}
             >
-              {isManualMode ? '← Buscar en agenda' : '+ Ingresar datos manuales'}
+              {isManualMode ? '← Search directory' : '+ Enter manual details'}
             </button>
           )}
         </div>
@@ -244,7 +244,7 @@ export default function RecipientHierarchySelector({
                   setSearchQuery(e.target.value);
                   fetchContacts(selectedType, e.target.value);
                 }}
-                placeholder={`Buscar ${selectedType === 'doctor' ? 'médico o clínica' : selectedType === 'patient' ? 'paciente' : selectedType === 'wholeseller' ? 'mayorista' : 'proveedor'}...`}
+                placeholder={`Search ${selectedType === 'doctor' ? 'doctor or clinic' : selectedType === 'patient' ? 'patient' : selectedType === 'wholeseller' ? 'wholesaler' : 'supplier'}...`}
                 disabled={disabled}
                 style={{
                   width: '100%',
@@ -273,16 +273,16 @@ export default function RecipientHierarchySelector({
             }}>
               {isLoading && contacts.length === 0 ? (
                 <div style={{ padding: '12px', fontSize: '0.78rem', color: '#64748b', textAlign: 'center' }}>
-                  Cargando agenda...
+                  Loading directory...
                 </div>
               ) : contacts.length === 0 ? (
                 <div style={{ padding: '12px', fontSize: '0.78rem', color: '#64748b', textAlign: 'center' }}>
-                  No se encontraron resultados.{' '}
+                  No contacts found.{' '}
                   <span 
                     onClick={() => setIsManualMode(true)} 
                     style={{ color: '#0284c7', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}
                   >
-                    Ingresar manualmente
+                    Enter manually
                   </span>
                 </div>
               ) : (
@@ -310,12 +310,12 @@ export default function RecipientHierarchySelector({
                           {c.name}
                         </div>
                         <div style={{ fontSize: '0.72rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {c.company ? `${c.company} · ` : ''}{c.email || c.phone || 'Sin contacto directo'}
+                          {c.company ? `${c.company} · ` : ''}{c.email || c.phone || 'No direct contact'}
                         </div>
                       </div>
                       {isSelected && (
                         <div style={{ color: '#16a34a', display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.74rem', fontWeight: 700 }}>
-                          <Check size={14} /> Seleccionado
+                          <Check size={14} /> Selected
                         </div>
                       )}
                     </div>
@@ -337,7 +337,7 @@ export default function RecipientHierarchySelector({
           }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: '#475569', marginBottom: '3px' }}>
-                Nombre completo *
+                Full name *
               </label>
               <input
                 type="text"
@@ -346,7 +346,7 @@ export default function RecipientHierarchySelector({
                   setRecipientName(e.target.value);
                   notifyChange({ name: e.target.value });
                 }}
-                placeholder="Ej. Dr. Carlos Gómez"
+                placeholder="e.g. Dr. Carlos Gomez"
                 style={{
                   width: '100%',
                   padding: '6px 8px',
@@ -359,7 +359,7 @@ export default function RecipientHierarchySelector({
 
             <div>
               <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: '#475569', marginBottom: '3px' }}>
-                Empresa / Clínica
+                Company / Clinic
               </label>
               <input
                 type="text"
@@ -368,7 +368,7 @@ export default function RecipientHierarchySelector({
                   setRecipientCompany(e.target.value);
                   notifyChange({ company: e.target.value });
                 }}
-                placeholder="Ej. Clínica Regenera"
+                placeholder="e.g. Regenera Clinic"
                 style={{
                   width: '100%',
                   padding: '6px 8px',
@@ -390,7 +390,7 @@ export default function RecipientHierarchySelector({
                   setRecipientEmail(e.target.value);
                   notifyChange({ email: e.target.value });
                 }}
-                placeholder="contacto@ejemplo.com"
+                placeholder="contact@example.com"
                 style={{
                   width: '100%',
                   padding: '6px 8px',
@@ -403,7 +403,7 @@ export default function RecipientHierarchySelector({
 
             <div>
               <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: '#475569', marginBottom: '3px' }}>
-                WhatsApp / Teléfono
+                WhatsApp / Phone
               </label>
               <input
                 type="tel"
@@ -412,7 +412,7 @@ export default function RecipientHierarchySelector({
                   setRecipientPhone(e.target.value);
                   notifyChange({ phone: e.target.value });
                 }}
-                placeholder="+34 600 000 000"
+                placeholder="+1 555 000 0000"
                 style={{
                   width: '100%',
                   padding: '6px 8px',
@@ -438,7 +438,7 @@ export default function RecipientHierarchySelector({
             textTransform: 'uppercase',
             letterSpacing: '0.04em'
           }}>
-            Notas / Propósito del envío (opcional)
+            NOTES / SENDING PURPOSE (OPTIONAL)
           </label>
           <input
             type="text"
@@ -447,7 +447,7 @@ export default function RecipientHierarchySelector({
               setRecipientNotes(e.target.value);
               notifyChange({ notes: e.target.value });
             }}
-            placeholder="Ej. Cotización de péptidos Q3, Muestra clínica para evaluación..."
+            placeholder="e.g. Q3 peptide quotation, Clinical sample for evaluation..."
             style={{
               width: '100%',
               padding: '6px 8px',

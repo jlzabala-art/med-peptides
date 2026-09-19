@@ -1099,9 +1099,9 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
         onClose={() => setShowShareProtocolsDrawer(false)}
         shareUrl="https://med-peptides.com/proto"
         docType="protocols_catalog"
-        title="Compartir Directorio de Protocolos"
-        subtitle="Genera un enlace corto para WhatsApp o Email con asignación de destinatario y seguimiento."
-        itemName="Directorio Clínico de Protocolos (77 Protocolos Verificados)"
+        title="Share Protocols Directory"
+        subtitle="Generate a tracked short link for WhatsApp or Email with recipient assignment."
+        itemName="Clinical Protocols Directory (77 Verified Protocols)"
         itemCount={protocols?.length || 77}
         accountManagerName="Atlas Clinical Desk"
       />
