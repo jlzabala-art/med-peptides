@@ -72,11 +72,18 @@ export default function UniversalShareDrawer({
   const targetType = recipient.type;
 
   const [activeLogId, setActiveLogId] = useState(logId);
+  const [activeShortUrl, setActiveShortUrl] = useState(null);
 
   // Sync activeLogId if logId prop changes
   React.useEffect(() => {
     setActiveLogId(logId);
   }, [logId]);
+
+  // Reset active tracked code if recipient changes
+  React.useEffect(() => {
+    setActiveLogId(null);
+    setActiveShortUrl(null);
+  }, [recipient.id, recipient.email, recipient.phone, recipient.name]);
 
   const markAsSentInCrm = async (targetId, channel = 'link') => {
     const idToUpdate = targetId || activeLogId;
@@ -100,6 +107,7 @@ export default function UniversalShareDrawer({
 
   // Helper to ensure universal tracking record exists and returns tracked URL
   const getTrackedUrl = async (channel = 'link') => {
+    if (activeShortUrl) return activeShortUrl;
     if (!shareUrl) return '';
     let currentLogId = activeLogId;
 
@@ -135,6 +143,10 @@ export default function UniversalShareDrawer({
           if (data.id) {
             currentLogId = data.id;
             setActiveLogId(data.id);
+          }
+          if (data.shortUrl) {
+            setActiveShortUrl(data.shortUrl);
+            return data.shortUrl;
           }
         }
       } catch (err) {

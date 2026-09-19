@@ -183,9 +183,12 @@ export async function POST(request) {
     const year = new Date().getFullYear();
     const randPart = Math.random().toString(36).substring(2, 6).toUpperCase();
     const shareCode = `SH-${year}-${randPart}`;
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+    const shortUrl = `${origin}/c/${shareCode}`;
 
     const docData = {
       shareCode,
+      shortUrl,
       assetType,
       assetTitle,
       assetMeta: {
@@ -217,10 +220,35 @@ export async function POST(request) {
 
     const docRef = await adminDb.collection('shared_records').add(docData);
 
+    // Also persist lightweight record into shared_catalog_links so /c/[shareCode] resolves instantly
+    const isProto = assetType === 'protocols_catalog' || assetType === 'protocol';
+    try {
+      await adminDb.collection('shared_catalog_links').doc(shareCode).set({
+        catalogId: shareCode,
+        catalogCode: shareCode,
+        catalogType: isProto ? 'protocols' : (assetType === 'catalog' || assetType === 'catalog_pdf' ? 'products' : assetType),
+        assetType,
+        recipientUserId: recipient.id || null,
+        recipientName: recipient.name || 'Valued Partner',
+        recipientEmail: recipient.email || null,
+        recipientPhone: recipient.phone || null,
+        recipientType: recipient.type || 'doctor',
+        targetUrl: shareUrl || (isProto ? '/proto' : '/catalog'),
+        shortUrl,
+        channel: deliveryChannel,
+        status: 'sent',
+        visitsCount: 0,
+        createdAt: new Date().toISOString(),
+      });
+    } catch (linkErr) {
+      console.warn('[POST /api/shares] Could not mirror to shared_catalog_links:', linkErr.message);
+    }
+
     return NextResponse.json({
       success: true,
       id: docRef.id,
       shareCode,
+      shortUrl,
       shareRecord: { id: docRef.id, ...docData }
     });
   } catch (err) {

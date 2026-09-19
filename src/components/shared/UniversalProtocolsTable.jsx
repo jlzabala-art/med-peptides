@@ -31,8 +31,9 @@ import AIQuickActionButton from '../ui/AIQuickActionButton';
 
 import { 
   ClipboardList, Plus, Play, Pause, Archive, Edit3, Trash2, FlaskConical, Download, RefreshCw, Briefcase,
-  ExternalLink, Copy 
+  ExternalLink, Copy, Share2 
 } from '@/lib/icons';
+import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { calculateClinicalCompleteness, getProtocolDisplayName } from '../../utils/protocolHelpers';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -52,6 +53,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
   const [linkedProduct, setLinkedProduct] = useState(null);
   const [showPathwayWizard, setShowPathwayWizard] = useState(false);
   const [showBulkCategoryPicker, setShowBulkCategoryPicker] = useState(false);
+  const [showShareProtocolsDrawer, setShowShareProtocolsDrawer] = useState(false);
   const [mobileActionProtocol, setMobileActionProtocol] = useState(null);
 
   const handleMobileQuickAction = useCallback((action, protocol) => {
@@ -376,6 +378,29 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
             onClick={() => setShowPathwayWizard(true)}
             title="Design structured multi-phase clinical pathway with AI"
           />
+          <button
+            type="button"
+            onClick={() => setShowShareProtocolsDrawer(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              height: '36px',
+              padding: '0 14px',
+              borderRadius: '8px',
+              fontWeight: 700,
+              fontSize: '0.8125rem',
+              backgroundColor: '#ffffff',
+              color: '#003666',
+              border: '1px solid #cbd5e1',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Share2 size={15} />
+            <span>Compartir Catálogo</span>
+          </button>
           <button
             type="button"
             onClick={() => setShowPathwayWizard(true)}
@@ -1067,6 +1092,20 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
         },
       ]}
     />
+
+    {showShareProtocolsDrawer && (
+      <UniversalShareDrawer
+        isOpen={showShareProtocolsDrawer}
+        onClose={() => setShowShareProtocolsDrawer(false)}
+        shareUrl="https://med-peptides.com/proto"
+        docType="protocols_catalog"
+        title="Compartir Directorio de Protocolos"
+        subtitle="Genera un enlace corto para WhatsApp o Email con asignación de destinatario y seguimiento."
+        itemName="Directorio Clínico de Protocolos (77 Protocolos Verificados)"
+        itemCount={protocols?.length || 77}
+        accountManagerName="Atlas Clinical Desk"
+      />
+    )}
     </>
   );
 }

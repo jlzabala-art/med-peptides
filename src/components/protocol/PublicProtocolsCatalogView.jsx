@@ -29,6 +29,9 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import '../../styles/publicProtocolsCatalog.css';
+import '../../components/product/PublicDatasheetView.css';
+import PublicAtlasAIDrawer from '../shared/PublicAtlasAIDrawer';
+import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from '../../utils/protocolTranslations';
 
 // ── Goal Taxonomy Buckets ───────────────────────────────────────────────────
 const GOAL_BUCKETS = [
@@ -131,12 +134,47 @@ function extractCompounds(p) {
 }
 
 export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
+  const [lang, setLang] = useState('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGoal, setSelectedGoal] = useState('all');
   const [durationFilter, setDurationFilter] = useState('all');
   const [phasesFilter, setPhasesFilter] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
   const [copiedId, setCopiedId] = useState(null);
+
+  // Synchronized language state across all public views
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
+      if (savedLang && ['en', 'es', 'fr', 'de', 'it'].includes(savedLang)) {
+        setLang(savedLang);
+      }
+      
+      const handleGlobalLang = (e) => {
+        if (e.detail && ['en', 'es', 'fr', 'de', 'it'].includes(e.detail)) {
+          setLang(e.detail);
+        }
+      };
+      window.addEventListener('atlas_lang_change', handleGlobalLang);
+      return () => window.removeEventListener('atlas_lang_change', handleGlobalLang);
+    }
+  }, []);
+
+  const handleLangChange = (nextLang) => {
+    setLang(nextLang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_lang', nextLang);
+        localStorage.setItem('atlas_catalog_lang', nextLang);
+        window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
+      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', nextLang);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  const t = getProtocolTranslations(lang);
 
   // Keyboard shortcut: ⌘K / Ctrl+K to focus search input
   useEffect(() => {
@@ -262,6 +300,54 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
   return (
     <div className="proto-catalog-container">
+      {/* ── Fixed Top Action Bar (Identical across all public views) ── */}
+      <header className="pds-top-bar" aria-label="Catalog Navigation" style={{ position: 'sticky', top: 0, zIndex: 900, background: '#ffffff', margin: '-1.5rem -1.5rem 1.5rem -1.5rem', width: 'calc(100% + 3rem)' }}>
+        <div className="pds-bar-inner">
+          <div className="pds-brand-group">
+            <span className="pds-brand-title">Med-Peptides</span>
+            <span className="pds-brand-divider" aria-hidden="true" />
+            <span className="pds-badge-pill">{lang === 'es' ? 'DIRECTORIO DE PROTOCOLOS' : 'PROTOCOL DIRECTORY'}</span>
+            <span className="pds-zero-price-badge">{t.clinicalRegistryBadge}</span>
+          </div>
+
+          <div className="pds-actions-group">
+            {/* Multi-language Selector (Identical across all public views) */}
+            <select 
+              className="pds-lang-select" 
+              value={lang} 
+              onChange={(e) => handleLangChange(e.target.value)}
+              aria-label="Select Language"
+            >
+              {SUPPORTED_LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>
+                  {l.flag} {l.label}
+                </option>
+              ))}
+            </select>
+
+            <Link
+              href="/catalog"
+              className="pds-btn pds-btn-ghost"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                padding: '0.4rem 0.8rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                color: '#334155',
+                textDecoration: 'none'
+              }}
+            >
+              <FlaskConical size={14} />
+              <span>{lang === 'es' ? 'Catálogo de Péptidos' : 'Peptide Catalog'}</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
       {/* ── 1. Hero Section ── */}
       <header className="proto-catalog-hero">
         <div className="proto-hero-pill">
@@ -269,11 +355,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           <span>Ecosystem Clinical Pathways • Single Source of Truth</span>
         </div>
         <h1 className="proto-catalog-title">
-          Directorio de Protocolos Clínicos & Péptidos
+          {t.catalogTitle}
         </h1>
         <p className="proto-catalog-subtitle">
-          Explora los 77 protocolos terapéuticos formulados con el catálogo de grado farmacéutico de Lotusland. 
-          Monoterapias y sinergias combinadas con calendarios de dosificación, fases de titulación y biomarcadores de seguridad.
+          {t.catalogSubtitle}
         </p>
       </header>
 
@@ -285,7 +370,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           </div>
           <div>
             <div className="proto-kpi-val">{enrichedProtocols.length}</div>
-            <div className="proto-kpi-label">Protocolos Activos</div>
+            <div className="proto-kpi-label">{t.activeProtocols}</div>
           </div>
         </div>
 
@@ -295,7 +380,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           </div>
           <div>
             <div className="proto-kpi-val">{GOAL_BUCKETS.length - 1}</div>
-            <div className="proto-kpi-label">Objetivos Terapéuticos</div>
+            <div className="proto-kpi-label">{t.therapeuticGoals}</div>
           </div>
         </div>
 
@@ -305,7 +390,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           </div>
           <div>
             <div className="proto-kpi-val">100%</div>
-            <div className="proto-kpi-label">Fórmulas Clínicas SSOT</div>
+            <div className="proto-kpi-label">{t.ssotClinicalFormulas}</div>
           </div>
         </div>
 
@@ -315,7 +400,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           </div>
           <div>
             <div className="proto-kpi-val">4–28 wks</div>
-            <div className="proto-kpi-label">Ciclos de Tratamiento</div>
+            <div className="proto-kpi-label">{t.treatmentCycles}</div>
           </div>
         </div>
       </div>
@@ -331,7 +416,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             className="proto-search-input"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por objetivo (ej: pérdida de peso), compuesto (ej: Tirzepatide), o síntoma... (⌘K)"
+            placeholder={t.searchPlaceholder}
           />
           {searchQuery && (
             <button
@@ -341,7 +426,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                 triggerHaptic('light');
                 setSearchQuery('');
               }}
-              title="Limpiar búsqueda"
+              title="Clear search"
             >
               <X size={18} />
             </button>
@@ -354,6 +439,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             const Icon = g.icon;
             const isActive = selectedGoal === g.id;
             const count = goalCounts[g.id] || 0;
+            const localizedLabel = GOAL_TRANSLATIONS[g.id]?.[lang] || g.label;
 
             return (
               <button
@@ -366,7 +452,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                 }}
               >
                 <Icon size={14} style={{ color: isActive ? '#ffffff' : g.color }} />
-                <span>{g.label}</span>
+                <span>{localizedLabel}</span>
                 <span className="proto-goal-count">{count}</span>
               </button>
             );
@@ -377,7 +463,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         <div className="proto-controls-row">
           <div className="proto-controls-left">
             <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
-              Filtros:
+              {lang === 'es' ? 'Filtros:' : 'Filters:'}
             </span>
 
             {/* Duration select */}
@@ -389,10 +475,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                 setDurationFilter(e.target.value);
               }}
             >
-              <option value="all">Todas las duraciones</option>
-              <option value="short">Ciclo Corto (≤ 8 semanas)</option>
-              <option value="medium">Ciclo Estándar (9–12 semanas)</option>
-              <option value="long">Ciclo Extendido (13+ semanas)</option>
+              <option value="all">{t.allDurations}</option>
+              <option value="short">{t.shortCycle}</option>
+              <option value="medium">{t.standardCycle}</option>
+              <option value="long">{t.extendedCycle}</option>
             </select>
 
             {/* Phases select */}
@@ -404,9 +490,9 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                 setPhasesFilter(e.target.value);
               }}
             >
-              <option value="all">Cualquier estructura</option>
-              <option value="single">Monofásico (1 fase continua)</option>
-              <option value="titration">Titulación Progresiva (2+ fases)</option>
+              <option value="all">{t.allStructures}</option>
+              <option value="single">{t.singlePhase}</option>
+              <option value="titration">{t.titrationPhase}</option>
             </select>
 
             {/* Sort select */}
@@ -418,11 +504,11 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                 setSortBy(e.target.value);
               }}
             >
-              <option value="relevance">Ordenar: Recomendados</option>
-              <option value="duration-desc">Duración: Mayor a menor</option>
-              <option value="duration-asc">Duración: Menor a mayor</option>
-              <option value="phases-desc">Fases: Mayor complejidad</option>
-              <option value="name-asc">Nombre: A – Z</option>
+              <option value="relevance">{t.sortRecommended}</option>
+              <option value="duration-desc">{t.sortDurationDesc}</option>
+              <option value="duration-asc">{t.sortDurationAsc}</option>
+              <option value="phases-desc">{lang === 'es' ? 'Fases: Mayor complejidad' : 'Phases: Highest complexity'}</option>
+              <option value="name-asc">{t.sortNameAsc}</option>
             </select>
           </div>
 
@@ -446,7 +532,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
               }}
             >
               <RotateCcw size={13} />
-              <span>Restablecer Filtros</span>
+              <span>{t.resetFilters}</span>
             </button>
           )}
         </div>
@@ -454,28 +540,28 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         {/* Active Filter Tags */}
         {hasActiveFilters && (
           <div className="proto-active-filters-strip">
-            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Filtros Activos:</span>
+            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{lang === 'es' ? 'Filtros Activos:' : 'Active Filters:'}</span>
             {searchQuery && (
               <span className="proto-filter-badge">
-                Búsqueda: "{searchQuery}"
+                {lang === 'es' ? 'Búsqueda' : 'Search'}: "{searchQuery}"
                 <span className="proto-filter-badge-remove" onClick={() => setSearchQuery('')}>×</span>
               </span>
             )}
             {selectedGoal !== 'all' && (
               <span className="proto-filter-badge">
-                Objetivo: {GOAL_BUCKETS.find(g => g.id === selectedGoal)?.label}
+                {lang === 'es' ? 'Objetivo' : 'Goal'}: {GOAL_TRANSLATIONS[selectedGoal]?.[lang] || selectedGoal}
                 <span className="proto-filter-badge-remove" onClick={() => setSelectedGoal('all')}>×</span>
               </span>
             )}
             {durationFilter !== 'all' && (
               <span className="proto-filter-badge">
-                Duración: {durationFilter}
+                {lang === 'es' ? 'Duración' : 'Duration'}: {durationFilter}
                 <span className="proto-filter-badge-remove" onClick={() => setDurationFilter('all')}>×</span>
               </span>
             )}
             {phasesFilter !== 'all' && (
               <span className="proto-filter-badge">
-                Fases: {phasesFilter}
+                {lang === 'es' ? 'Fases' : 'Phases'}: {phasesFilter}
                 <span className="proto-filter-badge-remove" onClick={() => setPhasesFilter('all')}>×</span>
               </span>
             )}
@@ -488,13 +574,13 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         <div className="proto-scope-badge">
           <Check size={16} />
           <span>
-            Mostrando <strong>{filteredProtocols.length}</strong> de <strong>{enrichedProtocols.length}</strong> protocolos clínicos disponibles
+            {lang === 'es' ? 'Mostrando' : 'Showing'} <strong>{filteredProtocols.length}</strong> {lang === 'es' ? 'de' : 'of'} <strong>{enrichedProtocols.length}</strong> {lang === 'es' ? 'protocolos clínicos disponibles' : 'available clinical protocols'}
           </span>
         </div>
         <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
           {selectedGoal !== 'all' 
-            ? `Filtrado por: ${GOAL_BUCKETS.find(g => g.id === selectedGoal)?.label}` 
-            : 'Mostrando Catálogo Completo'}
+            ? `${lang === 'es' ? 'Filtrado por' : 'Filtered by'}: ${GOAL_TRANSLATIONS[selectedGoal]?.[lang] || selectedGoal}` 
+            : (lang === 'es' ? 'Mostrando Catálogo Completo' : 'Showing Complete Directory')}
         </div>
       </div>
 
@@ -504,6 +590,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           {filteredProtocols.map(proto => {
             const primaryGoalId = proto.mappedGoals.find(g => g !== 'all') || 'longevity';
             const goalInfo = GOAL_BUCKETS.find(g => g.id === primaryGoalId) || GOAL_BUCKETS[0];
+            const localizedGoal = (GOAL_TRANSLATIONS[primaryGoalId]?.[lang] || goalInfo.label).split('&')[0].trim();
 
             return (
               <article key={proto.id || proto.cleanSlug} className="proto-card">
@@ -514,16 +601,16 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                       type="button"
                       className="proto-card-code"
                       onClick={(e) => handleCopyCode(proto.cleanCode, e)}
-                      title="Copiar Código de Protocolo"
+                      title={t.copyProtocolLink}
                     >
-                      {copiedId === proto.cleanCode ? '✓ COPIADO' : proto.cleanCode}
+                      {copiedId === proto.cleanCode ? (lang === 'es' ? '✓ COPIADO' : '✓ COPIED') : proto.cleanCode}
                     </button>
 
                     <span
                       className="proto-card-goal-pill"
                       style={{ background: goalInfo.bg, color: goalInfo.color, border: `1px solid ${goalInfo.color}33` }}
                     >
-                      {goalInfo.label.split('&')[0].trim()}
+                      {localizedGoal}
                     </span>
                   </div>
 
@@ -541,7 +628,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                   {proto.compounds.length > 0 && (
                     <div>
                       <div className="proto-card-peptides-label">
-                        Péptidos Activos ({proto.compounds.length}):
+                        {lang === 'es' ? 'Péptidos Activos' : 'Active Peptides'} ({proto.compounds.length}):
                       </div>
                       <div className="proto-card-peptides-list">
                         {proto.compounds.map((c, cIdx) => (
@@ -550,7 +637,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             href={`/p/${c.slug}`}
                             target="_blank"
                             className="proto-compound-chip"
-                            title={`Ver monografía técnica de ${c.name}`}
+                            title={`Inspect ${c.name} technical monograph`}
                           >
                             <span>{c.name}</span>
                             <ExternalLink size={10} />
@@ -564,17 +651,17 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                   <div className="proto-card-specs">
                     <div className="proto-card-spec-item">
                       <Clock size={13} style={{ color: '#0284c7' }} />
-                      <span>{proto.durationWeeks} Semanas</span>
+                      <span>{proto.durationWeeks} {lang === 'es' ? 'Semanas' : 'Weeks'}</span>
                     </div>
 
                     <div className="proto-card-spec-item">
                       <Layers size={13} style={{ color: '#0d9488' }} />
-                      <span>{proto.phasesCount} {proto.phasesCount === 1 ? 'Fase Continua' : 'Fases de Titulación'}</span>
+                      <span>{proto.phasesCount} {proto.phasesCount === 1 ? (lang === 'es' ? 'Fase Continua' : 'Continuous Phase') : (lang === 'es' ? 'Fases de Titulación' : 'Titration Phases')}</span>
                     </div>
 
                     <div className="proto-card-spec-item">
                       <Shield size={13} style={{ color: '#16a34a' }} />
-                      <span>Clínico</span>
+                      <span>{lang === 'es' ? 'Clínico' : 'Clinical'}</span>
                     </div>
                   </div>
                 </div>
@@ -586,7 +673,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                     className="proto-card-btn-primary"
                     onClick={() => triggerHaptic('selection')}
                   >
-                    <span>Explorar Timeline & Dosificación</span>
+                    <span>{t.viewTimeline}</span>
                     <ArrowRight size={14} />
                   </Link>
 
@@ -594,12 +681,12 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                     type="button"
                     className="proto-card-btn-icon"
                     onClick={(e) => handleCopyCode(`https://med-peptides.com/proto/${proto.cleanSlug}`, e)}
-                    title="Copiar enlace directo"
+                    title={t.copyProtocolLink}
                   >
                     {copiedId === `https://med-peptides.com/proto/${proto.cleanSlug}` ? (
                       <Check size={16} style={{ color: '#16a34a' }} />
                     ) : (
-                      <Share2 size={16} />
+                      <Copy size={16} />
                     )}
                   </button>
                 </div>
@@ -614,17 +701,17 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             <Search size={28} />
           </div>
           <h3 className="proto-empty-title">
-            No se encontraron protocolos para esta búsqueda
+            {t.noResultsTitle}
           </h3>
           <p className="proto-empty-subtitle">
-            Prueba ajustando los términos de búsqueda o seleccionando otro objetivo terapéutico en el selector superior.
+            {t.noResultsSubtitle}
           </p>
           <button
             type="button"
             className="proto-empty-btn"
             onClick={handleResetFilters}
           >
-            Restablecer todos los filtros
+            {t.resetFilters}
           </button>
         </div>
       )}
@@ -640,8 +727,19 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         lineHeight: 1.5,
         textAlign: 'center'
       }}>
-        <strong>Aviso Médico Profesional:</strong> Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.
+        <strong>{lang === 'es' ? 'Aviso Médico Profesional:' : 'Professional Medical Notice:'}</strong> {lang === 'es' ? 'Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.' : 'All clinical protocols presented in this directory are formulated under molecular pharmacokinetics standards and international clinical trials (SURMOUNT, STEP, TRIUMPH). Administration requires medical prescription and supervision by a certified healthcare professional.'}
       </footer>
+
+      {/* ── Floating Atlas AI Technical Inquiry (Single consolidated AI button across all public views) ── */}
+      <PublicAtlasAIDrawer
+        contextType="catalog"
+        contextAnchor={{
+          type: 'protocols_catalog',
+          totalProtocols: enrichedProtocols.length,
+          activeFilterGoal: selectedGoal,
+          activeSearchQuery: searchQuery
+        }}
+      />
     </div>
   );
 }

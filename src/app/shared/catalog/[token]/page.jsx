@@ -40,8 +40,6 @@ export async function generateMetadata({ params }) {
   const catalogueFilter = catalogData.catalogueFilter || '';
   const currency = catalogData.currency || 'USD';
   const validityDays = catalogData.validityDays || 30;
-
-  const isLotusland = supplierId.includes('lotusland') || catalogueFilter.toLowerCase().includes('lotus');
   const supplierTitle = 'Atlas Services Formulations';
 
   const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');

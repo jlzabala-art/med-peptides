@@ -28,7 +28,7 @@ import {
   Users, UserCheck, ShieldCheck, Mail, Archive,
   Trash2, Plus, Edit, AlertCircle, XCircle, Eye,
   Building2, DollarSign, CheckCircle2, Search, Download, UserPlus, Clock, Stethoscope, Sparkles,
-  FileText, Package, Calendar, Share2, MessageSquare
+  FileText, Package, Calendar, Share2, MessageSquare, BookOpen
 } from 'lucide-react';
 
 import { useFirestorePaginatedCollection } from '../../../hooks/data/useFirestorePaginatedCollection';
@@ -40,6 +40,8 @@ import FinancialWholesalerModal from '../../../components/admin/FinancialWholesa
 import User360Drawer from '../../../components/admin/users/User360Drawer';
 import InviteUserModal from '../../../components/admin/users/InviteUserModal';
 import AIUserIntelligenceModal from '../../../components/admin/users/AIUserIntelligenceModal';
+import UserSharedCatalogsPopover from './UserSharedCatalogsPopover';
+import UniversalShareDrawer from '../../../components/ui/UniversalShareDrawer';
 import { EMAILJS_CONFIG } from '@/config/emailjs';
 import { approveUserRoleAction } from '../../../actions/adminActions';
 import { normalizeRole, CANONICAL_ROLES, ROLE_METADATA } from '../../../constants/roles';
@@ -69,6 +71,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   
   const [allDoctors, setAllDoctors] = useState([]);
   const [allWholesalers, setAllWholesalers] = useState([]);
+  const [shareDrawerConfig, setShareDrawerConfig] = useState(null);
 
   // Robust Name Extractor supporting patient collections, Zoho sync, and auth documents
   const getUserFullName = (u) => {
@@ -311,7 +314,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     });
   }
 
-  async function handleQuickShareLotusland(targetUser) {
+  async function handleQuickShareCatalog(targetUser, catalogType = 'products') {
     const fullName = getUserFullName(targetUser);
     const phone = targetUser.phone || targetUser.phoneNumber || '';
     const email = targetUser.email || targetUser.contactEmail || '';
@@ -320,15 +323,16 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     const priceMarkup = Number(targetUser.customDiscountPct || targetUser.priceMarkupPercent || 30);
     const currency = targetUser.currency || 'USD';
 
-    const toastId = toast.loading(`Generating Lotusland catalog link for ${fullName} (${priceMarkup}% rate)...`);
+    const typeLabel = catalogType === 'protocols' ? 'Directorio de Protocolos' : 'Catálogo Clínico';
+    const toastId = toast.loading(`Generando enlace de ${typeLabel} para ${fullName}...`);
 
     try {
       const res = await fetch('/api/catalog/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          supplierId: 'supplier-lotusland',
-          catalogueFilter: 'RegenPept',
+          supplierId: catalogType === 'protocols' ? 'protocols-clinical' : 'catalog-general',
+          catalogueFilter: catalogType === 'protocols' ? 'Clinical Protocols' : 'General Catalog',
           recipientUserId: userId,
           recipientName: fullName,
           recipientPhone: phone,
@@ -348,18 +352,20 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
       const shortUrl = data.shortUrl || data.shareableUrl;
       const cleanPhone = phone.replace(/[^\d]/g, '');
-      const msg = `Hola ${fullName}, te comparto el catálogo clínico oficial de formulaciones analíticas de Lotusland / RegenPept:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier cotización o pedido.`;
+      const msg = catalogType === 'protocols'
+        ? `Hola ${fullName}, te comparto el Directorio Clínico Oficial de Protocolos y Dosificación:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier consulta clínica.`
+        : `Hola ${fullName}, te comparto el Catálogo Clínico Oficial de formulaciones y especificaciones:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier consulta o pedido.`;
 
       if (cleanPhone) {
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-        toast.success(`WhatsApp opened for ${fullName} with short link: ${shortUrl}`);
+        toast.success(`WhatsApp abierto para ${fullName} con enlace corto: ${shortUrl}`);
       } else {
         await navigator.clipboard.writeText(msg);
-        toast.success(`Short link copied to clipboard for ${fullName} (${shortUrl})`);
+        toast.success(`Enlace corto copiado al portapapeles (${shortUrl})`);
       }
     } catch (err) {
       toast.dismiss(toastId);
-      console.error('Error sharing Lotusland catalog:', err);
+      console.error('Error sharing catalog:', err);
       toast.error(err.message || 'Error generating shared link');
     }
   }
@@ -529,9 +535,19 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
                   </span>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', wordBreak: 'break-word' }}>{email}</span>
                 <CopyableId value={u.id} iconOnly={true} />
+                <UserSharedCatalogsPopover 
+                  user={u} 
+                  onOpenShareDrawer={(targetUser) => {
+                    setShareDrawerConfig({
+                      user: targetUser,
+                      shareUrl: 'https://med-peptides.com/catalog',
+                      docType: 'catalog'
+                    });
+                  }} 
+                />
               </div>
             </div>
           </div>
@@ -665,13 +681,23 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           });
         }
 
-        // Lotusland Catalog Direct WhatsApp Share Action
+        // Share Clinical Product Catalog
         actions.push({
-          label: 'Share Lotusland',
+          label: 'Compartir Catálogo',
           icon: Share2,
           onClick: (e) => { 
             e.stopPropagation(); 
-            handleQuickShareLotusland(u);
+            handleQuickShareCatalog(u, 'products');
+          }
+        });
+
+        // Share Clinical Protocols Directory
+        actions.push({
+          label: 'Compartir Protocolos',
+          icon: BookOpen,
+          onClick: (e) => { 
+            e.stopPropagation(); 
+            handleQuickShareCatalog(u, 'protocols');
           }
         });
 
@@ -1236,6 +1262,21 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
         <InviteUserModal
           isOpen={isInviteModalOpen}
           onClose={() => setIsInviteModalOpen(false)}
+        />
+      )}
+
+      {shareDrawerConfig && (
+        <UniversalShareDrawer
+          isOpen={Boolean(shareDrawerConfig)}
+          onClose={() => setShareDrawerConfig(null)}
+          shareUrl={shareDrawerConfig.shareUrl || 'https://med-peptides.com/catalog'}
+          docType={shareDrawerConfig.docType || 'catalog'}
+          title={`Compartir con ${getUserFullName(shareDrawerConfig.user)}`}
+          subtitle="Genera un enlace corto para WhatsApp o Email con seguimiento individual."
+          recipientName={getUserFullName(shareDrawerConfig.user)}
+          recipientEmail={shareDrawerConfig.user?.email || ''}
+          recipientPhone={shareDrawerConfig.user?.phone || shareDrawerConfig.user?.phoneNumber || ''}
+          accountManagerName="Atlas Commercial Desk"
         />
       )}
     </div>

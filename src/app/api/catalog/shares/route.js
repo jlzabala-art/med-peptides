@@ -61,10 +61,55 @@ export async function GET(request) {
     }
 
     let allDocs = [...snapshot.docs];
+
+    // Also query universal shared_records for any protocol or catalog shares
+    try {
+      const recordsSnap = await adminDb
+        .collection('shared_records')
+        .where('recipient.id', '==', recipientId)
+        .limit(limit)
+        .get();
+
+      recordsSnap.docs.forEach(rd => {
+        const rdata = rd.data();
+        // Check if not already in allDocs by shareCode / catalogId
+        const code = rdata.shareCode || rd.id;
+        const exists = allDocs.some(d => (d.data()?.catalogId === code || d.id === code));
+        if (!exists) {
+          allDocs.push({
+            id: rd.id,
+            data: () => ({
+              catalogId: code,
+              catalogCode: code,
+              catalogTitle: rdata.assetTitle || (rdata.assetType === 'protocols_catalog' ? 'Directorio de Protocolos Clínicos' : 'Catálogo Clínico'),
+              catalogType: (rdata.assetType === 'protocols_catalog' || rdata.assetType === 'protocol') ? 'protocols' : 'products',
+              supplierLabel: rdata.assetTitle || 'Catálogo General',
+              sourceType: 'web',
+              issuedAt: rdata.createdAt || new Date().toISOString(),
+              recipientName: rdata.recipient?.name,
+              recipientType: rdata.recipient?.type,
+              channel: rdata.deliveryChannel || 'whatsapp',
+              visitsCount: rdata.viewCount || 0,
+              shareableUrl: rdata.shareUrl || `https://med-peptides.com/c/${code}`,
+              status: rdata.status || 'sent',
+              interactions: {
+                webOpened: (rdata.viewCount || 0) > 0,
+                lastInteractionAt: rdata.lastViewedAt
+              }
+            })
+          });
+        }
+      });
+    } catch (recordsErr) {
+      console.warn('[catalog/shares] Optional shared_records query failed:', recordsErr.message);
+    }
+
     // Sort in-memory by issuedAt desc
     allDocs.sort((a, b) => {
-      const ta = a.data()?.issuedAt?.seconds || (a.data()?.issuedAt ? new Date(a.data().issuedAt).getTime() / 1000 : 0);
-      const tb = b.data()?.issuedAt?.seconds || (b.data()?.issuedAt ? new Date(b.data().issuedAt).getTime() / 1000 : 0);
+      const da = typeof a.data === 'function' ? a.data() : a;
+      const db = typeof b.data === 'function' ? b.data() : b;
+      const ta = da?.issuedAt?.seconds ? da.issuedAt.seconds * 1000 : (da?.issuedAt ? new Date(da.issuedAt).getTime() : 0);
+      const tb = db?.issuedAt?.seconds ? db.issuedAt.seconds * 1000 : (db?.issuedAt ? new Date(db.issuedAt).getTime() : 0);
       return tb - ta;
     });
 
@@ -72,27 +117,36 @@ export async function GET(request) {
     const docs = hasMore ? allDocs.slice(0, limit) : allDocs;
 
     const items = docs.map(doc => {
-      const d = doc.data();
+      const d = typeof doc.data === 'function' ? doc.data() : doc;
+      const catCode = d.catalogId || d.catalogCode || doc.id;
+      const isProto = d.catalogType === 'protocols' || d.assetType === 'protocols_catalog' || String(catCode).startsWith('PR-');
+
       return {
         id:             doc.id,
-        catalogId:      d.catalogId      || doc.id,
-        catalogCode:    d.catalogCode    || d.batchCode || doc.id,
+        catalogId:      catCode,
+        catalogCode:    catCode,
+        catalogType:    isProto ? 'protocols' : 'products',
+        catalogTitle:   d.catalogTitle || (isProto ? 'Directorio de Protocolos Clínicos' : `Catálogo • ${d.supplierLabel || 'General'}`),
         supplierId:     d.supplierId     || null,
-        supplierLabel:  d.supplierLabel  || d.catalogueFilter || d.supplierId || 'All Suppliers',
-        margin:         d.priceMarkupPercent ?? 0,
+        supplierLabel:  d.supplierLabel  || d.catalogueFilter || d.supplierId || (isProto ? 'Protocolos Clínicos' : 'All Products'),
+        margin:         d.priceMarkupPercent ?? d.margin ?? 0,
         currency:       d.currency       || 'USD',
         recipientName:  d.recipientName  || null,
         recipientType:  d.recipientType  || null,
         sourceType:     d.sourceType     || 'web',
+        channel:        d.channel        || 'whatsapp',
         issuedAt:       d.issuedAt       || null,
         validityDays:   d.validityDays   || 30,
+        visitsCount:    d.visitsCount    || (d.interactions?.webOpened ? 1 : 0),
+        status:         d.status         || 'sent',
         // Interaction tracking
         pdfDownloaded:      d.interactions?.pdfDownloaded      ?? false,
-        webOpened:          d.interactions?.webOpened          ?? false,
+        webOpened:          d.interactions?.webOpened          ?? (d.visitsCount > 0),
         orderPlaced:        d.interactions?.orderPlaced        ?? false,
         lastInteractionAt:  d.interactions?.lastInteractionAt  ?? null,
         // Share URL
-        shareableUrl:   d.shareableUrl   || null,
+        shareableUrl:   d.shareableUrl   || (catCode ? `https://med-peptides.com/c/${catCode}` : null),
+        shortUrl:       catCode ? `https://med-peptides.com/c/${catCode}` : (d.shareableUrl || null),
         pdfDownloadUrl: d.pdfDownloadUrl || null,
       };
     });

@@ -238,11 +238,61 @@ export default function PublicAtlasAIDrawer({
   // ── Metric Highlight Helper ────────────────────────────────────────────────
   const METRIC_REGEX = /(≥\s*\d+(?:\.\d+)?%|\d+(?:\.\d+)?%|[-−]?\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)|\b\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)\b|\bRP-HPLC\b|\bLC-MS\b|\bESI-MS\b|\b0\.9%\s+benzyl\s+alcohol\b|\bU-100\b|\b\d+\s*(?:days|months|hours|weeks|years)\b|\[PubMed:\s*\d+[^\]]*\]|\[Clinical[^\]]*\])/gi;
 
+  const TOKEN_REGEX = /(\[[^\]]+\]\(\/[^)]+\)|\*\*[^*]+\*\*)/g;
+
   const renderBodyWithHighlights = (text) => {
     if (!text) return null;
-    const boldChunks = text.split(/(\*\*[^*]+\*\*)/g);
+    const tokens = text.split(TOKEN_REGEX);
 
-    return boldChunks.map((chunk, cIdx) => {
+    return tokens.map((chunk, cIdx) => {
+      if (!chunk) return null;
+
+      // 1. Internal Public Markdown Link
+      if (chunk.startsWith('[') && chunk.includes('](')) {
+        const linkMatch = chunk.match(/^\[([^\]]+)\]\(\/([^)]+)\)$/);
+        if (linkMatch) {
+          const label = linkMatch[1];
+          const href = '/' + linkMatch[2];
+          return (
+            <a
+              key={cIdx}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: '#0284c7',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bae6fd',
+                borderRadius: '6px',
+                padding: '1px 7px',
+                margin: '1px 3px',
+                textDecoration: 'none',
+                fontWeight: 700,
+                fontSize: '0.80rem',
+                verticalAlign: 'baseline',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#e0f2fe';
+                e.currentTarget.style.borderColor = '#7dd3fc';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#eff6ff';
+                e.currentTarget.style.borderColor = '#bae6fd';
+              }}
+            >
+              <ExternalLink size={11} color="#0284c7" />
+              <span>{label}</span>
+            </a>
+          );
+        }
+      }
+
+      // 2. Bold emphasis
       if (chunk.startsWith('**') && chunk.endsWith('**')) {
         const inner = chunk.slice(2, -2);
         return (
@@ -252,6 +302,7 @@ export default function PublicAtlasAIDrawer({
         );
       }
 
+      // 3. Metric and Citation regex parser
       const metricParts = chunk.split(METRIC_REGEX);
       return metricParts.map((part, pIdx) => {
         if (!part) return null;
@@ -404,7 +455,11 @@ export default function PublicAtlasAIDrawer({
   // Safe markdown cleaner and high-fidelity clinical parser
   const renderSafeBotText = (txt) => {
     if (!txt) return null;
-    const sanitized = txt.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    // Sanitize markdown links: preserve only safe internal public platform routes, strip external or private links
+    const sanitized = txt.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, url) => {
+      const isSafePublic = /^\/(proto(\/.*)?|p(\/.*)?|catalog|calculator|what-are-peptides)(\?.*)?$/.test(url);
+      return isSafePublic ? `[${label}](${url})` : label;
+    });
     const rawLines = sanitized.split('\n').map(l => l.trim()).filter(Boolean);
 
     return (
@@ -603,7 +658,14 @@ export default function PublicAtlasAIDrawer({
     );
   };
 
-  const quickPrompts = contextType === 'monograph'
+  const quickPrompts = contextType === 'protocol'
+    ? [
+        `Explain the phase titration schedule`,
+        `Which active peptides are included and how do they synergize?`,
+        `What are the baseline laboratory monitoring biomarkers?`,
+        `Are there companion peptide monographs or calculators?`,
+      ]
+    : contextType === 'monograph'
     ? [
         `How to reconstitute with 2mL BAC water?`,
         `What are the storage guidelines?`,
@@ -647,7 +709,7 @@ export default function PublicAtlasAIDrawer({
       >
         <Sparkles size={16} color="#38bdf8" />
         <span style={{ letterSpacing: '0.01em' }}>
-          Atlas AI {contextType === 'monograph' ? 'Technical Inquiry' : 'Catalog Copilot'}
+          Atlas AI Technical Inquiry
         </span>
         <span
           style={{
@@ -766,7 +828,9 @@ export default function PublicAtlasAIDrawer({
               <ShieldCheck size={14} color="#16a34a" style={{ flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 <strong style={{ color: '#003666' }}>Active Focus:</strong>{' '}
-                {contextType === 'monograph'
+                {contextType === 'protocol'
+                  ? `Clinical Protocol: ${contextAnchor?.name || 'Protocol'} (${contextAnchor?.duration || 'Multi-week'})`
+                  : contextType === 'monograph'
                   ? `${contextAnchor?.name || 'Peptide Monograph'} (${contextAnchor?.purity || '≥99% HPLC'})`
                   : `Portfolio Catalog (${catalogInventory.length} Available Formulations)`}
               </div>

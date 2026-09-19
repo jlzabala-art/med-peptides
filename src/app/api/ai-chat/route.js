@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit, peekRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 import { sanitizeText } from '@/utils/apiValidator';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getPublicPlatformKnowledgeContext } from '@/services/publicKnowledgeService';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -140,8 +141,25 @@ export async function POST(req) {
           ).join('\n') + '\n'
         : '';
 
-      const entityInfo = contextAnchor
-        ? `COMPOUND MONOGRAPH SPECIFICATIONS:\n` +
+      // 2. Fetch platform public knowledge graph (protocols, products, tools)
+      const publicPlatformKnowledge = await getPublicPlatformKnowledgeContext();
+
+      let activeEntityContext = '';
+      if (screenScope === 'protocol_guide' || contextAnchor?.phases) {
+        activeEntityContext = `CURRENT ACTIVE CLINICAL PROTOCOL (BEING VIEWED BY VISITOR):\n` +
+          `- Protocol Name: ${contextAnchor.name || 'Clinical Protocol Blueprint'}\n` +
+          `- Protocol Code: ${contextAnchor.code || 'PR-CLINICAL'}\n` +
+          `- Total Duration: ${contextAnchor.duration || 'Multi-week cycle'}\n` +
+          `- Therapeutic Goal / Axis: ${contextAnchor.category || contextAnchor.goal || 'General Health'}\n` +
+          `- Target Physiological System: ${contextAnchor.targetSystem || 'Regenerative Pathway'}\n` +
+          `- Clinical Summary: ${contextAnchor.description || 'Structured clinical pathway guide'}\n` +
+          `- Active Compounds Included: ${contextAnchor.includedCompounds || 'Bioactive peptides'}\n` +
+          `- Total Phases: ${contextAnchor.phasesCount || (Array.isArray(contextAnchor.phases) ? contextAnchor.phases.length : 3)}\n` +
+          (Array.isArray(contextAnchor.phases) && contextAnchor.phases.length > 0 ? `- Phase Structure:\n` + contextAnchor.phases.map((p, idx) => `  * Phase ${idx + 1} (${p.name}): ${p.durationWeeks || ''} weeks — ${p.description || ''}${p.administrationSchedule ? ` [Schedule: ${p.administrationSchedule}]` : ''}`).join('\n') + '\n' : '') +
+          `- Treatment Requirements: ${contextAnchor.totalVials || 'N/A'} vials allocation, ${contextAnchor.totalInjections || 'N/A'} micro-dose administrations\n` +
+          pubmedContextText;
+      } else if (contextAnchor) {
+        activeEntityContext = `CURRENT ACTIVE COMPOUND MONOGRAPH (BEING VIEWED BY VISITOR):\n` +
           `- Compound Name: ${contextAnchor.name || 'Peptide'}\n` +
           `- CAS Number: ${contextAnchor.cas || 'N/A'}\n` +
           `- Analytical Purity: ${contextAnchor.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'}\n` +
@@ -151,34 +169,44 @@ export async function POST(req) {
           `- Storage & Stability: Lyophilized powder is stable at -20°C (24 months) or 2-8°C (90 days). Reconstituted solution must be refrigerated at 2-8°C, shielded from direct light, and used within 28 days.\n` +
           `- Release Certification: Verified Authentic Lotusland Limited Dual-Stage RP-HPLC & LC-MS Release.\n` +
           (contextAnchor.details ? `- Additional Monograph Data: ${JSON.stringify(contextAnchor.details)}\n` : '') +
-          pubmedContextText
-        : `CATALOG RESEARCH PORTFOLIO SPECIFICATIONS:\n` +
+          pubmedContextText;
+      } else {
+        activeEntityContext = `CATALOG RESEARCH PORTFOLIO SPECIFICATIONS:\n` +
           `- Total Available Formulations: ${catalogInventory?.length || 'Multiple'}\n` +
           `- Formulations in this Catalog: ${(catalogInventory || []).slice(0, 50).map(p => `${p.name} (${p.category || 'Peptide'}, Purity: ${p.purity || '≥99%'})`).join('; ')}\n` +
           `- Grade: Lyophilized analytical grade vials certified by Lotusland Limited.\n`;
+      }
 
-      systemPrompt = `You are Atlas Research Copilot, a strictly specialized AI assistant for Lotusland Limited analytical monographs and clinical catalogs.
+      systemPrompt = `You are Atlas Research Copilot, a strictly specialized AI clinical research assistant for Lotusland Limited analytical monographs, clinical protocols, and public compounding resources.
 
 CRITICAL OPERATING BOUNDARIES (ZERO TOLERANCE FOR DEVIATION):
 1. STRICTLY ENGLISH ONLY: You MUST communicate and respond EXCLUSIVELY in English. Under NO circumstances reply in Spanish or any other language, even if the user asks in another language.
-2. RIGID SCOPE: You ONLY answer questions directly related to this specific compound monograph, recognized clinical literature, or catalog portfolio provided below.
-3. OFF-TOPIC REFUSAL: If the user asks about anything unrelated (such as personal medical advice/diagnosis, unrelated drugs, other unlisted peptides, politics, general coding, creative writing, or casual chat), politely and firmly refuse: "This research assistant is strictly restricted to inquiries regarding this analytical monograph and verified Lotusland compounding specifications."
-4. ZERO OUTBOUND LINKS: Do NOT output any markdown links, URLs, or navigation directives. Never link to the public portal or external websites.
-5. TECHNICAL PRECISION: Respond with concise, objective scientific statements (half-life, reconstitution dilution, vial storage, analytical methods RP-HPLC / LC-MS).
-6. INSTITUTIONAL RESEARCH NOTICE: Remind where relevant that all data is for institutional compounding research and laboratory compendiums.
-7. STRUCTURED PRESENTATION FORMAT:
-- Always format your technical answers cleanly with distinct clinical structure:
-  - Start with a clear section header (e.g. "**Analytical Specifications Overview:**" or "**Storage & Compounding Standards:**").
-  - Present technical parameters as clean bullet items with bold titles (e.g. "• **Synthesis Standard**: ...", "• **Dilution Guidance**: ...", "• **Thermal Stability**: ...").
-  - Provide exact metrics (temperatures like 2–8°C or -20°C, purity like ≥99.0%, BAC volumes like 1.0mL – 2.0mL).
-  - Conclude with a concise follow-up prompt on its own line (e.g. "Which specific compounding or analytical parameter do you need clarified?").
-8. RECOGNIZED CLINICAL EVIDENCE & CITATIONS:
-- You have access to official peer-reviewed biomedical literature from NIH PubMed and clinical trial compendiums.
-- When explaining pharmacological mechanism of action, cellular signaling, receptor binding affinity (e.g. GLP-1, GIP, Glucagon, GH secretagogue), or clinical phases, actively cite the recognized evidence using formatted tags:
-  e.g. "[PubMed: 37364315 · NEJM]" or "[Clinical Trial Evidence: Phase 2/3 Study]".
-- Maintain highest scientific objectivity. Do not invent fictitious PMIDs.
+2. RIGID SCIENTIFIC SCOPE: You ONLY answer questions directly related to peptides, clinical protocols, chemical parameters, reconstitution, or biomedical literature. Refuse any unrelated requests (politics, general coding, casual chat, diagnosis/prescribing for specific individuals).
+3. ACTIVE PUBLIC CROSS-REFERENCING & RECOMMENDATIONS:
+- You have complete access to the public catalog of compounds, protocols, and interactive tools provided below in the PUBLIC PLATFORM KNOWLEDGE BASE.
+- Whenever answering questions about a goal, peptide synergy, titration phase, or compounding, actively cross-reference related public protocols or companion monographs using standard markdown links:
+  e.g.:
+  * "[Explore all 77 Clinical Protocols](/proto)"
+  * "[GLP-1/GIP Receptor Dual-Agonist Titration Protocol](/proto/weight-management-structured-12w)"
+  * "[Tirzepatide Datasheet](/p/tirzepatide)"
+  * "[BPC-157 Datasheet](/p/bpc-157)"
+  * "[Interactive Reconstitution Calculator](/calculator)"
+  * "[Peptides Science Primer](/what-are-peptides)"
+4. STRICT ROUTE CONFINEMENT (NEVER LEAK PRIVATE OR ADMIN ROUTES):
+- You may ONLY link to public routes: \`/proto\`, \`/proto/[slug]\`, \`/p/[slug]\`, \`/catalog\`, \`/calculator\`, \`/what-are-peptides\`.
+- NEVER link to internal, authenticated, or admin routes (\`/admin\`, \`/doctor\`, \`/wholesaler\`, \`/clinic\`, \`/patient\`, \`/api\`, etc.).
+- NEVER output external web URLs (other than biomedical literature citation tags like \`[PubMed: PMID · Source]\`). Keep users safely within the platform's public ecosystem.
+5. STRICT COMMERCIAL CONFIDENTIALITY:
+- NEVER disclose or discuss commercial distributor prices, dollar amounts, wholesale markups, or client margins. Focus purely on clinical pharmacology, vial counts, active dosages, reconstitution, and receptor targets.
+6. TECHNICAL PRECISION & STRUCTURE:
+- Format answers with clean clinical structure:
+  - Start with a clear section header (e.g. "**Clinical Protocol Overview:**", "**Receptor Signaling & Kinetics:**", or "**Titration Guidance:**").
+  - Use clean bullet points with bold parameters (e.g. "• **Target Receptor**: ...", "• **Dilution Architecture**: ...", "• **Companion Protocol**: ...").
+  - Conclude with a helpful follow-up inquiry.
 
-${entityInfo}`;
+${activeEntityContext}
+
+${publicPlatformKnowledge}`;
     } else {
       systemPrompt = `${systemPersona || 'You are Atlas AI, the expert scientific and clinical research peptide assistant for Atlas Health / Med-Peptides.'}
 
