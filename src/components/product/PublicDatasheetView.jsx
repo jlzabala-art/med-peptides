@@ -42,6 +42,7 @@ import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
+import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
 
@@ -1369,6 +1370,28 @@ export default function PublicDatasheetView({
         initialBatch={effectiveBatchCode}
         version={versionInfo.version}
         updatedAtDate={versionInfo.updatedAtDate}
+      />
+
+      {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
+      <PublicAtlasAIDrawer
+        contextType="monograph"
+        contextAnchor={{
+          name: product?.canonicalName || product?.name || 'Peptide Monograph',
+          cas: product?.cas || 'N/A',
+          purity: product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)',
+          molecular: product?.molecularWeight || product?.molecularFormula || 'N/A',
+          sequence: product?.sequence || null,
+          details: {
+            category: product?.category || 'Peptides',
+            storage: '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
+            reconstitution: '1.0mL - 2.0mL sterile bacteriostatic water',
+            activeSupplier: 'Lotusland Limited',
+          }
+        }}
+        storageKey={`monograph_${slug}`}
+        onOpenRegisterModal={() => {
+          window.open('/auth/login?register=true', '_blank');
+        }}
       />
     </div>
   );

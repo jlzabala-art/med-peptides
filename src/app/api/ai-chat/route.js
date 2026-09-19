@@ -1,17 +1,55 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { checkRateLimit, peekRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 import { sanitizeText } from '@/utils/apiValidator';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  if (searchParams.get('scope') === 'public_sandbox') {
+    const quota = peekRateLimit(req, { limit: 5, tier: 'ai-public-sandbox' });
+    return NextResponse.json({
+      limit: 5,
+      remaining: quota.remaining,
+      used: quota.count,
+      allowed: quota.allowed,
+    });
+  }
+  return NextResponse.json({ status: 'ok' });
+}
+
 export async function POST(req) {
+  const body = await req.json().catch(() => ({}));
+  const isPublicSandbox = body?.scope === 'public_sandbox';
+
+  // For public sandbox visitors (datasheets & public shared catalogs): 5 queries per 24h per IP
+  let sandboxRateInfo = null;
+  if (isPublicSandbox) {
+    sandboxRateInfo = checkRateLimit(req, {
+      limit: 5,
+      windowMs: 24 * 60 * 60 * 1000,
+      tier: 'ai-public-sandbox',
+    });
+    if (!sandboxRateInfo.allowed) {
+      return NextResponse.json(
+        {
+          error: 'QUOTA_EXCEEDED',
+          message: 'Guest research inquiry limit reached (5/5). Please sign in or register for unlimited professional access.',
+          limit: 5,
+          remaining: 0,
+          requiresRegistration: true,
+        },
+        { status: 429 }
+      );
+    }
+  }
+
   const rateInfo = checkRateLimit(req, { limit: 25, windowMs: 60 * 1000, tier: 'ai-chat' });
   if (!rateInfo.allowed) {
     return rateLimitExceededResponse(rateInfo);
   }
 
   try {
-    const body = await req.json();
     const { message: rawMessage, context = {}, history = [] } = body;
 
     const message = sanitizeText(rawMessage, 2000);
@@ -30,6 +68,7 @@ export async function POST(req) {
       agentName,
       currentUser,
       contextAnchor,
+      catalogInventory,
     } = context;
 
     const safePreferences = Array.isArray(preferences) ? preferences : [preferences].filter(Boolean);
@@ -38,8 +77,37 @@ export async function POST(req) {
     const userRole = currentUser?.role || 'guest';
     const userName = currentUser?.name || 'Valued User';
 
-    // Build rich clinical context prompt tailored to user and screen scope
-    const systemPrompt = `${systemPersona || 'You are Atlas AI, the expert scientific and clinical research peptide assistant for Atlas Health / Med-Peptides.'}
+    let systemPrompt = '';
+    if (isPublicSandbox) {
+      const entityInfo = contextAnchor
+        ? `COMPOUND MONOGRAPH SPECIFICATIONS:\n` +
+          `- Compound Name: ${contextAnchor.name || 'Peptide'}\n` +
+          `- CAS Number: ${contextAnchor.cas || 'N/A'}\n` +
+          `- Analytical Purity: ${contextAnchor.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'}\n` +
+          `- Molecular Formula / Weight: ${contextAnchor.molecular || 'N/A'}\n` +
+          `- Sequence: ${contextAnchor.sequence || 'Protected proprietary synthesis sequence'}\n` +
+          `- Standard Reconstitution Protocol: Reconstitute with 1.0mL – 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol). Introduce diluent slowly down the vial inner wall and swirl gently without shaking.\n` +
+          `- Storage & Stability: Lyophilized powder is stable at -20°C (24 months) or 2-8°C (90 days). Reconstituted solution must be refrigerated at 2-8°C, shielded from direct light, and used within 28 days.\n` +
+          `- Release Certification: Verified Authentic Lotusland Limited Dual-Stage RP-HPLC & LC-MS Release.\n` +
+          (contextAnchor.details ? `- Additional Monograph Data: ${JSON.stringify(contextAnchor.details)}\n` : '')
+        : `CATALOG RESEARCH PORTFOLIO SPECIFICATIONS:\n` +
+          `- Total Available Formulations: ${catalogInventory?.length || 'Multiple'}\n` +
+          `- Formulations in this Catalog: ${(catalogInventory || []).slice(0, 50).map(p => `${p.name} (${p.category || 'Peptide'}, Purity: ${p.purity || '≥99%'})`).join('; ')}\n` +
+          `- Grade: Lyophilized analytical grade vials certified by Lotusland Limited.\n`;
+
+      systemPrompt = `You are Atlas Research Copilot, a strictly specialized AI assistant for Lotusland Limited analytical monographs and clinical catalogs.
+
+CRITICAL OPERATING BOUNDARIES (ZERO TOLERANCE FOR DEVIATION):
+1. STRICTLY ENGLISH ONLY: You MUST communicate and respond EXCLUSIVELY in English. Under NO circumstances reply in Spanish or any other language, even if the user asks in another language.
+2. RIGID SCOPE: You ONLY answer questions directly related to this specific compound monograph or catalog portfolio provided below.
+3. OFF-TOPIC REFUSAL: If the user asks about anything unrelated (such as personal medical advice/diagnosis, unrelated drugs, other unlisted peptides, politics, general coding, creative writing, or casual chat), politely and firmly refuse: "This research assistant is strictly restricted to inquiries regarding this analytical monograph and verified Lotusland compounding specifications."
+4. ZERO OUTBOUND LINKS: Do NOT output any markdown links, URLs, or navigation directives. Never link to the public portal or external websites.
+5. TECHNICAL PRECISION: Respond with concise, objective scientific statements (half-life, reconstitution dilution, vial storage, analytical methods RP-HPLC / LC-MS).
+6. INSTITUTIONAL RESEARCH NOTICE: Remind where relevant that all data is for institutional compounding research and laboratory compendiums.
+
+${entityInfo}`;
+    } else {
+      systemPrompt = `${systemPersona || 'You are Atlas AI, the expert scientific and clinical research peptide assistant for Atlas Health / Med-Peptides.'}
 
 USER IDENTITY & DEDICATED ASSISTANT CONTRACT:
 - You are NOT a generic chatbot. You are the private, dedicated assistant working exclusively for: ${userName} (Role: ${userRole.toUpperCase()}${currentUser?.clinic ? `, Clinic/Facility: ${currentUser.clinic}` : ''}${currentUser?.license ? `, Lic: ${currentUser.license}` : ''}).
@@ -71,6 +139,7 @@ GUIDELINES:
    - Sleep: [DSIP](/product/dsip), [Epitalon](/product/epitalon)
 6. For reconstitution and dosage calculations, emphasize standard dilution with bacteriostatic water (e.g. 2mL of BAC water per 5mg/10mg vial).
 7. Always keep advice grounded in scientific research standards and remind users that compounds are for professional research protocols.`;
+    }
 
     if (GEMINI_API_KEY) {
       try {
@@ -101,7 +170,9 @@ GUIDELINES:
             reply: replyText,
             goal,
             model: 'gemini-2.5-flash',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
+            limit: isPublicSandbox ? 5 : undefined,
           });
           return applyRateLimitHeaders(res, rateInfo);
         }
@@ -135,7 +206,9 @@ GUIDELINES:
                 reply: replyText,
                 goal,
                 model: 'gemini-2.5-flash',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
+                limit: isPublicSandbox ? 5 : undefined,
               });
               return applyRateLimitHeaders(res, rateInfo);
             }
@@ -147,16 +220,24 @@ GUIDELINES:
     }
 
     // Intelligent context-aware fallback response
-    let fallbackReply = `Here is what you should know about **${goal || 'peptide research'}**:\n\n` +
-      `• **Target Mechanism**: Research indicates targeted peptide signaling supports receptor binding with high specificity.\n` +
-      `• **Key Compounds**: For your profile, explore [BPC-157](/product/bpc-157), [GHK-Cu](/product/ghk-cu), or [Epithalon](/product/epithalon).\n` +
-      `• **Reconstitution Guide**: Vials typically reconstitute with 1.0mL – 2.0mL of bacteriostatic water. You can check the [Dose Calculator](/calculator) for exact units.\n\n` +
-      `How else can I assist your protocol today?`;
+    let fallbackReply = isPublicSandbox
+      ? `**Analytical Specifications Overview**:\n\n` +
+        `• **Synthesis Standard**: Certified ≥99.0% analytical purity via Dual-Stage RP-HPLC & LC-MS release testing (Lotusland Limited).\n` +
+        `• **Dilution Guidance**: Reconstitute lyophilized cake with 1.0mL – 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol). Inject gently along vial glass wall and swirl; do not agitate.\n` +
+        `• **Thermal Stability**: Store lyophilized cakes at 2–8°C for short term (up to 90 days) or -20°C for extended research. Store reconstituted solution at 2–8°C shielded from light.\n\n` +
+        `Which specific compounding or analytical parameter do you need clarified?`
+      : `Here is what you should know about **${goal || 'peptide research'}**:\n\n` +
+        `• **Target Mechanism**: Research indicates targeted peptide signaling supports receptor binding with high specificity.\n` +
+        `• **Key Compounds**: For your profile, explore [BPC-157](/product/bpc-157), [GHK-Cu](/product/ghk-cu), or [Epithalon](/product/epithalon).\n` +
+        `• **Reconstitution Guide**: Vials typically reconstitute with 1.0mL – 2.0mL of bacteriostatic water. You can check the [Dose Calculator](/calculator) for exact units.\n\n` +
+        `How else can I assist your protocol today?`;
 
     const fallbackRes = NextResponse.json({
       reply: fallbackReply,
       goal,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
+      limit: isPublicSandbox ? 5 : undefined,
     });
     return applyRateLimitHeaders(fallbackRes, rateInfo);
 

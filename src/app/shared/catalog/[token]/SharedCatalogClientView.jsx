@@ -35,6 +35,7 @@ import SharedCatalogHeader from './components/SharedCatalogHeader';
 import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
 import SharedCatalogFloatingDock from './components/SharedCatalogFloatingDock';
+import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 
 function getPharmaMarginTheme(priceSource, meta = {}) {
   const margin = Number(meta?.margin || meta?.marginPercent || 0);
@@ -1696,6 +1697,19 @@ export default function SharedCatalogClientView({
           audienceType={activeRole === 'patient' ? 'patient' : 'doctor'}
         />
       )}
+
+      {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
+      <PublicAtlasAIDrawer
+        contextType="catalog"
+        catalogInventory={products.map(p => ({
+          name: p.canonicalName,
+          category: p.category,
+          purity: p.purity,
+          variantsCount: p.variants?.length || 0,
+        }))}
+        storageKey={`catalog_${catalogId}`}
+        onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
+      />
     </div>
   );
 }

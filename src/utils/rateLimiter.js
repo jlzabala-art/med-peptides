@@ -85,6 +85,37 @@ export function checkRateLimit(req, options = {}) {
 }
 
 /**
+ * Non-mutating rate limit lookup to check quota without incrementing count.
+ * @param {Request} req
+ * @param {Object} [options]
+ * @returns {{ count: number, limit: number, remaining: number, allowed: boolean }}
+ */
+export function peekRateLimit(req, options = {}) {
+  const { limit = 60, tier = 'default' } = options;
+  const ip = getClientIp(req);
+  const key = `${tier}:${ip}`;
+  const now = Date.now();
+  const record = rateLimitStore.get(key);
+
+  if (!record || record.resetTime <= now) {
+    return {
+      count: 0,
+      limit,
+      remaining: limit,
+      allowed: true,
+    };
+  }
+
+  const remaining = Math.max(0, limit - record.count);
+  return {
+    count: record.count,
+    limit,
+    remaining,
+    allowed: record.count < limit,
+  };
+}
+
+/**
  * Returns a standardized HTTP 429 Too Many Requests response with standard rate-limit headers.
  * 
  * @param {Object} rateInfo
