@@ -35,16 +35,16 @@ import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from 
 
 // ── Goal Taxonomy Buckets ───────────────────────────────────────────────────
 const GOAL_BUCKETS = [
-  { id: 'all', label: 'Todos los Protocolos', icon: FlaskConical, color: '#003666', bg: '#eff6ff' },
-  { id: 'fat_loss', label: 'Metabolismo & GLP-1 / GIP', icon: Zap, color: '#ea580c', bg: '#fff7ed' },
-  { id: 'longevity', label: 'Longevidad & Anti-Aging', icon: Heart, color: '#0d9488', bg: '#f0fdfa' },
-  { id: 'recovery', label: 'Regeneración Tisular & Articular', icon: Activity, color: '#0284c7', bg: '#f0f9ff' },
-  { id: 'cognitive', label: 'Neuroplasticidad & Cognición', icon: Brain, color: '#7c3aed', bg: '#faf5ff' },
-  { id: 'muscle_growth', label: 'Masa Muscular & Rendimiento', icon: Shield, color: '#16a34a', bg: '#f0fdf4' },
-  { id: 'immune', label: 'Inmunidad & Defensa Celular', icon: ShieldAlert, color: '#0891b2', bg: '#ecfeff' },
-  { id: 'sexual_health', label: 'Salud Hormonal & Sexual', icon: Sparkles, color: '#db2777', bg: '#fdf2f8' },
-  { id: 'sleep', label: 'Sueño & Ritmo Circadiano', icon: Moon, color: '#4338ca', bg: '#eef2ff' },
-  { id: 'skin_hair', label: 'Piel, Cabello & Estética', icon: Sparkles, color: '#d97706', bg: '#fffbeb' },
+  { id: 'all', label: 'All Protocols', icon: FlaskConical, color: '#003666', bg: '#eff6ff' },
+  { id: 'fat_loss', label: 'Metabolism & GLP-1 / GIP', icon: Zap, color: '#ea580c', bg: '#fff7ed' },
+  { id: 'longevity', label: 'Longevity & Anti-Aging', icon: Heart, color: '#0d9488', bg: '#f0fdfa' },
+  { id: 'recovery', label: 'Tissue & Joint Regeneration', icon: Activity, color: '#0284c7', bg: '#f0f9ff' },
+  { id: 'cognitive', label: 'Neuroplasticity & Cognition', icon: Brain, color: '#7c3aed', bg: '#faf5ff' },
+  { id: 'muscle_growth', label: 'Muscle Mass & Performance', icon: Shield, color: '#16a34a', bg: '#f0fdf4' },
+  { id: 'immune', label: 'Immunity & Cellular Defense', icon: ShieldAlert, color: '#0891b2', bg: '#ecfeff' },
+  { id: 'sexual_health', label: 'Hormonal & Sexual Health', icon: Sparkles, color: '#db2777', bg: '#fdf2f8' },
+  { id: 'sleep', label: 'Sleep & Circadian Rhythm', icon: Moon, color: '#4338ca', bg: '#eef2ff' },
+  { id: 'skin_hair', label: 'Skin, Hair & Aesthetics', icon: Sparkles, color: '#d97706', bg: '#fffbeb' },
 ];
 
 /**
@@ -145,9 +145,18 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   // Synchronized language state across all public views
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang');
+      if (urlLang && ['en', 'es', 'fr', 'de', 'it'].includes(urlLang)) {
+        setLang(urlLang);
+        return;
+      }
+
       const savedLang = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
       if (savedLang && ['en', 'es', 'fr', 'de', 'it'].includes(savedLang)) {
         setLang(savedLang);
+      } else {
+        setLang('en');
       }
       
       const handleGlobalLang = (e) => {
@@ -433,8 +442,34 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           )}
         </div>
 
-        {/* Goals Ribbon Selector */}
-        <div className="proto-goals-ribbon">
+        {/* Mobile Goal Category Selector (Mobile-First UX / Regla #23) */}
+        <div className="proto-mobile-goal-wrapper">
+          <label htmlFor="proto-mobile-goal-select" className="proto-mobile-goal-label">
+            {lang === 'es' ? 'Objetivo Terapéutico:' : 'Therapeutic Goal:'}
+          </label>
+          <select
+            id="proto-mobile-goal-select"
+            className="proto-mobile-goal-select"
+            value={selectedGoal}
+            onChange={(e) => {
+              triggerHaptic('selection');
+              setSelectedGoal(e.target.value);
+            }}
+          >
+            {GOAL_BUCKETS.map(g => {
+              const count = goalCounts[g.id] || 0;
+              const localizedLabel = GOAL_TRANSLATIONS[g.id]?.[lang] || g.label;
+              return (
+                <option key={g.id} value={g.id}>
+                  {localizedLabel} ({count})
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        {/* Goals Ribbon Selector (Desktop & Tablet Horizontal Strip) */}
+        <div className="proto-goals-ribbon" role="tablist" aria-label={lang === 'es' ? 'Filtrar por objetivo terapéutico' : 'Filter by therapeutic goal'}>
           {GOAL_BUCKETS.map(g => {
             const Icon = g.icon;
             const isActive = selectedGoal === g.id;
@@ -445,14 +480,16 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
               <button
                 key={g.id}
                 type="button"
+                role="tab"
+                aria-selected={isActive}
                 className={`proto-goal-chip ${isActive ? 'is-active' : ''}`}
                 onClick={() => {
                   triggerHaptic('selection');
                   setSelectedGoal(g.id);
                 }}
               >
-                <Icon size={14} style={{ color: isActive ? '#ffffff' : g.color }} />
-                <span>{localizedLabel}</span>
+                <Icon size={15} className="proto-goal-icon" style={{ color: isActive ? '#ffffff' : g.color }} />
+                <span className="proto-goal-label">{localizedLabel}</span>
                 <span className="proto-goal-count">{count}</span>
               </button>
             );

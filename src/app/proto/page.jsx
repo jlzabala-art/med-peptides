@@ -8,23 +8,33 @@ export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
 export const metadata = {
-  title: 'Directorio de Protocolos Clínicos & Vías Terapéuticas de Péptidos | Atlas Clinical',
-  description: 'Catálogo público de 77 protocolos terapéuticos formulados con péptidos de grado farmacéutico: GLP-1/GIP, Longevidad, Regeneración Tisular, Neuroplasticidad y Salud Celular.',
+  title: 'Clinical Protocol Directory & Peptide Treatment Pathways | Med-Peptides',
+  description: 'Public clinical registry of 77 evidence-based therapeutic protocols: GLP-1/GIP metabolism, cellular longevity, musculoskeletal recovery, neuroplasticity, and precision endocrinology.',
   alternates: {
     canonical: `${BASE_URL}/proto`,
   },
   openGraph: {
-    title: 'Directorio de Protocolos Clínicos & Péptidos | Atlas Clinical Directory',
-    description: 'Explora protocolos y dosificaciones clínicas basadas en evidencia con péptidos bioactivos de Lotusland.',
+    title: 'Clinical Protocol Directory • Evidence-Based Pathways | Med-Peptides',
+    description: 'Evidence-based clinical protocol guidelines, dosing titration schedules, and synergistic biomarker pathways for certified medical practitioners.',
     url: `${BASE_URL}/proto`,
-    siteName: 'Atlas Health Technologies',
-    locale: 'es_ES',
+    siteName: 'Med-Peptides Clinical Directory',
+    locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: `${BASE_URL}/og-catalog.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Med-Peptides Clinical Protocol Directory',
+        type: 'image/png'
+      }
+    ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Directorio de Protocolos Clínicos & Péptidos | Atlas Clinical',
-    description: '77 protocolos clínicos con calendarios de titulación, biomarcadores y sinergias farmacológicas.',
+    title: 'Clinical Protocol Directory • Evidence-Based Pathways | Med-Peptides',
+    description: '77 evidence-based clinical protocols with dosing titration schedules and active formulation metrics.',
+    images: [`${BASE_URL}/og-catalog.png`]
   },
 };
 

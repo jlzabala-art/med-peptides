@@ -213,7 +213,7 @@ export const PROTOCOL_I18N = {
     // Catalog Directory translations (/proto)
     catalogHeroPill: 'Vías Clínicas del Ecosistema • Single Source of Truth',
     catalogHeroTitle: 'Directorio de Protocolos Clínicos & Péptidos',
-    catalogHeroSubtitle: 'Explora los 77 protocolos terapéuticos formulados con el catálogo de grado farmacéutico de Lotusland. Monoterapias y sinergias combinadas con calendarios de dosificación, fases de titulación y biomarcadores de seguridad.',
+    catalogHeroSubtitle: 'Explora los 77 protocolos terapéuticos formulados bajo estándares clínicos avanzados. Monoterapias y sinergias combinadas con calendarios de dosificación, fases de titulación y biomarcadores de seguridad.',
     activeProtocolsKpi: 'Protocolos Activos',
     therapeuticGoalsKpi: 'Objetivos Terapéuticos',
     searchPlaceholder: 'Buscar protocolos por nombre, compuesto (ej. Tirzepatide, BPC-157), indicación o código...',
