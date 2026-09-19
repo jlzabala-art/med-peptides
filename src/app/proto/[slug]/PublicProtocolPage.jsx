@@ -37,8 +37,12 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const name = protocol?.name || protocol?.title || 'Clinical Protocol Blueprint';
   const category = protocol?.category || protocol?.goal || protocol?.therapeutic_category || 'Regenerative Recovery';
   const duration = protocol?.durationWeeks ? `${protocol.durationWeeks} Weeks` : (protocol?.duration || '8 Weeks');
-  const description = getLocalizedField(protocol, 'description', lang) || protocol?.description || protocol?.summary || protocol?.clinicalRationale || '';
-  const items = protocol?.items || protocol?.products || protocol?.peptides || [];
+  const description = getLocalizedField(protocol, 'description', lang) || protocol?.description || protocol?.summary || protocol?.overview_summary || protocol?.clinicalRationale || '';
+  const items = (Array.isArray(protocol?.items) && protocol.items.length > 0) ? protocol.items :
+                (Array.isArray(protocol?.bom) && protocol.bom.length > 0) ? protocol.bom :
+                (Array.isArray(protocol?.products) && protocol.products.length > 0) ? protocol.products :
+                (Array.isArray(protocol?.peptides) && protocol.peptides.length > 0) ? protocol.peptides :
+                (Array.isArray(protocol?.compounds) && protocol.compounds.length > 0) ? protocol.compounds : [];
   const phases = protocol?.phases || [];
 
   useEffect(() => {
@@ -217,7 +221,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             <strong>Standardized Clinical Pathway Blueprint</strong>
             <span>
               This treatment protocol guide is curated exclusively for certified medical practitioners and clinical research protocols. 
-              All active pharmaceutical ingredients and administration schedules adhere to Lotusland Biosciences research standards. Commercial pricing and distributor markups are strictly withheld.
+              All active pharmaceutical ingredients and administration schedules adhere to Atlas Services clinical research standards. Commercial pricing and distributor markups are strictly withheld.
             </span>
           </div>
         </div>
@@ -233,7 +237,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   <span>{duration}</span>
                 </span>
                 <span className="pds-cgmp-tag">
-                  Lotusland Clinical Standards
+                  Atlas Services Clinical Standards
                 </span>
                 <span className="pds-version-tag">
                   <span className="pds-version-dot" />
@@ -337,7 +341,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
               {items.map((item, idx) => {
-                const itemSlug = item.slug || item.productId || item.id;
+                const itemSlug = item.slug || item.productId || item.productSlug || (item.id && !item.id.startsWith('item-') ? item.id : null);
+                const itemName = item.product_name || item.name || item.title || 'Compound';
+                const itemDosage = item.dosage || item.dose || (item.quantity ? `${item.quantity} ${item.unit || 'Unit(s)'}` : null);
                 return (
                   <div key={idx} style={{
                     border: '1px solid #e2e8f0',
@@ -353,11 +359,11 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
                         <strong style={{ color: '#0f172a', fontSize: '1rem', fontWeight: 800 }}>
-                          {item.name || item.title || 'Compound'}
+                          {itemName}
                         </strong>
-                        {item.dosage && (
+                        {itemDosage && (
                           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 8px', borderRadius: '6px' }}>
-                            {item.dosage}
+                            {itemDosage}
                           </span>
                         )}
                       </div>
@@ -636,7 +642,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         }}
         activeStrength={{ name: duration }}
         activeFormat={{ name: 'Clinical Pathway' }}
-        isLotusland={true}
+        isLotusland={false}
       />
     </div>
   );

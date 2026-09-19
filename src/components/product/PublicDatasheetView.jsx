@@ -746,6 +746,28 @@ export default function PublicDatasheetView({
                 </span>
               </a>
             )}
+
+            {/* Direct Navigation to Verified Product Catalog */}
+            <a
+              href="/catalog"
+              className="pds-btn pds-btn-ghost"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#cbd5e1',
+                borderColor: 'rgba(255, 255, 255, 0.18)',
+                fontWeight: 600,
+                textDecoration: 'none'
+              }}
+              title={lang === 'es' ? 'Explorar Catálogo General de Péptidos' : 'Browse Peptide Compendium'}
+            >
+              <FlaskConical size={14} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Catálogo' : 'Catalog'}
+              </span>
+            </a>
           </div>
         </div>
       </header>

@@ -54,11 +54,11 @@ export const SENSITIVE_FINANCIAL_FIELDS = [
 
 // ─── Whitelist of Allowed Public Protocol Fields ─────────────────────────────
 export const PROTOCOL_PUBLIC_WHITELIST = [
-  'id', 'name', 'title', 'displayName', 'slug',
+  'id', 'name', 'title', 'displayName', 'slug', 'protocol_slug', 'protocol_id',
   'category', 'goal', 'goals', 'target', 'therapeutic_category',
-  'description', 'summary', 'clinicalRationale', 'mechanismOfAction',
+  'description', 'summary', 'overview_summary', 'clinicalRationale', 'mechanismOfAction',
   'duration', 'durationWeeks', 'totalWeeks', 'frequency',
-  'difficulty', 'phaseCount', 'phases', 'items', 'products', 'peptides',
+  'difficulty', 'phaseCount', 'phases', 'items', 'products', 'peptides', 'bom', 'compounds',
   'schedule', 'instructions', 'administrationInstructions',
   'contraindications', 'warnings', 'safetyGuidelines', 'storageInstructions',
   'biomarkers', 'recommendedTests', 'status', 'isActive',
@@ -127,6 +127,12 @@ export function sanitizePublicProtocol(rawProtocol) {
   }
   if (Array.isArray(whitelisted.peptides)) {
     whitelisted.peptides = whitelisted.peptides.map(stripSensitiveFields);
+  }
+  if (Array.isArray(whitelisted.bom)) {
+    whitelisted.bom = whitelisted.bom.map(stripSensitiveFields);
+  }
+  if (Array.isArray(whitelisted.compounds)) {
+    whitelisted.compounds = whitelisted.compounds.map(stripSensitiveFields);
   }
 
   // Clean nested phase items

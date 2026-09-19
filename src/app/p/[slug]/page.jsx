@@ -261,43 +261,55 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
   if (!adminDb) return [];
   try {
     const snap = await adminDb.collection('protocols')
-      .where('status', '==', 'active')
-      .limit(40)
+      .where('status', 'in', ['active', 'published'])
+      .limit(100)
       .get()
       .catch(() => null);
     
     if (!snap || snap.empty) return [];
 
     const matched = [];
-    const pIdLower = String(productId || '').toLowerCase();
-    const pSlugLower = String(productSlug || '').toLowerCase();
-    const pNameLower = String(productName || '').toLowerCase();
+    const pIdLower = String(productId || '').toLowerCase().trim();
+    const pSlugLower = String(productSlug || '').toLowerCase().trim();
+    const pNameLower = String(productName || '').toLowerCase().trim();
 
     snap.forEach(doc => {
       const data = doc.data();
       const allItems = [
+        ...(Array.isArray(data.bom) ? data.bom : []),
         ...(Array.isArray(data.items) ? data.items : []),
         ...(Array.isArray(data.products) ? data.products : []),
         ...(Array.isArray(data.peptides) ? data.peptides : []),
+        ...(Array.isArray(data.compounds) ? data.compounds : []),
         ...(Array.isArray(data.phases) ? data.phases.flatMap(ph => [...(ph.compounds || []), ...(ph.drugs_used || []), ...(ph.products || [])]) : [])
       ];
 
-      const isIncluded = allItems.some(it => {
+      const hasItemMatch = allItems.some(it => {
         const itId = String(it.productId || it.id || '').toLowerCase();
         const itSlug = String(it.slug || it.product_slug || '').toLowerCase();
-        const itName = String(it.name || it.title || it.canonicalName || '').toLowerCase();
+        const itName = String(it.product_name || it.name || it.title || it.canonicalName || '').toLowerCase();
         return (
-          (itId && (itId === pIdLower || itId.includes(pSlugLower))) ||
+          (itId && (itId === pIdLower || itId.includes(pSlugLower) || pSlugLower.includes(itId))) ||
           (itSlug && (itSlug === pSlugLower || pSlugLower.includes(itSlug))) ||
           (itName && (itName.includes(pNameLower) || pNameLower.includes(itName)))
         );
       });
 
-      if (isIncluded) {
+      const protoNameLower = String(data.name || data.title || '').toLowerCase();
+      const protoDescLower = String(data.overview_summary || data.summary || data.description || data.clinicalRationale || data.metadata?.description || '').toLowerCase();
+      const protoSlugLower = String(data.protocol_slug || data.slug || '').toLowerCase();
+
+      const hasTextMatch = (
+        protoNameLower.includes(pSlugLower) ||
+        protoNameLower.includes(pNameLower) ||
+        protoSlugLower.includes(pSlugLower) ||
+        protoDescLower.includes(pSlugLower)
+      );
+
+      if (hasItemMatch || hasTextMatch) {
         // Clinical Relevance Scoring to identify the Flagship / Primary Blueprint
         let clinicalScore = 0;
         if (data.isFlagship || data.featured) clinicalScore += 60;
-        const protoNameLower = String(data.name || data.title || '').toLowerCase();
         if (protoNameLower.includes(pNameLower) || protoNameLower.includes(pSlugLower)) clinicalScore += 35;
         if (protoNameLower.startsWith(pNameLower)) clinicalScore += 25;
         if (protoNameLower.includes('titration') || protoNameLower.includes('recomposition') || protoNameLower.includes('metabolic')) clinicalScore += 20;
@@ -308,13 +320,13 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
 
         matched.push({
           id: doc.id,
-          slug: data.slug || doc.id,
+          slug: data.slug || data.protocol_slug || doc.id,
           name: data.name || data.title || 'Clinical Pathway',
           category: data.category || data.goal || data.therapeutic_category || 'Clinical Protocol',
           duration: data.durationWeeks ? `${data.durationWeeks} Weeks` : (data.duration || '8 Weeks'),
           durationWeeks: durWeeks,
           phasesCount,
-          description: (data.summary || data.description || data.clinicalRationale || '').substring(0, 140),
+          description: (data.overview_summary || data.summary || data.description || data.clinicalRationale || '').substring(0, 180),
           clinicalScore,
           phasesSummary: Array.isArray(data.phases)
             ? data.phases.slice(0, 4).map((ph, idx) => ({

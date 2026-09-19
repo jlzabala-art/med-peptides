@@ -25,6 +25,18 @@ async function getPublicProtocol(slug) {
     if (bySlug && !bySlug.empty) doc = bySlug.docs[0];
   }
 
+  // 2b. Try by protocol_slug
+  if (!doc) {
+    const byProtoSlug = await adminDb.collection('protocols').where('protocol_slug', '==', target).limit(1).get().catch(() => null);
+    if (byProtoSlug && !byProtoSlug.empty) doc = byProtoSlug.docs[0];
+  }
+
+  // 2c. Try by protocol_id
+  if (!doc) {
+    const byProtoId = await adminDb.collection('protocols').where('protocol_id', '==', target).limit(1).get().catch(() => null);
+    if (byProtoId && !byProtoId.empty) doc = byProtoId.docs[0];
+  }
+
   // 3. Try prefix match
   if (!doc) {
     const byPrefix = await adminDb.collection('protocols')
