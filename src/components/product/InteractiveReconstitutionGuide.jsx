@@ -136,6 +136,7 @@ export default function InteractiveReconstitutionGuide({
   const [bacWaterMl, setBacWaterMl] = useState(() => baselineState.baseBac);
   const [doseUnit, setDoseUnit] = useState(() => baselineState.baseUnit);
   const [doseValue, setDoseValue] = useState(() => baselineState.baseDose);
+  const [selectedPhaseId, setSelectedPhaseId] = useState(null);
 
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
@@ -144,6 +145,7 @@ export default function InteractiveReconstitutionGuide({
       setBacWaterMl(baselineState.baseBac);
       setDoseUnit(baselineState.baseUnit);
       setDoseValue(baselineState.baseDose);
+      setSelectedPhaseId(null);
     }
   }, [initialVialMg, baselineState]);
 
@@ -157,6 +159,7 @@ export default function InteractiveReconstitutionGuide({
       const p1 = getClinicalPhase1Dose(product, vialMg);
       setDoseUnit(p1.unit);
       setDoseValue(p1.dose);
+      setSelectedPhaseId(null);
     }
   }, [vialMg, bacWaterMl, doseUnit, product]);
 
@@ -209,7 +212,7 @@ export default function InteractiveReconstitutionGuide({
     };
   }, [vialMg, bacWaterMl, doseUnit, doseValue]);
 
-  // ── Clinical Phase Protocols (3 Phases: Titration, Maintenance, Optimization + Custom) ──
+  // ── Dynamic Clinical Phase Protocols (Supports N dynamic phases + Custom) ──
   const clinicalPhases = useMemo(() => {
     const pName = String(product?.name || product?.slug || product?.id || '').toLowerCase();
     const isTb500 = pName.includes('tb-500') || pName.includes('tb500') || pName.includes('thymosin');
@@ -234,42 +237,70 @@ export default function InteractiveReconstitutionGuide({
       };
     };
 
-    // 1. Semaglutide & Cagrilintide (Titration: 0.25 mg -> 0.50 mg -> 1.00 mg)
+    // 0. Dynamic phases loaded directly from Firestore product record (if configured)
+    const rawPhases = Array.isArray(product?.clinical_phases) && product.clinical_phases.length > 0
+      ? product.clinical_phases
+      : (Array.isArray(product?.phases) && product.phases.length > 0 ? product.phases : null);
+
+    if (rawPhases) {
+      return rawPhases.map((p, idx) => {
+        const d = parseFloat(p.dose) || 1;
+        const u = p.unit || 'mg';
+        const numLabel = idx + 1;
+        return createPhase(
+          p.id || `phase_dyn_${numLabel}`,
+          d,
+          u,
+          p.phaseLabel || (lang === 'es' ? `FASE ${numLabel}` : `PHASE ${numLabel}`),
+          p.name || (lang === 'es' ? `Fase ${numLabel}` : `Phase ${numLabel}`),
+          p.title || (lang === 'es' ? `Fase ${numLabel}: ${p.name || ''}` : `Phase ${numLabel}: ${p.name || ''}`),
+          p.badge || `${d} ${u}`
+        );
+      });
+    }
+
+    // 1. Semaglutide & Cagrilintide (Full Clinical Titration: 0.25 mg -> 0.50 mg -> 1.00 mg -> 1.70/2.40 mg)
     if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
       const p1Dose = 0.25;
       const p2Dose = 0.50;
-      const p3Dose = vMg >= 10 ? 1.70 : 1.00;
+      const p3Dose = 1.00;
+      const p4Dose = vMg >= 10 ? 2.40 : 1.70;
 
       return [
-        createPhase('phase_sema_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '0.25 mg'),
-        createPhase('phase_sema_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '0.50 mg'),
-        createPhase('phase_sema_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
+        createPhase('phase_sema_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', '0.25 mg'),
+        createPhase('phase_sema_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', '0.50 mg'),
+        createPhase('phase_sema_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', '1.00 mg'),
+        createPhase('phase_sema_p4', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`)
       ];
     }
 
-    // 2. Tirzepatide (Titration: 2.5 mg -> 5.0 mg -> 7.5 mg / 10.0 mg)
+    // 2. Tirzepatide (Full Clinical Titration: 2.5 mg -> 5.0 mg -> 7.5 mg -> 10.0/15.0 mg)
     if (pName.includes('tirzepatide')) {
       const p1Dose = 2.5;
       const p2Dose = 5.0;
-      const p3Dose = vMg <= 10 ? 7.5 : 10.0;
+      const p3Dose = 7.5;
+      const p4Dose = vMg <= 10 ? 10.0 : 15.0;
 
       return [
-        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '2.5 mg'),
-        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '5.0 mg'),
-        createPhase('phase_tirz_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
+        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', '2.5 mg'),
+        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', '5.0 mg'),
+        createPhase('phase_tirz_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', '7.5 mg'),
+        createPhase('phase_tirz_p4', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`)
       ];
     }
 
-    // 3. Retatrutide & Tri-Agonist Metabolic Peptides (Titration: 1.0 mg -> 2.0 mg -> 4.0 mg)
+    // 3. Retatrutide & Tri-Agonist Metabolic Peptides (Full Clinical Titration: 1.0 mg -> 2.0 mg -> 4.0 mg -> 6.0/9.0 mg)
     if (pName.includes('retatrutide') || pName.includes('glp')) {
-      const p1Dose = vMg <= 10 ? 1.0 : 2.0;
-      const p2Dose = vMg <= 10 ? 2.0 : 4.0;
-      const p3Dose = vMg <= 10 ? 4.0 : 6.0;
+      const p1Dose = 1.0;
+      const p2Dose = 2.0;
+      const p3Dose = 4.0;
+      const p4Dose = vMg <= 10 ? 6.0 : 9.0;
 
       return [
-        createPhase('phase_met_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
-        createPhase('phase_met_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
-        createPhase('phase_met_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', `${p3Dose} mg`)
+        createPhase('phase_met_initiation', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', `${p1Dose} mg`),
+        createPhase('phase_met_titration', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', `${p2Dose} mg`),
+        createPhase('phase_met_escalation', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', `${p3Dose} mg`),
+        createPhase('phase_met_target', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`)
       ];
     }
 
@@ -345,35 +376,48 @@ export default function InteractiveReconstitutionGuide({
   }, [product, safeVialMg, safeBacMl, concentrationMgMl, doseUnit, lang]);
 
   const activePhaseId = useMemo(() => {
+    if (selectedPhaseId === 'custom') return 'custom';
+    if (selectedPhaseId) {
+      const found = clinicalPhases.find(p => p.id === selectedPhaseId);
+      if (found) {
+        const pMg = found.unit === 'mcg' ? found.dose / 1000 : found.dose;
+        const currentMg = doseUnit === 'mcg' ? (parseFloat(doseValue) || 0) / 1000 : (parseFloat(doseValue) || 0);
+        if (Math.abs(pMg - currentMg) < 0.01) return found.id;
+      }
+    }
     const currentMg = doseUnit === 'mcg' ? (parseFloat(doseValue) || 0) / 1000 : (parseFloat(doseValue) || 0);
     for (const p of clinicalPhases) {
       const pMg = p.unit === 'mcg' ? p.dose / 1000 : p.dose;
       if (Math.abs(pMg - currentMg) < 0.01) return p.id;
     }
     return 'custom';
-  }, [clinicalPhases, doseValue, doseUnit]);
+  }, [clinicalPhases, doseValue, doseUnit, selectedPhaseId]);
 
   const activePhaseObj = useMemo(() => {
-    const found = clinicalPhases.find(p => p.id === activePhaseId);
-    if (found) return found;
+    if (activePhaseId !== 'custom') {
+      const found = clinicalPhases.find(p => p.id === activePhaseId);
+      if (found) return found;
+    }
     return {
       id: 'custom',
-      phaseLabel: lang === 'es' ? 'AJUSTE' : 'CUSTOM',
-      name: lang === 'es' ? 'Personalizada' : 'Custom Dose',
+      phaseLabel: lang === 'es' ? 'LIBRE' : 'CUSTOM',
+      name: lang === 'es' ? 'Titulación Libre' : 'Manual Titration',
+      title: lang === 'es' ? 'Dosis Personalizada' : 'Custom Target Dose',
       badge: lang === 'es' ? 'Manual' : 'Fine-Tune',
       dose: doseValue,
       unit: doseUnit,
-      subtitle: `${syringeUnits.toFixed(0)} UI (${liquidVolumeMl.toFixed(2)} mL)`
+      subtitle: `${syringeUnits.toFixed(0)} UI (${liquidVolumeMl.toFixed(2)} mL) · ~${totalDosesInVial} ${lang === 'es' ? 'dosis' : 'doses'}`
     };
-  }, [clinicalPhases, activePhaseId, doseValue, doseUnit, syringeUnits, liquidVolumeMl, lang]);
+  }, [clinicalPhases, activePhaseId, doseValue, doseUnit, syringeUnits, liquidVolumeMl, totalDosesInVial, lang]);
 
   // Detect whether active parameters differ from official monograph protocol (declared after activePhaseId to avoid TDZ)
   const isModifiedFromBaseline = useMemo(() => {
     if (!baselineState) return false;
     const vialChanged = Math.abs(vialMg - baselineState.baseMg) > 0.01;
     const bacChanged = Math.abs(bacWaterMl - baselineState.baseBac) > 0.01;
-    // Official clinical phases (Phase 1, 2, 3) conform to the protocol monograph
+    // Official clinical phases conform to the protocol monograph
     const isCustomDose = activePhaseId === 'custom';
+    return vialChanged || bacChanged || isCustomDose;
   }, [baselineState, vialMg, bacWaterMl, activePhaseId]);
 
   // ── Dynamic Dose Presets for Fine-Tuning Pills aligned with peptide dosimetry ──
@@ -406,9 +450,12 @@ export default function InteractiveReconstitutionGuide({
     if (clinicalPhases && clinicalPhases.length > 0) {
       setDoseUnit(clinicalPhases[0].unit);
       setDoseValue(clinicalPhases[0].dose);
+      setSelectedPhaseId(clinicalPhases[0].id);
+      updateUrlParams(clinicalPhases[0].id, clinicalPhases[0].dose, clinicalPhases[0].unit);
     } else {
       setDoseUnit(baselineState.baseUnit);
       setDoseValue(baselineState.baseDose);
+      setSelectedPhaseId(null);
     }
     const msg = lang === 'es'
       ? 'Parámetros de reconstitución restaurados a la Fase 1 de la monografía.'
@@ -440,9 +487,41 @@ export default function InteractiveReconstitutionGuide({
 
   const handleSelectPhase = (phase) => {
     triggerHaptic('selection');
+    setSelectedPhaseId(phase.id);
     setDoseUnit(phase.unit);
     setDoseValue(phase.dose);
     updateUrlParams(phase.id, phase.dose, phase.unit);
+  };
+
+  const handleSelectCustom = () => {
+    triggerHaptic('selection');
+    setSelectedPhaseId('custom');
+    updateUrlParams('custom', doseValue, doseUnit);
+    setTimeout(() => {
+      const input = document.getElementById('irg-dose-input-stepper');
+      if (input) {
+        input.focus();
+        input.select?.();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
+  };
+
+  const handleCustomDoseChange = (newVal, newUnit = doseUnit) => {
+    const clamped = Math.max(0.01, parseFloat(newVal) || 0);
+    setDoseValue(clamped);
+    const newMg = newUnit === 'mcg' ? clamped / 1000 : clamped;
+    const matching = clinicalPhases.find(p => {
+      const pMg = p.unit === 'mcg' ? p.dose / 1000 : p.dose;
+      return Math.abs(pMg - newMg) < 0.01;
+    });
+    if (matching && selectedPhaseId !== 'custom') {
+      setSelectedPhaseId(matching.id);
+      updateUrlParams(matching.id, clamped, newUnit);
+    } else {
+      setSelectedPhaseId('custom');
+      updateUrlParams('custom', clamped, newUnit);
+    }
   };
 
   // Initial mount: load URL params if specified, defaulting always to Phase 1
@@ -453,19 +532,26 @@ export default function InteractiveReconstitutionGuide({
       const urlPhase = params.get('phase');
       const urlTargetDose = params.get('targetDose') || params.get('injectionDose') || params.get('drawDose');
       if (urlPhase && clinicalPhases.length > 0) {
-        const matched = clinicalPhases.find(p => p.id === urlPhase || p.id.endsWith(urlPhase));
-        if (matched) {
-          setDoseUnit(matched.unit);
-          setDoseValue(matched.dose);
-          return;
+        if (urlPhase === 'custom') {
+          setSelectedPhaseId('custom');
+        } else {
+          const matched = clinicalPhases.find(p => p.id === urlPhase || p.id.endsWith(urlPhase));
+          if (matched) {
+            setSelectedPhaseId(matched.id);
+            setDoseUnit(matched.unit);
+            setDoseValue(matched.dose);
+            return;
+          }
         }
       }
       if (urlTargetDose) {
         const numMatch = urlTargetDose.match(/(\d+(?:\.\d+)?)/);
         const unitMatch = urlTargetDose.includes('mcg') ? 'mcg' : 'mg';
         if (numMatch) {
-          setDoseValue(parseFloat(numMatch[1]));
+          const val = parseFloat(numMatch[1]);
+          setDoseValue(val);
           setDoseUnit(unitMatch);
+          setSelectedPhaseId('custom');
           return;
         }
       }
@@ -473,6 +559,7 @@ export default function InteractiveReconstitutionGuide({
       if (clinicalPhases && clinicalPhases.length > 0) {
         setDoseUnit(clinicalPhases[0].unit);
         setDoseValue(clinicalPhases[0].dose);
+        setSelectedPhaseId(clinicalPhases[0].id);
       }
     } catch {
       // Safe fallback
@@ -1201,7 +1288,7 @@ export default function InteractiveReconstitutionGuide({
               <span className="irg-val-badge font-mono">{doseValue} {doseUnit}</span>
             </div>
 
-            {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Google Cloud Console Standard - 3 Columns) */}
+            {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Auto-fit Columns + Custom) */}
             <div className="irg-phase-cards-grid">
               {clinicalPhases.map(phase => {
                 const isActive = activePhaseId === phase.id;
@@ -1232,6 +1319,31 @@ export default function InteractiveReconstitutionGuide({
                   </button>
                 );
               })}
+
+              {/* Custom / Manual Titration Card on Desktop */}
+              <button
+                type="button"
+                onClick={handleSelectCustom}
+                className={`irg-phase-card custom ${activePhaseId === 'custom' ? 'active' : ''}`}
+                title={lang === 'es' ? 'Ajustar dosis libremente en micro-titulación' : 'Fine-tune custom dose freely'}
+              >
+                <div className="irg-pc-header">
+                  <span className="irg-pc-overline">{lang === 'es' ? 'LIBRE' : 'CUSTOM'}</span>
+                  <span className="irg-pc-badge">{lang === 'es' ? 'Manual' : 'Fine-Tune'}</span>
+                </div>
+                <div className="irg-pc-title">{lang === 'es' ? 'Personalizada' : 'Custom Dose'}</div>
+                <div className="irg-pc-dose-row">
+                  <span className="irg-pc-num font-mono">{doseValue}</span>
+                  <span className="irg-pc-unit">{doseUnit}</span>
+                </div>
+                <div className="irg-pc-status">
+                  {activePhaseId === 'custom' ? (
+                    <span className="irg-pc-status-active">✓ {lang === 'es' ? 'Dosis Activa' : 'Active Dose'}</span>
+                  ) : (
+                    <span className="irg-pc-select-hint">{lang === 'es' ? 'Ajustar' : 'Fine-Tune'}</span>
+                  )}
+                </div>
+              </button>
             </div>
 
             {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card */}
@@ -1257,7 +1369,7 @@ export default function InteractiveReconstitutionGuide({
                   type="button"
                   role="tab"
                   aria-selected={activePhaseId === 'custom'}
-                  onClick={() => triggerHaptic('light')}
+                  onClick={handleSelectCustom}
                   className={`irg-mobile-tab-btn ${activePhaseId === 'custom' ? 'active' : ''}`}
                 >
                   <span className="irg-mtb-label">{lang === 'es' ? 'LIBRE' : 'CUSTOM'}</span>
@@ -1327,7 +1439,7 @@ export default function InteractiveReconstitutionGuide({
                   type="button"
                   onClick={() => {
                     triggerHaptic('light');
-                    setDoseValue(val);
+                    handleCustomDoseChange(val);
                   }}
                   className={`irg-pill-btn ${doseValue === val ? 'active' : ''}`}
                 >
@@ -1341,7 +1453,8 @@ export default function InteractiveReconstitutionGuide({
                 type="button"
                 onClick={() => {
                   triggerHaptic('tap');
-                  setDoseValue(prev => Math.max(0.1, +(prev - (doseUnit === 'mg' ? 0.25 : 50)).toFixed(2)));
+                  const step = doseUnit === 'mg' ? 0.25 : 50;
+                  handleCustomDoseChange(Math.max(0.05, +(doseValue - step).toFixed(2)));
                 }}
                 className="irg-step-btn"
                 title="Decrease dose"
@@ -1350,13 +1463,14 @@ export default function InteractiveReconstitutionGuide({
               </button>
               <div className="irg-dose-input-wrap">
                 <input
+                  id="irg-dose-input-stepper"
                   type="number"
                   inputMode="decimal"
                   autoComplete="off"
                   step={doseUnit === 'mg' ? '0.1' : '25'}
                   min="0.05"
                   value={doseValue}
-                  onChange={(e) => setDoseValue(Math.max(0, parseFloat(e.target.value) || 0))}
+                  onChange={(e) => handleCustomDoseChange(Math.max(0, parseFloat(e.target.value) || 0))}
                   className="irg-dose-input font-mono"
                   aria-label="Target dose value"
                 />
@@ -1366,7 +1480,8 @@ export default function InteractiveReconstitutionGuide({
                 type="button"
                 onClick={() => {
                   triggerHaptic('tap');
-                  setDoseValue(prev => +(prev + (doseUnit === 'mg' ? 0.25 : 50)).toFixed(2));
+                  const step = doseUnit === 'mg' ? 0.25 : 50;
+                  handleCustomDoseChange(+(doseValue + step).toFixed(2));
                 }}
                 className="irg-step-btn"
                 title="Increase dose"

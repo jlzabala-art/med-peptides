@@ -249,10 +249,10 @@
   margin-top: 2px;
 }
 
-/* Clinical Phase Selector Cards (Google Cloud Console Standard - 3 Columns) */
+/* Clinical Phase Selector Cards (Dynamic Columns: 2 to 5+ phases + Custom) */
 .irg-phase-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 0.65rem;
   margin-bottom: 0.85rem;
 }
@@ -288,6 +288,11 @@
     gap: 3px;
     width: 100%;
     box-sizing: border-box;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .irg-mobile-segmented-bar::-webkit-scrollbar {
+    display: none;
   }
 
   .irg-mobile-tab-btn {
