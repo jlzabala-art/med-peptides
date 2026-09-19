@@ -9,6 +9,18 @@ export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
+const KNOWN_PROTOCOL_ALIASES = {
+  'weight-management-structured-12w': 'wm_001',
+  'structured-weight-management': 'wm_001',
+  'glp-1-gip-receptor-dual-agonist-titration-protocol': 'wm_001',
+  'cognitive-support-structured': 'cog_001',
+  'longevity-foundation-structured': 'lon_001',
+  'recovery-foundation-bpc-tb': 'rec_001',
+  'growth-hormone-optimization': 'gh_001',
+  'immune-modulation-cellular': 'imm_001',
+  'mitochondrial-metabolic-support': 'mit_001',
+};
+
 async function getPublicProtocol(slug) {
   if (!adminDb || !slug) return null;
   const rawTarget = decodeURIComponent(slug).trim();
@@ -16,9 +28,17 @@ async function getPublicProtocol(slug) {
 
   let doc = null;
 
+  // 0. Instant known alias resolution (O(1) doc ID lookup)
+  if (KNOWN_PROTOCOL_ALIASES[target]) {
+    const byAliasDoc = await adminDb.collection('protocols').doc(KNOWN_PROTOCOL_ALIASES[target]).get().catch(() => null);
+    if (byAliasDoc?.exists) doc = byAliasDoc;
+  }
+
   // 1. Try by exact raw doc ID (Firestore doc IDs are case-sensitive!)
-  const byExactId = await adminDb.collection('protocols').doc(rawTarget).get().catch(() => null);
-  if (byExactId?.exists) doc = byExactId;
+  if (!doc) {
+    const byExactId = await adminDb.collection('protocols').doc(rawTarget).get().catch(() => null);
+    if (byExactId?.exists) doc = byExactId;
+  }
 
   // 1b. Try by lowercased doc ID if different
   if (!doc && rawTarget !== target) {
@@ -44,7 +64,19 @@ async function getPublicProtocol(slug) {
     if (byProtoId && !byProtoId.empty) doc = byProtoId.docs[0];
   }
 
-  // 3. Fallback: Search all active/published protocols by slugified name or title
+  // 2d. Try by aliases array-contains
+  if (!doc) {
+    const byAlias = await adminDb.collection('protocols').where('aliases', 'array-contains', target).limit(1).get().catch(() => null);
+    if (byAlias && !byAlias.empty) doc = byAlias.docs[0];
+  }
+
+  // 2e. Try by legacy_slug
+  if (!doc) {
+    const byLegacy = await adminDb.collection('protocols').where('legacy_slug', '==', target).limit(1).get().catch(() => null);
+    if (byLegacy && !byLegacy.empty) doc = byLegacy.docs[0];
+  }
+
+  // 3. Fallback: Search all active/published protocols by slugified name, title, or stored aliases
   if (!doc) {
     const allActive = await adminDb.collection('protocols')
       .where('status', 'in', ['active', 'published'])
@@ -55,7 +87,13 @@ async function getPublicProtocol(slug) {
       for (const d of allActive.docs) {
         const data = d.data();
         const slugName = String(data.name || data.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        if (slugName === target || slugName.includes(target) || target.includes(slugName)) {
+        if (
+          slugName === target ||
+          data.legacy_slug === target ||
+          (Array.isArray(data.aliases) && data.aliases.includes(target)) ||
+          slugName.includes(target) ||
+          target.includes(slugName)
+        ) {
           doc = d;
           break;
         }
