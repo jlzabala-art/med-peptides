@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import ClinicalGanttTimeline from '../../../components/protocol/ClinicalGanttTimeline';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import { 
+  generateDynamicReconData, 
+  generateDynamicSupplySummary, 
+  generateDynamicWeeklySchedule 
+} from '../../../utils/clinicalDosingEngine';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../../utils/productTranslations';
 import '../../../components/product/PublicDatasheetView.css';
 import { 
@@ -121,122 +126,42 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
     ];
   }, [protocol]);
 
-  // Protocol Supply Engine (Zero-Pricing Material Yield)
+  // Protocol Supply Engine (Zero-Pricing Material Yield) — Single Source of Truth
   const supplySummary = useMemo(() => {
-    const durWeeks = Number(protocol?.durationWeeks) || 
-      (protocol?.phases ? protocol.phases.reduce((acc, p) => acc + (Number(p.durationWeeks) || 0), 0) : 12) || 12;
+    return generateDynamicSupplySummary(protocol);
+  }, [protocol]);
 
-    const compoundSupplies = items.map(it => {
-      const isMots = it.productId?.includes('motsc') || it.productId?.includes('mots-c') || it.name?.toLowerCase().includes('mots');
-      const isReta = it.productId?.includes('reta') || it.name?.toLowerCase().includes('retatrutide');
-      
-      const q = it.quantity || (isMots ? Math.ceil(durWeeks * 1) : Math.ceil(durWeeks / 4));
-      const vialStrength = it.vial_size_mg || '10 mg';
-      const name = it.product_name || it.name || (isMots ? 'MOTS-c' : isReta ? 'Retatrutide' : 'Therapeutic Compound');
-      const cadence = it.frequency || (isMots ? '3x Weekly SubQ' : 'Once Weekly SubQ');
-      const injectionsPerWeek = isMots ? 3 : 1;
-      const totalInj = injectionsPerWeek * durWeeks;
+  // Reconstitution Specs for interactive console — Single Source of Truth
+  const reconData = useMemo(() => {
+    return generateDynamicReconData(protocol);
+  }, [protocol]);
 
-      return {
-        id: it.id || it.productId,
-        name,
-        slug: it.slug || it.productId,
-        vials: q,
-        vialStrength,
-        reconstitutionBac: '2.0 mL BAC',
-        cadence,
-        totalInjections: totalInj,
-        injectionsPerWeek,
-        weeklyDose: isMots ? '15.0 mg/wk (3x 5.0mg)' : '2.0 - 6.0 mg/wk (Titrated)'
-      };
-    });
-
-    const totalVials = compoundSupplies.reduce((sum, c) => sum + c.vials, 0) || 15;
-    const totalInjections = compoundSupplies.reduce((sum, c) => sum + c.totalInjections, 0) || 48;
-    const bacVials = Math.max(3, Math.ceil((totalVials * 2.0) / 10)); // 10mL BAC vials
-
-    return {
-      durWeeks,
-      totalVials,
-      totalInjections,
-      bacVials,
-      syringes: totalInjections,
-      alcoholSwabs: totalInjections,
-      compounds: compoundSupplies
-    };
-  }, [items, protocol]);
-
-  // Reconstitution Specs for interactive console
-  const reconData = [
-    {
-      name: 'Retatrutide',
-      strength: '10 mg Vial',
-      solvent: '2.0 mL BAC Water',
-      concentration: '5.0 mg / mL (0.05 mg per Unit on U-100)',
-      storage: 'Refrigerate at 2°C – 8°C (Do Not Freeze). Aqueous shelf-life: 28 Days.',
-      steps: [
-        'Clean the rubber stopper with an isopropyl alcohol swab.',
-        'Draw exactly 2.0 mL of Bacteriostatic Water into the mixing syringe.',
-        'Gently inject BAC water down the inside glass wall of the vial (avoid foaming).',
-        'Swirl smoothly in a figure-eight motion until completely dissolved. Do not shake vigorously.'
-      ],
-      dosingScale: [
-        { phase: 'Phase 1 (W1–W4)', dose: '2.0 mg Weekly', units: '40 Units (0.40 mL)', syringe: 'U-100 Insulin Syringe' },
-        { phase: 'Phase 2 (W5–W8)', dose: '4.0 mg Weekly', units: '80 Units (0.80 mL)', syringe: 'U-100 Insulin Syringe' },
-        { phase: 'Phase 3 (W9–W12)', dose: '6.0 mg Weekly', units: '120 Units (or 2x 60 Units)', syringe: 'U-100 Insulin Syringe' }
-      ]
-    },
-    {
-      name: 'MOTS-c',
-      strength: '10 mg Vial',
-      solvent: '2.0 mL BAC Water',
-      concentration: '5.0 mg / mL (0.05 mg per Unit on U-100)',
-      storage: 'Refrigerate at 2°C – 8°C. Peptide is temperature sensitive; protect from direct light.',
-      steps: [
-        'Clean vial septum with an isopropyl alcohol swab.',
-        'Introduce 2.0 mL of cold BAC water slowly along the glass wall.',
-        'Allow lyophilized powder to wet and dissolve naturally with minimal agitation.',
-        'Administer SubQ promptly in morning fasted state for maximum cellular response.'
-      ],
-      dosingScale: [
-        { phase: 'All Phases (W1–W12)', dose: '5.0 mg per injection', units: '100 Units (1.0 mL)', syringe: 'U-100 (1.0 mL) Syringe' },
-        { phase: 'Frequency', dose: '3x Weekly (Mon / Wed / Fri)', units: '3 Vials / 4 Weeks (12 Vials Total)', syringe: 'SubQ Abdominal / Thigh' }
-      ]
-    }
-  ];
-
-  // 7-Day Administration Schedule Map (Dynamically derived from active compounds)
-  const primaryCompound = items[0]?.name || items[0]?.product_name || (protocol?.name?.includes('Tirzepatide') ? 'Tirzepatide' : 'Primary API');
-  const secondaryCompound = items[1]?.name || items[1]?.product_name || (protocol?.name?.includes('MOTS-c') ? 'MOTS-c' : null);
-
+  // 7-Day Administration Schedule Map — Single Source of Truth
   const weeklySchedule = useMemo(() => {
-    const pName = primaryCompound.replace(/\(.*\)/, '').trim();
-    const sName = secondaryCompound ? secondaryCompound.replace(/\(.*\)/, '').trim() : null;
+    return generateDynamicWeeklySchedule(protocol);
+  }, [protocol]);
 
-    if (sName) {
-      return [
-        { day: 'Monday', compound: sName, dose: 'Target Phase Dose', time: 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-        { day: 'Tuesday', compound: 'Metabolic Rest', dose: 'Hydration & Electrolytes', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-        { day: 'Wednesday', compound: sName, dose: 'Target Phase Dose', time: 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-        { day: 'Thursday', compound: 'Metabolic Rest', dose: 'Zone 2 Cardio / Hydration', time: 'All Day', route: 'Lifestyle Calibration', badgeColor: '#64748b', rest: true },
-        { day: 'Friday', compound: sName, dose: 'Target Phase Dose', time: 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-        { day: 'Saturday', compound: 'Metabolic Rest', dose: 'Nutritional Support', time: 'All Day', route: 'Nutritional Support', badgeColor: '#64748b', rest: true },
-        { day: 'Sunday', compound: pName, dose: 'Phased Administration', time: 'Evening • Pre-Sleep', route: 'SubQ (Abdomen / Thigh)', badgeColor: '#0284c7', rest: false }
-      ];
-    } else {
-      return [
-        { day: 'Monday', compound: pName, dose: 'Phased Dose', time: 'Morning • Fasted', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-        { day: 'Tuesday', compound: 'Recovery', dose: 'Oral Micronutrients', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-        { day: 'Wednesday', compound: 'Recovery', dose: 'Hydration Focus', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-        { day: 'Thursday', compound: pName, dose: 'Optional Booster (if split)', time: 'Morning', route: 'SubQ', badgeColor: '#0d9488', rest: false },
-        { day: 'Friday', compound: 'Recovery', dose: 'Electrolytes & Rest', time: 'All Day', route: 'Oral Support', badgeColor: '#64748b', rest: true },
-        { day: 'Saturday', compound: 'Recovery', dose: 'Active Lifestyle', time: 'All Day', route: 'Lifestyle', badgeColor: '#64748b', rest: true },
-        { day: 'Sunday', compound: 'Preparation', dose: 'Baseline Evaluation', time: 'Evening', route: 'Monitoring', badgeColor: '#64748b', rest: true }
-      ];
+  // Auto-clamp active tab if compounds count changes
+  useEffect(() => {
+    if (activeReconTab >= reconData.length && reconData.length > 0) {
+      setActiveReconTab(0);
     }
-  }, [primaryCompound, secondaryCompound]);
+  }, [reconData.length, activeReconTab]);
 
-  const currentRecon = reconData[activeReconTab] || reconData[0];
+  const currentRecon = reconData[activeReconTab] || reconData[0] || {
+    name: protocol?.name || 'Therapeutic Compound',
+    strength: '10 mg Vial',
+    solvent: '2.0 mL BAC Water',
+    concentration: '5.0 mg / mL',
+    storage: 'Refrigerate at 2°C – 8°C (Do Not Freeze). Protect from light. Aqueous stability: 28 days.',
+    steps: [
+      'Disinfect vial rubber septum using a sterile 70% isopropyl alcohol wipe.',
+      'Draw exactly 2.0 mL of Bacteriostatic 0.9% Benzyl Alcohol Water using a sterile mixing syringe.',
+      'Gently inject BAC water down the inside glass wall of the vial (avoid foaming).',
+      'Swirl smoothly in a figure-eight motion until completely dissolved. Do not shake vigorously.'
+    ],
+    dosingScale: []
+  };
 
   return (
     <div className="public-datasheet-root">

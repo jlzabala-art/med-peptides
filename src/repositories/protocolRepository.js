@@ -46,37 +46,28 @@ import { logPHIAccess, PHI_ACTIONS } from '../services/PHIAuditService.js';
 const protocolsCol        = ()  => collection(db, 'protocols');        // canonical source
 
 // ── Protocol Cache (performance layer - Golden Rule #2) ────────────────────────
-const PROTOCOL_CACHE_KEY = 'regenpept_protocols_cache_v2';
+const PROTOCOL_CACHE_KEY = 'regenpept_protocols_cache_v3';
 const PROTOCOL_CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
 const cache = createCacheManager(PROTOCOL_CACHE_KEY, PROTOCOL_CACHE_TTL_MS, {
   transformForStorage: (protocols) => {
     if (!Array.isArray(protocols)) return protocols;
     return protocols.map((p) => ({
+      ...p,
       id: p.id,
       name: p.name || p.title || '',
       protocol_title: p.protocol_title || p.name || '',
+      slug: p.slug || p.protocol_slug || p.id,
+      protocol_slug: p.protocol_slug || p.slug || p.id,
       category: p.category || p.therapeutic_category || '',
       therapeutic_category: p.therapeutic_category || p.category || '',
       goals: p.goals || [],
       goal: p.goal || p.primary_goal || '',
-      status: p.status || 'approved',
-      duration_weeks: p.duration_weeks || 4,
-      peptides: (p.peptides || []).map((pep) => ({
-        id: pep.id,
-        name: pep.name || pep.product_title || '',
-        weekly_dose: pep.weekly_dose || pep.dosage || '',
-        format: pep.format || 'Vial',
-      })),
-      phases: (p.phases || []).map((ph) => ({
-        phase_title: ph.phase_title || 'Phase',
-        start_week: ph.start_week || 1,
-        end_week: ph.end_week || 4,
-        drugs_used: (ph.drugs_used || []).map((d) => ({
-          product_title: d.product_title || d.name || '',
-          weekly_dose: d.weekly_dose || '',
-          format: d.format || 'Vial',
-        })),
-      })),
+      status: p.status || 'active',
+      duration_weeks: p.duration_weeks || p.durationWeeks || 4,
+      durationWeeks: p.durationWeeks || p.duration_weeks || 4,
+      duration: p.duration || `${p.durationWeeks || p.duration_weeks || 4} Weeks`,
+      peptides: p.peptides || [],
+      phases: p.phases || p.phase_blueprints || [],
     }));
   },
 });
@@ -122,9 +113,9 @@ export async function getAllProtocols({ forceRefresh = false } = {}) {
  * @returns {Promise<Array>}
  */
 export async function getProtocolTemplates({ forceRefresh = false } = {}) {
-  // Reuse the shared cache; approved filtering is client-side only
+  // Reuse the shared cache; active & approved filtering is client-side only
   const all = await getAllProtocols({ forceRefresh });
-  return all.filter((p) => !p.status || p.status === 'approved');
+  return all.filter((p) => !p.status || p.status === 'approved' || p.status === 'active');
 }
 
 /**
@@ -271,18 +262,26 @@ export async function getApprovedTemplatesByObjective(objective) {
  */
 export async function getProtocolTemplate(id) {
   try {
-    // 1. Direct document lookup by doc ID (e.g. 'wm_001')
-    const directRef  = doc(db, 'protocols', id);
+    if (!id) return null;
+    const cleanId = String(id).trim();
+
+    // 1. Direct document lookup by doc ID (e.g. 'u0b4lq4Ol664bfv2BscE' or 'wm_001')
+    const directRef  = doc(db, 'protocols', cleanId);
     const directSnap = await getDoc(directRef);
     if (directSnap.exists()) return normalizeProtocol(directSnap.data(), directSnap.id);
 
-    // 2. Fallback: query by protocol_slug field (URL slugs like 'weight-management-structured-12w')
-    const q1    = query(protocolsCol(), where('protocol_slug', '==', id));
+    // 2. Query by slug field
+    const qSlug = query(protocolsCol(), where('slug', '==', cleanId));
+    const snapSlug = await getDocs(qSlug);
+    if (!snapSlug.empty) return normalizeProtocol(snapSlug.docs[0].data(), snapSlug.docs[0].id);
+
+    // 3. Fallback: query by protocol_slug field (URL slugs like 'weight-management-structured-12w')
+    const q1    = query(protocolsCol(), where('protocol_slug', '==', cleanId));
     const snap1 = await getDocs(q1);
     if (!snap1.empty) return normalizeProtocol(snap1.docs[0].data(), snap1.docs[0].id);
 
-    // 3. Fallback: query by protocol_id field
-    const q2    = query(protocolsCol(), where('protocol_id', '==', id));
+    // 4. Fallback: query by protocol_id field
+    const q2    = query(protocolsCol(), where('protocol_id', '==', cleanId));
     const snap2 = await getDocs(q2);
     if (!snap2.empty) return normalizeProtocol(snap2.docs[0].data(), snap2.docs[0].id);
 

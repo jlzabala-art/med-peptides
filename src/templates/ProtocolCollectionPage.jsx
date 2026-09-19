@@ -165,6 +165,11 @@ function phaseToString(p) {
 }
 
 function extractPhases(doc) {
+  // 1. Direct canonical phases array
+  if (Array.isArray(doc.phases) && doc.phases.length) {
+    return doc.phases.map(phaseToString).filter(Boolean).slice(0, 4);
+  }
+  // 2. phase_blueprints
   const blueprints = Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : [];
   if (blueprints.length) {
     return blueprints
@@ -172,7 +177,7 @@ function extractPhases(doc) {
       .filter(Boolean)
       .slice(0, 4); // cap to keep cards compact
   }
-  // Firestore resolved_phases fallback
+  // 3. Firestore resolved_phases fallback
   const resolved = doc.generated_protocol_template?.resolved_phases;
   if (Array.isArray(resolved) && resolved.length) {
     return resolved.map(phaseToString).filter(Boolean).slice(0, 4);
@@ -211,6 +216,21 @@ function toStringArray(arr) {
 }
 
 function extractCompounds(doc) {
+  // 1. Direct peptides array
+  if (Array.isArray(doc.peptides) && doc.peptides.length) {
+    const list = doc.peptides.map(p => p.name || p.product_title || p.id).filter(Boolean);
+    if (list.length) return [...new Set(list)].slice(0, 5);
+  }
+  // 2. Compounds from phases
+  if (Array.isArray(doc.phases) && doc.phases.length) {
+    const names = doc.phases.flatMap(p => [
+      ...(Array.isArray(p.compounds) ? p.compounds : []),
+      ...(Array.isArray(p.items) ? p.items : []),
+      ...(Array.isArray(p.drugs) ? p.drugs : [])
+    ]).map(d => d.name || d.product_name || d.product_title || d.title || d.id).filter(Boolean);
+    if (names.length) return [...new Set(names)].slice(0, 5);
+  }
+  // 3. phase_blueprints
   const blueprints = Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : [];
   const names = blueprints
     .flatMap(p => Array.isArray(p.drugs) ? p.drugs : [])
@@ -223,6 +243,9 @@ function extractCompounds(doc) {
  * Total duration — uses variant_rules or falls back to summing phases.
  */
 function extractDuration(doc) {
+  if (doc.duration) return String(doc.duration);
+  if (doc.durationWeeks) return `${doc.durationWeeks} wks`;
+  if (doc.duration_weeks) return `${doc.duration_weeks} wks`;
   // Try to pull a representative age-group default
   const ageVariants = doc.variant_rules?.age_variants;
   if (ageVariants) {
@@ -236,8 +259,8 @@ function extractDuration(doc) {
     }
   }
   // Sum phase durations
-  const blueprints = Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : [];
-  const total = blueprints.reduce((sum, p) => sum + (p.default_duration_weeks || 0), 0);
+  const phases = Array.isArray(doc.phases) ? doc.phases : (Array.isArray(doc.phase_blueprints) ? doc.phase_blueprints : []);
+  const total = phases.reduce((sum, p) => sum + (Number(p.durationWeeks || p.duration_weeks || p.default_duration_weeks) || 0), 0);
   return total > 0 ? `${total} wks` : null;
 }
 

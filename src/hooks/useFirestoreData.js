@@ -49,12 +49,13 @@ export function useFirestoreData() {
       try {
         const q = query(
           collection(db, 'protocols'),
-          where('active', '==', true),
           limit(200)
         );
         const snap = await getDocs(q);
         if (!snap.empty) {
-          const templates = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+          const templates = snap.docs
+            .map((d) => ({ ...d.data(), id: d.id }))
+            .filter((p) => p.status === 'active' || p.status === 'approved' || p.active === true || !p.status);
           return buildProtocolIndex(templates);
         }
       } catch (err) {

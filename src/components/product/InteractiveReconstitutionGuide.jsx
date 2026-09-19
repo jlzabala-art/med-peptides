@@ -18,6 +18,7 @@ import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
 import { getReconstitutionBaseline, parseMgFromPresentation } from '../../utils/reconstitutionBaseline';
+import { resolveClinicalCompoundDose } from '../../utils/clinicalDosingEngine';
 
 // ── Static preset arrays — defined outside component to avoid re-allocation ───
 const BAC_PRESETS = Object.freeze([1.0, 2.0, 2.5, 3.0, 5.0]);
@@ -36,7 +37,8 @@ function extractDoseFromProtocolPhase(phase, phaseIndex, totalPhases, product, v
     ...(Array.isArray(phase?.compounds) ? phase.compounds : []),
     ...(Array.isArray(phase?.items) ? phase.items : []),
     ...(Array.isArray(phase?.drugs_used) ? phase.drugs_used : []),
-    ...(Array.isArray(phase?.products) ? phase.products : [])
+    ...(Array.isArray(phase?.products) ? phase.products : []),
+    ...(Array.isArray(phase?.drugs) ? phase.drugs : [])
   ];
 
   let matchedCompound = compoundsList.find(c => {
@@ -45,94 +47,12 @@ function extractDoseFromProtocolPhase(phase, phaseIndex, totalPhases, product, v
     return cName.includes(pName) || pName.includes(cName) || (cId && pName.includes(cId));
   });
 
-  if (!matchedCompound && compoundsList.length === 1) {
+  if (!matchedCompound && compoundsList.length > 0) {
     matchedCompound = compoundsList[0];
   }
 
-  const rawDose = matchedCompound?.dosage || matchedCompound?.dose || phase?.dose || phase?.dosage || '';
-  let dose = null;
-  let unit = phase?.unit || 'mg';
-
-  if (typeof rawDose === 'number') {
-    dose = rawDose;
-    unit = 'mg';
-  } else if (typeof rawDose === 'string' && rawDose.trim()) {
-    const trimmed = rawDose.trim();
-    // Direct match: e.g. "2.5 mg" or "250 mcg"
-    const directMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU|g)$/i);
-    if (directMatch) {
-      dose = parseFloat(directMatch[1]);
-      unit = directMatch[2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
-    } else if (/escalating|titrating/i.test(trimmed)) {
-      // Escalating sequence e.g. "2.5 mg subcutaneous weekly for 4 weeks, titrating to 5 mg weekly thereafter"
-      const doses = [...trimmed.matchAll(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)/gi)];
-      if (doses.length > 0) {
-        if (phaseIndex === 0) {
-          dose = parseFloat(doses[0][1]);
-          unit = doses[0][2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
-        } else if (phaseIndex < doses.length) {
-          dose = parseFloat(doses[phaseIndex][1]);
-          unit = doses[phaseIndex][2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
-        } else {
-          // If more phases than parsed doses (e.g. 5 phases), step up gracefully based on compound
-          if (pName.includes('tirzepatide')) {
-            const steps = [2.5, 5.0, 7.5, 10.0, 15.0];
-            dose = steps[Math.min(phaseIndex, steps.length - 1)];
-          } else if (pName.includes('semaglutide')) {
-            const steps = [0.25, 0.50, 1.0, 1.7, 2.4];
-            dose = steps[Math.min(phaseIndex, steps.length - 1)];
-          } else {
-            dose = parseFloat(doses[doses.length - 1][1]);
-          }
-          unit = doses[doses.length - 1][2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
-        }
-      }
-    } else {
-      // Range: e.g. "250 mcg to 500 mcg" or "2.5 - 5.0 mg"
-      const rangeMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)?\s*(?:to|-)\s*(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)/i);
-      if (rangeMatch) {
-        const u = (rangeMatch[4] || rangeMatch[2] || 'mg').toLowerCase() === 'mcg' ? 'mcg' : 'mg';
-        unit = u;
-        dose = phaseIndex === 0 ? parseFloat(rangeMatch[1]) : parseFloat(rangeMatch[3]);
-      } else {
-        const single = trimmed.match(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU|g)/i);
-        if (single) {
-          dose = parseFloat(single[1]);
-          unit = single[2].toLowerCase() === 'mcg' ? 'mcg' : 'mg';
-        }
-      }
-    }
-  }
-
-  // Compound-specific titration fallback when dose is missing or ambiguous
-  if (dose === null || isNaN(dose) || dose <= 0 || (phaseIndex > 0 && pName.includes('tirzepatide') && dose === 2.5)) {
-    if (pName.includes('tirzepatide')) {
-      const steps = [2.5, 5.0, 7.5, 10.0, 15.0];
-      dose = steps[Math.min(phaseIndex, steps.length - 1)];
-      unit = 'mg';
-    } else if (pName.includes('semaglutide') || pName.includes('cagrilintide')) {
-      const steps = [0.25, 0.50, 1.0, 1.7, 2.4];
-      dose = steps[Math.min(phaseIndex, steps.length - 1)];
-      unit = 'mg';
-    } else if (pName.includes('retatrutide')) {
-      const steps = [1.0, 2.0, 4.0, 6.0, 9.0];
-      dose = steps[Math.min(phaseIndex, steps.length - 1)];
-      unit = 'mg';
-    } else if (pName.includes('tb-500') || pName.includes('tb500')) {
-      const steps = [1.0, 2.0, 2.5];
-      dose = steps[Math.min(phaseIndex, steps.length - 1)];
-      unit = 'mg';
-    } else if (pName.includes('bpc') || pName.includes('ipamorelin') || pName.includes('cjc')) {
-      const steps = [250, 500, 750];
-      dose = steps[Math.min(phaseIndex, steps.length - 1)];
-      unit = 'mcg';
-    } else {
-      dose = +(Math.max(0.25, Math.min(2.5, (vMg || 10) * 0.1 * (phaseIndex + 1))).toFixed(2));
-      unit = 'mg';
-    }
-  }
-
-  return { dose, unit };
+  const res = resolveClinicalCompoundDose(matchedCompound, phase, phaseIndex, totalPhases, product?.name, vMg);
+  return { dose: res.doseVal, unit: res.doseUnit };
 }
 
 /**

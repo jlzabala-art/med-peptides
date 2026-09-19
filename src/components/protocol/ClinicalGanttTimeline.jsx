@@ -8,6 +8,7 @@ import {
 import '../../styles/clinicalGantt.css';
 import StatusBadge from '../ui/StatusBadge';
 import { WarehouseOriginBadge, ColdChainBadge } from '../ui/WarehouseOriginBadge';
+import { resolveClinicalCompoundDose } from '../../utils/clinicalDosingEngine';
 
 /**
  * ClinicalGanttTimeline
@@ -21,84 +22,23 @@ import { WarehouseOriginBadge, ColdChainBadge } from '../ui/WarehouseOriginBadge
  */
 function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, totalPhases = 3) {
   if (!compound) return { unitDose: 'Active', shortCadence: '1x/wk', weeklyTotal: '', isStepUp: false };
-  const rawDose = compound?.dosage || compound?.dose || '';
-  const freq = compound?.frequency || '';
-  
-  let unitDose = 'Active';
-  let shortCadence = '1x/wk';
-  let timesPerWeek = 1;
-
-  if (/daily|nightly|fasted morning|cada día/i.test(freq)) {
-    shortCadence = 'Daily';
-    timesPerWeek = 7;
-  } else if (/3x|3 times|3 veces|mon\/wed\/fri/i.test(freq)) {
-    shortCadence = '3x/wk';
-    timesPerWeek = 3;
-  } else if (/2x|2 times|twice/i.test(freq)) {
-    shortCadence = '2x/wk';
-    timesPerWeek = 2;
-  } else if (/5 days on|5d/i.test(freq)) {
-    shortCadence = '5d/wk';
-    timesPerWeek = 5;
-  } else if (/once weekly|weekly|1x|semanal/i.test(freq)) {
-    shortCadence = '1x/wk';
-    timesPerWeek = 1;
-  }
-
-  if (typeof rawDose === 'number') {
-    unitDose = `${rawDose} mg`;
-  } else if (typeof rawDose === 'string') {
-    const trimmed = rawDose.trim();
-    if (/^\d+(\.\d+)?\s*(mg|mcg|µg|UI|IU|g)$/i.test(trimmed)) {
-      unitDose = trimmed;
-    } else if (/escalating|titrating/i.test(trimmed)) {
-      const doses = trimmed.match(/\d+(\.\d+)?\s*(mg|mcg|µg|UI|IU)/gi) || [];
-      if (doses.length > 0) {
-        if (phaseIndex === 0) unitDose = doses[0];
-        else if (phaseIndex < doses.length) unitDose = doses[phaseIndex];
-        else unitDose = doses[doses.length - 1];
-      }
-    } else {
-      const rangeMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)?\s*(?:to|-)\s*(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU)/i);
-      if (rangeMatch) {
-        const unit = rangeMatch[4] || rangeMatch[2] || 'mg';
-        unitDose = phaseIndex === 0 ? `${rangeMatch[1]} ${unit}` : `${rangeMatch[3]} ${unit}`;
-      } else {
-        const single = trimmed.match(/\d+(?:\.\d+)?\s*(mg|mcg|µg|UI|IU|g)/i);
-        if (single) unitDose = single[0];
-      }
-    }
-  }
-
-  let weeklyTotal = '';
-  const numMatch = unitDose.match(/^(\d+(?:\.\d+)?)\s*(mg|mcg|µg|UI|IU|g)/i);
-  if (numMatch) {
-    const val = parseFloat(numMatch[1]);
-    const unit = numMatch[2].toLowerCase();
-    const totalVal = Math.round((val * timesPerWeek) * 100) / 100;
-    if (unit === 'mcg' && totalVal >= 1000) {
-      const mgVal = Math.round((totalVal / 1000) * 10) / 10;
-      weeklyTotal = `${mgVal} mg/wk (${totalVal.toLocaleString()} mcg)`;
-    } else {
-      weeklyTotal = `${totalVal} ${numMatch[2]}/wk`;
-    }
-  }
+  const res = resolveClinicalCompoundDose(compound, phase, phaseIndex, totalPhases);
 
   let isStepUp = false;
   if (phaseIndex > 0) {
-    const priorDose = resolveWeeklyCompoundDose(compound, null, 0, 1, totalPhases);
-    if (priorDose.unitDose !== unitDose && priorDose.unitDose !== 'Active') {
+    const priorDose = resolveClinicalCompoundDose(compound, null, 0, totalPhases);
+    if (priorDose.unitDose !== res.unitDose && priorDose.unitDose !== 'Active') {
       isStepUp = true;
     }
   }
 
   return {
-    unitDose,
-    shortCadence,
-    timesPerWeek,
-    weeklyTotal,
-    isStepUp,
-    frequency: freq || `${shortCadence} (${compound.route || 'Subcutaneous'})`,
+    unitDose: res.unitDose,
+    shortCadence: res.shortCadence,
+    timesPerWeek: res.timesPerWeek,
+    weeklyTotal: res.weeklyTotal,
+    isStepUp: res.isStepUp || isStepUp,
+    frequency: compound.frequency || `${res.shortCadence} (${compound.route || 'Subcutaneous'})`,
     route: compound.route || 'Subcutaneous',
     storage: compound.storage || '❄️ 2°C – 8°C Refrigerator',
     format: compound.format || '🧪 Sterile Lyophilized Vial'
