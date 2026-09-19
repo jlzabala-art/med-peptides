@@ -25,6 +25,8 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
+import { Mail, Lock } from 'lucide-react';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 
 const DAY_LABELS_ES = {
   Monday: 'Lunes',
@@ -48,6 +50,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   });
 
   const [copied, setCopied] = useState(false);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [activeReconTab, setActiveReconTab] = useState(0);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [dynamicTranslations, setDynamicTranslations] = useState({});
@@ -284,6 +287,19 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               </a>
             )}
 
+            {/* Institutional Inquiry Button */}
+            <button
+              type="button"
+              className="pds-btn pds-btn-contact"
+              onClick={() => setIsInquiryDrawerOpen(true)}
+              title={lang === 'es' ? 'Consulta Médica sobre este Protocolo (business@med-peptides.com)' : 'Inquire on this Protocol (business@med-peptides.com)'}
+            >
+              <Mail size={14} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Contacto' : 'Contact'}
+              </span>
+            </button>
+
             {/* Copy Link Button */}
             <button 
               type="button" 
@@ -293,6 +309,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               {copied ? <Check size={14} /> : <Copy size={14} />}
               <span className="pds-btn-label-desktop">{copied ? t.linkCopied : t.copyLink}</span>
             </button>
+
+            {/* Practitioner Sign In / Register CTA */}
+            <Link
+              href={`/login?redirect=/proto/${encodeURIComponent(slug)}`}
+              className="pds-btn pds-btn-login"
+              title={lang === 'es' ? 'Acceso Profesionales · Herramientas de titulación y personalización' : 'Practitioner Portal · Access protocol customization & patient titration'}
+            >
+              <Lock size={13} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Acceso Portal' : 'Sign In'}
+              </span>
+            </Link>
           </div>
         </div>
       </header>
@@ -1227,6 +1255,20 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         onOpenRegisterModal={() => {
           window.open('/auth/login?register=true', '_blank');
         }}
+      />
+
+      {/* Non-Intrusive Institutional Inquiry Drawer */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="protocol"
+        initialEntity={{
+          name: baseName,
+          code: protocolCode,
+          slug: slug,
+          category: category
+        }}
+        lang={lang}
       />
     </div>
   );

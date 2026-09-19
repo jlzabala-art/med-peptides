@@ -37,6 +37,8 @@ import { triggerHaptic } from '../../utils/haptics';
 import '../../styles/publicProtocolsCatalog.css';
 import '../../components/product/PublicDatasheetView.css';
 import PublicAtlasAIDrawer from '../shared/PublicAtlasAIDrawer';
+import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInquiryDrawer';
+import { Mail, Lock } from 'lucide-react';
 import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from '../../utils/protocolTranslations';
 
 // ── Goal Taxonomy Buckets ───────────────────────────────────────────────────
@@ -148,6 +150,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   const [sortBy, setSortBy] = useState('relevance');
   const [copiedId, setCopiedId] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // Default: list view
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState(() => new Set());
 
   const toggleExpanded = (id) => {
@@ -407,27 +410,18 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
               ))}
             </select>
 
-            <Link
-              href="/catalog"
-              className="pds-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                padding: '0.4rem 0.85rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(56, 189, 248, 0.4)',
-                background: 'rgba(56, 189, 248, 0.12)',
-                color: '#e0f2fe',
-                textDecoration: 'none',
-                transition: 'all 0.15s ease'
-              }}
+            {/* Institutional Inquiry Button */}
+            <button
+              type="button"
+              className="pds-btn pds-btn-contact"
+              onClick={() => setIsInquiryDrawerOpen(true)}
+              title={lang === 'es' ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
             >
-              <FlaskConical size={14} />
-              <span>{lang === 'es' ? 'Catálogo de Péptidos ↗' : 'Peptide Catalog ↗'}</span>
-            </Link>
+              <Mail size={14} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Contacto' : 'Contact'}
+              </span>
+            </button>
 
             {/* Copy Directory Link */}
             <button
@@ -454,56 +448,45 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                 {copiedDirectoryUrl ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar Enlace' : 'Copy Link')}
               </span>
             </button>
+
+            {/* Practitioner Sign In / Register CTA */}
+            <Link
+              href="/login?redirect=/proto"
+              className="pds-btn pds-btn-login"
+              title={lang === 'es' ? 'Acceso Profesionales · Herramientas de titulación y pautas avanzadas' : 'Practitioner Portal · Access protocol customization & patient titration'}
+            >
+              <Lock size={13} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Acceso Portal' : 'Sign In'}
+              </span>
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* ── Google Cloud Console Scope Switcher Tabs (Products vs Protocols) ── */}
+      {/* ── Google Cloud Console Active Scope Indicator ── */}
       <div className="proto-scope-nav-container" style={{ display: 'flex', justifyContent: 'center', margin: '0 0 1.25rem 0' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f1f5f9', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <Link
-            href="/catalog"
+        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f1f5f9', padding: '3px 8px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '8px 16px',
+              padding: '6px 14px',
               borderRadius: '6px',
-              textDecoration: 'none',
-              color: '#475569',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              transition: 'all 0.15s ease'
-            }}
-            title="Browse Formulation Vials & Active Compounds"
-          >
-            <FlaskConical size={15} />
-            <span>Products & Vials</span>
-          </Link>
-
-          <button
-            type="button"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: 'none',
               background: '#ffffff',
               color: '#003666',
               fontSize: '0.82rem',
               fontWeight: 700,
-              boxShadow: '0 1px 3px rgba(0, 54, 102, 0.12)'
+              boxShadow: '0 1px 3px rgba(0, 54, 102, 0.08)'
             }}
-            title="Browse Standardized Clinical Protocols"
           >
-            <ClipboardList size={15} />
-            <span>Clinical Protocols</span>
+            <ClipboardList size={15} style={{ color: '#0284c7' }} />
+            <span>{lang === 'es' ? 'Registro de Protocolos Clínicos' : 'Clinical Protocols Registry'}</span>
             <span style={{ background: '#003666', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '1px 7px', borderRadius: '10px' }}>
               {enrichedProtocols.length}
             </span>
-          </button>
+          </div>
         </div>
       </div>
 
@@ -1204,6 +1187,14 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           activeFilterGoal: selectedGoal,
           activeSearchQuery: searchQuery
         }}
+      />
+
+      {/* Non-Intrusive Institutional Inquiry Drawer */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="protocols_directory"
+        lang={lang}
       />
     </div>
   );

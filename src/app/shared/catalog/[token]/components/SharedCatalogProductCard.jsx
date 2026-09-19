@@ -4,7 +4,6 @@ import React from 'react';
 import { Package, CheckCircle2, ClipboardList, FileText, FlaskConical } from 'lucide-react';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
-import ClinicalInfoRequestPanel from './ClinicalInfoRequestPanel';
 
 /**
  * SharedCatalogProductCard — Renders a single product card with all its variants,
@@ -349,10 +348,6 @@ export default function SharedCatalogProductCard({
           })}
         </div>
       </div>
-
-
-      {/* Zero-Economic Clinical Information Request Micro-Panel */}
-      <ClinicalInfoRequestPanel product={prod} catalogMeta={catalogMeta} />
     </div>
   );
 }

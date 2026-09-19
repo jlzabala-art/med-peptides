@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Package,
   LogOut,
+  Mail,
 } from 'lucide-react';
 import { SHIPPING_DESTINATIONS } from '../../../../../hooks/data/useSharedCatalogState';
 import { SUPPORTED_LANGS } from '../catalogI18n';
@@ -42,6 +43,7 @@ export default function SharedCatalogTopNav({
   setRegisterSubmitted,
   setRegisterError,
   setIsRegisterModalOpen,
+  setIsInquiryDrawerOpen,
 }) {
   return (
     <header className="institutional-topbar">
@@ -115,6 +117,32 @@ export default function SharedCatalogTopNav({
             <option value="en" style={{ background: '#002544', color: '#ffffff' }}>🇺🇸 EN</option>
             <option value="es" style={{ background: '#002544', color: '#ffffff' }}>🇪🇸 ES</option>
           </select>
+
+          {/* Institutional Inquiry Button */}
+          {setIsInquiryDrawerOpen && (
+            <button
+              type="button"
+              className="pds-btn pds-btn-contact"
+              onClick={() => setIsInquiryDrawerOpen(true)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.10)',
+                color: '#e2e8f0',
+                border: '1px solid rgba(255, 255, 255, 0.22)',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                cursor: 'pointer'
+              }}
+              title={lang === 'es' ? 'Consulta Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
+            >
+              <Mail size={13} />
+              <span className="access-label-full">{lang === 'es' ? 'Contacto' : 'Contact'}</span>
+            </button>
+          )}
 
           {/* Cart Pill (Active only when items selected) */}
           {cartTotalUnits > 0 && (

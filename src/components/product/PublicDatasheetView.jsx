@@ -45,6 +45,8 @@ import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
 import { getHumanFormatName } from '../../utils/productVariantProcessing';
@@ -82,6 +84,7 @@ export default function PublicDatasheetView({
     return 'en';
   });
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inlineSvg, setInlineSvg] = useState(null);
@@ -940,9 +943,9 @@ export default function PublicDatasheetView({
               </a>
             )}
 
-            {/* Direct Navigation to Verified Product Catalog */}
-            <a
-              href="/catalog"
+            {/* Direct Navigation to Verified Clinical Protocols Directory */}
+            <Link
+              href="/proto"
               className="pds-btn pds-btn-ghost"
               style={{
                 display: 'inline-flex',
@@ -954,13 +957,26 @@ export default function PublicDatasheetView({
                 fontWeight: 600,
                 textDecoration: 'none'
               }}
-              title={lang === 'es' ? 'Explorar Catálogo General de Péptidos' : 'Browse Peptide Compendium'}
+              title={lang === 'es' ? 'Explorar Directorio de Protocolos Clínicos' : 'Browse Clinical Protocols Directory'}
             >
-              <FlaskConical size={14} />
+              <FileText size={14} />
               <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Catálogo' : 'Catalog'}
+                {lang === 'es' ? 'Protocolos' : 'Protocols'}
               </span>
-            </a>
+            </Link>
+
+            {/* Institutional Inquiry Button */}
+            <button
+              type="button"
+              className="pds-btn pds-btn-contact"
+              onClick={() => setIsInquiryDrawerOpen(true)}
+              title={lang === 'es' ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
+            >
+              <Mail size={14} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Contacto' : 'Contact'}
+              </span>
+            </button>
 
             {/* Copy Link Button */}
             <button 
@@ -982,6 +998,18 @@ export default function PublicDatasheetView({
               {copied ? <Check size={14} /> : <Copy size={14} />}
               <span className="pds-btn-label-desktop">{copied ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar Enlace' : 'Copy Link')}</span>
             </button>
+
+            {/* Practitioner Sign In / Register CTA */}
+            <Link
+              href={`/login?redirect=/p/${encodeURIComponent(slug)}`}
+              className="pds-btn pds-btn-login"
+              title={lang === 'es' ? 'Acceso Profesionales · Ver lotes analíticos, precios mayoristas y pedidos' : 'Practitioner Portal · Access certified CoAs & wholesale pricing'}
+            >
+              <Lock size={13} />
+              <span className="pds-btn-label-desktop">
+                {lang === 'es' ? 'Acceso Portal' : 'Sign In'}
+              </span>
+            </Link>
           </div>
         </div>
       </header>
@@ -1675,6 +1703,20 @@ export default function PublicDatasheetView({
         onOpenRegisterModal={() => {
           window.open('/auth/login?register=true', '_blank');
         }}
+      />
+
+      {/* Non-Intrusive Institutional Inquiry Drawer */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="product"
+        initialEntity={{
+          name: activeVariant?.name || product?.name || slug,
+          slug: slug,
+          strength: activeVariant?.vialStrength || activeStrengthObj?.name || '',
+          category: activeVariant?.category || product?.category || 'Peptides'
+        }}
+        lang={lang}
       />
     </div>
   );

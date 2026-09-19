@@ -38,6 +38,7 @@ import SharedCatalogTopNav from './components/SharedCatalogTopNav';
 import SharedCatalogHeader from './components/SharedCatalogHeader';
 import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import SharedCatalogProductListRow from './components/SharedCatalogProductListRow';
 import SharedCatalogFloatingDock from './components/SharedCatalogFloatingDock';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -285,6 +286,7 @@ export default function SharedCatalogClientView({
 
   // ── Clinic Portal Registration Modal State ───────────────────────────────
   const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = React.useState(false);
   const [registerForm, setRegisterForm] = React.useState({
     clinicName: '', // Always generic and empty by default, never pre-filled with vendor/portal names
     contactName: '',
@@ -755,6 +757,7 @@ export default function SharedCatalogClientView({
         setRegisterSubmitted={setRegisterSubmitted}
         setRegisterError={setRegisterError}
         setIsRegisterModalOpen={setIsRegisterModalOpen}
+        setIsInquiryDrawerOpen={setIsInquiryDrawerOpen}
       />
 
       <div className="catalog-container">
@@ -2033,6 +2036,14 @@ export default function SharedCatalogClientView({
         }))}
         storageKey={`catalog_${catalogId}`}
         onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
+      />
+
+      {/* Non-Intrusive Institutional Inquiry Drawer */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="catalog"
+        lang={lang}
       />
     </div>
   );
