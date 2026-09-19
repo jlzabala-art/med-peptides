@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Download, ClipboardList, Clock, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, ClipboardList, Clock, ShieldCheck, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
 import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
 
@@ -63,6 +63,7 @@ export default function SharedCatalogHeader({
 }) {
   const validity = useValidityCountdown(catalogMeta);
   const theme = pharmaMarginTheme || DEFAULT_PHARMA_MARGIN_THEME;
+  const [showVerificationDetails, setShowVerificationDetails] = useState(false);
   return (
     <>
       {/* Executive Header Card with Dynamic Pharma Margin Theme & Optimized Laptop Layout */}
@@ -167,11 +168,40 @@ export default function SharedCatalogHeader({
               <Download size={16} />
               <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
             </button>
-            <PharmaBarcodeStamp catalogCode={catalogCode} batchCode={batchCode} theme="dark" width={195} height={24} />
+
+            {/* Mobile-only toggle for technical verification assets */}
+            <button
+              type="button"
+              className="mobile-qr-toggle-btn"
+              onClick={() => setShowVerificationDetails(!showVerificationDetails)}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                color: '#e0f2fe',
+                border: '1px solid rgba(255, 255, 255, 0.22)',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontWeight: 700,
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.15s ease',
+                width: '100%'
+              }}
+            >
+              <QrCode size={14} />
+              <span>{showVerificationDetails ? 'Hide Verification & 3D QR' : 'Verify Catalog ID & 3D QR Code'}</span>
+              {showVerificationDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+
+            <div className={`barcode-desktop-wrapper ${showVerificationDetails ? 'mobile-visible' : ''}`}>
+              <PharmaBarcodeStamp catalogCode={catalogCode} batchCode={batchCode} theme="dark" width={195} height={24} />
+            </div>
           </div>
 
           {/* 3D Holographic Interactive Scan Card */}
-          <div className="header-card-qr">
+          <div className={`header-card-qr ${showVerificationDetails ? 'mobile-visible' : ''}`}>
             <Interactive3DScanCard url={shareUrl} catalogCode={catalogCode} batchCode={batchCode} recipientName={catalogMeta?.recipientName} />
           </div>
         </div>

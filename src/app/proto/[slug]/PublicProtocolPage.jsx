@@ -921,20 +921,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                       borderLeft: `4px solid ${isActiveAdmin ? activeBorderColor : '#cbd5e1'}`,
                       borderRadius: '10px',
                       padding: '0.85rem 1.15rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      flexWrap: 'wrap',
-                      gap: '0.75rem',
                       boxShadow: isActiveAdmin ? '0 2px 8px -2px rgba(2, 132, 199, 0.08)' : 'none',
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    {/* Left Column: Day Badge & Compound + Dose */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: '1 1 280px', minWidth: '220px' }}>
+                    {/* Col 1: Day Badge */}
+                    <div className="proto-roadmap-day-col">
                       <div style={{
-                        minWidth: '95px',
-                        padding: '0.3rem 0.65rem',
+                        width: '100%',
+                        padding: '0.35rem 0.65rem',
                         borderRadius: '6px',
                         background: isActiveAdmin ? `${activeBorderColor}14` : '#f1f5f9',
                         color: isActiveAdmin ? activeBorderColor : '#475569',
@@ -944,51 +939,52 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         textAlign: 'center',
                         textTransform: 'uppercase',
                         border: `1px solid ${isActiveAdmin ? `${activeBorderColor}30` : '#e2e8f0'}`,
-                        flexShrink: 0
+                        boxSizing: 'border-box'
                       }}>
                         {ws.day}
                       </div>
+                    </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <div style={{
-                          fontWeight: 800,
-                          fontSize: '0.92rem',
-                          color: isActiveAdmin ? '#0f172a' : '#475569',
-                          letterSpacing: '-0.01em',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          flexWrap: 'wrap'
-                        }}>
-                          <span>{ws.compound}</span>
-                          {isActiveAdmin && (
-                            <span style={{
-                              fontSize: '0.62rem',
-                              fontWeight: 800,
-                              background: `${activeBorderColor}18`,
-                              color: activeBorderColor,
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                              textTransform: 'uppercase'
-                            }}>
-                              {lang === 'es' ? 'Administración' : 'Admin'}
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: '0.76rem', color: isActiveAdmin ? activeBorderColor : '#64748b', fontWeight: 600 }}>
-                          {ws.dose}
-                        </div>
+                    {/* Col 2: Compound & Dose */}
+                    <div className="proto-roadmap-info-col" style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                      <div style={{
+                        fontWeight: 800,
+                        fontSize: '0.92rem',
+                        color: isActiveAdmin ? '#0f172a' : '#475569',
+                        letterSpacing: '-0.01em',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        flexWrap: 'wrap'
+                      }}>
+                        <span>{ws.compound}</span>
+                        {isActiveAdmin && (
+                          <span style={{
+                            fontSize: '0.62rem',
+                            fontWeight: 800,
+                            background: `${activeBorderColor}18`,
+                            color: activeBorderColor,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            textTransform: 'uppercase'
+                          }}>
+                            {lang === 'es' ? 'Administración' : 'Admin'}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.76rem', color: isActiveAdmin ? activeBorderColor : '#64748b', fontWeight: 600 }}>
+                        {ws.dose}
                       </div>
                     </div>
 
-                    {/* Middle Column: Timing / Schedule Note */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#64748b', flex: '1 1 180px' }}>
-                      <Clock size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                    {/* Col 3: Timing / Schedule Note (Fixed Column for Vertical Alignment) */}
+                    <div className="proto-roadmap-time-col" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#475569', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <Clock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
                       <span>{ws.time}</span>
                     </div>
 
-                    {/* Right Column: Route & Protocol Mode Tag */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                    {/* Col 4: Route & Protocol Mode Tag (Right-aligned) */}
+                    <div className="proto-roadmap-route-col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                       <span style={{
                         fontSize: '0.72rem',
                         fontWeight: 700,
@@ -996,7 +992,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         borderRadius: '6px',
                         background: isActiveAdmin ? '#eff6ff' : '#f1f5f9',
                         color: isActiveAdmin ? '#1d4ed8' : '#64748b',
-                        border: `1px solid ${isActiveAdmin ? '#bfdbfe' : '#e2e8f0'}`
+                        border: `1px solid ${isActiveAdmin ? '#bfdbfe' : '#e2e8f0'}`,
+                        whiteSpace: 'nowrap'
                       }}>
                         {ws.route}
                       </span>

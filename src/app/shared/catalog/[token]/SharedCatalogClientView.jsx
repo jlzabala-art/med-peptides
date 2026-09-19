@@ -46,11 +46,11 @@ function getPharmaMarginTheme(priceSource, meta = {}) {
     return {
       tierCode: 'INSTITUTIONAL DIRECT',
       tierLabel: 'Institutional Direct',
-      gradient: 'linear-gradient(135deg, #022c22 0%, #064e3b 50%, #047857 100%)',
-      borderColor: 'rgba(52, 211, 153, 0.35)',
-      glow: 'rgba(16, 185, 129, 0.25)',
-      accentColor: '#6ee7b7',
-      pillBg: 'rgba(6, 78, 59, 0.6)',
+      gradient: 'linear-gradient(135deg, #001f3f 0%, #003666 50%, #0284c7 100%)',
+      borderColor: 'rgba(56, 189, 248, 0.35)',
+      glow: 'rgba(14, 165, 233, 0.25)',
+      accentColor: '#7dd3fc',
+      pillBg: 'rgba(2, 132, 199, 0.25)',
     };
   }
   if (src === 'wholesaler' || src === 'wholeseller') {

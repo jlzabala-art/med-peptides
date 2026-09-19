@@ -254,6 +254,12 @@ export default function SharedCatalogStyles() {
           align-items: flex-start;
           flex-shrink: 0;
         }
+        .mobile-qr-toggle-btn {
+          display: none !important;
+        }
+        .barcode-desktop-wrapper {
+          display: block;
+        }
         .header-card-qr {
           display: flex;
           justify-content: center;
@@ -789,20 +795,74 @@ export default function SharedCatalogStyles() {
             gap: 14px !important;
             margin-top: 14px !important;
           }
+          .topbar-actions {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 6px !important;
+            margin-top: 4px !important;
+          }
+          .topbar-row-logistics {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            flex-wrap: nowrap !important;
+          }
+          .topbar-destination {
+            min-width: unset !important;
+            padding: 4px 8px !important;
+            font-size: 0.74rem !important;
+          }
+          .topbar-destination select {
+            font-size: 0.74rem !important;
+          }
+          .topbar-currency-toggle {
+            padding: 1px !important;
+          }
+          .currency-btn {
+            padding: 3px 6px !important;
+            font-size: 0.68rem !important;
+          }
+          .topbar-signin-btn, .topbar-apply-btn {
+            padding: 5px 10px !important;
+            font-size: 0.74rem !important;
+            min-height: 30px !important;
+          }
           .header-card-actions {
             width: 100% !important;
             margin-top: 0 !important;
             align-items: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
           }
           .header-card-actions button {
             width: 100% !important;
             justify-content: center !important;
             min-height: 42px !important;
           }
+          .mobile-qr-toggle-btn {
+            display: flex !important;
+          }
+          .barcode-desktop-wrapper {
+            display: none;
+            width: 100%;
+          }
+          .barcode-desktop-wrapper.mobile-visible {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+            margin-top: 8px !important;
+          }
           .header-card-qr {
+            display: none !important;
+          }
+          .header-card-qr.mobile-visible {
             width: 100% !important;
             display: flex !important;
             justify-content: center !important;
+            margin-top: 8px !important;
           }
           .dock-wrapper {
             padding: 8px 10px max(12px, env(safe-area-inset-bottom, 12px)) 10px !important;
