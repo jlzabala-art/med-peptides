@@ -1770,10 +1770,10 @@ export default function PublicDatasheetView({
         onClose={() => setIsInquiryDrawerOpen(false)}
         contextType="product"
         initialEntity={{
-          name: activeVariant?.name || product?.name || slug,
+          name: product?.canonicalName || product?.name || slug,
           slug: slug,
-          strength: activeVariant?.vialStrength || activeStrengthObj?.name || '',
-          category: activeVariant?.category || product?.category || 'Peptides'
+          strength: selectedStrength?.name || selectedStrengthId || '',
+          category: product?.category || 'Peptides'
         }}
         lang={lang}
       />
