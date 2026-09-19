@@ -1,0 +1,487 @@
+Claro. Te dejo un prompt completo para Antigravity, pensado para que trabaje directamente sobre la interfaz actual y sea especialmente estricto en no cambiar ninguna funcionalidad:
+
+TASK: UX/UI REFINEMENT OF PRODUCT VARIANT DETAILS — DESKTOP + MOBILE
+Review and improve the current Product Variant Details interface shown in the existing application.
+IMPORTANT:
+This is strictly a UX/UI and responsive-layout refinement.
+DO NOT change any functionality.
+DO NOT change business logic.
+DO NOT change data models.
+DO NOT change calculations.
+DO NOT remove any existing information.
+DO NOT add new features.
+DO NOT modify API calls, Zoho integration, RFQ behavior, Datasheet behavior, Share Web behavior, label generation, CoA functionality, Audit Trail, supplier logic, pricing logic, discounts, SKUs, batch codes, or permissions.
+The objective is to make the existing interface cleaner, more consistent, more professional and significantly better on mobile, following Google Cloud Console / Material Design 3 principles
+--------------------------------------------------
+
+1. DESIGN SYSTEM
+
+--------------------------------------------------
+Use Google Cloud Console and Material Design 3 as the main visual references.
+The interface should feel:
+
+- Professional
+- Technical
+- Pharmaceutical / B2B
+- Clean
+- Dense but highly readable
+- Consistent
+- Operational rather than decorative
+Preserve the existing overall visual identity, but improve hierarchy, spacing, alignment and component consistency.
+Use an 8px spacing system.
+Recommended spacing:
+- 8px between closely related elements
+- 16px standard internal padding
+- 16–24px between sections
+- 24px only for major separation
+Avoid excessive empty space.
+Reduce unnecessary nested cards, borders and containers.
+Prefer:
+- spacing
+- subtle dividers
+- tonal backgrounds
+- typography hierarchy
+instead of placing every information group inside another bordered rectangle.
+
+--------------------------------------------------
+1. RESPONSIVE STRATEGY
+
+--------------------------------------------------
+
+DESKTOP and MOBILE must use the same design language, but they do not need to use the same physical layout.
+Do NOT simply shrink the desktop interface for mobile.
+Desktop should remain information-dense and efficient.
+Mobile should use a dedicated adaptive vertical layout optimized for touch and scanning.
+No horizontal scrolling should be necessary for normal variant management
+--------------------------------------------------
+
+3. DESKTOP — VARIANT LIST
+
+--------------------------------------------------
+Keep the current compact variant overview concept.
+Preserve information such as:
+Dosage / Scale
+Format
+Cost Unit
+WS
+Copy
+Favorite
+Expand / Collapse
+Maintain a compact table/list presentation because it works well on desktop.
+Improve:
+
+- column alignment
+- typography
+- vertical centering
+- spacing
+- icon consistency
+- row heights
+- hover states
+- expanded-row relationship
+The expanded variant must visually feel like it belongs to the selected row.
+Do not create an excessive number of nested cards inside the expanded area.
+
+--------------------------------------------------
+1. MOBILE — MAJOR LAYOUT CHANGE
+
+--------------------------------------------------
+
+The current mobile implementation feels like a desktop table compressed into a narrow viewport.
+Replace this presentation with a native mobile card layout.
+Each variant should become a compact expandable card.
+COLLAPSED MOBILE VARIANT EXAMPLE:
+┌─────────────────────────────────┐
+│ 15 mg                    $90.00 │
+│ Vial · Lotusland Limited        │
+│                          [ WS ] │
+└─────────────────────────────────┘
+The hierarchy should be:
+PRIMARY:
+15 mg
+SECONDARY:
+Vial · Lotusland Limited
+PRIMARY COMMERCIAL VALUE:
+$90.00
+STATUS:
+WS
+The expand/collapse control should be clearly accessible but visually subtle.
+Do not repeat information unnecessarily when the card is expanded
+--------------------------------------------------
+
+5. EXPANDED MOBILE VARIANT
+
+--------------------------------------------------
+
+When expanded, structure the information vertically.
+Recommended hierarchy:
+A. Variant Header
+B. Commercial / Zoho / Audit navigation
+C. Batch / identification
+D. Datasheet / Share / Labels actions
+E. Supplier information
+F. Commercial pricing
+G. CoA / RFQ actions
+H. Zoho integration
+The information must read naturally from top to bottom
+--------------------------------------------------
+
+6. COMMERCIAL RATES / ZOHO ERP / AUDIT TRAIL
+
+--------------------------------------------------
+Redesign these controls as a consistent segmented navigation component.
+Example:
+[ Commercial Rates ] [ Zoho ERP • ] [ Audit Trail ]
+The active section should be clearly visible.
+Inactive sections should remain neutral.
+Avoid making each tab look like an unrelated button.
+On mobile, use the full available width.
+All segments should have consistent:
+
+- height
+- padding
+- typography
+- radius
+- icon sizing
+Do not change the navigation behavior.
+
+--------------------------------------------------
+1. BATCH / VIAL CODE SECTION
+
+--------------------------------------------------
+
+Simplify the visual treatment of:
+VIAL CODE / BATCH
+RP-SUPPL-15MG-15MG
+Copy
+3D Matrix
+Auto-Assigned
+The batch code should be the primary content of this section.
+Example:
+VIAL CODE / BATCH
+RP-SUPPL-15MG-15MG        [Copy]
+[ 3D Matrix ]   Auto-Assigned
+Avoid excessive borders around every individual element.
+The batch identifier should remain easy to copy.
+On mobile, allow the layout to reflow instead of squeezing all controls onto one line
+--------------------------------------------------
+
+8. DATASHEET / SHARE WEB / DOWNLOAD LABELS
+
+--------------------------------------------------
+IMPORTANT DESIGN CHANGE.
+Currently Datasheet, Share Web and Download Labels look like three different types of controls.
+They belong to the same logical action family and should therefore share one component style.
+Use the same:
+
+- height
+- border radius
+- icon size
+- typography
+- padding
+- border treatment
+- hover behavior
+- touch behavior
+DESKTOP:
+[ Datasheet ]   [ Share Web ]   [ Labels ▾ ]
+MOBILE:
+[ Datasheet ] [ Share ] [ Labels ▾ ]
+or intelligently reflow into 2 + 1 if the viewport requires it.
+Do NOT use green as the primary styling specifically for Share Web.
+Sharing is an action, not a positive commercial status.
+Use the standard neutral/blue action treatment.
+If necessary, indicate public status separately and subtly.
+Example:
+Share Web
+• Public
+Do not change any existing functionality.
+
+--------------------------------------------------
+1. SEMANTIC COLOR SYSTEM
+
+--------------------------------------------------
+
+Normalize the use of color throughout this component.
+BLUE:
+Navigation, links and primary actions.
+Examples:
+Request RFQ
+Create in Zoho
+selected navigation
+interactive links
+GREEN:
+Positive / active / commercial states.
+Examples:
+Active Rate
+WS
+Wholesale special pricing
+active commercial discount
+ORANGE:
+Warnings or incomplete states.
+Example:
+Not Synced
+NEUTRAL GREY:
+Metadata and secondary actions.
+Examples:
+dates
+SKU
+batch metadata
+Copy
+CoA secondary action
+audit metadata
+Do not use different colors merely to differentiate buttons.
+Color should communicate meaning
+--------------------------------------------------
+ 1. SUPPLIER SECTION
+
+--------------------------------------------------
+
+Simplify the Lotusland supplier block.
+Recommended hierarchy:
+Lotusland                         -25%
+Quoted: Sep 2, 2026
+● Active Rate
+Then commercial information.
+Do not give every supplier attribute its own heavy container.
+Discount should appear as a compact commercial status/chip.
+Active Rate should be clearly identifiable but visually subtle
+--------------------------------------------------
+ 1. SINGLE UNIT VS WHOLESALE
+
+--------------------------------------------------
+
+DESKTOP:
+Keep both commercial options side-by-side:
+[ SINGLE UNIT ]    [ WHOLESALE 10-KIT ]
+This provides useful direct comparison.
+MOBILE:
+Stack them vertically.
+Example:
+SINGLE UNIT
+$90.00 / unit
+List: $120.00
+MOQ: 1 unit
+----------------------------
+
+WHOLESALE 10-KIT        -44%
+$500 / kit
+$50.00 / unit
+Special Kit Price
+The Wholesale card may retain a subtle green tonal background because it represents a special commercial condition.
+Reduce the saturation/intensity of the green.
+It should feel like a highlighted pricing option, not a success notification.
+Never wrap monetary values awkwardly.
+Keep together:
+$90.00 / unit
+$500 / kit
+$50.00 / unit
+-44%
+10-kit
+--------------------------------------------------
+ 1. CURRENCY INFORMATION
+
+--------------------------------------------------
+
+Keep all current currency conversions.
+However, visually demote them relative to the principal USD commercial price.
+Example:
+$500 / kit
+≈ €460 · 1,835 د.إ
+The primary commercial value must always be visually dominant.
+Currency conversions are secondary metadata
+--------------------------------------------------
+ 1. COA + RFQ
+
+--------------------------------------------------
+
+Maintain both actions.
+Request RFQ is the stronger action.
+Attach CoA is secondary.
+DESKTOP:
+Place them together and align them consistently.
+MOBILE:
+Use a clean two-column action row where possible.
+[ Attach CoA ] [ Request RFQ ]
+Request RFQ may use the stronger blue treatment.
+Attach CoA should use a secondary outlined/tonal treatment
+--------------------------------------------------
+ 1. ZOHO ERP SECTION
+
+--------------------------------------------------
+
+Simplify the Zoho integration area.
+Separate:
+IDENTITY
+STATUS
+ACTION
+NAVIGATION
+Example:
+ZOHO ERP
+Portal SKU
+SKU-TIRZ-LOTUS
+● Not Synced
+[ Create in Zoho ]
+Full Zoho View ↗
+"Not Synced" must behave visually as a status chip.
+"Create in Zoho" is an action.
+"Full Zoho View" is navigation.
+Do not make these three concepts look like equivalent buttons.
+Preserve all existing functionality
+--------------------------------------------------
+ 1. TOUCH TARGETS
+
+--------------------------------------------------
+Mobile interaction is a priority.
+All interactive elements should provide approximately a 48x48px minimum touch target, even when the visible icon is smaller.
+Especially review:
+
+- Edit pencil icons
+- Copy icons
+- Expand/collapse
+- Dropdown arrows
+- Favorite
+- WS
+- external links
+- 3D Matrix
+- label dropdown
+Visible icons can remain approximately 20–24px.
+Increase the invisible/clickable target rather than unnecessarily enlarging the icon itself.
+
+--------------------------------------------------
+ 1. TYPOGRAPHY
+
+--------------------------------------------------
+
+Create a stronger hierarchy.
+Variant dosage:
+high emphasis
+Price:
+high emphasis
+Supplier / format:
+medium emphasis
+Section labels:
+small / medium emphasis
+Metadata:
+secondary text
+SKU / Batch:
+monospace or existing technical identifier styling where appropriate
+Avoid excessive use of uppercase.
+Use uppercase only for compact technical labels where it improves scanning
+--------------------------------------------------
+ 1. REDUCE VISUAL NOISE
+
+--------------------------------------------------
+The current expanded variant contains too many:
+
+- borders
+- rectangles
+- pills
+- different button styles
+- competing background colors
+Reduce visual noise without reducing information.
+Use ONE principal expanded variant surface.
+Inside it, organize information primarily through:
+- whitespace
+- alignment
+- typography
+- subtle dividers
+- tonal sections
+Avoid:
+card → card → card → bordered field → chip → bordered field
+unless the nested component has a clear semantic reason.
+
+--------------------------------------------------
+ 1. MOBILE TARGET STRUCTURE
+
+--------------------------------------------------
+
+Aim approximately for this structure:
+┌─────────────────────────────────┐
+│ 15 mg                    $90.00 │
+│ Vial · Lotusland Limited   [WS] │
+├─────────────────────────────────┤
+│ Commercial | Zoho ERP | Audit  │
+├─────────────────────────────────┤
+│ VIAL CODE / BATCH               │
+│ RP-SUPPL-15MG-15MG       Copy  │
+│ 3D Matrix · Auto-Assigned       │
+│                                 │
+│ Datasheet   Share   Labels ▾   │
+├─────────────────────────────────┤
+│ Lotusland                  -25% │
+│ Sep 2, 2026 · ● Active Rate    │
+│                                 │
+│ SINGLE UNIT                     │
+│ $90.00 / unit                  │
+│ List $120 · MOQ 1              │
+│                                 │
+│ WHOLESALE 10-KIT          -44% │
+│ $500 / kit                     │
+│ $50.00 / unit                  │
+│ Special Kit Price              │
+│                                 │
+│ [ Attach CoA ] [ Request RFQ ] │
+├─────────────────────────────────┤
+│ ZOHO ERP              Not Synced│
+│ SKU-TIRZ-LOTUS                  │
+│ [ Create in Zoho ]             │
+│ Full Zoho View ↗               │
+└─────────────────────────────────┘
+This is a conceptual hierarchy, not a requirement to reproduce the ASCII layout literally
+--------------------------------------------------
+ 1. DESKTOP / MOBILE CONSISTENCY
+
+--------------------------------------------------
+Desktop and mobile must clearly belong to the same application.
+Use identical:
+
+- typography system
+- semantic colors
+- button families
+- chips
+- iconography
+- border radius system
+- section terminology
+Only the layout should adapt.
+Desktop = horizontal density.
+Mobile = vertical clarity.
+
+--------------------------------------------------
+ 1. NON-NEGOTIABLE CONSTRAINT
+
+--------------------------------------------------
+DO NOT MODIFY FUNCTIONALITY.
+All existing functionality must remain exactly available.
+This includes every current:
+
+- action
+- button
+- field
+- price
+- calculation
+- supplier
+- variant
+- batch code
+- SKU
+- status
+- discount
+- currency conversion
+- dropdown
+- link
+- integration
+- RFQ action
+- CoA action
+- Datasheet action
+- Share Web action
+- Labels action
+- Zoho action
+- Audit Trail action
+- 3D Matrix action
+The objective is exclusively:
+RESPONSIVE UX
+VISUAL HIERARCHY
+CONSISTENCY
+READABILITY
+TOUCH USABILITY
+GOOGLE CLOUD / MATERIAL DESIGN ALIGNMENT
+Do not redesign unrelated screens.
+Implement the improvements directly in the existing components and preserve the current application architecture wherever possible.

@@ -2,11 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { usePathname } from 'next/navigation';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useRoleAccess } from '../../../hooks/useRoleAccess';
+import { useAuth } from '../../../context/AuthContext';
 import { Briefcase, ArrowRight, Trash2, ChevronUp, ChevronDown } from '@/lib/icons';
 
 export default function WorkspaceFloatingDock() {
+  const pathname = usePathname() || '';
+  const { user, isAuthenticated } = useAuth();
+  const { is } = useRoleAccess();
+
   const {
     workspaces,
     activeWorkspaceId,
@@ -15,7 +21,17 @@ export default function WorkspaceFloatingDock() {
     setDrawerOpen,
   } = useWorkspaceStore();
 
-  const { is } = useRoleAccess();
+  const isProfessional = is('admin') || 
+    is('medical_director') || 
+    is('doctor') || 
+    is('clinic') || 
+    is('wholesaler') || 
+    is('supplier') || 
+    is('compounding_pharmacy') || 
+    is('account_manager') || 
+    is('patient_coordinator') || 
+    is('fagron_clinic');
+
   const isDoctor = is('doctor') || is('medical_director');
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -33,8 +49,42 @@ export default function WorkspaceFloatingDock() {
     0
   );
 
-  // If SSR, drawer is open, or all workspaces empty: hide dock
-  if (!mounted || typeof document === 'undefined' || isDrawerOpen || !activeWs || totalAllItems === 0) {
+  // Check if current route is a public or unauthenticated page
+  const isPublicRoute = 
+    pathname === '/' ||
+    pathname.startsWith('/p/') ||
+    pathname.startsWith('/proto/') ||
+    pathname.startsWith('/protocol/') ||
+    pathname.startsWith('/product/') ||
+    pathname.startsWith('/quotation/') ||
+    pathname.startsWith('/shared/') ||
+    pathname.startsWith('/c/') ||
+    pathname.startsWith('/what-are-peptides') ||
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/faq') ||
+    pathname.startsWith('/about') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/session-ended') ||
+    pathname.startsWith('/verify/');
+
+  // Hide dock if:
+  // 1. Not mounted / SSR
+  // 2. Drawer is open
+  // 3. Workspaces empty
+  // 4. On public page
+  // 5. Not authenticated or not a professional user
+  if (
+    !mounted || 
+    typeof document === 'undefined' || 
+    isDrawerOpen || 
+    !activeWs || 
+    totalAllItems === 0 ||
+    isPublicRoute ||
+    !isAuthenticated ||
+    !user ||
+    !isProfessional
+  ) {
     return null;
   }
 

@@ -246,41 +246,43 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           </code>
         </div>
 
-        {/* Tab Controls */}
+        {/* Tab Controls (Material 3 Segmented Control) */}
         <div style={{
-          display: 'inline-flex',
+          display: 'flex',
           alignItems: 'center',
-          backgroundColor: '#e2e8f0',
+          backgroundColor: '#f1f5f9',
+          border: '1px solid #e2e8f0',
           padding: '3px',
           borderRadius: '8px',
-          gap: '2px',
-          maxWidth: '100%',
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch'
+          gap: '3px',
+          width: '100%',
+          maxWidth: '520px'
         }}>
           {/* Commercial Tab */}
           <button
             type="button"
             onClick={() => setActiveTab('pricing')}
             style={{
+              flex: 1,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
+              gap: '6px',
+              minHeight: '34px',
               padding: '4px 10px',
               fontSize: '0.74rem',
-              fontWeight: activeTab === 'pricing' ? 750 : 550,
-              color: activeTab === 'pricing' ? '#0f172a' : '#475569',
+              fontWeight: activeTab === 'pricing' ? 700 : 500,
+              color: activeTab === 'pricing' ? '#003666' : '#64748b',
               backgroundColor: activeTab === 'pricing' ? '#ffffff' : 'transparent',
-              border: 'none',
+              border: activeTab === 'pricing' ? '1px solid #cbd5e1' : '1px solid transparent',
               borderRadius: '6px',
               cursor: 'pointer',
-              boxShadow: activeTab === 'pricing' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+              boxShadow: activeTab === 'pricing' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
               transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap',
-              minHeight: '28px'
+              whiteSpace: 'nowrap'
             }}
           >
-            <DollarSign size={13} style={{ color: activeTab === 'pricing' ? '#059669' : '#64748b' }} />
+            <DollarSign size={13} style={{ color: activeTab === 'pricing' ? '#003666' : '#94a3b8' }} />
             <span>Commercial Rates</span>
           </button>
 
@@ -289,24 +291,26 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
             type="button"
             onClick={() => setActiveTab('zoho')}
             style={{
+              flex: 1,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
+              gap: '6px',
+              minHeight: '34px',
               padding: '4px 10px',
               fontSize: '0.74rem',
-              fontWeight: activeTab === 'zoho' ? 750 : 550,
-              color: activeTab === 'zoho' ? '#0f172a' : '#475569',
+              fontWeight: activeTab === 'zoho' ? 700 : 500,
+              color: activeTab === 'zoho' ? '#003666' : '#64748b',
               backgroundColor: activeTab === 'zoho' ? '#ffffff' : 'transparent',
-              border: 'none',
+              border: activeTab === 'zoho' ? '1px solid #cbd5e1' : '1px solid transparent',
               borderRadius: '6px',
               cursor: 'pointer',
-              boxShadow: activeTab === 'zoho' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+              boxShadow: activeTab === 'zoho' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
               transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap',
-              minHeight: '28px'
+              whiteSpace: 'nowrap'
             }}
           >
-            <Zap size={13} style={{ color: activeTab === 'zoho' ? '#6366f1' : '#64748b' }} />
+            <Zap size={13} style={{ color: activeTab === 'zoho' ? '#003666' : '#94a3b8' }} />
             <span>Zoho ERP</span>
             <span style={{
               width: '6px',
@@ -322,30 +326,32 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
             type="button"
             onClick={() => setActiveTab('audit')}
             style={{
+              flex: 1,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
+              gap: '6px',
+              minHeight: '34px',
               padding: '4px 10px',
               fontSize: '0.74rem',
-              fontWeight: activeTab === 'audit' ? 750 : 550,
-              color: activeTab === 'audit' ? '#0f172a' : '#475569',
+              fontWeight: activeTab === 'audit' ? 700 : 500,
+              color: activeTab === 'audit' ? '#003666' : '#64748b',
               backgroundColor: activeTab === 'audit' ? '#ffffff' : 'transparent',
-              border: 'none',
+              border: activeTab === 'audit' ? '1px solid #cbd5e1' : '1px solid transparent',
               borderRadius: '6px',
               cursor: 'pointer',
-              boxShadow: activeTab === 'audit' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+              boxShadow: activeTab === 'audit' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
               transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap',
-              minHeight: '28px'
+              whiteSpace: 'nowrap'
             }}
           >
-            <History size={13} style={{ color: activeTab === 'audit' ? '#0284c7' : '#64748b' }} />
+            <History size={13} style={{ color: activeTab === 'audit' ? '#003666' : '#94a3b8' }} />
             <span>Audit Trail</span>
             {timeline.length > 0 && (
               <span style={{
                 fontSize: '0.65rem',
-                backgroundColor: activeTab === 'audit' ? '#eff6ff' : '#cbd5e1',
-                color: activeTab === 'audit' ? '#0369a1' : '#475569',
+                backgroundColor: activeTab === 'audit' ? '#eff6ff' : '#e2e8f0',
+                color: activeTab === 'audit' ? '#003666' : '#64748b',
                 padding: '0 5px',
                 borderRadius: '9999px',
                 fontWeight: 700
@@ -361,24 +367,26 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               type="button"
               onClick={() => setActiveTab('yield')}
               style={{
+                flex: 1,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                justifyContent: 'center',
+                gap: '6px',
+                minHeight: '34px',
                 padding: '4px 10px',
                 fontSize: '0.74rem',
-                fontWeight: activeTab === 'yield' ? 750 : 550,
-                color: activeTab === 'yield' ? '#0f172a' : '#475569',
+                fontWeight: activeTab === 'yield' ? 700 : 500,
+                color: activeTab === 'yield' ? '#003666' : '#64748b',
                 backgroundColor: activeTab === 'yield' ? '#ffffff' : 'transparent',
-                border: 'none',
+                border: activeTab === 'yield' ? '1px solid #cbd5e1' : '1px solid transparent',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                boxShadow: activeTab === 'yield' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                boxShadow: activeTab === 'yield' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
                 transition: 'all 0.15s ease',
-                whiteSpace: 'nowrap',
-                minHeight: '28px'
+                whiteSpace: 'nowrap'
               }}
             >
-              <FlaskConical size={13} style={{ color: activeTab === 'yield' ? '#7c3aed' : '#64748b' }} />
+              <FlaskConical size={13} style={{ color: activeTab === 'yield' ? '#003666' : '#94a3b8' }} />
               <span>Bulk API Yield</span>
             </button>
           )}
@@ -505,92 +513,93 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           )}
         </div>
 
-        {/* Row 2: GCP Action Group — Datasheet · Share Web | Labels PDF Dropdown */}
+        {/* Row 2: Unified Action Family — [ Datasheet ] [ Share Web ] [ Labels ▾ ] */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          flexWrap: 'nowrap',
-          gap: '6px',
-          padding: '0.35rem 0.625rem',
+          flexWrap: 'wrap',
+          gap: '8px',
+          padding: '0.45rem 0.75rem',
           backgroundColor: '#f8fafc',
           borderTop: '1px solid #e2e8f0',
-          overflowX: 'auto',
         }}>
-          {/* Primary Navigation / Share Group (Segmented Pill) */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', borderRadius: '6px', overflow: 'hidden', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.03)', flexShrink: 0 }}>
-            {/* Datasheet */}
-            <a
-              href={canonicalMonographPath}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 9px',
-                fontSize: '0.70rem',
-                fontWeight: 600,
-                color: '#003666',
-                backgroundColor: '#ffffff',
-                borderRight: '1px solid #cbd5e1',
-                textDecoration: 'none',
-                transition: 'all 0.15s ease',
-                whiteSpace: 'nowrap'
-              }}
-              title={`Open Live Technical Datasheet for ${variant?.dosage || '10mg'} (Batch ${currentVialCode})`}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
-            >
-              <FileText size={12} color="#0284c7" />
-              <span>Datasheet</span>
-              <ExternalLink size={10} color="#94a3b8" />
-            </a>
+          {/* 1. Datasheet Action */}
+          <a
+            href={canonicalMonographPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              minHeight: '32px',
+              padding: '0 11px',
+              fontSize: '0.74rem',
+              fontWeight: 650,
+              color: '#003666',
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              whiteSpace: 'nowrap'
+            }}
+            title={`Open Live Technical Datasheet for ${variant?.dosage || '10mg'} (Batch ${currentVialCode})`}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+          >
+            <FileText size={13} color="#0284c7" />
+            <span>Datasheet</span>
+            <ExternalLink size={10} color="#94a3b8" />
+          </a>
 
-            {/* Share Web */}
-            <button
-              type="button"
-              onClick={() => setShareDrawerOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 9px',
-                fontSize: '0.70rem',
-                fontWeight: 600,
-                color: '#0d9488',
-                backgroundColor: '#ffffff',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                whiteSpace: 'nowrap'
-              }}
-              title={`Share Datasheet & Labels for ${selectedProduct?.name || 'Peptide'} (${currentVialCode})`}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f0fdfa'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
-            >
-              <Share2 size={12} color="#0d9488" />
-              <span>Share Web</span>
-            </button>
-          </div>
+          {/* 2. Share Web Action (Consistent with Datasheet, no green) */}
+          <button
+            type="button"
+            onClick={() => setShareDrawerOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              minHeight: '32px',
+              padding: '0 11px',
+              fontSize: '0.74rem',
+              fontWeight: 650,
+              color: '#003666',
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              whiteSpace: 'nowrap'
+            }}
+            title={`Share Datasheet & Labels for ${selectedProduct?.name || 'Peptide'} (${currentVialCode})`}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+          >
+            <Share2 size={13} color="#0284c7" />
+            <span>Share Web</span>
+            <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 600 }}>• Public</span>
+          </button>
 
-          {/* Vertical Divider */}
-          <span style={{ display: 'inline-block', width: '1px', height: '18px', backgroundColor: '#cbd5e1', margin: '0 2px', flexShrink: 0 }} />
-
-          {/* Labels Dropdown (GCP Action Dropdown) */}
-          <div style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }} ref={labelsDropdownRef}>
+          {/* 3. Download Labels Action Dropdown (Consistent with family) */}
+          <div style={{ position: 'relative', display: 'inline-block' }} ref={labelsDropdownRef}>
             <button
               type="button"
               onClick={() => setLabelsDropdownOpen(prev => !prev)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
-                padding: '4px 9px',
-                fontSize: '0.70rem',
-                fontWeight: 600,
-                color: '#0369a1',
-                backgroundColor: '#f0f9ff',
-                border: '1px solid #bae6fd',
+                gap: '6px',
+                minHeight: '32px',
+                padding: '0 11px',
+                fontSize: '0.74rem',
+                fontWeight: 650,
+                color: '#003666',
+                backgroundColor: labelsDropdownOpen ? '#f1f5f9' : '#ffffff',
+                border: '1px solid #cbd5e1',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
@@ -598,12 +607,12 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
                 whiteSpace: 'nowrap'
               }}
               title="Download print-ready thermal labels & batch sheets"
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = labelsDropdownOpen ? '#e0f2fe' : '#f0f9ff'; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = labelsDropdownOpen ? '#f1f5f9' : '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
             >
-              <Download size={12} color="#0369a1" />
-              <span>Download Labels</span>
-              <ChevronDown size={11} color="#0369a1" style={{ transform: labelsDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+              <Download size={13} color="#0284c7" />
+              <span>Labels</span>
+              <ChevronDown size={11} color="#64748b" style={{ transform: labelsDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
             </button>
 
             {/* Dropdown Popover */}

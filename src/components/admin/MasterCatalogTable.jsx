@@ -730,16 +730,27 @@ export default function MasterCatalogTable({
         icon={headerProps.icon}
         primaryAction={headerProps.primaryAction}
         mobileOverflowActions={headerProps.mobileOverflowActions || null}
+        viewSelector={
+          <div className="catalog-view-switcher-bar">
+            <button
+              type="button"
+              className={`catalog-view-switcher-btn ${catalogViewMode === 'table' ? 'active' : ''}`}
+              onClick={() => setCatalogViewMode('table')}
+            >
+              <Layers size={13} /> Table View
+            </button>
+            <button
+              type="button"
+              className={`catalog-view-switcher-btn ${catalogViewMode === 'genomics_matrix' ? 'active' : ''}`}
+              onClick={() => setCatalogViewMode('genomics_matrix')}
+            >
+              <Dna size={13} color={catalogViewMode === 'genomics_matrix' ? '#0284c7' : 'currentColor'} /> Genomics Matrix
+            </button>
+          </div>
+        }
         actions={
-          <div className="catalog-header-actions-wrap">
+          <div className="catalog-toolbar-actions">
             <style>{`
-              .catalog-header-actions-wrap {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                flex-wrap: wrap;
-                justify-content: flex-end;
-              }
               .catalog-view-switcher-bar {
                 display: inline-flex;
                 background: #f1f5f9;
@@ -772,17 +783,7 @@ export default function MasterCatalogTable({
                 align-items: center;
                 gap: 0.4rem;
               }
-              @media (max-width: 1024px) {
-                .catalog-header-actions-wrap {
-                  flex-direction: column !important;
-                  align-items: stretch !important;
-                  gap: 0.5rem;
-                  width: 100% !important;
-                  max-width: 100% !important;
-                  box-sizing: border-box;
-                  overflow-x: hidden;
-                  margin-top: 0.2rem;
-                }
+              @media (max-width: 768px) {
                 .catalog-view-switcher-bar {
                   width: 100% !important;
                   display: flex !important;
@@ -803,49 +804,23 @@ export default function MasterCatalogTable({
                 .catalog-toolbar-actions {
                   width: 100% !important;
                   display: flex !important;
-                  align-items: center !important;
-                  justify-content: stretch !important;
-                  box-sizing: border-box;
-                }
-                .catalog-header-actions-desktop {
-                  display: none !important;
-                }
-                .catalog-header-actions-mobile {
-                  width: 100% !important;
-                  display: flex !important;
+                  flex-direction: column !important;
+                  gap: 0.5rem !important;
                 }
               }
             `}</style>
-            <div className="catalog-view-switcher-bar">
-              <button
-                type="button"
-                className={`catalog-view-switcher-btn ${catalogViewMode === 'table' ? 'active' : ''}`}
-                onClick={() => setCatalogViewMode('table')}
-              >
-                <Layers size={13} /> Table View
-              </button>
-              <button
-                type="button"
-                className={`catalog-view-switcher-btn ${catalogViewMode === 'genomics_matrix' ? 'active' : ''}`}
-                onClick={() => setCatalogViewMode('genomics_matrix')}
-              >
-                <Dna size={13} color={catalogViewMode === 'genomics_matrix' ? '#0284c7' : 'currentColor'} /> Genomics Matrix
-              </button>
-            </div>
-            <div className="catalog-toolbar-actions">
-              {mobileHeaderActions ? (
-                <>
-                  <div className="catalog-header-actions-desktop">
-                    {headerActions || headerProps.actions}
-                  </div>
-                  <div className="catalog-header-actions-mobile" style={{ width: '100%' }}>
-                    {mobileHeaderActions}
-                  </div>
-                </>
-              ) : (
-                headerActions || headerProps.actions
-              )}
-            </div>
+            {mobileHeaderActions ? (
+              <>
+                <div className="catalog-header-actions-desktop">
+                  {headerActions || headerProps.actions}
+                </div>
+                <div className="catalog-header-actions-mobile" style={{ width: '100%' }}>
+                  {mobileHeaderActions}
+                </div>
+              </>
+            ) : (
+              headerActions || headerProps.actions
+            )}
           </div>
         }
         breadcrumbs={headerProps.breadcrumbs}

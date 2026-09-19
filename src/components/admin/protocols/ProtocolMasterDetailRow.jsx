@@ -43,148 +43,184 @@ export default function ProtocolMasterDetailRow({
       gap: '1rem',
       boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
     }}>
-      {/* 1. Header Overview Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-            Clinical Pathway Architecture
-          </span>
-          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-            {goals.map((g, idx) => (
-              <span key={idx} style={{ 
-                background: 'rgba(14, 165, 233, 0.1)', 
-                color: '#0284c7', 
-                fontSize: '0.72rem', 
-                fontWeight: 700, 
-                padding: '2px 8px', 
-                borderRadius: '9999px',
-                border: '1px solid rgba(14, 165, 233, 0.2)'
-              }}>
-                {typeof g === 'string' ? getGoalLabel(g) : (g?.label || 'Clinical Goal')}
+      {/* 1. Protocol Overview (Zone A) */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.65rem',
+        borderBottom: '1px solid #e2e8f0',
+        paddingBottom: '0.85rem'
+      }}>
+        {/* Title and Actions Row */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.85rem'
+        }}>
+          {/* Identity & Subtitle */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: '1.2rem',
+              fontWeight: 800,
+              color: '#0f172a',
+              letterSpacing: '-0.01em',
+              lineHeight: 1.25
+            }}>
+              {protocol.name || protocol.title || 'Clinical Protocol Summary'}
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                {protocol.category || protocol.therapeutic_category || 'Regenerative Therapy'}
               </span>
-            ))}
+              {goals.length > 0 && <span style={{ color: '#cbd5e1' }}>•</span>}
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {goals.map((g, idx) => (
+                  <span key={idx} style={{ 
+                    background: 'rgba(14, 165, 233, 0.08)', 
+                    color: '#0284c7', 
+                    fontSize: '0.70rem', 
+                    fontWeight: 700, 
+                    padding: '2px 8px', 
+                    borderRadius: '9999px',
+                    border: '1px solid rgba(14, 165, 233, 0.2)'
+                  }}>
+                    {typeof g === 'string' ? getGoalLabel(g) : (g?.label || 'Clinical Goal')}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <button
-            type="button"
-            onClick={() => {
-              const protocolItems = (phases || []).flatMap(phase => 
-                (phase.drugs_used || phase.products || []).map(d => ({
-                  productId: d.productId || d.id || d.product_slug,
-                  canonicalName: d.product_title || d.name || 'Protocol Medication',
-                  dosage: d.weekly_dose || d.dosage || '',
-                  quantity: 1,
-                  unitPrice: Number(d.price || 150),
-                  supplierCost: Number(d.supplierCost || 85),
-                  format: d.format || 'Vial',
-                }))
-              );
-              const itemsToLoad = protocolItems.length > 0 ? protocolItems : [{
-                productId: protocol.id,
-                canonicalName: protocol.name || protocol.title || 'Clinical Protocol Kit',
-                dosage: `${durationWeeks} wks`,
-                quantity: 1,
-                unitPrice: 250,
-                supplierCost: 120,
-                format: 'Kit'
-              }];
+          {/* Action Hierarchy: Primary (Create Rx), Secondary (Load to Workspace), Tertiary (Full Editor) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {onCreateRx && (
+              <button
+                type="button"
+                onClick={() => onCreateRx(protocol)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  minHeight: '36px',
+                  padding: '0 14px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  background: 'var(--color-primary, #003666)',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,54,102,0.25)',
+                  transition: 'background-color 0.15s ease'
+                }}
+              >
+                <ClipboardList size={15} />
+                <span>Create Prescription</span>
+              </button>
+            )}
 
-              const { addItems, activeWorkspaceId } = useWorkspaceStore.getState();
-              addItems(itemsToLoad, activeWorkspaceId);
-              notifier.success(`Loaded ${itemsToLoad.length} compound(s) from "${protocol.name || protocol.title}" into Workspace!`);
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              background: '#eff6ff',
-              color: '#1d4ed8',
-              border: '1px solid #bfdbfe',
-              cursor: 'pointer'
-            }}
-          >
-            <Briefcase size={14} />
-            <span>Load to Workspace</span>
-          </button>
-
-          {onCreateRx && (
             <button
               type="button"
-              onClick={() => onCreateRx(protocol)}
+              onClick={() => {
+                const protocolItems = (phases || []).flatMap(phase => 
+                  (phase.drugs_used || phase.products || []).map(d => ({
+                    productId: d.productId || d.id || d.product_slug,
+                    canonicalName: d.product_title || d.name || 'Protocol Medication',
+                    dosage: d.weekly_dose || d.dosage || '',
+                    quantity: 1,
+                    unitPrice: Number(d.price || 150),
+                    supplierCost: Number(d.supplierCost || 85),
+                    format: d.format || 'Vial',
+                  }))
+                );
+                const itemsToLoad = protocolItems.length > 0 ? protocolItems : [{
+                  productId: protocol.id,
+                  canonicalName: protocol.name || protocol.title || 'Clinical Protocol Kit',
+                  dosage: `${durationWeeks} wks`,
+                  quantity: 1,
+                  unitPrice: 250,
+                  supplierCost: 120,
+                  format: 'Kit'
+                }];
+
+                const { addItems, activeWorkspaceId } = useWorkspaceStore.getState();
+                addItems(itemsToLoad, activeWorkspaceId);
+                notifier.success(`Loaded ${itemsToLoad.length} compound(s) from "${protocol.name || protocol.title}" into Workspace!`);
+              }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
+                gap: '6px',
+                minHeight: '36px',
+                padding: '0 12px',
                 borderRadius: '6px',
                 fontSize: '0.78rem',
                 fontWeight: 700,
-                background: 'var(--color-primary, #003666)',
-                color: '#ffffff',
-                border: 'none',
+                background: '#eff6ff',
+                color: '#1d4ed8',
+                border: '1px solid #bfdbfe',
                 cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0,54,102,0.2)'
+                transition: 'all 0.15s ease'
               }}
             >
-              <ClipboardList size={14} />
-              <span>Create Prescription</span>
+              <Briefcase size={15} />
+              <span>Load to Workspace</span>
             </button>
-          )}
 
-          {onOpenDrawer && (
-            <button
-              type="button"
-              onClick={() => onOpenDrawer(protocol)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                background: '#ffffff',
-                color: '#334155',
-                border: '1px solid #cbd5e1',
-                cursor: 'pointer'
-              }}
-            >
-              <Edit3 size={14} />
-              <span>Full Clinical Editor</span>
-            </button>
-          )}
+            {onOpenDrawer && (
+              <button
+                type="button"
+                onClick={() => onOpenDrawer(protocol)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  minHeight: '36px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  background: '#ffffff',
+                  color: '#334155',
+                  border: '1px solid #cbd5e1',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Edit3 size={15} />
+                <span>Full Clinical Editor</span>
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* 2. Key Metrics Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
-        <div style={{ background: '#ffffff', padding: '0.6rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Treatment Duration</span>
-          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-            <Clock size={15} color="#0284c7" />
+        {/* Compact Single-Row Summary Strip (Duration | Phases | Mode) */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '0.65rem',
+          padding: '6px 12px',
+          background: '#ffffff',
+          borderRadius: '6px',
+          border: '1px solid #e2e8f0',
+          width: 'fit-content'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+            <Clock size={14} color="#0284c7" />
             <span>{durationWeeks} Weeks</span>
           </div>
-        </div>
-
-        <div style={{ background: '#ffffff', padding: '0.6rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Clinical Phases</span>
-          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-            <Layers size={15} color="#7c3aed" />
-            <span>{phases.length || 1} Phase{phases.length !== 1 ? 's' : ''}</span>
+          <span style={{ color: '#cbd5e1', fontWeight: 300 }}>|</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+            <Layers size={14} color="#7c3aed" />
+            <span>{phases.length || 1} Clinical Phase{phases.length !== 1 ? 's' : ''}</span>
           </div>
-        </div>
-
-        <div style={{ background: '#ffffff', padding: '0.6rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Therapeutic Mode</span>
-          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-            {protocol.category || protocol.therapeutic_category || 'Regenerative Medicine'}
+          <span style={{ color: '#cbd5e1', fontWeight: 300 }}>|</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>
+            <span>{protocol.category || protocol.therapeutic_category || 'Weight Management'}</span>
           </div>
         </div>
       </div>
@@ -418,32 +454,38 @@ export default function ProtocolMasterDetailRow({
         </div>
       </div>
 
-      {/* 6. Clinical Contraindications & Safety Profile */}
+      {/* 6. Clinical Contraindications (Zone B) */}
       {Array.isArray(protocol.contraindications) && protocol.contraindications.length > 0 && (
         <div style={{
-          background: '#fef2f2',
+          background: '#ffffff',
           borderRadius: '8px',
-          border: '1px solid #fecaca',
-          padding: '0.75rem 1rem'
+          border: '1px solid #e2e8f0',
+          padding: '0.75rem 1rem',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.35rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
             <ShieldAlert size={14} color="#dc2626" />
             <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Clinical Contraindications & Exclusion Criteria ({protocol.contraindications.length})
+              Contraindications & Clinical Exclusions ({protocol.contraindications.length})
             </span>
           </div>
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
             {protocol.contraindications.map((contra, idx) => (
               <span key={idx} style={{
                 fontSize: '0.72rem',
+                fontWeight: 600,
                 color: '#991b1b',
-                background: '#ffffff',
-                border: '1px solid #fca5a5',
-                padding: '2px 8px',
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                padding: '3px 8px',
                 borderRadius: '6px',
-                lineHeight: 1.4
+                lineHeight: 1.4,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
               }}>
-                ⛔ {typeof contra === 'string' ? contra : (contra.condition || JSON.stringify(contra))}
+                <span style={{ color: '#dc2626', fontSize: '0.75rem' }}>•</span>
+                <span>{typeof contra === 'string' ? contra : (contra.condition || JSON.stringify(contra))}</span>
               </span>
             ))}
           </div>

@@ -28,6 +28,7 @@ export default function DataModule({
   isSubModule = false,
   actions, // ReactNode (if provided, overrides primaryAction)
   primaryAction, // { label, icon: ActionIcon, onClick }
+  viewSelector, // View Selector (e.g. Table View | Matrix)
   kpis, // ReactNode
   filtersBar, // Legacy explicit bar, if still needed
   searchPlaceholder = "Search...",
@@ -92,16 +93,8 @@ export default function DataModule({
 
   // GCP Table Columns Customizer persistence (Golden Rule GCP standard)
   const colStorageKey = namespace ? `atlas_cols_${namespace}` : (title ? `atlas_cols_${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}` : null);
+  // Initialize identically on SSR and client to prevent React Error #418 (hydration mismatch)
   const [activeVisibleColumns, setActiveVisibleColumns] = useState(() => {
-    if (typeof window !== 'undefined' && colStorageKey) {
-      try {
-        const saved = localStorage.getItem(colStorageKey);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch (e) {}
-    }
     return (columns || []).map(c => c.key || c.header || c.label).filter(Boolean);
   });
 
@@ -203,6 +196,13 @@ export default function DataModule({
     document.body.removeChild(link);
   };
 
+  const renderSafeActionIcon = (iconCmp) => {
+    if (!iconCmp) return null;
+    if (React.isValidElement(iconCmp)) return iconCmp;
+    if (typeof iconCmp === 'function') return React.createElement(iconCmp, { size: 16 });
+    return null;
+  };
+
   const finalActions = (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
       {enableExport && (
@@ -217,7 +217,7 @@ export default function DataModule({
             className="gcp-btn-primary"
             onClick={primaryAction.onClick}
           >
-            {primaryAction.icon && <primaryAction.icon size={16} />}
+            {renderSafeActionIcon(primaryAction.icon)}
             <span>{primaryAction.label}</span>
           </button>
         )
@@ -257,13 +257,14 @@ export default function DataModule({
           }
         }
       `}</style>
-      {(!hideHeader && (title || subtitle || actions || primaryAction || enableExport || breadcrumbs)) && (
+      {(!hideHeader && (title || subtitle || actions || primaryAction || enableExport || breadcrumbs || viewSelector)) && (
         <div className="dm-header-section">
           <PageHeader
             title={title}
             subtitle={subtitle}
             icon={Icon}
             actions={finalActions}
+            viewSelector={viewSelector}
             breadcrumbs={breadcrumbs}
             panel={panel}
           />

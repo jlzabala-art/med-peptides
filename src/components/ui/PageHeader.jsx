@@ -28,21 +28,41 @@ const DASHBOARD_LABELS = {
 };
 
 /**
- * PageHeader - Unified header for all panels (Admin, Doctor, Patient, Wholeseller, Supplier, Clinic, Pharmacy)
- * Displays page icon, title, description/statistics, action buttons, and a 1-click return to Dashboard.
+ * Helper to safely render icons without throwing React Error #130
+ * if an object or React element is passed instead of a component.
+ */
+function renderSafeIcon(IconComponent, props = {}) {
+  if (!IconComponent) return null;
+  if (React.isValidElement(IconComponent)) return IconComponent;
+  if (typeof IconComponent === 'function') return <IconComponent {...props} />;
+  return null;
+}
+
+/**
+ * PageHeader - Standardized Header across Atlas Health (AI Prompts/UX Header)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Features:
+ *  - Typographic Title: No decorative thumbnails next to page titles.
+ *  - Full Title Visibility: No awkward "Product C..." truncation.
+ *  - Compact Breadcrumbs above title on desktop.
+ *  - Clear Action Hierarchy: Primary action → Secondary actions (outlined/tonal) → Tertiary navigation.
+ *  - Optional View Selector (Material Segmented Control).
+ *  - Native Mobile Reflow: [←] Title → View Selector → Primary Action → Secondary Grid.
  */
 export default function PageHeader({
   title,
   subtitle,
-  icon: Icon,
+  icon,
   actions,
+  viewSelector,
   breadcrumbs,
-  panel = 'admin', // admin | doctor | patient | wholeseller | supplier | clinic | pharmacy
+  panel = 'admin',
   iconBg,
   iconColor,
   helpTopic,
-  showAiAssistant = false, // AI button lives exclusively in the top navigation header with full page context
+  showAiAssistant = false,
   showDashboardBack = true,
+  onBack,
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -57,36 +77,17 @@ export default function PageHeader({
 
   // Auto-generate breadcrumbs if not explicitly set to false and not on root dashboard
   const finalBreadcrumbs = (breadcrumbs === false || breadcrumbs === null) ? null : (breadcrumbs || (!isDashboardRoot ? [
-    { label: `🏠 ${dashboardLabel}`, href: dashboardRoute },
+    { label: dashboardLabel, href: dashboardRoute },
     { label: title }
   ] : null));
 
-  // Determine default accent colors based on panel
-  let defaultIconColor = 'var(--color-primary, #003666)';
-  let defaultIconBg = 'var(--color-primary-subtle, rgba(0, 54, 102, 0.08))';
-
-  if (panel === 'doctor') {
-    defaultIconColor = 'var(--color-primary, #0d9488)';
-    defaultIconBg = 'rgba(13, 148, 136, 0.08)';
-  } else if (panel === 'patient') {
-    defaultIconColor = 'var(--color-primary, #7c3aed)';
-    defaultIconBg = 'rgba(124, 58, 237, 0.08)';
-  } else if (panel === 'wholeseller' || panel === 'wholesaler') {
-    defaultIconColor = 'var(--color-primary, #c2410c)';
-    defaultIconBg = 'rgba(194, 65, 12, 0.08)';
-  } else if (panel === 'supplier') {
-    defaultIconColor = 'var(--color-primary, #2563eb)';
-    defaultIconBg = 'rgba(37, 99, 235, 0.08)';
-  } else if (panel === 'clinic') {
-    defaultIconColor = 'var(--color-primary, #0284c7)';
-    defaultIconBg = 'rgba(2, 132, 199, 0.08)';
-  } else if (panel === 'pharmacy') {
-    defaultIconColor = 'var(--color-primary, #059669)';
-    defaultIconBg = 'rgba(5, 150, 105, 0.08)';
-  }
-
-  const finalIconColor = iconColor || defaultIconColor;
-  const finalIconBg = iconBg || defaultIconBg;
+  let defaultPrimaryColor = 'var(--color-primary, #003666)';
+  if (effectivePanel === 'doctor') defaultPrimaryColor = '#0d9488';
+  else if (effectivePanel === 'patient') defaultPrimaryColor = '#7c3aed';
+  else if (effectivePanel === 'wholeseller' || effectivePanel === 'wholesaler') defaultPrimaryColor = '#c2410c';
+  else if (effectivePanel === 'supplier') defaultPrimaryColor = '#2563eb';
+  else if (effectivePanel === 'clinic') defaultPrimaryColor = '#0284c7';
+  else if (effectivePanel === 'pharmacy') defaultPrimaryColor = '#059669';
 
   return (
     <>
@@ -94,13 +95,13 @@ export default function PageHeader({
         .page-header {
           display: flex;
           flex-direction: column;
-          margin-bottom: 1rem;
-          padding: 0.85rem 0;
+          margin-bottom: 0.85rem;
+          padding: 0.75rem 0;
           border-bottom: 1px solid var(--color-border, #e2e8f0);
           position: sticky;
           top: 0;
           z-index: 20;
-          background-color: rgba(248, 250, 252, 0.92);
+          background-color: rgba(248, 250, 252, 0.95);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           width: 100%;
@@ -111,55 +112,95 @@ export default function PageHeader({
         .page-header-top-row {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
           width: 100%;
-          gap: 0.75rem;
+          gap: 1rem;
         }
 
         .page-header-left {
           display: flex;
-          align-items: center;
-          gap: 0.875rem;
+          flex-direction: column;
+          align-items: flex-start;
           flex: 1 1 auto;
           min-width: 0;
         }
 
-        .page-header-icon {
+        .page-header-breadcrumbs-wrap {
+          margin-bottom: 0.25rem;
+        }
+
+        .page-header-breadcrumbs-wrap ol {
+          font-size: 0.76rem !important;
+          color: #64748b;
+        }
+
+        .page-header-title-row {
           display: flex;
           align-items: center;
+          gap: 0.5rem;
+          width: 100%;
+        }
+
+        .page-header-mobile-back-btn {
+          display: none;
+          align-items: center;
           justify-content: center;
-          width: 44px;
-          height: 44px;
-          border-radius: var(--radius-md, 8px);
+          width: 36px;
+          height: 36px;
+          min-width: 36px;
+          border-radius: 8px;
+          border: 1px solid #cbd5e1;
+          background-color: #ffffff;
+          color: #1e293b;
+          cursor: pointer;
           flex-shrink: 0;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+          transition: background-color 0.15s ease;
+        }
+
+        .page-header-mobile-back-btn:hover {
+          background-color: #f1f5f9;
         }
 
         .page-header-title {
           margin: 0;
-          font-size: 1.25rem;
+          font-size: 1.35rem;
           font-weight: 800;
-          color: var(--color-text-primary, #1e293b);
+          color: #0f172a;
           line-height: 1.25;
-          letter-spacing: -0.01em;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          letter-spacing: -0.015em;
+          white-space: normal;
+          word-break: break-word;
         }
 
         .page-header-subtitle {
-          color: var(--color-text-secondary, #64748b);
-          font-size: 0.84rem;
+          color: #64748b;
+          font-size: 0.82rem;
           line-height: 1.35;
           margin-top: 0.2rem;
           font-weight: 500;
         }
 
-        .page-header-quick-actions {
+        .page-header-right {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           flex-shrink: 0;
+        }
+
+        .page-header-actions-desktop {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-shrink: 0;
+        }
+
+        .page-header-quick-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          flex-shrink: 0;
+          padding-left: 0.4rem;
+          border-left: 1px solid #e2e8f0;
         }
 
         .page-header-quick-btn {
@@ -169,131 +210,150 @@ export default function PageHeader({
           gap: 6px;
           height: 36px;
           padding: 0 12px;
-          border-radius: var(--radius-md, 8px);
-          border: 1px solid var(--color-border, #cbd5e1);
+          border-radius: 8px;
+          border: 1px solid #cbd5e1;
           background-color: #ffffff;
-          color: var(--color-text-primary, #0f172a);
+          color: #334155;
           font-size: 0.8125rem;
-          font-weight: 700;
+          font-weight: 600;
           cursor: pointer;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+          box-shadow: 0 1px 2px rgba(0,0,0,0.02);
           transition: all 0.15s ease;
           flex-shrink: 0;
         }
 
         .page-header-quick-btn:hover {
-          background-color: var(--color-bg-hover, #f8fafc);
+          background-color: #f8fafc;
           border-color: #94a3b8;
+          color: #0f172a;
         }
 
         .page-header-help {
           width: 36px;
           padding: 0;
-          border-color: var(--color-border, #e2e8f0);
-          color: var(--text-muted, #64748b);
+          color: #64748b;
         }
 
-        .page-header-actions-row {
+        .page-header-view-selector-desktop {
+          margin-top: 0.5rem;
           width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: stretch;
-          gap: 0.5rem;
-          margin-top: 0.75rem;
-          box-sizing: border-box;
         }
 
-        .page-header-actions-desktop {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-left: auto;
-          flex-shrink: 0;
+        .page-header-view-selector-mobile {
+          display: none;
         }
 
         .page-header-actions-mobile {
           display: none;
         }
 
-        .page-header-quick-btn-label {
-          display: inline;
-        }
-
-        @media (max-width: 1024px) {
+        @media (max-width: 768px) {
           .page-header {
-            padding: 0.45rem 0;
+            padding: 0.5rem 0;
             margin-bottom: 0.5rem;
             position: static !important;
           }
+
           .page-header-top-row {
-            gap: 0.4rem;
+            gap: 0.5rem;
           }
+
           .page-header-breadcrumbs-wrap {
             display: none !important;
           }
-          .page-header-icon {
-            width: 34px;
-            height: 34px;
+
+          .page-header-mobile-back-btn {
+            display: inline-flex !important;
           }
+
           .page-header-title {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
+            line-height: 1.25;
           }
+
           .page-header-subtitle {
             display: none !important;
           }
+
+          .page-header-right {
+            margin-left: auto;
+          }
+
+          .page-header-actions-desktop {
+            display: none !important;
+          }
+
+          .page-header-quick-actions {
+            border-left: none;
+            padding-left: 0;
+          }
+
           .page-header-quick-btn {
             width: 36px;
             height: 36px;
             padding: 0;
           }
+
           .page-header-quick-btn-label {
             display: none !important;
           }
-          .page-header-actions-desktop {
+
+          .page-header-view-selector-desktop {
             display: none !important;
           }
+
+          .page-header-view-selector-mobile {
+            display: flex !important;
+            width: 100% !important;
+            margin-top: 0.5rem;
+          }
+
+          .page-header-view-selector-mobile > * {
+            width: 100% !important;
+          }
+
           .page-header-actions-mobile {
             display: flex !important;
-            margin-top: 0.45rem;
+            flex-direction: column;
+            margin-top: 0.5rem;
             width: 100% !important;
             gap: 0.5rem;
-            align-items: center;
-            justify-content: stretch;
-          }
-          .page-header-actions-mobile > * {
-            width: 100% !important;
-            flex: 1 1 100% !important;
           }
         }
       `}</style>
-      <div className={`page-header panel-${panel}`}>
+      <header className={`page-header panel-${effectivePanel}`}>
         <div className="page-header-top-row">
           <div className="page-header-left">
-            {Icon && (
-              <div
-                className="page-header-icon"
-                style={{
-                  backgroundColor: finalIconBg,
-                  color: finalIconColor,
-                }}
-              >
-                <Icon size={22} />
+            {finalBreadcrumbs && (
+              <div className="page-header-breadcrumbs-wrap">
+                <Breadcrumb items={finalBreadcrumbs} style={{ marginBottom: '2px', fontSize: '0.76rem' }} />
               </div>
             )}
-            <div style={{ minWidth: 0 }}>
-              {finalBreadcrumbs && (
-                <div className="page-header-breadcrumbs-wrap">
-                  <Breadcrumb items={finalBreadcrumbs} />
-                </div>
+            <div className="page-header-title-row">
+              {showDashboardBack && !isDashboardRoot && (
+                <button
+                  type="button"
+                  onClick={() => (onBack ? onBack() : router.push(dashboardRoute))}
+                  className="page-header-mobile-back-btn"
+                  title={`Back to ${dashboardLabel}`}
+                  aria-label="Back"
+                >
+                  <ArrowLeft size={18} />
+                </button>
               )}
-              <h2 className="page-header-title">{title}</h2>
-              {subtitle && (
-                <div className="page-header-subtitle">{subtitle}</div>
-              )}
+              <h1 className="page-header-title">{title}</h1>
             </div>
+            {subtitle && (
+              <div className="page-header-subtitle">{subtitle}</div>
+            )}
+            {viewSelector && (
+              <div className="page-header-view-selector-desktop">
+                {viewSelector}
+              </div>
+            )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+          <div className="page-header-right">
             {actions && (
               <div className="page-header-actions-desktop">
                 {actions}
@@ -305,11 +365,11 @@ export default function PageHeader({
                 {showDashboardBack && !isDashboardRoot && (
                   <button
                     type="button"
-                    onClick={() => router.push(dashboardRoute)}
+                    onClick={() => (onBack ? onBack() : router.push(dashboardRoute))}
                     className="page-header-quick-btn"
                     title={`Return to ${dashboardLabel}`}
                   >
-                    <ArrowLeft size={16} style={{ color: finalIconColor }} />
+                    <ArrowLeft size={15} style={{ color: defaultPrimaryColor }} />
                     <span className="page-header-quick-btn-label">Dashboard</span>
                   </button>
                 )}
@@ -327,7 +387,7 @@ export default function PageHeader({
                     }}
                     title={`Ask AI Assistant for ${title}`}
                   >
-                    <Sparkles size={15} style={{ color: finalIconColor }} />
+                    <Sparkles size={15} style={{ color: defaultPrimaryColor }} />
                     <span className="page-header-quick-btn-label">Ask AI</span>
                   </button>
                 )}
@@ -344,8 +404,9 @@ export default function PageHeader({
                       }));
                     }}
                     title="Module Help & Documentation"
+                    aria-label="Help"
                   >
-                    <HelpCircle size={18} />
+                    <HelpCircle size={17} />
                   </button>
                 )}
               </div>
@@ -353,12 +414,18 @@ export default function PageHeader({
           </div>
         </div>
 
+        {viewSelector && (
+          <div className="page-header-view-selector-mobile">
+            {viewSelector}
+          </div>
+        )}
+
         {actions && (
           <div className="page-header-actions-mobile">
             {actions}
           </div>
         )}
-      </div>
+      </header>
     </>
   );
 }

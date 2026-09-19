@@ -3,18 +3,19 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Institutional styles and responsive grid for ClinicalGanttTimeline.
  * Supports Laptop widescreen Gantt matrices and Mobile-First touch timeline.
+ * Aligned with Material 3 & Google Cloud Console principles.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 .clinical-gantt-container {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 1.15rem 1.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   font-family: inherit;
 }
 
@@ -24,62 +25,67 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .gantt-title-group {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
 .gantt-icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f0fdfa;
+  color: #0d9488;
+  border: 1px solid #ccfbf1;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+  flex-shrink: 0;
 }
 
 .gantt-mode-toggle {
-  display: flex;
+  display: inline-flex;
+  align-items: center;
   background: #f1f5f9;
-  border-radius: 10px;
-  padding: 4px;
-  gap: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
 }
 
 .gantt-mode-btn {
   border: none;
   background: transparent;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
+  min-height: 36px;
+  border-radius: 6px;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
+  transition: all 0.15s ease;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .gantt-mode-btn.active {
   background: #ffffff;
   color: #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* Widescreen Gantt Matrix (Laptop) */
 .gantt-matrix-wrapper {
   overflow-x: auto;
-  padding-bottom: 0.75rem;
-  border: 1px solid #f1f5f9;
-  border-radius: 14px;
+  padding-bottom: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   background: #fafafa;
 }
 
@@ -103,7 +109,7 @@
   align-items: center;
   border-bottom: 1px solid #e2e8f0;
   background: #ffffff;
-  min-height: 56px;
+  min-height: 52px;
   transition: background 0.15s ease;
 }
 
@@ -112,9 +118,9 @@
 }
 
 .gantt-compound-label {
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.85rem;
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #0f172a;
   display: flex;
   flex-direction: column;
@@ -126,39 +132,40 @@
 }
 
 .gantt-bar {
-  border-radius: 8px;
-  padding: 0.4rem 0.65rem;
-  margin: 4px 6px;
-  font-size: 0.76rem;
-  font-weight: 800;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  margin: 2px 4px;
+  font-size: 0.74rem;
+  font-weight: 700;
   color: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .gantt-bar:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
 }
 
 .gantt-bar-induction {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  background: #0284c7;
 }
 
 .gantt-bar-optimization {
-  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  background: #0d9488;
 }
 
 .gantt-bar-maintenance {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  background: #7c3aed;
 }
 
 .gantt-bar-washout {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: #d97706;
 }
 
 /* Biomarker Checkpoint Pin */
@@ -168,11 +175,11 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: 20px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 700;
   margin: 2px auto;
   cursor: pointer;
 }
@@ -182,46 +189,73 @@
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding: 0.5rem 0;
+  padding: 0.35rem 0;
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-week-chip {
   flex-shrink: 0;
-  min-width: 52px;
+  min-width: 50px;
   min-height: 48px;
-  border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.mobile-week-chip:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
 }
 
 .mobile-week-chip.active {
   background: #0d9488;
   color: #ffffff;
   border-color: #0f766e;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+}
+
+.mobile-week-chip.active span {
+  color: #ffffff !important;
 }
 
 /* Week Inspection Card */
 .week-detail-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #cbd5e1;
-  border-radius: 14px;
-  padding: 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
+/* Responsive Rules */
 @media (max-width: 768px) {
   .clinical-gantt-container {
-    padding: 1rem;
-    border-radius: 14px;
+    padding: 0.85rem;
+    border-radius: 8px;
+    gap: 0.85rem;
+  }
+
+  /* CRITICAL GOLDEN RULE: Never squeeze 14-week matrix into mobile */
+  .gantt-matrix-wrapper {
+    display: none !important;
+  }
+
+  .mobile-week-chip {
+    min-width: 52px;
+    min-height: 48px;
+  }
+
+  .gantt-mode-btn {
+    min-height: 44px;
   }
 }

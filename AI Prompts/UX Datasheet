@@ -1,0 +1,532 @@
+Este prompt está diseñado para que Antigravity haga una mejora exclusivamente visual, sin modificar ninguna funcionalidad, cálculo, contenido clínico ni navegación.
+
+Improve the visual design, consistency, and responsive presentation of the existing Med-Peptides product monograph page.
+
+This is a UI and UX refinement only. Do not change, remove, add, or reinterpret any existing functionality.
+
+Primary objective
+
+Create a more cohesive, professional, and clinically credible interface inspired by Google Cloud Console and Material Design 3 principles:
+
+* Clear information hierarchy
+* Consistent component structure
+* Predictable spacing
+* Restrained use of color
+* Strong alignment
+* Accessible contrast
+* Unified iconography
+* Responsive tables and content
+* Minimal decorative effects
+* High information density without visual clutter
+
+The final result should feel like one unified pharmaceutical platform, rather than several independently designed modules placed on the same page.
+
+Strict functional constraints
+
+Do not change:
+
+* Existing calculations
+* Reconstitution logic
+* Dose-selection logic
+* Clinical phases
+* Syringe calibration behavior
+* Sliders, selectors, buttons, links, downloads, or QR codes
+* Product or batch data
+* Tables or table content
+* Warnings, disclaimers, or regulatory text
+* Navigation
+* User roles or permissions
+* Data sources or API calls
+* Existing routes
+* Any business or clinical rule
+
+Do not add new functionality.
+
+Do not remove any information.
+
+Only improve layout, styling, visual hierarchy, component consistency, responsiveness, and accessibility.
+
+1. Standardize all first-level sections
+
+Every first-level content section must begin with the same navy-blue section header.
+
+Apply this consistently to:
+
+* Analytical Matrix and Clinical Specifications
+* Reconstitution Protocol and Dosimetry
+* Batch Traceability and Analytical Assurance
+* Physical Vial Labels and Batch Printing
+* Any other equivalent first-level module
+
+Use one reusable SectionHeader component.
+
+All first-level headers must have:
+
+* The same background color
+* The same minimum height
+* The same internal padding
+* The same border radius
+* The same title position
+* The same icon container
+* The same title typography
+* The same subtitle typography
+* The same position for badges and status indicators
+* The same responsive behavior
+
+Recommended structure:
+
+1. Icon
+2. Section title
+3. Short descriptive subtitle
+4. Optional status badge aligned consistently
+5. Optional secondary metadata or category label
+
+Use a deep navy color close to #003B70 or the current primary navy.
+
+Avoid creating different header layouts for different sections.
+
+1. Equalize section widths and spacing
+
+All first-level sections must occupy the same available width and align to the same page grid.
+
+Use:
+
+* One consistent maximum content width
+* One consistent horizontal page padding
+* The same distance between sections
+* The same internal section padding
+* The same corner radius
+* The same border treatment
+* The same subtle elevation level
+
+No section should appear narrower, wider, more indented, or visually heavier than another section at the same hierarchy level.
+
+Use an 8-pixel spacing system:
+
+* 4 px for very small internal separation
+* 8 px between tightly related elements
+* 16 px between controls
+* 24 px between component groups
+* 32 px between major blocks
+* 48 px between first-level sections where appropriate
+
+Avoid arbitrary spacing values.
+
+1. Establish a consistent page hierarchy
+
+Use the following hierarchy throughout the page:
+
+Level 1
+
+Full-width module with navy header.
+
+Level 2
+
+Subsection within the module, using a simple title, small supporting icon, and optional divider.
+
+Level 3
+
+Cards, selectors, tables, metrics, notices, and instructional content.
+
+Do not style Level 2 or Level 3 elements as if they were new first-level sections.
+
+Avoid having several competing visual headers inside the same module.
+
+The user should be able to understand the page structure immediately from scrolling alone.
+
+1. Redesign the syringe visualization
+
+Keep the existing syringe behavior, values, calibration, calculations, markings, and warning logic exactly as they are.
+
+Only redesign its visual presentation.
+
+The syringe currently looks like a separate neon-style graphic. Integrate it with the rest of the clinical interface.
+
+Use:
+
+* The same navy, blue, cyan, gray, and restrained green palette used elsewhere
+* Flat or lightly elevated Material-style surfaces
+* Subtle borders
+* Controlled gradients only where necessary to communicate liquid volume
+* The same typography as the rest of the interface
+* The same icon style
+* The same corner radius as other clinical cards
+
+Remove or significantly reduce:
+
+* Neon glow
+* Strong red illumination
+* Excessive dark contrast
+* Decorative effects that make the syringe resemble a gaming interface
+* Heavy shadows
+* Visual treatments not used elsewhere on the page
+
+The syringe barrel should remain clearly distinguishable from the background, but it should look like a precise clinical calibration diagram.
+
+Recommended visual treatment:
+
+* Neutral light or navy container consistent with the surrounding section
+* White or very light syringe barrel
+* Blue or cyan liquid fill
+* Dark navy measurement markings
+* Clear selected draw line
+* Small, restrained warning color only when a genuine warning is active
+* Consistent labels for units, milliliters, and maximum syringe capacity
+
+If the calculated dose exceeds one U-100 syringe, represent this warning clearly without making the entire visualization red.
+
+1. Normalize card design
+
+Create a common card system for:
+
+* Product specifications
+* Vial and solvent selection
+* Clinical phases
+* Calibration results
+* Analytical metrics
+* Protocol steps
+* Label-download options
+* Regulatory notices
+
+Use no more than three card variants:
+
+1. Standard information card
+2. Selected or active card
+3. Warning or regulatory card
+
+All standard cards should share:
+
+* Border radius
+* Border color
+* Internal padding
+* Typography
+* Shadow or elevation
+* Background color
+* Hover behavior where applicable
+
+Selected cards should use:
+
+* Primary blue border
+* Light blue tonal background
+* Clear selected indicator
+* No excessive glow or heavy shadow
+
+Warning cards should use amber only for real warnings.
+
+Green should be reserved for:
+
+* Verified
+* Passed
+* Available
+* Authenticated
+* Successful status
+
+Purple should be used only when it communicates a distinct, consistent category. Do not use decorative colors without semantic meaning.
+
+1. Improve clinical phase cards
+
+Preserve every clinical phase and all associated values and selection behavior.
+
+Correct the current visual collisions between:
+
+* “Phase” labels
+* Dose badges
+* Phase numbers
+* Active-state labels
+* Titles and values
+
+Create a stable card layout:
+
+* Phase number and dose badge in the top row
+* Phase name underneath
+* Primary dose value in a clearly defined position
+* State text such as “Select” or “Active phase” at the bottom
+* Equal card width and height
+* Consistent internal padding
+
+Text must never overlap at any breakpoint.
+
+Active phase styling should remain clearly visible but use the same selected-state language as all other selected controls.
+
+1. Improve typography
+
+Use a typography system aligned with Google Material principles.
+
+Recommended hierarchy:
+
+* Page title: 32–36 px
+* First-level section title: 18–20 px
+* Section subtitle: 14–16 px
+* Level 2 heading: 16–18 px
+* Card title: 14–16 px
+* Body text: 14–16 px
+* Supporting text: 13–14 px
+* Labels and metadata: 12–13 px
+
+Use consistent line heights and font weights.
+
+Avoid excessive uppercase text. Uppercase may remain for short technical labels, but long headings should use sentence case.
+
+Reduce letter spacing where the current uppercase headings feel overly expanded.
+
+Use monospace only for:
+
+* Batch codes
+* Molecular sequences
+* Technical identifiers
+* Values that require exact character differentiation
+
+1. Standardize icons
+
+Replace inconsistent emoji-style graphics with a unified icon family.
+
+Use Material Symbols or an equivalent clean outlined icon system.
+
+Apply the same:
+
+* Stroke weight
+* Optical size
+* Color
+* Container size
+* Alignment
+
+This applies especially to:
+
+* Vial presentation
+* Syringe and reconstitution
+* Batch verification
+* Laboratory analysis
+* QR and traceability
+* Shipping labels
+* Client vial labels
+* Download actions
+* Clinical notices
+
+Do not mix emojis, filled icons, outlined icons, and decorative illustrations in the same hierarchy.
+
+Icons must support recognition, not act as decoration.
+
+1. Refine colors and surfaces
+
+Retain the existing pharmaceutical blue identity, but simplify the palette.
+
+Recommended semantic structure:
+
+* Primary navy: section headers and primary emphasis
+* Primary blue: active controls, links, and selected borders
+* Cyan: secondary technical emphasis
+* Green: verification and successful quality status
+* Amber: warnings requiring attention
+* Red: critical errors only
+* Neutral gray: secondary text, dividers, and inactive controls
+* Light blue-gray: page and card backgrounds
+
+Avoid using multiple unrelated greens, blues, purples, and cyan tones for components of the same type.
+
+Use tonal surfaces instead of heavy shadows.
+
+Use one elevation treatment for standard sections and another subtle elevation treatment for interactive elements.
+
+ 1. Improve tables
+
+Preserve all table columns, rows, values, and behavior.
+
+Improve:
+
+* Header contrast
+* Cell padding
+* Column alignment
+* Row height
+* Selected-row treatment
+* Numeric alignment
+* Responsive behavior
+* Horizontal scrolling
+
+Tables must not be clipped on the right side.
+
+On narrower screens:
+
+* Place the table inside a clearly scrollable horizontal container
+* Keep column headers visible
+* Preserve the selected-row indicator
+* Do not truncate essential clinical values
+* Do not silently hide columns
+* Provide a subtle visual cue that horizontal scrolling is available
+
+Use tabular numerals for concentrations, doses, volumes, and analytical results.
+
+ 1. Align controls and selection patterns
+
+Use one visual language for all selectable controls:
+
+* Dose buttons
+* Vial strength buttons
+* BAC water volume buttons
+* Clinical phase cards
+* Unit selectors
+* Presentation selectors
+
+Every control must have the same clearly defined states:
+
+* Default
+* Hover
+* Focus
+* Selected
+* Disabled
+
+Selected controls should not use different colors or interaction patterns in different sections.
+
+Ensure all interactive targets are at least 44 × 44 px where practical.
+
+ 1. Improve notices and regulatory content
+
+Preserve the complete regulatory wording.
+
+Create consistent styles for:
+
+* Informational notice
+* Clinical warning
+* Mandatory prescriber directive
+* Verified quality notice
+* Technical reference note
+
+Use a small semantic icon, a concise heading, and readable body text.
+
+Avoid nested boxes inside boxes unless they communicate a necessary hierarchy.
+
+The “Clinical Pharmacopoeial Directive and Prescriber Responsibility Notice” should remain visually important, but its appearance must be consistent with the rest of the platform.
+
+ 1. Label and document section
+
+Bring “Physical Vial Labels and Batch Printing” into the same first-level module system.
+
+Add the standard navy header at the beginning of this section.
+
+Keep both label options functionally unchanged.
+
+Make the two label cards:
+
+* Equal width
+* Equal height
+* Structurally identical
+* Aligned by title, description, primary button, and secondary actions
+
+Use semantic color only to differentiate the shipping label from the client vial label.
+
+The document preview should use the same container width, radius, border, and spacing as the other major content blocks.
+
+ 1. Responsive behavior
+
+Optimize the page for desktop, tablet, and mobile without modifying functionality.
+
+Desktop
+
+* Use a stable centered content grid
+* Align all sections to the same width
+* Keep related controls in balanced two-column layouts
+* Avoid excessive empty space
+
+Tablet
+
+* Reduce gutters consistently
+* Allow two-column areas to stack when content becomes compressed
+* Preserve control sizes and readable typography
+
+Mobile
+
+* Stack cards vertically
+* Make action buttons full-width where appropriate
+* Allow tables to scroll horizontally
+* Keep section headers compact but consistent
+* Place badges below titles when necessary
+* Prevent all text, badge, and control overlap
+* Ensure the syringe remains legible without horizontal clipping
+
+ 1. Accessibility
+
+Follow Material Design and WCAG-oriented accessibility principles.
+
+Ensure:
+
+* Minimum 4.5:1 contrast for normal text
+* Minimum 3:1 contrast for large text and meaningful graphical elements
+* Visible keyboard focus states
+* Color is never the only indicator of status
+* Icons have accessible labels
+* Tables retain correct semantic structure
+* Buttons and links remain distinguishable
+* Selected states use more than color alone
+* Text remains readable at 200% zoom
+* No content overlaps when browser text size is increased
+* Motion is minimal and respects reduced-motion preferences
+
+ 1. Visual cleanup
+
+Remove unnecessary visual noise:
+
+* Excessive nested borders
+* Inconsistent shadows
+* Repeated labels that do not add meaning
+* Unnecessary decorative badges
+* Mixed icon styles
+* Uneven card heights
+* Misaligned controls
+* Large empty gaps
+* Inconsistent section margins
+* Text clipping and overlap
+* Unnecessary gradients and glow effects
+
+Do not make the interface visually sterile. Preserve the scientific and pharmaceutical identity while making the page calmer, more coherent, and easier to scan.
+
+ 1. Implementation approach
+
+First identify and reuse shared components and design tokens.
+
+Create or consolidate tokens for:
+
+* Colors
+* Spacing
+* Typography
+* Border radius
+* Borders
+* Elevation
+* Section width
+* Header height
+* Control height
+* Icon size
+* Focus ring
+
+Prefer reusable components such as:
+
+* SectionHeader
+* ContentSection
+* InformationCard
+* MetricCard
+* StatusBadge
+* SelectionButton
+* ClinicalNotice
+* ResponsiveDataTable
+* SectionIcon
+* SyringeVisualization
+
+Do not duplicate styles for individual sections.
+
+Acceptance criteria
+
+The redesign is complete only when:
+
+* Every first-level section begins with the same navy header pattern
+* Every first-level section occupies the same page width
+* Section spacing is consistent
+* Equivalent cards have equal dimensions
+* The syringe matches the visual language of the rest of the application
+* No clinical phase text overlaps
+* No table is clipped
+* All existing functionality works exactly as before
+* No data, calculations, copy, routes, or interactions have changed
+* The layout works on desktop, tablet, and mobile
+* Keyboard focus is visible
+* Color contrast is accessible
+* The result looks like a unified Google-quality clinical platform
+
+Before finishing, compare the updated interface against the current screenshots and verify that all changes are visual only.

@@ -124,10 +124,10 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
           <div className="ptc-header-titles">
             <div className="ptc-header-meta-row">
               <span className="ptc-header-category">
-                Batch Traceability &amp; Analytical Assurance
+                {t.batchTraceabilitySection || 'Batch Traceability & Analytical Assurance'}
               </span>
               <span className="ptc-verified-badge">
-                <CheckCircle2 size={11} /> VERIFIED AUTHENTIC
+                <CheckCircle2 size={11} /> {t.verifiedAuthenticTag || 'VERIFIED AUTHENTIC'}
               </span>
             </div>
             <h3 className="ptc-header-title">
@@ -138,7 +138,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
 
         <div className="ptc-cert-badge">
           <Award size={15} color="#facc15" />
-          <span>Dual-Stage RP-HPLC &amp; LC-MS Certified Release</span>
+          <span>{t.dualStageCertified || 'Dual-Stage RP-HPLC & LC-MS Certified Release'}</span>
         </div>
       </div>
 

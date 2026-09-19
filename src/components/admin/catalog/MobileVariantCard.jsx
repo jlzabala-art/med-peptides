@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Package, MoreVertical, Archive, Trash2, Edit3, ShoppingCart, ShieldCheck, DollarSign, TrendingUp, History, FileText, Send } from 'lucide-react';
+import { Package, MoreVertical, Archive, Trash2, Edit3, ShoppingCart, ShieldCheck, DollarSign, TrendingUp, History, FileText, Send, ChevronDown, ChevronRight } from 'lucide-react';
 import MobileActionSheet from '../../ui/MobileActionSheet';
 import VariantTimelinePanel from './VariantTimelinePanel';
 import { formatNumberAdaptive, formatCurrencyAdaptive } from '../../../utils/formatters';
@@ -62,8 +62,8 @@ export default function MobileVariantCard({
   const unitLabel = priceView === 'kit' ? 'kit' : 'unit';
 
   const primaryPrice = convertedPrice !== null 
-    ? `${sym}${formatNumberAdaptive(convertedPrice)}${suf} / ${unitLabel}` 
-    : 'Not priced';
+    ? `${sym}${formatNumberAdaptive(convertedPrice)}${suf}` 
+    : '—';
 
   // Normalized $/g and $/mg
   let normalizedPrice = null;
@@ -84,37 +84,91 @@ export default function MobileVariantCard({
     <>
       <div 
         className="bg-white rounded-lg border border-slate-200 overflow-hidden relative"
-        style={{ padding: '14px', marginBottom: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+        style={{ marginBottom: '10px', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
       >
-        {/* Header: Format and Supplier */}
-        <div className="flex justify-between items-start mb-3 gap-2">
-          <div className="flex-1">
-            <h3 className="text-[14px] font-medium text-slate-800 m-0 leading-tight flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-slate-900">{dosage || displayFormat}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-600">{displayFormat}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500 font-normal">{supplier}</span>
-            </h3>
+        {/* Native Mobile Collapsed Header (UX Variant Prompt Spec) */}
+        <div 
+          onClick={() => setShowTimeline(!showTimeline)}
+          style={{
+            padding: '12px 14px',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+            backgroundColor: showTimeline ? '#f8fafc' : '#ffffff',
+            borderBottom: showTimeline ? '1px solid #e2e8f0' : 'none',
+            userSelect: 'none'
+          }}
+        >
+          {/* Top Row: Dosage (Primary) vs Commercial Price */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#003666', display: 'flex', alignItems: 'center' }}>
+                {showTimeline ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+              </span>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
+                {dosage || displayFormat}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 850, color: '#0f172a' }}>
+                {primaryPrice}
+              </span>
+              <button 
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsActionSheetOpen(true);
+                }}
+                style={{
+                  minWidth: '44px',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#94a3b8',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '50%',
+                  marginRight: '-8px'
+                }}
+                aria-label="Open variant actions"
+              >
+                <MoreVertical size={18} />
+              </button>
+            </div>
           </div>
-          
-          <button 
-            onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsActionSheetOpen(true);
-            }}
-            className="flex-shrink-0 flex items-center justify-center w-8 h-8 -mt-1 -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors"
-            style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
-            aria-label={`Open actions`}
-          >
-            <MoreVertical size={18} />
-          </button>
+
+          {/* Sub Row: Format · Supplier on Left, Channel Status [ WS ] on Right */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '26px' }}>
+            <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500 }}>
+              {displayFormat} • {supplier}
+            </span>
+
+            <span 
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                padding: '2px 7px',
+                borderRadius: '4px',
+                textTransform: 'uppercase',
+                backgroundColor: activeChannelMeta.badgeBg || '#eff6ff',
+                borderColor: activeChannelMeta.badgeBorder || '#bfdbfe',
+                color: activeChannelMeta.color || '#003666',
+                border: '1px solid'
+              }}
+            >
+              {activeChannelMeta.shortLabel || 'WS'}
+            </span>
+          </div>
         </div>
 
         {/* Dynamic Details (Purity, Sample Type, TAT) */}
-        {(purity || sampleType || turnaroundTime) && (
-          <div className="mb-3 flex flex-wrap gap-y-2 gap-x-4 text-xs text-slate-600">
+        {(purity || sampleType || turnaroundTime) && !showTimeline && (
+          <div style={{ padding: '0 14px 10px 40px', display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.72rem', color: '#64748b' }}>
             {purity && (
               <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-100 font-medium">
                 Purity: {purity}
@@ -133,11 +187,10 @@ export default function MobileVariantCard({
           </div>
         )}
 
-        {/* Pricing Section: Single Channel vs Waterfall Matrix */}
-        {commercialChannel === 'all' ? (
-          /* Waterfall 2x2 Grid for Mobile */
-          <div className="pt-3 border-t border-slate-100">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+        {/* Collapsed Secondary Pricing & Channel Preview (shown only when collapsed) */}
+        {!showTimeline && commercialChannel === 'all' && (
+          <div style={{ padding: '0 14px 12px 14px', borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               Commercial Channels ({unitLabel.toUpperCase()})
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -148,7 +201,7 @@ export default function MobileVariantCard({
                 return (
                   <div className="bg-slate-50 p-2 rounded border border-slate-200">
                     <div className="text-[10px] font-bold text-slate-500">📦 Cost (Master)</div>
-                    <div className="text-[13px] font-bold text-slate-800">
+                    <div className="text-[12px] font-bold text-slate-800">
                       {cP != null ? `${sym}${formatNumberAdaptive(cP)}${suf}` : '—'}
                     </div>
                   </div>
@@ -167,123 +220,19 @@ export default function MobileVariantCard({
                       <span>🏢 Wholesale</span>
                       {m.marginPct != null && <span>+{m.marginPct}%</span>}
                     </div>
-                    <div className="text-[13px] font-bold text-blue-900">
-                      {cP != null ? `${sym}${formatNumberAdaptive(cP)}${suf}` : '—'}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* 3. Clinic */}
-              {(() => {
-                const cost = resolveChannelPrice(row, 'cost', priceView).price;
-                const sell = resolveChannelPrice(row, 'clinic', priceView).price;
-                const m = calculateMarginMetrics(cost, sell);
-                const cP = sell != null ? sell * multiplier : null;
-                return (
-                  <div className="bg-emerald-50/60 p-2 rounded border border-emerald-200/80">
-                    <div className="text-[10px] font-bold text-emerald-700 flex justify-between items-center">
-                      <span>🏥 Clinic</span>
-                      {m.marginPct != null && <span>+{m.marginPct}%</span>}
-                    </div>
-                    <div className="text-[13px] font-bold text-emerald-900">
-                      {cP != null ? `${sym}${formatNumberAdaptive(cP)}${suf}` : '—'}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* 4. Retail */}
-              {(() => {
-                const cost = resolveChannelPrice(row, 'cost', priceView).price;
-                const sell = resolveChannelPrice(row, 'retail', priceView).price;
-                const m = calculateMarginMetrics(cost, sell);
-                const cP = sell != null ? sell * multiplier : null;
-                return (
-                  <div className="bg-purple-50/60 p-2 rounded border border-purple-200/80">
-                    <div className="text-[10px] font-bold text-purple-700 flex justify-between items-center">
-                      <span>🛍️ Retail</span>
-                      {m.marginPct != null && <span>+{m.marginPct}%</span>}
-                    </div>
-                    <div className="text-[13px] font-bold text-purple-900">
+                    <div className="text-[12px] font-bold text-blue-900">
                       {cP != null ? `${sym}${formatNumberAdaptive(cP)}${suf}` : '—'}
                     </div>
                   </div>
                 );
               })()}
             </div>
-          </div>
-        ) : (
-          /* Single Selected Channel View */
-          <div className="flex flex-col gap-1.5 pt-3 border-t border-slate-100">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span 
-                  className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase"
-                  style={{
-                    backgroundColor: activeChannelMeta.badgeBg,
-                    borderColor: activeChannelMeta.badgeBorder,
-                    color: activeChannelMeta.color
-                  }}
-                >
-                  {activeChannelMeta.icon} {activeChannelMeta.shortLabel}
-                </span>
-                <span className="text-[15px] font-bold text-slate-900">
-                  {primaryPrice}
-                </span>
-              </div>
-              
-              {(normalizedPriceGram || normalizedPrice) && (
-                <div className="flex flex-col items-end text-right bg-slate-50 px-2 py-0.5 rounded border border-slate-100 leading-tight">
-                  {normalizedPriceGram && (
-                    <span className="text-[11px] font-bold text-slate-800">
-                      {normalizedPriceGram}
-                    </span>
-                  )}
-                  {normalizedPrice && (
-                    <span className="text-[9.5px] font-medium text-slate-500">
-                      {normalizedPrice}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Margin Info Pill if channel !== 'cost' */}
-            {commercialChannel !== 'cost' && marginInfo.marginPct != null && (
-              <div className="flex items-center gap-2 text-xs flex-wrap mt-0.5">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[11px] ${
-                  marginInfo.marginPct >= 30 ? 'bg-emerald-100 text-emerald-800' :
-                  marginInfo.marginPct >= 15 ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'
-                }`}>
-                  <TrendingUp size={11} /> {marginInfo.marginPct}% Margin
-                </span>
-                <span className="text-slate-500 text-[11px]">
-                  +{sym}{formatNumberAdaptive(marginInfo.profitDelta * multiplier)}{suf} profit (Cost: {sym}{formatNumberAdaptive(rawCostUSD * multiplier)}{suf})
-                </span>
-              </div>
-            )}
           </div>
         )}
 
-        {/* Change History Toggle for Mobile */}
-        <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowTimeline(!showTimeline);
-            }}
-            className="text-[11px] font-semibold text-sky-700 hover:text-sky-900 flex items-center gap-1.5 py-1 px-1.5 rounded hover:bg-sky-50 transition-colors"
-          >
-            <History size={12} />
-            <span>{showTimeline ? 'Hide History' : `Change History (${(row.timeline || row.history || []).length})`}</span>
-          </button>
-        </div>
-
+        {/* Expanded State: Master-Detail Panel */}
         {showTimeline && (
-          <div className="mt-2 -mx-3 -mb-3">
+          <div style={{ borderTop: '1px solid #e2e8f0' }}>
             <VariantTimelinePanel 
               variant={row} 
               selectedProduct={selectedProduct} 

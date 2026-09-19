@@ -1,0 +1,553 @@
+Yes. In the screenshots, the protocol contains good information, but the expanded view becomes too long and fragmented: first a summary, then contraindications, then another large “Interactive Clinical Pathway Engine,” then the 14-week timeline, phases, compounds, and finally the selected-week instructions. On mobile, reproducing that structure would be particularly difficult.
+
+I would ask Antigravity to make the Protocol Summary a single coherent responsive experience, with a more compact executive summary on laptop and a genuinely mobile-native representation. No new functions and no changes to clinical content.
+
+Use this prompt:
+
+TASK: REDESIGN THE PROTOCOL SUMMARY UX — LAPTOP + MOBILE
+Improve the UX/UI of the existing Protocol Summary / Expanded Protocol view in Atlas Health.
+REFERENCE:
+Use the current Protocols screen and expanded protocol shown in the existing application as the source of truth.
+IMPORTANT:
+This is strictly a UX/UI and responsive-layout improvement.
+DO NOT add new functionality.
+DO NOT remove functionality.
+DO NOT change clinical content.
+DO NOT modify protocol calculations.
+DO NOT change dosages.
+DO NOT change phases.
+DO NOT change treatment schedules.
+DO NOT change prescription logic.
+DO NOT change patient logic.
+DO NOT modify APIs, database structures, permissions or business logic.
+The objective is to make the EXISTING protocol information substantially easier to understand, scan and navigate on both laptop and mobile.
+Follow Google Cloud Console / Material Design 3 principles
+==================================================
+
+1. CORE UX PROBLEM
+==================================================
+The current expanded protocol contains valuable information but feels too long and fragmented.
+The user currently moves through several visually independent blocks:
+
+- Protocol identity
+- Clinical Pathway Architecture
+- Main actions
+- Treatment duration
+- Clinical phases
+- Therapeutic mode
+- Pharmacology / mechanism
+- Required biomarkers
+- Monitoring cadence
+- Contraindications
+- Interactive Clinical Pathway Engine
+- Doctor View / Patient Journey
+- Week navigator
+- Treatment phases
+- Compound-by-week matrix
+- Weekly administration instructions
+- Safety information
+These should NOT feel like separate applications or unrelated cards.
+Create one coherent "Protocol Summary" experience with a clear information hierarchy.
+The user should be able to understand:
+WHAT is this protocol?
+HOW LONG does it last?
+WHAT are its phases?
+WHICH compounds are involved?
+WHEN are they administered?
+WHAT happens in the selected week?
+WHAT clinical/safety information is relevant?
+without visually decoding a large number of nested cards.
+==================================================
+
+2. DO NOT REDESIGN THE MAIN PROTOCOL TABLE
+==================================================
+Preserve the existing Protocols list/table and its existing functionality.
+Focus primarily on the EXPANDED PROTOCOL SUMMARY.
+The expanded content should visually belong to the selected protocol row.
+Avoid making the expanded area look like a separate application embedded inside the table.
+==================================================
+2. LAPTOP — NEW INFORMATION HIERARCHY
+==================================================
+On laptop, organize the expanded protocol into four clear visual zones:
+A. PROTOCOL OVERVIEW
+B. CLINICAL SUMMARY
+C. TREATMENT TIMELINE
+D. SELECTED WEEK DETAILS
+Do not necessarily create four heavy cards.
+Use spacing, dividers, typography and subtle tonal backgrounds to communicate hierarchy.
+==================================================
+3. PROTOCOL OVERVIEW
+==================================================
+Create a compact header for the expanded protocol.
+Example hierarchy:
+ADVANCED GLP-1/GIP METABOLIC RECOMPOSITION
+Weight Management · Regenerative Therapy
+8 Weeks     1 Phase     Weight Management
+[ Load to Workspace ] [ Create Prescription ] [ Full Clinical Editor ]
+The protocol name must be the strongest visual element.
+Category / therapeutic mode should be secondary.
+Duration, phases and therapeutic mode should become compact summary metrics.
+Avoid using three large cards just to display:
+
+- Treatment Duration
+- Clinical Phases
+- Therapeutic Mode
+They consume too much vertical space for relatively little information.
+Convert them into a compact summary strip.
+For example:
+8 Weeks  |  1 Clinical Phase  |  Weight Management
+Use icons only where they improve scanning.
+==================================================
+
+5. ACTION HIERARCHY
+==================================================
+Preserve:
+Load to Workspace
+Create Prescription
+Full Clinical Editor
+Do not change their functionality.
+Create Prescription should remain the strongest primary action.
+Load to Workspace should be secondary.
+Full Clinical Editor should be tertiary / outlined.
+Use consistent height, radius, typography and icon sizing.
+On mobile, these controls must reflow intelligently rather than shrink.
+==================================================
+2. CLINICAL SUMMARY
+==================================================
+Improve the presentation of:
+Clinical Pharmacology & Mechanism of Action
+Required Laboratory Biomarkers
+Clinical Monitoring Cadence
+Contraindications
+Safety information
+Do not give every piece of clinical information the same visual weight.
+Recommended semantic hierarchy:
+NORMAL INFORMATION:
+neutral surface
+CLINICAL MONITORING / LAB REQUIREMENTS:
+subtle blue tonal treatment
+CONTRAINDICATIONS:
+subtle red tonal treatment
+SAFETY WARNINGS:
+subtle amber/orange tonal treatment
+Avoid highly saturated backgrounds.
+The interface is a professional medical application, not a consumer alert system.
+Use color primarily as semantic reinforcement.
+==================================================
+3. CONTRAINDICATIONS
+==================================================
+The current red chips are visually dominant.
+Keep ALL existing contraindications, but refine the UX.
+Display contraindications inside one clearly labeled clinical section.
+Example:
+CONTRAINDICATIONS
+[ Medullary thyroid carcinoma history ]
+[ MEN2 ]
+[ Pregnancy or breastfeeding ]
+[ Severe gastroparesis ]
+Use compact chips with subtle red borders/background.
+Avoid creating a large red area.
+The clinical meaning should remain obvious without visually overwhelming the protocol.
+==================================================
+4. REMOVE THE "SECOND APPLICATION" FEEL
+==================================================
+Currently the "Interactive Clinical Pathway Engine" appears as another large application/card inside the already expanded protocol.
+Integrate this content into the same Protocol Summary design language.
+Keep:
+
+- Doctor View
+- Patient Journey
+- Timeline Navigator
+- Treatment Phases
+- Compound timeline
+- weekly details
+but visually integrate them into the protocol summary.
+Do NOT add or remove functionality.
+Avoid an additional oversized outer card around the entire pathway section when the expanded protocol already provides containment.
+==================================================
+
+9. DOCTOR VIEW / PATIENT JOURNEY
+==================================================
+Preserve both existing views.
+Style them as a clean Material segmented control:
+[ Doctor View | Patient Journey ]
+Use:
+
+- one shared container
+- clear selected state
+- neutral inactive state
+- consistent typography
+- consistent icon sizing
+Avoid making them look like unrelated buttons.
+==================================================
+ 1. TIMELINE NAVIGATOR — LAPTOP
+==================================================
+The current W1, W2, W3... controls consume considerable space and compete with the treatment matrix.
+Improve the hierarchy.
+Use a compact horizontal week navigator.
+Example:
+W1  W2  W3  W4 | W5  W6  W7  W8 | W9  W10  W11  W12 | W13 W14
+Selected week should be visually strong.
+Phase changes should be subtly visible.
+The navigator and treatment phases should visually correspond.
+The user should immediately understand:
+Current week
+Current phase
+Total protocol duration
+For example:
+Week 1 of 14
+Induction & Adaptation
+[ W1 ][ W2 ][ W3 ][ W4 ] [ W5 ] ...
+Do not change week-selection behavior.
+==================================================
+ 2. TREATMENT PHASES
+==================================================
+Improve the visual connection between:
+Phase 1
+Phase 2
+Phase 3
+Phase 4
+and their corresponding weeks.
+The current matrix contains the information but requires too much visual decoding.
+Create a clear phase band above the week columns.
+Example:
+INDUCTION & ADAPTATION
+W1 — W4
+THERAPEUTIC TITRATION
+W5 — W8
+PEAK MAINTENANCE
+W9 — W12
+WASHOUT / OFF-CYCLE
+W13 — W14
+The phase band should align exactly with the week grid underneath.
+Use subtle tonal differences.
+Do not introduce decorative gradients or excessive colors.
+==================================================
+ 3. COMPOUND TIMELINE — LAPTOP
+==================================================
+Preserve the existing compound-by-week matrix.
+Improve readability.
+LEFT SIDE:
+Compound identity
+RIGHT SIDE:
+Weekly administration schedule
+Example:
+Primary Peptide API
+Reusable Pen · 20 mg Cartridge
+BPC-157
+10 mg Lyophilized Vial
+MOTS-c
+10 mg Lyophilized Vial
+Glutathione + NAD+
+Multi-Dose Vial
+Keep compound names visually stronger than formulation metadata.
+Use a smaller secondary style for:
+
+- cartridge information
+- vial information
+- formulation information
+==================================================
+ 1. DOSAGE CELLS
+==================================================
+Current dosage blocks are visually too narrow and text becomes difficult to read.
+Improve:
+
+- minimum width
+- text alignment
+- internal padding
+- typography
+- contrast
+Never allow values such as:
+2.5 mg
+500 mcg
+5.0 mg
+7.5 mg
+100 mg
+to break awkwardly across multiple lines.
+The complete dose + unit should remain readable as one visual unit.
+Do not change any dosage value.
+==================================================
+ 1. USE COLOR TO REPRESENT STRUCTURE
+==================================================
+The timeline currently uses multiple strong colors.
+Refine the palette following Material principles.
+Color should primarily help distinguish:
+
+- selected week
+- phase
+- active treatment block
+- safety status
+Avoid using many unrelated saturated colors simply for visual variety.
+The matrix should remain understandable even without relying exclusively on color.
+==================================================
+ 1. SELECTED WEEK DETAILS
+==================================================
+The weekly administration section should feel directly connected to the selected week.
+Example:
+WEEK 1
+Induction & Adaptation
+Duration: Weeks 1–4
+Administration Instructions
+Primary Peptide API                  2.5 mg
+Once weekly · Sunday PM
+Subcutaneous
+Reusable Pen · 20 mg Cartridge
+2°C–8°C
+BPC-157                            500 mcg
+Daily · Morning Fasted
+Subcutaneous
+10 mg Lyophilized Vial
+2°C–8°C
+Required Lab Biomarker
+Baseline Panel...
+Safety Sentinel
+...
+The selected week should be clearly visible at the beginning of this section.
+Avoid another large nested card hierarchy.
+==================================================
+ 2. IMPORTANT — MOBILE VERSION
+==================================================
+Create a proper responsive MOBILE representation of the existing Protocol Summary.
+If the current mobile version does not exist or is incomplete, implement responsive presentation using ONLY the existing functionality and information.
+DO NOT create mobile-only functionality.
+DO NOT remove information from mobile.
+Do NOT attempt to display the desktop clinical matrix at desktop width inside a narrow viewport.
+Do NOT simply scale down the desktop UI.
+==================================================
+ 3. MOBILE PROTOCOL HEADER
+==================================================
+Recommended structure:
+Advanced GLP-1/GIP
+Metabolic Recomposition
+Weight Management
+Regenerative Therapy
+8 Weeks · 1 Phase
+[ Create Prescription ]
+[ Load to Workspace ] [ Full Editor ]
+The primary protocol information should fit within the first mobile viewport as efficiently as possible.
+==================================================
+ 4. MOBILE CLINICAL SUMMARY
+==================================================
+Stack clinical information vertically.
+Use compact sections with strong headings and minimal nesting.
+Example:
+CLINICAL SUMMARY
+Mechanism of Action
+...
+LAB REQUIREMENTS
+Baseline Panel...
+MONITORING
+...
+CONTRAINDICATIONS
+[ MEN2 ] [ Pregnancy ... ]
+...
+Avoid horizontal overflow.
+Avoid fixed-width desktop containers.
+==================================================
+ 5. MOBILE TIMELINE
+==================================================
+The desktop treatment matrix should adapt to mobile.
+DO NOT attempt to squeeze 14 week columns into the screen.
+The mobile experience should focus on the currently selected week while preserving access to the existing week selection.
+Use a horizontally scrollable week selector:
+Week 1 of 14 · Induction & Adaptation
+←  [W1] [W2] [W3] [W4] [W5]  →
+Then show the treatments for the selected week vertically.
+This is a responsive representation of the existing data, NOT new functionality.
+==================================================
+ 6. MOBILE WEEK VIEW
+==================================================
+For the selected week, transform the matrix into vertically stacked treatment rows/cards.
+Example:
+WEEK 1
+Induction & Adaptation
+Primary Peptide API
+2.5 mg
+Once Weekly · Sunday PM
+Subcutaneous
+Reusable Pen · 20 mg Cartridge
+2°C–8°C
+────────────────────────
+BPC-157
+500 mcg
+Daily · Morning Fasted
+Subcutaneous
+10 mg Lyophilized Vial
+2°C–8°C
+This should use exactly the same underlying information as the desktop matrix.
+Do not duplicate or create data.
+==================================================
+ 7. MOBILE PHASE CONTEXT
+==================================================
+Always provide context for the selected week.
+For example:
+Week 6 of 14
+Phase 2 · Therapeutic Titration
+Weeks 5–8
+This information should be derived from the existing protocol.
+Do not create new clinical logic.
+==================================================
+ 8. MOBILE SAFETY INFORMATION
+==================================================
+Safety information should remain clearly visible but should not consume the entire viewport.
+Use compact semantic banners:
+Blue:
+Lab / monitoring information
+Amber:
+Safety warning
+Red:
+Contraindications
+Allow text to wrap naturally.
+Do not reduce clinical information.
+==================================================
+ 9. MOBILE TOUCH TARGETS
+==================================================
+All mobile interactive controls should provide approximately 48x48px minimum touch targets.
+Review especially:
+
+- Week selector
+- Doctor View / Patient Journey
+- Expand/collapse
+- Create Prescription
+- Load to Workspace
+- Full Clinical Editor
+- protocol actions
+- timeline navigation
+Visible icons can remain approximately 20–24px.
+==================================================
+ 1. REDUCE NESTED CONTAINERS
+==================================================
+This is an important visual requirement.
+Avoid:
+CARD
+  → CARD
+      → CARD
+          → BORDERED CARD
+Prefer:
+MAIN PROTOCOL SURFACE
+Header
+────────────
+Clinical Summary
+────────────
+Timeline
+────────────
+Selected Week
+────────────
+Safety
+Use spacing and subtle dividers to create structure.
+==================================================
+ 2. STICKY CONTEXT — ONLY IF ALREADY SUPPORTED
+==================================================
+Do not introduce new sticky navigation functionality.
+If sticky positioning is already part of the existing component behavior, refine its presentation.
+Otherwise leave scrolling behavior unchanged.
+==================================================
+ 3. WORKSPACE BAR
+==================================================
+Preserve the existing Workspace bar and its functionality.
+Make sure it does not obscure clinically important content on laptop or mobile.
+Respect safe bottom spacing so that the final protocol content remains fully readable above the Workspace bar.
+Do not change Workspace functionality.
+==================================================
+ 4. VISUAL LANGUAGE
+==================================================
+Follow the visual language already established across Atlas Health and refine it toward Google Cloud / Material Design 3.
+Use:
+Blue:
+primary actions and navigation
+Teal/green:
+active clinical states / selected treatment information where already semantically appropriate
+Red:
+contraindications / critical clinical restrictions
+Amber:
+safety warnings
+Neutral:
+metadata and structural information
+Use subtle tonal backgrounds instead of saturated fills.
+Maintain strong accessibility contrast.
+==================================================
+ 5. RESPONSIVE BREAKPOINT PRINCIPLE
+==================================================
+LAPTOP:
+Prioritize information density and comparative overview.
+TABLET:
+Allow intelligent reflow.
+MOBILE:
+Prioritize selected-week context and vertical readability.
+The same information and functionality must exist across all breakpoints.
+Only the PRESENTATION changes.
+==================================================
+ 6. TARGET MOBILE INFORMATION ARCHITECTURE
+==================================================
+The mobile Protocol Summary should approximately follow this order:
+PROTOCOL
+Advanced GLP-1/GIP Metabolic Recomposition
+Weight Management · Regenerative Therapy
+8 Weeks · 1 Phase
+[ Create Prescription ]
+[ Load to Workspace ] [ Full Editor ]
+────────────────────
+CLINICAL SUMMARY
+Mechanism of Action
+...
+Required Biomarkers
+...
+Monitoring
+...
+Contraindications
+...
+────────────────────
+TREATMENT PATHWAY
+Doctor View | Patient Journey
+Week 1 of 14
+Induction & Adaptation
+[W1][W2][W3][W4][W5] →
+────────────────────
+WEEK 1 TREATMENT
+Primary Peptide API
+2.5 mg
+Once Weekly · Subcutaneous
+Reusable Pen · 20 mg Cartridge
+2°C–8°C
+BPC-157
+500 mcg
+Daily · Subcutaneous
+10 mg Lyophilized Vial
+2°C–8°C
+────────────────────
+Required Lab Biomarker
+...
+Safety Sentinel
+...
+This is a visual hierarchy reference, not a request to add new content.
+==================================================
+ 7. FINAL NON-NEGOTIABLE REQUIREMENT
+==================================================
+THIS IS A UX/UI REFACTOR ONLY.
+Do not:
+
+- add features
+- remove features
+- alter clinical content
+- invent clinical information
+- modify doses
+- modify duration
+- modify phases
+- modify biomarkers
+- modify contraindications
+- modify safety warnings
+- change protocol logic
+- change prescription logic
+- change Workspace behavior
+- change Doctor View / Patient Journey behavior
+- change database structure
+- change APIs
+Reuse the existing components and architecture wherever practical.
+The final result should make the Protocol Summary feel like ONE coherent clinical workflow rather than several independent interfaces stacked vertically.
+DESKTOP:
+compact, information-dense, highly scannable.
+MOBILE:
+native vertical clinical summary, touch-friendly, no compressed desktop table, with the selected week becoming the principal way of understanding the treatment schedule.
+Preserve 100% of the existing functionality and clinical information.
+
+The most important instruction here is the mobile transformation of the 14-column matrix. It should not try to reproduce that matrix at 390–430 px. The same information should become week selector → selected phase → treatments for that week, which keeps the underlying functionality and data intact while making it genuinely usable on a phone.

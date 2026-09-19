@@ -103,8 +103,47 @@ export const UI_I18N = {
     molecularIdentity: 'Molecular Identity & CAS',
     subqRoute: 'Subcutaneous (SubQ) Administration',
     salPassed: 'Sterility Assurance Level 10⁻⁶',
-    pharmacologicalOverview: 'Pharmacological Overview',
-    translating: 'Translating...',
+    targetReceptorAxis: 'Target Receptor Axis:',
+    verifiedLaboratories: 'Verified Manufacturing Laboratories:',
+    verifiedSourcesAvailable: 'verified sources available',
+    allLaboratoriesOverview: 'All Laboratories (Overview)',
+    analyticalMatrixSection: 'Analytical Matrix & Clinical Specifications',
+    officialCompendium: 'Official Compendium',
+    completeFormulationsMatrix: 'Complete Formulations & Strengths Matrix',
+    allApprovedPresentations: 'All Approved Presentations & Doses',
+    solutionConcentrationCol: 'Solution Concentration (mg/mL)',
+    solubilitySolventCol: 'Solubility / Solvent',
+    batchAvailabilityCol: 'Batch Availability',
+    regulatoryNoticeHeading: 'Clinical Pharmacopoeial Directive and Prescriber Responsibility Notice',
+    batchTraceabilitySection: 'Batch Traceability and Analytical Assurance',
+    physicalLabelsSection: 'Physical Vial Labels and Batch Printing',
+    physicalLabelsSubtitle: 'Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.',
+    shippingTraceabilityLabel: 'Shipping & Traceability Label',
+    outboundLogisticsTag: 'For Outbound Box & Logistics',
+    shippingLabelDesc: 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.',
+    clientVialLabelTitle: 'Official Patient Vial Label',
+    patientSubqTag: 'For Patient Dispensing (SubQ)',
+    clientVialLabelDesc: 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.',
+    downloadPrintReadyPdf: 'Download Print Ready (PDF)',
+    copyDirectLabelLink: 'Copy Direct Link',
+    printThermalDirect: 'Print Thermal (Direct)',
+    downloadingState: 'Downloading...',
+    specCompendiumTitle: 'Regulatory Specifications & Quality Assurance Compendium',
+    verifiedAuthenticTag: 'VERIFIED AUTHENTIC',
+    dualStageCertified: 'Dual-Stage RP-HPLC & LC-MS Certified Release',
+    singleVsWholesaleTitle: 'Single Unit vs Wholesale 10-Kit',
+    resetBaselineButton: '↺ Reset to Standard Baseline',
+    fineTuningHeader: 'Fine-tuning & micro-titration:',
+    customPhaseLabel: 'Custom',
+    activePhasePill: '✓ Active Phase',
+    selectPhasePill: 'Select',
+    referenceParamsModified: 'Reference Parameters Modified (Clinical Simulation Model):',
+    targetDrawLabel: 'Target Draw',
+    diluentLabel: 'Diluent',
+    vialLabel: 'Vial',
+    monographBaselineNotice: 'Monograph Baseline Reference Model (Indicative):',
+    monographBaselineDesc: 'Synchronized with monograph table. Subject to prescribing physician clinical authorization.',
+    nominalVialConc: 'Nominal Vial Concentration:',
   },
   es: {
     brandName: BRAND_CONFIG.name,
@@ -195,6 +234,47 @@ export const UI_I18N = {
     salPassed: 'Nivel de Garantía de Esterilidad 10⁻⁶',
     pharmacologicalOverview: 'Descripción Farmacológica',
     translating: 'Traduciendo...',
+    targetReceptorAxis: 'Eje del Receptor Diana:',
+    verifiedLaboratories: 'Laboratorios de Fabricación Verificados:',
+    verifiedSourcesAvailable: 'fuentes verificadas disponibles',
+    allLaboratoriesOverview: 'Todos los Laboratorios (Resumen)',
+    analyticalMatrixSection: 'Matriz Analítica y Especificaciones Clínicas',
+    officialCompendium: 'Compendio Oficial',
+    completeFormulationsMatrix: 'Matriz Completa de Formulaciones y Dosificaciones',
+    allApprovedPresentations: 'Presentaciones y Concentraciones Aprobadas',
+    solutionConcentrationCol: 'Concentración Solución (mg/mL)',
+    solubilitySolventCol: 'Solubilidad / Solvente',
+    batchAvailabilityCol: 'Disponibilidad de Lote',
+    regulatoryNoticeHeading: 'Directiva Farmacopeica Clínica y Aviso de Responsabilidad del Prescriptor',
+    batchTraceabilitySection: 'Trazabilidad de Lote y Aseguramiento Analítico',
+    physicalLabelsSection: 'Etiquetas Físicas del Vial e Impresión de Lote',
+    physicalLabelsSubtitle: 'Etiquetas adhesivas estandarizadas de 38×90mm y hojas de lote preparadas para uso clínico y de despacho.',
+    shippingTraceabilityLabel: 'Etiqueta de Envío y Trazabilidad',
+    outboundLogisticsTag: 'Para Caja de Envío y Logística',
+    shippingLabelDesc: 'Etiqueta de embalaje discreta con código de barras 1D de alta densidad y código QR. Permite consulta instantánea de la monografía digital y certificado de laboratorio sin mostrar nombres de marca.',
+    clientVialLabelTitle: 'Etiqueta Oficial del Vial del Paciente',
+    patientSubqTag: 'Para Dispensación a Paciente (SubQ)',
+    clientVialLabelDesc: 'Etiqueta clínica de alta adherencia para viales de pacientes. Muestra concentración exacta, lote estéril, pauta de reconstitución y QR de verificación directa.',
+    downloadPrintReadyPdf: 'Descargar Listo para Imprimir (PDF)',
+    copyDirectLabelLink: 'Copiar Enlace Directo',
+    printThermalDirect: 'Imprimir Térmica (Directo)',
+    downloadingState: 'Descargando...',
+    specCompendiumTitle: 'Compendio de Especificaciones Regulatorias y Garantía de Calidad',
+    verifiedAuthenticTag: 'VERIFICADO AUTÉNTICO',
+    dualStageCertified: 'Liberación Certificada en Doble Etapa RP-HPLC y LC-MS',
+    singleVsWholesaleTitle: 'Unidad Individual vs Pack Mayorista de 10',
+    resetBaselineButton: '↺ Restablecer a línea base',
+    fineTuningHeader: 'Ajuste manual o micro-titulación:',
+    customPhaseLabel: 'Personalizada',
+    activePhasePill: '✓ Fase Activa',
+    selectPhasePill: 'Seleccionar',
+    referenceParamsModified: 'Parámetros modificados (Simulación clínica orientativa):',
+    targetDrawLabel: 'Dosis a extraer',
+    diluentLabel: 'Diluyente',
+    vialLabel: 'Vial',
+    monographBaselineNotice: 'Línea base de referencia de la monografía (Orientativo):',
+    monographBaselineDesc: 'Sincronizado con la tabla analítica. Sujeto a prescripción médica final.',
+    nominalVialConc: 'Concentración Nominal del Vial:',
   },
   fr: {
     brandName: BRAND_CONFIG.name,
@@ -250,7 +330,7 @@ export const UI_I18N = {
     prepStep: '1. Préparation Aseptique & Antisepsis',
     prepText: 'Désinfectez le plan de travail et tamponnez le septum en caoutchouc avec une lingette d\'alcool isopropylique à 70%. Laissez sécher à l\'air pendant 30 secondes pour une antisepsie vérifiée. Ne touchez plus le bouchon stérile.',
     solventStep: '2. Addition Contrôlée de Solvant (Eau BAC)',
-    solventText: 'Prélevez exactement {volume} mL d\'Eau Bactériostatique (BAC avec 0.9% d\'alcool benzylique). Introduisez l\'aiguille à 45° à travers le septum et laissez le liquide glisser lentement le long de la paroi interne en verre. Ne projetez pas directement sur le lyophilisat.',
+    solventText: 'Prélevez le volume d\'Eau Bactériostatique (BAC avec 0.9% d\'alcool benzylique) indiqué par votre médecin. Introduisez l\'aiguille à 45° à travers le septum et laissez le liquide glisser lentement le long de la paroi interne en verre. Ne projetez pas directement sur le lyophilisat.',
     dissolutionStep: '3. Dissolution Moléculaire Douce',
     dissolutionText: 'Faites tourner doucement le flacon en mouvement circulaire entre les mains jusqu\'à limpidité totale et cristalline. Ne pas agiter vigoureusement ni utiliser de vortex pour ne pas briser les liaisons peptidiques.',
     storageStep: '4. Chaîne du Froid et Stabilité Clinique',
@@ -285,6 +365,47 @@ export const UI_I18N = {
     salPassed: 'Niveau d\'Assurance de Stérilité 10⁻⁶',
     pharmacologicalOverview: 'Aperçu Pharmacologique',
     translating: 'Traduction en cours...',
+    targetReceptorAxis: 'Axe Récepteur Cible :',
+    verifiedLaboratories: 'Laboratoires de Fabrication Vérifiés :',
+    verifiedSourcesAvailable: 'sources vérifiées disponibles',
+    allLaboratoriesOverview: 'Tous les Laboratoires (Vue d\'ensemble)',
+    analyticalMatrixSection: 'Matrice Analytique & Spécifications Cliniques',
+    officialCompendium: 'Compendium Officiel',
+    completeFormulationsMatrix: 'Matrice Complète des Formulations & Dosages',
+    allApprovedPresentations: 'Présentations et Dosages Approuvés',
+    solutionConcentrationCol: 'Concentration Solution (mg/mL)',
+    solubilitySolventCol: 'Solubilité / Solvant',
+    batchAvailabilityCol: 'Disponibilité des Lots',
+    regulatoryNoticeHeading: 'Directive Pharmacopée Clinique et Avis de Responsabilité du Prescripteur',
+    batchTraceabilitySection: 'Traçabilité des Lots et Assurance Analytique',
+    physicalLabelsSection: 'Étiquettes Physiques du Flacon et Impression des Lots',
+    physicalLabelsSubtitle: 'Étiquettes adhésives standard 38×90mm et feuilles de lots formatées pour un usage clinique et expédition.',
+    shippingTraceabilityLabel: 'Étiquette d\'Expédition & Traçabilité',
+    outboundLogisticsTag: 'Pour Boîte d\'Expédition & Logistique',
+    shippingLabelDesc: 'Étiquette d\'emballage discrète avec code-barres 1D haute densité et code QR. Permet la consultation instantanée de la monographie numérique et du certificat de laboratoire sans afficher de marque.',
+    clientVialLabelTitle: 'Étiquette Officielle du Flacon Patient',
+    patientSubqTag: 'Pour Délivrance Patient (SubQ)',
+    clientVialLabelDesc: 'Étiquette clinique haute adhérence pour flacons patients. Affiche la concentration exacte, le numéro de lot stérile, les instructions de reconstitution et le QR de vérification directe.',
+    downloadPrintReadyPdf: 'Télécharger Prêt à Imprimer (PDF)',
+    copyDirectLabelLink: 'Copier le Lien Direct',
+    printThermalDirect: 'Impression Thermique (Direct)',
+    downloadingState: 'Téléchargement...',
+    specCompendiumTitle: 'Compendium des Spécifications Réglementaires & Assurance Qualité',
+    verifiedAuthenticTag: 'VÉRIFIÉ AUTHENTIQUE',
+    dualStageCertified: 'Libération Certifiée en Deux Étapes RP-HPLC & LC-MS',
+    singleVsWholesaleTitle: 'Unité Individuelle vs Pack Grossiste de 10',
+    resetBaselineButton: '↺ Rétablir le modèle de référence',
+    fineTuningHeader: 'Ajustement fin & micro-titration :',
+    customPhaseLabel: 'Personnalisée',
+    activePhasePill: '✓ Phase Active',
+    selectPhasePill: 'Sélectionner',
+    referenceParamsModified: 'Paramètres modifiés (Modèle de simulation clinique) :',
+    targetDrawLabel: 'Dose à prélever',
+    diluentLabel: 'Diluant',
+    vialLabel: 'Flacon',
+    monographBaselineNotice: 'Modèle de référence de la monographie (Indicatif) :',
+    monographBaselineDesc: 'Synchronisé avec la table de la monographie. Soumis à prescription médicale finale.',
+    nominalVialConc: 'Concentration Nominale du Flacon :',
   },
   de: {
     brandName: BRAND_CONFIG.name,
@@ -340,7 +461,7 @@ export const UI_I18N = {
     prepStep: '1. Aseptische Vorbereitung & Antisepsis',
     prepText: 'Arbeitsfläche reinigen und das Gummiseptum gründlich mit einem 70% Isopropanol-Tupfer desinfizieren. Für vollständige Antisepsis 30 Sekunden an der Luft trocknen lassen. Den sterilen Stopfen nicht mehr berühren.',
     solventStep: '2. Kontrollierte Lösungsmittelzugabe (BAC-Wasser)',
-    solventText: 'Exakt {volume} mL Bakteriostatisches Wasser (BAC mit 0,9% Benzylalkohol) mit einer sterilen Spritze aufziehen. Nadel im 45°-Winkel einführen und Flüssigkeit langsam an der inneren Glaswand herablaufen lassen. Niemals direkt auf den Lyophilisatkuchen spritzen.',
+    solventText: 'Das verordnete Volumen Bakteriostatisches Wasser (BAC mit 0,9% Benzylalkohol) mit einer sterilen Spritze aufziehen. Nadel im 45°-Winkel einführen und Flüssigkeit langsam an der inneren Glaswand herablaufen lassen. Niemals direkt auf den Lyophilisatkuchen spritzen.',
     dissolutionStep: '3. Schonende Molekulare Auflösung',
     dissolutionText: 'Das Fläschchen vorsichtig mit langsamer Drehbewegung zwischen den Handflächen schwenken, bis die Lösung vollkommen klar ist. Nicht schütteln oder vortexen, um Scherkräfte und Peptidkettenbruch zu verhindern.',
     storageStep: '4. Kühlkette & Klinische Stabilität',
@@ -375,6 +496,158 @@ export const UI_I18N = {
     salPassed: 'Sterilitätssicherheitslevel 10⁻⁶',
     pharmacologicalOverview: 'Pharmakologische Übersicht',
     translating: 'Wird übersetzt...',
+    targetReceptorAxis: 'Zielrezeptorachse:',
+    verifiedLaboratories: 'Verifizierte Herstellungslabore:',
+    verifiedSourcesAvailable: 'verifizierte Quellen verfügbar',
+    allLaboratoriesOverview: 'Alle Labore (Übersicht)',
+    analyticalMatrixSection: 'Analytische Matrix & Klinische Spezifikationen',
+    officialCompendium: 'Offizielles Kompendium',
+    completeFormulationsMatrix: 'Vollständige Formulierungs- & Dosis-Matrix',
+    allApprovedPresentations: 'Alle Zugelassenen Darreichungsformen & Dosen',
+    solutionConcentrationCol: 'Lösungskonzentration (mg/mL)',
+    solubilitySolventCol: 'Löslichkeit / Lösungsmittel',
+    batchAvailabilityCol: 'Chargenverfügbarkeit',
+    regulatoryNoticeHeading: 'Klinische Arzneibuch-Richtlinie und Hinweis zur Verschreiber-Verantwortung',
+    batchTraceabilitySection: 'Chargenrückverfolgbarkeit & Analytische Qualitätssicherung',
+    physicalLabelsSection: 'Physische Fläschchenetiketten & Chargendruck',
+    physicalLabelsSubtitle: 'Standardisierte 38×90mm Klebeetiketten und Chargenblätter formatiert für Klinik- und Versandgebrauch.',
+    shippingTraceabilityLabel: 'Versand- & Rückverfolgbarkeitsetikett',
+    outboundLogisticsTag: 'Für Umverpackung & Logistik',
+    shippingLabelDesc: 'Diskretes Verpackungsetikett mit 1D-Barcode hoher Dichte und QR-Code. Ermöglicht sofortiges Abrufen der digitalen Monographie und des Laborzertifikats ohne Markennamen.',
+    clientVialLabelTitle: 'Offizielles Patienten-Fläschchenetikett',
+    patientSubqTag: 'Für Patientenabgabe (SubQ)',
+    clientVialLabelDesc: 'Hochhaftendes klinisches Etikett für Patientenfläschchen. Zeigt genaue Konzentration, sterile Chargennummer, Rekonstitutionshinweise und QR-Verifizierungscode.',
+    downloadPrintReadyPdf: 'Druckfertig herunterladen (PDF)',
+    copyDirectLabelLink: 'Direktlink kopieren',
+    printThermalDirect: 'Thermodruck (Direkt)',
+    downloadingState: 'Wird heruntergeladen...',
+    specCompendiumTitle: 'Regulatorische Spezifikationen & Qualitätssicherungs-Kompendium',
+    verifiedAuthenticTag: 'AUTHENTIZITÄT VERIFIZIERT',
+    dualStageCertified: 'Zweistufige RP-HPLC & LC-MS zertifizierte Freigabe',
+    singleVsWholesaleTitle: 'Einzeleinheit vs. Großhandels-10er-Pack',
+    resetBaselineButton: '↺ Auf Standard-Referenz zurücksetzen',
+    fineTuningHeader: 'Feinabstimmung & Mikrotitration:',
+    customPhaseLabel: 'Individuell',
+    activePhasePill: '✓ Aktive Phase',
+    selectPhasePill: 'Auswählen',
+    referenceParamsModified: 'Geänderte Referenzparameter (Klinisches Simulationsmodell):',
+    targetDrawLabel: 'Aufzuziehende Dosis',
+    diluentLabel: 'Lösungsmittel',
+    vialLabel: 'Fläschchen',
+    monographBaselineNotice: 'Monographie-Basisreferenzmodell (Indikativ):',
+    monographBaselineDesc: 'Synchronisiert mit der Monographietabelle. Vorbehaltlich der ärztlichen Verschreibung.',
+    nominalVialConc: 'Nominale Fläschchenkonzentration:',
+  },
+  fr: {
+    brandName: BRAND_CONFIG.name,
+    datasheetBadge: 'Fiche d\'Information Produit',
+    scientificMonograph: 'Monographie Scientifique',
+    clinicalReference: 'Référence Clinique · Fiche Technique',
+    prescriptionRequired: '℞ Prescription Requise',
+    prescriptionOnly: 'Sur Ordonnance Uniquement',
+    copyLink: 'Copier le lien',
+    copied: 'Copié !',
+    printPdf: 'Imprimer / PDF',
+    shareWhatsapp: 'Partager sur WhatsApp',
+    shareColleague: 'Partager avec un Confrère',
+    downloadPdf: 'Télécharger Monographie PDF',
+    downloadLabelSvg: 'Télécharger Étiquette SVG (1200×630)',
+    whatsappText: 'Fiche d\'Information Clinique',
+    scannedForGuide: 'Consulter le guide clinique',
+    mechanism: 'Mécanisme d\'Action',
+    dosage: 'Posologie et Présentations',
+    reconstitution: 'Guide de Reconstitution',
+    storage: 'Conditions de Stockage',
+    contraindications: 'Contre-indications et Avertissements',
+    format: 'Format',
+    purity: 'Pureté',
+    route: 'Voie',
+    lotuslandVerified: 'Vérifié par Lotusland',
+    documentedMonograph: 'Documenté sur Monographie',
+    presentationsMatrix: 'Disponibilité des Lots et Matrice des Présentations',
+    activePresentation: 'Format de Présentation Actif',
+    concentrationContent: 'Concentration et Contenu Actif par Flacon',
+    sourcingPedigree: 'Provenance et Traçabilité Certifiée',
+    accessTier: 'Niveau d\'Accès Clinique',
+    officialMonograph: 'Monographie Officielle (PDF)',
+    digitalVerification: 'Vérification Numérique (CoA)',
+    vialQrTitle: 'Code QR Officiel et Code-Barres Analytique du Flacon',
+    vialQrSubtitle: 'Scannez avec un smartphone pour accéder à cette monographie, certificat HPLC et spécifications analytiques.',
+    reconstitutionSection: 'Protocole de Reconstitution et Calibration Interactive de Seringue',
+    interactiveCalcBadge: 'Outil Clinique Interactif',
+    interactiveCalcTitle: 'Simulateur Interactif de Reconstitution et Seringue U-100',
+    interactiveCalcSubtitle: 'Ajustez le volume d\'Eau Bactériostatique (BAC) et la dose souhaitée pour visualiser en temps réel le repère exact sur la seringue à insuline U-100.',
+    vialContentLabel: 'Contenu Actif du Flacon',
+    bacWaterLabel: 'Eau BAC Ajoutée (Solvant)',
+    resultingConcLabel: 'Concentration Résultante',
+    targetDoseLabel: 'Dose Souhaitée par Prise',
+    doseUnitToggle: 'Unité de Dose',
+    syringeDrawHeading: 'Calibration Visuelle de la Seringue U-100',
+    unitsToDraw: 'Prélever au Repère Exact',
+    liquidVol: 'Volume Liquide',
+    dosesInVial: 'Doses Totales par Flacon',
+    syringeModelSpec: 'Seringue à insuline standard U-100 (1.0 mL = 100 Unités · 1 Unité = 0.01 mL)',
+    warnExceedsSyringe: '⚠ Dépasse la capacité d\'une seule seringue (100 Unités / 1.0 mL). Diluez avec moins d\'eau BAC ou fractionnez en 2 injections.',
+    tipSmallVolume: 'ℹ Très petit volume (< 5 Unités). Envisagez d\'ajouter davantage d\'eau BAC pour un repérage visuel plus précis.',
+    prepStep: '1. Préparation Aseptique & Antisepsis',
+    prepText: 'Désinfectez le plan de travail et tamponnez le septum en caoutchouc avec une lingette d\'alcool isopropylique à 70%. Laissez sécher à l\'air pendant 30 secondes pour une antisepsie vérifiée. Ne touchez plus le bouchon stérile.',
+    solventStep: '2. Addition Contrôlée de Solvant (Eau BAC)',
+    digitalRecordDesc: 'QR-Code scannen oder online überprüfen für sofortige Bestätigung des Laborzertifikats.',
+    viewCoaPortal: 'Vollständiges CoA-Portal öffnen',
+    purityIndicator: 'Reinheitsindikator (RP-HPLC)',
+    molecularIdentity: 'Molekulare Identität & CAS',
+    subqRoute: 'Subkutane (SubQ) Verabreichung',
+    salPassed: 'Sterilitätssicherheitslevel 10⁻⁶',
+    pharmacologicalOverview: 'Pharmakologische Übersicht',
+    translating: 'Wird übersetzt...',
+  }
+};
+
+export const CATEGORY_TRANSLATIONS = {
+  'Weight Management': { es: 'Control de Peso', fr: 'Gestion du Poids', de: 'Gewichtsmanagement' },
+  'Anti-Aging & Cellular Longevity': { es: 'Antienvejecimiento y Longevidad Celular', fr: 'Anti-Âge et Longévité Cellulaire', de: 'Anti-Aging & Zelluläre Langlebigkeit' },
+  'Tissue Repair & Regeneration': { es: 'Reparación y Regeneración Tisular', fr: 'Réparation et Régénération Tissulaire', de: 'Gewebereparatur & Regeneration' },
+  'Cognitive Enhancement & Nootropics': { es: 'Optimización Cognitiva y Nootrópicos', fr: 'Amélioration Cognitive et Nootropiques', de: 'Kognitive Optimierung & Nootropika' },
+  'Growth Hormone Secretagogues': { es: 'Secretagogos de Hormona de Crecimiento', fr: 'Sécrétagogues de l\'Hormone de Croissance', de: 'Wachstumshormon-Sekretagoga' },
+  'Metabolic Health': { es: 'Salud Metabólica', fr: 'Santé Métabolique', de: 'Stoffwechselgesundheit' },
+  'Regenerative Therapy': { es: 'Terapia Regenerativa', fr: 'Thérapie Régénérative', de: 'Regenerative Therapie' },
+};
+
+export const TARGET_SYSTEM_TRANSLATIONS = {
+  'Dual GLP-1 and GIP Receptor Agonist': { es: 'Agonista Dual de Receptores GLP-1 y GIP', fr: 'Agoniste Double des Récepteurs GLP-1 et GIP', de: 'Dualer GLP-1- und GIP-Rezeptoragonist' },
+  'GLP-1 Receptor Agonist': { es: 'Agonista del Receptor GLP-1', fr: 'Agoniste du Récepteur GLP-1', de: 'GLP-1-Rezeptoragonist' },
+  'Triple GLP-1, GIP, and Glucagon Receptor Agonist': { es: 'Agonista Triple de Receptores GLP-1, GIP y Glucagón', fr: 'Agoniste Triple des Récepteurs GLP-1, GIP et Glucagon', de: 'Tripler GLP-1-, GIP- und Glukagon-Rezeptoragonist' },
+  'Cytoprotective / Angiogenic Growth Factor Modulator': { es: 'Modulador Citoprotector y Factor de Crecimiento Angiogénico', fr: 'Modulateur Cytoprotecteur et Facteur de Croissance Angiogénique', de: 'Zytoprotektiver und angiogener Wachstumsfaktormodulator' },
+  'Actin-Sequestering Tissue Regeneration Peptide': { es: 'Péptido Secuestrador de Actina para Regeneración Tisular', fr: 'Peptide Séquestrant l\'Actine pour la Régénération Tissulaire', de: 'Actin-sequestrierendes Peptid zur Geweberegeneration' },
+  'Copper-Binding Cellular Remodeling Tripeptide': { es: 'Tripéptido de Remodelación Celular de Unión a Cobre', fr: 'Tripeptide de Remodelage Cellulaire Liant le Cuivre', de: 'Kupferbindendes Zellerneuerungs-Tripeptid' },
+  'Mitochondrial-Derived Peptide (Metabolic Regulator)': { es: 'Péptido Derivado de Mitocondrias (Regulador Metabólico)', fr: 'Peptide Dérivé des Mitochondries (Régulateur Métabolique)', de: 'Mitochondrial abgeleitetes Peptid (Stoffwechselregulator)' },
+};
+
+export const CLINICAL_PEPTIDE_DESCRIPTIONS = {
+  tirzepatide: {
+    es: 'Tirzepatida es un agonista dual de los receptores GIP y GLP-1 de primera clase. Diseñado para un control glucémico superior y una reducción de peso profunda, optimiza la sensibilidad a la insulina, retrasa el vaciamiento gástrico y reduce de forma sinérgica la ingesta calórica central mediante la activación bimodal de incretinas.',
+    fr: 'Le tirzépatide est un agoniste double des récepteurs GIP et GLP-1 de première classe. Conçu pour un contrôle glycémique supérieur et une réduction pondérale profonde, il optimise la sensibilité à l\'insuline, ralentit la vidange gastrique et régule l\'appétit via une activation incrétine bimodale.',
+    de: 'Tirzepatid ist ein erstklassiger dualer GIP- und GLP-1-Rezeptoragonist. Er wurde für eine überlegene glykämische Kontrolle und tiefgreifende Gewichtsreduktion entwickelt, optimiert die Insulinsensitivität, verzögert die Magenentleerung und dämpft den zentralen Appetit.'
+  },
+  semaglutide: {
+    es: 'Semaglutida es un agonista selectivo del receptor GLP-1 de acción prolongada. Induce una potente supresión del apetito a nivel hipotalámico, ralentiza el tránsito gastrointestinal y optimiza la secreción de insulina glucosa-dependiente.',
+    fr: 'Le sémaglutide est un agoniste sélectif du récepteur GLP-1 à action prolongée. Il induit une puissante régulation de l\'appétit au niveau hypothalamique et optimise la sécrétion d\'insuline.',
+    de: 'Semaglutid ist ein langwirksamer selektiver GLP-1-Rezeptoragonist. Es bewirkt eine signifikante Appetitzügelung im Hypothalamus und optimiert die glukoseabhängige Insulinsekretion.'
+  },
+  retatrutide: {
+    es: 'Retatrutida es un agonista tri-receptor de última generación para GIP, GLP-1 y Glucagón (GGG). Eleva el gasto energético basal mitocondrial, acelera el aclaramiento lipídico hepático y promueve una pérdida de peso sin precedentes.',
+    fr: 'Le rétatrutide est un agoniste tri-récepteur innovant pour GIP, GLP-1 et Glucagon (GGG). Il augmente la dépense énergétique basale et favorise la lipolyse hépatique.',
+    de: 'Retatrutid ist ein bahnbrechender Tri-Rezeptoragonist für GIP, GLP-1 und Glukagon (GGG). Es steigert den mitochondrialen Grundumsatz und fördert den Fettabbau.'
+  },
+  'bpc-157': {
+    es: 'BPC-157 (Body Protection Compound) es un pentadecapéptido citoprotector derivado de los jugos gástricos. Promueve una angiogénesis acelerada, modula la expresión de VEGF y repara la integridad endotelial y mucosal.',
+    fr: 'Le BPC-157 est un pentadécapeptide cytoprotecteur dérivé du suc gastrique. Il accélère l\'angiogenèse, module l\'expression du VEGF et favorise la réparation tissulaire.',
+    de: 'BPC-157 ist ein zytoprotektives Pentadecapeptid. Es fördert eine beschleunigte Angiogenese, stimuliert VEGF und repariert Sehnen-, Bänder- und Schleimhautgewebe.'
+  },
+  'tb-500': {
+    es: 'TB-500 es el segmento sintético activo de la Timosina Beta-4. Secuestra la actina celular para promover la migración celular, angiogénesis colateral y remodelación de matriz extracelular en tejidos lesionados.',
+    fr: 'Le TB-500 est le fragment synthétique actif de la Thymosine Bêta-4. Il séquestre l\'actine pour stimuler la migration cellulaire et la régénération des tissus mous.',
+    de: 'TB-500 ist das synthetische aktive Segment von Thymosin Beta-4. Es fördert die Zellmigration und die Regeneration von Muskel-, Sehnen- und Herzgewebe.'
   }
 };
 
@@ -382,10 +655,38 @@ export function getTranslations(lang = 'en') {
   return UI_I18N[lang] || UI_I18N.en;
 }
 
+export function getLocalizedCategory(category, lang = 'en') {
+  if (!category || lang === 'en') return category;
+  return CATEGORY_TRANSLATIONS[category]?.[lang] || category;
+}
+
+export function getLocalizedTargetSystem(targetSystem, lang = 'en') {
+  if (!targetSystem || lang === 'en') return targetSystem;
+  return TARGET_SYSTEM_TRANSLATIONS[targetSystem]?.[lang] || targetSystem;
+}
+
 export function getLocalizedField(product, field, lang = 'en') {
   if (!product) return '';
+  const slug = (product.slug || product.id || '').toLowerCase();
+  
+  // 1. Direct Firestore translations map
   const translations = product.aiContent?.translations?.[lang] || product.translations?.[lang] || {};
-  return translations[field] || product[`${field}_${lang}`] || product[field] || '';
+  if (translations[field]) return translations[field];
+
+  // 2. Direct property localized name_es, description_es
+  if (product[`${field}_${lang}`]) return product[`${field}_${lang}`];
+
+  // 3. Clinical peptide dictionary fallback if non-English
+  if (lang !== 'en' && (field === 'description' || field === 'clinicalOverview' || field === 'desc')) {
+    for (const [key, val] of Object.entries(CLINICAL_PEPTIDE_DESCRIPTIONS)) {
+      if (slug.includes(key) && val[lang]) {
+        return val[lang];
+      }
+    }
+  }
+
+  // 4. Default return for English or untreated
+  return product[field] || '';
 }
 
 export function getLocalizedProduct(product, lang = 'en') {
@@ -395,9 +696,12 @@ export function getLocalizedProduct(product, lang = 'en') {
   return {
     ...product,
     displayName: translations.name || product[`name_${lang}`] || product.name || product.displayName,
-    description: translations.description || product[`description_${lang}`] || product.description || product.desc,
-    desc: translations.description || product[`description_${lang}`] || product.desc || product.description,
+    description: getLocalizedField(product, 'description', lang) || product.description || product.desc,
+    desc: getLocalizedField(product, 'description', lang) || product.desc || product.description,
     objective: translations.objective || product[`objective_${lang}`] || product.objective,
     mechanisms: translations.mechanisms || product[`mechanisms_${lang}`] || product.mechanisms,
+    category: getLocalizedCategory(product.category || product.therapeutic_category, lang),
+    targetSystem: getLocalizedTargetSystem(product.targetSystem || product.target, lang),
   };
 }
+

@@ -26,9 +26,16 @@ import {
   Tag,
   Eye,
   Loader2,
-  Droplets
+  Droplets,
+  Printer
 } from '@/lib/icons';
-import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
+import { 
+  SUPPORTED_LANGUAGES, 
+  getTranslations, 
+  getLocalizedField,
+  getLocalizedCategory,
+  getLocalizedTargetSystem
+} from '../../utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
@@ -195,15 +202,16 @@ export default function PublicDatasheetView({
   }, [lang, product]);
 
   const name = product?.name || product?.displayName || 'Clinical Peptide';
-  const category = product?.category || product?.therapeutic_category || 'Peptide';
+  const category = getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
   const casNumber = product?.casNumber || product?.cas || 'Documented on Monograph';
   const formula = product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null;
   const mw = product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null;
   const purity = product?.purity || '≥ 99.4% (RP-HPLC)';
   const sequence = product?.sequence || product?.molecular?.sequence || null;
-  const targetSystem = product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis';
+  const targetSystem = getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
   const description = dynamicTranslations[lang]?.description
     || getLocalizedField(product, 'description', lang) 
+    || getLocalizedField(product, 'clinicalOverview', lang)
     || product?.clinicalOverview
     || product?.clinical_overview
     || product?.description 
@@ -668,7 +676,15 @@ export default function PublicDatasheetView({
             <select 
               className="pds-lang-select" 
               value={lang} 
-              onChange={(e) => startTransition(() => setLang(e.target.value))}
+              onChange={(e) => {
+                const nextLang = e.target.value;
+                startTransition(() => setLang(nextLang));
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('lang', nextLang);
+                  window.history.replaceState({}, '', url.toString());
+                }
+              }}
               aria-label="Select Language"
             >
               {SUPPORTED_LANGUAGES.map(l => (
@@ -720,7 +736,7 @@ export default function PublicDatasheetView({
             </div>
             <h1 className="pds-title">{name}</h1>
             <p className="pds-target">
-              <strong>Target Receptor Axis:</strong> {targetSystem}
+              <strong>{t.targetReceptorAxis || 'Target Receptor Axis:'}</strong> {targetSystem}
             </p>
           </div>
 
@@ -769,10 +785,10 @@ export default function PublicDatasheetView({
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <Building2 size={15} color="#003666" />
-                  Verified Manufacturing Laboratories:
+                  {t.verifiedLaboratories || 'Verified Manufacturing Laboratories:'}
                 </span>
                 <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  {suppliersList.length} verified sources available
+                  {suppliersList.length} {t.verifiedSourcesAvailable || 'verified sources available'}
                 </span>
               </div>
 
@@ -792,7 +808,7 @@ export default function PublicDatasheetView({
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  🌐 All Laboratories (Overview)
+                  🌐 {t.allLaboratoriesOverview || 'All Laboratories (Overview)'}
                 </button>
 
                 {suppliersList.map(s => {
@@ -963,21 +979,21 @@ export default function PublicDatasheetView({
                 <div className="pds-section-header-titles">
                   <div className="pds-section-header-meta-row">
                     <span className="pds-section-header-category">
-                      {lang === 'es' ? 'MATRIZ ANALÍTICA & ESPECIFICACIONES' : 'ANALYTICAL MATRIX & CLINICAL SPECIFICATIONS'}
+                      {t.analyticalMatrixSection || 'ANALYTICAL MATRIX & CLINICAL SPECIFICATIONS'}
                     </span>
                     <span className="pds-section-badge">
-                      <CheckCircle2 size={11} /> {lang === 'es' ? 'COMPENDIO OFICIAL' : 'OFFICIAL COMPENDIUM'}
+                      <CheckCircle2 size={11} /> {t.officialCompendium || 'OFFICIAL COMPENDIUM'}
                     </span>
                   </div>
                   <h3 className="pds-section-header-title">
-                    {lang === 'es' ? 'Matriz Completa de Formulaciones y Dosificaciones' : 'Complete Formulations & Strengths Matrix'}
+                    {t.completeFormulationsMatrix || 'Complete Formulations & Strengths Matrix'}
                   </h3>
                 </div>
               </div>
 
               <div className="pds-section-cert-badge">
                 <Sparkles size={14} color="#38bdf8" />
-                <span>{lang === 'es' ? 'Presentaciones y Concentraciones Aprobadas' : 'All Approved Presentations & Doses'}</span>
+                <span>{t.allApprovedPresentations || 'All Approved Presentations & Doses'}</span>
               </div>
             </div>
 
@@ -986,13 +1002,13 @@ export default function PublicDatasheetView({
                 <table className="pds-strengths-table">
                   <thead>
                     <tr>
-                      <th>Strength / Dose</th>
-                      <th>Presentation Format</th>
-                      <th>Reconstitution Diluent</th>
-                      <th>{lang === 'es' ? 'Concentración Solución (mg/mL)' : 'Solution Concentration (mg/mL)'}</th>
-                      <th>Administration</th>
-                      <th>Analytical Grade</th>
-                      <th>Laboratory Verification</th>
+                      <th>{lang === 'es' ? 'Concentración / Dosis' : 'Strength / Dose'}</th>
+                      <th>{lang === 'es' ? 'Formato de Presentación' : 'Presentation Format'}</th>
+                      <th>{lang === 'es' ? 'Diluyente de Reconstitución' : 'Reconstitution Diluent'}</th>
+                      <th>{t.solutionConcentrationCol || 'Solution Concentration (mg/mL)'}</th>
+                      <th>{lang === 'es' ? 'Vía de Administración' : 'Administration'}</th>
+                      <th>{lang === 'es' ? 'Grado Analítico' : 'Analytical Grade'}</th>
+                      <th>{lang === 'es' ? 'Verificación de Laboratorio' : 'Laboratory Verification'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1008,27 +1024,27 @@ export default function PublicDatasheetView({
                         const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
 
                         const diluentText = isPenOrCart 
-                          ? 'Pre-filled Solution (Zero mixing)' 
+                          ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
                           : isOral 
-                            ? 'Solid Oral Dose (No diluent)'
+                            ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
                             : isSpray
-                              ? 'Pre-metered Intranasal Solution'
+                              ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
                               : `${recon.volume} mL BAC Water`;
 
                         const concText = isPenOrCart 
-                          ? 'Calibrated Pen Solution' 
+                          ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
                           : isOral 
-                            ? 'Dry Oral Solid Unit'
+                            ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
                             : isSpray
-                              ? 'Metered Spray Unit'
+                              ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
                               : `${recon.concentration} mg/mL`;
 
                         const adminText = isPenOrCart 
-                          ? 'Subcutaneous Pen Multi-dose' 
+                          ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
                           : isOral 
-                            ? 'Oral Enteric Unit'
+                            ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
                             : isSpray
-                              ? 'Intranasal Mucosal'
+                              ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
                               : 'Subcutaneous / IM (U-100)';
 
                         return (
@@ -1043,12 +1059,12 @@ export default function PublicDatasheetView({
                             title="Click to view full clinical details for this presentation"
                             style={{ cursor: 'pointer' }}
                           >
-                            <td data-label="Strength / Dose">
-                              <div className="pds-dose-cell">
+                            <td data-label="Strength / Dose" className="pds-strength-cell">
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                                 {isCurrentlyActive && (
                                   <span className="pds-active-dot" aria-label="Active Presentation" title="Active Presentation" />
                                 )}
-                                <span className="pds-table-bold-spec">{st.name}</span>
+                                <span className="pds-strength-name">{st.name}</span>
                               </div>
                             </td>
                             <td data-label="Presentation Format">
@@ -1057,9 +1073,11 @@ export default function PublicDatasheetView({
                               </span>
                             </td>
                             <td data-label="Reconstitution Diluent">{diluentText}</td>
-                            <td data-label="Solution Concentration (mg/mL)" className="font-mono">
-                              {!isPenOrCart && !isOral && !isSpray ? (
-                                <span className="pds-conc-highlight">{concText}</span>
+                            <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
+                              {recon.volume > 0 && !isPenOrCart && !isOral && !isSpray ? (
+                                <span className="pds-conc-badge font-mono">
+                                  {concText}
+                                </span>
                               ) : (
                                 concText
                               )}
@@ -1088,14 +1106,14 @@ export default function PublicDatasheetView({
               <div className="pds-section-header-titles">
                 <div className="pds-section-header-meta-row">
                   <span className="pds-section-header-category">
-                    {lang === 'es' ? 'PROTOCOLO DE RECONSTITUCIÓN & DOSIMETRÍA' : 'RECONSTITUTION PROTOCOL & DOSIMETRY'}
+                    {t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY'}
                   </span>
                   <span className="pds-section-badge">
-                    <CheckCircle2 size={11} /> {lang === 'es' ? 'SIMULADOR CLÍNICO' : 'PRECISION SIMULATOR'}
+                    <CheckCircle2 size={11} /> {t.interactiveCalcBadge || 'PRECISION SIMULATOR'}
                   </span>
                 </div>
                 <h3 className="pds-section-header-title">
-                  {lang === 'es' ? 'Guía Interactiva de Reconstitución y Calibrador U-100' : 'Interactive Reconstitution & U-100 Syringe Simulator'}
+                  {t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator'}
                 </h3>
               </div>
             </div>
@@ -1132,22 +1150,40 @@ export default function PublicDatasheetView({
           />
         </section>
 
-        {/* ── Block 4: Physical Labels & Dispensing Downloads ── */}
-        <section id="labels-section" className="pds-vial-label-section">
-          <div className="pds-vial-label-card">
-            <div className="pds-vial-label-header">
-              <div className="pds-vial-label-title-group">
-                <div className="pds-vial-label-icon-badge">
-                  <QrCode size={22} color="#003666" />
+        {/* ── Block 4: Physical Labels & Dispensing Downloads (Harmonized Navy Header) ── */}
+        <section id="labels-section" className="pds-section-card">
+          <div className="pds-section-header">
+            <div className="pds-section-header-left">
+              <div className="pds-section-header-shield">
+                <QrCode size={22} />
+              </div>
+              <div className="pds-section-header-titles">
+                <div className="pds-section-header-meta-row">
+                  <span className="pds-section-header-category">
+                    {t.physicalLabelsSection || 'PHYSICAL VIAL LABELS & DISPENSING'}
+                  </span>
+                  <span className="pds-section-badge">
+                    <CheckCircle2 size={11} /> 38×90mm THERMAL
+                  </span>
                 </div>
-                <div>
-                  <h3 className="pds-vial-label-title">Physical Vial Labels &amp; Batch Printing</h3>
-                  <p className="pds-vial-label-subtitle">
-                    Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.
-                  </p>
-                </div>
+                <h3 className="pds-section-header-title">
+                  {t.physicalLabelsSection || 'Physical Vial Labels & Batch Printing'}
+                </h3>
               </div>
             </div>
+
+            <div className="pds-section-header-right">
+              <div className="pds-section-cert-badge">
+                <Printer size={14} color="#38bdf8" />
+                <span>Thermal 38×90mm Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pds-section-card-body" style={{ padding: '1.5rem' }}>
+            <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+              {t.physicalLabelsSubtitle || 'Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.'}
+            </p>
 
             {/* Dual Label Options Grid: Shipping vs Client Vial */}
             <div className="pds-dual-labels-grid">
@@ -1156,12 +1192,12 @@ export default function PublicDatasheetView({
                 <div className="pds-label-type-head">
                   <span className="pds-label-badge-icon">📦</span>
                   <div>
-                    <h4 className="pds-label-type-title">Shipping &amp; Traceability Label</h4>
-                    <span className="pds-label-use-tag">For Outbound Box &amp; Logistics</span>
+                    <h4 className="pds-label-type-title">{t.shippingTraceabilityLabel || 'Shipping & Traceability Label'}</h4>
+                    <span className="pds-label-use-tag">{t.outboundLogisticsTag || 'For Outbound Box & Logistics'}</span>
                   </div>
                 </div>
                 <p className="pds-label-type-desc">
-                  Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.
+                  {t.shippingLabelDesc || 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.'}
                 </p>
                 <div className="pds-label-type-buttons">
                   <a 
@@ -1175,9 +1211,9 @@ export default function PublicDatasheetView({
                     title="Download 38x90mm Shipping Label (PDF File)"
                   >
                     {downloadingType === 'shipping_38x90' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
                     ) : (
-                      <><Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span></>
+                      <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
                     )}
                   </a>
                   <a 
@@ -1191,7 +1227,7 @@ export default function PublicDatasheetView({
                     title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
                   >
                     {downloadingType === 'shipping_sheet' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
                     ) : (
                       <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
                     )}
@@ -1203,9 +1239,9 @@ export default function PublicDatasheetView({
                     title="Copy direct shareable link to this shipping label"
                   >
                     {copiedLabelType === 'shipping' ? (
-                      <><Check size={14} className="pds-btn-icon text-success" /> <span>Copied Link</span></>
+                      <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
                     ) : (
-                      <><Copy size={14} className="pds-btn-icon" /> <span>Copy Link</span></>
+                      <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
                     )}
                   </button>
                 </div>
@@ -1216,12 +1252,12 @@ export default function PublicDatasheetView({
                 <div className="pds-label-type-head">
                   <span className="pds-label-badge-icon">🏷️</span>
                   <div>
-                    <h4 className="pds-label-type-title">Client Vial Application Label</h4>
-                    <span className="pds-label-use-tag active">For Customer Vial Adhesion</span>
+                    <h4 className="pds-label-type-title">{t.clientVialLabelTitle || 'Official Patient Vial Label'}</h4>
+                    <span className="pds-label-use-tag active">{t.patientSubqTag || 'For Patient Dispensing (SubQ)'}</span>
                   </div>
                 </div>
                 <p className="pds-label-type-desc">
-                  Full clinical specification label provided for the client or clinician to adhere directly onto the vial. Includes dose, RP-HPLC purity, handwriteable reconstitution fields, and cold-chain guidance.
+                  {t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.'}
                 </p>
                 <div className="pds-label-type-buttons">
                   <a 
@@ -1235,9 +1271,9 @@ export default function PublicDatasheetView({
                     title="Download 38x90mm Client Vial Label (PDF File)"
                   >
                     {downloadingType === 'client_38x90' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
                     ) : (
-                      <><Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span></>
+                      <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
                     )}
                   </a>
                   <a 
@@ -1251,7 +1287,7 @@ export default function PublicDatasheetView({
                     title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
                   >
                     {downloadingType === 'client_sheet' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
                     ) : (
                       <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
                     )}
@@ -1263,9 +1299,9 @@ export default function PublicDatasheetView({
                     title="Copy direct shareable link to this client vial label"
                   >
                     {copiedLabelType === 'client' ? (
-                      <><Check size={14} className="pds-btn-icon text-success" /> <span>Copied Link</span></>
+                      <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
                     ) : (
-                      <><Copy size={14} className="pds-btn-icon" /> <span>Copy Link</span></>
+                      <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
                     )}
                   </button>
                 </div>

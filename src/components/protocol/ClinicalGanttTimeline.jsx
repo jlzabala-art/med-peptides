@@ -193,14 +193,14 @@ export default function ClinicalGanttTimeline({
         </div>
       </div>
 
-      {/* 2. Mobile Quick Week Scroller (< 768px touch targets) */}
+      {/* 2. Timeline Week Selector */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
-            📅 Timeline Navigator (Select Week):
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
+          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Timeline Navigator
           </span>
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0d9488' }}>
-            Week {selectedWeek} of {totalWeeks} ({currentPhase.phaseName})
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0d9488' }}>
+            Week {selectedWeek} of {totalWeeks} · Phase {currentPhase.phaseNumber || 1}: {currentPhase.phaseName} (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
           </span>
         </div>
 

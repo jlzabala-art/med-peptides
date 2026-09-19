@@ -1,0 +1,561 @@
+I agree with standardizing this globally. The main issue is that the laptop header has the title/breadcrumb separated from the actions, while mobile changes the hierarchy considerably. I would create one reusable “Page Header / List Header” pattern for Product Catalog, Protocols, Prescriptions, Patients, Inventory, etc., adapting only its responsive layout.
+
+I would also remove the decorative thumbnail/icon next to page titles where present, simplify breadcrumbs, and establish a strict button hierarchy: primary action → secondary actions → navigation.
+
+Here is the Antigravity prompt:
+
+TASK: STANDARDIZE ALL MAIN PAGE HEADERS ACROSS ATLAS HEALTH — DESKTOP + MOBILE
+Review and refactor the UX/UI of the main page headers across Atlas Health.
+Use the current Product Catalog page as the initial reference, but this task MUST create and apply a consistent reusable header pattern across all equivalent main screens, including at minimum:
+- Product Catalog
+- Protocols
+- Prescriptions
+- Patients
+- Doctors
+- Treatments
+- Inventory & Supply
+- Import Price List
+- Orders / Sales screens
+- Purchasing screens
+- Logistics screens
+- Finance screens
+- Marketing screens
+- Other equivalent primary list/index pages
+IMPORTANT:
+This is strictly a UX/UI and responsive consistency refactor.
+DO NOT change functionality.
+DO NOT remove actions.
+DO NOT add new actions.
+DO NOT change routes.
+DO NOT change permissions.
+DO NOT change filters.
+DO NOT change search behavior.
+DO NOT change import/export logic.
+DO NOT change table behavior.
+DO NOT change business logic.
+DO NOT change APIs or database structures.
+The objective is to create ONE coherent Page Header system shared by all major Atlas Health screens.
+Follow Google Cloud Console / Material Design 3 principles.
+==================================================
+1. CORE DESIGN OBJECTIVE
+==================================================
+Currently different main screens use slightly different structures for:
+- Page title
+- Breadcrumbs
+- Thumbnails/icons
+- Back navigation
+- View selectors
+- Primary actions
+- Import / Export
+- Search
+- Filters
+- Metrics
+- Desktop/mobile adaptation
+Standardize these elements.
+A user moving between:
+Products → Protocols → Prescriptions → Patients → Inventory
+should immediately recognize the same information architecture.
+Do not redesign each page independently.
+Create a reusable responsive PAGE HEADER PATTERN.
+==================================================
+2. REMOVE PAGE TITLE THUMBNAILS
+==================================================
+Remove decorative thumbnails / large icons associated with page titles on these main list/index pages.
+Do not replace them with another decorative element.
+Icons can remain inside:
+- buttons
+- navigation
+- tabs
+- status indicators
+- functional controls
+But the PAGE TITLE itself should be typographic.
+Example:
+Product Catalog
+not:
+[icon/thumbnail] Product Catalog
+This rule should be applied consistently across equivalent main screens.
+==================================================
+3. DESKTOP PAGE HEADER — TARGET STRUCTURE
+==================================================
+Use the following hierarchy:
+Breadcrumb / contextual navigation
+PAGE TITLE                         PAGE ACTIONS
+Optional subtitle / metadata
+View selector
+────────────────────────────────────────────
+Metrics / page content
+For Product Catalog, conceptually:
+Admin / Catalog
+Product Catalog
+                         [Import] [Export ▾] [+ New Product]
+[ Table View | Genomics Matrix ]
+────────────────────────────────────────────
+Metrics Scope: Active Catalog
+...
+The exact positioning should adapt to available width, but the hierarchy must remain consistent.
+==================================================
+4. PAGE TITLE
+==================================================
+The page title must be the strongest element in the page header.
+Example:
+Product Catalog
+Use a clear Material typography hierarchy.
+Do not truncate the title unnecessarily as currently happens with:
+"Product C..."
+If enough desktop width exists, always display the complete page title.
+On mobile, allow a title to use up to two lines if necessary.
+Never truncate a major page title merely to preserve empty horizontal space.
+==================================================
+5. BREADCRUMBS
+==================================================
+Simplify breadcrumbs.
+Desktop:
+Use compact breadcrumbs above the title.
+Example:
+Admin / Catalog
+Product Catalog
+Do not allow breadcrumbs to compete visually with the page title.
+Use smaller secondary typography.
+Mobile:
+Do NOT show a large multi-line breadcrumb.
+If contextual navigation is required by existing functionality, represent it using the existing back navigation pattern.
+Do not duplicate:
+Back button
++
+breadcrumb
++
+Dashboard button
+when these represent overlapping navigation concepts.
+Preserve the functionality but simplify its presentation.
+==================================================
+6. DESKTOP ACTION HIERARCHY
+==================================================
+All equivalent pages should follow the same action hierarchy.
+For Product Catalog:
+PRIMARY:
++ New Product
+SECONDARY:
+Import
+Export ▾
+NAVIGATION:
+Dashboard / Back
+Primary action should be visually strongest.
+Secondary actions should use the same consistent outlined/tonal component style.
+Navigation actions should be visually weaker than operational actions.
+Example:
+[ Import ] [ Export ▾ ] [+ New Product]
+Do not make every button equally prominent.
+==================================================
+7. REMOVE REDUNDANT "DASHBOARD" BUTTON STYLING
+==================================================
+Where an explicit Dashboard/back action currently exists in the page action group, visually separate navigation from operational actions.
+For example:
+← Dashboard
+should NOT have the same visual weight as:
++ New Product
+If the existing route/action must remain, keep it.
+But render it as a tertiary navigation action.
+Do not change navigation functionality.
+==================================================
+8. VIEW SELECTOR
+==================================================
+Controls such as:
+Table View
+Genomics Matrix
+should be treated as VIEW SELECTION, not page actions.
+Use a Material segmented control.
+Example:
+[ Table View | Genomics Matrix ]
+The selected view should be clearly visible.
+The unselected view should be neutral.
+Do not place view selectors visually in the same button group as:
+Import
+Export
+New Product
+These represent different concepts.
+This pattern must also be reused on other pages that have equivalent view modes.
+==================================================
+9. DESKTOP HEADER LAYOUT
+==================================================
+Recommended desktop structure:
+┌──────────────────────────────────────────────────────────┐
+│ Admin / Catalog                                          │
+│                                                          │
+│ Product Catalog              Import  Export  + New Product│
+│                                                          │
+│ [ Table View | Genomics Matrix ]                         │
+└──────────────────────────────────────────────────────────┘
+Then:
+Metrics / KPIs
+Search
+Filters
+Main content
+Keep the header compact.
+Do not create excessive vertical whitespace.
+==================================================
+10. MOBILE HEADER — IMPORTANT REDESIGN
+==================================================
+The mobile header should NOT be a compressed desktop header.
+Create a consistent native mobile structure.
+Recommended hierarchy:
+Product Catalog                       [←]
+[ Table View | Genomics Matrix ]
+[ + New Product ]
+[ Import ]              [ Export ▾ ]
+────────────────────────────────
+Search products...
+Category / quick filters
+[ Filters ]
+Then page-specific metrics/content.
+However, preserve the existing navigation semantics of the current back control.
+Do not introduce new navigation behavior.
+==================================================
+11. MOBILE TITLE ROW
+==================================================
+Use a simple title row:
+Product Catalog                    [←]
+or, depending on the application's existing navigation convention:
+[←] Product Catalog
+Choose ONE pattern and use it consistently across ALL equivalent screens.
+Do not use different back-button positions on Products, Protocols and Prescriptions.
+Do not include decorative title thumbnails.
+The title should remain visually dominant.
+==================================================
+12. MOBILE PRIMARY ACTION
+==================================================
+The page's primary creation action should be immediately identifiable.
+Product Catalog:
+[ + New Product ]
+Protocols:
+[ + New Protocol ]
+Prescriptions:
+[ + New Prescription ]
+etc., ONLY where those actions already exist.
+DO NOT invent missing creation actions.
+The primary action may use full width or a dominant grid position on mobile.
+Use the same pattern on all screens.
+==================================================
+13. MOBILE SECONDARY ACTIONS
+==================================================
+Secondary actions should appear immediately after the primary action.
+Example:
+[ + New Product             ]
+[ Import        ] [ Export ▾ ]
+Use equal height.
+Use consistent:
+- radius
+- icon size
+- typography
+- padding
+- borders
+Do not allow Import and Export to look like unrelated component families.
+==================================================
+14. MOBILE VIEW SELECTOR
+==================================================
+The view selector should remain near the top because it changes how the page content is represented.
+Example:
+[ Table View | Genomics Matrix ]
+Full available width.
+Do not display these as two unrelated buttons.
+Use a single segmented control.
+Apply this pattern to all pages with multiple view modes.
+==================================================
+15. SEARCH BELONGS TO CONTENT, NOT PAGE ACTIONS
+==================================================
+Search should be visually separated from the page title/action header.
+Hierarchy:
+PAGE IDENTITY
+↓
+VIEW + ACTIONS
+↓
+divider / spacing
+↓
+SEARCH
+↓
+QUICK FILTERS
+↓
+FILTERS
+↓
+METRICS / RESULTS
+This distinction is important.
+Do not mix search with creation/import/export actions.
+==================================================
+16. FILTERS AND CATEGORY CHIPS
+==================================================
+On mobile, preserve existing category chips such as:
+Longevity & Anti-Aging
+Metabolic & Weight Loss
+Tissue Repair & Recovery
+...
+Allow horizontal scrolling where currently appropriate.
+Do not compress them until labels become unreadable.
+The Filters control should remain clearly available.
+Do not add or remove filtering functionality.
+==================================================
+17. METRICS POSITION
+==================================================
+Keep page metrics below the header/search/filter area.
+For Product Catalog:
+Total Products
+Raw Materials / APIs
+Finished Formulations
+Active Categories
+Do not place metrics between the page title and its actions.
+The page should read:
+1. WHERE AM I?
+2. WHAT CAN I DO?
+3. HOW DO I VIEW / FIND CONTENT?
+4. WHAT IS THE CURRENT STATE?
+5. CONTENT
+==================================================
+18. MOBILE METRICS
+==================================================
+Keep the current responsive metric-card concept but normalize it.
+On medium mobile widths:
+2-column grid where readable.
+On narrow screens:
+1-column if necessary.
+Do not reduce typography to force four cards into a row.
+Preserve all metric data.
+==================================================
+19. FILTERED / GLOBAL DATABASE VIEW
+==================================================
+Controls such as:
+Applied Filters View
+Global Database View
+or:
+Filtered
+All (422 Products · 830 Vars)
+represent a scope/view selector.
+Treat them consistently as a segmented control.
+Do not make them look like ordinary buttons.
+Use the same component language as other segmented controls, while maintaining appropriate hierarchy.
+Do not change scope behavior.
+==================================================
+20. CONSISTENT COMPONENT FAMILIES
+==================================================
+Across ALL major pages define consistent families:
+PRIMARY ACTION
+Filled primary button.
+SECONDARY ACTION
+Outlined / tonal button.
+TERTIARY NAVIGATION
+Text / subtle outlined navigation.
+SEGMENTED CONTROL
+For mutually exclusive views.
+FILTER CHIP
+For filters/categories.
+STATUS CHIP
+For status only.
+Do not use status-chip styling for actions.
+Do not use action-button styling for passive metadata.
+==================================================
+21. RESPONSIVE HEADER COMPONENT
+==================================================
+Create or refactor toward a reusable component architecture such as:
+PageHeader
+with conceptual slots for:
+- breadcrumb
+- title
+- subtitle
+- primaryAction
+- secondaryActions
+- navigationAction
+- viewSelector
+- metadata
+The exact implementation should respect the existing codebase.
+Do not perform an unnecessary architectural rewrite.
+The goal is visual and responsive consistency.
+==================================================
+22. GLOBAL APPLICATION
+==================================================
+IMPORTANT:
+Do NOT implement this only for Product Catalog.
+Audit all equivalent major screens and apply the same header logic wherever applicable.
+At minimum review:
+PRODUCT CATALOG
+PROTOCOLS
+PRESCRIPTIONS
+PATIENTS
+DOCTORS
+TREATMENTS
+INVENTORY & SUPPLY
+IMPORT PRICE LIST
+Then identify equivalent main/index screens in:
+SALES
+PURCHASING
+LOGISTICS
+FINANCE
+MARKETING
+Apply the same system where structurally appropriate.
+Do not force the pattern onto detail/edit screens where a different header hierarchy is genuinely required.
+==================================================
+23. DESKTOP CONSISTENCY EXAMPLES
+==================================================
+PRODUCTS
+Admin / Catalog
+Product Catalog
+[Table View | Genomics Matrix]
+                    [Import] [Export ▾] [+ New Product]
+PROTOCOLS
+Clinical
+Protocols
+[existing view selector, if any]
+                    [existing secondary actions] [+ existing primary action]
+PRESCRIPTIONS
+Clinical
+Prescriptions
+                    [existing secondary actions] [+ existing primary action]
+PATIENTS
+Clinical
+Patients
+                    [existing secondary actions] [+ existing primary action]
+The exact actions must come from each existing screen.
+DO NOT invent actions merely to make the headers visually identical.
+Consistency means identical hierarchy and component language, NOT identical functionality.
+==================================================
+24. MOBILE CONSISTENCY EXAMPLES
+==================================================
+PRODUCT CATALOG
+Product Catalog                    [←]
+[ Table View | Genomics Matrix ]
+[ + New Product ]
+[ Import ]              [ Export ▾ ]
+────────────────────────────────
+Search products...
+...
+PROTOCOLS
+Protocols                           [←]
+[ existing view selector ]
+[ existing primary action ]
+[ existing secondary actions ]
+────────────────────────────────
+Search protocols...
+...
+PRESCRIPTIONS
+Prescriptions                       [←]
+[ existing primary action ]
+[ existing secondary actions ]
+────────────────────────────────
+Search prescriptions...
+...
+Again:
+Do not create actions that do not currently exist.
+==================================================
+25. SPACING
+==================================================
+Use an 8px spacing system.
+Recommended:
+8px:
+closely related elements
+12–16px:
+button/action gaps
+16px:
+mobile horizontal page padding
+16–24px:
+between header sections
+24–32px:
+between page header and main content on desktop
+Avoid the excessive blank vertical area currently visible between the desktop top application bar and Product Catalog content.
+The page should feel compact and operational.
+==================================================
+26. ALIGNMENT
+==================================================
+Desktop:
+The page title, content container, metrics, search and results/table should share the same primary left alignment.
+Avoid slightly different container widths across:
+header
+metrics
+search
+filters
+table
+Establish one content grid.
+This will significantly improve perceived quality.
+==================================================
+27. MOBILE SAFE AREAS
+==================================================
+Respect:
+top app navigation
+bottom navigation
+Workspace bar
+The page header and primary actions must never be obscured.
+The Workspace floating bar must not cover important page controls or content.
+Do not modify Workspace functionality.
+==================================================
+28. TYPOGRAPHY
+==================================================
+Establish a consistent hierarchy:
+PAGE TITLE
+Highest emphasis within content area.
+BREADCRUMB
+Small, secondary.
+SUBTITLE / METADATA
+Secondary.
+BUTTONS
+Consistent medium emphasis.
+FILTERS
+Compact.
+METRICS
+Large numerical value + secondary label.
+Avoid arbitrary font-size changes between pages.
+==================================================
+29. ICONOGRAPHY
+==================================================
+Use icons only when functional or useful for recognition.
+REMOVE decorative page-title thumbnails.
+Keep icons for:
+Import
+Export
+New
+Search
+Filters
+Back
+view selection
+functional actions
+Use consistent icon sizes.
+Avoid mixing multiple visual icon styles.
+==================================================
+30. TARGET RESULT
+==================================================
+The user should be able to move between:
+Product Catalog
+→ Protocols
+→ Prescriptions
+→ Patients
+→ Inventory
+and always see the same conceptual structure:
+PAGE TITLE
+VIEW MODE
+PRIMARY + SECONDARY ACTIONS
+SEARCH
+FILTERS
+PAGE-SPECIFIC SUMMARY / METRICS
+CONTENT
+Desktop should be compact and horizontally efficient.
+Mobile should be vertical, touch-friendly and clearly prioritized.
+The responsive layout may change, but the information hierarchy should remain identical.
+==================================================
+31. NON-NEGOTIABLE REQUIREMENT
+==================================================
+THIS IS A UX/UI REFACTOR ONLY.
+DO NOT:
+- add functionality
+- remove functionality
+- change navigation destinations
+- change permissions
+- change search behavior
+- change filters
+- change import/export behavior
+- change creation workflows
+- change database structures
+- change APIs
+- change business logic
+- change Workspace behavior
+- change page-specific calculations or data
+Remove decorative page-title thumbnails.
+Standardize the Page Header architecture.
+Apply it consistently across all equivalent major Atlas Health screens.
+Reuse existing components wherever possible.
+The final result should feel like one coherent enterprise application built from a shared Google Cloud / Material Design system, rather than individual pages designed independently.
+
+I would emphasize two changes from the current screenshots: on laptop, Product Catalog should move into the same horizontal block as its actions and the huge empty space above it should disappear; on mobile, the sequence should be very predictable: Title → View → Actions → Search/Filters → Metrics → Content. That same sequence should then become the standard for Protocols, Prescriptions, Patients, and the rest of the main modules.
