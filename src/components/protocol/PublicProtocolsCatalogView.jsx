@@ -228,7 +228,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
       const compounds = extractCompounds(p);
       const mappedGoals = mapProtocolToGoals(p);
       const cleanName = p.name || p.protocol_name || p.title || 'Clinical Protocol';
-      const cleanCode = p.protocol_id || p.protocolCode || (p.id ? `PR-${p.id.slice(0, 6).toUpperCase()}` : 'PR-CLIN');
+      const cleanCode = p.sku || p.code || p.protocol_id || p.protocolCode || (p.id ? `PR-${p.id.slice(0, 6).toUpperCase()}` : 'PR-CLIN');
       const cleanSlug = p.slug || p.protocol_slug || p.id;
       const summary = p.overview_summary || p.description || p.executiveSummary || p.clinical_rationale || 
         'Prescription protocol calibrated for cellular receptor adaptation and targeted biomarker outcomes.';
@@ -922,15 +922,6 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                               </button>
 
-                              <button
-                                type="button"
-                                className="proto-card-code"
-                                onClick={(e) => handleCopyCode(proto.cleanCode, e)}
-                                title={t.copyProtocolLink}
-                              >
-                                {copiedId === proto.cleanCode ? (lang === 'es' ? '✓ COPIADO' : '✓ COPIED') : proto.cleanCode}
-                              </button>
-
                               <Link
                                 href={`/proto/${proto.cleanSlug}`}
                                 className="proto-list-title"
@@ -1077,17 +1068,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                       return (
                         <article key={proto.id || proto.cleanSlug} className="proto-card">
                           <div className="proto-card-top">
-                            {/* Header: Code & Category Pill */}
+                            {/* Header: Category Goal Pill */}
                             <div className="proto-card-header">
-                              <button
-                                type="button"
-                                className="proto-card-code"
-                                onClick={(e) => handleCopyCode(proto.cleanCode, e)}
-                                title={t.copyProtocolLink}
-                              >
-                                {copiedId === proto.cleanCode ? (lang === 'es' ? '✓ COPIADO' : '✓ COPIED') : proto.cleanCode}
-                              </button>
-
                               <span
                                 className="proto-card-goal-pill"
                                 style={{ background: goalInfo.bg, color: goalInfo.color, border: `1px solid ${goalInfo.color}33` }}

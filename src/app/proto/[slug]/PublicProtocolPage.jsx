@@ -344,7 +344,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           <div className="pds-context-breadcrumb">
             <Link href="/proto">{lang === 'es' ? 'Protocolos' : 'Protocols'}</Link>
             <span className="pds-context-breadcrumb-sep">/</span>
-            <span className="pds-context-breadcrumb-curr">{protocolCode} • {displayName}</span>
+            <span className="pds-context-breadcrumb-curr">{displayName}</span>
           </div>
 
           {/* Section Anchor Tabs */}
