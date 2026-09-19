@@ -294,19 +294,47 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
       });
 
       if (isIncluded) {
+        // Clinical Relevance Scoring to identify the Flagship / Primary Blueprint
+        let clinicalScore = 0;
+        if (data.isFlagship || data.featured) clinicalScore += 60;
+        const protoNameLower = String(data.name || data.title || '').toLowerCase();
+        if (protoNameLower.includes(pNameLower) || protoNameLower.includes(pSlugLower)) clinicalScore += 35;
+        if (protoNameLower.startsWith(pNameLower)) clinicalScore += 25;
+        if (protoNameLower.includes('titration') || protoNameLower.includes('recomposition') || protoNameLower.includes('metabolic')) clinicalScore += 20;
+        const phasesCount = Array.isArray(data.phases) ? data.phases.length : 1;
+        clinicalScore += phasesCount * 8;
+        const durWeeks = Number(data.durationWeeks) || 8;
+        clinicalScore += Math.min(durWeeks, 30);
+
         matched.push({
           id: doc.id,
           slug: data.slug || doc.id,
           name: data.name || data.title || 'Clinical Pathway',
           category: data.category || data.goal || data.therapeutic_category || 'Clinical Protocol',
           duration: data.durationWeeks ? `${data.durationWeeks} Weeks` : (data.duration || '8 Weeks'),
-          phasesCount: Array.isArray(data.phases) ? data.phases.length : 1,
-          description: (data.summary || data.description || data.clinicalRationale || '').substring(0, 140)
+          durationWeeks: durWeeks,
+          phasesCount,
+          description: (data.summary || data.description || data.clinicalRationale || '').substring(0, 140),
+          clinicalScore,
+          phasesSummary: Array.isArray(data.phases)
+            ? data.phases.slice(0, 4).map((ph, idx) => ({
+                label: ph.phaseLabel || ph.name || `Phase ${idx + 1}`,
+                dose: ph.dose || ph.dosage || null,
+                unit: ph.unit || 'mg'
+              }))
+            : []
         });
       }
     });
 
-    return matched.slice(0, 4);
+    // Sort by clinical relevance score descending
+    matched.sort((a, b) => b.clinicalScore - a.clinicalScore);
+
+    // Flag the top protocol as the Primary Reference Blueprint
+    return matched.slice(0, 5).map((item, idx) => ({
+      ...item,
+      isPrimary: idx === 0
+    }));
   } catch (err) {
     console.warn('[getAssociatedProtocols] Error:', err);
     return [];

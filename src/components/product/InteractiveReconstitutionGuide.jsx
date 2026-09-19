@@ -41,7 +41,8 @@ export default function InteractiveReconstitutionGuide({
   activeFormatId = 'vial',
   activeFormat = null,
   supplierName = '',
-  lang = 'en' 
+  lang = 'en',
+  primaryProtocol = null
 }) {
   const t = getTranslations(lang);
 
@@ -1277,6 +1278,54 @@ export default function InteractiveReconstitutionGuide({
               </label>
               <span className="irg-val-badge font-mono">{doseValue} {doseUnit}</span>
             </div>
+
+            {/* 📋 Explicit Linkage to Primary Clinical Blueprint */}
+            {primaryProtocol && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                borderRadius: '8px',
+                marginBottom: '10px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#0369a1' }}>
+                  <Info size={14} style={{ flexShrink: 0, color: '#0284c7' }} />
+                  <span>
+                    <strong>{lang === 'es' ? 'Vía Clínica de Referencia:' : 'Clinical Reference Blueprint:'}</strong>{' '}
+                    {lang === 'es'
+                      ? 'Fases de dosimetría resumidas del protocolo'
+                      : 'Dosimetry schedule summarized from the clinical blueprint'}{' '}
+                    <strong style={{ color: '#0f172a' }}>{primaryProtocol.name}</strong> ({primaryProtocol.duration}).
+                  </span>
+                </div>
+                <a
+                  href={`/proto/${primaryProtocol.slug || primaryProtocol.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#0284c7',
+                    textDecoration: 'none',
+                    padding: '3px 8px',
+                    borderRadius: '5px',
+                    background: '#ffffff',
+                    border: '1px solid #bae6fd',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>{lang === 'es' ? 'Ver Guía Completa (Gantt) →' : 'View Full Blueprint (Gantt) →'}</span>
+                </a>
+              </div>
+            )}
 
             {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Auto-fit Columns + Custom) */}
             <div className="irg-phase-cards-grid">

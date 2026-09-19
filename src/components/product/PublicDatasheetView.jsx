@@ -99,6 +99,17 @@ export default function PublicDatasheetView({
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const requestedLangs = useRef(new Set());
 
+  const primaryProtocol = useMemo(() => {
+    if (!Array.isArray(associatedProtocols) || associatedProtocols.length === 0) return null;
+    return associatedProtocols.find(p => p.isPrimary) || associatedProtocols[0];
+  }, [associatedProtocols]);
+
+  const secondaryProtocols = useMemo(() => {
+    if (!Array.isArray(associatedProtocols) || associatedProtocols.length <= 1) return [];
+    const primId = primaryProtocol?.id || primaryProtocol?.slug;
+    return associatedProtocols.filter(p => (p.id || p.slug) !== primId);
+  }, [associatedProtocols, primaryProtocol]);
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobileDevice(
@@ -1180,6 +1191,7 @@ export default function PublicDatasheetView({
               activeFormat={activeFormat}
               supplierName={supplierName}
               lang={lang}
+              primaryProtocol={primaryProtocol}
             />
           </div>
         </section>
@@ -1397,81 +1409,189 @@ export default function PublicDatasheetView({
             </div>
 
             <div className="pds-section-card-body">
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: '16px'
-              }}>
-                {associatedProtocols.map(proto => (
-                  <div
-                    key={proto.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      padding: '18px 20px',
-                      backgroundColor: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      transition: 'all 0.2s ease',
-                      gap: '12px'
-                    }}
-                  >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          color: '#003666',
-                          backgroundColor: '#e0f2fe',
-                          padding: '2px 8px',
-                          borderRadius: '6px'
-                        }}>
-                          {proto.category}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
-                          ⏱ {proto.duration} · {proto.phasesCount} {proto.phasesCount === 1 ? 'Phase' : 'Phases'}
-                        </span>
-                      </div>
-                      <h4 style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
-                        {proto.name}
-                      </h4>
-                      {proto.description && (
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }}>
-                          {proto.description}
-                        </p>
-                      )}
+              {/* ⭐ 1. Primary Clinical Reference Blueprint (Hero Card) */}
+              {primaryProtocol && (
+                <div style={{
+                  border: '2px solid #0284c7',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
+                  padding: '24px',
+                  marginBottom: secondaryProtocols.length > 0 ? '24px' : '0',
+                  boxShadow: '0 4px 12px rgba(2, 132, 199, 0.08)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
+                        color: '#ffffff',
+                        backgroundColor: '#0284c7',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        ⭐ {lang === 'es' ? 'VÍA CLÍNICA PRINCIPAL DE REFERENCIA' : 'PRIMARY CLINICAL BLUEPRINT'}
+                      </span>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#0369a1',
+                        backgroundColor: '#e0f2fe',
+                        padding: '3px 8px',
+                        borderRadius: '6px'
+                      }}>
+                        {primaryProtocol.category}
+                      </span>
                     </div>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                      ⏱ {primaryProtocol.duration} · {primaryProtocol.phasesCount} {primaryProtocol.phasesCount === 1 ? 'Phase' : 'Phases'}
+                    </span>
+                  </div>
 
-                    <div style={{ paddingTop: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
-                      <a
-                        href={`/proto/${proto.slug || proto.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
+                    {primaryProtocol.name}
+                  </h4>
+
+                  <div style={{
+                    fontSize: '0.86rem',
+                    color: '#0369a1',
+                    lineHeight: 1.5,
+                    marginBottom: '14px',
+                    padding: '10px 14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    borderRadius: '8px',
+                    border: '1px solid #bae6fd'
+                  }}>
+                    ℹ️ <strong>{lang === 'es' ? 'Correspondencia con la Ficha Técnica:' : 'Direct Monograph Alignment:'}</strong>{' '}
+                    {lang === 'es'
+                      ? `Las dosis y fases de titulación calculadas en la guía superior son el resumen clínico directo de este protocolo oficial de ${primaryProtocol.duration}.`
+                      : `The target doses and titration phases simulated above represent the direct operational summary of this ${primaryProtocol.duration} clinical protocol.`}
+                  </div>
+
+                  {primaryProtocol.description && (
+                    <p style={{ margin: '0 0 16px 0', fontSize: '0.88rem', color: '#475569', lineHeight: 1.5 }}>
+                      {primaryProtocol.description}
+                    </p>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <a
+                      href={`/proto/${primaryProtocol.slug || primaryProtocol.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '0.88rem',
+                        fontWeight: 800,
+                        color: '#ffffff',
+                        backgroundColor: '#0284c7',
+                        textDecoration: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0369a1'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#0284c7'; }}
+                    >
+                      <span>
+                        {lang === 'es'
+                          ? `Explorar Guía Clínica Completa (Gantt, Biomarcadores y Pautas) →`
+                          : `Explore Full Clinical Blueprint (${primaryProtocol.duration} Gantt & Biomarkers) →`}
+                      </span>
+                      <ExternalLink size={15} />
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* 📂 2. Alternative & Synergistic Clinical Pathways (Subtle Compact Grid) */}
+              {secondaryProtocols.length > 0 && (
+                <div style={{ marginTop: '16px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '12px',
+                    paddingBottom: '8px',
+                    borderBottom: '1px solid #e2e8f0'
+                  }}>
+                    <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {lang === 'es'
+                        ? `Otras Vías Clínicas y Combinaciones Sinergéticas (${secondaryProtocols.length})`
+                        : `Alternative & Synergistic Clinical Pathways (${secondaryProtocols.length})`}
+                    </span>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                    gap: '12px'
+                  }}>
+                    {secondaryProtocols.map(proto => (
+                      <div
+                        key={proto.id}
                         style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
-                          color: '#0284c7',
-                          textDecoration: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          backgroundColor: '#f0f9ff',
-                          border: '1px solid #bae6fd',
-                          transition: 'all 0.15s ease'
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          padding: '12px 14px',
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '10px',
+                          transition: 'all 0.15s ease',
+                          gap: '8px'
                         }}
                       >
-                        <span>{lang === 'es' ? 'Ver Guía Clínica' : 'Explore Clinical Blueprint'}</span>
-                        <ExternalLink size={13} />
-                      </a>
-                    </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
+                              {proto.category}
+                            </span>
+                            <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
+                              ⏱ {proto.duration}
+                            </span>
+                          </div>
+                          <h5 style={{ margin: '0 0 4px 0', fontSize: '0.90rem', fontWeight: 700, color: '#1e293b', lineHeight: 1.3 }}>
+                            {proto.name}
+                          </h5>
+                          {proto.description && (
+                            <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                              {proto.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                          <a
+                            href={`/proto/${proto.slug || proto.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '0.76rem',
+                              fontWeight: 700,
+                              color: '#0284c7',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <span>{lang === 'es' ? 'Ver Guía' : 'View Blueprint'}</span>
+                            <ArrowRight size={12} />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           </section>
         )}
