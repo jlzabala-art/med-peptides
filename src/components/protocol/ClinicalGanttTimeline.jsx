@@ -193,8 +193,8 @@ export default function ClinicalGanttTimeline({
         </div>
       </div>
 
-      {/* 2. Timeline Week Selector */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+      {/* 2. Timeline Week Selector & Phase Jumpers */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
           <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Timeline Navigator
@@ -202,6 +202,26 @@ export default function ClinicalGanttTimeline({
           <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0d9488' }}>
             Week {selectedWeek} of {totalWeeks} · Phase {currentPhase.phaseNumber || 1}: {currentPhase.phaseName} (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
           </span>
+        </div>
+
+        {/* Phase Jump Pills */}
+        <div className="phase-jumper-pills">
+          {phases.map((phase, idx) => {
+            const start = phases.slice(0, idx).reduce((acc, curr) => acc + (Number(curr.durationWeeks) || 4), 0) + 1;
+            const end = start + (Number(phase.durationWeeks) || 4) - 1;
+            const isCurrentPhase = selectedWeek >= start && selectedWeek <= end;
+            return (
+              <button
+                key={idx}
+                type="button"
+                className={`phase-jumper-btn ${isCurrentPhase ? 'active' : ''}`}
+                onClick={() => setSelectedWeek(start)}
+              >
+                <span>Phase {phase.phaseNumber || (idx + 1)}: {phase.phaseName}</span>
+                <span style={{ opacity: 0.75, fontSize: '0.68rem' }}>(W{start}–{end})</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="mobile-week-scroller">
@@ -229,11 +249,21 @@ export default function ClinicalGanttTimeline({
           {/* Phase Header Row */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: `200px repeat(${totalWeeks}, 1fr)`,
+            gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(44px, 1fr))`,
             background: '#f8fafc',
             borderBottom: '2px solid #cbd5e1'
           }}>
-            <div style={{ padding: '0.75rem', fontWeight: 800, fontSize: '0.75rem', color: '#475569' }}>
+            <div style={{
+              padding: '0.75rem',
+              fontWeight: 800,
+              fontSize: '0.75rem',
+              color: '#475569',
+              position: 'sticky',
+              left: 0,
+              zIndex: 6,
+              background: '#f8fafc',
+              borderRight: '2px solid #cbd5e1'
+            }}>
               TREATMENT PHASES
             </div>
             {phases.map((phase, idx) => (
@@ -258,12 +288,22 @@ export default function ClinicalGanttTimeline({
           {/* Week Numbers Row */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: `200px repeat(${totalWeeks}, 1fr)`,
+            gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(44px, 1fr))`,
             background: '#ffffff',
             borderBottom: '1px solid #e2e8f0',
             textAlign: 'center'
           }}>
-            <div style={{ padding: '0.5rem', fontWeight: 700, fontSize: '0.7rem', color: '#64748b' }}>
+            <div style={{
+              padding: '0.5rem',
+              fontWeight: 700,
+              fontSize: '0.7rem',
+              color: '#64748b',
+              position: 'sticky',
+              left: 0,
+              zIndex: 6,
+              background: '#ffffff',
+              borderRight: '2px solid #cbd5e1'
+            }}>
               Compound & Format
             </div>
             {weeksArray.map(w => (
@@ -291,7 +331,7 @@ export default function ClinicalGanttTimeline({
               key={compIdx}
               style={{
                 display: 'grid',
-                gridTemplateColumns: `200px repeat(${totalWeeks}, 1fr)`,
+                gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(44px, 1fr))`,
                 borderBottom: '1px solid #f1f5f9',
                 alignItems: 'center'
               }}

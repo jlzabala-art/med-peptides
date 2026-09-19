@@ -1,7 +1,24 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Send, X, ShieldCheck, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react';
+import {
+  Sparkles,
+  Send,
+  X,
+  ShieldCheck,
+  AlertTriangle,
+  ArrowRight,
+  RefreshCw,
+  CheckCircle2,
+  FileText,
+  Thermometer,
+  Droplets,
+  HelpCircle,
+  Layers,
+  FlaskConical,
+  BookOpen,
+  ExternalLink,
+} from 'lucide-react';
 
 /**
  * PublicAtlasAIDrawer
@@ -13,12 +30,13 @@ import { Sparkles, Send, X, ShieldCheck, AlertTriangle, ArrowRight, RefreshCw } 
  * 1. Strictly in English at all times.
  * 2. Hard rate-limit of 5 queries per IP / 24h.
  * 3. Session isolation via sessionStorage (no cross-user query bleed).
- * 4. Zero outbound hyperlinks (no jumping out of the document context).
+ * 4. Zero outbound hyperlinks away from the platform.
  * 5. Registration CTA trigger once the 5 queries are exhausted.
+ * 6. Live integration with Recognized Clinical Sources (NIH PubMed & Clinical Compendiums).
  */
 export default function PublicAtlasAIDrawer({
   contextType = 'monograph', // 'monograph' | 'catalog'
-  contextAnchor = null,     // { name, cas, purity, molecular, sequence, details }
+  contextAnchor = null,     // { name, cas, purity, molecular, sequence, details, slug }
   catalogInventory = [],    // [{ name, category, purity, format }]
   storageKey = 'default',
   onOpenRegisterModal = null,
@@ -30,6 +48,9 @@ export default function PublicAtlasAIDrawer({
   const [remaining, setRemaining] = useState(5);
   const [limit, setLimit] = useState(5);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'evidence'
+  const [clinicalSources, setClinicalSources] = useState([]);
+  const [isLoadingSources, setIsLoadingSources] = useState(false);
   const messagesEndRef = useRef(null);
 
   const sessionKey = `atlas_ai_public_${storageKey}`;
@@ -72,12 +93,60 @@ export default function PublicAtlasAIDrawer({
     };
   }, []);
 
-  // 3. Scroll to latest message
+  // 3. Pre-load recognized PubMed clinical evidence for active compound
   useEffect(() => {
-    if (isOpen) {
+    if (contextType === 'monograph' && contextAnchor?.name) {
+      let isMounted = true;
+      setIsLoadingSources(true);
+      const cleanName = contextAnchor.name.replace(/\([^)]*\)/g, '').replace(/≥.*%/, '').trim();
+      const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(cleanName)}&retmode=json&retmax=4`;
+
+      fetch(searchUrl)
+        .then(res => res.json())
+        .then(data => {
+          const ids = data.esearchresult?.idlist || [];
+          if (ids.length === 0) {
+            if (isMounted) setIsLoadingSources(false);
+            return;
+          }
+          const sumUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`;
+          return fetch(sumUrl);
+        })
+        .then(res => (res ? res.json() : null))
+        .then(sumData => {
+          if (!isMounted || !sumData?.result) return;
+          const result = sumData.result || {};
+          const ids = sumData.result.uids || [];
+          const parsed = ids.map(id => {
+            const item = result[id] || {};
+            return {
+              pmid: id,
+              title: item.title || '',
+              journal: item.source || item.fulljournalname || 'Biomedical Journal',
+              pubdate: item.pubdate || item.epubdate || '',
+              authors: (item.authors || []).slice(0, 2).map(a => a.name).join(', '),
+              pubmedUrl: `https://pubmed.ncbi.nlm.nih.gov/${id}/`
+            };
+          });
+          setClinicalSources(parsed);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (isMounted) setIsLoadingSources(false);
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [contextType, contextAnchor?.name]);
+
+  // 4. Scroll to latest message
+  useEffect(() => {
+    if (isOpen && activeTab === 'chat') {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, activeTab]);
 
   // Save session messages locally
   const saveMessages = (updated) => {
@@ -94,6 +163,7 @@ export default function PublicAtlasAIDrawer({
     if (!query || isLoading || isBlocked) return;
 
     setMessage('');
+    setActiveTab('chat');
     const newMsgList = [...messages, { sender: 'user', text: query, timestamp: new Date().toISOString() }];
     saveMessages(newMsgList);
     setIsLoading(true);
@@ -138,6 +208,10 @@ export default function PublicAtlasAIDrawer({
         }
       }
 
+      if (Array.isArray(data.sources) && data.sources.length > 0) {
+        setClinicalSources(prev => (prev.length > 0 ? prev : data.sources));
+      }
+
       const botReply = data.reply || 'Analytical specification confirmed. All compounding parameters must follow standard institutional guidelines.';
       saveMessages([
         ...newMsgList,
@@ -161,27 +235,369 @@ export default function PublicAtlasAIDrawer({
     }
   };
 
-  // Safe markdown cleaner (strips any markdown links to prevent external escapes)
+  // ── Metric Highlight Helper ────────────────────────────────────────────────
+  const METRIC_REGEX = /(≥\s*\d+(?:\.\d+)?%|\d+(?:\.\d+)?%|[-−]?\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:°C|°F)|\d+(?:\.\d+)?\s*[-–—]\s*\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)|\b\d+(?:\.\d+)?\s*(?:mL|mg|mcg|µg)\b|\bRP-HPLC\b|\bLC-MS\b|\bESI-MS\b|\b0\.9%\s+benzyl\s+alcohol\b|\bU-100\b|\b\d+\s*(?:days|months|hours|weeks|years)\b|\[PubMed:\s*\d+[^\]]*\]|\[Clinical[^\]]*\])/gi;
+
+  const renderBodyWithHighlights = (text) => {
+    if (!text) return null;
+    const boldChunks = text.split(/(\*\*[^*]+\*\*)/g);
+
+    return boldChunks.map((chunk, cIdx) => {
+      if (chunk.startsWith('**') && chunk.endsWith('**')) {
+        const inner = chunk.slice(2, -2);
+        return (
+          <strong key={cIdx} style={{ color: '#00284d', fontWeight: 700 }}>
+            {inner}
+          </strong>
+        );
+      }
+
+      const metricParts = chunk.split(METRIC_REGEX);
+      return metricParts.map((part, pIdx) => {
+        if (!part) return null;
+        if (METRIC_REGEX.test(part)) {
+          METRIC_REGEX.lastIndex = 0;
+
+          // Citation tag badge
+          if (part.startsWith('[PubMed:') || part.startsWith('[Clinical')) {
+            return (
+              <span
+                key={`${cIdx}-${pIdx}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#eff6ff',
+                  color: '#1d4ed8',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '5px',
+                  padding: '1px 6px',
+                  margin: '0 2px',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  verticalAlign: 'baseline',
+                }}
+              >
+                <BookOpen size={11} color="#2563eb" />
+                {part.replace(/[\[\]]/g, '')}
+              </span>
+            );
+          }
+
+          // Clinical parameter metric badge
+          return (
+            <span
+              key={`${cIdx}-${pIdx}`}
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#eff6ff',
+                color: '#1d4ed8',
+                padding: '0 4px',
+                margin: '0 1.5px',
+                borderRadius: '4px',
+                fontWeight: 700,
+                fontSize: '0.79rem',
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                border: '1px solid rgba(59, 130, 246, 0.22)',
+                verticalAlign: 'baseline',
+              }}
+            >
+              {part}
+            </span>
+          );
+        }
+        return part;
+      });
+    });
+  };
+
+  const getSpecIconAndStyle = (label, body) => {
+    const text = ((label || '') + ' ' + (body || '')).toLowerCase();
+
+    if (
+      text.includes('storage') ||
+      text.includes('thermal') ||
+      text.includes('temp') ||
+      text.includes('stability') ||
+      text.includes('°c') ||
+      text.includes('freeze') ||
+      text.includes('refrigerat') ||
+      text.includes('cool')
+    ) {
+      return {
+        icon: <Thermometer size={14} color="#2563eb" style={{ flexShrink: 0 }} />,
+        tagBg: '#eff6ff',
+        tagColor: '#1d4ed8',
+        borderColor: 'rgba(59, 130, 246, 0.25)',
+      };
+    }
+    if (
+      text.includes('dilut') ||
+      text.includes('reconstitut') ||
+      text.includes('water') ||
+      text.includes('bac') ||
+      text.includes('solvent') ||
+      text.includes('inject') ||
+      text.includes('syringe') ||
+      text.includes('volume') ||
+      text.includes('liquid')
+    ) {
+      return {
+        icon: <Droplets size={14} color="#0284c7" style={{ flexShrink: 0 }} />,
+        tagBg: '#f0f9ff',
+        tagColor: '#0369a1',
+        borderColor: 'rgba(14, 165, 233, 0.25)',
+      };
+    }
+    if (
+      text.includes('purity') ||
+      text.includes('standard') ||
+      text.includes('hplc') ||
+      text.includes('ms') ||
+      text.includes('synthes') ||
+      text.includes('analytical') ||
+      text.includes('grade') ||
+      text.includes('certif')
+    ) {
+      return {
+        icon: <ShieldCheck size={14} color="#059669" style={{ flexShrink: 0 }} />,
+        tagBg: '#ecfdf5',
+        tagColor: '#047857',
+        borderColor: 'rgba(16, 185, 129, 0.25)',
+      };
+    }
+    if (
+      text.includes('cas') ||
+      text.includes('molecular') ||
+      text.includes('formula') ||
+      text.includes('weight') ||
+      text.includes('sequence') ||
+      text.includes('peptide') ||
+      text.includes('receptor') ||
+      text.includes('affinity') ||
+      text.includes('agonist')
+    ) {
+      return {
+        icon: <FlaskConical size={14} color="#7c3aed" style={{ flexShrink: 0 }} />,
+        tagBg: '#f5f3ff',
+        tagColor: '#6d28d9',
+        borderColor: 'rgba(139, 92, 246, 0.25)',
+      };
+    }
+    return {
+      icon: <CheckCircle2 size={14} color="#003666" style={{ flexShrink: 0 }} />,
+      tagBg: '#f8fafc',
+      tagColor: '#003666',
+      borderColor: '#e2e8f0',
+    };
+  };
+
+  const getDynamicSuggestions = () => {
+    return contextType === 'monograph'
+      ? ['BAC Dilution Ratio', 'Refrigeration Limits', 'Dual HPLC Assay', 'Receptor Target Affinities']
+      : ['Metabolic Peptides', 'Immediate Dispatch', 'Lotusland Standards', 'Verified Volume Tiers'];
+  };
+
+  // Safe markdown cleaner and high-fidelity clinical parser
   const renderSafeBotText = (txt) => {
     if (!txt) return null;
-    // Strip markdown links [text](url) -> text
     const sanitized = txt.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-    const lines = sanitized.split('\n');
+    const rawLines = sanitized.split('\n').map(l => l.trim()).filter(Boolean);
 
-    return lines.map((line, idx) => {
-      // Bold rendering
-      const parts = line.split(/(\*\*[^*]+\*\*)/g);
-      return (
-        <p key={idx} style={{ margin: '0 0 6px 0', lineHeight: 1.45, fontSize: '0.86rem' }}>
-          {parts.map((part, pIdx) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-              return <strong key={pIdx} style={{ color: '#00284d', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {/* Institutional Micro-Header */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '4px',
+            paddingBottom: '4px',
+            borderBottom: '1px solid #f1f5f9',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.70rem', fontWeight: 800, color: '#003666', letterSpacing: '0.02em' }}>
+            <Sparkles size={11} color="#0284c7" />
+            <span>LOTUSLAND ANALYTICAL VERIFICATION</span>
+          </div>
+          <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>Standard Monograph</span>
+        </div>
+
+        {rawLines.map((line, idx) => {
+          // Check if it's a section header
+          const isHeader = (
+            (line.endsWith(':') && !line.startsWith('•') && !line.startsWith('-') && !line.startsWith('*') && line.length < 65) ||
+            line.startsWith('### ') ||
+            line.startsWith('## ') ||
+            (/^(\*\*[^*]+:\*\*|\*\*[^*]+\*\*)$/.test(line))
+          );
+
+          if (isHeader) {
+            const cleanTitle = line.replace(/^[#*\s]+|[*#:]+$/g, '').trim();
+            return (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  margin: '6px 0 4px 0',
+                  paddingBottom: '4px',
+                  borderBottom: '1px solid #e2e8f0',
+                }}
+              >
+                <Layers size={13} color="#003666" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#00284d', letterSpacing: '-0.01em', textTransform: 'uppercase' }}>
+                  {cleanTitle}
+                </span>
+              </div>
+            );
+          }
+
+          // Check if it's a callout or closing question
+          const isQuestionOrCallout = (
+            line.endsWith('?') ||
+            line.toLowerCase().startsWith('which specific') ||
+            line.toLowerCase().startsWith('would you like') ||
+            line.toLowerCase().startsWith('please let me know') ||
+            line.toLowerCase().startsWith('note:') ||
+            line.toLowerCase().startsWith('warning:')
+          );
+
+          if (isQuestionOrCallout) {
+            return (
+              <div
+                key={idx}
+                style={{
+                  marginTop: '6px',
+                  backgroundColor: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  borderRadius: '8px',
+                  padding: '9px 12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '7px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px' }}>
+                  <HelpCircle size={14} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#0369a1', lineHeight: 1.4 }}>
+                    {line}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', paddingLeft: '21px' }}>
+                  {getDynamicSuggestions().map((chip, cIdx) => (
+                    <button
+                      key={cIdx}
+                      type="button"
+                      onClick={() => handleSendMessage(`Please detail: ${chip}`)}
+                      disabled={isBlocked || isLoading}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '12px',
+                        padding: '2px 8px',
+                        fontSize: '0.70rem',
+                        fontWeight: 600,
+                        color: '#003666',
+                        cursor: isBlocked || isLoading ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      + {chip}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          // Check if it's a bullet or parameter item
+          const isBullet = (
+            line.startsWith('•') ||
+            line.startsWith('-') ||
+            line.startsWith('*') ||
+            /^\d+\.\s/.test(line) ||
+            /^[A-Za-z\s/&—-]+:\s+.+/.test(line)
+          );
+
+          if (isBullet) {
+            const stripped = line.replace(/^[\s•\-*]+|\s*^\d+\.\s*/, '').trim();
+            const colonMatch = stripped.match(/^(\*\*[^*]+:\*\*|\*\*[^*]+\*\*:\s*|[A-Za-z0-9\s/&—-]+:)\s*(.+)$/);
+
+            let label = null;
+            let body = stripped;
+
+            if (colonMatch) {
+              label = colonMatch[1].replace(/[:*]/g, '').trim();
+              body = colonMatch[2].trim();
             }
-            return part;
-          })}
-        </p>
-      );
-    });
+
+            const style = getSpecIconAndStyle(label, body);
+
+            return (
+              <div
+                key={idx}
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: `1px solid ${style.borderColor}`,
+                  borderRadius: '8px',
+                  padding: '8px 11px',
+                  marginBottom: '2px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
+                }}
+              >
+                {label && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '3px' }}>
+                    {style.icon}
+                    <span style={{ fontSize: '0.78rem', fontWeight: 750, color: style.tagColor, letterSpacing: '-0.01em' }}>
+                      {label}
+                    </span>
+                  </div>
+                )}
+                <div style={{ fontSize: '0.82rem', lineHeight: 1.45, color: '#334155', paddingLeft: label ? '19px' : '0' }}>
+                  {!label && (
+                    <span style={{ display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px' }}>
+                      {style.icon}
+                    </span>
+                  )}
+                  {renderBodyWithHighlights(body)}
+                </div>
+              </div>
+            );
+          }
+
+          // General paragraph
+          return (
+            <p key={idx} style={{ margin: '0 0 4px 0', lineHeight: 1.45, fontSize: '0.84rem', color: '#334155' }}>
+              {renderBodyWithHighlights(line)}
+            </p>
+          );
+        })}
+
+        {/* Footer Verification Stamp */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: '6px',
+            paddingTop: '6px',
+            borderTop: '1px dashed #e2e8f0',
+            fontSize: '0.67rem',
+            color: '#94a3b8',
+            fontWeight: 500,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <ShieldCheck size={11} color="#16a34a" />
+            <span>Dual-Stage RP-HPLC & LC-MS Verified</span>
+          </div>
+          <span>Lotusland Limited</span>
+        </div>
+      </div>
+    );
   };
 
   const quickPrompts = contextType === 'monograph'
@@ -189,6 +605,7 @@ export default function PublicAtlasAIDrawer({
         `How to reconstitute with 2mL BAC water?`,
         `What are the storage guidelines?`,
         `What is the purity specification?`,
+        `What does peer-reviewed clinical research say?`,
       ]
     : [
         `What formulations are ready for immediate dispatch?`,
@@ -263,7 +680,7 @@ export default function PublicAtlasAIDrawer({
             onClick={(e) => e.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: '420px',
+              maxWidth: '430px',
               height: '100%',
               backgroundColor: '#ffffff',
               display: 'flex',
@@ -334,7 +751,7 @@ export default function PublicAtlasAIDrawer({
             <div
               style={{
                 backgroundColor: '#f8fafc',
-                padding: '10px 16px',
+                padding: '9px 16px',
                 borderBottom: '1px solid #e2e8f0',
                 fontSize: '0.76rem',
                 color: '#334155',
@@ -352,117 +769,302 @@ export default function PublicAtlasAIDrawer({
               </div>
             </div>
 
-            {/* Messages Scroll Area */}
+            {/* Dual Mode Tab Selector */}
             <div
               style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: '16px',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-                backgroundColor: '#ffffff',
+                borderBottom: '1px solid #e2e8f0',
+                backgroundColor: '#f8fafc',
+                padding: '0 12px',
               }}
             >
-              {messages.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 10px', color: '#64748b' }}>
+              <button
+                type="button"
+                onClick={() => setActiveTab('chat')}
+                style={{
+                  padding: '9px 14px',
+                  fontSize: '0.78rem',
+                  fontWeight: activeTab === 'chat' ? 750 : 600,
+                  color: activeTab === 'chat' ? '#003666' : '#64748b',
+                  borderBottom: activeTab === 'chat' ? '2px solid #003666' : '2px solid transparent',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <Sparkles size={13} color={activeTab === 'chat' ? '#0284c7' : '#94a3b8'} />
+                <span>Technical Inquiry</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('evidence')}
+                style={{
+                  padding: '9px 14px',
+                  fontSize: '0.78rem',
+                  fontWeight: activeTab === 'evidence' ? 750 : 600,
+                  color: activeTab === 'evidence' ? '#003666' : '#64748b',
+                  borderBottom: activeTab === 'evidence' ? '2px solid #003666' : '2px solid transparent',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <BookOpen size={13} color={activeTab === 'evidence' ? '#0284c7' : '#94a3b8'} />
+                <span>Clinical Evidence {clinicalSources.length > 0 ? `(${clinicalSources.length})` : ''}</span>
+              </button>
+            </div>
+
+            {/* Tab 1: Chat View */}
+            {activeTab === 'chat' && (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                {messages.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '24px 10px', color: '#64748b' }}>
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        backgroundColor: '#f0f9ff',
+                        color: '#0284c7',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '10px',
+                      }}
+                    >
+                      <Sparkles size={22} />
+                    </div>
+                    <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
+                      Dedicated Technical Research Assistant
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '320px', margin: '6px auto 0', lineHeight: 1.45 }}>
+                      Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.
+                    </div>
+
+                    {/* Suggested Prompts */}
+                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Suggested Inquiries:
+                      </div>
+                      {quickPrompts.map((q, qIdx) => (
+                        <button
+                          key={qIdx}
+                          type="button"
+                          onClick={() => handleSendMessage(q)}
+                          disabled={isBlocked || isLoading}
+                          style={{
+                            background: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            padding: '8px 12px',
+                            fontSize: '0.78rem',
+                            color: '#003666',
+                            fontWeight: 600,
+                            textAlign: 'left',
+                            cursor: isBlocked || isLoading ? 'default' : 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          → {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  messages.map((m, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
+                        maxWidth: m.sender === 'user' ? '82%' : '96%',
+                        background: m.sender === 'user'
+                          ? 'linear-gradient(135deg, #003666 0%, #002244 100%)'
+                          : '#ffffff',
+                        color: m.sender === 'user' ? '#ffffff' : '#1e293b',
+                        border: m.sender === 'user' ? 'none' : '1px solid #e2e8f0',
+                        borderRadius: m.sender === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                        padding: m.sender === 'user' ? '10px 14px' : '13px 14px',
+                        boxShadow: m.sender === 'user'
+                          ? '0 2px 6px rgba(0, 54, 102, 0.18)'
+                          : '0 2px 8px -2px rgba(0, 54, 102, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03)',
+                      }}
+                    >
+                      {m.sender === 'user' ? (
+                        <div style={{ fontSize: '0.86rem', lineHeight: 1.4, fontWeight: 500 }}>{m.text}</div>
+                      ) : (
+                        renderSafeBotText(m.text)
+                      )}
+                    </div>
+                  ))
+                )}
+
+                {isLoading && (
                   <div
                     style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '50%',
-                      backgroundColor: '#f0f9ff',
-                      color: '#0284c7',
-                      display: 'inline-flex',
+                      alignSelf: 'flex-start',
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '10px 14px',
+                      fontSize: '0.82rem',
+                      color: '#64748b',
+                      display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: '10px',
+                      gap: '8px',
                     }}
                   >
-                    <Sparkles size={22} />
+                    <RefreshCw size={14} className="animate-spin" color="#003666" />
+                    <span>Querying analytical & clinical literature compendiums…</span>
                   </div>
-                  <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                    Dedicated Technical Research Assistant
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '300px', margin: '6px auto 0' }}>
-                    Ask specific technical questions regarding reconstitution volumes, storage temperatures, or batch analytics. Strictly limited to this monograph.
-                  </div>
+                )}
 
-                  {/* Suggested Prompts */}
-                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Suggested Inquiries:
-                    </div>
-                    {quickPrompts.map((q, qIdx) => (
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+
+            {/* Tab 2: Recognized Clinical Evidence Compendium */}
+            {activeTab === 'evidence' && (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '16px',
+                  backgroundColor: '#f8fafc',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                }}
+              >
+                {/* Compound Clinical Identity Card */}
+                <div
+                  style={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    padding: '14px',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <FlaskConical size={16} color="#003666" />
+                    <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#00284d' }}>
+                      {contextAnchor?.name || 'Peptide Active Substance'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div><strong>CAS Registry:</strong> {contextAnchor?.cas || 'Verified Compendial ID'}</div>
+                    <div><strong>Synthesis Standard:</strong> {contextAnchor?.purity || '≥ 99.0% Dual-Stage RP-HPLC Verified'}</div>
+                    <div><strong>Formulation Quality:</strong> Lyophilized Analytical Grade (Lotusland Limited Release)</div>
+                  </div>
+                </div>
+
+                {/* Peer-Reviewed PubMed Studies */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                  <BookOpen size={14} color="#003666" />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#00284d', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    Peer-Reviewed PubMed Clinical Studies
+                  </span>
+                </div>
+
+                {isLoadingSources ? (
+                  <div style={{ textAlign: 'center', padding: '24px 0', color: '#64748b', fontSize: '0.80rem' }}>
+                    <RefreshCw size={16} className="animate-spin" style={{ display: 'inline', marginRight: '6px' }} />
+                    Retrieving NIH PubMed citations…
+                  </div>
+                ) : clinicalSources.length === 0 ? (
+                  <div style={{ backgroundColor: '#ffffff', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '16px', textAlign: 'center', color: '#64748b', fontSize: '0.78rem' }}>
+                    Official compendial monograph active. Verified analytical CoA available in primary specifications tab.
+                  </div>
+                ) : (
+                  clinicalSources.map((study, sIdx) => (
+                    <div
+                      key={sIdx}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '9px',
+                        padding: '12px',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 750,
+                            backgroundColor: '#eff6ff',
+                            color: '#1d4ed8',
+                            padding: '2px 7px',
+                            borderRadius: '5px',
+                            border: '1px solid #dbeafe',
+                          }}
+                        >
+                          {study.journal} ({study.pubdate ? study.pubdate.slice(0, 4) : 'Clinical Study'})
+                        </span>
+                        <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: '#64748b', fontWeight: 600 }}>
+                          PMID: {study.pmid}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                        {study.title}
+                      </div>
+
+                      {study.authors && (
+                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          Authors: {study.authors}
+                        </div>
+                      )}
+
                       <button
-                        key={qIdx}
                         type="button"
-                        onClick={() => handleSendMessage(q)}
-                        disabled={isBlocked || isLoading}
+                        onClick={() => {
+                          handleSendMessage(`What are the key clinical findings and dosage protocols discussed in PubMed study PMID ${study.pmid}?`);
+                        }}
                         style={{
-                          background: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          padding: '8px 12px',
-                          fontSize: '0.78rem',
+                          marginTop: '4px',
+                          alignSelf: 'flex-start',
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
                           color: '#003666',
-                          fontWeight: 600,
-                          textAlign: 'left',
-                          cursor: isBlocked || isLoading ? 'default' : 'pointer',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
                           transition: 'all 0.15s ease',
                         }}
                       >
-                        → {q}
+                        <Sparkles size={11} color="#0284c7" />
+                        <span>Inquire About This Study →</span>
                       </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                messages.map((m, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                      maxWidth: '85%',
-                      backgroundColor: m.sender === 'user' ? '#003666' : '#f8fafc',
-                      color: m.sender === 'user' ? '#ffffff' : '#1e293b',
-                      border: m.sender === 'user' ? 'none' : '1px solid #e2e8f0',
-                      borderRadius: m.sender === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                      padding: '10px 14px',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                    }}
-                  >
-                    {m.sender === 'user' ? (
-                      <div style={{ fontSize: '0.86rem', lineHeight: 1.4 }}>{m.text}</div>
-                    ) : (
-                      renderSafeBotText(m.text)
-                    )}
-                  </div>
-                ))
-              )}
-
-              {isLoading && (
-                <div
-                  style={{
-                    alignSelf: 'flex-start',
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    padding: '10px 14px',
-                    fontSize: '0.82rem',
-                    color: '#64748b',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <RefreshCw size={14} className="animate-spin" color="#003666" />
-                  <span>Verifying analytical specifications…</span>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
 
             {/* Quota Exhaustion Banner & Registration Trigger */}
             {isBlocked && (

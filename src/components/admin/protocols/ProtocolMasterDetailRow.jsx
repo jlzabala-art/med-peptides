@@ -170,6 +170,42 @@ export default function ProtocolMasterDetailRow({
               <span>Load to Workspace</span>
             </button>
 
+            {/* Share Public Clinical Guide (Zero Financial Disclosure) */}
+            <button
+              type="button"
+              onClick={() => {
+                const slugOrId = protocol.slug || protocol.id;
+                const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/proto/${slugOrId}`;
+                if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                  navigator.clipboard.writeText(publicUrl).then(() => {
+                    notifier.success('Public Clinical Protocol link copied to clipboard!');
+                  }).catch(() => {});
+                }
+                if (typeof window !== 'undefined') {
+                  window.open(publicUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                minHeight: '36px',
+                padding: '0 12px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                background: '#f0fdf4',
+                color: '#15803d',
+                border: '1px solid #bbf7d0',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              title="Open and copy public clinical guide (strictly clinical, zero financial info)"
+            >
+              <ExternalLink size={15} />
+              <span>Share Clinical Guide</span>
+            </button>
+
             {onOpenDrawer && (
               <button
                 type="button"
@@ -459,32 +495,37 @@ export default function ProtocolMasterDetailRow({
         <div style={{
           background: '#ffffff',
           borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          padding: '0.75rem 1rem',
+          border: '1px solid #fecaca',
+          padding: '0.85rem 1.1rem',
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
-            <ShieldAlert size={14} color="#dc2626" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Contraindications & Clinical Exclusions ({protocol.contraindications.length})
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldAlert size={15} color="#dc2626" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Contraindications & Clinical Exclusions ({protocol.contraindications.length})
+              </span>
+            </div>
+            <span style={{ fontSize: '0.70rem', color: '#b91c1c', fontWeight: 600 }}>
+              Verify patient baseline biomarkers prior to induction
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
             {protocol.contraindications.map((contra, idx) => (
               <span key={idx} style={{
-                fontSize: '0.72rem',
+                fontSize: '0.74rem',
                 fontWeight: 600,
                 color: '#991b1b',
                 background: '#fef2f2',
                 border: '1px solid #fecaca',
-                padding: '3px 8px',
+                padding: '4px 10px',
                 borderRadius: '6px',
                 lineHeight: 1.4,
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px'
+                gap: '5px'
               }}>
-                <span style={{ color: '#dc2626', fontSize: '0.75rem' }}>•</span>
+                <span style={{ color: '#dc2626', fontSize: '0.8rem' }}>•</span>
                 <span>{typeof contra === 'string' ? contra : (contra.condition || JSON.stringify(contra))}</span>
               </span>
             ))}

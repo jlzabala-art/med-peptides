@@ -30,7 +30,8 @@ import AppActionGroup from '../ui/AppActionGroup';
 import AIQuickActionButton from '../ui/AIQuickActionButton';
 
 import { 
-  ClipboardList, Plus, Play, Pause, Archive, Edit3, Trash2, FlaskConical, Download, RefreshCw, Briefcase 
+  ClipboardList, Plus, Play, Pause, Archive, Edit3, Trash2, FlaskConical, Download, RefreshCw, Briefcase,
+  ExternalLink, Copy 
 } from '@/lib/icons';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { calculateClinicalCompleteness, getProtocolDisplayName } from '../../utils/protocolHelpers';
@@ -595,7 +596,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           key: 'protocol_name',
           header: 'Protocol Name & Category',
           sortable: true,
-          width: '42%',
+          width: '38%',
           render: (p) => {
             return (
               <div style={{ fontWeight: 600, color: '#202124' }}>
@@ -673,22 +674,28 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           header: 'Clinical Data',
           sortable: true,
           sortValue: (p) => calculateClinicalCompleteness(p).pct,
-          width: '10%',
+          width: '14%',
           align: 'center',
           render: (p) => {
             const { pct, color } = calculateClinicalCompleteness(p);
             return (
               <span
-                title={`${pct}% Completed`}
+                title={`${pct}% Completed clinical dataset`}
                 style={{
-                  display: 'inline-block',
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: color,
-                  cursor: 'help'
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  backgroundColor: `${color}18`,
+                  color: color,
+                  fontSize: '0.72rem',
+                  fontWeight: 700
                 }}
-              />
+              >
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: color }} />
+                <span>{pct}%</span>
+              </span>
             );
           }
         },
@@ -727,6 +734,32 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
             };
 
             const baseActions = [
+              {
+                type: 'view_public_guide',
+                label: 'View Public Clinical Guide',
+                icon: ExternalLink,
+                onClick: () => {
+                  const slugOrId = p.slug || p.id;
+                  const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/proto/${slugOrId}`;
+                  if (typeof window !== 'undefined') {
+                    window.open(publicUrl, '_blank', 'noopener,noreferrer');
+                  }
+                }
+              },
+              {
+                type: 'copy_public_link',
+                label: 'Copy Public Guide Link',
+                icon: Copy,
+                onClick: () => {
+                  const slugOrId = p.slug || p.id;
+                  const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/proto/${slugOrId}`;
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(publicUrl).then(() => {
+                      notifier.success('Public Clinical Protocol link copied to clipboard!');
+                    }).catch(() => {});
+                  }
+                }
+              },
               {
                 type: 'load_workspace',
                 label: 'Load into Workspace Hub',

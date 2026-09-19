@@ -13,13 +13,31 @@ import { Component } from 'react';
 export default class AppErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, isProfessional: false, role: null };
     this.handleReload = this.handleReload.bind(this);
     this.handleGoHome = this.handleGoHome.bind(this);
   }
 
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
+  }
+
+  componentDidMount() {
+    this.checkProfessionalAuth();
+  }
+
+  checkProfessionalAuth() {
+    if (typeof window !== 'undefined') {
+      try {
+        const authRaw = localStorage.getItem('auth_user') || localStorage.getItem('atlas_auth_user');
+        const user = authRaw ? JSON.parse(authRaw) : null;
+        const role = user?.role || '';
+        const isProfessional = ['doctor', 'admin', 'clinic', 'wholesaler', 'wholeseller', 'supplier', 'pharmacy'].includes(role);
+        this.setState({ isProfessional, role });
+      } catch {
+        this.setState({ isProfessional: false, role: null });
+      }
+    }
   }
 
   componentDidCatch(error, info) {
@@ -29,20 +47,55 @@ export default class AppErrorBoundary extends Component {
         stack: error?.stack,
         componentStack: info?.componentStack
       };
+
+      // Auto-recover from deployment ChunkLoadError (when a new build replaces chunks)
+      if (
+        error?.name === 'ChunkLoadError' ||
+        error?.message?.includes('Loading chunk') ||
+        error?.message?.includes('Failed to fetch dynamically imported module')
+      ) {
+        const lastReload = sessionStorage.getItem('chunk_reload_ts');
+        const now = Date.now();
+        if (!lastReload || now - Number(lastReload) > 10000) {
+          sessionStorage.setItem('chunk_reload_ts', String(now));
+          window.location.reload();
+          return;
+        }
+      }
     }
     console.error('[AppErrorBoundary] Unhandled render error:', error, info);
   }
 
   handleReload() {
-    window.location.reload();
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   }
 
   handleGoHome() {
-    window.location.href = '/';
+    if (typeof window !== 'undefined') {
+      try {
+        const authRaw = localStorage.getItem('auth_user') || localStorage.getItem('atlas_auth_user');
+        const user = authRaw ? JSON.parse(authRaw) : null;
+        const role = user?.role || '';
+        const isProfessional = ['doctor', 'admin', 'clinic', 'wholesaler', 'wholeseller', 'supplier', 'pharmacy'].includes(role);
+        
+        if (isProfessional) {
+          window.location.href = role === 'admin' ? '/admin' : `/${role}`;
+        } else {
+          // Public visitor: strictly prevent navigation to root storefront. Direct to professional login.
+          window.location.href = '/auth/login';
+        }
+      } catch {
+        window.location.href = '/auth/login';
+      }
+    }
   }
 
   render() {
     if (!this.state.hasError) return this.props.children;
+
+    const { isProfessional, role } = this.state;
 
     return (
       <div style={{
@@ -68,9 +121,11 @@ export default class AppErrorBoundary extends Component {
         <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 0.5rem', color: '#f1f5f9' }}>
           Something went wrong
         </h1>
-        <p style={{ fontSize: '0.9rem', color: 'var(--color-text-tertiary)', margin: '0 0 2rem', maxWidth: '400px' }}>
-          An unexpected error occurred. Your session and data are safe.
-          Try reloading the page or returning to the home screen.
+        <p style={{ fontSize: '0.9rem', color: 'var(--color-text-tertiary)', margin: '0 0 2rem', maxWidth: '440px', lineHeight: 1.5 }}>
+          An unexpected error occurred while loading this view.
+          {isProfessional 
+            ? ' You can reload the page or return to your professional workspace.' 
+            : ' Please reload the page or authenticate via the professional portal.'}
         </p>
 
         {/* Actions */}
@@ -103,7 +158,7 @@ export default class AppErrorBoundary extends Component {
               cursor: 'pointer',
             }}
           >
-            ← Go to home
+            {isProfessional ? `← Go to ${role === 'admin' ? 'Admin' : 'Dashboard'}` : '🔐 Professional Access'}
           </button>
         </div>
 

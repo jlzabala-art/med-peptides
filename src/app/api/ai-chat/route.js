@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit, peekRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 import { sanitizeText } from '@/utils/apiValidator';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
@@ -77,8 +78,68 @@ export async function POST(req) {
     const userRole = currentUser?.role || 'guest';
     const userName = currentUser?.name || 'Valued User';
 
+    let clinicalEvidenceArticles = [];
     let systemPrompt = '';
     if (isPublicSandbox) {
+      // 1. Fetch recognized clinical literature from PubMed / cache
+      if (contextAnchor?.name) {
+        const slug = contextAnchor.slug || contextAnchor.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        try {
+          if (adminDb) {
+            const pubmedSnap = await adminDb.collection('pubmed_cache').doc(slug).get().catch(() => null);
+            if (pubmedSnap && pubmedSnap.exists) {
+              clinicalEvidenceArticles = pubmedSnap.data()?.articles || [];
+            }
+          }
+
+          // If no cache yet, query NCBI E-Utilities with 3.5s timeout
+          if (clinicalEvidenceArticles.length === 0) {
+            const cleanQuery = contextAnchor.name.replace(/\([^)]*\)/g, '').replace(/≥.*%/, '').trim();
+            const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(cleanQuery)}&retmode=json&retmax=3`;
+            const sRes = await fetch(searchUrl, { signal: AbortSignal.timeout(3500) }).catch(() => null);
+            if (sRes && sRes.ok) {
+              const sData = await sRes.json();
+              const ids = sData.esearchresult?.idlist || [];
+              if (ids.length > 0) {
+                const sumUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(',')}&retmode=json`;
+                const sumRes = await fetch(sumUrl, { signal: AbortSignal.timeout(3500) }).catch(() => null);
+                if (sumRes && sumRes.ok) {
+                  const sumData = await sumRes.json();
+                  const result = sumData.result || {};
+                  clinicalEvidenceArticles = ids.map(id => {
+                    const item = result[id] || {};
+                    return {
+                      pmid: id,
+                      title: item.title || '',
+                      journal: item.source || item.fulljournalname || 'Peer-Reviewed Journal',
+                      pubdate: item.pubdate || item.epubdate || '',
+                      authors: (item.authors || []).slice(0, 2).map(a => a.name).join(', '),
+                      pubmedUrl: `https://pubmed.ncbi.nlm.nih.gov/${id}/`
+                    };
+                  });
+                  // Cache in Firestore asynchronously
+                  if (adminDb && clinicalEvidenceArticles.length > 0) {
+                    adminDb.collection('pubmed_cache').doc(slug).set({
+                      articles: clinicalEvidenceArticles,
+                      updatedAt: new Date().toISOString()
+                    }, { merge: true }).catch(() => {});
+                  }
+                }
+              }
+            }
+          }
+        } catch (pubmedErr) {
+          console.warn('[Atlas AI API] PubMed literature retrieval notice:', pubmedErr.message);
+        }
+      }
+
+      const pubmedContextText = clinicalEvidenceArticles.length > 0
+        ? `\nRECOGNIZED PEER-REVIEWED SCIENTIFIC LITERATURE (NIH PubMed):\n` +
+          clinicalEvidenceArticles.map((a, i) => 
+            `- [PubMed PMID: ${a.pmid}] "${a.title}" (${a.journal}, ${a.pubdate})`
+          ).join('\n') + '\n'
+        : '';
+
       const entityInfo = contextAnchor
         ? `COMPOUND MONOGRAPH SPECIFICATIONS:\n` +
           `- Compound Name: ${contextAnchor.name || 'Peptide'}\n` +
@@ -89,7 +150,8 @@ export async function POST(req) {
           `- Standard Reconstitution Protocol: Reconstitute with 1.0mL – 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol). Introduce diluent slowly down the vial inner wall and swirl gently without shaking.\n` +
           `- Storage & Stability: Lyophilized powder is stable at -20°C (24 months) or 2-8°C (90 days). Reconstituted solution must be refrigerated at 2-8°C, shielded from direct light, and used within 28 days.\n` +
           `- Release Certification: Verified Authentic Lotusland Limited Dual-Stage RP-HPLC & LC-MS Release.\n` +
-          (contextAnchor.details ? `- Additional Monograph Data: ${JSON.stringify(contextAnchor.details)}\n` : '')
+          (contextAnchor.details ? `- Additional Monograph Data: ${JSON.stringify(contextAnchor.details)}\n` : '') +
+          pubmedContextText
         : `CATALOG RESEARCH PORTFOLIO SPECIFICATIONS:\n` +
           `- Total Available Formulations: ${catalogInventory?.length || 'Multiple'}\n` +
           `- Formulations in this Catalog: ${(catalogInventory || []).slice(0, 50).map(p => `${p.name} (${p.category || 'Peptide'}, Purity: ${p.purity || '≥99%'})`).join('; ')}\n` +
@@ -99,11 +161,22 @@ export async function POST(req) {
 
 CRITICAL OPERATING BOUNDARIES (ZERO TOLERANCE FOR DEVIATION):
 1. STRICTLY ENGLISH ONLY: You MUST communicate and respond EXCLUSIVELY in English. Under NO circumstances reply in Spanish or any other language, even if the user asks in another language.
-2. RIGID SCOPE: You ONLY answer questions directly related to this specific compound monograph or catalog portfolio provided below.
+2. RIGID SCOPE: You ONLY answer questions directly related to this specific compound monograph, recognized clinical literature, or catalog portfolio provided below.
 3. OFF-TOPIC REFUSAL: If the user asks about anything unrelated (such as personal medical advice/diagnosis, unrelated drugs, other unlisted peptides, politics, general coding, creative writing, or casual chat), politely and firmly refuse: "This research assistant is strictly restricted to inquiries regarding this analytical monograph and verified Lotusland compounding specifications."
 4. ZERO OUTBOUND LINKS: Do NOT output any markdown links, URLs, or navigation directives. Never link to the public portal or external websites.
 5. TECHNICAL PRECISION: Respond with concise, objective scientific statements (half-life, reconstitution dilution, vial storage, analytical methods RP-HPLC / LC-MS).
 6. INSTITUTIONAL RESEARCH NOTICE: Remind where relevant that all data is for institutional compounding research and laboratory compendiums.
+7. STRUCTURED PRESENTATION FORMAT:
+- Always format your technical answers cleanly with distinct clinical structure:
+  - Start with a clear section header (e.g. "**Analytical Specifications Overview:**" or "**Storage & Compounding Standards:**").
+  - Present technical parameters as clean bullet items with bold titles (e.g. "• **Synthesis Standard**: ...", "• **Dilution Guidance**: ...", "• **Thermal Stability**: ...").
+  - Provide exact metrics (temperatures like 2–8°C or -20°C, purity like ≥99.0%, BAC volumes like 1.0mL – 2.0mL).
+  - Conclude with a concise follow-up prompt on its own line (e.g. "Which specific compounding or analytical parameter do you need clarified?").
+8. RECOGNIZED CLINICAL EVIDENCE & CITATIONS:
+- You have access to official peer-reviewed biomedical literature from NIH PubMed and clinical trial compendiums.
+- When explaining pharmacological mechanism of action, cellular signaling, receptor binding affinity (e.g. GLP-1, GIP, Glucagon, GH secretagogue), or clinical phases, actively cite the recognized evidence using formatted tags:
+  e.g. "[PubMed: 37364315 · NEJM]" or "[Clinical Trial Evidence: Phase 2/3 Study]".
+- Maintain highest scientific objectivity. Do not invent fictitious PMIDs.
 
 ${entityInfo}`;
     } else {
@@ -173,6 +246,7 @@ GUIDELINES:
             timestamp: new Date().toISOString(),
             remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
             limit: isPublicSandbox ? 5 : undefined,
+            sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
           });
           return applyRateLimitHeaders(res, rateInfo);
         }
@@ -209,6 +283,7 @@ GUIDELINES:
                 timestamp: new Date().toISOString(),
                 remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
                 limit: isPublicSandbox ? 5 : undefined,
+                sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
               });
               return applyRateLimitHeaders(res, rateInfo);
             }
@@ -238,6 +313,7 @@ GUIDELINES:
       timestamp: new Date().toISOString(),
       remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
       limit: isPublicSandbox ? 5 : undefined,
+      sources: isPublicSandbox ? clinicalEvidenceArticles : undefined,
     });
     return applyRateLimitHeaders(fallbackRes, rateInfo);
 

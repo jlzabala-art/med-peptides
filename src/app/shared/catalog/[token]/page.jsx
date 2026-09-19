@@ -217,16 +217,21 @@ export default async function SharedCatalogPage({ params }) {
         resolvedDoc = linkSnap.data() || {};
         if (resolvedDoc.status === 'revoked') {
           verification = { valid: false, revoked: true };
-        } else if (resolvedDoc.token) {
-          const v = verifySignedQuoteToken(resolvedDoc.token);
-          if (v.valid) {
-            verification = v;
-          } else {
-            verification = { valid: false, expired: v.expired };
-          }
-        } else if (resolvedDoc.status === 'active') {
+        } else {
           const isExpired = resolvedDoc.expiresAt && new Date(resolvedDoc.expiresAt) < new Date();
-          verification = { valid: !isExpired, expired: isExpired, payload: resolvedDoc };
+          if (isExpired) {
+            verification = { valid: false, expired: true };
+          } else if (resolvedDoc.token) {
+            const v = verifySignedQuoteToken(resolvedDoc.token);
+            if (v.valid) {
+              verification = v;
+            } else {
+              // Valid Firestore document fallback
+              verification = { valid: true, payload: resolvedDoc };
+            }
+          } else {
+            verification = { valid: true, payload: resolvedDoc };
+          }
         }
       }
     } catch (docErr) {

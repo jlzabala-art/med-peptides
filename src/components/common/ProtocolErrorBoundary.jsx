@@ -38,6 +38,25 @@ export default class ProtocolErrorBoundary extends React.Component {
     this.props.onRetry?.();
   }
 
+  handleGoBack = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        const authRaw = localStorage.getItem('auth_user') || localStorage.getItem('atlas_auth_user');
+        const user = authRaw ? JSON.parse(authRaw) : null;
+        const role = user?.role || '';
+        const isProfessional = ['doctor', 'admin', 'clinic', 'wholesaler', 'wholeseller', 'supplier', 'pharmacy'].includes(role);
+
+        if (isProfessional) {
+          window.location.href = role === 'admin' ? '/admin' : `/${role}`;
+        } else {
+          window.location.href = '/auth/login';
+        }
+      } catch {
+        window.location.href = '/auth/login';
+      }
+    }
+  };
+
   render() {
     if (!this.state.hasError) return this.props.children;
 
@@ -55,6 +74,19 @@ export default class ProtocolErrorBoundary extends React.Component {
       : isNetworkError
       ? 'Could not reach the server. Check your connection, then retry.'
       : 'An unexpected error occurred while loading your protocols. Retrying usually fixes it.';
+
+    let isProfessional = false;
+    let role = null;
+    if (typeof window !== 'undefined') {
+      try {
+        const authRaw = localStorage.getItem('auth_user') || localStorage.getItem('atlas_auth_user');
+        const user = authRaw ? JSON.parse(authRaw) : null;
+        role = user?.role || '';
+        isProfessional = ['doctor', 'admin', 'clinic', 'wholesaler', 'wholeseller', 'supplier', 'pharmacy'].includes(role);
+      } catch {
+        isProfessional = false;
+      }
+    }
 
     return (
       <div className="ph-error-boundary" role="alert" aria-live="assertive">
@@ -81,10 +113,15 @@ export default class ProtocolErrorBoundary extends React.Component {
             Try again
           </button>
 
-          <a href="/" className="ph-error-boundary__back-link">
+          <button
+            type="button"
+            onClick={this.handleGoBack}
+            className="ph-error-boundary__back-link"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
             <ArrowLeft size={14} aria-hidden="true" />
-            Back to home
-          </a>
+            {isProfessional ? `← Go to ${role === 'admin' ? 'Admin' : 'Dashboard'}` : '🔐 Professional Access'}
+          </button>
         </div>
       </div>
     );

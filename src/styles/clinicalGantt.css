@@ -87,11 +87,13 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #fafafa;
+  position: relative;
 }
 
 .gantt-matrix {
   display: grid;
-  min-width: 750px;
+  min-width: max-content;
+  width: 100%;
 }
 
 .gantt-timeline-header {
@@ -124,11 +126,50 @@
   color: #0f172a;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #e2e8f0;
+  border-right: 2px solid #cbd5e1;
   background: #ffffff;
   position: sticky;
   left: 0;
-  z-index: 2;
+  z-index: 5;
+  box-shadow: 3px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Phase Jump Pills */
+.phase-jumper-pills {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.2rem 0;
+  scrollbar-width: thin;
+}
+
+.phase-jumper-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.phase-jumper-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.phase-jumper-btn.active {
+  background: #0d9488;
+  color: #ffffff;
+  border-color: #0f766e;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.25);
 }
 
 .gantt-bar {
