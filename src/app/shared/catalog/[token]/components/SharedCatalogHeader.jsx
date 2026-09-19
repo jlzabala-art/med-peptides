@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, ClipboardList, Clock, ShieldCheck, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, ClipboardList, Clock, ShieldCheck, QrCode, ChevronDown, ChevronUp, FlaskConical, Package } from 'lucide-react';
 import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
 
@@ -58,6 +58,7 @@ export default function SharedCatalogHeader({
   shareUrl,
   showProtocolsUnderProducts,
   setShowProtocolsUnderProducts,
+  activeTab = 'products',
   setActiveTab,
   t,
 }) {
@@ -207,16 +208,32 @@ export default function SharedCatalogHeader({
         </div>
       </div>
 
-      {/* View Switcher Tabs (Only if dedicated protocol catalog) */}
-      {isProtocolCatalog && (
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          <button
-            onClick={() => setActiveTab('protocols')}
-            className="tab-button active"
-          >
-            <ClipboardList size={16} />
-            <span>Clinical Protocols ({protocols.length})</span>
-          </button>
+      {/* Google Cloud Style Global Scope Switcher: Products vs Protocols */}
+      {protocols && protocols.length > 0 && products && products.length > 0 && (
+        <div className="catalog-scope-nav-bar">
+          <div className="catalog-scope-nav-inner">
+            <button
+              type="button"
+              onClick={() => setActiveTab && setActiveTab('products')}
+              className={`catalog-scope-tab ${activeTab === 'products' ? 'is-active' : ''}`}
+              title="Browse Formulation Vials & Active Compounds"
+            >
+              <FlaskConical size={15} />
+              <span>Products & Vials</span>
+              <span className="catalog-scope-badge">{products.length}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab && setActiveTab('protocols')}
+              className={`catalog-scope-tab ${activeTab === 'protocols' ? 'is-active' : ''}`}
+              title="Browse Standardized Clinical Protocols"
+            >
+              <ClipboardList size={15} />
+              <span>Clinical Protocols</span>
+              <span className="catalog-scope-badge">{protocols.length}</span>
+            </button>
+          </div>
         </div>
       )}
     </>

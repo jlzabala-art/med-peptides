@@ -961,6 +961,27 @@ export default function PublicDatasheetView({
                 {lang === 'es' ? 'Catálogo' : 'Catalog'}
               </span>
             </a>
+
+            {/* Copy Link Button */}
+            <button 
+              type="button" 
+              className="pds-btn pds-btn-ghost" 
+              onClick={handleCopyUrl}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#cbd5e1',
+                borderColor: 'rgba(255, 255, 255, 0.18)',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              title={lang === 'es' ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
+            >
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              <span className="pds-btn-label-desktop">{copied ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar Enlace' : 'Copy Link')}</span>
+            </button>
           </div>
         </div>
       </header>

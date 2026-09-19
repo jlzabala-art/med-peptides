@@ -9,6 +9,7 @@ import {
   Activity,
   Brain,
   Shield,
+  ShieldCheck,
   ShieldAlert,
   Sparkles,
   Moon,
@@ -29,7 +30,8 @@ import {
   ChevronDown,
   ChevronUp,
   List,
-  LayoutGrid
+  LayoutGrid,
+  ClipboardList
 } from '@/lib/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import '../../styles/publicProtocolsCatalog.css';
@@ -352,6 +354,18 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const [copiedDirectoryUrl, setCopiedDirectoryUrl] = useState(false);
+  const handleCopyDirectoryUrl = async () => {
+    try {
+      if (typeof window !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(window.location.href);
+        triggerHaptic('copy');
+        setCopiedDirectoryUrl(true);
+        setTimeout(() => setCopiedDirectoryUrl(false), 2000);
+      }
+    } catch {}
+  };
+
   const handleResetFilters = () => {
     triggerHaptic('tap');
     setSearchQuery('');
@@ -365,26 +379,29 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
   return (
     <div className="proto-catalog-container">
-      {/* ── Fixed Top Action Bar (Identical across all public views) ── */}
-      <header className="pds-top-bar" aria-label="Catalog Navigation" style={{ position: 'sticky', top: 0, zIndex: 900, background: '#ffffff', margin: '-1.5rem -1.5rem 1.5rem -1.5rem', width: 'calc(100% + 3rem)' }}>
+      {/* ── Fixed Institutional Top Action Bar (Navy Blue Theme) ── */}
+      <header className="pds-top-bar" aria-label="Catalog Navigation" style={{ position: 'sticky', top: 0, zIndex: 900, background: '#003666', borderBottom: '1px solid rgba(255, 255, 255, 0.12)', margin: '-1.5rem -1.5rem 1.5rem -1.5rem', width: 'calc(100% + 3rem)', boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)' }}>
         <div className="pds-bar-inner">
           <div className="pds-brand-group">
-            <span className="pds-brand-title">Med-Peptides</span>
-            <span className="pds-brand-divider" aria-hidden="true" />
-            <span className="pds-badge-pill">{lang === 'es' ? 'DIRECTORIO DE PROTOCOLOS' : 'PROTOCOL DIRECTORY'}</span>
-            <span className="pds-zero-price-badge">{t.clinicalRegistryBadge}</span>
+            <span className="pds-brand-title" style={{ color: '#ffffff', fontWeight: 800 }}>Med-Peptides</span>
+            <span className="pds-brand-divider" aria-hidden="true" style={{ background: 'rgba(255, 255, 255, 0.25)' }} />
+            <span className="pds-badge-pill" style={{ background: 'rgba(255, 255, 255, 0.14)', color: '#e0f2fe', border: '1px solid rgba(255, 255, 255, 0.22)' }}>
+              {lang === 'es' ? 'DIRECTORIO DE PROTOCOLOS' : 'PROTOCOL DIRECTORY'}
+            </span>
+            <span className="pds-zero-price-badge" style={{ color: '#93c5fd' }}>{t.clinicalRegistryBadge}</span>
           </div>
 
           <div className="pds-actions-group">
-            {/* Multi-language Selector (Identical across all public views) */}
+            {/* Multi-language Selector */}
             <select 
               className="pds-lang-select" 
               value={lang} 
               onChange={(e) => handleLangChange(e.target.value)}
               aria-label="Select Language"
+              style={{ background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)' }}
             >
               {SUPPORTED_LANGUAGES.map(l => (
-                <option key={l.code} value={l.code}>
+                <option key={l.code} value={l.code} style={{ background: '#002544', color: '#ffffff' }}>
                   {l.flag} {l.label}
                 </option>
               ))}
@@ -392,26 +409,103 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
             <Link
               href="/catalog"
-              className="pds-btn pds-btn-ghost"
+              className="pds-btn"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.4rem',
                 fontSize: '0.78rem',
-                fontWeight: 600,
-                padding: '0.4rem 0.8rem',
+                fontWeight: 700,
+                padding: '0.4rem 0.85rem',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                color: '#334155',
-                textDecoration: 'none'
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                background: 'rgba(56, 189, 248, 0.12)',
+                color: '#e0f2fe',
+                textDecoration: 'none',
+                transition: 'all 0.15s ease'
               }}
             >
               <FlaskConical size={14} />
-              <span>{lang === 'es' ? 'Catálogo de Péptidos' : 'Peptide Catalog'}</span>
+              <span>{lang === 'es' ? 'Catálogo de Péptidos ↗' : 'Peptide Catalog ↗'}</span>
             </Link>
+
+            {/* Copy Directory Link */}
+            <button
+              type="button"
+              className="pds-btn"
+              onClick={handleCopyDirectoryUrl}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#cbd5e1',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                fontWeight: 600,
+                padding: '0.4rem 0.85rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '0.78rem'
+              }}
+              title={lang === 'es' ? 'Copiar enlace al directorio' : 'Copy directory link to clipboard'}
+            >
+              {copiedDirectoryUrl ? <Check size={14} /> : <Copy size={14} />}
+              <span className="pds-btn-label-desktop">
+                {copiedDirectoryUrl ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar Enlace' : 'Copy Link')}
+              </span>
+            </button>
           </div>
         </div>
       </header>
+
+      {/* ── Google Cloud Console Scope Switcher Tabs (Products vs Protocols) ── */}
+      <div className="proto-scope-nav-container" style={{ display: 'flex', justifyContent: 'center', margin: '0 0 1.25rem 0' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f1f5f9', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <Link
+            href="/catalog"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              color: '#475569',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              transition: 'all 0.15s ease'
+            }}
+            title="Browse Formulation Vials & Active Compounds"
+          >
+            <FlaskConical size={15} />
+            <span>Products & Vials</span>
+          </Link>
+
+          <button
+            type="button"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              background: '#ffffff',
+              color: '#003666',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              boxShadow: '0 1px 3px rgba(0, 54, 102, 0.12)'
+            }}
+            title="Browse Standardized Clinical Protocols"
+          >
+            <ClipboardList size={15} />
+            <span>Clinical Protocols</span>
+            <span style={{ background: '#003666', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '1px 7px', borderRadius: '10px' }}>
+              {enrichedProtocols.length}
+            </span>
+          </button>
+        </div>
+      </div>
 
       {/* ── 1. Hero Section ── */}
       <header className="proto-catalog-hero">
@@ -420,52 +514,87 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           <span>Ecosystem Clinical Pathways • Single Source of Truth</span>
         </div>
         <h1 className="proto-catalog-title">
-          {t.catalogTitle}
+          {t.catalogHeroTitle || t.catalogTitle || 'Clinical Protocols & Peptides Directory'}
         </h1>
         <p className="proto-catalog-subtitle">
-          {t.catalogSubtitle}
+          {t.catalogHeroSubtitle || t.catalogSubtitle || 'Explore standardized therapeutic protocols formulated with certified pharmaceutical grade compounds. Monotherapies and combined synergies with dosage schedules, titration phases, and laboratory surveillance.'}
         </p>
       </header>
 
-      {/* ── 2. KPI Metrics Strip (Regla #22) ── */}
-      <div className="proto-kpi-strip">
-        <div className="proto-kpi-card">
-          <div className="proto-kpi-icon" style={{ background: '#eff6ff', color: '#0284c7' }}>
-            <FlaskConical size={22} />
+      {/* ── 2. KPI Metrics Strip with Scope Indicator (Regla #22) ── */}
+      <div className="proto-kpi-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', padding: '0 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: hasActiveFilters ? '#ea580c' : '#16a34a' }} />
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>
+              {hasActiveFilters
+                ? (lang === 'es' ? `Vista Filtrada: ${filteredProtocols.length} de ${enrichedProtocols.length} protocolos activos` : `Active Filters View: ${filteredProtocols.length} of ${enrichedProtocols.length} protocols matching`)
+                : (lang === 'es' ? `Base Global del Registro: ${enrichedProtocols.length} protocolos disponibles` : `Global Registry View: ${enrichedProtocols.length} standardized clinical protocols`)}
+            </span>
           </div>
-          <div>
-            <div className="proto-kpi-val">{enrichedProtocols.length}</div>
-            <div className="proto-kpi-label">{t.activeProtocols}</div>
-          </div>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#003666',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '6px',
+                padding: '3px 9px',
+                cursor: 'pointer'
+              }}
+            >
+              {lang === 'es' ? 'Ver Base Completa (Limpiar Filtros)' : 'View Entire Database (Reset Filters)'}
+            </button>
+          )}
         </div>
 
-        <div className="proto-kpi-card">
-          <div className="proto-kpi-icon" style={{ background: '#f0fdfa', color: '#0d9488' }}>
-            <Sparkles size={22} />
+        <div className="proto-kpi-strip">
+          <div className="proto-kpi-card">
+            <div className="proto-kpi-icon" style={{ background: '#eff6ff', color: '#0284c7' }}>
+              <FlaskConical size={22} />
+            </div>
+            <div className="proto-kpi-body">
+              <div className="proto-kpi-title">{t.kpiActiveProtocolsTitle || 'ACTIVE PROTOCOLS'}</div>
+              <div className="proto-kpi-val">{hasActiveFilters ? filteredProtocols.length : enrichedProtocols.length}</div>
+              <div className="proto-kpi-subtitle">{t.kpiActiveProtocolsSub || 'Standardized pathways in registry'}</div>
+            </div>
           </div>
-          <div>
-            <div className="proto-kpi-val">{GOAL_BUCKETS.length - 1}</div>
-            <div className="proto-kpi-label">{t.therapeuticGoals}</div>
-          </div>
-        </div>
 
-        <div className="proto-kpi-card">
-          <div className="proto-kpi-icon" style={{ background: '#faf5ff', color: '#7c3aed' }}>
-            <Layers size={22} />
+          <div className="proto-kpi-card">
+            <div className="proto-kpi-icon" style={{ background: '#f0fdfa', color: '#0d9488' }}>
+              <Sparkles size={22} />
+            </div>
+            <div className="proto-kpi-body">
+              <div className="proto-kpi-title">{t.kpiGoalsTitle || 'THERAPEUTIC GOALS'}</div>
+              <div className="proto-kpi-val">{GOAL_BUCKETS.length - 1}</div>
+              <div className="proto-kpi-subtitle">{t.kpiGoalsSub || 'Target biomarker categories'}</div>
+            </div>
           </div>
-          <div>
-            <div className="proto-kpi-val">100%</div>
-            <div className="proto-kpi-label">{t.ssotClinicalFormulas}</div>
-          </div>
-        </div>
 
-        <div className="proto-kpi-card">
-          <div className="proto-kpi-icon" style={{ background: '#fff7ed', color: '#ea580c' }}>
-            <Clock size={22} />
+          <div className="proto-kpi-card">
+            <div className="proto-kpi-icon" style={{ background: '#faf5ff', color: '#7c3aed' }}>
+              <Layers size={22} />
+            </div>
+            <div className="proto-kpi-body">
+              <div className="proto-kpi-title">{t.kpiSsotTitle || 'DOSIMETRIC SSOT'}</div>
+              <div className="proto-kpi-val">100%</div>
+              <div className="proto-kpi-subtitle">{t.kpiSsotSub || 'Calibrated titration formulas'}</div>
+            </div>
           </div>
-          <div>
-            <div className="proto-kpi-val">4–28 wks</div>
-            <div className="proto-kpi-label">{t.treatmentCycles}</div>
+
+          <div className="proto-kpi-card">
+            <div className="proto-kpi-icon" style={{ background: '#fff7ed', color: '#ea580c' }}>
+              <Clock size={22} />
+            </div>
+            <div className="proto-kpi-body">
+              <div className="proto-kpi-title">{t.kpiCyclesTitle || 'CYCLE HORIZON'}</div>
+              <div className="proto-kpi-val">4–28 wks</div>
+              <div className="proto-kpi-subtitle">{t.kpiCyclesSub || 'Treatment duration spectrum'}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -829,44 +958,73 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             </div>
                           </div>
 
-                          {/* Expandable Master-Detail Panel */}
+                          {/* Expandable Master-Detail Panel (Google Cloud Console Standard) */}
                           {isExpanded && (
                             <div className="proto-list-expanded">
-                              <p className="proto-list-expanded-summary">
-                                {proto.summary}
-                              </p>
-
-                              {proto.compounds.length > 0 && (
-                                <div style={{ marginTop: '0.75rem' }}>
-                                  <div className="proto-card-peptides-label" style={{ marginBottom: '6px' }}>
-                                    {lang === 'es' ? 'Péptidos Activos Incluidos:' : 'Included Active Peptides:'}
+                              <div className="proto-expanded-grid">
+                                {/* Left Column: Clinical Rationale & Compounds */}
+                                <div className="proto-expanded-left">
+                                  <div className="proto-expanded-section-label">
+                                    {lang === 'es' ? 'RESUMEN CLÍNICO & INDICACIÓN' : 'CLINICAL SUMMARY & INDICATION'}
                                   </div>
-                                  <div className="proto-card-peptides-list">
-                                    {proto.compounds.map((c, cIdx) => (
-                                      <Link
-                                        key={cIdx}
-                                        href={`/p/${c.slug}`}
-                                        target="_blank"
-                                        className="proto-compound-chip"
-                                        title={`Inspect ${c.name} technical monograph`}
-                                      >
-                                        <span>{c.name}</span>
-                                        <ExternalLink size={10} />
-                                      </Link>
-                                    ))}
+                                  <p className="proto-list-expanded-summary">
+                                    {proto.summary}
+                                  </p>
+
+                                  {proto.compounds.length > 0 && (
+                                    <div style={{ marginTop: '0.85rem' }}>
+                                      <div className="proto-card-peptides-label" style={{ marginBottom: '6px' }}>
+                                        {lang === 'es' ? 'Péptidos Activos Incluidos (Monografías):' : 'Included Active Peptides (Monographs):'}
+                                      </div>
+                                      <div className="proto-card-peptides-list" style={{ marginBottom: 0 }}>
+                                        {proto.compounds.map((c, cIdx) => (
+                                          <Link
+                                            key={cIdx}
+                                            href={`/p/${c.slug}`}
+                                            target="_blank"
+                                            className="proto-compound-chip"
+                                            title={`Inspect ${c.name} technical monograph`}
+                                          >
+                                            <span>{c.name}</span>
+                                            <ExternalLink size={10} />
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Right Column: Structured Administration Telemetry */}
+                                <div className="proto-expanded-right">
+                                  <div className="proto-expanded-section-label">
+                                    {lang === 'es' ? 'PARÁMETROS DE ADMINISTRACIÓN' : 'ADMINISTRATION PARAMETERS'}
+                                  </div>
+                                  <div className="proto-telemetry-specs">
+                                    <div className="proto-telemetry-item">
+                                      <span className="proto-telemetry-key">{lang === 'es' ? 'Vía:' : 'Route:'}</span>
+                                      <span className="proto-telemetry-val">Subcutaneous (SubQ)</span>
+                                    </div>
+                                    <div className="proto-telemetry-item">
+                                      <span className="proto-telemetry-key">{lang === 'es' ? 'Frecuencia:' : 'Schedule:'}</span>
+                                      <span className="proto-telemetry-val">{proto.phasesCount > 1 ? (lang === 'es' ? 'Titulación Progresiva' : 'Progressive Titration') : (lang === 'es' ? 'Monofásico Continuo' : 'Continuous Protocol')}</span>
+                                    </div>
+                                    <div className="proto-telemetry-item">
+                                      <span className="proto-telemetry-key">{lang === 'es' ? 'Estructura:' : 'Phases:'}</span>
+                                      <span className="proto-telemetry-val">{proto.phasesCount} {proto.phasesCount === 1 ? (lang === 'es' ? 'Fase' : 'Phase') : (lang === 'es' ? 'Fases' : 'Phases')} ({proto.durationWeeks}w {lang === 'es' ? 'total' : 'total'})</span>
+                                    </div>
+                                  </div>
+
+                                  <div style={{ marginTop: '12px' }}>
+                                    <Link
+                                      href={`/proto/${proto.cleanSlug}`}
+                                      className="proto-expanded-blueprint-btn"
+                                      onClick={() => triggerHaptic('selection')}
+                                    >
+                                      <span>{lang === 'es' ? 'Explorar Blueprint Completo (Gantt) ↗' : 'Explore Full Clinical Blueprint (Gantt) ↗'}</span>
+                                      <ExternalLink size={13} />
+                                    </Link>
                                   </div>
                                 </div>
-                              )}
-
-                              <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-                                <Link
-                                  href={`/proto/${proto.cleanSlug}`}
-                                  className="proto-card-btn-primary"
-                                  style={{ padding: '0.45rem 1rem', fontSize: '0.80rem' }}
-                                >
-                                  <span>{lang === 'es' ? 'Abrir Ficha Técnica Completa' : 'Open Complete Protocol Datasheet'}</span>
-                                  <ArrowRight size={14} />
-                                </Link>
                               </div>
                             </div>
                           )}
@@ -1011,7 +1169,19 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         </div>
       )}
 
-      {/* ── 6. Bottom Information Notice ── */}
+      {/* ── 6. Institutional Prudence & Medical Notice (Bottom of page per GCP Standards) ── */}
+      <div className="pds-notice-card" style={{ marginTop: '2.5rem', marginBottom: '1.25rem' }}>
+        <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
+        <div className="pds-notice-text">
+          <strong>{lang === 'es' ? 'Compendio Clínico de Acceso Profesional' : 'Professional Clinical Reference Directory'}</strong>
+          <span>
+            {lang === 'es' 
+              ? 'Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.'
+              : 'All clinical protocols presented in this directory are formulated under molecular pharmacokinetics standards and international clinical trials (SURMOUNT, STEP, TRIUMPH). Administration requires medical prescription and supervision by a certified healthcare professional.'}
+          </span>
+        </div>
+      </div>
+
       <footer style={{
         background: '#f8fafc',
         border: '1px solid #e2e8f0',

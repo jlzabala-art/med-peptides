@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   Activity,
+  ClipboardList,
   ExternalLink
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
@@ -1424,31 +1425,28 @@ export default function InteractiveReconstitutionGuide({
                 </div>
               </div>
 
-              <a
-                href={`/proto/${activeSelectedProtocol.slug || activeSelectedProtocol.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: '#0284c7',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  color: '#ffffff',
-                  padding: '9px 18px',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 800,
-                  textDecoration: 'none',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
-                  transition: 'all 0.15s ease',
-                  flexShrink: 0
-                }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0369a1'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#0284c7'; }}
-              >
-                <span>{lang === 'es' ? 'Explorar Blueprint Completo (Gantt) ↗' : 'Explore Full Clinical Blueprint (Gantt) ↗'}</span>
-              </a>
+              <div className="irg-proto-actions-bar">
+                <a
+                  href="/proto"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="irg-proto-btn-secondary"
+                  title={lang === 'es' ? 'Explorar el directorio clínico completo de protocolos' : 'Browse comprehensive clinical protocol directory'}
+                >
+                  <ClipboardList size={14} />
+                  <span>{lang === 'es' ? 'Directorio de Protocolos (50+) ↗' : 'All Protocols Directory (50+) ↗'}</span>
+                </a>
+
+                <a
+                  href={`/proto/${activeSelectedProtocol.slug || activeSelectedProtocol.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="irg-proto-btn-primary"
+                  title={lang === 'es' ? 'Abrir cronograma dosimétrico y fases en Gantt' : 'Open full clinical dosimetric roadmap & Gantt phases'}
+                >
+                  <span>{lang === 'es' ? 'Explorar Blueprint (Gantt) ↗' : 'Explore Clinical Blueprint (Gantt) ↗'}</span>
+                </a>
+              </div>
             </div>
 
             {/* Protocol Switcher / Dropdown Selector (Institutional GCP Standard) */}
@@ -1535,43 +1533,46 @@ export default function InteractiveReconstitutionGuide({
                     {activeSelectedProtocol.description}
                   </p>
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                  <Link
-                    href={`/proto/${activeSelectedProtocol.slug || activeSelectedProtocol.id}`}
-                    target="_blank"
-                    style={{
-                      fontSize: '0.74rem',
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flexShrink: 0 }}>
+                  {activeSelectedProtocol.duration && (
+                    <span style={{
+                      fontSize: '0.72rem',
                       fontWeight: 700,
-                      color: '#ffffff',
-                      background: 'rgba(56, 189, 248, 0.25)',
-                      border: '1px solid rgba(56, 189, 248, 0.4)',
+                      color: '#e0f2fe',
+                      background: 'rgba(56, 189, 248, 0.2)',
+                      border: '1px solid rgba(56, 189, 248, 0.35)',
                       borderRadius: '6px',
-                      padding: '3px 8px',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <span>{lang === 'es' ? 'Ver Timeline del Protocolo' : 'View Protocol Timeline'}</span>
-                    <ExternalLink size={11} />
-                  </Link>
-                  <Link
-                    href="/proto"
-                    target="_blank"
-                    style={{
-                      fontSize: '0.74rem',
+                      padding: '2px 8px'
+                    }}>
+                      {activeSelectedProtocol.duration}
+                    </span>
+                  )}
+                  {activeSelectedProtocol.phasesCount && (
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: '#e0f2fe',
+                      background: 'rgba(255, 255, 255, 0.12)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '6px',
+                      padding: '2px 8px'
+                    }}>
+                      {activeSelectedProtocol.phasesCount} {lang === 'es' ? 'Fases' : 'Phases'}
+                    </span>
+                  )}
+                  {(activeSelectedProtocol.route || activeSelectedProtocol.administration_route) && (
+                    <span style={{
+                      fontSize: '0.72rem',
                       fontWeight: 700,
                       color: '#93c5fd',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '3px'
-                    }}
-                  >
-                    <span>{lang === 'es' ? 'Directorio' : 'Directory'}</span>
-                    <ExternalLink size={10} />
-                  </Link>
+                      background: 'rgba(147, 197, 253, 0.15)',
+                      border: '1px solid rgba(147, 197, 253, 0.3)',
+                      borderRadius: '6px',
+                      padding: '2px 8px'
+                    }}>
+                      {activeSelectedProtocol.route || activeSelectedProtocol.administration_route}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

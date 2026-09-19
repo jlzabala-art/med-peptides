@@ -14,7 +14,11 @@ import {
   Building2,
   Download,
   MessageSquare,
-  Search
+  Search,
+  Clock,
+  Layers,
+  ArrowRight,
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
@@ -97,7 +101,7 @@ function getPharmaMarginTheme(priceSource, meta = {}) {
   };
 }
 
-function getRelatedProtocols(product, allProtocols) {
+export function getRelatedProtocols(product, allProtocols) {
   if (!allProtocols || allProtocols.length === 0 || !product) return [];
   const prodNameLower = (product.canonicalName || product.name || '').toLowerCase().trim();
   const prodSlugLower = (product.slug || product.id || '').toLowerCase().trim();
@@ -770,6 +774,7 @@ export default function SharedCatalogClientView({
           shareUrl={shareUrl}
           showProtocolsUnderProducts={showProtocolsUnderProducts}
           setShowProtocolsUnderProducts={setShowProtocolsUnderProducts}
+          activeTab={activeTab}
           setActiveTab={setActiveTab}
           t={t}
         />
@@ -804,120 +809,313 @@ export default function SharedCatalogClientView({
           setViewMode={setViewMode}
         />
 
-        {/* ── MAIN CONTENT: Products (Grouped by Goals) ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {displayedProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔬</div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>No formulations found</div>
-              <p style={{ color: '#64748b', marginTop: '6px', fontSize: '0.9rem' }}>Try adjusting your search or category filters.</p>
-              <button
-                type="button"
-                onClick={() => { setSearchQuery(''); clearGoals(); setPackagingMode('all'); setDosageFilter('all'); setOnlyWithProtocols(false); }}
-                style={{ marginTop: '14px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 18px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
-              >
-                Reset All Filters
-              </button>
-            </div>
-          ) : (
-            groupedProducts.map(group => (
-              <section key={group.goal.id} className="proto-goal-section" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {/* Goal Section Header */}
-                <div className="proto-goal-section-header" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
-                      background: '#eff6ff',
-                      color: '#003666',
+        {/* ── MAIN CONTENT: Protocols vs Products (Google Cloud Console Standard) ── */}
+        {activeTab === 'protocols' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {filteredProtocols.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📋</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>No clinical protocols found</div>
+                <p style={{ color: '#64748b', marginTop: '6px', fontSize: '0.9rem' }}>Try adjusting your search query or therapeutic goal filters.</p>
+                <button
+                  type="button"
+                  onClick={() => { setSearchQuery(''); clearGoals(); }}
+                  style={{ marginTop: '14px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 18px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Reset Protocol Filters
+                </button>
+              </div>
+            ) : (
+              filteredProtocols.map(proto => {
+                const protoCode = proto.protocol_id || proto.protocolCode || (proto.id ? `PR-${proto.id.slice(0, 6).toUpperCase()}` : 'PR-CLIN');
+                const protoTitle = proto.title || proto.name || 'Clinical Protocol';
+                const protoSlug = proto.slug || proto.id;
+                const compounds = Array.isArray(proto.compounds) ? proto.compounds : [];
+                const phasesCount = Array.isArray(proto.phases) ? proto.phases.length : 1;
+                const durWeeks = proto.durationWeeks || (typeof proto.duration === 'string' ? parseInt(proto.duration, 10) || 8 : 8);
+
+                return (
+                  <article
+                    key={proto.id || protoSlug}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '16px 20px',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <FlaskConical size={16} />
-                    </div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.01em' }}>
-                        {group.goal.label}
-                      </h3>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>
-                        {group.products.length} {group.products.length === 1 ? 'formulation available' : 'formulations available'}
+                      flexDirection: 'column',
+                      gap: '12px',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontFamily: 'ui-monospace, monospace',
+                          fontSize: '0.74rem',
+                          fontWeight: 800,
+                          color: '#003666',
+                          background: 'rgba(0, 54, 102, 0.08)',
+                          padding: '2px 8px',
+                          borderRadius: '6px'
+                        }}>
+                          {protoCode}
+                        </span>
+                        <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
+                          {protoTitle}
+                        </h3>
+                        {proto.goal && (
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            background: '#eff6ff',
+                            color: '#0284c7',
+                            border: '1px solid #bfdbfe',
+                            padding: '2px 8px',
+                            borderRadius: '6px'
+                          }}>
+                            {proto.goal}
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPublicProtocol(proto)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: '#003666',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '7px 14px',
+                            fontSize: '0.80rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)'
+                          }}
+                          title="Open Clinical Protocol Dossier"
+                        >
+                          <ClipboardList size={14} />
+                          <span>Open Protocol Datasheet</span>
+                        </button>
+
+                        <a
+                          href={`/proto/${protoSlug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: '#f8fafc',
+                            color: '#475569',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            padding: '7px 10px',
+                            fontSize: '0.80rem',
+                            fontWeight: 700,
+                            textDecoration: 'none'
+                          }}
+                          title="Open Full Roadmap in New Tab"
+                        >
+                          <ExternalLink size={13} />
+                        </a>
                       </div>
                     </div>
-                  </div>
-                  <span style={{
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    padding: '2px 10px',
-                    borderRadius: '9999px',
-                    background: '#eff6ff',
-                    color: '#003666',
-                    border: '1px solid #bfdbfe'
-                  }}>
-                    {group.products.length}
-                  </span>
-                </div>
 
-                {/* Items: List Mode (Default) vs Cards Mode */}
-                {viewMode === 'list' ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {group.products.map(prod => (
-                      <SharedCatalogProductListRow
-                        key={prod.id}
-                        prod={prod}
-                        isExpanded={expandedProductIds.has(prod.id)}
-                        onToggleExpand={() => toggleExpandedProduct(prod.id)}
-                        includePrices={includePrices}
-                        fxMultiplier={fxMultiplier}
-                        currentCurrency={currentCurrency}
-                        currencySymbol={currencySymbol}
-                        packagingMode={packagingMode}
-                        cart={cart}
-                        updateQuantity={updateQuantity}
-                        protocols={protocols}
-                        setSelectedPublicProtocol={setSelectedPublicProtocol}
-                        catalogMeta={catalogMeta}
-                        t={t}
-                      />
-                    ))}
+                    {/* Description */}
+                    {proto.description && (
+                      <p style={{ margin: 0, fontSize: '0.86rem', color: '#475569', lineHeight: 1.55 }}>
+                        {proto.description}
+                      </p>
+                    )}
+
+                    {/* Footer: Compounds & Specs */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '10px',
+                      paddingTop: '10px',
+                      borderTop: '1px solid #f1f5f9'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                          Formulation Compounds:
+                        </span>
+                        {compounds.map((c, idx) => {
+                          const cName = typeof c === 'string' ? c : (c?.name || c?.drugName || '');
+                          if (!cName) return null;
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setActiveTab('products');
+                                setSearchQuery(cName);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: '#eff6ff',
+                                border: '1px solid #bfdbfe',
+                                color: '#003666',
+                                fontSize: '0.74rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                transition: 'all 0.12s ease'
+                              }}
+                              title={`Filter catalog products for ${cName}`}
+                            >
+                              <span>{cName}</span>
+                              <FlaskConical size={10} color="#0284c7" />
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem', fontWeight: 700, color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '3px 8px', borderRadius: '6px' }}>
+                          <Clock size={12} color="#0284c7" />
+                          <span>{durWeeks} Weeks</span>
+                        </span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem', fontWeight: 700, color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '3px 8px', borderRadius: '6px' }}>
+                          <Layers size={12} color="#0d9488" />
+                          <span>{phasesCount} {phasesCount === 1 ? 'Phase' : 'Phases'}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          /* Products View (Grouped by Goals) */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {displayedProducts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔬</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>No formulations found</div>
+                <p style={{ color: '#64748b', marginTop: '6px', fontSize: '0.9rem' }}>Try adjusting your search or category filters.</p>
+                <button
+                  type="button"
+                  onClick={() => { setSearchQuery(''); clearGoals(); setPackagingMode('all'); setDosageFilter('all'); setOnlyWithProtocols(false); }}
+                  style={{ marginTop: '14px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 18px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              groupedProducts.map(group => (
+                <section key={group.goal.id} className="proto-goal-section" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Goal Section Header */}
+                  <div className="proto-goal-section-header" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '10px',
+                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        background: '#eff6ff',
+                        color: '#003666',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <FlaskConical size={16} />
+                      </div>
+                      <div>
+                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.01em' }}>
+                          {group.goal.label}
+                        </h3>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>
+                          {group.products.length} {group.products.length === 1 ? 'formulation available' : 'formulations available'}
+                        </div>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '0.74rem',
+                      fontWeight: 800,
+                      padding: '2px 10px',
+                      borderRadius: '9999px',
+                      background: '#eff6ff',
+                      color: '#003666',
+                      border: '1px solid #bfdbfe'
+                    }}>
+                      {group.products.length}
+                    </span>
                   </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {group.products.map(prod => (
-                      <SharedCatalogProductCard
-                        key={prod.id}
-                        prod={prod}
-                        includePrices={includePrices}
-                        fxMultiplier={fxMultiplier}
-                        currentCurrency={currentCurrency}
-                        currencySymbol={currencySymbol}
-                        packagingMode={packagingMode}
-                        cart={cart}
-                        updateQuantity={updateQuantity}
-                        showProtocolsUnderProducts={false}
-                        protocols={protocols}
-                        setSelectedPublicProtocol={setSelectedPublicProtocol}
-                        catalogMeta={catalogMeta}
-                        t={t}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            ))
-          )}
-        </div>
+
+                  {/* Items: List Mode (Default) vs Cards Mode */}
+                  {viewMode === 'list' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {group.products.map(prod => (
+                        <SharedCatalogProductListRow
+                          key={prod.id}
+                          prod={prod}
+                          isExpanded={expandedProductIds.has(prod.id)}
+                          onToggleExpand={() => toggleExpandedProduct(prod.id)}
+                          includePrices={includePrices}
+                          fxMultiplier={fxMultiplier}
+                          currentCurrency={currentCurrency}
+                          currencySymbol={currencySymbol}
+                          packagingMode={packagingMode}
+                          cart={cart}
+                          updateQuantity={updateQuantity}
+                          protocols={protocols}
+                          setSelectedPublicProtocol={setSelectedPublicProtocol}
+                          catalogMeta={catalogMeta}
+                          t={t}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {group.products.map(prod => (
+                        <SharedCatalogProductCard
+                          key={prod.id}
+                          prod={prod}
+                          includePrices={includePrices}
+                          fxMultiplier={fxMultiplier}
+                          currentCurrency={currentCurrency}
+                          currencySymbol={currencySymbol}
+                          packagingMode={packagingMode}
+                          cart={cart}
+                          updateQuantity={updateQuantity}
+                          showProtocolsUnderProducts={false}
+                          protocols={protocols}
+                          setSelectedPublicProtocol={setSelectedPublicProtocol}
+                          catalogMeta={catalogMeta}
+                          t={t}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Algolia Cross-sell (optional) */}
         {cartItems.length > 0 && !isProtocolCatalog && (

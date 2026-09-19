@@ -289,15 +289,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
       {/* ── Main Container ── */}
       <main className="pds-container">
-        {/* Institutional Verification Notice */}
-        <div className="pds-notice-card">
-          <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
-          <div className="pds-notice-text">
-            <strong>{t.standardizedBlueprint}</strong>
-            <span>{t.blueprintNotice}</span>
-          </div>
-        </div>
-
         {/* Navigation Breadcrumb back to /proto Directory */}
         <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <Link
@@ -379,33 +370,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <button
                     type="button"
-                    onClick={handleCopyUrl}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      padding: '4px 8px',
-                      fontSize: '0.70rem',
-                      fontWeight: 700,
-                      color: '#0284c7',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    {copied ? <Check size={11} /> : <Copy size={11} />}
-                    <span>{copied ? t.linkCopied : t.copyLink}</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setIsQrModalOpen(true)}
                     style={{
                       background: '#ffffff',
                       border: '1px solid #cbd5e1',
                       borderRadius: '6px',
-                      padding: '4px 8px',
-                      fontSize: '0.70rem',
+                      padding: '4px 10px',
+                      fontSize: '0.72rem',
                       fontWeight: 700,
                       color: '#0d9488',
                       cursor: 'pointer',
@@ -414,8 +385,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                       gap: '4px'
                     }}
                   >
-                    <QrCode size={11} />
-                    <span>QR</span>
+                    <QrCode size={12} />
+                    <span>{lang === 'es' ? 'Ver QR' : 'View QR'}</span>
                   </button>
                 </div>
               </div>
@@ -434,7 +405,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              <QRCodeSVG value={publicUrl} size={110} level="M" />
+              <div
+                onClick={() => setIsQrModalOpen(true)}
+                style={{ cursor: 'pointer' }}
+                title={lang === 'es' ? 'Clic para ampliar o imprimir código QR' : 'Click to enlarge or print QR code'}
+              >
+                <QRCodeSVG value={publicUrl} size={110} level="M" />
+              </div>
               <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
                 {t.verifiedProtocol}
               </div>
@@ -443,7 +420,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               </div>
               <button
                 type="button"
-                onClick={handleCopyUrl}
+                onClick={() => setIsQrModalOpen(true)}
                 style={{
                   marginTop: '0.25rem',
                   background: '#f8fafc',
@@ -452,15 +429,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   padding: '3px 8px',
                   fontSize: '0.70rem',
                   fontWeight: 700,
-                  color: '#0284c7',
+                  color: '#0d9488',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}
               >
-                {copied ? <Check size={11} /> : <Copy size={11} />}
-                <span>{copied ? t.linkCopied : t.copyLink}</span>
+                <QrCode size={11} />
+                <span>{lang === 'es' ? 'Ampliar QR' : 'Enlarge QR'}</span>
               </button>
             </div>
           </div>
@@ -1134,9 +1111,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   </div>
                 </div>
               ))}
+              </div>
+            </section>
+
+            {/* Institutional Verification & Clinical Governance Notice (Positioned at bottom per GCP Standards) */}
+            <div className="pds-notice-card" style={{ marginTop: '1.75rem', marginBottom: '1.25rem' }}>
+              <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
+              <div className="pds-notice-text">
+                <strong>{t.standardizedBlueprint}</strong>
+                <span>{t.blueprintNotice}</span>
+              </div>
             </div>
-          </section>
-        </div>
+          </div>
 
         {/* ── Modal QR Code Dialog ── */}
         {isQrModalOpen && (

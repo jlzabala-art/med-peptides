@@ -11,9 +11,24 @@
   color: #0f172a;
 }
 
+.proto-catalog-container > .pds-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #003666;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin: -2.5rem -1.5rem 1.5rem -1.5rem;
+  width: calc(100% + 3rem);
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25);
+}
+
 @media (max-width: 768px) {
   .proto-catalog-container {
     padding: 1.25rem 1rem 3rem;
+  }
+  .proto-catalog-container > .pds-top-bar {
+    margin: -1.25rem -1rem 1rem -1rem;
+    width: calc(100% + 2rem);
   }
 }
 
@@ -95,7 +110,7 @@
   border-radius: 12px;
   padding: 1.15rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -103,7 +118,8 @@
 
 .proto-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.06);
+  border-color: #cbd5e1;
 }
 
 .proto-kpi-icon {
@@ -116,11 +132,34 @@
   flex-shrink: 0;
 }
 
+.proto-kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.proto-kpi-title {
+  font-size: 0.70rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .proto-kpi-val {
   font-size: 1.55rem;
   font-weight: 900;
-  color: #0f172a;
-  line-height: 1.1;
+  color: #003666;
+  line-height: 1.15;
+}
+
+.proto-kpi-subtitle {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #94a3b8;
+  line-height: 1.35;
+  margin-top: 1px;
 }
 
 .proto-kpi-label {
@@ -976,6 +1015,95 @@
   line-height: 1.55;
 }
 
+/* ── Google Cloud Console Master-Detail Drawer Layout ── */
+.proto-expanded-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.proto-expanded-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.proto-expanded-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.proto-expanded-section-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #003666;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 2px;
+}
+
+.proto-telemetry-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.proto-telemetry-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  padding: 3px 0;
+  border-bottom: 1px dashed #f1f5f9;
+}
+
+.proto-telemetry-key {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.proto-telemetry-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.proto-expanded-blueprint-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.2);
+}
+
+.proto-expanded-blueprint-btn:hover {
+  background: #0369a1;
+  color: #ffffff;
+}
+
+@media (max-width: 860px) {
+  .proto-expanded-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 640px) {
   .proto-list-expanded {
     padding: 0.85rem 1rem !important;
@@ -986,5 +1114,8 @@
   .proto-list-meta {
     width: 100%;
     justify-content: flex-start;
+  }
+  .proto-expanded-blueprint-btn {
+    min-height: 44px; /* Golden Rule #23 touch target standard */
   }
 }

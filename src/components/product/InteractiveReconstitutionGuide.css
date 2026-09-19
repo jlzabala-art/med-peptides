@@ -1502,3 +1502,82 @@
     gap: 0.65rem;
   }
 }
+
+/* ── Google Cloud Console Style Dual-Action Protocol Toolbar ──────────────── */
+.irg-proto-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.irg-proto-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.80rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.irg-proto-btn-secondary:hover {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.irg-proto-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0284c7;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.80rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.irg-proto-btn-primary:hover {
+  background: #0369a1;
+  box-shadow: 0 3px 12px rgba(2, 132, 199, 0.4);
+}
+
+@media (max-width: 768px) {
+  .irg-proto-actions-bar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .irg-proto-btn-secondary,
+  .irg-proto-btn-primary {
+    justify-content: center;
+    min-height: 44px; /* Golden Rule #23 touch target standard */
+    padding: 10px 12px;
+    font-size: 0.76rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .irg-proto-actions-bar {
+    grid-template-columns: 1fr;
+  }
+}
+

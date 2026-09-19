@@ -1157,6 +1157,86 @@ export default function SharedCatalogStyles() {
           border-top: 1px solid #f1f5f9;
           animation: fadeIn 0.15s ease-out;
         }
+
+        /* ── Google Cloud Console Scope Switcher Tabs ────────────────────── */
+        .catalog-scope-nav-bar {
+          display: flex;
+          justify-content: flex-start;
+          margin-top: 14px;
+          margin-bottom: 16px;
+        }
+
+        .catalog-scope-nav-inner {
+          display: inline-flex;
+          align-items: center;
+          background: #f1f5f9;
+          padding: 3px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        .catalog-scope-tab {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 6px;
+          border: none;
+          background: transparent;
+          color: #475569;
+          font-size: 0.82rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          user-select: none;
+        }
+
+        .catalog-scope-tab:hover {
+          color: #0f172a;
+          background: rgba(255, 255, 255, 0.6);
+        }
+
+        .catalog-scope-tab.is-active {
+          background: #ffffff;
+          color: #003666;
+          box-shadow: 0 1px 3px rgba(0, 54, 102, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .catalog-scope-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 54, 102, 0.08);
+          color: #003666;
+          font-size: 0.70rem;
+          font-weight: 800;
+          padding: 1px 7px;
+          border-radius: 10px;
+          line-height: 1.3;
+        }
+
+        .catalog-scope-tab.is-active .catalog-scope-badge {
+          background: #003666;
+          color: #ffffff;
+        }
+
+        @media (max-width: 640px) {
+          .catalog-scope-nav-bar {
+            width: 100%;
+          }
+          .catalog-scope-nav-inner {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+          }
+          .catalog-scope-tab {
+            justify-content: center;
+            min-height: 42px;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+          }
+        }
       `}</style>
   );
 }
