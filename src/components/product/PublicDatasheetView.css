@@ -1804,3 +1804,60 @@
     display: none;
   }
 }
+
+/* ── Formulations Table Subpanel (Integrated into Block 1) ── */
+.pds-table-subpanel {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pds-table-subpanel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.pds-table-subpanel-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pds-subpanel-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0284c7;
+  text-transform: uppercase;
+}
+
+.pds-subpanel-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pds-subpanel-badge {
+  font-size: 0.74rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* ── Block 3 Traceability Section Wrapper (Elevated Top-Level) ── */
+.pds-traceability-wrapper {
+  margin: 1.75rem 0;
+}
+
+.pds-traceability-wrapper .ptc-card-container {
+  margin: 0;
+}
+

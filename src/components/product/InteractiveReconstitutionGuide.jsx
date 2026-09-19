@@ -1124,21 +1124,11 @@ export default function InteractiveReconstitutionGuide({
   // ── Standard Lyophilized Vial & Syringe Reconstitution View ─────────────────
   return (
     <div className="irg-wrapper">
-      {/* ── Header ── */}
-      <div className="irg-header">
-        <div className="irg-header-left">
-          <div className="irg-badge">
-            <Sparkles size={13} />
-            <span>{t.interactiveCalcBadge || 'Interactive Clinical Tool'}</span>
-          </div>
-          <h2 className="irg-title">
-            <Thermometer size={20} color="#003666" />
-            {t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator'}
-          </h2>
-          <p className="irg-subtitle">
-            {t.interactiveCalcSubtitle || 'Simulate precise Bacteriostatic Water (BAC) volume and target dose to visualize the exact draw line on a U-100 insulin syringe in real time.'}
-          </p>
-        </div>
+      {/* ── Subtitle / Instructions ── */}
+      <div className="irg-header" style={{ borderBottom: 'none', paddingBottom: '0.25rem', marginBottom: '0.5rem' }}>
+        <p className="irg-subtitle">
+          {t.interactiveCalcSubtitle || 'Simulate precise Bacteriostatic Water (BAC) volume and target dose to visualize the exact draw line on a U-100 insulin syringe in real time.'}
+        </p>
       </div>
 
       {/* ── Protocol Baseline Tracking Bar ── */}

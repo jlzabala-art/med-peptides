@@ -761,23 +761,37 @@ export default function PublicDatasheetView({
           )}
         </section>
 
-        {/* ── Available Strengths & Administration Formats Matrix ── */}
-        <section className="pds-matrix-section">
-          <div className="pds-matrix-header">
-            <div>
-              <h2 className="pds-section-heading" style={{ marginBottom: '0.25rem' }}>
-                <Layers size={18} color="#003666" />
-                {t.presentationsMatrix} ({supplierName})
-              </h2>
-              <p className="pds-matrix-subtitle">
-                {t.activePresentation}
-              </p>
+        {/* ── Block 1: Batch Availability & Presentations Matrix (Harmonized Navy Header) ── */}
+        <section id="presentations-matrix" className="pds-section-card">
+          <div className="pds-section-header">
+            <div className="pds-section-header-left">
+              <div className="pds-section-header-shield">
+                <Layers size={22} />
+              </div>
+              <div className="pds-section-header-titles">
+                <div className="pds-section-header-meta-row">
+                  <span className="pds-section-header-category">
+                    {lang === 'es' ? 'DISPONIBILIDAD DE LOTE Y PRESENTACIONES' : 'BATCH AVAILABILITY & PRESENTATIONS'}
+                  </span>
+                  <span className="pds-section-badge">
+                    <CheckCircle2 size={11} /> {t.officialCompendium || 'OFFICIAL COMPENDIUM'}
+                  </span>
+                </div>
+                <h3 className="pds-section-header-title">
+                  {t.presentationsMatrix || 'Batch Availability & Presentations Matrix'} ({supplierName})
+                </h3>
+              </div>
             </div>
-            <div className="pds-supplier-badge">
-              <CheckCircle2 size={13} color="#0284c7" />
-              <span>Pedigree Verified ({supplierName})</span>
+
+            <div className="pds-section-header-right">
+              <div className="pds-section-cert-badge">
+                <Sparkles size={14} color="#38bdf8" />
+                <span>{t.allApprovedPresentations || 'All Verified Presentations & Formats'}</span>
+              </div>
             </div>
           </div>
+
+          <div className="pds-section-card-body">
 
           {/* Multi-Supplier Laboratory Selector (Rendered ONLY if product has multiple verified suppliers) */}
           {isMultiSupplierMode && (
@@ -969,36 +983,25 @@ export default function PublicDatasheetView({
             </div>
           </div>
 
-          {/* ── Complete Formulations & Strengths Matrix (Harmonized Navy Header) ── */}
-          <div className="pds-section-card">
-            <div className="pds-section-header">
-              <div className="pds-section-header-left">
-                <div className="pds-section-header-shield">
-                  <Layers size={22} />
-                </div>
-                <div className="pds-section-header-titles">
-                  <div className="pds-section-header-meta-row">
-                    <span className="pds-section-header-category">
-                      {t.analyticalMatrixSection || 'ANALYTICAL MATRIX & CLINICAL SPECIFICATIONS'}
-                    </span>
-                    <span className="pds-section-badge">
-                      <CheckCircle2 size={11} /> {t.officialCompendium || 'OFFICIAL COMPENDIUM'}
-                    </span>
-                  </div>
-                  <h3 className="pds-section-header-title">
-                    {t.completeFormulationsMatrix || 'Complete Formulations & Strengths Matrix'}
-                  </h3>
-                </div>
+          {/* ── Complete Formulations & Strengths Subpanel ── */}
+          <div className="pds-table-subpanel">
+            <div className="pds-table-subpanel-header">
+              <div className="pds-table-subpanel-titles">
+                <span className="pds-subpanel-label">
+                  {t.analyticalMatrixSection || 'ANALYTICAL MATRIX & CLINICAL SPECIFICATIONS'}
+                </span>
+                <h4 className="pds-subpanel-title">
+                  {t.completeFormulationsMatrix || 'Complete Formulations & Strengths Matrix'}
+                </h4>
               </div>
-
-              <div className="pds-section-cert-badge">
-                <Sparkles size={14} color="#38bdf8" />
-                <span>{t.allApprovedPresentations || 'All Approved Presentations & Doses'}</span>
+              <div className="pds-subpanel-badge-wrap">
+                <span className="pds-subpanel-badge font-mono">
+                  {sortedStrengths.length} {lang === 'es' ? 'concentraciones analíticas' : 'analytical strengths'}
+                </span>
               </div>
             </div>
 
-            <div className="pds-section-card-body">
-              <div className="pds-table-responsive">
+            <div className="pds-table-responsive">
                 <table className="pds-strengths-table">
                   <thead>
                     <tr>
@@ -1139,8 +1142,8 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}
-        <section id="specs-section" className="pds-specs-section">
+        {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
+        <section id="specs-section" className="pds-traceability-wrapper">
           <ProductTraceabilityCard
             product={product}
             baseUrl={baseUrl}
