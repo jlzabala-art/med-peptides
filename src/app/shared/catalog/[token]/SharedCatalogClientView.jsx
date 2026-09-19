@@ -34,6 +34,7 @@ import SharedCatalogTopNav from './components/SharedCatalogTopNav';
 import SharedCatalogHeader from './components/SharedCatalogHeader';
 import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
+import SharedCatalogProductListRow from './components/SharedCatalogProductListRow';
 import SharedCatalogFloatingDock from './components/SharedCatalogFloatingDock';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 
@@ -233,6 +234,50 @@ export default function SharedCatalogClientView({
     if (!onlyWithProtocols) return filteredProducts || [];
     return (filteredProducts || []).filter(prod => getRelatedProtocols(prod, protocols).length > 0);
   }, [filteredProducts, onlyWithProtocols, protocols]);
+
+  // Dual view mode: 'list' (default) vs 'cards'
+  const [viewMode, setViewMode] = React.useState('list');
+  const [expandedProductIds, setExpandedProductIds] = React.useState(() => new Set());
+  const toggleExpandedProduct = React.useCallback((id) => {
+    setExpandedProductIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const groupedProducts = React.useMemo(() => {
+    if (!displayedProducts || displayedProducts.length === 0) return [];
+
+    const activeGoalBuckets = selectedGoals && selectedGoals.length > 0
+      ? availableGoals.filter(g => selectedGoals.includes(g.id))
+      : availableGoals;
+
+    const groups = [];
+    const placedProductIds = new Set();
+
+    (activeGoalBuckets || []).forEach(goal => {
+      const matching = displayedProducts.filter(p => p.canonicalGoals?.includes(goal.id));
+      if (matching.length > 0) {
+        matching.forEach(p => placedProductIds.add(p.id));
+        groups.push({
+          goal,
+          products: matching
+        });
+      }
+    });
+
+    const remainder = displayedProducts.filter(p => !placedProductIds.has(p.id));
+    if (remainder.length > 0) {
+      groups.push({
+        goal: { id: 'other', label: 'General Formulations & Research Standards', count: remainder.length },
+        products: remainder
+      });
+    }
+
+    return groups;
+  }, [displayedProducts, availableGoals, selectedGoals]);
 
   // ── Clinic Portal Registration Modal State ───────────────────────────────
   const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
@@ -755,10 +800,12 @@ export default function SharedCatalogClientView({
           showProtocolsUnderProducts={showProtocolsUnderProducts}
           setShowProtocolsUnderProducts={setShowProtocolsUnderProducts}
           displayedProducts={displayedProducts}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
         />
 
-        {/* ── MAIN CONTENT: Products Grid ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {/* ── MAIN CONTENT: Products (Grouped by Goals) ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {displayedProducts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔬</div>
@@ -773,23 +820,101 @@ export default function SharedCatalogClientView({
               </button>
             </div>
           ) : (
-            displayedProducts.map(prod => (
-              <SharedCatalogProductCard
-                key={prod.id}
-                prod={prod}
-                includePrices={includePrices}
-                fxMultiplier={fxMultiplier}
-                currentCurrency={currentCurrency}
-                currencySymbol={currencySymbol}
-                packagingMode={packagingMode}
-                cart={cart}
-                updateQuantity={updateQuantity}
-                showProtocolsUnderProducts={false}
-                protocols={protocols}
-                setSelectedPublicProtocol={setSelectedPublicProtocol}
-                catalogMeta={catalogMeta}
-                t={t}
-              />
+            groupedProducts.map(group => (
+              <section key={group.goal.id} className="proto-goal-section" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* Goal Section Header */}
+                <div className="proto-goal-section-header" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '8px',
+                      background: '#eff6ff',
+                      color: '#003666',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <FlaskConical size={16} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.01em' }}>
+                        {group.goal.label}
+                      </h3>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>
+                        {group.products.length} {group.products.length === 1 ? 'formulation available' : 'formulations available'}
+                      </div>
+                    </div>
+                  </div>
+                  <span style={{
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    padding: '2px 10px',
+                    borderRadius: '9999px',
+                    background: '#eff6ff',
+                    color: '#003666',
+                    border: '1px solid #bfdbfe'
+                  }}>
+                    {group.products.length}
+                  </span>
+                </div>
+
+                {/* Items: List Mode (Default) vs Cards Mode */}
+                {viewMode === 'list' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {group.products.map(prod => (
+                      <SharedCatalogProductListRow
+                        key={prod.id}
+                        prod={prod}
+                        isExpanded={expandedProductIds.has(prod.id)}
+                        onToggleExpand={() => toggleExpandedProduct(prod.id)}
+                        includePrices={includePrices}
+                        fxMultiplier={fxMultiplier}
+                        currentCurrency={currentCurrency}
+                        currencySymbol={currencySymbol}
+                        packagingMode={packagingMode}
+                        cart={cart}
+                        updateQuantity={updateQuantity}
+                        protocols={protocols}
+                        setSelectedPublicProtocol={setSelectedPublicProtocol}
+                        catalogMeta={catalogMeta}
+                        t={t}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {group.products.map(prod => (
+                      <SharedCatalogProductCard
+                        key={prod.id}
+                        prod={prod}
+                        includePrices={includePrices}
+                        fxMultiplier={fxMultiplier}
+                        currentCurrency={currentCurrency}
+                        currencySymbol={currencySymbol}
+                        packagingMode={packagingMode}
+                        cart={cart}
+                        updateQuantity={updateQuantity}
+                        showProtocolsUnderProducts={false}
+                        protocols={protocols}
+                        setSelectedPublicProtocol={setSelectedPublicProtocol}
+                        catalogMeta={catalogMeta}
+                        t={t}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
             ))
           )}
         </div>

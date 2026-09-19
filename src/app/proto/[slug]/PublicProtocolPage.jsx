@@ -905,39 +905,105 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
-              {weeklySchedule.map((ws, idx) => (
-                <div key={idx} style={{
-                  background: ws.rest ? '#f8fafc' : '#ffffff',
-                  border: ws.rest ? '1px dashed #cbd5e1' : `1.5px solid ${ws.badgeColor}33`,
-                  borderRadius: '10px',
-                  padding: '0.85rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  minHeight: '120px'
-                }}>
-                  <div>
-                    <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
-                      {ws.day}
+            <div className="proto-roadmap-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
+              {weeklySchedule.map((ws, idx) => {
+                const isActiveAdmin = !ws.rest;
+                const activeBorderColor = ws.badgeColor || '#0284c7';
+
+                return (
+                  <div
+                    key={idx}
+                    className={`proto-roadmap-row ${isActiveAdmin ? 'is-active' : 'is-rest'}`}
+                    style={{
+                      width: '100%',
+                      background: isActiveAdmin ? '#ffffff' : '#f8fafc',
+                      border: isActiveAdmin ? `1px solid ${activeBorderColor}40` : '1px solid #e2e8f0',
+                      borderLeft: `4px solid ${isActiveAdmin ? activeBorderColor : '#cbd5e1'}`,
+                      borderRadius: '10px',
+                      padding: '0.85rem 1.15rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '0.75rem',
+                      boxShadow: isActiveAdmin ? '0 2px 8px -2px rgba(2, 132, 199, 0.08)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {/* Left Column: Day Badge & Compound + Dose */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: '1 1 280px', minWidth: '220px' }}>
+                      <div style={{
+                        minWidth: '95px',
+                        padding: '0.3rem 0.65rem',
+                        borderRadius: '6px',
+                        background: isActiveAdmin ? `${activeBorderColor}14` : '#f1f5f9',
+                        color: isActiveAdmin ? activeBorderColor : '#475569',
+                        fontWeight: 800,
+                        fontSize: '0.75rem',
+                        letterSpacing: '0.04em',
+                        textAlign: 'center',
+                        textTransform: 'uppercase',
+                        border: `1px solid ${isActiveAdmin ? `${activeBorderColor}30` : '#e2e8f0'}`,
+                        flexShrink: 0
+                      }}>
+                        {ws.day}
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <div style={{
+                          fontWeight: 800,
+                          fontSize: '0.92rem',
+                          color: isActiveAdmin ? '#0f172a' : '#475569',
+                          letterSpacing: '-0.01em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          flexWrap: 'wrap'
+                        }}>
+                          <span>{ws.compound}</span>
+                          {isActiveAdmin && (
+                            <span style={{
+                              fontSize: '0.62rem',
+                              fontWeight: 800,
+                              background: `${activeBorderColor}18`,
+                              color: activeBorderColor,
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              textTransform: 'uppercase'
+                            }}>
+                              {lang === 'es' ? 'Administración' : 'Admin'}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '0.76rem', color: isActiveAdmin ? activeBorderColor : '#64748b', fontWeight: 600 }}>
+                          {ws.dose}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ fontWeight: 800, color: ws.rest ? '#64748b' : ws.badgeColor, fontSize: '0.85rem', marginTop: '3px' }}>
-                      {ws.compound}
+
+                    {/* Middle Column: Timing / Schedule Note */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#64748b', flex: '1 1 180px' }}>
+                      <Clock size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                      <span>{ws.time}</span>
                     </div>
-                    <div style={{ fontSize: '0.70rem', color: '#0f172a', fontWeight: 600, marginTop: '2px' }}>
-                      {ws.dose}
+
+                    {/* Right Column: Route & Protocol Mode Tag */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        padding: '0.25rem 0.65rem',
+                        borderRadius: '6px',
+                        background: isActiveAdmin ? '#eff6ff' : '#f1f5f9',
+                        color: isActiveAdmin ? '#1d4ed8' : '#64748b',
+                        border: `1px solid ${isActiveAdmin ? '#bfdbfe' : '#e2e8f0'}`
+                      }}>
+                        {ws.route}
+                      </span>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '6px' }}>
-                      {ws.time}
-                    </div>
-                    <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
-                      {ws.route}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -1004,29 +1070,72 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               {protocol?.safetyGuidelines || protocol?.contraindications_text || t.contraindicationsDesc}
             </p>
 
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {/* Clinical Exclusions Matrix */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '0.75rem',
+              marginTop: '1rem'
+            }}>
               {[
-                lang === 'es' ? 'Hipersensibilidad conocida a los principios activos' : 'Known hypersensitivity to active peptides',
-                lang === 'es' ? 'Neoplasias endocrinas activas o sospecha de MTC/MEN 2' : 'Active endocrine neoplasms or suspected MTC/MEN 2',
-                lang === 'es' ? 'Insuficiencia renal o hepática severa no controlada' : 'Severe unmanaged renal or hepatic impairment',
-                lang === 'es' ? 'Embarazo, lactancia o plan de embarazo en curso' : 'Pregnancy, lactation, or planned pregnancy',
-                lang === 'es' ? 'Antecedentes de pancreatitis aguda o crónica' : 'History of acute or chronic pancreatitis'
-              ].map((c, i) => (
-                <span key={i} style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  color: '#991b1b',
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}>
-                  <span style={{ color: '#dc2626', fontSize: '0.8rem' }}>•</span>
-                  <span>{c}</span>
-                </span>
+                {
+                  title: lang === 'es' ? 'Hipersensibilidad a Péptidos' : 'Known Peptide Hypersensitivity',
+                  desc: lang === 'es' ? 'Reacción alérgica previa o anafilaxia a principios activos o excipientes.' : 'Prior systemic or localized hypersensitivity to active peptide chains or excipients.'
+                },
+                {
+                  title: lang === 'es' ? 'Neoplasias Endocrinas / MTC / MEN 2' : 'Endocrine Neoplasms / MTC / MEN 2',
+                  desc: lang === 'es' ? 'Antecedente personal o familiar de carcinoma medular de tiroides o NEM 2.' : 'Personal or family history of medullary thyroid carcinoma or MEN type 2.'
+                },
+                {
+                  title: lang === 'es' ? 'Insuficiencia Renal o Hepática Severa' : 'Severe Renal or Hepatic Impairment',
+                  desc: lang === 'es' ? 'Disfunción orgánica avanzada no compensada sin supervisión especializada.' : 'Uncompensated advanced clearance dysfunction without nephrology supervision.'
+                },
+                {
+                  title: lang === 'es' ? 'Embarazo y Lactancia' : 'Pregnancy & Lactation',
+                  desc: lang === 'es' ? 'Contraindicado en gestación, lactancia materna o búsqueda activa de embarazo.' : 'Strictly contraindicated during active gestation, nursing, or conception planning.'
+                },
+                {
+                  title: lang === 'es' ? 'Antecedentes de Pancreatitis' : 'Pancreatitis History',
+                  desc: lang === 'es' ? 'Episodios agudos previos o inflamación pancreática crónica activa.' : 'Prior acute pancreatitis episodes or active chronic pancreatic pathology.'
+                }
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    background: '#fffbfb',
+                    border: '1px solid #fee2e2',
+                    borderLeft: '4px solid #ef4444',
+                    borderRadius: '10px',
+                    padding: '0.85rem 1rem',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    boxShadow: '0 1px 2px rgba(239, 68, 68, 0.04)'
+                  }}
+                >
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '6px',
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginTop: '2px'
+                  }}>
+                    <AlertTriangle size={13} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#991b1b', lineHeight: 1.3 }}>
+                      {item.title}
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#7f1d1d', marginTop: '3px', lineHeight: 1.45 }}>
+                      {item.desc}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </section>

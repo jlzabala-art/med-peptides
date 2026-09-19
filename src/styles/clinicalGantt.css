@@ -898,5 +898,137 @@
   .pac-week-btn {
     min-width: unset;
   }
+
+  .phase-stepper-track {
+    display: none !important;
+  }
+
+  .gantt-mobile-phase-bar {
+    display: flex !important;
+  }
+
+  .gantt-toolbar-toggles {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+
+  .gantt-toolbar-toggles .gantt-mode-toggle {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  .gantt-toolbar-toggles .gantt-mode-btn {
+    flex: 1 1 0 !important;
+    justify-content: center !important;
+    padding: 0.35rem 0.35rem !important;
+    font-size: 0.70rem !important;
+    min-height: 34px !important;
+    gap: 4px !important;
+  }
+
+  .gantt-toolbar-toggles .gantt-mode-btn span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
+/* ── GCP Mobile Phase Selector (< 640px) ── */
+.gantt-mobile-phase-bar {
+  display: none;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.gantt-mobile-phase-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.75rem 0.95rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.gantt-mobile-phase-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.gantt-mobile-phase-badge {
+  font-size: 0.70rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #0d9488;
+  background: #f0fdfa;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccfbf1;
+}
+
+.gantt-mobile-phase-weeks {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.gantt-mobile-phase-select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1.5px solid #0d9488;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.gantt-mobile-pills-strip {
+  display: flex;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.gantt-mobile-pill-btn {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0.5rem 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 40px;
+  transition: all 0.15s ease;
+  color: #475569;
+}
+
+.gantt-mobile-pill-btn.is-active {
+  background: #0d9488;
+  border-color: #0f766e;
+  color: #ffffff;
+}
+
+.gantt-mobile-pill-btn.is-completed {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+}
+
+.gantt-mobile-pill-num {
+  font-weight: 800;
+  font-size: 0.76rem;
+}
+
+.gantt-mobile-pill-text {
+  font-size: 0.70rem;
+  font-weight: 600;
+  opacity: 0.9;
+}

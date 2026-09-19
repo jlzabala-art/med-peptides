@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Filter, ChevronDown, ClipboardList } from 'lucide-react';
+import { Search, Filter, ChevronDown, ClipboardList, List, LayoutGrid } from 'lucide-react';
 
 /**
  * SharedCatalogFilterBar — Search box, Goals multi-select, Format/Packaging dropdown,
@@ -36,6 +36,9 @@ export default function SharedCatalogFilterBar({
   setShowProtocolsUnderProducts,
   // Result count
   displayedProducts,
+  // Dual view mode
+  viewMode = 'list',
+  setViewMode,
 }) {
   const ROUTE_LABELS = {
     injectable: { label: 'Injectable / SubQ', icon: '💉' },
@@ -668,11 +671,34 @@ export default function SharedCatalogFilterBar({
         </div>
       )}
 
-      {/* Formulations count indicator */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '2px' }}>
+      {/* Formulations count indicator & View Switcher */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '4px' }}>
         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-          Showing {displayedProducts.length} of {products.length} formulations
+          Showing <strong>{displayedProducts.length}</strong> of <strong>{products.length}</strong> formulations
         </div>
+
+        {setViewMode && (
+          <div className="proto-view-switcher" role="radiogroup" aria-label="Catalog view mode">
+            <button
+              type="button"
+              className={`proto-view-btn ${viewMode === 'list' ? 'is-active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="Compact list view"
+            >
+              <List size={13} />
+              <span>List</span>
+            </button>
+            <button
+              type="button"
+              className={`proto-view-btn ${viewMode === 'cards' ? 'is-active' : ''}`}
+              onClick={() => setViewMode('cards')}
+              title="Cards grid view"
+            >
+              <LayoutGrid size={13} />
+              <span>Cards</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

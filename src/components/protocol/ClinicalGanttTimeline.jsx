@@ -281,7 +281,7 @@ export default function ClinicalGanttTimeline({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="gantt-toolbar-toggles" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           {/* Layout View Switcher: Accordions (Default) vs Gantt Matrix */}
           <div className="gantt-mode-toggle">
             <button
@@ -290,7 +290,7 @@ export default function ClinicalGanttTimeline({
               onClick={() => setActiveLayout('accordions')}
               title="Phased Accordions View (Recommended)"
             >
-              <Layers size={14} /> Phased Accordions
+              <Layers size={14} /> <span>Phased Accordions</span>
             </button>
             <button
               type="button"
@@ -298,7 +298,7 @@ export default function ClinicalGanttTimeline({
               onClick={() => setActiveLayout('gantt')}
               title="Full Macro Gantt Matrix View"
             >
-              <Table size={14} /> Gantt Matrix
+              <Table size={14} /> <span>Gantt Matrix</span>
             </button>
           </div>
 
@@ -309,14 +309,14 @@ export default function ClinicalGanttTimeline({
               className={`gantt-mode-btn ${viewMode === 'doctor' ? 'active' : ''}`}
               onClick={() => setViewMode('doctor')}
             >
-              <Stethoscope size={15} /> Doctor View
+              <Stethoscope size={15} /> <span>Doctor View</span>
             </button>
             <button
               type="button"
               className={`gantt-mode-btn ${viewMode === 'patient' ? 'active' : ''}`}
               onClick={() => setViewMode('patient')}
             >
-              <User size={15} /> Patient Journey
+              <User size={15} /> <span>Patient Journey</span>
             </button>
           </div>
         </div>
@@ -325,7 +325,59 @@ export default function ClinicalGanttTimeline({
       {/* 2. ACCORDION PHASE VIEW (Default & Clean Architecture) */}
       {activeLayout === 'accordions' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {/* Macro Progress Stepper Horizon */}
+          {/* Mobile GCP Phase Selector (Visible on mobile < 640px) */}
+          <div className="gantt-mobile-phase-bar">
+            <div className="gantt-mobile-phase-card">
+              <div className="gantt-mobile-phase-meta">
+                <span className="gantt-mobile-phase-badge">
+                  Phase {normalizedPhases[openPhaseIdx]?.phaseNumber || openPhaseIdx + 1} of {normalizedPhases.length}
+                </span>
+                <span className="gantt-mobile-phase-weeks">
+                  Weeks {normalizedPhases[openPhaseIdx]?.startWeek}–{normalizedPhases[openPhaseIdx]?.endWeek}
+                </span>
+              </div>
+              <select
+                className="gantt-mobile-phase-select"
+                value={openPhaseIdx}
+                onChange={(e) => {
+                  const newIdx = parseInt(e.target.value, 10);
+                  setOpenPhaseIdx(newIdx);
+                  setSelectedWeek(normalizedPhases[newIdx]?.startWeek || 1);
+                }}
+                aria-label="Select Clinical Phase"
+              >
+                {normalizedPhases.map((ph, idx) => (
+                  <option key={idx} value={idx}>
+                    Phase {ph.phaseNumber}: {ph.phaseName} (Weeks {ph.startWeek}–{ph.endWeek})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Step Pills Strip without text truncation */}
+            <div className="gantt-mobile-pills-strip">
+              {normalizedPhases.map((ph, idx) => {
+                const isOpen = openPhaseIdx === idx;
+                const isPast = openPhaseIdx > idx;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`gantt-mobile-pill-btn ${isOpen ? 'is-active' : isPast ? 'is-completed' : ''}`}
+                    onClick={() => {
+                      setOpenPhaseIdx(idx);
+                      setSelectedWeek(ph.startWeek);
+                    }}
+                  >
+                    <span className="gantt-mobile-pill-num">{isPast ? '✓' : idx + 1}</span>
+                    <span className="gantt-mobile-pill-text">W{ph.startWeek}–{ph.endWeek}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Macro Progress Stepper Horizon (Visible on desktop >= 641px) */}
           <div className="phase-stepper-track">
             {normalizedPhases.map((ph, idx) => {
               const isOpen = openPhaseIdx === idx;
