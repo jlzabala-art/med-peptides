@@ -11,7 +11,7 @@ export function buildHomepageLayout({ topProducts, featuredGoals, stats }) {
     hero: {
       title: 'Optimize Your Health with Peptides & Supplements',
       subtitle: 'Precision protocols, AI‑driven recommendations',
-      cta: { label: 'Explore Protocols', href: '/protocols' },
+      cta: { label: 'Explore Protocols', href: '/proto' },
     },
     topProducts,
     featuredGoals,

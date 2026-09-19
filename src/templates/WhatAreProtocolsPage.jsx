@@ -227,7 +227,7 @@ export default function WhatAreProtocolsPage() {
           </p>
           <button
             className="wap-hero__cta"
-            onClick={() => router.push('/protocols')}
+            onClick={() => router.push('/proto')}
           >
             Explore Clinical Protocols
             <ArrowRight size={16} />
@@ -515,14 +515,14 @@ export default function WhatAreProtocolsPage() {
             <div className="warp-cta-buttons">
               <button
                 className="wap-cta-btn"
-                onClick={() => router.push('/protocols')}
+                onClick={() => router.push('/proto')}
               >
                 Browse Clinical Protocols
                 <ArrowRight size={18} />
               </button>
               <button
                 className="wap-cta-btn--outline"
-                onClick={() => router.push('/protocols?level=beginner')}
+                onClick={() => router.push('/proto?level=beginner')}
               >
                 Browse Beginner Protocols
                 <ArrowRight size={18} />

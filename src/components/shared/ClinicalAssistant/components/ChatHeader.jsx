@@ -33,12 +33,12 @@ export default function ChatHeader({
     pageContext?.activeTab === 'protocols' ||
     pageContext?.page === 'protocols' ||
     Boolean(pageContext?.selectedProtocol) ||
-    (typeof window !== 'undefined' && window.location.pathname.includes('/protocols'))
+    (typeof window !== 'undefined' && (window.location.pathname.includes('/proto') || window.location.pathname.includes('/protocols')))
   );
   const isProductContext = !isPatientContext && !isProtocolContext && (
     pageContext?.isProductPage ||
     Boolean(pageContext?.selectedProduct) ||
-    (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
+    (typeof window !== 'undefined' && (window.location.pathname.startsWith('/p/') || window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
     (!pageContext && messages?.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)))
   );
   const isCatalogContext = !isPatientContext && !isProductContext && !isProtocolContext && (

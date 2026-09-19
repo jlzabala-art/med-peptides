@@ -127,7 +127,7 @@ export default function KnowledgeHubShowcase() {
               protocols tailored to your goals.
             </p>
           </div>
-          <button onClick={() => router.push('/collection/protocols')} className="khs-bridge-cta">
+          <button onClick={() => router.push('/proto')} className="khs-bridge-cta">
             View Protocols
           </button>
         </div>

@@ -890,7 +890,19 @@ export default function PublicDatasheetView({
           <div className="pds-brand-group">
             <span className="pds-brand-title">{t.brandName}</span>
             <span className="pds-brand-divider" aria-hidden="true" />
-            <span className="pds-badge-pill">{t.scientificMonograph}</span>
+            
+            {/* Segmented Directory Switcher */}
+            <div className="pds-directory-switcher" role="navigation" aria-label="Catalog Track Switcher">
+              <Link href="/catalog" className="pds-switcher-item is-active" title={lang === 'es' ? 'Catálogo de Compuestos' : 'Compounds Catalog'}>
+                <FlaskConical size={13} />
+                <span>{lang === 'es' ? 'Compuestos' : 'Compounds'}</span>
+              </Link>
+              <Link href="/proto" className="pds-switcher-item" title={lang === 'es' ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}>
+                <Layers size={13} />
+                <span>{lang === 'es' ? 'Protocolos' : 'Protocols'}</span>
+              </Link>
+            </div>
+
             <span className="pds-zero-price-badge">{t.clinicalReference}</span>
           </div>
 
@@ -1013,6 +1025,53 @@ export default function PublicDatasheetView({
           </div>
         </div>
       </header>
+
+      {/* ── Tier 2: Sticky Contextual In-Page Navigation Bar ── */}
+      <nav className="pds-context-bar" aria-label="Contextual Monograph Sections">
+        <div className="pds-context-inner">
+          {/* Breadcrumb & Compound Name */}
+          <div className="pds-context-breadcrumb">
+            <Link href="/catalog">{lang === 'es' ? 'Catálogo' : 'Catalog'}</Link>
+            <span className="pds-context-breadcrumb-sep">/</span>
+            <span className="pds-context-breadcrumb-curr">{product?.name || name || 'Peptide Monograph'}</span>
+          </div>
+
+          {/* Smooth In-Page Section Anchor Tabs */}
+          <div className="pds-anchor-tabs" role="tablist">
+            <a href="#overview" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'General' : 'Overview'}</span>
+            </a>
+            <a href="#clinical-indications" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Indicaciones' : 'Indications'}</span>
+            </a>
+            <a href="#pharmacology" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Farmacología' : 'Pharmacology'}</span>
+            </a>
+            {associatedProtocols && associatedProtocols.length > 0 && (
+              <a href="#clinical-pathways" className="pds-anchor-tab is-active">
+                <span>{lang === 'es' ? `Protocolos (/proto)` : `Protocols (/proto)`} ({associatedProtocols.length})</span>
+              </a>
+            )}
+            <a href="#reconstitution" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Reconstitución' : 'Reconstitution'}</span>
+            </a>
+            <a href="#traceability" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Calidad HPLC' : 'HPLC Quality'}</span>
+            </a>
+          </div>
+
+          {/* Value-Driven Professional Auth Incentive */}
+          <div className="pds-auth-incentive-strip">
+            <span className="pds-auth-incentive-msg">
+              <ShieldCheck size={14} style={{ color: '#38bdf8' }} />
+              <span>{lang === 'es' ? 'Clínicas y Farmacias: Acceso mayorista (-40%) y receta digital' : 'Medical Clinics: Access wholesale tiers (-40%) & digital Rx'}</span>
+            </span>
+            <Link href={`/login?tab=register&role=doctor&redirect=/p/${encodeURIComponent(slug)}`} className="pds-auth-incentive-btn">
+              <span>{lang === 'es' ? 'Alta Clínica →' : 'Provider Access →'}</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       {/* ── Main Monograph Container ── */}
       <main className="pds-container">

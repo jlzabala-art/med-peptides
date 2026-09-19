@@ -246,7 +246,19 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           <div className="pds-brand-group">
             <span className="pds-brand-title">Med-Peptides</span>
             <span className="pds-brand-divider" aria-hidden="true" />
-            <span className="pds-badge-pill">{t.clinicalProtocolGuide}</span>
+            
+            {/* Segmented Directory Switcher */}
+            <div className="pds-directory-switcher" role="navigation" aria-label="Catalog Track Switcher">
+              <Link href="/catalog" className="pds-switcher-item" title={lang === 'es' ? 'Explorar Catálogo de Compuestos' : 'Browse Research Compounds Catalog'}>
+                <FlaskConical size={13} />
+                <span>{lang === 'es' ? 'Compuestos' : 'Compounds'}</span>
+              </Link>
+              <Link href="/proto" className="pds-switcher-item is-active" title={lang === 'es' ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}>
+                <Layers size={13} />
+                <span>{lang === 'es' ? 'Protocolos' : 'Protocols'}</span>
+              </Link>
+            </div>
+
             <span className="pds-zero-price-badge">{t.clinicalRegistryBadge}</span>
           </div>
 
@@ -324,6 +336,50 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </div>
         </div>
       </header>
+
+      {/* ── Tier 2: Sticky Contextual In-Page Navigation Bar ── */}
+      <nav className="pds-context-bar proto-no-print" aria-label="Contextual Protocol Regimen Navigation">
+        <div className="pds-context-inner">
+          {/* Breadcrumb & Protocol Title */}
+          <div className="pds-context-breadcrumb">
+            <Link href="/proto">{lang === 'es' ? 'Protocolos' : 'Protocols'}</Link>
+            <span className="pds-context-breadcrumb-sep">/</span>
+            <span className="pds-context-breadcrumb-curr">{protocolCode} • {displayName}</span>
+          </div>
+
+          {/* Section Anchor Tabs */}
+          <div className="pds-anchor-tabs" role="tablist">
+            <a href="#blueprint" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Plan Clínico' : 'Blueprint'}</span>
+            </a>
+            <a href="#titration-phases" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Fases' : 'Phases'} ({phases.length})</span>
+            </a>
+            {items.length > 0 && (
+              <a href="#included-compounds" className="pds-anchor-tab is-active">
+                <span>{lang === 'es' ? 'Compuestos (/p/)' : 'Compounds (/p/)'} ({items.length})</span>
+              </a>
+            )}
+            <a href="#biomarker-panels" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Biomarcadores' : 'Biomarkers'}</span>
+            </a>
+            <a href="#administration-schedule" className="pds-anchor-tab">
+              <span>{lang === 'es' ? 'Pauta 7 Días' : '7-Day Schedule'}</span>
+            </a>
+          </div>
+
+          {/* Value-Driven Professional Auth Incentive */}
+          <div className="pds-auth-incentive-strip">
+            <span className="pds-auth-incentive-msg">
+              <ShieldCheck size={14} style={{ color: '#38bdf8' }} />
+              <span>{lang === 'es' ? 'Médicos y Especialistas: Personaliza dosis y exporta pautas para pacientes' : 'Prescribing Physicians: Customize dosages & export patient schedules'}</span>
+            </span>
+            <Link href={`/login?tab=register&role=doctor&redirect=/proto/${encodeURIComponent(slug)}`} className="pds-auth-incentive-btn">
+              <span>{lang === 'es' ? 'Pauta Médica →' : 'Provider Access →'}</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       {/* ── Main Container ── */}
       <main className="pds-container">

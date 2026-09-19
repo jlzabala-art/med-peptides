@@ -17,6 +17,7 @@ export async function GET(request) {
 
     const staticRoutes = [
       '',
+      '/proto',
       '/protocol-finder',
     ];
 

@@ -941,9 +941,9 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
                       onClick={() => {
                         const targetSlug = resolveProtocolSlug(p);
                         if (targetSlug === 'collection') {
-                          router.push('/collection/protocols');
+                          router.push('/proto');
                         } else {
-                          router.push(`/protocol/${targetSlug}`);
+                          router.push(`/proto/${targetSlug}`);
                         }
                       }}
                       style={{

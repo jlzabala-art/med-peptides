@@ -83,7 +83,7 @@ export default function GlobalSearchBar({
   const router = useRouter();
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
-  const isProtocolsPage = (namespace || '').includes('protocol') || (typeof window !== 'undefined' && window.location.pathname.includes('/protocols'));
+  const isProtocolsPage = (namespace || '').includes('protocol') || (typeof window !== 'undefined' && (window.location.pathname.includes('/proto') || window.location.pathname.includes('/protocols')));
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {

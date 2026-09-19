@@ -1,3 +1,5 @@
+@import './publicStickyHeader.css';
+
 /* ══════════════════════════════════════════════════════════════════════════════
    PUBLIC PROTOCOLS CATALOG DIRECTORY (/proto, /protocols)
    Aesthetics: Atlas Clinical Blue / GCP Console Standard / Glassmorphism
@@ -259,7 +261,163 @@
   background: #e2e8f0;
 }
 
-/* ── Goals Filter Ribbon (Desktop & Mobile) ── */
+/* ── Executive Goal Cards Hub (Google Cloud Console Resource Discovery Pattern) ── */
+.proto-goal-grid-hub {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1100px) {
+  .proto-goal-grid-hub {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .proto-goal-grid-hub {
+    grid-template-columns: 1fr;
+  }
+}
+
+.proto-goal-hub-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.proto-goal-hub-card:hover {
+  transform: translateY(-2px);
+  border-color: #94a3b8;
+  box-shadow: 0 6px 18px -2px rgba(0, 54, 102, 0.08);
+}
+
+.proto-goal-hub-card.is-active {
+  border-color: #003666;
+  background: #f8fafc;
+  box-shadow: 0 4px 16px -2px rgba(0, 54, 102, 0.16);
+}
+
+.proto-goal-hub-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.proto-goal-hub-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.proto-goal-hub-card-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.proto-goal-hub-card-count {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.proto-goal-hub-card-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.proto-goal-hub-card-biomarkers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ── GCP Key-Value Metadata Grid (Golden Rules #8, #11, #28) ── */
+.proto-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem 0.95rem;
+  margin-bottom: 0.85rem;
+}
+
+@media (max-width: 580px) {
+  .proto-field-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+.proto-field-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.proto-field-label {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.proto-field-value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proto-biomarker-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* ── Goals Filter Ribbon (Desktop Wrap & Mobile Scroll) ── */
 .proto-mobile-goal-wrapper {
   display: none;
 }
@@ -267,13 +425,21 @@
 .proto-goals-ribbon {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.65rem;
-  overflow-x: auto;
-  padding: 4px 2px 10px 2px;
+  padding: 4px 0 10px 0;
   margin-bottom: 1.25rem;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
+}
+
+@media (max-width: 768px) {
+  .proto-goals-ribbon {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
 }
 
 .proto-goals-ribbon::-webkit-scrollbar {

@@ -1,0 +1,202 @@
+/* ══════════════════════════════════════════════════════════════════
+   PUBLIC STICKY HEADER & CONTEXTUAL NAVIGATION (GCP Standards)
+   Applies across: /catalog, /p/[slug], /proto, /proto/[slug]
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Tier 2: Sticky Contextual Action Bar ──────────────────────── */
+.pds-context-bar {
+  position: sticky;
+  top: 48px; /* sits directly under .pds-top-bar */
+  z-index: 990;
+  background: rgba(0, 37, 71, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 14px rgba(0, 30, 60, 0.20);
+  transition: all 0.2s ease;
+}
+
+.pds-context-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0.45rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── Segmented Directory Switcher ──────────────────────────────── */
+.pds-directory-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.pds-switcher-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.pds-switcher-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pds-switcher-item.is-active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+
+/* ── Contextual Anchor Jumps (Page-Specific) ───────────────────── */
+.pds-anchor-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pds-anchor-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.pds-anchor-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pds-anchor-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+.pds-anchor-tab.is-active {
+  color: #38bdf8;
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  font-weight: 700;
+}
+
+/* ── Value-Driven Auth Incentive Strip / Pill ──────────────────── */
+.pds-auth-incentive-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #e0f2fe;
+  font-size: 0.73rem;
+  font-weight: 500;
+}
+
+.pds-auth-incentive-msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pds-auth-incentive-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #38bdf8;
+  color: #002244;
+  font-weight: 800;
+  font-size: 0.71rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.pds-auth-incentive-btn:hover {
+  background: #7dd3fc;
+  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.4);
+}
+
+/* ── Contextual Breadcrumb ─────────────────────────────────────── */
+.pds-context-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.pds-context-breadcrumb a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.pds-context-breadcrumb a:hover {
+  color: #38bdf8;
+}
+
+.pds-context-breadcrumb-sep {
+  opacity: 0.45;
+}
+
+.pds-context-breadcrumb-curr {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+/* ── Mobile Adaptations (Golden Rule #23) ──────────────────────── */
+@media (max-width: 900px) {
+  .pds-context-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.4rem 0.85rem;
+  }
+  
+  .pds-directory-switcher {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .pds-switcher-item {
+    flex: 1;
+    justify-content: center;
+    min-height: 38px;
+  }
+  
+  .pds-auth-incentive-strip {
+    justify-content: space-between;
+  }
+}

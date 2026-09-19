@@ -512,7 +512,7 @@ export default function TrendingProtocols() {
             <ArrowRight size={15} />
           </button>
           <button
-            onClick={() => router.push('/protocols')}
+            onClick={() => router.push('/proto')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               padding: '0.85rem 1.75rem', background: 'white',

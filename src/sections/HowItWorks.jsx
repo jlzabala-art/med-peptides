@@ -83,7 +83,7 @@ const STEPS = [
     Icon: MapIcon,
     title: 'Follow a Protocol',
     desc: 'Access structured research protocols with dosing schedules, timing, and compound guidance.',
-    href: '/protocols',
+    href: '/proto',
     color: '#fbbf24',
   },
 ];

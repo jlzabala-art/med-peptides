@@ -76,7 +76,7 @@ export default function MobileNavDock() {
     return [
       { id: 'catalog', label: 'Catalog', icon: Package, path: '/admin/catalog', altPath: '/catalog' },
       { id: 'prescriptions', label: 'Rx', icon: FileText, path: '/admin/prescriptions', altPath: '/prescriptions' },
-      { id: 'protocols', label: 'Protocols', icon: Layers, path: '/admin/protocols', altPath: '/protocols' },
+      { id: 'protocols', label: 'Protocols', icon: Layers, path: '/admin/protocols', altPath: '/proto' },
       { id: 'patients', label: 'Patients', icon: Users, path: '/admin/patients', altPath: '/patients' },
       { id: 'workspace', label: 'Workspace', icon: Briefcase, isWorkspaceTrigger: true },
     ];

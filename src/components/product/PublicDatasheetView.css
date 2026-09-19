@@ -1,3 +1,5 @@
+@import '../../styles/publicStickyHeader.css';
+
 /* ══════════════════════════════════════════════════════════════════
    PublicDatasheetView — Pharmaceutical Monograph Styles
    Extracted from <style jsx global> to eliminate FOUC on page load.

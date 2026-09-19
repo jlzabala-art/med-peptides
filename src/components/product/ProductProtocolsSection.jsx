@@ -92,7 +92,7 @@ export default function ProductProtocolsSection({ protocols, peptideName }) {
         {/* View All Protocols CTA */}
         <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
           <button
-            onClick={() => router.push('/protocols')}
+            onClick={() => router.push('/proto')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               padding: '0.75rem 1.75rem',

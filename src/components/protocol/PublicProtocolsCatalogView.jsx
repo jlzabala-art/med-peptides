@@ -388,9 +388,19 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           <div className="pds-brand-group">
             <span className="pds-brand-title" style={{ color: '#ffffff', fontWeight: 800 }}>Med-Peptides</span>
             <span className="pds-brand-divider" aria-hidden="true" style={{ background: 'rgba(255, 255, 255, 0.25)' }} />
-            <span className="pds-badge-pill" style={{ background: 'rgba(255, 255, 255, 0.14)', color: '#e0f2fe', border: '1px solid rgba(255, 255, 255, 0.22)' }}>
-              {lang === 'es' ? 'DIRECTORIO DE PROTOCOLOS' : 'PROTOCOL DIRECTORY'}
-            </span>
+            
+            {/* Segmented Directory Switcher */}
+            <div className="pds-directory-switcher" role="navigation" aria-label="Catalog Track Switcher">
+              <Link href="/catalog" className="pds-switcher-item" title={lang === 'es' ? 'Explorar Catálogo de Compuestos' : 'Browse Research Compounds Catalog'}>
+                <FlaskConical size={13} />
+                <span>{lang === 'es' ? 'Compuestos' : 'Compounds'}</span>
+              </Link>
+              <Link href="/proto" className="pds-switcher-item is-active" title={lang === 'es' ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}>
+                <Layers size={13} />
+                <span>{lang === 'es' ? 'Protocolos' : 'Protocols'}</span>
+              </Link>
+            </div>
+
             <span className="pds-zero-price-badge" style={{ color: '#93c5fd' }}>{t.clinicalRegistryBadge}</span>
           </div>
 
@@ -463,6 +473,47 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           </div>
         </div>
       </header>
+
+      {/* ── Tier 2: Sticky Contextual Action Bar with Provider Incentives ── */}
+      <nav className="pds-context-bar" aria-label="Contextual Protocol Navigation" style={{ margin: '-1.5rem -1.5rem 1.5rem -1.5rem', width: 'calc(100% + 3rem)' }}>
+        <div className="pds-context-inner">
+          {/* Quick Goal Tabs */}
+          <div className="pds-anchor-tabs" role="tablist">
+            <button 
+              type="button" 
+              role="tab"
+              aria-selected={selectedGoal === 'all'}
+              className={`pds-anchor-tab ${selectedGoal === 'all' ? 'is-active' : ''}`}
+              onClick={() => { triggerHaptic('selection'); setSelectedGoal('all'); }}
+            >
+              {lang === 'es' ? 'Todos' : 'All Protocols'} ({enrichedProtocols.length})
+            </button>
+            {GOAL_BUCKETS.slice(1, 6).map(g => (
+              <button
+                key={g.id}
+                type="button"
+                role="tab"
+                aria-selected={selectedGoal === g.id}
+                className={`pds-anchor-tab ${selectedGoal === g.id ? 'is-active' : ''}`}
+                onClick={() => { triggerHaptic('selection'); setSelectedGoal(g.id); }}
+              >
+                {GOAL_TRANSLATIONS[g.id]?.[lang] || g.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Value-Driven Professional Auth Incentive */}
+          <div className="pds-auth-incentive-strip">
+            <span className="pds-auth-incentive-msg">
+              <ShieldCheck size={14} style={{ color: '#38bdf8' }} />
+              <span>{lang === 'es' ? 'Clínicas y Médicos: Regístrate para duplicar pautas en fichas de pacientes' : 'Healthcare Providers: Register to duplicate blueprints into patient charts'}</span>
+            </span>
+            <Link href="/login?tab=register&role=doctor&redirect=/proto" className="pds-auth-incentive-btn">
+              <span>{lang === 'es' ? 'Alta Profesional →' : 'Register as Provider →'}</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
       {/* ── Google Cloud Console Active Scope Indicator ── */}
       <div className="proto-scope-nav-container" style={{ display: 'flex', justifyContent: 'center', margin: '0 0 1.25rem 0' }}>

@@ -29,7 +29,7 @@ export function ProtocolNotFound({ slug }) {
         No protocol was found for <code>{slug}</code>. It may have been archived
         or the link is incorrect.
       </p>
-      <button className="proto-back-btn" onClick={() => router.push('/protocols')}>
+      <button className="proto-back-btn" onClick={() => router.push('/proto')}>
         Browse All Protocols
       </button>
     </div>

@@ -13,7 +13,7 @@ export const CATALOG_BROWSE = [
   },
   {
     label: 'Browse Protocols',
-    path: '/collection/protocols',
+    path: '/proto',
     icon: 'ClipboardList',
     desc: 'Multi-peptide clinical blueprints',
   },
@@ -47,7 +47,7 @@ export const CATALOGS_MENU = [
   },
   {
     label: 'Protocols',
-    path: '/collection/protocols',
+    path: '/proto',
     icon: 'ClipboardList',
     desc: 'Structured biological pathways',
   },

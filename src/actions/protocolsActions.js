@@ -106,7 +106,7 @@ export async function updateProtocolAction(protocolId, updateData = {}) {
     revalidatePath(`/proto/${slug}`);
     revalidatePath(`/proto/${protocolId}`);
     revalidatePath(`/shared/protocol/${protocolId}`);
-    revalidatePath('/collection/protocols');
+    revalidatePath('/proto');
 
     return { success: true };
   } catch (error) {

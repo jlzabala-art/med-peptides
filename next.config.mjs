@@ -78,6 +78,21 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: '/collection/protocols',
+        destination: '/proto',
+        permanent: true,
+      },
+      {
+        source: '/protocols',
+        destination: '/proto',
+        permanent: true,
+      },
+      {
+        source: '/protocol',
+        destination: '/proto',
+        permanent: true,
+      },
+      {
         source: '/auth/login',
         destination: '/login',
         permanent: false,

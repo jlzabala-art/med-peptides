@@ -171,7 +171,7 @@ export default function CatalogMegaMenu({ onClose }) {
             {t('nav.viewFullCatalog', 'View Full Catalog →')}
           </Link>
           <Link
-            to="/collection/protocols"
+            to="/proto"
             className="mega-menu-footer-link"
             onClick={onClose}
           >

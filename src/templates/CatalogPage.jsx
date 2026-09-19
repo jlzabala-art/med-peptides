@@ -29,7 +29,7 @@ const BROWSE_TILES = [
     label: 'Protocols',
     description: 'Evidence-based clinical protocols built for real outcomes.',
     icon: Microscope,
-    path: '/collection/protocols',
+    path: '/proto',
     accent: '#00D1FF',
     bg: 'rgba(0,209,255,0.06)',
     border: 'rgba(0,209,255,0.18)',
@@ -360,7 +360,7 @@ function CatalogPage({ onOpenSearch }) {
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
           <Link
-            href="/protocols"
+            href="/proto"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               color: 'var(--primary)', fontWeight: 700, fontSize: '0.9rem',

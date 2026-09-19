@@ -105,13 +105,13 @@ async function fetchNavigationMetadata() {
   const goals = uniqueSorted(goalsRaw, 8).map(label => ({
     label,
     slug: toSlug(label),
-    path: `/collection/protocols?goal=${toSlug(label)}`,
+    path: `/proto?goal=${toSlug(label)}`,
   }));
 
   const conditions = uniqueSorted(conditionsRaw, 8).map(label => ({
     label,
     slug: toSlug(label),
-    path: `/collection/protocols?search=${encodeURIComponent(label)}`,
+    path: `/proto?search=${encodeURIComponent(label)}`,
   }));
 
   const result = { categories, goals, conditions };

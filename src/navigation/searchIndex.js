@@ -92,7 +92,7 @@ export const searchIndex = [
     title: 'Protocol Library',
     description: 'Browse available protocols to prescribe',
     category: 'Clinical',
-    path: '/protocols',
+    path: '/proto',
     iconName: 'flask',
     roles: ['clinic', 'doctor']
   },

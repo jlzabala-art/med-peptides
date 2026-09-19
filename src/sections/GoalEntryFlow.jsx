@@ -95,8 +95,8 @@ export default function GoalEntryFlow({ onOpenAI, onSeedSearch }) {
     if (onSeedSearch) {
       onSeedSearch(query);
     } else {
-      // Unify exploration under the collection view
-      router.push(`/collection/protocols?q=${encodeURIComponent(goal.label)}`);
+      // Unify exploration under the public protocols catalog
+      router.push(`/proto?q=${encodeURIComponent(goal.label)}`);
     }
   };
 

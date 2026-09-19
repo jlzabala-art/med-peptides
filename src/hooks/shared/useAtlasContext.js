@@ -40,7 +40,7 @@ export function useAtlasContext() {
             { id: 'doc_formats', icon: Sparkles, label: 'Dosing & Formats', desc: 'Vial sizes & concentrations', color: 'purple', prompt: 'What dosages, concentrations, and vial formats are available for catalog peptides?' },
             { id: 'doc_indications', icon: Activity, label: 'Clinical Indications', desc: 'Research evidence & trials', color: 'teal', prompt: 'Summarize clinical research evidence and medical indications for catalog peptides.' }
           ];
-        } else if (pathname.includes('/protocols')) {
+        } else if (pathname.includes('/proto') || pathname.includes('/protocols')) {
           suggestedPrompts = [
             { label: '📄 Descargar Guía Clínica de Protocolo PDF' },
             { label: '🔬 Mecanismos de acción y fases de titulación' },
@@ -199,7 +199,7 @@ export function useAtlasContext() {
             { id: 'admin_pricing', icon: TrendingUp, label: 'Pricing & Margins', desc: 'Cost vs Wholesale vs Retail', color: 'purple', prompt: 'Audit peptide pricing levels and margins across cost, clinic, wholesale, and retail tiers.' },
             { id: 'admin_stock', icon: AlertCircle, label: 'Catalog Stock Alerts', desc: 'Critical stock & zero units', color: 'red', prompt: 'Which catalog peptides or variants have low stock (<20 units) or are out of stock?' }
           ];
-        } else if (pathname.includes('/protocols')) {
+        } else if (pathname.includes('/proto') || pathname.includes('/protocols')) {
           suggestedPrompts = [
             { label: '📋 Exportar Compendio de Protocolos PDF' },
             { label: '🔥 Comparar protocolos metabólicos (Semaglutide/Retatrutide)' },

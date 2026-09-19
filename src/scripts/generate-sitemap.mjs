@@ -31,7 +31,7 @@ const BASE_URL = 'https://med-peptides-app-27a3a.web.app';
 const staticPages = [
   { url: '/', priority: '1.0', changefreq: 'weekly' },
   { url: '/catalog', priority: '0.9', changefreq: 'weekly' },
-  { url: '/protocols', priority: '0.9', changefreq: 'weekly' },
+  { url: '/proto', priority: '0.9', changefreq: 'weekly' },
   { url: '/objectives', priority: '0.8', changefreq: 'weekly' },
   { url: '/academy', priority: '0.8', changefreq: 'weekly' },
   { url: '/quality', priority: '0.7', changefreq: 'monthly' },

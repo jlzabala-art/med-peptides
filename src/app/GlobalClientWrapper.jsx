@@ -41,13 +41,13 @@ function StorefrontShell({ children }) {
     if (cat === 'Academy') return router.push('/academy');
     
     const focusAreaMap = {
-      'Recovery & Repair': '/collection/protocols?goal=Recovery & Repair',
-      'Metabolic & Weight': '/collection/protocols?goal=Metabolic & Weight',
-      'Longevity & Anti-Aging': '/collection/protocols?goal=Longevity & Anti-Aging',
-      'Cognitive & Mood': '/collection/protocols?goal=Cognitive & Mood',
-      'Sleep & Circadian': '/collection/protocols?goal=Sleep & Circadian',
-      'Hormonal Optimization': '/collection/protocols?goal=Hormonal Optimization',
-      'Immune Support': '/collection/protocols?goal=Immune Support',
+      'Recovery & Repair': '/proto?goal=Recovery & Repair',
+      'Metabolic & Weight': '/proto?goal=Metabolic & Weight',
+      'Longevity & Anti-Aging': '/proto?goal=Longevity & Anti-Aging',
+      'Cognitive & Mood': '/proto?goal=Cognitive & Mood',
+      'Sleep & Circadian': '/proto?goal=Sleep & Circadian',
+      'Hormonal Optimization': '/proto?goal=Hormonal Optimization',
+      'Immune Support': '/proto?goal=Immune Support',
     };
 
     if (focusAreaMap[cat]) return router.push(focusAreaMap[cat]);
