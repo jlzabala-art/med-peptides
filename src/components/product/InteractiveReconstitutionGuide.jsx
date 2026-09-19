@@ -11,7 +11,8 @@ import {
   Sparkles,
   Droplets,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Activity
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';

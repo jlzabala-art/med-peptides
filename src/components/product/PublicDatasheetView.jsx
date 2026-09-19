@@ -47,6 +47,7 @@ import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
+import { getHumanFormatName } from '../../utils/productVariantProcessing';
 
 function WaIcon() {
   return (
@@ -290,7 +291,18 @@ export default function PublicDatasheetView({
 
   // ─── Hierarchy, Formats & Strengths Matrix ─────────────────────────────────
   const hierarchy = product?.processedHierarchy || {};
-  const suppliersList = useMemo(() => Array.isArray(hierarchy.suppliers) ? hierarchy.suppliers : [], [hierarchy.suppliers]);
+  const suppliersList = useMemo(() => {
+    const list = Array.isArray(hierarchy.suppliers) ? [...hierarchy.suppliers] : [];
+    list.sort((a, b) => {
+      const aIsLotus = String(a.id || a.name || '').toLowerCase().includes('lotusland');
+      const bIsLotus = String(b.id || b.name || '').toLowerCase().includes('lotusland');
+      if (aIsLotus && !bIsLotus) return -1;
+      if (!aIsLotus && bIsLotus) return 1;
+      return 0;
+    });
+    return list;
+  }, [hierarchy.suppliers]);
+
   const isMultiSupplierMode = !product?.isSingleSupplierLocked && suppliersList.length > 1;
 
   // Helper to ensure physical labels, QR codes, and URLs always bind to a concrete laboratory
@@ -310,7 +322,7 @@ export default function PublicDatasheetView({
     return raw.startsWith('supplier-') ? raw : `supplier-${raw.toLowerCase().replace(/[\s_]+/g, '-')}`;
   };
 
-  // Active supplier state: default to primary concrete laboratory (NEVER generic 'all')
+  // Active supplier state: default strictly to Lotusland if present, otherwise first available
   const [activeSupplierId, setActiveSupplierId] = useState(() => {
     if (initialSupplierFilter && initialSupplierFilter !== 'all') {
       const cleanTarget = String(initialSupplierFilter).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
@@ -320,7 +332,9 @@ export default function PublicDatasheetView({
       });
       if (matched) return matched.id;
     }
-    return suppliersList[0]?.id || product?.supplierId || 'supplier-lotusland';
+    // Default strictly to Lotusland if present
+    const lotuslandSupp = suppliersList.find(s => String(s.id || s.name).toLowerCase().includes('lotusland'));
+    return lotuslandSupp?.id || suppliersList[0]?.id || product?.supplierId || 'supplier-lotusland';
   });
 
   const activeSupplierObj = useMemo(() => {
@@ -339,11 +353,7 @@ export default function PublicDatasheetView({
   }, [product, activeSupplierObj]);
 
   const displaySupplierName = useMemo(() => {
-    const raw = supplierName || '';
-    if (raw.toLowerCase().includes('lotusland')) {
-      return 'Atlas Services';
-    }
-    return raw;
+    return supplierName || 'Certified Clinical Synthesis Laboratory';
   }, [supplierName]);
 
   const rawFormats = Array.isArray(hierarchy.formats) ? hierarchy.formats : [];
@@ -480,10 +490,16 @@ export default function PublicDatasheetView({
   const activeFormatStrengthIds = Array.isArray(activeFormat?.strengths) ? activeFormat.strengths : [];
 
   const filteredStrengths = useMemo(() => {
+    if (activeSupplierId !== 'all' && activeSupplierObj?.formatStrengths) {
+      const allowedStrengthIds = activeSupplierObj.formatStrengths[activeFormatId] || [];
+      if (allowedStrengthIds.length > 0) {
+        return sortedStrengths.filter(s => allowedStrengthIds.includes(s.id));
+      }
+    }
     return sortedStrengths.filter(s => 
       activeFormatStrengthIds.length === 0 || activeFormatStrengthIds.includes(s.id)
     );
-  }, [sortedStrengths, activeFormatStrengthIds]);
+  }, [sortedStrengths, activeSupplierId, activeSupplierObj, activeFormatId, activeFormatStrengthIds]);
 
   const [selectedStrengthId, setSelectedStrengthId] = useState(() => {
     if (initialStrength) {
@@ -715,6 +731,153 @@ export default function PublicDatasheetView({
 
     window.open(`https://wa.me/?text=${encodeURIComponent(pharmaMsg)}`, '_blank', 'noopener,noreferrer');
   };
+
+  const matrixRows = useMemo(() => {
+    const rows = [];
+    const variantIndex = hierarchy.variantIndex || {};
+
+    if (activeSupplierId !== 'all' && activeSupplierObj) {
+      // 1. Single Supplier Mode: Only show verified formulations belonging to THIS supplier
+      availableFormats.forEach(fmt => {
+        const suppStrengthsForFormat = activeSupplierObj.formatStrengths?.[fmt.id] || [];
+        const strengthObjs = sortedStrengths.filter(s => suppStrengthsForFormat.includes(s.id));
+
+        strengthObjs.forEach(st => {
+          const vKey = `${activeSupplierObj.id}::${fmt.id}::${st.id}`;
+          const v = variantIndex[vKey];
+          const recon = getReconstitutionVolume(st.name);
+          const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
+          const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
+          const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet') || fmt.id.includes('oral');
+          const isSpray = fmt.id.includes('spray') || fmt.id.includes('nasal');
+
+          const diluentText = isSolventProduct
+            ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
+            : isPenOrCart 
+              ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
+              : isOral 
+                ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                : isSpray
+                  ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
+                  : `${recon.volume} mL BAC Water`;
+
+          const concText = isSolventProduct
+            ? '0.9% Benzyl Alcohol USP'
+            : isPenOrCart 
+              ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
+              : isOral 
+                ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                : isSpray
+                  ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
+                  : `${recon.concentration} mg/mL`;
+
+          const adminText = isSolventProduct
+            ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
+            : isPenOrCart 
+              ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+              : isOral 
+                ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                : isSpray
+                  ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
+                  : 'Subcutaneous / IM (U-100)';
+
+          rows.push({
+            key: `${activeSupplierObj.id}-${fmt.id}-${st.id}`,
+            formatId: fmt.id,
+            formatName: fmt.name,
+            strengthId: st.id,
+            strengthName: st.name,
+            diluentText,
+            concText,
+            adminText,
+            recon,
+            isPenOrCart,
+            isOral,
+            isSpray,
+            isCurrentlyActive,
+            purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : '≥ 99.0% (RP-HPLC)'),
+            supplierName: activeSupplierObj.name || 'Lotusland Limited',
+            supplierId: activeSupplierObj.id
+          });
+        });
+      });
+    } else {
+      // 2. All Laboratories Overview Mode: List every verified supplier and their true formulations
+      suppliersList.forEach(supp => {
+        const suppFormatIds = Array.isArray(supp.formats) ? supp.formats : [];
+        suppFormatIds.forEach(fId => {
+          const fmtObj = availableFormats.find(f => f.id === fId) || { id: fId, name: getHumanFormatName(fId) };
+          const suppStrengths = supp.formatStrengths?.[fId] || [];
+          const strengthObjs = sortedStrengths.filter(s => suppStrengths.includes(s.id));
+
+          strengthObjs.forEach(st => {
+            const vKey = `${supp.id}::${fId}::${st.id}`;
+            const v = variantIndex[vKey];
+            const recon = getReconstitutionVolume(st.name);
+            const isCurrentlyActive = fId === activeFormatId && st.id === selectedStrengthId;
+            const isPenOrCart = fId.includes('pen') || fId.includes('cartridge');
+            const isOral = fId.includes('capsule') || fId.includes('tablet') || fId.includes('oral');
+            const isSpray = fId.includes('spray') || fId.includes('nasal');
+
+            const diluentText = isSolventProduct
+              ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
+              : isPenOrCart 
+                ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
+                : isOral 
+                  ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                  : isSpray
+                    ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
+                    : `${recon.volume} mL BAC Water`;
+
+            const concText = isSolventProduct
+              ? '0.9% Benzyl Alcohol USP'
+              : isPenOrCart 
+                ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
+                : isOral 
+                  ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                  : isSpray
+                    ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
+                    : `${recon.concentration} mg/mL`;
+
+            const adminText = isSolventProduct
+              ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
+              : isPenOrCart 
+                ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+                : isOral 
+                  ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                  : isSpray
+                    ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
+                    : 'Subcutaneous / IM (U-100)';
+
+            rows.push({
+              key: `${supp.id}-${fId}-${st.id}`,
+              formatId: fId,
+              formatName: fmtObj.name,
+              strengthId: st.id,
+              strengthName: st.name,
+              diluentText,
+              concText,
+              adminText,
+              recon,
+              isPenOrCart,
+              isOral,
+              isSpray,
+              isCurrentlyActive,
+              purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : '≥ 99.0% (RP-HPLC)'),
+              supplierName: supp.name || supp.id,
+              supplierId: supp.id
+            });
+          });
+        });
+      });
+    }
+
+    return rows.sort((a, b) => {
+      const diff = parseNum(a.strengthName) - parseNum(b.strengthName);
+      if (diff !== 0) return diff;
+      return a.supplierName.localeCompare(b.supplierName);
+    });
+  }, [activeSupplierId, activeSupplierObj, availableFormats, sortedStrengths, hierarchy.variantIndex, activeFormatId, selectedStrengthId, isSolventProduct, suppliersList, lang]);
 
   return (
     <div className="public-datasheet-root">
@@ -1138,90 +1301,49 @@ export default function PublicDatasheetView({
                     </tr>
                   </thead>
                   <tbody>
-                    {availableFormats.flatMap(fmt => {
-                      const compatStrengths = sortedStrengths.filter(s => !fmt.strengths || fmt.strengths.includes(s.id));
-                      const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: 'Standard Clinical Dose' }];
-                      const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
-                      const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet') || fmt.id.includes('oral');
-                      const isSpray = fmt.id.includes('spray') || fmt.id.includes('nasal');
-
-                      return list.map(st => {
-                        const recon = getReconstitutionVolume(st.name);
-                        const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
-
-                        const diluentText = isSolventProduct
-                          ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
-                          : isPenOrCart 
-                            ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-                            : isOral 
-                              ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                              : isSpray
-                                ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
-                                : `${recon.volume} mL BAC Water`;
-
-                        const concText = isSolventProduct
-                          ? '0.9% Benzyl Alcohol USP'
-                          : isPenOrCart 
-                            ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-                            : isOral 
-                              ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                              : isSpray
-                                ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
-                                : `${recon.concentration} mg/mL`;
-
-                        const adminText = isSolventProduct
-                          ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
-                          : isPenOrCart 
-                            ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                            : isOral 
-                              ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                              : isSpray
-                                ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
-                                : 'Subcutaneous / IM (U-100)';
-
-                        return (
-                          <tr 
-                            key={`${fmt.id}-${st.id}`}
-                            className={isCurrentlyActive ? 'pds-row-selected' : ''}
-                            onClick={() => {
-                              setActiveFormatId(fmt.id);
-                              setSelectedStrengthId(st.id);
-                              triggerHaptic('selection');
-                            }}
-                            title="Click to view full clinical details for this presentation"
-                            style={{ cursor: 'pointer' }}
-                          >
-                            <td data-label="Strength / Dose" className="pds-strength-cell">
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                {isCurrentlyActive && (
-                                  <span className="pds-active-dot" aria-label="Active Presentation" title="Active Presentation" />
-                                )}
-                                <span className="pds-strength-name">{st.name}</span>
-                              </div>
-                            </td>
-                            <td data-label="Presentation Format">
-                              <span className={`pds-format-pill pds-format-${fmt.id}`}>
-                                {fmt.name}
-                              </span>
-                            </td>
-                            <td data-label="Reconstitution Diluent">{diluentText}</td>
-                            <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
-                              {recon.volume > 0 && !isPenOrCart && !isOral && !isSpray && !isSolventProduct ? (
-                                <span className="pds-conc-badge font-mono">
-                                  {concText}
-                                </span>
-                              ) : (
-                                concText
+                    {matrixRows.map(row => {
+                      return (
+                        <tr 
+                          key={row.key}
+                          className={row.isCurrentlyActive ? 'pds-row-selected' : ''}
+                          onClick={() => {
+                            setActiveFormatId(row.formatId);
+                            setSelectedStrengthId(row.strengthId);
+                            triggerHaptic('selection');
+                          }}
+                          title="Click to view full clinical details for this presentation"
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <td data-label="Strength / Dose" className="pds-strength-cell">
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                              {row.isCurrentlyActive && (
+                                <span className="pds-active-dot" aria-label="Active Presentation" title="Active Presentation" />
                               )}
-                            </td>
-                            <td data-label="Administration">{adminText}</td>
-                            <td data-label="Analytical Grade" className="pds-purity-cell">
-                              {isSolventProduct ? 'USP Grade (Sterile)' : '≥ 99.0% (RP-HPLC)'}
-                            </td>
-                            <td data-label="Laboratory Verification">{displaySupplierName}</td>
-                          </tr>
-                        );
-                      });
+                              <span className="pds-strength-name">{row.strengthName}</span>
+                            </div>
+                          </td>
+                          <td data-label="Presentation Format">
+                            <span className={`pds-format-pill pds-format-${row.formatId}`}>
+                              {row.formatName}
+                            </span>
+                          </td>
+                          <td data-label="Reconstitution Diluent">{row.diluentText}</td>
+                          <td data-label="Solution Concentration (mg/mL)" className="pds-conc-cell">
+                            {row.recon.volume > 0 && !row.isPenOrCart && !row.isOral && !row.isSpray && !isSolventProduct ? (
+                              <span className="pds-conc-badge font-mono">
+                                {row.concText}
+                              </span>
+                            ) : (
+                              row.concText
+                            )}
+                          </td>
+                          <td data-label="Administration">{row.adminText}</td>
+                          <td data-label="Analytical Grade" className="pds-purity-cell">
+                            {row.purity}
+                          </td>
+                          <td data-label="Laboratory Verification">{row.supplierName}</td>
+                        </tr>
+                      );
                     })}
                   </tbody>
                 </table>

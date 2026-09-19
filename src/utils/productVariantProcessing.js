@@ -54,6 +54,7 @@ export function processProductVariants(variants) {
         id: supplierId,
         name: v.supplierName || v.supplier || supplierId,
         formats: new Set(),
+        formatStrengths: {}, // formatId -> Set of strengthIds
       });
     }
 
@@ -74,7 +75,13 @@ export function processProductVariants(variants) {
     }
 
     // 3. Establish relationships
-    supplierMap.get(supplierId).formats.add(formatId);
+    const suppObj = supplierMap.get(supplierId);
+    suppObj.formats.add(formatId);
+    if (!suppObj.formatStrengths[formatId]) {
+      suppObj.formatStrengths[formatId] = new Set();
+    }
+    suppObj.formatStrengths[formatId].add(strengthId);
+
     formatMap.get(formatId).strengths.add(strengthId);
 
     // 4. Index the variant by the hierarchy: supplierId -> formatId -> strengthId
@@ -85,7 +92,17 @@ export function processProductVariants(variants) {
   });
 
   // Convert Sets to Arrays for serialization
-  const suppliers = Array.from(supplierMap.values()).map(s => ({ ...s, formats: Array.from(s.formats) }));
+  const suppliers = Array.from(supplierMap.values()).map(s => {
+    const serializedFormatStrengths = {};
+    for (const [fId, setVal] of Object.entries(s.formatStrengths || {})) {
+      serializedFormatStrengths[fId] = Array.from(setVal);
+    }
+    return {
+      ...s,
+      formats: Array.from(s.formats),
+      formatStrengths: serializedFormatStrengths,
+    };
+  });
   const formats = Array.from(formatMap.values()).map(f => ({ ...f, strengths: Array.from(f.strengths) }));
   const strengths = Array.from(strengthMap.values());
 
