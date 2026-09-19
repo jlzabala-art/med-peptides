@@ -257,6 +257,62 @@ export async function generateMetadata({ params, searchParams }) {
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
 import { generateProductJsonLd } from '../../../utils/seoStructuredData';
 
+async function getAssociatedProtocols(productId, productSlug, productName) {
+  if (!adminDb) return [];
+  try {
+    const snap = await adminDb.collection('protocols')
+      .where('status', '==', 'active')
+      .limit(40)
+      .get()
+      .catch(() => null);
+    
+    if (!snap || snap.empty) return [];
+
+    const matched = [];
+    const pIdLower = String(productId || '').toLowerCase();
+    const pSlugLower = String(productSlug || '').toLowerCase();
+    const pNameLower = String(productName || '').toLowerCase();
+
+    snap.forEach(doc => {
+      const data = doc.data();
+      const allItems = [
+        ...(Array.isArray(data.items) ? data.items : []),
+        ...(Array.isArray(data.products) ? data.products : []),
+        ...(Array.isArray(data.peptides) ? data.peptides : []),
+        ...(Array.isArray(data.phases) ? data.phases.flatMap(ph => [...(ph.compounds || []), ...(ph.drugs_used || []), ...(ph.products || [])]) : [])
+      ];
+
+      const isIncluded = allItems.some(it => {
+        const itId = String(it.productId || it.id || '').toLowerCase();
+        const itSlug = String(it.slug || it.product_slug || '').toLowerCase();
+        const itName = String(it.name || it.title || it.canonicalName || '').toLowerCase();
+        return (
+          (itId && (itId === pIdLower || itId.includes(pSlugLower))) ||
+          (itSlug && (itSlug === pSlugLower || pSlugLower.includes(itSlug))) ||
+          (itName && (itName.includes(pNameLower) || pNameLower.includes(itName)))
+        );
+      });
+
+      if (isIncluded) {
+        matched.push({
+          id: doc.id,
+          slug: data.slug || doc.id,
+          name: data.name || data.title || 'Clinical Pathway',
+          category: data.category || data.goal || data.therapeutic_category || 'Clinical Protocol',
+          duration: data.durationWeeks ? `${data.durationWeeks} Weeks` : (data.duration || '8 Weeks'),
+          phasesCount: Array.isArray(data.phases) ? data.phases.length : 1,
+          description: (data.summary || data.description || data.clinicalRationale || '').substring(0, 140)
+        });
+      }
+    });
+
+    return matched.slice(0, 4);
+  } catch (err) {
+    console.warn('[getAssociatedProtocols] Error:', err);
+    return [];
+  }
+}
+
 export default async function PublicProductRoute({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
@@ -278,6 +334,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
   }
 
   const safeProduct = sanitizeForClient(product);
+  const associatedProtocols = await getAssociatedProtocols(safeProduct.id, slug, safeProduct.canonicalName || safeProduct.name);
   const jsonLd = generateProductJsonLd(safeProduct, BASE_URL);
 
   return (
@@ -297,6 +354,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
         initialStrength={initialStrength}
         initialLang={initialLang}
         initialBatch={initialBatch}
+        associatedProtocols={associatedProtocols}
       />
     </>
   );

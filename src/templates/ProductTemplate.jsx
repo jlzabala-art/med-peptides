@@ -2,6 +2,7 @@
 
  
 import { useMemo, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useProductBySlug } from '../hooks/data/useProductBySlug';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import ProductDetail from './ProductDetail';
@@ -156,7 +157,28 @@ export default function ProductTemplate({
 
   return (
     <div className="container" style={{ paddingBottom: '4rem' }}>
-      <Breadcrumbs items={breadcrumbItems} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+        <Breadcrumbs items={breadcrumbItems} />
+
+        {/* 🔬 Mode Switcher: Overview ⟷ Technical Datasheet */}
+        {slug && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f8fafc', padding: '3px', borderRadius: '8px', border: '1px solid #e2e8f0', gap: '2px' }}>
+            <span style={{ padding: '4px 10px', fontSize: '0.75rem', fontWeight: 700, borderRadius: '6px', background: '#ffffff', color: '#0f172a', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0' }}>
+              🛍️ Overview
+            </span>
+            <Link
+              href={`/p/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ padding: '4px 10px', fontSize: '0.75rem', fontWeight: 600, borderRadius: '6px', color: '#0284c7', textDecoration: 'none', transition: 'all 0.15s ease' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#e0f2fe'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              🔬 Technical Datasheet (HPLC) ↗
+            </Link>
+          </div>
+        )}
+      </div>
       
       <ProductDetail 
         product={product} 

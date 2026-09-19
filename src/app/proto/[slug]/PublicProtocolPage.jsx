@@ -142,6 +142,28 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               ))}
             </select>
 
+            {/* Jump to Included Peptides */}
+            {items.length > 0 && (
+              <a
+                href="#included-compounds"
+                className="pds-btn pds-btn-ghost"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: 'rgba(14, 165, 233, 0.15)',
+                  color: '#38bdf8',
+                  borderColor: 'rgba(56, 189, 248, 0.35)',
+                  fontWeight: 600
+                }}
+              >
+                <FlaskConical size={14} />
+                <span className="pds-btn-label-desktop">
+                  {lang === 'es' ? `Péptidos (${items.length})` : `Peptides (${items.length})`}
+                </span>
+              </a>
+            )}
+
             {/* Atlas AI Copilot Quick Trigger */}
             <button
               type="button"
@@ -288,7 +310,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         </section>
 
         {/* Included Compounds Section */}
-        <section className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <section id="included-compounds" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

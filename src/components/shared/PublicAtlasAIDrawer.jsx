@@ -393,8 +393,11 @@ export default function PublicAtlasAIDrawer({
   };
 
   const getDynamicSuggestions = () => {
+    if (contextType === 'protocol') {
+      return ['Titration Schedule', 'Required Biomarkers', 'Compound Synergies', 'Contraindications'];
+    }
     return contextType === 'monograph'
-      ? ['BAC Dilution Ratio', 'Refrigeration Limits', 'Dual HPLC Assay', 'Receptor Target Affinities']
+      ? ['BAC Dilution Ratio', 'Refrigeration Limits', 'Clinical Pathways', 'Receptor Target Affinities']
       : ['Metabolic Peptides', 'Immediate Dispatch', 'Lotusland Standards', 'Verified Volume Tiers'];
   };
 

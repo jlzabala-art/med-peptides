@@ -83,7 +83,7 @@ export default function ProductProtocolsSection({ protocols, peptideName }) {
                 id={protocol.id}
                 protocol={protocol}
                 matchReason="Contains Compound"
-                onClick={() => router.push(`/protocol/${protocol.slug || protocol.id}`)}
+                onClick={() => router.push(`/proto/${protocol.slug || protocol.id}`)}
               />
             </div>
           ))}

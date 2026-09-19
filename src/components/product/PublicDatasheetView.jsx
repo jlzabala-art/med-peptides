@@ -63,7 +63,8 @@ export default function PublicDatasheetView({
   initialFormat = null,
   initialStrength = null,
   initialLang = null,
-  initialBatch = null
+  initialBatch = null,
+  associatedProtocols = []
 }) {
   const [lang, setLang] = useState(() => {
     if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
@@ -712,6 +713,28 @@ export default function PublicDatasheetView({
                 </option>
               ))}
             </select>
+
+            {/* Quick jump to associated clinical pathways / protocols */}
+            {associatedProtocols && associatedProtocols.length > 0 && (
+              <a
+                href="#clinical-pathways"
+                className="pds-btn pds-btn-ghost"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'rgba(37, 99, 235, 0.15)',
+                  color: '#60a5fa',
+                  borderColor: 'rgba(96, 165, 250, 0.35)',
+                  fontWeight: 600
+                }}
+              >
+                <Activity size={14} />
+                <span className="pds-btn-label-desktop">
+                  {lang === 'es' ? `Protocolos (${associatedProtocols.length})` : `Pathways (${associatedProtocols.length})`}
+                </span>
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -1348,6 +1371,110 @@ export default function PublicDatasheetView({
             </div>
           </div>
         </section>
+
+        {/* ── Block 4: Clinical Treatment Pathways Featuring this Compound ── */}
+        {associatedProtocols && associatedProtocols.length > 0 && (
+          <section id="clinical-pathways" className="pds-section-card" style={{ marginTop: '24px' }}>
+            <div className="pds-section-header">
+              <div className="pds-section-header-left">
+                <div className="pds-section-header-shield">
+                  <Activity size={22} />
+                </div>
+                <div className="pds-section-header-titles">
+                  <div className="pds-section-header-meta-row">
+                    <span className="pds-section-header-category">
+                      {lang === 'es' ? 'INTEGRACIÓN CLÍNICA' : 'CLINICAL INTEGRATION'}
+                    </span>
+                    <span className="pds-section-badge">
+                      <CheckCircle2 size={11} /> {associatedProtocols.length} {lang === 'es' ? 'VÍAS DISPONIBLES' : 'ACTIVE PATHWAYS'}
+                    </span>
+                  </div>
+                  <h3 className="pds-section-header-title">
+                    {lang === 'es' ? 'Protocolos Clínicos que incorporan este péptido' : 'Clinical Treatment Pathways featuring this API'}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="pds-section-card-body">
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '16px'
+              }}>
+                {associatedProtocols.map(proto => (
+                  <div
+                    key={proto.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      padding: '18px 20px',
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      transition: 'all 0.2s ease',
+                      gap: '12px'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          color: '#003666',
+                          backgroundColor: '#e0f2fe',
+                          padding: '2px 8px',
+                          borderRadius: '6px'
+                        }}>
+                          {proto.category}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                          ⏱ {proto.duration} · {proto.phasesCount} {proto.phasesCount === 1 ? 'Phase' : 'Phases'}
+                        </span>
+                      </div>
+                      <h4 style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
+                        {proto.name}
+                      </h4>
+                      {proto.description && (
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.45 }}>
+                          {proto.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div style={{ paddingTop: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
+                      <a
+                        href={`/proto/${proto.slug || proto.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          color: '#0284c7',
+                          textDecoration: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          backgroundColor: '#f0f9ff',
+                          border: '1px solid #bae6fd',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{lang === 'es' ? 'Ver Guía Clínica' : 'Explore Clinical Blueprint'}</span>
+                        <ExternalLink size={13} />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Institutional Regulatory Footnote */}
         <footer className="pds-page-footer">

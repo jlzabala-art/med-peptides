@@ -43,6 +43,7 @@ import OptimizedImage from '@/snippets/OptimizedImage';
 import FAQAccordion from '@/components/discovery/FAQAccordion';
 import RelatedPeptidesRow from '@/components/discovery/RelatedPeptidesRow';
 import PubMedPreviewPanel from '@/components/discovery/PubMedPreviewPanel';
+import DatasheetTeaserCard from '../DatasheetTeaserCard';
 import ProductProtocolsSection from '../ProductProtocolsSection';
 import ReconstitutionGuide from '../ReconstitutionGuide';
 import PenDosingGuide from '../PenDosingGuide';
@@ -770,6 +771,9 @@ export default function PeptideDetail({
                   )}
                 </div>
               )}
+
+              {/* 🔬 1-Click Bridge: Official Technical Datasheet & HPLC Certificate */}
+              <DatasheetTeaserCard product={activeProduct} />
 
 
 
