@@ -330,16 +330,18 @@ export default function SharedCatalogStyles() {
         }
         .product-card {
           background: #ffffff;
-          border: 1px solid #e2e8f0;
+          border: 1px solid #cbd5e1;
+          border-top: 3px solid #003666;
           border-radius: 14px;
           padding: 20px 22px;
-          margin-bottom: 16px;
-          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-          box-shadow: 0 4px 16px -4px rgba(0, 54, 102, 0.06), 0 1px 3px rgba(0,0,0,0.02);
+          margin-bottom: 18px;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 4px 16px -4px rgba(0, 54, 102, 0.07), 0 1px 3px rgba(0,0,0,0.02);
         }
         .product-card:hover {
-          border-color: #bae6fd;
-          box-shadow: 0 8px 24px -4px rgba(0, 54, 102, 0.12), 0 2px 6px rgba(0,0,0,0.04);
+          border-color: #38bdf8;
+          border-top-color: #0284c7;
+          box-shadow: 0 10px 28px -4px rgba(0, 54, 102, 0.14), 0 2px 8px rgba(0,0,0,0.04);
         }
         .pds-catalog-monograph-btn {
           display: inline-flex;

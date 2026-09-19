@@ -6,7 +6,7 @@ export const revalidate = 0;
 
 /**
  * OpenGraph Metadata for WhatsApp & Social Unfurling
- * Uses lightweight (<180KB) og-catalog.jpg with crisp Atlas Health / Lotusland branding.
+ * Uses lightweight (<180KB) og-catalog.png with crisp Atlas Services institutional branding.
  */
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;

@@ -515,8 +515,17 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           ))}
         </nav>
 
-        {/* Included Compounds Section */}
-        <section id="included-compounds" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: '1.75rem' }}>
+        {/* ── Balanced Responsive Protocol Layout (Laptop 2-Column Grid / Mobile 1-Column) ── */}
+        <div className="proto-laptop-layout" style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr)',
+          gap: '1.5rem',
+          alignItems: 'start'
+        }}>
+          {/* ════ LEFT COLUMN: Clinical Pathway, Timeline, Mechanisms & Reconstitution ════ */}
+          <div className="proto-col-left" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+            {/* Included Compounds Section */}
+            <section id="included-compounds" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #003666', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(0, 54, 102, 0.07)', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -624,92 +633,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           <ClinicalGanttTimeline protocol={protocol} />
         </section>
 
-        {/* ── Protocol Cycle Dispensing & Logistics Blueprint (Zero Pricing) ── */}
-        <section id="cycle-supplies" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: '1.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Package size={18} />
-              </div>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                  Protocol Cycle Dispensing & Logistics Blueprint
-                </h2>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                  Calculated active API inventory and sterile administration consumables for the full {duration}
-                </div>
-              </div>
-            </div>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#7c3aed', background: '#f3e8ff', padding: '3px 10px', borderRadius: '9999px' }}>
-              Prescriptive Logistics • Zero Pricing Disclosed
-            </span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            {/* Peptide Supply Breakdown */}
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Box size={14} color="#0284c7" />
-                <span>Active Peptide Requirements</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {supplySummary.compounds.map((c, i) => (
-                  <div key={i} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.92rem' }}>{c.name} ({c.vialStrength})</div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Cadence: {c.cadence} • {c.weeklyDose}</div>
-                      <div style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 600, marginTop: '2px' }}>{c.totalInjections} Micro-Dose Injections</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0284c7' }}>{c.vials} Vials</div>
-                      <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 600 }}>12-Week Allocation</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Sterile Ancillary Consumables */}
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Droplets size={14} color="#0d9488" />
-                <span>Sterile Reconstitution & Administration Supplies</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Bacteriostatic Water (BAC)</div>
-                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>USP Preserved Solvent (2.0 mL per vial)</div>
-                  </div>
-                  <span style={{ fontWeight: 800, color: '#0d9488', fontSize: '0.95rem' }}>{supplySummary.bacVials}x 10 mL Vials</span>
-                </div>
-
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Sterile U-100 Insulin Syringes</div>
-                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>31G 8mm Ultra-Fine (Single Use)</div>
-                  </div>
-                  <span style={{ fontWeight: 800, color: '#0284c7', fontSize: '0.95rem' }}>{supplySummary.syringes} Syringes</span>
-                </div>
-
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Antiseptic Prep Pads</div>
-                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>70% Isopropyl Alcohol Swabs</div>
-                  </div>
-                  <span style={{ fontWeight: 800, color: '#64748b', fontSize: '0.95rem' }}>{supplySummary.alcoholSwabs} Swabs</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
-            ℹ️ Note: Auxiliary supplies are automatically calculated based on exact weekly administration events and 28-day aqueous stability limits. Commercial prices and supply costs are strictly excluded.
-          </div>
-        </section>
-
         {/* ── Interactive Reconstitution & Syringe Calibration Console ── */}
-        <section id="reconstitution-console" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: '1.75rem' }}>
+        <section id="reconstitution-console" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -753,7 +678,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
             {/* Dilution Specifications */}
             <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.65rem' }}>
@@ -805,60 +730,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </div>
         </section>
 
-        {/* ── Weekly Administration Roadmap (7-Day Schedule Grid) ── */}
-        <section id="weekly-calendar" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: '1.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CalendarDays size={18} />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                Weekly Administration Roadmap (7-Day Regimen Grid)
-              </h2>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                Standardized weekly administration schedule preventing receptor exhaustion and injection overlap
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
-            {weeklySchedule.map((ws, idx) => (
-              <div key={idx} style={{
-                background: ws.rest ? '#f8fafc' : '#ffffff',
-                border: ws.rest ? '1px dashed #cbd5e1' : `1.5px solid ${ws.badgeColor}33`,
-                borderRadius: '10px',
-                padding: '0.85rem',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '130px'
-              }}>
-                <div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
-                    {ws.day}
-                  </div>
-                  <div style={{ fontWeight: 800, color: ws.rest ? '#64748b' : ws.badgeColor, fontSize: '0.90rem', marginTop: '4px' }}>
-                    {ws.compound}
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#0f172a', fontWeight: 600, marginTop: '2px' }}>
-                    {ws.dose}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '6px' }}>
-                    {ws.time}
-                  </div>
-                  <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
-                    {ws.route}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* ── Dual-Pathway Pharmacokinetics & Receptor Synergy ── */}
-        <section id="synergy-pk" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: '1.75rem' }}>
+        <section id="synergy-pk" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Zap size={18} />
@@ -873,7 +746,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
             <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Retatrutide • Triple Incretin / Glucagon Agonist
@@ -899,7 +772,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         </section>
 
         {/* ── Contraindications & Clinical Exclusions ── */}
-        <section className="pds-card" style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', marginBottom: '1.75rem' }}>
+        <section className="pds-card" style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -946,42 +819,181 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ))}
           </div>
         </section>
+      </div>
+
+      {/* ════ RIGHT COLUMN: Logistics & Supplies, Regimen Calendar & Laboratory Safety ════ */}
+      <div className="proto-col-right" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+        {/* ── Protocol Cycle Dispensing & Logistics Blueprint (Zero Pricing) ── */}
+        <section id="cycle-supplies" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #7c3aed', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(124, 58, 237, 0.08)', marginBottom: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Package size={18} />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  Cycle Dispensing & Logistics Blueprint
+                </h2>
+                <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
+                  Active API vial requirements for full {duration}
+                </div>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#7c3aed', background: '#f3e8ff', padding: '2px 8px', borderRadius: '9999px' }}>
+              Zero Pricing Disclosed
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.25rem' }}>
+            {/* Peptide Supply Breakdown */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.15rem' }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Box size={14} color="#0284c7" />
+                <span>Active Peptide Requirements</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {supplySummary.compounds.map((c, i) => (
+                  <div key={i} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.90rem' }}>{c.name} ({c.vialStrength})</div>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b' }}>Cadence: {c.cadence}</div>
+                      <div style={{ fontSize: '0.70rem', color: '#0d9488', fontWeight: 600, marginTop: '2px' }}>{c.totalInjections} Micro-Dose Injections</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0284c7' }}>{c.vials} Vials</div>
+                      <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 600 }}>12-Week Allocation</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sterile Ancillary Consumables */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.15rem' }}>
+              <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Droplets size={14} color="#0d9488" />
+                <span>Sterile Administration Consumables</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Bacteriostatic Water (BAC)</div>
+                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>USP Preserved Solvent (2.0 mL per vial)</div>
+                  </div>
+                  <span style={{ fontWeight: 800, color: '#0d9488', fontSize: '0.95rem' }}>{supplySummary.bacVials}x 10 mL Vials</span>
+                </div>
+
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Sterile U-100 Insulin Syringes</div>
+                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>31G 8mm Ultra-Fine (Single Use)</div>
+                  </div>
+                  <span style={{ fontWeight: 800, color: '#0284c7', fontSize: '0.95rem' }}>{supplySummary.syringes} Syringes</span>
+                </div>
+
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.85rem' }}>Antiseptic Prep Pads</div>
+                    <div style={{ fontSize: '0.70rem', color: '#64748b' }}>70% Isopropyl Alcohol Swabs</div>
+                  </div>
+                  <span style={{ fontWeight: 800, color: '#64748b', fontSize: '0.95rem' }}>{supplySummary.alcoholSwabs} Swabs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '0.70rem', color: '#64748b', fontStyle: 'italic', borderTop: '1px solid #f1f5f9', paddingTop: '0.65rem' }}>
+            ℹ️ Note: Auxiliary supplies are automatically calculated based on exact weekly administration events and 28-day aqueous stability limits. Commercial prices and supply costs are strictly excluded.
+          </div>
+        </section>
+
+        {/* ── Weekly Administration Roadmap (7-Day Schedule Grid) ── */}
+        <section id="weekly-calendar" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #ea580c', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(234, 88, 12, 0.08)', marginBottom: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CalendarDays size={18} />
+            </div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                Weekly Administration Roadmap
+              </h2>
+              <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
+                Standardized 7-day administration cadence
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
+            {weeklySchedule.map((ws, idx) => (
+              <div key={idx} style={{
+                background: ws.rest ? '#f8fafc' : '#ffffff',
+                border: ws.rest ? '1px dashed #cbd5e1' : `1.5px solid ${ws.badgeColor}33`,
+                borderRadius: '10px',
+                padding: '0.75rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: '115px'
+              }}>
+                <div>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                    {ws.day}
+                  </div>
+                  <div style={{ fontWeight: 800, color: ws.rest ? '#64748b' : ws.badgeColor, fontSize: '0.85rem', marginTop: '3px' }}>
+                    {ws.compound}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#0f172a', fontWeight: 600, marginTop: '2px' }}>
+                    {ws.dose}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.65rem', color: '#64748b', marginTop: '5px' }}>
+                    {ws.time}
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+                    {ws.route}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* ── Laboratory Biomarkers & Safety Monitoring ── */}
-        <section id="biomarkers-safety" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: '4rem' }}>
+        <section id="biomarkers-safety" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #0284c7', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(2, 132, 199, 0.08)', marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Thermometer size={18} />
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                Recommended Laboratory Biomarkers & Safety Monitoring
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                Safety Biomarkers & Monitoring
               </h2>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                Recommended blood panels and clinical check points for therapeutic monitoring
+              <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
+                Recommended clinical check points
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {biomarkers.map((b, idx) => (
               <div key={idx} style={{
                 background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: '10px',
-                padding: '1rem',
+                padding: '0.85rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.35rem'
+                gap: '0.25rem'
               }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                   {b.phase || `Checkpoint ${idx + 1}`}
                 </div>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
                   {b.tests}
                 </div>
                 {b.notes && (
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.4, marginTop: '2px' }}>
                     {b.notes}
                   </div>
                 )}
@@ -989,6 +1001,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ))}
           </div>
         </section>
+      </div>
+    </div>
       </main>
 
       {/* ── Fixed Floating Bottom Bar (Mobile Elevated) ── */}
