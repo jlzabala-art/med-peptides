@@ -179,6 +179,7 @@ export default function SharedCatalogClientView({
   const { user, activeRole, logout } = useAuth();
   const isAuthenticated = Boolean(user && user.uid && activeRole !== 'guest');
 
+  const catalogId = catalogMeta?.catalogId || 'catalog';
   const [shareUrl, setShareUrl] = React.useState('');
 
   // ── Language toggle (EN by default, ES optional) ──────────────────────────

@@ -94,12 +94,26 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
     const pCatBrand = String(p.catalogBrand || p.sourceCatalogue || p.source_catalogue || '').toLowerCase().trim();
 
     if (vCatBrand) {
-      if (!vCatBrand.includes(normTargetCat)) return false;
+      if (!vCatBrand.includes(normTargetCat)) {
+        const isLotusEquiv = (normTargetCat === 'regenpept' && vCatBrand.includes('lotusland')) ||
+                             (normTargetCat === 'lotusland' && vCatBrand.includes('regenpept'));
+        if (!isLotusEquiv) return false;
+      }
     } else if (pCatBrand) {
-      if (!pCatBrand.includes(normTargetCat)) return false;
+      if (!pCatBrand.includes(normTargetCat)) {
+        const isLotusEquiv = (normTargetCat === 'regenpept' && pCatBrand.includes('lotusland')) ||
+                             (normTargetCat === 'lotusland' && pCatBrand.includes('regenpept'));
+        if (!isLotusEquiv) return false;
+      }
     } else {
-      // Neither variant nor product has a matching catalogue brand
-      return false;
+      // Neither variant nor product has an explicit catalogue brand
+      // When filtering for RegenPept or Lotusland, treat Lotusland items as matching the RegenPept catalogue
+      const isLotus = String(v.supplier || v.supplierName || v.supplierId || p.supplierId || '').toLowerCase().includes('lotus');
+      if ((normTargetCat === 'regenpept' || normTargetCat === 'lotusland') && isLotus) {
+        // Accept
+      } else {
+        return false;
+      }
     }
   }
 
