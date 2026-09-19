@@ -290,7 +290,8 @@ export default function ClinicalGanttTimeline({
               onClick={() => setActiveLayout('accordions')}
               title="Phased Accordions View (Recommended)"
             >
-              <Layers size={14} /> <span>Phased Accordions</span>
+              <Layers size={14} />
+              <span className="gantt-btn-text">Phases<span className="gantt-btn-sub"> View</span></span>
             </button>
             <button
               type="button"
@@ -298,7 +299,8 @@ export default function ClinicalGanttTimeline({
               onClick={() => setActiveLayout('gantt')}
               title="Full Macro Gantt Matrix View"
             >
-              <Table size={14} /> <span>Gantt Matrix</span>
+              <Table size={14} />
+              <span className="gantt-btn-text">Gantt<span className="gantt-btn-sub"> Matrix</span></span>
             </button>
           </div>
 
@@ -308,15 +310,19 @@ export default function ClinicalGanttTimeline({
               type="button"
               className={`gantt-mode-btn ${viewMode === 'doctor' ? 'active' : ''}`}
               onClick={() => setViewMode('doctor')}
+              title="Doctor Clinical Calibration"
             >
-              <Stethoscope size={15} /> <span>Doctor View</span>
+              <Stethoscope size={14} />
+              <span className="gantt-btn-text">Doctor<span className="gantt-btn-sub"> View</span></span>
             </button>
             <button
               type="button"
               className={`gantt-mode-btn ${viewMode === 'patient' ? 'active' : ''}`}
               onClick={() => setViewMode('patient')}
+              title="Patient Treatment Journey"
             >
-              <User size={15} /> <span>Patient Journey</span>
+              <User size={14} />
+              <span className="gantt-btn-text">Patient<span className="gantt-btn-sub"> Journey</span></span>
             </button>
           </div>
         </div>
@@ -591,117 +597,57 @@ export default function ClinicalGanttTimeline({
         </div>
       ) : (
         /* 3. MULTI-WEEK MATRIX (Gantt View) */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {/* Timeline Navigator Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Timeline Navigator
-            </span>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0d9488' }}>
-              Week {selectedWeek} of {totalWeeks} · Phase {currentPhase.phaseNumber || 1}: {currentPhase.phaseName} (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
-            </span>
-          </div>
-
-          {/* Phase Jump Pills */}
-          <div className="phase-jumper-pills">
-            {normalizedPhases.map((phase, idx) => {
-              const isCurrentPhase = selectedWeek >= phase.startWeek && selectedWeek <= phase.endWeek;
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`phase-jumper-btn ${isCurrentPhase ? 'active' : ''}`}
-                  onClick={() => setSelectedWeek(phase.startWeek)}
-                >
-                  <span>Phase {phase.phaseNumber}: {phase.phaseName}</span>
-                  <span style={{ opacity: 0.75, fontSize: '0.68rem' }}>(W{phase.startWeek}–{phase.endWeek})</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Micro-Dose Week Scroller */}
-          <div className="mobile-week-scroller">
-            {weeksArray.map(w => {
-              const isSelected = selectedWeek === w;
-              const isTaken = dosesTaken[`w_${w}`];
-              const pForW = normalizedPhases.find(p => w >= p.startWeek && w <= p.endWeek) || normalizedPhases[0];
-              const pIdx = normalizedPhases.indexOf(pForW);
-              const primaryComp = distinctCompounds[0];
-              const primaryDose = primaryComp ? resolveWeeklyCompoundDose(
-                (pForW.compounds || []).find(c => c.name?.toUpperCase() === primaryComp.name?.toUpperCase()) || primaryComp,
-                pForW, pIdx, w, normalizedPhases.length
-              ) : null;
-
-              return (
-                <div
-                  key={w}
-                  className={`mobile-week-chip ${isSelected ? 'active' : ''}`}
-                  onClick={() => setSelectedWeek(w)}
-                >
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, opacity: 0.8 }}>WK</span>
-                  <span style={{ fontSize: '1rem', fontWeight: 800 }}>{w}</span>
-                  {primaryDose && primaryDose.unitDose !== 'Active' && (
-                    <span style={{ fontSize: '0.62rem', fontWeight: 700, color: isSelected ? '#ffffff' : '#0d9488', marginTop: '1px' }}>
-                      {primaryDose.unitDose}
-                    </span>
-                  )}
-                  {isTaken && <CheckCircle2 size={10} style={{ color: '#10b981', marginTop: '1px' }} />}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Weekly Payload Summary Strip */}
-          <div className="weekly-payload-strip">
-            <div className="payload-header">
-              <span className="payload-title">
-                <Sparkles size={14} style={{ color: '#0d9488' }} />
-                Week {selectedWeek} Prescribed Load & Weekly Totals
-              </span>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', background: '#ccfbf1', padding: '2px 8px', borderRadius: '6px' }}>
-                Phase {currentPhase.phaseNumber || 1}: {currentPhase.phaseName} (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
-              </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Phase Jump Pills & Navigation Horizon */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div className="phase-jumper-pills">
+              {normalizedPhases.map((phase, idx) => {
+                const isCurrentPhase = selectedWeek >= phase.startWeek && selectedWeek <= phase.endWeek;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`phase-jumper-btn ${isCurrentPhase ? 'active' : ''}`}
+                    onClick={() => setSelectedWeek(phase.startWeek)}
+                  >
+                    <span>Phase {phase.phaseNumber}: {phase.phaseName}</span>
+                    <span className="phase-jumper-badge">Weeks {phase.startWeek}–{phase.endWeek}</span>
+                  </button>
+                );
+              })}
             </div>
-            
-            <div className="payload-chips-container">
-              {activeWeekCompounds.map((ac, idx) => (
-                <div key={idx} className="payload-compound-chip">
-                  <div className="payload-chip-left">
-                    <span className="payload-chip-name">{ac.name}</span>
-                    <span className="payload-chip-cadence">{ac.frequency}</span>
-                  </div>
-                  <div className="payload-chip-right">
-                    <span className="payload-chip-dose">{ac.unitDose} / inj</span>
-                    {ac.weeklyTotal && (
-                      <span className="payload-chip-weekly-total">{ac.weeklyTotal}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+
+            <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0d9488', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>Inspecting Week <strong>{selectedWeek}</strong> of {totalWeeks}</span>
             </div>
           </div>
 
-          {/* Gantt Matrix Grid */}
+          {/* Swipe / Scroll Hint for Touch & Narrow screens */}
+          <div className="gantt-swipe-hint">
+            <span>⇄ Scroll horizontally to explore all {totalWeeks} weeks • Click any week or compound bar to inspect prescribed load</span>
+          </div>
+
+          {/* Gantt Matrix Grid (Primary Hero Visual) */}
           <div className="gantt-matrix-wrapper">
             <div className="gantt-matrix">
               {/* Phase Header Row */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(56px, 1fr))`,
+                gridTemplateColumns: `var(--gantt-col-compound, 200px) repeat(${totalWeeks}, minmax(var(--gantt-col-week, 56px), 1fr))`,
                 background: '#f8fafc',
                 borderBottom: '2px solid #cbd5e1'
               }}>
                 <div style={{
-                  padding: '0.75rem',
+                  padding: '0.65rem 0.75rem',
                   fontWeight: 800,
-                  fontSize: '0.75rem',
+                  fontSize: '0.74rem',
                   color: '#475569',
                   position: 'sticky',
                   left: 0,
-                  zIndex: 6,
+                  zIndex: 10,
                   background: '#f8fafc',
-                  borderRight: '2px solid #cbd5e1'
+                  borderRight: '2px solid #cbd5e1',
+                  boxShadow: '2px 0 6px rgba(0,0,0,0.04)'
                 }}>
                   TREATMENT PHASES
                 </div>
@@ -710,13 +656,13 @@ export default function ClinicalGanttTimeline({
                     key={idx}
                     style={{
                       gridColumn: `span ${phase.durationWeeks || 4}`,
-                      padding: '0.6rem 0.4rem',
+                      padding: '0.55rem 0.4rem',
                       textAlign: 'center',
                       fontWeight: 800,
-                      fontSize: '0.74rem',
+                      fontSize: '0.73rem',
                       color: '#0f172a',
                       borderLeft: '1px solid #e2e8f0',
-                      background: idx % 2 === 0 ? 'rgba(13, 148, 136, 0.06)' : 'rgba(14, 165, 233, 0.06)'
+                      background: idx % 2 === 0 ? 'rgba(13, 148, 136, 0.07)' : 'rgba(14, 165, 233, 0.07)'
                     }}
                   >
                     Phase {phase.phaseNumber}: {phase.phaseName} ({phase.durationWeeks}w)
@@ -727,21 +673,22 @@ export default function ClinicalGanttTimeline({
               {/* Week Numbers Row */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(56px, 1fr))`,
+                gridTemplateColumns: `var(--gantt-col-compound, 200px) repeat(${totalWeeks}, minmax(var(--gantt-col-week, 56px), 1fr))`,
                 background: '#ffffff',
                 borderBottom: '1px solid #e2e8f0',
                 textAlign: 'center'
               }}>
                 <div style={{
-                  padding: '0.5rem',
+                  padding: '0.5rem 0.75rem',
                   fontWeight: 700,
                   fontSize: '0.7rem',
                   color: '#64748b',
                   position: 'sticky',
                   left: 0,
-                  zIndex: 6,
+                  zIndex: 10,
                   background: '#ffffff',
-                  borderRight: '2px solid #cbd5e1'
+                  borderRight: '2px solid #cbd5e1',
+                  boxShadow: '2px 0 6px rgba(0,0,0,0.04)'
                 }}>
                   Compound & Format
                 </div>
@@ -759,8 +706,10 @@ export default function ClinicalGanttTimeline({
                         backgroundColor: isSelected ? '#ccfbf1' : 'transparent',
                         borderLeft: isSelected ? '2px solid #0d9488' : '1px solid #f1f5f9',
                         borderRight: isSelected ? '2px solid #0d9488' : 'none',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        transition: 'background 0.12s ease'
                       }}
+                      title={`Select Week ${w}`}
                     >
                       W{w}
                     </div>
@@ -774,14 +723,15 @@ export default function ClinicalGanttTimeline({
                   key={cIdx}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: `220px repeat(${totalWeeks}, minmax(56px, 1fr))`,
+                    gridTemplateColumns: `var(--gantt-col-compound, 200px) repeat(${totalWeeks}, minmax(var(--gantt-col-week, 56px), 1fr))`,
                     borderBottom: '1px solid #f1f5f9',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    background: cIdx % 2 === 0 ? '#ffffff' : '#fafafa'
                   }}
                 >
                   <div className="gantt-compound-label">
                     <span>{comp.name}</span>
-                    <span style={{ fontSize: '0.68rem', color: '#0d9488', fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.66rem', color: '#0d9488', fontWeight: 700, marginTop: '2px' }}>
                       {comp.format || 'Lyophilized Vial'}
                     </span>
                   </div>
@@ -828,6 +778,62 @@ export default function ClinicalGanttTimeline({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Synchronized Week Detail Inspector (Below Gantt chart) */}
+          <div className="weekly-payload-strip">
+            <div className="payload-header">
+              <span className="payload-title">
+                <Sparkles size={15} style={{ color: '#0d9488' }} />
+                Week {selectedWeek} Prescribed Load & Totals
+              </span>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0d9488', background: '#ccfbf1', padding: '2px 8px', borderRadius: '6px' }}>
+                Phase {currentPhase.phaseNumber || 1}: {currentPhase.phaseName} (Weeks {currentPhase.startWeek}–{currentPhase.endWeek})
+              </span>
+            </div>
+            
+            <div className="payload-chips-container">
+              {activeWeekCompounds.map((ac, idx) => (
+                <div key={idx} className="payload-compound-chip">
+                  <div className="payload-chip-left">
+                    <span className="payload-chip-name">{ac.name}</span>
+                    <span className="payload-chip-cadence">{ac.frequency}</span>
+                  </div>
+                  <div className="payload-chip-right">
+                    <span className="payload-chip-dose">{ac.unitDose} / inj</span>
+                    {ac.weeklyTotal && (
+                      <span className="payload-chip-weekly-total">{ac.weeklyTotal}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {viewMode === 'patient' && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleToggleDose(`w_${selectedWeek}`)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 16px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: dosesTaken[`w_${selectedWeek}`] ? '#10b981' : '#0d9488',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <CheckCircle2 size={14} />
+                  {dosesTaken[`w_${selectedWeek}`] ? '✓ Dose Confirmed Taken' : `Mark Week ${selectedWeek} Dose Taken`}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

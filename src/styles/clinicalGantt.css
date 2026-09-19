@@ -172,6 +172,39 @@
   box-shadow: 0 1px 3px rgba(13, 148, 136, 0.25);
 }
 
+.phase-jumper-badge {
+  font-size: 0.68rem;
+  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+.phase-jumper-btn.active .phase-jumper-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.gantt-swipe-hint {
+  display: none;
+  font-size: 0.72rem;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  padding: 5px 10px;
+  text-align: center;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .gantt-swipe-hint {
+    display: block;
+  }
+}
+
 .gantt-bar {
   border-radius: 6px;
   padding: 0.3rem 0.35rem;
@@ -410,9 +443,36 @@
     gap: 0.85rem;
   }
 
-  /* CRITICAL GOLDEN RULE: Never squeeze 14-week matrix into mobile */
+  /* Google Cloud Waterfall / Trace UX: Horizontal scrollable timeline matrix with sticky compound labels */
   .gantt-matrix-wrapper {
-    display: none !important;
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .gantt-matrix {
+    min-width: 560px;
+  }
+
+  .gantt-compound-label {
+    min-width: 125px;
+    max-width: 145px;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.74rem;
+  }
+
+  .gantt-day-cell {
+    min-width: 42px;
+    padding: 0.25rem 0.15rem;
+  }
+
+  .gantt-dose-badge {
+    font-size: 0.65rem;
+    padding: 2px 4px;
   }
 
   .mobile-week-chip {
@@ -922,16 +982,22 @@
   .gantt-toolbar-toggles .gantt-mode-btn {
     flex: 1 1 0 !important;
     justify-content: center !important;
-    padding: 0.35rem 0.35rem !important;
-    font-size: 0.70rem !important;
-    min-height: 34px !important;
-    gap: 4px !important;
+    padding: 0.4rem 0.35rem !important;
+    font-size: 0.75rem !important;
+    min-height: 38px !important;
+    gap: 5px !important;
   }
 
-  .gantt-toolbar-toggles .gantt-mode-btn span {
+  /* Prevent button truncation by hiding secondary label word on compact mobile screens (< 640px) */
+  .gantt-btn-sub {
+    display: none !important;
+  }
+
+  .gantt-toolbar-toggles .gantt-mode-btn .gantt-btn-text {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
+    font-weight: 700;
   }
 }
 
