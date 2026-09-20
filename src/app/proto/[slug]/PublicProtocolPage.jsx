@@ -186,7 +186,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const dynT = dynamicTranslations[lang] || {};
   const displayName = dynT.name || (lang === 'es' && protocol?.name_es) || baseName;
   const displayDescription = dynT.description || (lang === 'es' && protocol?.description_es) || baseDescription;
-  const displayDuration = rawDuration;
+  const displayDuration = lang === 'es'
+    ? rawDuration.replace(/\bWeeks?\b/i, 'Semanas').replace(/\bDays?\b/i, 'Días').replace(/\bMonths?\b/i, 'Meses')
+    : rawDuration;
 
   // Protocol Supply Engine — Single Source of Truth
   const supplySummary = useMemo(() => {
@@ -283,33 +285,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
       {/* ── Main Container ── */}
       <main className="pds-container">
-        {/* Navigation Breadcrumb back to /proto Directory */}
-        <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <Link
-            href="/proto"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.80rem',
-              fontWeight: 700,
-              color: '#003666',
-              textDecoration: 'none',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              padding: '4px 12px',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span>← {t.exploreAllProtocols}</span>
-          </Link>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>/</span>
-          <span style={{ fontSize: '0.80rem', color: '#64748b', fontWeight: 600 }}>{category}</span>
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>/</span>
-          <span style={{ fontSize: '0.80rem', color: '#0f172a', fontWeight: 700 }}>{displayName}</span>
-        </div>
-
         {/* Hero Section */}
         <section className="pds-hero">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>

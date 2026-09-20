@@ -416,37 +416,11 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         }}
       />
 
-      {/* ── Google Cloud Console Active Scope Indicator ── */}
-      <div className="proto-scope-nav-container" style={{ display: 'flex', justifyContent: 'center', margin: '0 0 1.25rem 0' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f1f5f9', padding: '3px 8px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '6px 14px',
-              borderRadius: '6px',
-              background: '#ffffff',
-              color: '#003666',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              boxShadow: '0 1px 3px rgba(0, 54, 102, 0.08)'
-            }}
-          >
-            <ClipboardList size={15} style={{ color: '#0284c7' }} />
-            <span>{lang === 'es' ? 'Registro de Protocolos Clínicos' : 'Clinical Protocols Registry'}</span>
-            <span style={{ background: '#003666', color: '#ffffff', fontSize: '0.70rem', fontWeight: 800, padding: '1px 7px', borderRadius: '10px' }}>
-              {enrichedProtocols.length}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* ── 1. Hero Section ── */}
       <header className="proto-catalog-hero">
         <div className="proto-hero-pill">
           <FlaskConical size={14} />
-          <span>Ecosystem Clinical Pathways • Single Source of Truth</span>
+          <span>{lang === 'es' ? 'Ecosistema de Vías Clínicas • Fuente Única de Verdad' : 'Ecosystem Clinical Pathways • Single Source of Truth'}</span>
         </div>
         <h1 className="proto-catalog-title">
           {t.catalogHeroTitle || t.catalogTitle || 'Clinical Protocols & Peptides Directory'}

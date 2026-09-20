@@ -8,26 +8,94 @@ import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Grid3X3 from "lucide-react/dist/esm/icons/grid-3-x-3";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
-import React, { lazy, Suspense, useCallback, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useState, useEffect } from 'react';
 import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
-
-
-
-
-
-
 
 import { usePageMeta } from '../hooks/usePageMeta';
 import dynamic from 'next/dynamic';
 
 const FeaturedPeptides = dynamic(() => import('../sections/FeaturedPeptides'));
 
-// ── Browse tile data ──────────────────────────────────────────────────────────
+// ── Internationalization Dictionary ─────────────────────────────────────────
+const CATALOG_I18N = {
+  en: {
+    metaTitle: 'Clinical Catalog | Protocols & Peptides',
+    metaDesc: 'Discover evidence-based protocols and research-grade peptides — your unified clinical discovery surface.',
+    breadcrumbCompendium: 'Clinical Compendium',
+    breadcrumbCatalog: 'General Catalog',
+    anchorCategories: 'Categories',
+    anchorPeptides: 'Featured Peptides',
+    calloutMessage: 'Medical Clinics: Access wholesale pricing & digital orders',
+    calloutCta: 'Wholesale Access →',
+    heroEyebrow: 'Clinical Discovery',
+    heroTitleLine1: 'Protocols & Peptides.',
+    heroTitleLine2: 'One Catalog.',
+    heroSubtitle: 'Evidence-based protocols and research-grade peptides in a single unified surface.',
+    searchPlaceholder: 'Search protocols, peptides, objectives…',
+    browseArrow: 'Browse',
+    featuredPeptides: 'Featured Peptides',
+    viewAllPeptides: 'View all peptides',
+    tiles: {
+      protocols: {
+        label: 'Protocols',
+        description: 'Evidence-based clinical protocols built for real outcomes.',
+      },
+      peptides: {
+        label: 'Peptides',
+        description: 'Research-grade compounds with full purity documentation.',
+      },
+      supplements: {
+        label: 'Supplements',
+        description: 'Precision nutraceuticals and research-backed formulations.',
+      },
+      categories: {
+        label: 'Categories',
+        description: 'Browse by clinical objective — metabolic, recovery, longevity and more.',
+      },
+    },
+  },
+  es: {
+    metaTitle: 'Catálogo Clínico | Protocolos y Péptidos',
+    metaDesc: 'Descubra protocolos basados en evidencia y péptidos de grado de investigación en una sola superficie clínica.',
+    breadcrumbCompendium: 'Compendio Clínico',
+    breadcrumbCatalog: 'Catálogo General',
+    anchorCategories: 'Categorías',
+    anchorPeptides: 'Péptidos Destacados',
+    calloutMessage: 'Clínicas Médicas: Acceso a precios mayoristas y prescripciones digitales',
+    calloutCta: 'Alta Mayorista →',
+    heroEyebrow: 'Descubrimiento Clínico',
+    heroTitleLine1: 'Protocolos y Péptidos.',
+    heroTitleLine2: 'Un Solo Catálogo.',
+    heroSubtitle: 'Protocolos basados en evidencia y péptidos de grado de investigación en una única superficie unificada.',
+    searchPlaceholder: 'Buscar protocolos, péptidos, objetivos terapéuticos…',
+    browseArrow: 'Explorar',
+    featuredPeptides: 'Péptidos Destacados',
+    viewAllPeptides: 'Ver todos los péptidos',
+    tiles: {
+      protocols: {
+        label: 'Protocolos',
+        description: 'Protocolos clínicos basados en evidencia formulados para resultados reales.',
+      },
+      peptides: {
+        label: 'Péptidos',
+        description: 'Compuestos de grado de investigación con documentación analítica completa de pureza.',
+      },
+      supplements: {
+        label: 'Suplementos',
+        description: 'Nutracéuticos de precisión y formulaciones respaldadas por investigación clínica.',
+      },
+      categories: {
+        label: 'Categorías',
+        description: 'Explorar por objetivo clínico: metabólico, recuperación, longevidad y más.',
+      },
+    },
+  },
+};
+
+// ── Browse tile definitions ──────────────────────────────────────────────────
 const BROWSE_TILES = [
   {
     id: 'protocols',
-    label: 'Protocols',
-    description: 'Evidence-based clinical protocols built for real outcomes.',
     icon: Microscope,
     path: '/proto',
     accent: '#00D1FF',
@@ -36,8 +104,6 @@ const BROWSE_TILES = [
   },
   {
     id: 'peptides',
-    label: 'Peptides',
-    description: 'Research-grade compounds with full purity documentation.',
     icon: FlaskConical,
     path: '/collection/peptides',
     accent: '#7C3AED',
@@ -46,8 +112,6 @@ const BROWSE_TILES = [
   },
   {
     id: 'supplements',
-    label: 'Supplements',
-    description: 'Precision nutraceuticals and research-backed formulations.',
     icon: Leaf,
     path: '/collection/supplements',
     accent: 'var(--color-success)',
@@ -56,8 +120,6 @@ const BROWSE_TILES = [
   },
   {
     id: 'categories',
-    label: 'Categories',
-    description: 'Browse by clinical objective — metabolic, recovery, longevity and more.',
     icon: Grid3X3,
     path: '/collection/all',
     accent: '#EA580C',
@@ -95,19 +157,50 @@ function PeptidesSectionSkeleton() {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 function CatalogPage({ onOpenSearch }) {
-  usePageMeta({
-    title: 'Clinical Catalog | Protocols & Peptides',
-    description: 'Discover evidence-based protocols and research-grade peptides — your unified clinical discovery surface.',
-    path: '/catalog',
-  });
-
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang');
+      if (urlLang && (urlLang === 'es' || urlLang === 'en')) return urlLang;
       const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
-      if (stored) return stored;
+      if (stored && (stored === 'es' || stored === 'en')) return stored;
     }
     return 'en';
   });
+
+  const t = CATALOG_I18N[lang] || CATALOG_I18N.en;
+
+  usePageMeta({
+    title: t.metaTitle,
+    description: t.metaDesc,
+    path: '/catalog',
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleGlobalLang = (e) => {
+        if (e.detail && (e.detail === 'es' || e.detail === 'en')) {
+          setLang(e.detail);
+        }
+      };
+      window.addEventListener('atlas_lang_change', handleGlobalLang);
+      return () => window.removeEventListener('atlas_lang_change', handleGlobalLang);
+    }
+  }, []);
+
+  const handleLangChange = (nextLang) => {
+    setLang(nextLang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atlas_portal_lang', nextLang);
+        localStorage.setItem('atlas_catalog_lang', nextLang);
+        window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
+      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', nextLang);
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
 
   const router = useRouter();
 
@@ -128,22 +221,20 @@ function CatalogPage({ onOpenSearch }) {
       <PublicUnifiedHeader
         track="compounds"
         lang={lang}
-        onLangChange={setLang}
+        onLangChange={handleLangChange}
         inquiryContextType="catalog"
         loginRedirect="/catalog"
         breadcrumb={[
-          { label: lang === 'es' ? 'Compendio Clínico' : 'Clinical Compendium', href: '/catalog' },
-          { label: lang === 'es' ? 'Catálogo General' : 'General Catalog' }
+          { label: t.breadcrumbCompendium, href: '/catalog' },
+          { label: t.breadcrumbCatalog }
         ]}
         anchorTabs={[
-          { id: 'browse-categories', label: lang === 'es' ? 'Categorías' : 'Categories', href: '#browse-categories' },
-          { id: 'featured-peptides', label: lang === 'es' ? 'Péptidos Destacados' : 'Featured Peptides', href: '#featured-peptides' },
+          { id: 'browse-categories', label: t.anchorCategories, href: '#browse-categories' },
+          { id: 'featured-peptides', label: t.anchorPeptides, href: '#featured-peptides' },
         ]}
         callout={{
-          message: lang === 'es' 
-            ? 'Clínicas Médicas: Acceso a precios mayoristas y prescripciones digitales'
-            : 'Medical Clinics: Access wholesale pricing & digital orders',
-          ctaLabel: lang === 'es' ? 'Alta Mayorista →' : 'Wholesale Access →',
+          message: t.calloutMessage,
+          ctaLabel: t.calloutCta,
           ctaHref: '/login?tab=register&role=doctor&redirect=/catalog'
         }}
       />
@@ -298,7 +389,7 @@ function CatalogPage({ onOpenSearch }) {
           letterSpacing: '0.15em',
           marginBottom: '0.75rem',
         }}>
-          Clinical Discovery
+          {t.heroEyebrow}
         </p>
         <h1 style={{
           color: 'white',
@@ -309,8 +400,8 @@ function CatalogPage({ onOpenSearch }) {
           marginBottom: '1rem',
           letterSpacing: '-0.02em',
         }}>
-          Protocols &amp; Peptides.<br />
-          <span style={{ color: 'rgba(0,209,255,0.85)' }}>One Catalog.</span>
+          {t.heroTitleLine1}<br />
+          <span style={{ color: 'rgba(0,209,255,0.85)' }}>{t.heroTitleLine2}</span>
         </h1>
         <p style={{
           color: 'rgba(255,255,255,0.55)',
@@ -321,7 +412,7 @@ function CatalogPage({ onOpenSearch }) {
           marginRight: 'auto',
           lineHeight: 1.6,
         }}>
-          Evidence-based protocols and research-grade peptides in a single unified surface.
+          {t.heroSubtitle}
         </p>
 
         {/* Search trigger */}
@@ -329,7 +420,7 @@ function CatalogPage({ onOpenSearch }) {
           <Search size={18} className="catalog-search-icon" />
           <input
             className="catalog-search-input"
-            placeholder="Search protocols, peptides, objectives…"
+            placeholder={t.searchPlaceholder}
             readOnly
             onKeyDown={handleSearchKey}
             aria-label="Open global search"
@@ -342,6 +433,7 @@ function CatalogPage({ onOpenSearch }) {
         <div className="catalog-browse-grid" id="browse-categories">
           {BROWSE_TILES.map(tile => {
             const Icon = tile.icon;
+            const tileData = t.tiles[tile.id] || tile;
             return (
               <Link
                 key={tile.id}
@@ -362,7 +454,7 @@ function CatalogPage({ onOpenSearch }) {
                   fontFamily: 'var(--font-heading)',
                   marginBottom: '0.4rem',
                 }}>
-                  {tile.label}
+                  {tileData.label}
                 </div>
                 <div style={{
                   fontSize: '0.85rem',
@@ -370,42 +462,20 @@ function CatalogPage({ onOpenSearch }) {
                   lineHeight: 1.55,
                   flexGrow: 1,
                 }}>
-                  {tile.description}
+                  {tileData.description}
                 </div>
                 <div className="browse-tile-arrow" style={{ color: tile.accent }}>
-                  Browse <ArrowRight size={14} />
+                  {t.browseArrow} <ArrowRight size={14} />
                 </div>
               </Link>
             );
           })}
         </div>
 
-        {/* Featured Protocols — temporarily hidden until optimized */}
-        {/* <div className="catalog-divider">
-          <div className="catalog-divider-line" />
-          <span className="catalog-divider-label">Featured Protocols</span>
-          <div className="catalog-divider-line" />
-        </div>
-
-        <FeaturedProtocols />
-
-        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <Link
-            href="/proto"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              color: 'var(--primary)', fontWeight: 700, fontSize: '0.9rem',
-              textDecoration: 'none',
-            }}
-          >
-            View all protocols <ArrowRight size={15} />
-          </Link>
-        </div> */}
-
         {/* ── Featured Peptides ────────────────────────────────────────────── */}
         <div className="catalog-divider" id="featured-peptides">
           <div className="catalog-divider-line" />
-          <span className="catalog-divider-label">Featured Peptides</span>
+          <span className="catalog-divider-label">{t.featuredPeptides}</span>
           <div className="catalog-divider-line" />
         </div>
 
@@ -422,7 +492,7 @@ function CatalogPage({ onOpenSearch }) {
               textDecoration: 'none',
             }}
           >
-            View all peptides <ArrowRight size={15} />
+            {t.viewAllPeptides} <ArrowRight size={15} />
           </Link>
         </div>
       </div>
