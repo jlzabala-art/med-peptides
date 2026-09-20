@@ -13,21 +13,20 @@
   color: #0f172a;
 }
 
+.proto-catalog-container > .public-unified-header,
 .proto-catalog-container > .pds-top-bar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: #003666;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   margin: -2.5rem -1.5rem 1.5rem -1.5rem;
   width: calc(100% + 3rem);
-  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25);
 }
 
 @media (max-width: 768px) {
   .proto-catalog-container {
     padding: 1.25rem 1rem 3rem;
   }
+  .proto-catalog-container > .public-unified-header,
   .proto-catalog-container > .pds-top-bar {
     margin: -1.25rem -1rem 1rem -1rem;
     width: calc(100% + 2rem);

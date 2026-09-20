@@ -63,7 +63,7 @@
   .portal-main-content,
   .admin-terminal-root,
   main {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 }

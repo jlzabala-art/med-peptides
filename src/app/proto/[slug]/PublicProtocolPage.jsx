@@ -27,6 +27,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { Mail, Lock } from 'lucide-react';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 
 const DAY_LABELS_ES = {
   Monday: 'Lunes',
@@ -240,146 +241,45 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
   return (
     <div className="public-datasheet-root">
-      {/* ── Fixed Top Action Bar ── */}
-      <header className="pds-top-bar proto-no-print" aria-label="Protocol Actions">
-        <div className="pds-bar-inner">
-          <div className="pds-brand-group">
-            <span className="pds-brand-title">Med-Peptides</span>
-            <span className="pds-brand-divider" aria-hidden="true" />
-            
-            {/* Segmented Directory Switcher */}
-            <div className="pds-directory-switcher" role="navigation" aria-label="Catalog Track Switcher">
-              <Link href="/catalog" className="pds-switcher-item" title={lang === 'es' ? 'Explorar Catálogo de Compuestos' : 'Browse Research Compounds Catalog'}>
-                <FlaskConical size={13} />
-                <span>{lang === 'es' ? 'Compuestos' : 'Compounds'}</span>
-              </Link>
-              <Link href="/proto" className="pds-switcher-item is-active" title={lang === 'es' ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}>
-                <Layers size={13} />
-                <span>{lang === 'es' ? 'Protocolos' : 'Protocols'}</span>
-              </Link>
-            </div>
-
-            <span className="pds-zero-price-badge">{t.clinicalRegistryBadge}</span>
-          </div>
-
-          <div className="pds-actions-group">
-            {/* Multi-language Selector (Identical across all public views) */}
-            <select 
-              className="pds-lang-select" 
-              value={lang} 
-              onChange={(e) => handleLangChange(e.target.value)}
-              aria-label="Select Language"
-            >
-              {SUPPORTED_LANGUAGES.map(l => (
-                <option key={l.code} value={l.code}>
-                  {l.flag} {l.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Jump to Included Peptides */}
-            {items.length > 0 && (
-              <a
-                href="#included-compounds"
-                className="pds-btn pds-btn-ghost"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'rgba(14, 165, 233, 0.15)',
-                  color: '#38bdf8',
-                  borderColor: 'rgba(56, 189, 248, 0.35)',
-                  fontWeight: 600
-                }}
-              >
-                <FlaskConical size={14} />
-                <span className="pds-btn-label-desktop">
-                  {t.peptidesBadge} ({items.length})
-                </span>
-              </a>
-            )}
-
-            {/* Institutional Inquiry Button */}
-            <button
-              type="button"
-              className="pds-btn pds-btn-contact"
-              onClick={() => setIsInquiryDrawerOpen(true)}
-              title={lang === 'es' ? 'Consulta Médica sobre este Protocolo (business@med-peptides.com)' : 'Inquire on this Protocol (business@med-peptides.com)'}
-            >
-              <Mail size={14} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Contacto' : 'Contact'}
-              </span>
-            </button>
-
-            {/* Copy Link Button */}
-            <button 
-              type="button" 
-              className="pds-btn pds-btn-ghost" 
-              onClick={handleCopyUrl}
-            >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span className="pds-btn-label-desktop">{copied ? t.linkCopied : t.copyLink}</span>
-            </button>
-
-            {/* Practitioner Sign In / Register CTA */}
-            <Link
-              href={`/login?redirect=/proto/${encodeURIComponent(slug)}`}
-              className="pds-btn pds-btn-login"
-              title={lang === 'es' ? 'Acceso Profesionales · Herramientas de titulación y personalización' : 'Practitioner Portal · Access protocol customization & patient titration'}
-            >
-              <Lock size={13} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Acceso Portal' : 'Sign In'}
-              </span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Tier 2: Sticky Contextual In-Page Navigation Bar ── */}
-      <nav className="pds-context-bar proto-no-print" aria-label="Contextual Protocol Regimen Navigation">
-        <div className="pds-context-inner">
-          {/* Breadcrumb & Protocol Title */}
-          <div className="pds-context-breadcrumb">
-            <Link href="/proto">{lang === 'es' ? 'Protocolos' : 'Protocols'}</Link>
-            <span className="pds-context-breadcrumb-sep">/</span>
-            <span className="pds-context-breadcrumb-curr">{displayName}</span>
-          </div>
-
-          {/* Section Anchor Tabs */}
-          <div className="pds-anchor-tabs" role="tablist">
-            <a href="#blueprint" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Plan Clínico' : 'Blueprint'}</span>
-            </a>
-            <a href="#titration-phases" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Fases' : 'Phases'} ({phases.length})</span>
-            </a>
-            {items.length > 0 && (
-              <a href="#included-compounds" className="pds-anchor-tab is-active">
-                <span>{lang === 'es' ? 'Compuestos (/p/)' : 'Compounds (/p/)'} ({items.length})</span>
-              </a>
-            )}
-            <a href="#biomarker-panels" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Biomarcadores' : 'Biomarkers'}</span>
-            </a>
-            <a href="#administration-schedule" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Pauta 7 Días' : '7-Day Schedule'}</span>
-            </a>
-          </div>
-
-          {/* Value-Driven Professional Auth Incentive */}
-          <div className="pds-auth-incentive-strip">
-            <span className="pds-auth-incentive-msg">
-              <ShieldCheck size={14} style={{ color: '#38bdf8' }} />
-              <span>{lang === 'es' ? 'Médicos y Especialistas: Personaliza dosis y exporta pautas para pacientes' : 'Prescribing Physicians: Customize dosages & export patient schedules'}</span>
-            </span>
-            <Link href={`/login?tab=register&role=doctor&redirect=/proto/${encodeURIComponent(slug)}`} className="pds-auth-incentive-btn">
-              <span>{lang === 'es' ? 'Pauta Médica →' : 'Provider Access →'}</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
+      <PublicUnifiedHeader
+        track="protocols"
+        lang={lang}
+        onLangChange={handleLangChange}
+        copyUrl={publicUrl}
+        inquiryContextType="protocol"
+        inquiryEntity={{
+          name: displayName,
+          slug,
+          code: protocol?.sku || protocol?.code || '',
+          category: protocol?.goal || 'Clinical Protocols'
+        }}
+        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+        loginRedirect={`/proto/${encodeURIComponent(slug)}`}
+        breadcrumb={[
+          { label: lang === 'es' ? 'Protocolos' : 'Protocols', href: '/proto' },
+          { label: displayName }
+        ]}
+        anchorTabs={[
+          { id: 'blueprint', label: lang === 'es' ? 'Plan Clínico' : 'Blueprint', href: '#blueprint' },
+          { id: 'titration-phases', label: lang === 'es' ? 'Fases' : 'Phases', href: '#titration-phases', count: phases.length },
+          ...(items.length > 0 ? [{
+            id: 'included-compounds',
+            label: lang === 'es' ? 'Compuestos (/p/)' : 'Compounds (/p/)',
+            href: '#included-compounds',
+            count: items.length
+          }] : []),
+          { id: 'biomarker-panels', label: lang === 'es' ? 'Biomarcadores' : 'Biomarkers', href: '#biomarker-panels' },
+          { id: 'administration-schedule', label: lang === 'es' ? 'Pauta 7 Días' : '7-Day Schedule', href: '#administration-schedule' },
+        ]}
+        callout={{
+          message: lang === 'es'
+            ? 'Médicos y Especialistas: Personaliza dosis y exporta pautas para pacientes'
+            : 'Prescribing Physicians: Customize dosages & export patient schedules',
+          ctaLabel: lang === 'es' ? 'Pauta Médica →' : 'Provider Access →',
+          ctaHref: `/login?tab=register&role=doctor&redirect=/proto/${encodeURIComponent(slug)}`
+        }}
+      />
 
       {/* ── Main Container ── */}
       <main className="pds-container">

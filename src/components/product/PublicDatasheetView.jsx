@@ -46,6 +46,7 @@ import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMo
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -884,194 +885,47 @@ export default function PublicDatasheetView({
 
   return (
     <div className="public-datasheet-root">
-      {/* ── Fixed Top Institutional Header (Google Cloud UX Pattern) ── */}
-      <header className="pds-top-bar">
-        <div className="pds-bar-inner">
-          <div className="pds-brand-group">
-            <span className="pds-brand-title">{t.brandName}</span>
-            <span className="pds-brand-divider" aria-hidden="true" />
-            
-            {/* Segmented Directory Switcher */}
-            <div className="pds-directory-switcher" role="navigation" aria-label="Catalog Track Switcher">
-              <Link href="/catalog" className="pds-switcher-item is-active" title={lang === 'es' ? 'Catálogo de Compuestos' : 'Compounds Catalog'}>
-                <FlaskConical size={13} />
-                <span>{lang === 'es' ? 'Compuestos' : 'Compounds'}</span>
-              </Link>
-              <Link href="/proto" className="pds-switcher-item" title={lang === 'es' ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}>
-                <Layers size={13} />
-                <span>{lang === 'es' ? 'Protocolos' : 'Protocols'}</span>
-              </Link>
-            </div>
-
-            <span className="pds-zero-price-badge">{t.clinicalReference}</span>
-          </div>
-
-          <div className="pds-actions-group">
-            {/* Multi-language Selector */}
-            <select 
-              className="pds-lang-select" 
-              value={lang} 
-              onChange={(e) => {
-                const nextLang = e.target.value;
-                setLang(nextLang);
-                if (typeof window !== 'undefined') {
-                  try {
-                    localStorage.setItem('atlas_portal_lang', nextLang);
-                    localStorage.setItem('atlas_catalog_lang', nextLang);
-                  } catch {}
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('lang', nextLang);
-                  window.history.replaceState({}, '', url.toString());
-                }
-              }}
-              aria-label="Select Language"
-            >
-              {SUPPORTED_LANGUAGES.map(l => (
-                <option key={l.code} value={l.code}>
-                  {l.flag} {l.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Quick jump to associated clinical pathways / protocols */}
-            {associatedProtocols && associatedProtocols.length > 0 && (
-              <a
-                href="#clinical-pathways"
-                className="pds-btn pds-btn-ghost"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'rgba(37, 99, 235, 0.15)',
-                  color: '#60a5fa',
-                  borderColor: 'rgba(96, 165, 250, 0.35)',
-                  fontWeight: 600
-                }}
-              >
-                <Activity size={14} />
-                <span className="pds-btn-label-desktop">
-                  {lang === 'es' ? `Protocolos (${associatedProtocols.length})` : `Pathways (${associatedProtocols.length})`}
-                </span>
-              </a>
-            )}
-
-            {/* Direct Navigation to Verified Clinical Protocols Directory */}
-            <Link
-              href="/proto"
-              className="pds-btn pds-btn-ghost"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
-                borderColor: 'rgba(255, 255, 255, 0.18)',
-                fontWeight: 600,
-                textDecoration: 'none'
-              }}
-              title={lang === 'es' ? 'Explorar Directorio de Protocolos Clínicos' : 'Browse Clinical Protocols Directory'}
-            >
-              <FileText size={14} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Protocolos' : 'Protocols'}
-              </span>
-            </Link>
-
-            {/* Institutional Inquiry Button */}
-            <button
-              type="button"
-              className="pds-btn pds-btn-contact"
-              onClick={() => setIsInquiryDrawerOpen(true)}
-              title={lang === 'es' ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
-            >
-              <Mail size={14} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Contacto' : 'Contact'}
-              </span>
-            </button>
-
-            {/* Copy Link Button */}
-            <button 
-              type="button" 
-              className="pds-btn pds-btn-ghost" 
-              onClick={handleCopyUrl}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
-                borderColor: 'rgba(255, 255, 255, 0.18)',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-              title={lang === 'es' ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
-            >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span className="pds-btn-label-desktop">{copied ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar Enlace' : 'Copy Link')}</span>
-            </button>
-
-            {/* Practitioner Sign In / Register CTA */}
-            <Link
-              href={`/login?redirect=/p/${encodeURIComponent(slug)}`}
-              className="pds-btn pds-btn-login"
-              title={lang === 'es' ? 'Acceso Profesionales · Ver lotes analíticos, precios mayoristas y pedidos' : 'Practitioner Portal · Access certified CoAs & wholesale pricing'}
-            >
-              <Lock size={13} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Acceso Portal' : 'Sign In'}
-              </span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Tier 2: Sticky Contextual In-Page Navigation Bar ── */}
-      <nav className="pds-context-bar" aria-label="Contextual Monograph Sections">
-        <div className="pds-context-inner">
-          {/* Breadcrumb & Compound Name */}
-          <div className="pds-context-breadcrumb">
-            <Link href="/catalog">{lang === 'es' ? 'Catálogo' : 'Catalog'}</Link>
-            <span className="pds-context-breadcrumb-sep">/</span>
-            <span className="pds-context-breadcrumb-curr">{product?.name || name || 'Peptide Monograph'}</span>
-          </div>
-
-          {/* Smooth In-Page Section Anchor Tabs */}
-          <div className="pds-anchor-tabs" role="tablist">
-            <a href="#overview" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'General' : 'Overview'}</span>
-            </a>
-            <a href="#clinical-indications" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Indicaciones' : 'Indications'}</span>
-            </a>
-            <a href="#pharmacology" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Farmacología' : 'Pharmacology'}</span>
-            </a>
-            {associatedProtocols && associatedProtocols.length > 0 && (
-              <a href="#clinical-pathways" className="pds-anchor-tab is-active">
-                <span>{lang === 'es' ? `Protocolos (/proto)` : `Protocols (/proto)`} ({associatedProtocols.length})</span>
-              </a>
-            )}
-            <a href="#reconstitution" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Reconstitución' : 'Reconstitution'}</span>
-            </a>
-            <a href="#traceability" className="pds-anchor-tab">
-              <span>{lang === 'es' ? 'Calidad HPLC' : 'HPLC Quality'}</span>
-            </a>
-          </div>
-
-          {/* Value-Driven Professional Auth Incentive */}
-          <div className="pds-auth-incentive-strip">
-            <span className="pds-auth-incentive-msg">
-              <ShieldCheck size={14} style={{ color: '#38bdf8' }} />
-              <span>{lang === 'es' ? 'Clínicas y Farmacias: Acceso mayorista (-40%) y receta digital' : 'Medical Clinics: Access wholesale tiers (-40%) & digital Rx'}</span>
-            </span>
-            <Link href={`/login?tab=register&role=doctor&redirect=/p/${encodeURIComponent(slug)}`} className="pds-auth-incentive-btn">
-              <span>{lang === 'es' ? 'Alta Clínica →' : 'Provider Access →'}</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
+      <PublicUnifiedHeader
+        track="compounds"
+        lang={lang}
+        onLangChange={setLang}
+        copyUrl={dynamicPublicUrl}
+        inquiryContextType="product"
+        inquiryEntity={{
+          name: product?.name || name,
+          slug,
+          code: effectiveBatchCode || activeVariant?.code || activeVariant?.sku || '',
+          strength: selectedStrengthId || '',
+          category: category || 'Research Peptides'
+        }}
+        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+        loginRedirect={`/p/${encodeURIComponent(slug)}`}
+        breadcrumb={[
+          { label: lang === 'es' ? 'Catálogo' : 'Catalog', href: '/catalog' },
+          { label: product?.name || name || 'Peptide Monograph' }
+        ]}
+        anchorTabs={[
+          { id: 'overview', label: lang === 'es' ? 'General' : 'Overview', href: '#overview' },
+          { id: 'clinical-indications', label: lang === 'es' ? 'Indicaciones' : 'Indications', href: '#clinical-indications' },
+          { id: 'pharmacology', label: lang === 'es' ? 'Farmacología' : 'Pharmacology', href: '#pharmacology' },
+          ...(associatedProtocols && associatedProtocols.length > 0 ? [{
+            id: 'clinical-pathways',
+            label: lang === 'es' ? 'Protocolos (/proto)' : 'Protocols (/proto)',
+            href: '#clinical-pathways',
+            count: associatedProtocols.length
+          }] : []),
+          { id: 'reconstitution', label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution' },
+          { id: 'traceability', label: lang === 'es' ? 'Calidad HPLC' : 'HPLC Quality', href: '#traceability' },
+        ]}
+        callout={{
+          message: lang === 'es'
+            ? 'Clínicas y Farmacias: Acceso mayorista (-40%) y receta digital'
+            : 'Medical Clinics: Access wholesale tiers (-40%) & digital Rx',
+          ctaLabel: lang === 'es' ? 'Alta Clínica →' : 'Provider Access →',
+          ctaHref: `/login?tab=register&role=doctor&redirect=/p/${encodeURIComponent(slug)}`
+        }}
+      />
 
       {/* ── Main Monograph Container ── */}
       <main className="pds-container">

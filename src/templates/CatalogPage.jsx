@@ -8,8 +8,8 @@ import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Grid3X3 from "lucide-react/dist/esm/icons/grid-3-x-3";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
-/* eslint-disable no-unused-vars */
-import React, { lazy, Suspense, useCallback } from 'react';
+import React, { lazy, Suspense, useCallback, useState } from 'react';
+import PublicUnifiedHeader from '../components/shared/PublicUnifiedHeader';
 
 
 
@@ -101,6 +101,14 @@ function CatalogPage({ onOpenSearch }) {
     path: '/catalog',
   });
 
+  const [lang, setLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
+      if (stored) return stored;
+    }
+    return 'en';
+  });
+
   const router = useRouter();
 
   const handleSearchClick = useCallback(() => {
@@ -116,6 +124,29 @@ function CatalogPage({ onOpenSearch }) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--background)' }}>
+      {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
+      <PublicUnifiedHeader
+        track="compounds"
+        lang={lang}
+        onLangChange={setLang}
+        inquiryContextType="catalog"
+        loginRedirect="/catalog"
+        breadcrumb={[
+          { label: lang === 'es' ? 'Compendio Clínico' : 'Clinical Compendium', href: '/catalog' },
+          { label: lang === 'es' ? 'Catálogo General' : 'General Catalog' }
+        ]}
+        anchorTabs={[
+          { id: 'browse-categories', label: lang === 'es' ? 'Categorías' : 'Categories', href: '#browse-categories' },
+          { id: 'featured-peptides', label: lang === 'es' ? 'Péptidos Destacados' : 'Featured Peptides', href: '#featured-peptides' },
+        ]}
+        callout={{
+          message: lang === 'es' 
+            ? 'Clínicas Médicas: Acceso a precios mayoristas y prescripciones digitales'
+            : 'Medical Clinics: Access wholesale pricing & digital orders',
+          ctaLabel: lang === 'es' ? 'Alta Mayorista →' : 'Wholesale Access →',
+          ctaHref: '/login?tab=register&role=doctor&redirect=/catalog'
+        }}
+      />
 
       {/* ── Keyframe injection ── */}
       <style>{`
@@ -308,7 +339,7 @@ function CatalogPage({ onOpenSearch }) {
 
       {/* ── Browse Tiles ─────────────────────────────────────────────────────── */}
       <div className="container" style={{ paddingTop: 0 }}>
-        <div className="catalog-browse-grid">
+        <div className="catalog-browse-grid" id="browse-categories">
           {BROWSE_TILES.map(tile => {
             const Icon = tile.icon;
             return (
@@ -372,7 +403,7 @@ function CatalogPage({ onOpenSearch }) {
         </div> */}
 
         {/* ── Featured Peptides ────────────────────────────────────────────── */}
-        <div className="catalog-divider">
+        <div className="catalog-divider" id="featured-peptides">
           <div className="catalog-divider-line" />
           <span className="catalog-divider-label">Featured Peptides</span>
           <div className="catalog-divider-line" />

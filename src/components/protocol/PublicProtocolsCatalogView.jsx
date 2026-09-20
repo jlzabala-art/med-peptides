@@ -38,6 +38,7 @@ import '../../styles/publicProtocolsCatalog.css';
 import '../../components/product/PublicDatasheetView.css';
 import PublicAtlasAIDrawer from '../shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInquiryDrawer';
+import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
 import { Mail, Lock } from 'lucide-react';
 import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from '../../utils/protocolTranslations';
 
@@ -382,138 +383,38 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
   return (
     <div className="proto-catalog-container">
-      {/* ── Fixed Institutional Top Action Bar (Navy Blue Theme) ── */}
-      <header className="pds-top-bar" aria-label="Catalog Navigation" style={{ position: 'sticky', top: 0, zIndex: 900, background: '#003666', borderBottom: '1px solid rgba(255, 255, 255, 0.12)', margin: '-1.5rem -1.5rem 1.5rem -1.5rem', width: 'calc(100% + 3rem)', boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)' }}>
-        <div className="pds-bar-inner">
-          <div className="pds-brand-group">
-            <span className="pds-brand-title" style={{ color: '#ffffff', fontWeight: 800 }}>Med-Peptides</span>
-            <span className="pds-brand-divider" aria-hidden="true" style={{ background: 'rgba(255, 255, 255, 0.25)' }} />
-            
-            {/* Segmented Directory Switcher */}
-            <div className="pds-directory-switcher" role="navigation" aria-label="Catalog Track Switcher">
-              <Link href="/catalog" className="pds-switcher-item" title={lang === 'es' ? 'Explorar Catálogo de Compuestos' : 'Browse Research Compounds Catalog'}>
-                <FlaskConical size={13} />
-                <span>{lang === 'es' ? 'Compuestos' : 'Compounds'}</span>
-              </Link>
-              <Link href="/proto" className="pds-switcher-item is-active" title={lang === 'es' ? 'Directorio de Protocolos Clínicos' : 'Clinical Protocols Directory'}>
-                <Layers size={13} />
-                <span>{lang === 'es' ? 'Protocolos' : 'Protocols'}</span>
-              </Link>
-            </div>
-
-            <span className="pds-zero-price-badge" style={{ color: '#93c5fd' }}>{t.clinicalRegistryBadge}</span>
-          </div>
-
-          <div className="pds-actions-group">
-            {/* Multi-language Selector */}
-            <select 
-              className="pds-lang-select" 
-              value={lang} 
-              onChange={(e) => handleLangChange(e.target.value)}
-              aria-label="Select Language"
-              style={{ background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)' }}
-            >
-              {SUPPORTED_LANGUAGES.map(l => (
-                <option key={l.code} value={l.code} style={{ background: '#002544', color: '#ffffff' }}>
-                  {l.flag} {l.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Institutional Inquiry Button */}
-            <button
-              type="button"
-              className="pds-btn pds-btn-contact"
-              onClick={() => setIsInquiryDrawerOpen(true)}
-              title={lang === 'es' ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
-            >
-              <Mail size={14} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Contacto' : 'Contact'}
-              </span>
-            </button>
-
-            {/* Copy Directory Link */}
-            <button
-              type="button"
-              className="pds-btn"
-              onClick={handleCopyDirectoryUrl}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#cbd5e1',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                fontWeight: 600,
-                padding: '0.4rem 0.85rem',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '0.78rem'
-              }}
-              title={lang === 'es' ? 'Copiar enlace al directorio' : 'Copy directory link to clipboard'}
-            >
-              {copiedDirectoryUrl ? <Check size={14} /> : <Copy size={14} />}
-              <span className="pds-btn-label-desktop">
-                {copiedDirectoryUrl ? (lang === 'es' ? 'Copiado' : 'Copied') : (lang === 'es' ? 'Copiar Enlace' : 'Copy Link')}
-              </span>
-            </button>
-
-            {/* Practitioner Sign In / Register CTA */}
-            <Link
-              href="/login?redirect=/proto"
-              className="pds-btn pds-btn-login"
-              title={lang === 'es' ? 'Acceso Profesionales · Herramientas de titulación y pautas avanzadas' : 'Practitioner Portal · Access protocol customization & patient titration'}
-            >
-              <Lock size={13} />
-              <span className="pds-btn-label-desktop">
-                {lang === 'es' ? 'Acceso Portal' : 'Sign In'}
-              </span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Tier 2: Sticky Contextual Action Bar with Provider Incentives ── */}
-      <nav className="pds-context-bar" aria-label="Contextual Protocol Navigation" style={{ margin: '-1.5rem -1.5rem 1.5rem -1.5rem', width: 'calc(100% + 3rem)' }}>
-        <div className="pds-context-inner">
-          {/* Quick Goal Tabs */}
-          <div className="pds-anchor-tabs" role="tablist">
-            <button 
-              type="button" 
-              role="tab"
-              aria-selected={selectedGoal === 'all'}
-              className={`pds-anchor-tab ${selectedGoal === 'all' ? 'is-active' : ''}`}
-              onClick={() => { triggerHaptic('selection'); setSelectedGoal('all'); }}
-            >
-              {lang === 'es' ? 'Todos' : 'All Protocols'} ({enrichedProtocols.length})
-            </button>
-            {GOAL_BUCKETS.slice(1, 6).map(g => (
-              <button
-                key={g.id}
-                type="button"
-                role="tab"
-                aria-selected={selectedGoal === g.id}
-                className={`pds-anchor-tab ${selectedGoal === g.id ? 'is-active' : ''}`}
-                onClick={() => { triggerHaptic('selection'); setSelectedGoal(g.id); }}
-              >
-                {GOAL_TRANSLATIONS[g.id]?.[lang] || g.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Value-Driven Professional Auth Incentive */}
-          <div className="pds-auth-incentive-strip">
-            <span className="pds-auth-incentive-msg">
-              <ShieldCheck size={14} style={{ color: '#38bdf8' }} />
-              <span>{lang === 'es' ? 'Clínicas y Médicos: Regístrate para duplicar pautas en fichas de pacientes' : 'Healthcare Providers: Register to duplicate blueprints into patient charts'}</span>
-            </span>
-            <Link href="/login?tab=register&role=doctor&redirect=/proto" className="pds-auth-incentive-btn">
-              <span>{lang === 'es' ? 'Alta Profesional →' : 'Register as Provider →'}</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
+      <PublicUnifiedHeader
+        track="protocols"
+        lang={lang}
+        onLangChange={handleLangChange}
+        copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://med-peptides.com/proto'}
+        inquiryContextType="protocols_directory"
+        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+        loginRedirect="/proto"
+        filterTabs={[
+          {
+            id: 'all',
+            label: lang === 'es' ? 'Todos' : 'All Protocols',
+            count: enrichedProtocols.length,
+            isActive: selectedGoal === 'all',
+            onClick: () => setSelectedGoal('all')
+          },
+          ...GOAL_BUCKETS.slice(1, 6).map(g => ({
+            id: g.id,
+            label: GOAL_TRANSLATIONS[g.id]?.[lang] || g.label,
+            isActive: selectedGoal === g.id,
+            onClick: () => setSelectedGoal(g.id)
+          }))
+        ]}
+        callout={{
+          message: lang === 'es'
+            ? 'Clínicas y Médicos: Regístrate para duplicar pautas en fichas de pacientes'
+            : 'Healthcare Providers: Register to duplicate blueprints into patient charts',
+          ctaLabel: lang === 'es' ? 'Alta Profesional →' : 'Register as Provider →',
+          ctaHref: '/login?tab=register&role=doctor&redirect=/proto'
+        }}
+      />
 
       {/* ── Google Cloud Console Active Scope Indicator ── */}
       <div className="proto-scope-nav-container" style={{ display: 'flex', justifyContent: 'center', margin: '0 0 1.25rem 0' }}>

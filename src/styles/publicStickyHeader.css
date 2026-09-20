@@ -1,33 +1,104 @@
 /* ══════════════════════════════════════════════════════════════════
-   PUBLIC STICKY HEADER & CONTEXTUAL NAVIGATION (GCP Standards)
-   Applies across: /catalog, /p/[slug], /proto, /proto/[slug]
+   PUBLIC UNIFIED 2-TIER STICKY HEADER & CONTEXTUAL NAVIGATION
+   Standards: Atlas Deep Blue / Google Cloud Console Executive Bar
+   Applies across all 4 screens:
+     1. /catalog (Compounds Catalog)
+     2. /p/[slug] (Compound Datasheet / Monograph)
+     3. /proto (Clinical Protocols Directory)
+     4. /proto/[slug] (Protocol Blueprint & Regimen)
    ══════════════════════════════════════════════════════════════════ */
 
-/* ── Tier 2: Sticky Contextual Action Bar ──────────────────────── */
-.pds-context-bar {
+/* ── Sticky Master Container ───────────────────────────────────── */
+.public-unified-header {
   position: sticky;
-  top: 48px; /* sits directly under .pds-top-bar */
-  z-index: 990;
-  background: rgba(0, 37, 71, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 4px 14px rgba(0, 30, 60, 0.20);
-  transition: all 0.2s ease;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  background: #003666;
+  box-shadow: 0 4px 16px rgba(0, 30, 60, 0.22);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.pds-context-inner {
+/* Scroll Clearance: Prevents in-page anchor jumps from being obscured */
+[id],
+.pds-section,
+.proto-blueprint-card,
+.proto-phases-section,
+.proto-compounds-section,
+.proto-biomarkers-section,
+.proto-schedule-section,
+#overview,
+#clinical-indications,
+#pharmacology,
+#clinical-pathways,
+#reconstitution,
+#traceability,
+#blueprint,
+#titration-phases,
+#included-compounds,
+#biomarker-panels,
+#administration-schedule {
+  scroll-margin-top: 110px;
+}
+
+/* ── Line 1: Universal Executive Top Bar ────────────────────────── */
+.puh-tier1 {
+  background: #003666;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  transition: padding 0.2s ease;
+}
+
+.puh-tier1-inner {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 0.45rem 1.25rem;
+  padding: 0.50rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  flex-wrap: wrap;
+  transition: padding 0.2s ease;
 }
 
-/* ── Segmented Directory Switcher ──────────────────────────────── */
+/* Progressive Scroll Compression (Preserving laptop/mobile viewport) */
+.public-unified-header.is-scrolled .puh-tier1-inner {
+  padding-top: 0.30rem;
+  padding-bottom: 0.30rem;
+}
+
+/* Brand & Switcher Group */
+.puh-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.puh-brand-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.puh-brand-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.puh-brand-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.22);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Directory Switcher [Compounds ⟷ Protocols] */
+.puh-directory-switcher,
 .pds-directory-switcher {
   display: inline-flex;
   align-items: center;
@@ -38,11 +109,12 @@
   gap: 2px;
 }
 
+.puh-switcher-item,
 .pds-switcher-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 4px 11px;
   border-radius: 6px;
   font-size: 0.76rem;
   font-weight: 700;
@@ -52,36 +124,214 @@
   white-space: nowrap;
 }
 
+.puh-switcher-item:hover,
 .pds-switcher-item:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.12);
 }
 
+.puh-switcher-item.is-active,
 .pds-switcher-item.is-active {
   background: #0284c7;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
 }
 
-/* ── Contextual Anchor Jumps (Page-Specific) ───────────────────── */
+/* Reference Badge */
+.puh-reference-badge {
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  background: rgba(147, 197, 253, 0.12);
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(147, 197, 253, 0.24);
+  white-space: nowrap;
+}
+
+/* Right-side Universal Action Buttons */
+.puh-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.puh-lang-select {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.puh-lang-select:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.puh-lang-select option {
+  background: #002544;
+  color: #ffffff;
+}
+
+.puh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.38rem 0.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.puh-btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.puh-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.puh-btn-contact {
+  background: rgba(14, 165, 233, 0.18);
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.puh-btn-contact:hover {
+  background: rgba(14, 165, 233, 0.28);
+  color: #ffffff;
+  border-color: rgba(56, 189, 248, 0.55);
+}
+
+.puh-btn-login {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+
+.puh-btn-login:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45);
+}
+
+/* ── Line 2: Contextual Navigation & Value Strip ─────────────────── */
+.puh-tier2,
+.pds-context-bar {
+  background: rgba(0, 37, 71, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  transition: all 0.2s ease;
+}
+
+.puh-tier2-inner,
+.pds-context-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0.40rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.puh-tier2-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.puh-tier2-left::-webkit-scrollbar {
+  display: none;
+}
+
+/* Breadcrumb */
+.puh-breadcrumb,
+.pds-context-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.puh-breadcrumb-link,
+.pds-context-breadcrumb a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.puh-breadcrumb-link:hover,
+.pds-context-breadcrumb a:hover {
+  color: #38bdf8;
+}
+
+.puh-breadcrumb-sep,
+.pds-context-breadcrumb-sep {
+  opacity: 0.45;
+  color: #64748b;
+}
+
+.puh-breadcrumb-curr,
+.pds-context-breadcrumb-curr {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+/* Anchor Tabs */
+.puh-anchor-tabs,
 .pds-anchor-tabs {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  flex-shrink: 0;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.pds-anchor-tabs::-webkit-scrollbar {
+.puh-anchor-tabs::-webkit-scrollbar {
   display: none;
 }
 
+.puh-anchor-tab,
 .pds-anchor-tab {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 11px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.74rem;
   font-weight: 600;
@@ -91,41 +341,55 @@
   border: 1px solid transparent;
   transition: all 0.15s ease;
   white-space: nowrap;
+  cursor: pointer;
 }
 
+.puh-anchor-tab:hover,
 .pds-anchor-tab:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(255, 255, 255, 0.20);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
+.puh-anchor-tab.is-active,
 .pds-anchor-tab.is-active {
   color: #38bdf8;
-  background: rgba(14, 165, 233, 0.15);
-  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(14, 165, 233, 0.18);
+  border-color: rgba(56, 189, 248, 0.45);
   font-weight: 700;
+  box-shadow: 0 1px 3px rgba(14, 165, 233, 0.2);
 }
 
-/* ── Value-Driven Auth Incentive Strip / Pill ──────────────────── */
+.puh-tab-count {
+  font-size: 0.70rem;
+  opacity: 0.85;
+}
+
+/* Professional Value Callout Strip */
+.puh-callout-strip,
 .pds-auth-incentive-strip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border-radius: 6px;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.25);
   color: #e0f2fe;
   font-size: 0.73rem;
   font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
+.puh-callout-msg,
 .pds-auth-incentive-msg {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
+.puh-callout-btn,
 .pds-auth-incentive-btn {
   display: inline-flex;
   align-items: center;
@@ -137,66 +401,66 @@
   padding: 3px 8px;
   border-radius: 4px;
   text-decoration: none;
+  border: none;
+  cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
+.puh-callout-btn:hover,
 .pds-auth-incentive-btn:hover {
   background: #7dd3fc;
   box-shadow: 0 2px 6px rgba(56, 189, 248, 0.4);
 }
 
-/* ── Contextual Breadcrumb ─────────────────────────────────────── */
-.pds-context-breadcrumb {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.76rem;
-  color: #94a3b8;
-  white-space: nowrap;
-}
-
-.pds-context-breadcrumb a {
-  color: #cbd5e1;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.15s;
-}
-
-.pds-context-breadcrumb a:hover {
-  color: #38bdf8;
-}
-
-.pds-context-breadcrumb-sep {
-  opacity: 0.45;
-}
-
-.pds-context-breadcrumb-curr {
-  color: #f8fafc;
-  font-weight: 700;
-}
-
-/* ── Mobile Adaptations (Golden Rule #23) ──────────────────────── */
+/* ── Mobile Responsive Adaptations (Golden Rule #23) ───────────── */
 @media (max-width: 900px) {
-  .pds-context-inner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    padding: 0.4rem 0.85rem;
+  .puh-reference-badge {
+    display: none;
   }
   
-  .pds-directory-switcher {
+  .puh-callout-strip {
+    display: none; /* Keep Line 2 focused on navigation tabs on small screens */
+  }
+
+  .puh-tier2-inner {
+    padding: 0.35rem 0.85rem;
+  }
+
+  .puh-tier2-left {
     width: 100%;
-    justify-content: center;
+    /* Gradient mask indicators indicating horizontal scrollability */
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
   }
-  
-  .pds-switcher-item {
-    flex: 1;
-    justify-content: center;
-    min-height: 38px;
+}
+
+@media (max-width: 640px) {
+  .puh-tier1-inner {
+    padding: 0.40rem 0.75rem;
   }
-  
-  .pds-auth-incentive-strip {
-    justify-content: space-between;
+
+  .puh-brand-title {
+    font-size: 0.92rem;
+  }
+
+  .puh-btn-label {
+    display: none; /* Show only icons on extra-narrow phones to avoid wrapping */
+  }
+
+  .puh-btn {
+    padding: 0.35rem 0.50rem;
+  }
+
+  .puh-switcher-item span {
+    display: none; /* Show flask / layers icons on ultra mobile */
+  }
+
+  .puh-switcher-item {
+    padding: 4px 7px;
+  }
+
+  .puh-breadcrumb {
+    display: none; /* Prefer anchor tabs on narrow mobile viewports */
   }
 }
