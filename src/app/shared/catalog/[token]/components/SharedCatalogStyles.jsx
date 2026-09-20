@@ -34,16 +34,33 @@ export default function SharedCatalogStyles() {
         .topbar-brand {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
         }
         .topbar-brand-title {
           font-size: 0.95rem;
           font-weight: 800;
           color: #ffffff;
           letter-spacing: -0.01em;
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          gap: 8px;
+        }
+        .topbar-brand-divider {
+          width: 1px;
+          height: 15px;
+          background-color: rgba(255, 255, 255, 0.25);
+          display: inline-block;
+          margin: 0 4px;
+        }
+        .topbar-badge-pill {
+          background-color: rgba(56, 189, 248, 0.15);
+          border: 1px solid rgba(56, 189, 248, 0.35);
+          color: #7dd3fc;
+          font-size: 0.68rem;
+          font-weight: 800;
+          padding: 2px 8px;
+          border-radius: 9999px;
+          letter-spacing: 0.04em;
+          white-space: nowrap;
         }
         .portal-verified-badge {
           display: inline-flex;
@@ -56,138 +73,330 @@ export default function SharedCatalogStyles() {
           font-weight: 700;
           padding: 2px 8px;
           border-radius: 6px;
-        }
-        .topbar-actions {
+            .topbar-actions {
           display: flex;
           align-items: center;
           flex-wrap: nowrap;
           gap: 8px;
         }
-        .topbar-row-logistics {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .topbar-row-access {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .topbar-currency-toggle {
-          display: inline-flex;
-          background-color: rgba(255, 255, 255, 0.12);
-          padding: 2px;
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .currency-btn {
-          padding: 4px 10px;
-          border-radius: 6px;
-          border: none;
-          font-size: 0.76rem;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.15s ease;
-        }
-        .currency-btn.active {
-          background-color: #38bdf8;
-          color: #002244;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        .currency-btn.inactive {
-          background: transparent;
-          color: #e0f2fe;
-        }
         .topbar-destination {
+          height: 32px;
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background-color: rgba(255, 255, 255, 0.12);
-          padding: 5px 12px;
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          font-size: 0.8rem;
+          background-color: rgba(255, 255, 255, 0.10);
+          padding: 0 10px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.20);
+          font-size: 0.78rem;
           color: #ffffff;
-          min-width: 180px;
+          min-width: 170px;
           flex-shrink: 0;
+          box-sizing: border-box;
           transition: all 0.15s ease;
         }
         .topbar-destination:hover {
-          background-color: rgba(255, 255, 255, 0.18);
+          background-color: rgba(255, 255, 255, 0.16);
           border-color: rgba(255, 255, 255, 0.35);
         }
-        .topbar-destination select {
+        .dest-flag-icon {
+          font-size: 0.85rem;
+          flex-shrink: 0;
+        }
+        .topbar-dest-select {
           background: transparent;
           color: #ffffff;
           border: none;
-          font-size: 0.8rem;
+          font-size: 0.78rem;
           font-weight: 700;
           cursor: pointer;
           outline: none;
           width: 100%;
           white-space: nowrap;
         }
-        .topbar-destination select option {
-          background: #002244;
+        .topbar-dest-select option {
+          background: #002544;
+          color: #ffffff;
+        }
+        .topbar-quick-tools {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+        .topbar-select {
+          height: 32px;
+          background-color: rgba(255, 255, 255, 0.10);
+          color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.20);
+          border-radius: 6px;
+          padding: 0 8px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          cursor: pointer;
+          outline: none;
+          box-sizing: border-box;
+          transition: all 0.15s ease;
+        }
+        .topbar-select:hover {
+          background-color: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.35);
+        }
+        .topbar-select option {
+          background: #002544;
+          color: #ffffff;
+        }
+        .topbar-contact-btn {
+          height: 32px;
+          background-color: rgba(255, 255, 255, 0.10);
+          color: #e2e8f0;
+          border: 1px solid rgba(255, 255, 255, 0.20);
+          border-radius: 6px;
+          padding: 0 10px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          cursor: pointer;
+          box-sizing: border-box;
+          transition: all 0.15s ease;
+          white-space: nowrap;
+        }
+        .topbar-contact-btn:hover {
+          background-color: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.35);
           color: #ffffff;
         }
         .topbar-cart-pill {
+          height: 32px;
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background-color: rgba(56, 189, 248, 0.2);
-          border: 1px solid rgba(56, 189, 248, 0.4);
+          background-color: rgba(56, 189, 248, 0.18);
+          border: 1px solid rgba(56, 189, 248, 0.38);
           color: #e0f2fe;
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 0.8rem;
+          padding: 0 10px;
+          border-radius: 6px;
+          font-size: 0.76rem;
           font-weight: 800;
           cursor: pointer;
+          box-sizing: border-box;
           transition: all 0.15s ease;
+          white-space: nowrap;
         }
         .topbar-cart-pill:hover {
-          background-color: rgba(56, 189, 248, 0.3);
+          background-color: rgba(56, 189, 248, 0.28);
         }
-        .topbar-signin-btn {
-          display: inline-flex;
+        .topbar-row-access {
+          display: flex;
           align-items: center;
           gap: 6px;
-          background-color: rgba(255, 255, 255, 0.12);
+          flex-shrink: 0;
+        }
+        .topbar-auth-inner {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .topbar-signin-btn {
+          height: 32px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          background-color: rgba(255, 255, 255, 0.10);
           border: 1px solid rgba(255, 255, 255, 0.25);
           color: #ffffff;
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 0.8rem;
+          padding: 0 12px;
+          border-radius: 6px;
+          font-size: 0.76rem;
           font-weight: 700;
           text-decoration: none;
           cursor: pointer;
+          box-sizing: border-box;
           transition: all 0.15s ease;
+          white-space: nowrap;
         }
         .topbar-signin-btn:hover {
-          background-color: rgba(255, 255, 255, 0.2);
-          border-color: rgba(255, 255, 255, 0.4);
+          background-color: rgba(255, 255, 255, 0.18);
+          border-color: rgba(255, 255, 255, 0.40);
         }
         .topbar-apply-btn {
+          height: 32px;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 6px;
           background: #0284c7;
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.30);
           color: #ffffff;
-          padding: 7px 14px;
-          border-radius: 8px;
-          font-size: 0.8rem;
+          padding: 0 14px;
+          border-radius: 6px;
+          font-size: 0.76rem;
           font-weight: 800;
           cursor: pointer;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+          box-sizing: border-box;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
           transition: all 0.15s ease;
+          white-space: nowrap;
         }
         .topbar-apply-btn:hover {
           background: #0369a1;
-          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
         }
         .access-label-compact {
           display: none;
+        }
+
+        /* Product List Row — Standard GCP Console High-Density Item */
+        .catalog-list-item {
+          background-color: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          margin-bottom: 8px;
+          overflow: hidden;
+          transition: all 0.15s ease;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+        .catalog-list-item.is-expanded {
+          border-color: #0284c7;
+          box-shadow: 0 4px 14px rgba(2, 132, 199, 0.08);
+        }
+        .catalog-list-row-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 14px;
+          cursor: pointer;
+          background-color: #ffffff;
+          transition: background 0.12s ease;
+          gap: 12px;
+        }
+        .catalog-list-item.is-expanded .catalog-list-row-header {
+          background-color: #f8fafc;
+        }
+        .catalog-row-main {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+        .catalog-row-img {
+          width: 40px;
+          height: 40px;
+          border-radius: 8px;
+          object-fit: cover;
+          border: 1px solid #e2e8f0;
+          flex-shrink: 0;
+        }
+        .catalog-row-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          min-width: 0;
+        }
+        .catalog-row-title-line {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .catalog-row-title {
+          font-size: 0.95rem;
+          font-weight: 800;
+          color: #0f172a;
+          letter-spacing: -0.01em;
+        }
+        .catalog-row-purity {
+          font-size: 0.66rem;
+          font-weight: 700;
+          background-color: #f0fdf4;
+          color: #16a34a;
+          padding: 1px 6px;
+          border-radius: 4px;
+          border: 1px solid #bbf7d0;
+          white-space: nowrap;
+        }
+        .catalog-row-subtitle {
+          font-size: 0.72rem;
+          color: #64748b;
+        }
+        .catalog-row-action-zone {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-shrink: 0;
+        }
+        .catalog-row-price-block {
+          text-align: right;
+          padding-right: 2px;
+        }
+        .catalog-price-label {
+          font-size: 0.65rem;
+          color: #64748b;
+          display: block;
+          text-transform: uppercase;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+        }
+        .catalog-price-amount {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: #003666;
+        }
+        .catalog-row-buttons {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .catalog-row-monograph-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          height: 32px;
+          padding: 0 10px;
+          border-radius: 6px;
+          background: #f8fafc;
+          border: 1px solid #cbd5e1;
+          color: #475569;
+          font-size: 0.72rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.15s ease;
+          cursor: pointer;
+        }
+        .catalog-row-monograph-btn:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+          border-color: #94a3b8;
+        }
+        .catalog-row-expand-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          height: 32px;
+          padding: 0 12px;
+          border-radius: 6px;
+          background: #f1f5f9;
+          color: #003666;
+          border: 1px solid #cbd5e1;
+          font-size: 0.74rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .catalog-list-item.is-expanded .catalog-row-expand-btn {
+          background: #003666;
+          color: #ffffff;
+          border-color: #003666;
+        }
+        .catalog-row-expand-btn:hover {
+          background: #e2e8f0;
+        }
+        .catalog-list-item.is-expanded .catalog-row-expand-btn:hover {
+          background: #002544;
         }
         /* Executive Header Card */
         .header-card {
@@ -698,16 +907,22 @@ export default function SharedCatalogStyles() {
         }
         @media (max-width: 768px) {
           .topbar-inner {
-            padding: 8px 12px !important;
-            gap: 10px !important;
-            flex-direction: column !important;
-            align-items: stretch !important;
+            display: grid !important;
+            grid-template-columns: 1fr auto !important;
+            grid-template-rows: auto auto !important;
+            row-gap: 6px !important;
+            column-gap: 8px !important;
+            padding: 6px 10px !important;
+            height: auto !important;
           }
           .topbar-brand {
-            width: 100% !important;
+            grid-column: 1 !important;
+            grid-row: 1 !important;
             display: flex !important;
             align-items: center !important;
-            justify-content: space-between !important;
+            gap: 6px !important;
+            justify-content: flex-start !important;
+            width: auto !important;
           }
           .topbar-brand-title {
             font-size: 0.88rem !important;
@@ -716,74 +931,155 @@ export default function SharedCatalogStyles() {
             display: none !important;
           }
           .topbar-actions {
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 8px !important;
+            display: contents !important;
           }
-          .topbar-row-logistics {
-            width: 100% !important;
+          .topbar-quick-tools {
+            grid-column: 2 !important;
+            grid-row: 1 !important;
             display: flex !important;
-            flex-wrap: wrap !important;
             align-items: center !important;
-            justify-content: space-between !important;
-            gap: 8px !important;
+            justify-content: flex-end !important;
+            gap: 5px !important;
           }
-          .topbar-row-access {
-            width: 100% !important;
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 8px !important;
+          .topbar-select {
+            height: 28px !important;
+            font-size: 0.70rem !important;
+            padding: 0 4px !important;
+          }
+          .topbar-contact-btn {
+            height: 28px !important;
+            font-size: 0.70rem !important;
+            padding: 0 6px !important;
+          }
+          .contact-label-text {
+            display: none !important;
           }
           .topbar-destination {
-            flex: 1 1 100% !important;
+            grid-column: 1 !important;
+            grid-row: 2 !important;
+            height: 30px !important;
+            min-width: 0 !important;
             width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
-            padding: 7px 12px !important;
-            font-size: 0.82rem !important;
-            display: flex !important;
+            padding: 0 6px !important;
+            font-size: 0.72rem !important;
+            flex: 1 1 auto !important;
+            display: inline-flex !important;
             align-items: center !important;
             box-sizing: border-box !important;
-            border-radius: 8px !important;
+            border-radius: 6px !important;
           }
-          .topbar-destination select {
+          .topbar-dest-select {
             width: 100% !important;
-            max-width: 100% !important;
-            font-size: 0.82rem !important;
+            font-size: 0.72rem !important;
             white-space: nowrap !important;
           }
-          .topbar-currency-toggle {
-            flex-shrink: 0 !important;
-          }
-          .currency-btn {
-            padding: 5px 8px !important;
-            font-size: 0.72rem !important;
-          }
           .topbar-cart-pill {
-            flex-shrink: 0 !important;
-            padding: 5px 8px !important;
-            font-size: 0.72rem !important;
+            height: 28px !important;
+            padding: 0 6px !important;
+            font-size: 0.70rem !important;
+          }
+          .topbar-row-access {
+            grid-column: 2 !important;
+            grid-row: 2 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            min-width: 120px !important;
+            width: auto !important;
+          }
+          .topbar-auth-inner {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            width: 100% !important;
           }
           .topbar-signin-btn,
           .topbar-apply-btn {
-            width: 100% !important;
-            display: flex !important;
+            height: 30px !important;
+            min-height: 30px !important;
+            font-size: 0.72rem !important;
+            padding: 0 8px !important;
+            border-radius: 6px !important;
+            display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             text-align: center !important;
-            min-height: 38px !important;
-            padding: 6px 10px !important;
-            font-size: 0.76rem !important;
-            border-radius: 8px !important;
             box-sizing: border-box !important;
             white-space: nowrap !important;
+            flex: 1 !important;
           }
           .access-label-full {
             display: none !important;
           }
           .access-label-compact {
             display: inline !important;
+          }
+
+          /* Product List Item Mobile Ergonomics */
+          .catalog-list-row-header {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 10px 12px !important;
+            gap: 8px !important;
+          }
+          .catalog-row-main {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+          }
+          .catalog-row-info {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+          }
+          .catalog-row-title-line {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+          }
+          .catalog-row-title {
+            font-size: 0.92rem !important;
+          }
+          .catalog-row-action-zone {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding-top: 8px !important;
+            border-top: 1px solid #f1f5f9 !important;
+          }
+          .catalog-row-price-block {
+            display: flex !important;
+            align-items: baseline !important;
+            gap: 4px !important;
+            text-align: left !important;
+          }
+          .catalog-price-label {
+            display: inline !important;
+            font-size: 0.68rem !important;
+          }
+          .catalog-price-amount {
+            font-size: 1.1rem !important;
+          }
+          .catalog-row-buttons {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+          }
+          .catalog-row-monograph-btn {
+            height: 30px !important;
+            padding: 0 8px !important;
+            font-size: 0.70rem !important;
+          }
+          .monograph-btn-label {
+            display: none !important;
+          }
+          .catalog-row-expand-btn {
+            height: 30px !important;
+            padding: 0 10px !important;
+            font-size: 0.72rem !important;
           }
           .chips-scroll-container {
             flex-wrap: wrap !important;
@@ -794,40 +1090,6 @@ export default function SharedCatalogStyles() {
             align-items: stretch !important;
             gap: 14px !important;
             margin-top: 14px !important;
-          }
-          .topbar-actions {
-            width: 100% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            gap: 6px !important;
-            margin-top: 4px !important;
-          }
-          .topbar-row-logistics {
-            display: flex !important;
-            align-items: center !important;
-            gap: 4px !important;
-            flex-wrap: nowrap !important;
-          }
-          .topbar-destination {
-            min-width: unset !important;
-            padding: 4px 8px !important;
-            font-size: 0.74rem !important;
-          }
-          .topbar-destination select {
-            font-size: 0.74rem !important;
-          }
-          .topbar-currency-toggle {
-            padding: 1px !important;
-          }
-          .currency-btn {
-            padding: 3px 6px !important;
-            font-size: 0.68rem !important;
-          }
-          .topbar-signin-btn, .topbar-apply-btn {
-            padding: 5px 10px !important;
-            font-size: 0.74rem !important;
-            min-height: 30px !important;
           }
           .header-card-actions {
             width: 100% !important;

@@ -14,66 +14,6 @@
   padding-bottom: 5rem;
 }
 
-/* ── Top Breadcrumb Bar with Back-to-Catalog Button ── */
-.pds-top-breadcrumb-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.82rem;
-  margin-bottom: -0.85rem;
-  flex-wrap: wrap;
-}
-
-.pds-back-to-catalog-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #003666;
-  font-weight: 700;
-  font-size: 0.8rem;
-  text-decoration: none;
-  transition: all 0.18s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.pds-back-to-catalog-btn:hover {
-  background: #f0f9ff;
-  border-color: #0284c7;
-  color: #0284c7;
-  transform: translateX(-2px);
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
-}
-
-.pds-breadcrumb-divider {
-  color: #94a3b8;
-  font-size: 0.85rem;
-  user-select: none;
-}
-
-.pds-breadcrumb-current {
-  color: #64748b;
-  font-weight: 600;
-  font-size: 0.8rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 380px;
-}
-
-@media (max-width: 640px) {
-  .pds-top-breadcrumb-bar {
-    margin-bottom: -1rem;
-  }
-  .pds-breadcrumb-divider,
-  .pds-breadcrumb-current {
-    display: none;
-  }
-}
-
 .pds-top-bar {
   position: sticky;
   top: 0;
@@ -2365,21 +2305,26 @@
   }
 }
 
-/* ── Enhanced Mobile Touch & Scroll Rules ── */
+/* ── Enhanced Mobile Touch & Responsive Selector (GCP Standard) ── */
 @media (max-width: 640px) {
   .pds-strength-chips {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     width: 100%;
+    overflow-x: visible;
   }
   .pds-strength-chips::-webkit-scrollbar {
     display: none;
   }
   .pds-strength-chip {
-    flex-shrink: 0;
+    flex: 1 1 calc(33.333% - 0.5rem);
+    min-width: 80px;
+    min-height: 42px;
+    justify-content: center;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.85rem;
+    text-align: center;
   }
 
   .atlas-ai-public-fab {
@@ -2393,6 +2338,12 @@
   .pds-detail-grid {
     grid-template-columns: 1fr;
     gap: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .pds-strength-chip {
+    flex: 1 1 calc(50% - 0.5rem);
   }
 }
 

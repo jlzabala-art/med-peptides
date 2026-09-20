@@ -32,8 +32,8 @@ import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
-import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav';
+import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 
 const DAY_LABELS_ES = {
   Monday: 'Lunes',
@@ -51,8 +51,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
       const urlParams = new URLSearchParams(window.location.search);
       const urlLang = urlParams.get('lang');
       if (urlLang && SUPPORTED_LANGUAGES.some(l => l.code === urlLang)) return urlLang;
-      const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
-      if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) return stored;
     }
     return 'en';
   });
@@ -92,6 +90,25 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 (Array.isArray(protocol?.peptides) && protocol.peptides.length > 0) ? protocol.peptides :
                 (Array.isArray(protocol?.compounds) && protocol.compounds.length > 0) ? protocol.compounds : [];
   const phases = protocol?.phases || [];
+
+  // ── Version & Update Date System (Homogeneous GCP Standard) ──
+  const versionInfo = useMemo(() => {
+    const rawUpdated = protocol?.updatedAt || protocol?._updatedAt;
+    let d = new Date();
+    if (rawUpdated) {
+      if (typeof rawUpdated.toDate === 'function') d = rawUpdated.toDate();
+      else {
+        const parsed = new Date(rawUpdated);
+        if (!isNaN(parsed.getTime())) d = parsed;
+      }
+    }
+    const updatedAtDate = d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    return getPublicVersionInfo(protocol?.version, updatedAtDate, lang);
+  }, [protocol, lang]);
 
   // Listen for cross-page/cross-component language synchronization
   useEffect(() => {
@@ -277,6 +294,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         }}
         onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
         loginRedirect={`/proto/${encodeURIComponent(slug)}`}
+        hideTier2={true}
         breadcrumb={[
           { label: lang === 'es' ? 'Protocolos' : 'Protocols', href: '/proto' },
           { label: displayName }
@@ -316,8 +334,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
               <span className="pds-cgmp-tag">
                 {lang === 'es' ? 'Estándares Clínicos Atlas Services' : 'Atlas Services Clinical Standards'}
               </span>
-              <span className="pds-version-tag">
+              <span className="pds-version-tag" title={`Clinical Protocol Specification Rev ${versionInfo.version}`}>
                 <span className="pds-version-dot" />
+                <span>Rev {versionInfo.version}</span>
+              </span>
+              <span className="pds-updated-tag" title="Verified clinical specification release date">
+                <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
+              </span>
+              <span className="pds-purity-tag">
+                <Layers size={13} />
                 <span>{phases.length || 3} {lang === 'es' ? 'Fases de Tratamiento' : 'Treatment Phases'}</span>
               </span>
               <span style={{
@@ -1000,14 +1025,19 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </PublicSectionCard>
 
-          {/* Institutional Verification & Clinical Governance Notice */}
-          <div className="pds-notice-card" style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
-            <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
-            <div className="pds-notice-text">
-              <strong>{t.standardizedBlueprint}</strong>
-              <span>{t.blueprintNotice}</span>
+          {/* Standardized Institutional Disclaimer & Versioning Footer */}
+          <footer className="pds-disclaimer-footer" style={{ marginTop: '2.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
+            <p className="pds-disclaimer-text" style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 0.75rem 0' }}>
+              {lang === 'es'
+                ? 'Aviso Médico Institucional: Este protocolo describe pautas de investigación clínica y formulación magistral bajo supervisión facultativa. Los compuestos descritos requieren prescripción y control analítico previo.'
+                : 'Institutional Medical Disclaimer: This protocol outlines clinical research blueprints and compounding specifications under authorized medical supervision. Described compounds require prescription and preliminary diagnostic evaluation.'}
+            </p>
+            <div className="pds-footer-metadata" style={{ fontSize: '0.70rem', color: '#94a3b8', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <span>
+                Document Ref: PROTO-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
+              </span>
             </div>
-          </div>
+          </footer>
         </div>
 
         {/* ── Modal QR Code Dialog ── */}

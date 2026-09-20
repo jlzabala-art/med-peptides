@@ -1072,9 +1072,9 @@ export default function SharedCatalogClientView({
                   {/* Items: List Mode (Default) vs Cards Mode */}
                   {viewMode === 'list' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {group.products.map(prod => (
+                      {group.products.map((prod, pIdx) => (
                         <SharedCatalogProductListRow
-                          key={prod.id}
+                          key={`${prod.id || 'prod'}-${pIdx}`}
                           prod={prod}
                           isExpanded={expandedProductIds.has(prod.id)}
                           onToggleExpand={() => toggleExpandedProduct(prod.id)}
@@ -1094,9 +1094,9 @@ export default function SharedCatalogClientView({
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {group.products.map(prod => (
+                      {group.products.map((prod, pIdx) => (
                         <SharedCatalogProductCard
-                          key={prod.id}
+                          key={`${prod.id || 'prod'}-${pIdx}`}
                           prod={prod}
                           includePrices={includePrices}
                           fxMultiplier={fxMultiplier}

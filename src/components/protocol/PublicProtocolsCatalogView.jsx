@@ -173,13 +173,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         setLang(urlLang);
         return;
       }
-
-      const savedLang = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
-      if (savedLang && ['en', 'es', 'fr', 'de', 'it'].includes(savedLang)) {
-        setLang(savedLang);
-      } else {
-        setLang('en');
-      }
+      // Strict default to English per user directive
+      setLang('en');
       
       const handleGlobalLang = (e) => {
         if (e.detail && ['en', 'es', 'fr', 'de', 'it'].includes(e.detail)) {
@@ -383,10 +378,11 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
   return (
     <div className="proto-catalog-container">
-      {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
+      {/* ── Fixed Sticky Executive Navigation ── */}
       <PublicUnifiedHeader
         track="protocols"
         lang={lang}
+        hideTier2={true}
         onLangChange={handleLangChange}
         copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://med-peptides.com/proto'}
         inquiryContextType="protocols_directory"
@@ -536,66 +532,32 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
           )}
         </div>
 
-        {/* Mobile Goal Category Selector (Mobile-First UX / Regla #23) */}
-        <div className="proto-mobile-goal-wrapper">
-          <label htmlFor="proto-mobile-goal-select" className="proto-mobile-goal-label">
-            {lang === 'es' ? 'Objetivo Terapéutico:' : 'Therapeutic Goal:'}
-          </label>
-          <select
-            id="proto-mobile-goal-select"
-            className="proto-mobile-goal-select"
-            value={selectedGoal}
-            onChange={(e) => {
-              triggerHaptic('selection');
-              setSelectedGoal(e.target.value);
-            }}
-          >
-            {GOAL_BUCKETS.map(g => {
-              const count = goalCounts[g.id] || 0;
-              const localizedLabel = GOAL_TRANSLATIONS[g.id]?.[lang] || g.label;
-              return (
-                <option key={g.id} value={g.id}>
-                  {localizedLabel} ({count})
-                </option>
-              );
-            })}
-          </select>
-        </div>
-
-        {/* Goals Ribbon Selector (Desktop & Tablet Horizontal Strip) */}
-        <div className="proto-goals-ribbon" role="tablist" aria-label={lang === 'es' ? 'Filtrar por objetivo terapéutico' : 'Filter by therapeutic goal'}>
-          {GOAL_BUCKETS.map(g => {
-            const Icon = g.icon;
-            const isActive = selectedGoal === g.id;
-            const count = goalCounts[g.id] || 0;
-            const localizedLabel = GOAL_TRANSLATIONS[g.id]?.[lang] || g.label;
-
-            return (
-              <button
-                key={g.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                className={`proto-goal-chip ${isActive ? 'is-active' : ''}`}
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setSelectedGoal(g.id);
-                }}
-              >
-                <Icon size={15} className="proto-goal-icon" style={{ color: isActive ? '#ffffff' : g.color }} />
-                <span className="proto-goal-label">{localizedLabel}</span>
-                <span className="proto-goal-count">{count}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Secondary Filter Controls */}
+        {/* Filter Controls Row */}
         <div className="proto-controls-row">
           <div className="proto-controls-left">
             <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
               {lang === 'es' ? 'Filtros:' : 'Filters:'}
             </span>
+
+            {/* Goal select */}
+            <select
+              className="proto-select-filter"
+              value={selectedGoal}
+              onChange={(e) => {
+                triggerHaptic('light');
+                setSelectedGoal(e.target.value);
+              }}
+            >
+              {GOAL_BUCKETS.map(g => {
+                const count = goalCounts[g.id] || 0;
+                const localizedLabel = GOAL_TRANSLATIONS[g.id]?.[lang] || g.label;
+                return (
+                  <option key={g.id} value={g.id}>
+                    {g.id === 'all' ? (lang === 'es' ? 'Todos los Objetivos' : 'All Goals') : localizedLabel} ({count})
+                  </option>
+                );
+              })}
+            </select>
 
             {/* Duration select */}
             <select

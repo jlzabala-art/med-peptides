@@ -54,6 +54,7 @@ import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
 import { getHumanFormatName } from '../../utils/productVariantProcessing';
+import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../config/publicVersionConfig';
 
 function WaIcon() {
   return (
@@ -306,8 +307,7 @@ export default function PublicDatasheetView({
       month: 'short',
       day: 'numeric',
     });
-    const version = product?.version ? (String(product.version).startsWith('v') ? product.version : `v${product.version}`) : 'v2.4';
-    return { version, updatedAtDate };
+    return getPublicVersionInfo(product?.version, updatedAtDate, lang);
   }, [product, lang]);
 
   // ─── Hierarchy, Formats & Strengths Matrix ─────────────────────────────────
@@ -927,20 +927,6 @@ export default function PublicDatasheetView({
 
       {/* ── Standardized Clinical Page Shell ── */}
       <PublicPageShell>
-        {/* ── Breadcrumb & Back to Catalog Action ── */}
-        <div className="pds-top-breadcrumb-bar">
-          <Link
-            href="/c/CAT-MU9L9GBN"
-            className="pds-back-to-catalog-btn"
-            title={lang === 'es' ? 'Volver al Catálogo de Productos' : 'Back to Product Catalog'}
-          >
-            <ArrowLeft size={14} />
-            <span>{lang === 'es' ? 'Catálogo de Productos' : 'Product Catalog'}</span>
-          </Link>
-          <span className="pds-breadcrumb-divider" aria-hidden="true">/</span>
-          <span className="pds-breadcrumb-current">{product?.canonicalName || product?.name || name}</span>
-        </div>
-
         {/* Universal Clinical Page Hero */}
         <PublicPageHero
           badges={

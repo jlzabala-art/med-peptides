@@ -16,7 +16,9 @@ import {
   Activity,
   ClipboardList,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  FileText,
+  Layers
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
@@ -1432,9 +1434,9 @@ export default function InteractiveReconstitutionGuide({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="irg-proto-btn-secondary"
-                  title={lang === 'es' ? 'Explorar el directorio clínico completo de protocolos' : 'Browse comprehensive clinical protocol directory'}
+                  title={lang === 'es' ? 'Explorar el catálogo clínico con los 50+ protocolos' : 'Browse comprehensive clinical protocol directory (50+)'}
                 >
-                  <ClipboardList size={14} />
+                  <Layers size={14} />
                   <span>{lang === 'es' ? 'Directorio de Protocolos (50+) ↗' : 'All Protocols Directory (50+) ↗'}</span>
                 </a>
 
@@ -1443,9 +1445,10 @@ export default function InteractiveReconstitutionGuide({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="irg-proto-btn-primary"
-                  title={lang === 'es' ? 'Abrir cronograma dosimétrico y fases en Gantt' : 'Open full clinical dosimetric roadmap & Gantt phases'}
+                  title={lang === 'es' ? 'Ver pauta clínica completa, fases y dosificación de este protocolo' : 'View full clinical protocol roadmap, phases & dosing'}
                 >
-                  <span>{lang === 'es' ? 'Explorar Blueprint (Gantt) ↗' : 'Explore Clinical Blueprint (Gantt) ↗'}</span>
+                  <FileText size={14} />
+                  <span>{lang === 'es' ? 'Ver Protocolo Completo ↗' : 'View Full Protocol ↗'}</span>
                 </a>
               </div>
             </div>

@@ -49,10 +49,10 @@ export default function SharedCatalogTopNav({
     <header className="institutional-topbar">
       <div className="topbar-inner">
         {/* Brand & Badge Group */}
-        <div className="pds-brand-group">
-          <span className="pds-brand-title">Med-Peptides</span>
-          <span className="pds-brand-divider" aria-hidden="true" />
-          <span className="pds-badge-pill">
+        <div className="topbar-brand">
+          <span className="topbar-brand-title">Med-Peptides</span>
+          <span className="topbar-brand-divider" aria-hidden="true" />
+          <span className="topbar-badge-pill">
             {lang === 'es' ? 'CATÁLOGO CLÍNICO' : 'CLINICAL CATALOG'}
           </span>
           <span className="portal-verified-badge">
@@ -61,24 +61,15 @@ export default function SharedCatalogTopNav({
           </span>
         </div>
 
-        {/* Compact Single-Row Action Controls */}
+        {/* Action Controls */}
         <div className="topbar-actions">
           {/* Destination Selector */}
           <div className="topbar-destination">
-            <span>✈️</span>
+            <span className="dest-flag-icon">✈️</span>
             <select
               value={selectedShipping}
               onChange={(e) => setSelectedShipping(e.target.value)}
-              style={{
-                background: 'transparent',
-                color: '#0f172a',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                outline: 'none',
-                whiteSpace: 'nowrap'
-              }}
+              className="topbar-dest-select"
               title={activeShipping?.label}
               aria-label="Shipping Destination"
             >
@@ -93,127 +84,111 @@ export default function SharedCatalogTopNav({
             </select>
           </div>
 
-          {/* Compact Currency Dropdown */}
-          <select
-            value={currentCurrency}
-            onChange={(e) => setCurrentCurrency(e.target.value)}
-            className="pds-lang-select"
-            style={{ minWidth: '65px', background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)', borderRadius: '6px', padding: '3px 6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-            aria-label="Currency"
-          >
-            <option value="USD" style={{ background: '#002544', color: '#ffffff' }}>$ USD</option>
-            <option value="EUR" style={{ background: '#002544', color: '#ffffff' }}>€ EUR</option>
-            <option value="AED" style={{ background: '#002544', color: '#ffffff' }}>AED</option>
-          </select>
-
-          {/* Harmonized Language Dropdown */}
-          <select
-            value={lang}
-            onChange={(e) => handleLangToggle(e.target.value)}
-            className="pds-lang-select"
-            style={{ background: 'rgba(255, 255, 255, 0.12)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)', borderRadius: '6px', padding: '3px 6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-            aria-label="Language"
-          >
-            <option value="en" style={{ background: '#002544', color: '#ffffff' }}>🇺🇸 EN</option>
-            <option value="es" style={{ background: '#002544', color: '#ffffff' }}>🇪🇸 ES</option>
-          </select>
-
-          {/* Institutional Inquiry Button */}
-          {setIsInquiryDrawerOpen && (
-            <button
-              type="button"
-              className="pds-btn pds-btn-contact"
-              onClick={() => setIsInquiryDrawerOpen(true)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.10)',
-                color: '#e2e8f0',
-                border: '1px solid rgba(255, 255, 255, 0.22)',
-                borderRadius: '6px',
-                padding: '4px 8px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                cursor: 'pointer'
-              }}
-              title={lang === 'es' ? 'Consulta Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
+          {/* Quick Tools: Currency, Language, Inquiry Contact & Cart */}
+          <div className="topbar-quick-tools">
+            <select
+              value={currentCurrency}
+              onChange={(e) => setCurrentCurrency(e.target.value)}
+              className="topbar-select topbar-select-currency"
+              aria-label="Currency"
             >
-              <Mail size={13} />
-              <span className="access-label-full">{lang === 'es' ? 'Contacto' : 'Contact'}</span>
-            </button>
-          )}
+              <option value="USD">$ USD</option>
+              <option value="EUR">€ EUR</option>
+              <option value="AED">AED</option>
+            </select>
 
-          {/* Cart Pill (Active only when items selected) */}
-          {cartTotalUnits > 0 && (
-            <button
-              type="button"
-              onClick={() => setIsCartOpen(!isCartOpen)}
-              className="topbar-cart-pill"
-              title={t('order.title', 'Review Order')}
+            <select
+              value={lang}
+              onChange={(e) => handleLangToggle(e.target.value)}
+              className="topbar-select topbar-select-lang"
+              aria-label="Language"
             >
-              <Package size={14} />
-              <span>{cartTotalUnits} Vials</span>
-              <span>•</span>
-              <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
-            </button>
-          )}
+              <option value="en">🇺🇸 EN</option>
+              <option value="es">🇪🇸 ES</option>
+            </select>
+
+            {setIsInquiryDrawerOpen && (
+              <button
+                type="button"
+                className="topbar-contact-btn"
+                onClick={() => setIsInquiryDrawerOpen(true)}
+                title={lang === 'es' ? 'Consulta Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
+              >
+                <Mail size={13} />
+                <span className="contact-label-text">{lang === 'es' ? 'Contacto' : 'Contact'}</span>
+              </button>
+            )}
+
+            {cartTotalUnits > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className="topbar-cart-pill"
+                title={t('order.title', 'Review Order')}
+              >
+                <Package size={13} />
+                <span>{cartTotalUnits}</span>
+                <span>•</span>
+                <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
+              </button>
+            )}
+          </div>
 
           {/* Clinical Provider Auth / Portal Access */}
-          {isAuthenticated ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <a
-                href={
-                  activeRole === 'admin' ? '/admin' :
-                  activeRole === 'doctor' || activeRole === 'medical_director' ? '/doctor' :
-                  activeRole === 'wholesaler' ? '/wholesaler' :
-                  activeRole === 'supplier' ? '/supplier' :
-                  activeRole === 'clinic' ? '/clinic' : '/patient'
-                }
-                className="topbar-apply-btn"
-                style={{ textDecoration: 'none' }}
-              >
-                <Building2 size={13} />
-                <span className="access-label-full">{lang === 'es' ? 'Mi Portal' : 'My Portal'}</span>
-                <span className="access-label-compact">Portal</span>
-              </a>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    await logout();
-                  } catch (e) {
-                    console.error('Sign out error:', e);
+          <div className="topbar-row-access">
+            {isAuthenticated ? (
+              <div className="topbar-auth-inner">
+                <a
+                  href={
+                    activeRole === 'admin' ? '/admin' :
+                    activeRole === 'doctor' || activeRole === 'medical_director' ? '/doctor' :
+                    activeRole === 'wholesaler' ? '/wholesaler' :
+                    activeRole === 'supplier' ? '/supplier' :
+                    activeRole === 'clinic' ? '/clinic' : '/patient'
                   }
-                }}
-                className="topbar-signin-btn"
-                style={{ padding: '4px 8px' }}
-                title={`Sign Out (${user?.email || 'Provider'})`}
-              >
-                <LogOut size={13} color="#f87171" />
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <a
-                href="/login"
-                className="topbar-signin-btn"
-                title="Provider Authentication"
-              >
-                <Lock size={13} color="#ffffff" />
-                <span>{lang === 'es' ? 'Acceder' : 'Sign In'}</span>
-              </a>
-              <button
-                type="button"
-                onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
-                className="topbar-apply-btn"
-              >
-                <Building2 size={13} />
-                <span className="access-label-full">{lang === 'es' ? 'Solicitar Acceso' : 'Apply'}</span>
-                <span className="access-label-compact">{lang === 'es' ? 'Acceso' : 'Apply'}</span>
-              </button>
-            </div>
-          )}
+                  className="topbar-apply-btn"
+                >
+                  <Building2 size={13} />
+                  <span className="access-label-full">{lang === 'es' ? 'Mi Portal' : 'My Portal'}</span>
+                  <span className="access-label-compact">Portal</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await logout();
+                    } catch (e) {
+                      console.error('Sign out error:', e);
+                    }
+                  }}
+                  className="topbar-signin-btn"
+                  title={`Sign Out (${user?.email || 'Provider'})`}
+                >
+                  <LogOut size={13} color="#f87171" />
+                </button>
+              </div>
+            ) : (
+              <div className="topbar-auth-inner">
+                <a
+                  href="/login"
+                  className="topbar-signin-btn"
+                  title="Provider Authentication"
+                >
+                  <Lock size={13} color="#ffffff" />
+                  <span>{lang === 'es' ? 'Acceder' : 'Sign In'}</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
+                  className="topbar-apply-btn"
+                >
+                  <Building2 size={13} />
+                  <span className="access-label-full">{lang === 'es' ? 'Solicitar Acceso' : 'Apply'}</span>
+                  <span className="access-label-compact">{lang === 'es' ? 'Acceso' : 'Apply'}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
