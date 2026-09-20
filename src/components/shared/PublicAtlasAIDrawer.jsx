@@ -40,6 +40,7 @@ export default function PublicAtlasAIDrawer({
   catalogInventory = [],    // [{ name, category, purity, format }]
   storageKey = 'default',
   onOpenRegisterModal = null,
+  hideFloatingTrigger = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -681,50 +682,53 @@ export default function PublicAtlasAIDrawer({
   return (
     <>
       {/* ── Floating Launcher Trigger ── */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="atlas-ai-public-fab"
-        title="Open Atlas AI Technical Research Copilot"
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 9999,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '9px',
-          background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
-          color: '#ffffff',
-          border: '1px solid rgba(56, 189, 248, 0.45)',
-          borderRadius: '24px',
-          padding: '10px 18px',
-          fontSize: '0.84rem',
-          fontWeight: 800,
-          cursor: 'pointer',
-          boxShadow: '0 8px 24px -4px rgba(0, 54, 102, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15)',
-          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <Sparkles size={16} color="#38bdf8" />
-        <span style={{ letterSpacing: '0.01em' }}>
-          Atlas AI Technical Inquiry
-        </span>
-        <span
+      {!hideFloatingTrigger && (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="atlas-ai-public-fab"
+          title="Open Atlas AI Technical Research Copilot"
           style={{
-            fontSize: '0.70rem',
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 45,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '9px',
+            background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+            color: '#ffffff',
+            border: '1px solid rgba(56, 189, 248, 0.45)',
+            borderRadius: '24px',
+            padding: '10px 18px',
+            fontSize: '0.84rem',
             fontWeight: 800,
-            backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.25)' : 'rgba(56, 189, 248, 0.2)',
-            color: isBlocked ? '#fca5a5' : '#bae6fd',
-            border: `1px solid ${isBlocked ? '#f87171' : 'rgba(56, 189, 248, 0.35)'}`,
-            padding: '2px 7px',
-            borderRadius: '10px',
+            cursor: 'pointer',
+            boxShadow: '0 8px 24px -4px rgba(0, 54, 102, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15)',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            backdropFilter: 'blur(8px)',
           }}
         >
-          {isBlocked ? 'Limit Reached' : `${remaining}/${limit}`}
-        </span>
-      </button>
+          <Sparkles size={16} color="#38bdf8" />
+          <span className="atlas-ai-fab-label" style={{ letterSpacing: '0.01em' }}>
+            Atlas AI Technical Inquiry
+          </span>
+          <span
+            className="atlas-ai-fab-badge"
+            style={{
+              fontSize: '0.70rem',
+              fontWeight: 800,
+              backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.25)' : 'rgba(56, 189, 248, 0.2)',
+              color: isBlocked ? '#fca5a5' : '#bae6fd',
+              border: `1px solid ${isBlocked ? '#f87171' : 'rgba(56, 189, 248, 0.35)'}`,
+              padding: '2px 7px',
+              borderRadius: '10px',
+            }}
+          >
+            {isBlocked ? 'Limit Reached' : `${remaining}/${limit}`}
+          </span>
+        </button>
+      )}
 
       {/* ── Slide-Over Drawer ── */}
       {isOpen && (

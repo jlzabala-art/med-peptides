@@ -107,6 +107,7 @@ export default function SharedCatalogProductListRow({
             protocols={protocols}
             setSelectedPublicProtocol={setSelectedPublicProtocol}
             catalogMeta={catalogMeta}
+            hideMasterImage={true}
             t={t}
           />
         </div>

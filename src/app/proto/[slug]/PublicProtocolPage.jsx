@@ -600,7 +600,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
           {/* Section 2: Phased Timeline Gantt */}
           <PublicSectionCard
-            id="pathway-timeline"
+            id="titration-phases"
             icon={Layers}
             category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
             title={t.sec2Title}
@@ -1089,6 +1089,50 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </div>
         )}
       </PublicPageShell>
+
+      {/* Mobile Sticky Bottom Action Bar (GCP Standard) */}
+      <div className="mobile-proto-sticky-bar" style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: '#ffffff',
+        borderTop: '1px solid #e2e8f0',
+        padding: '10px 16px max(10px, env(safe-area-inset-bottom, 10px)) 16px',
+        display: 'none',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        zIndex: 90,
+        boxShadow: '0 -4px 16px rgba(0, 0, 0, 0.06)'
+      }}>
+        <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+          <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {displayName}
+          </div>
+          <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
+            {displayDuration} • {phases.length || 3} {lang === 'es' ? 'Fases' : 'Phases'}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsInquiryDrawerOpen(true)}
+          style={{
+            background: '#003666',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '9px 16px',
+            fontSize: '0.78rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
+          }}
+        >
+          {lang === 'es' ? 'Consultar Protocolo' : 'Inquire Protocol'}
+        </button>
+      </div>
 
       {/* ── Single Public Atlas AI Research Copilot Floating Trigger ── */}
       <PublicAtlasAIDrawer

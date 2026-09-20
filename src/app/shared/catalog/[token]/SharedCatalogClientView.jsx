@@ -2027,6 +2027,7 @@ export default function SharedCatalogClientView({
 
       {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
+        hideFloatingTrigger={isCartOpen || isInquiryDrawerOpen || isRegisterModalOpen || Boolean(selectedPublicProtocol)}
         contextType="catalog"
         catalogInventory={products.map(p => ({
           name: p.canonicalName,

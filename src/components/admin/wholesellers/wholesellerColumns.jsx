@@ -11,7 +11,8 @@ import React, { useState } from 'react';
 import StatusBadge from '../../ui/StatusBadge';
 import CopyableId from '../../ui/CopyableId';
 import QuoteQuickActionDropdown from '../../ui/QuoteQuickActionDropdown';
-import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X } from '@/lib/icons';
+import PricingTierSelectorCell from '../customers/PricingTierSelectorCell';
+import { Globe, Mail, Phone, Package, ShoppingBag, Edit2, Check, X, Share2, Eye } from '@/lib/icons';
 
 // ── Inline editable cell ─────────────────────────────────────────────────────
 function InlineEditableCell({ value, onSave, placeholder = '—' }) {
@@ -58,12 +59,12 @@ function InlineEditableCell({ value, onSave, placeholder = '—' }) {
 }
 
 // ── Column definitions ────────────────────────────────────────────────────────
-export function getWholesellerColumns({ onUpdate } = {}) {
+export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace } = {}) {
   return [
     {
       key: 'companyName',
       header: 'Distributor',
-      width: '25%',
+      width: '23%',
       sortable: true,
       render: (row) => (
         <div>
@@ -81,7 +82,7 @@ export function getWholesellerColumns({ onUpdate } = {}) {
     {
       key: 'contactEmail',
       header: 'Contact',
-      width: '20%',
+      width: '18%',
       sortable: true,
       render: (row) => (
         <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -112,36 +113,34 @@ export function getWholesellerColumns({ onUpdate } = {}) {
     {
       key: 'pricingTier',
       header: 'Pricing Tier',
-      width: '12%',
+      width: '15%',
       sortable: true,
       render: (row) => (
-        <InlineEditableCell
-          value={row.pricingTier}
-          placeholder="—"
-          onSave={(val) => onUpdate?.(row.id, { pricingTier: val })}
+        <PricingTierSelectorCell
+          customer={row}
+          customerType="wholesaler"
+          onUpdate={onUpdate}
         />
       ),
     },
     {
       key: 'catalogAccess',
       header: 'Catalog Access',
-      width: '15%',
+      width: '12%',
       sortable: false,
       render: (row) => {
         const hasRestriction = (row.authorizedVariantIds?.length || 0) > 0;
         return (
           <div style={{ fontSize: '12px' }}>
             {hasRestriction ? (
-              <div>
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '4px',
-                  background: 'var(--color-warning-bg, #fffbeb)', color: 'var(--color-warning, #d97706)',
-                  borderRadius: '12px', padding: '2px 8px', fontSize: '11px', fontWeight: 500,
-                }}>
-                  <Package size={10} />
-                  {row.authorizedVariantIds.length} variants
-                </span>
-              </div>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                background: 'var(--color-warning-bg, #fffbeb)', color: 'var(--color-warning, #d97706)',
+                borderRadius: '12px', padding: '2px 8px', fontSize: '11px', fontWeight: 500,
+              }}>
+                <Package size={10} />
+                {row.authorizedVariantIds.length} variants
+              </span>
             ) : (
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: '4px',
@@ -169,7 +168,16 @@ export function getWholesellerColumns({ onUpdate } = {}) {
       width: '10%',
       align: 'right',
       render: (row) => (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px' }} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => onSharePage?.(row)}
+            className="gcp-btn-secondary"
+            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}
+            title="Compartir Página Pública (Catálogo / Protocolo) con margen confirmado"
+          >
+            <Share2 size={12} />
+          </button>
           <QuoteQuickActionDropdown 
             size="sm" 
             variant="icon" 
@@ -180,6 +188,15 @@ export function getWholesellerColumns({ onUpdate } = {}) {
               wholesalerName: row.companyName || row.name 
             }} 
           />
+          <button
+            type="button"
+            onClick={() => onOpenWorkspace?.(row)}
+            className="gcp-btn-secondary"
+            style={{ padding: '4px 7px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center' }}
+            title="Ver Workspace / Drawer 360°"
+          >
+            <Eye size={13} />
+          </button>
         </div>
       ),
     },

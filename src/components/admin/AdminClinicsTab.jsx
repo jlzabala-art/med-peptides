@@ -15,6 +15,9 @@ import { exportToCSV, triggerServerExport } from '../../utils/universalExporter'
 import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
 import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 import ClinicProfileWorkspace from './clinics/ClinicProfileWorkspace';
+import PricingTierSelectorCell from './customers/PricingTierSelectorCell';
+import CustomerShareModal from './customers/CustomerShareModal';
+import CustomerSharedLinksCard from './customers/CustomerSharedLinksCard';
 import TerritoryFilter from './clinics/TerritoryFilter';
 import PageHeader from '../ui/PageHeader';
 import AIQuickActionButton from '../ui/AIQuickActionButton';
@@ -22,6 +25,7 @@ import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTable from '../ui/DataTable';
 import StandardDrawer from '../ui/StandardDrawer';
 import { useToast } from '../../hooks/useToast';
+import { Share2 } from '@/lib/icons';
 import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 import useDataModuleState from '../../hooks/useDataModuleState';
 import MobileClinicCard from '../shared/mobile/MobileClinicCard';
@@ -113,6 +117,7 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
   const setSelectedTerritory = (val) => updateUrlParam('territory', val);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
+  const [shareModalClinic, setShareModalClinic] = useState(null);
   const { toast } = useToast();
 
   const filtered = useMemo(() => {
@@ -133,7 +138,7 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     {
       key: 'name',
       header: 'Clinic / Medical Center',
-      width: '38%',
+      width: '28%',
       render: (c) => {
         const typeLabel = c.type ? c.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Clinic';
         return (
@@ -156,32 +161,49 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     },
     {
       key: 'location',
-      header: 'Location & Address',
-      width: '28%',
+      header: 'Location & Country',
+      width: '18%',
       render: (c) => {
         const loc = [c.city, c.country].filter(Boolean).join(', ');
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              📍 {loc || 'Location on file'}
-            </span>
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {c.streetAddress || c.state || 'Address registered'}
-            </span>
-          </div>
+          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            📍 {loc || 'Location on file'}
+          </span>
         );
       }
     },
     {
+      key: 'pricingTier',
+      header: 'Pricing Tier',
+      width: '18%',
+      render: (c) => (
+        <PricingTierSelectorCell
+          customer={c}
+          customerType="clinic"
+          onUpdate={async (id, data) => {
+            try {
+              const { updateDoc, doc } = await import('firebase/firestore');
+              const { db } = await import('@/firebase');
+              await updateDoc(doc(db, 'clinics', id), data);
+              refresh();
+            } catch (err) {
+              console.error('Failed to update clinic tier:', err);
+              throw err;
+            }
+          }}
+        />
+      )
+    },
+    {
       key: 'contact',
-      header: 'Direct Contact',
-      width: '20%',
+      header: 'Contact',
+      width: '18%',
       render: (c) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+          <span style={{ fontSize: '0.80rem', fontWeight: 600, color: 'var(--text-main)' }}>
             📞 {c.phone || '—'}
           </span>
-          <span style={{ fontSize: '0.74rem', color: '#0369a1' }}>
+          <span style={{ fontSize: '0.72rem', color: '#0369a1' }}>
             {c.email || (c.website ? new URL(c.website).hostname.replace('www.', '') : '—')}
           </span>
         </div>
@@ -190,11 +212,20 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     {
       key: 'status',
       header: 'Status & Actions',
-      width: '14%',
+      width: '18%',
       render: (c) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }} onClick={e => e.stopPropagation()}>
           <StatusBadge status={c.status || 'active'} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button
+              type="button"
+              onClick={() => setShareModalClinic(c)}
+              className="gcp-btn-secondary"
+              style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}
+              title="Compartir Página Pública (Catálogo / Protocolo) con margen confirmado"
+            >
+              <Share2 size={12} />
+            </button>
             <QuoteQuickActionDropdown 
               size="sm" 
               variant="icon" 
@@ -208,7 +239,7 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
             <button
               onClick={() => setSelectedClinic(c)}
               className="gcp-btn-icon"
-              title="Open Clinic Profile"
+              title="Open Clinic Profile Workspace (360°)"
               style={{ padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer' }}
             >
               👁️
@@ -283,29 +314,12 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
   ];
 
   const clinicExpandableRender = (clinic) => (
-    <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Contact & Address</span>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a', marginTop: '4px' }}>{clinic.address || '—'}</div>
-          <div style={{ fontSize: '0.8rem', color: '#475569' }}>{clinic.email || '—'} · {clinic.phone || '—'}</div>
-        </div>
-        <div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Account Manager</span>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a', marginTop: '4px' }}>{clinic.manager || 'Unassigned'}</div>
-        </div>
-        {clinic.insights && clinic.insights.length > 0 && (
-          <div style={{ gridColumn: '1 / -1' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Clinical & Commercial Insights</span>
-            <ul style={{ margin: '4px 0 0', paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#334155' }}>
-              {clinic.insights.map((ins, i) => (
-                <li key={i}>{ins}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
+    <CustomerSharedLinksCard
+      customer={clinic}
+      customerType="clinic"
+      onOpenShareModal={() => setShareModalClinic(clinic)}
+      onOpenWorkspace={() => setSelectedClinic(clinic)}
+    />
   );
 
   return (
@@ -386,11 +400,21 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
             />
           )}
 
+          {/* Customer Share Modal (Lotusland baseline + margin) */}
+          <CustomerShareModal
+            isOpen={Boolean(shareModalClinic)}
+            onClose={() => setShareModalClinic(null)}
+            customer={shareModalClinic}
+            customerType="clinic"
+            onSuccess={() => refresh()}
+          />
+
           <StandardDrawer 
             isOpen={!!selectedClinic} 
             onClose={() => setSelectedClinic(null)} 
-            title={selectedClinic?.name}
-            width="50vw"
+            hideHeader={true}
+            bodyPadding="0"
+            width="min(920px, 95vw)"
           >
             {selectedClinic && <ClinicProfileWorkspace clinic={selectedClinic} onClose={() => setSelectedClinic(null)} />}
           </StandardDrawer>

@@ -19,6 +19,8 @@ import DataModule from '../ui/DataModule';
 import StandardDrawer from '../ui/StandardDrawer';
 import CreateWholesellerDrawer from './CreateWholesellerDrawer';
 import WholesalerProfileWorkspace from './wholesellers/WholesalerProfileWorkspace';
+import CustomerShareModal from './customers/CustomerShareModal';
+import CustomerSharedLinksCard from './customers/CustomerSharedLinksCard';
 import Modal from '../ui/Modal';
 import AccountManagerSelect from '../ui/AccountManagerSelect';
 import { DataTableSkeleton } from '../ui';
@@ -144,6 +146,7 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState('');
+  const [shareModalWholesaler, setShareModalWholesaler] = useState(null);
 
   if (loading && !wholesellers.length) {
     return (
@@ -188,6 +191,8 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
 
   const columns = getWholesellerColumns({
     onUpdate: (id, data) => handleUpdate(id, data),
+    onSharePage: (w) => setShareModalWholesaler(w),
+    onOpenWorkspace: (w) => setSelectedWholeseller(w)
   });
 
   return (
@@ -269,6 +274,14 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
         data={paginatedData}
         columns={columns}
         keyField="id"
+        expandableRender={(row) => (
+          <CustomerSharedLinksCard
+            customer={row}
+            customerType="wholesaler"
+            onOpenShareModal={() => setShareModalWholesaler(row)}
+            onOpenWorkspace={() => setSelectedWholeseller(row)}
+          />
+        )}
         onRowClick={(d) => setSelectedWholeseller(d)}
         emptyState={{
           title: 'No wholesellers found',
@@ -283,6 +296,15 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
           onPageChange: setCurrentPage,
           onPageSizeChange: setPageSize,
         }}
+      />
+
+      {/* Customer Share Modal (Lotusland baseline + margin) */}
+      <CustomerShareModal
+        isOpen={Boolean(shareModalWholesaler)}
+        onClose={() => setShareModalWholesaler(null)}
+        customer={shareModalWholesaler}
+        customerType="wholesaler"
+        onSuccess={() => refresh()}
       />
 
       {/* Create Wholeseller Drawer */}
@@ -300,8 +322,9 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
       <StandardDrawer
         isOpen={Boolean(selectedWholeseller)}
         onClose={() => setSelectedWholeseller(null)}
-        title={selectedWholeseller?.name || 'Wholesaler Profile'}
-        width="820px"
+        hideHeader={true}
+        bodyPadding="0"
+        width="min(920px, 95vw)"
       >
         {selectedWholeseller && (
           <WholesalerProfileWorkspace

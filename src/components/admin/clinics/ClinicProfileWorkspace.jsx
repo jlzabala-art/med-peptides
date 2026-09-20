@@ -556,17 +556,23 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
           </button>
           <button
             onClick={onClose}
+            className="gcp-btn-secondary"
             style={{
-              padding: '6px 10px',
-              background: 'none',
-              border: '1px solid var(--border)',
+              padding: '6px 14px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
               borderRadius: '8px',
               cursor: 'pointer',
-              color: 'var(--text-muted)'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#f1f5f9',
+              border: '1px solid #cbd5e1',
+              color: '#334155'
             }}
-            title="Close Drawer"
+            title="Cerrar panel"
           >
-            <X size={18} />
+            <X size={15} /> Cerrar
           </button>
         </div>
       </div>
@@ -1352,6 +1358,79 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
           )}
         </div>
 
+      </div>
+
+      {/* ── Standard GCP Sticky Footer ── */}
+      <div
+        style={{
+          flexShrink: 0,
+          position: 'sticky',
+          bottom: 0,
+          backgroundColor: '#ffffff',
+          borderTop: '1px solid var(--border)',
+          padding: '12px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.04)',
+          zIndex: 20
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.80rem', color: 'var(--text-muted)' }}>
+          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{effectiveClinic.name}</span>
+          <span>•</span>
+          <span>Physicians: <strong style={{ color: '#15803d' }}>{physicians.length}</strong></span>
+          <span>•</span>
+          <span>Tier: <strong style={{ color: '#2563eb' }}>{effectiveClinic.tier || 'Standard'}</strong></span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="gcp-btn-secondary"
+            style={{
+              padding: '8px 20px',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              borderRadius: '8px',
+              cursor: 'pointer',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              color: '#334155'
+            }}
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
+              setWorkspaceIntent('sell', activeWorkspaceId);
+              setTargetEntity(activeWorkspaceId, {
+                id: effectiveClinic.id,
+                name: effectiveClinic.name,
+                type: 'clinic'
+              });
+              setDrawerOpen(true);
+              notifier.success(`Configured Workspace for Clinic "${effectiveClinic.name}"!`);
+            }}
+            className="gcp-btn-primary"
+            style={{
+              padding: '8px 20px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            <Briefcase size={15} /> Quote in Workspace
+          </button>
+        </div>
       </div>
 
       <style>{`

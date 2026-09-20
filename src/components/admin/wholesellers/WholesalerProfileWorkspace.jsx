@@ -237,19 +237,23 @@ export default function WholesalerProfileWorkspace({
           <button
             type="button"
             onClick={onClose}
+            className="gcp-btn-secondary"
             style={{
-              padding: '6px 10px',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #cbd5e1',
+              padding: '6px 14px',
+              fontSize: '0.80rem',
+              fontWeight: 600,
               borderRadius: '8px',
               cursor: 'pointer',
-              color: '#475569',
-              display: 'flex',
-              alignItems: 'center'
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#f1f5f9',
+              border: '1px solid #cbd5e1',
+              color: '#334155'
             }}
-            title="Close Drawer"
+            title="Cerrar panel"
           >
-            <X size={18} />
+            <X size={15} /> Cerrar
           </button>
         </div>
       </div>
@@ -1016,6 +1020,71 @@ export default function WholesalerProfileWorkspace({
             )}
           </div>
 
+        </div>
+      </div>
+
+      {/* ── Standard GCP Sticky Footer ── */}
+      <div
+        style={{
+          flexShrink: 0,
+          position: 'sticky',
+          bottom: 0,
+          backgroundColor: '#ffffff',
+          borderTop: '1px solid var(--border)',
+          padding: '12px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.04)',
+          zIndex: 20
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.80rem', color: 'var(--text-muted)' }}>
+          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{displayName}</span>
+          <span>•</span>
+          <span>Terms: <strong style={{ color: '#16a34a' }}>{formData.paymentTerms}</strong></span>
+          <span>•</span>
+          <span>Margin: <strong style={{ color: '#c2410c' }}>{formData.discountMargin}%</strong></span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="gcp-btn-secondary"
+            style={{
+              padding: '8px 20px',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              borderRadius: '8px',
+              cursor: 'pointer',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              color: '#334155'
+            }}
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              notifier.info(`Initiating B2B Purchase Order for ${displayName}`);
+            }}
+            className="gcp-btn-primary"
+            style={{
+              padding: '8px 20px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            <Package size={15} /> New B2B Order
+          </button>
         </div>
       </div>
     </div>

@@ -35,6 +35,8 @@ export default function SharedCatalogStyles() {
           display: flex;
           align-items: center;
           gap: 8px;
+          flex-shrink: 0;
+          white-space: nowrap;
         }
         .topbar-brand-title {
           font-size: 0.95rem;
@@ -43,6 +45,8 @@ export default function SharedCatalogStyles() {
           letter-spacing: -0.01em;
           display: inline-flex;
           align-items: center;
+          white-space: nowrap !important;
+          flex-shrink: 0;
         }
         .topbar-brand-divider {
           width: 1px;
@@ -73,7 +77,9 @@ export default function SharedCatalogStyles() {
           font-weight: 700;
           padding: 2px 8px;
           border-radius: 6px;
-            .topbar-actions {
+          white-space: nowrap;
+        }
+        .topbar-actions {
           display: flex;
           align-items: center;
           flex-wrap: nowrap;
@@ -245,8 +251,9 @@ export default function SharedCatalogStyles() {
           background: #0369a1;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
         }
-        .access-label-compact {
-          display: none;
+        .access-label-text {
+          font-weight: 700;
+          letter-spacing: -0.01em;
         }
 
         /* Product List Row — Standard GCP Console High-Density Item */
@@ -731,7 +738,37 @@ export default function SharedCatalogStyles() {
 
         @media (max-width: 768px) {
           .catalog-container {
-            padding: 10px 8px 115px 8px;
+            padding: 10px 8px calc(140px + env(safe-area-inset-bottom, 16px)) 8px !important;
+          }
+          .tab-button {
+            min-height: 44px !important;
+            flex: 1 1 0 !important;
+            justify-content: center !important;
+            font-size: 0.82rem !important;
+            border-radius: 10px !important;
+            box-sizing: border-box !important;
+          }
+          .tab-button.active {
+            background: #003666 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25) !important;
+          }
+          .tab-button.inactive {
+            background: #ffffff !important;
+            color: #475569 !important;
+            border: 1px solid #cbd5e1 !important;
+          }
+          .filter-bar {
+            position: sticky !important;
+            top: 72px !important;
+            z-index: 40 !important;
+            padding: 10px 12px !important;
+            border-radius: 12px !important;
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 4px 16px rgba(0, 54, 102, 0.08) !important;
+            border-color: #cbd5e1 !important;
+            margin-bottom: 12px !important;
           }
           .header-card {
             padding: 16px 14px;
@@ -741,32 +778,34 @@ export default function SharedCatalogStyles() {
             font-size: 1.35rem !important;
           }
           .header-meta-container {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
             gap: 8px !important;
             width: 100% !important;
             margin-top: 14px !important;
           }
           .header-meta-pill {
-            width: 100% !important;
             box-sizing: border-box !important;
-            display: flex !important;
+            display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             text-align: center !important;
-            padding: 8px 10px !important;
-            font-size: 0.74rem !important;
+            padding: 6px 12px !important;
+            font-size: 0.75rem !important;
             border-radius: 8px !important;
             white-space: nowrap !important;
+            background-color: rgba(255, 255, 255, 0.16) !important;
+            border: 1px solid rgba(255, 255, 255, 0.22) !important;
+            color: #ffffff !important;
           }
           .header-meta-pill.pill-full {
-            grid-column: 1 / -1 !important;
             width: 100% !important;
             font-size: 0.78rem !important;
             font-weight: 700 !important;
             background-color: rgba(255, 255, 255, 0.22) !important;
             border: 1px solid rgba(255, 255, 255, 0.28) !important;
-            padding: 9px 12px !important;
+            padding: 8px 12px !important;
+            color: #ffffff !important;
           }
           .product-card {
             padding: 12px 10px !important;
@@ -904,8 +943,7 @@ export default function SharedCatalogStyles() {
             background-color: #cbd5e1 !important;
             margin: 0 auto 10px auto !important;
           }
-        }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .topbar-inner {
             display: grid !important;
             grid-template-columns: 1fr auto !important;
@@ -923,9 +961,17 @@ export default function SharedCatalogStyles() {
             gap: 6px !important;
             justify-content: flex-start !important;
             width: auto !important;
+            min-width: 0 !important;
           }
           .topbar-brand-title {
             font-size: 0.88rem !important;
+            white-space: nowrap !important;
+          }
+          .topbar-brand-divider {
+            display: none !important;
+          }
+          .topbar-badge-pill {
+            display: none !important;
           }
           .portal-verified-badge {
             display: none !important;
@@ -942,14 +988,26 @@ export default function SharedCatalogStyles() {
             gap: 5px !important;
           }
           .topbar-select {
-            height: 28px !important;
-            font-size: 0.70rem !important;
-            padding: 0 4px !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            font-size: 0.74rem !important;
+            padding: 0 6px !important;
+            border-radius: 8px !important;
+            box-sizing: border-box !important;
           }
           .topbar-contact-btn {
-            height: 28px !important;
-            font-size: 0.70rem !important;
-            padding: 0 6px !important;
+            width: 32px !important;
+            min-width: 32px !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            border-radius: 8px !important;
           }
           .contact-label-text {
             display: none !important;
@@ -957,26 +1015,39 @@ export default function SharedCatalogStyles() {
           .topbar-destination {
             grid-column: 1 !important;
             grid-row: 2 !important;
-            height: 30px !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
             min-width: 0 !important;
             width: 100% !important;
-            padding: 0 6px !important;
-            font-size: 0.72rem !important;
+            padding: 0 8px !important;
+            font-size: 0.74rem !important;
             flex: 1 1 auto !important;
             display: inline-flex !important;
             align-items: center !important;
             box-sizing: border-box !important;
-            border-radius: 6px !important;
+            border-radius: 8px !important;
           }
           .topbar-dest-select {
             width: 100% !important;
-            font-size: 0.72rem !important;
+            font-size: 0.74rem !important;
             white-space: nowrap !important;
           }
           .topbar-cart-pill {
-            height: 28px !important;
-            padding: 0 6px !important;
-            font-size: 0.70rem !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            padding: 0 10px !important;
+            font-size: 0.76rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            border-radius: 8px !important;
+            gap: 5px !important;
+          }
+          .cart-pill-total {
+            display: none !important;
           }
           .topbar-row-access {
             grid-column: 2 !important;
@@ -995,11 +1066,12 @@ export default function SharedCatalogStyles() {
           }
           .topbar-signin-btn,
           .topbar-apply-btn {
-            height: 30px !important;
-            min-height: 30px !important;
-            font-size: 0.72rem !important;
-            padding: 0 8px !important;
-            border-radius: 6px !important;
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            font-size: 0.74rem !important;
+            padding: 0 10px !important;
+            border-radius: 8px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -1007,12 +1079,6 @@ export default function SharedCatalogStyles() {
             box-sizing: border-box !important;
             white-space: nowrap !important;
             flex: 1 !important;
-          }
-          .access-label-full {
-            display: none !important;
-          }
-          .access-label-compact {
-            display: inline !important;
           }
 
           /* Product List Item Mobile Ergonomics */
@@ -1069,17 +1135,27 @@ export default function SharedCatalogStyles() {
             gap: 6px !important;
           }
           .catalog-row-monograph-btn {
-            height: 30px !important;
-            padding: 0 8px !important;
-            font-size: 0.70rem !important;
+            height: 32px !important;
+            padding: 0 10px !important;
+            font-size: 0.72rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            border-radius: 6px !important;
           }
           .monograph-btn-label {
             display: none !important;
           }
           .catalog-row-expand-btn {
-            height: 30px !important;
-            padding: 0 10px !important;
-            font-size: 0.72rem !important;
+            height: 32px !important;
+            padding: 0 12px !important;
+            font-size: 0.74rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            border-radius: 6px !important;
           }
           .chips-scroll-container {
             flex-wrap: wrap !important;
@@ -1144,12 +1220,125 @@ export default function SharedCatalogStyles() {
             justify-content: center !important;
             min-height: 44px !important;
           }
+          /* Atlas AI Technical Inquiry Floating Button — Mobile Non-Obstructive Guard */
+          .atlas-ai-public-fab {
+            bottom: 84px !important;
+            right: 16px !important;
+            width: 48px !important;
+            height: 48px !important;
+            min-width: 48px !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 6px 20px rgba(0, 54, 102, 0.45) !important;
+            z-index: 45 !important;
+          }
+          .atlas-ai-fab-label {
+            display: none !important;
+          }
+          .atlas-ai-fab-badge {
+            position: absolute !important;
+            top: -2px !important;
+            right: -2px !important;
+            font-size: 0.62rem !important;
+            padding: 1px 5px !important;
+            border-radius: 9999px !important;
+          }
           .checkout-form-grid {
             grid-template-columns: 1fr !important;
           }
           .checkout-modal-card {
             padding: 16px 14px !important;
             border-radius: 14px !important;
+          }
+        }
+
+        /* ── Dedicated iPad Portrait Rules (768px – 1023px) ── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .topbar-inner {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 8px 16px !important;
+            height: 52px !important;
+            gap: 10px !important;
+          }
+          .topbar-brand {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            flex-shrink: 0 !important;
+          }
+          .topbar-brand-title {
+            font-size: 0.95rem !important;
+          }
+          .topbar-badge-pill {
+            display: inline-flex !important;
+            font-size: 0.68rem !important;
+          }
+          .portal-verified-badge {
+            display: none !important;
+          }
+          .topbar-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+          }
+          .topbar-destination {
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            min-width: 160px !important;
+            max-width: 220px !important;
+            font-size: 0.74rem !important;
+            border-radius: 8px !important;
+          }
+          .topbar-select {
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            font-size: 0.74rem !important;
+            border-radius: 8px !important;
+          }
+          .topbar-contact-btn {
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            width: 32px !important;
+            min-width: 32px !important;
+            border-radius: 8px !important;
+          }
+          .contact-label-text {
+            display: none !important;
+          }
+          .topbar-cart-pill {
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            border-radius: 8px !important;
+            font-size: 0.76rem !important;
+          }
+          .topbar-signin-btn,
+          .topbar-apply-btn {
+            height: 32px !important;
+            min-height: 32px !important;
+            max-height: 32px !important;
+            border-radius: 8px !important;
+            font-size: 0.74rem !important;
+            padding: 0 12px !important;
+          }
+          .filter-bar {
+            top: 52px !important;
+          }
+          .catalog-container {
+            padding: 16px 20px calc(110px + env(safe-area-inset-bottom, 16px)) 20px !important;
+          }
+          .atlas-ai-public-fab {
+            bottom: 84px !important;
+            right: 20px !important;
+            z-index: 45 !important;
           }
         }
 

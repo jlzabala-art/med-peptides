@@ -6,15 +6,19 @@ import { getFrequentlyPrescribedTogether } from '@/services/algoliaRecommendServ
 
 export default function AlgoliaRecommendCrossSell({
   cartItems = [],
-  products = [],
+  products,
+  catalogProducts,
   onAddToCart,
+  onAddProduct,
   currencySymbol = '$',
   fxMultiplier = 1,
   currentCurrency = 'USD'
 }) {
+  const allProducts = useMemo(() => catalogProducts || products || [], [catalogProducts, products]);
   const [recommendations, setRecommendations] = useState([]);
   const [addedIds, setAddedIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
+  const lastFetchedIdRef = React.useRef(null);
 
   // Identify if cart contains lyophilized peptide vials
   const needsReconstitution = useMemo(() => {
@@ -28,7 +32,7 @@ export default function AlgoliaRecommendCrossSell({
   // Find supply products (Bac Water, Syringes) in catalog
   const supplyItems = useMemo(() => {
     const list = [];
-    products.forEach(p => {
+    allProducts.forEach(p => {
       const name = (p.canonicalName || p.name || '').toLowerCase();
       p.variants?.forEach(v => {
         const vName = (v.name || '').toLowerCase();
@@ -44,12 +48,19 @@ export default function AlgoliaRecommendCrossSell({
       });
     });
     return list.slice(0, 2);
-  }, [products, cartItems]);
+  }, [allProducts, cartItems]);
+
+  const targetId = cartItems && cartItems.length > 0 ? (cartItems[0].productId || cartItems[0].id) : null;
 
   // Fetch Algolia AI synergies
   useEffect(() => {
-    if (!cartItems || cartItems.length === 0) {
+    if (!targetId) {
       setRecommendations([]);
+      lastFetchedIdRef.current = null;
+      return;
+    }
+
+    if (lastFetchedIdRef.current === targetId) {
       return;
     }
 
@@ -57,9 +68,9 @@ export default function AlgoliaRecommendCrossSell({
     const fetchAlgoliaRecommendations = async () => {
       setLoading(true);
       try {
-        const targetItem = cartItems[0];
+        lastFetchedIdRef.current = targetId;
         const hits = await getFrequentlyPrescribedTogether({
-          objectID: targetItem.productId || targetItem.id,
+          objectID: targetId,
           category: 'peptide',
           maxRecommendations: 3
         });
@@ -70,7 +81,7 @@ export default function AlgoliaRecommendCrossSell({
         const matches = [];
         hits.forEach(hit => {
           const hitName = (hit.name || hit.canonicalName || '').toLowerCase().trim();
-          const matchProd = products.find(p => {
+          const matchProd = allProducts.find(p => {
             const pName = (p.canonicalName || p.name || '').toLowerCase().trim();
             return pName.includes(hitName) || hitName.includes(pName);
           });
@@ -93,7 +104,7 @@ export default function AlgoliaRecommendCrossSell({
 
     fetchAlgoliaRecommendations();
     return () => { active = false; };
-  }, [cartItems, products]);
+  }, [targetId, allProducts, cartItems]);
 
   // Combine supply items and Algolia synergies
   const combinedSuggestions = useMemo(() => {
@@ -109,7 +120,9 @@ export default function AlgoliaRecommendCrossSell({
   if (combinedSuggestions.length === 0) return null;
 
   const handleAdd = (item) => {
-    if (onAddToCart) {
+    if (onAddProduct) {
+      onAddProduct(item.product, item.variant);
+    } else if (onAddToCart) {
       onAddToCart(item.variant, item.product);
     }
     setAddedIds(prev => new Set(prev).add(item.variant.id));

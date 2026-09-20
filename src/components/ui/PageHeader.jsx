@@ -168,8 +168,9 @@ export default function PageHeader({
           color: #0f172a;
           line-height: 1.25;
           letter-spacing: -0.015em;
-          white-space: normal;
-          word-break: break-word;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .page-header-subtitle {
@@ -266,9 +267,22 @@ export default function PageHeader({
             display: inline-flex !important;
           }
 
+          .page-header-title-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            min-width: 0 !important;
+            flex: 1 1 auto !important;
+            width: 100% !important;
+          }
+
           .page-header-title {
-            font-size: 1.15rem;
-            line-height: 1.25;
+            font-size: 1.15rem !important;
+            line-height: 1.25 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            min-width: 0 !important;
           }
 
           .page-header-subtitle {
@@ -286,6 +300,11 @@ export default function PageHeader({
           .page-header-quick-actions {
             border-left: none;
             padding-left: 0;
+          }
+
+          /* Hide duplicate back button on mobile since mobile-back-btn is already active next to the title */
+          .page-header-quick-actions .page-header-quick-btn:not(.page-header-ai-btn) {
+            display: none !important;
           }
 
           .page-header-quick-btn {

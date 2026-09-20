@@ -128,8 +128,8 @@ export default function SharedCatalogTopNav({
               >
                 <Package size={13} />
                 <span>{cartTotalUnits}</span>
-                <span>•</span>
-                <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
+                <span className="cart-pill-total">•</span>
+                <span className="cart-pill-total">{currencySymbol}{grandTotal.toFixed(2)}</span>
               </button>
             )}
           </div>
@@ -149,8 +149,7 @@ export default function SharedCatalogTopNav({
                   className="topbar-apply-btn"
                 >
                   <Building2 size={13} />
-                  <span className="access-label-full">{lang === 'es' ? 'Mi Portal' : 'My Portal'}</span>
-                  <span className="access-label-compact">Portal</span>
+                  <span className="access-label-text">{lang === 'es' ? 'Mi Portal' : 'My Portal'}</span>
                 </a>
                 <button
                   type="button"
@@ -181,10 +180,10 @@ export default function SharedCatalogTopNav({
                   type="button"
                   onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
                   className="topbar-apply-btn"
+                  title={lang === 'es' ? 'Solicitar Acceso Institucional' : 'Apply for Institutional Access'}
                 >
                   <Building2 size={13} />
-                  <span className="access-label-full">{lang === 'es' ? 'Solicitar Acceso' : 'Apply'}</span>
-                  <span className="access-label-compact">{lang === 'es' ? 'Acceso' : 'Apply'}</span>
+                  <span className="access-label-text">{lang === 'es' ? 'Acceso' : 'Apply'}</span>
                 </button>
               </div>
             )}

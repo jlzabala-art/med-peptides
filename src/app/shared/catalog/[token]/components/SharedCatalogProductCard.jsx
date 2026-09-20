@@ -23,6 +23,7 @@ export default function SharedCatalogProductCard({
   protocols,
   setSelectedPublicProtocol,
   catalogMeta,
+  hideMasterImage = false,
   t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
@@ -64,59 +65,87 @@ export default function SharedCatalogProductCard({
       {/* Product Master Header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', gap: '14px', flex: '1 1 300px' }}>
-          <img
-            src={resolveVariantClinicalImage(prod.variants[0], prod)}
-            alt={prod.canonicalName}
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '10px',
-              objectFit: 'cover',
-              border: '1px solid #e2e8f0',
-              flexShrink: 0,
-              boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
-            }}
-          />
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-              <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
-                {prod.canonicalName}
-              </span>
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                backgroundColor: '#f0fdf4',
-                color: '#16a34a',
-                padding: '3px 8px',
-                borderRadius: '5px',
-                border: '1px solid #bbf7d0'
-              }}>
-                {prod.purity}
-              </span>
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                backgroundColor: '#f8fafc',
-                color: '#64748b',
-                padding: '3px 8px',
-                borderRadius: '5px',
-                border: '1px solid #e2e8f0'
-              }}>
-                {prod.category}
-              </span>
-              <a
-                href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pds-catalog-monograph-btn"
-                title={t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}
-              >
-                <FileText size={13} />
-                <span>{t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}</span>
-              </a>
-            </div>
+          {!hideMasterImage && (
+            <img
+              src={resolveVariantClinicalImage(prod.variants[0], prod)}
+              alt={prod.canonicalName}
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '10px',
+                objectFit: 'cover',
+                border: '1px solid #e2e8f0',
+                flexShrink: 0,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+              }}
+            />
+          )}
+          <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+            {!hideMasterImage ? (
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
+                  {prod.canonicalName}
+                </span>
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  backgroundColor: '#f0fdf4',
+                  color: '#16a34a',
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  border: '1px solid #bbf7d0'
+                }}>
+                  {prod.purity}
+                </span>
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  backgroundColor: '#f8fafc',
+                  color: '#64748b',
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  {prod.category}
+                </span>
+                <a
+                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pds-catalog-monograph-btn"
+                  title={t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}
+                >
+                  <FileText size={13} />
+                  <span>{t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}</span>
+                </a>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  backgroundColor: '#f8fafc',
+                  color: '#64748b',
+                  padding: '3px 8px',
+                  borderRadius: '5px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  {prod.category}
+                </span>
+                <a
+                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pds-catalog-monograph-btn"
+                  title={t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}
+                >
+                  <FileText size={13} />
+                  <span>{t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}</span>
+                </a>
+              </div>
+            )}
             {prod.description && (
-              <p className="product-desc-clamp">{prod.description}</p>
+              <p className="product-desc-clamp" style={hideMasterImage ? { marginTop: '2px', marginBottom: '8px' } : undefined}>{prod.description}</p>
             )}
           </div>
         </div>

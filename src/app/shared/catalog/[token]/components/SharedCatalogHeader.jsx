@@ -109,7 +109,7 @@ export default function SharedCatalogHeader({
             </p>
 
             <div className="header-meta-container">
-              <span className="header-meta-pill">
+              <span className="header-meta-pill" style={{ color: '#ffffff' }}>
                 📅 {catalogMeta.issuedAt || catalogMeta.iat
                   ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                   : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -137,7 +137,7 @@ export default function SharedCatalogHeader({
                     : `Prices valid for ${validity.daysLeft} days`}
                 </span>
               )}
-              <span className="header-meta-pill pill-full">
+              <span className="header-meta-pill pill-full" style={{ color: '#ffffff' }}>
                 {isProtocolCatalog
                   ? `📋 ${protocols.length} Clinical Protocols`
                   : `📦 ${products.length} Products • ${totalVariants} Verified Variants`}
