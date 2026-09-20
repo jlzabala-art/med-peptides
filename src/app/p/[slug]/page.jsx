@@ -190,22 +190,22 @@ export async function generateMetadata({ params, searchParams }) {
   if (!product) {
     return {
       title: 'Pharmaceutical Monograph | Atlas Services',
-      description: 'Official clinical and pharmaceutical peptide monographs.',
+      description: 'Clinical and pharmaceutical peptide monographs.',
     };
   }
 
   const name = product.canonicalName || product.name || product.title || slug;
   const isLotus = (product.supplierName || product.supplier || '').toLowerCase().includes('lotusland');
   const supplierName = product.isSingleSupplierLocked
-    ? (product.supplierName || product.supplier || supplierFilter || 'Official Laboratory')
+    ? (product.supplierName || product.supplier || supplierFilter || 'Certified Laboratory')
     : 'Certified Clinical Laboratories';
   const purity = product.purity || '≥ 99.0% (RP-HPLC & ESI-MS)';
 
   const formatSuffix = formatParam ? ` [${formatParam.toUpperCase()}]` : '';
   const doseSuffix = doseParam ? ` (${doseParam.replace(/_/g, ' ')})` : '';
 
-  const pharmaTitle = `${name}${doseSuffix}${formatSuffix} — Official Clinical Monograph & Specs | Atlas Services`;
-  const pharmaDesc = `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Sourced through authorized synthesis partner ${supplierName} for Atlas Services. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
+  const pharmaTitle = `${name}${doseSuffix}${formatSuffix} — Clinical Monograph & Specifications | Atlas Services`;
+  const pharmaDesc = `Pharmaceutical Monograph & Analytical Specifications for ${name}. Sourced through authorized synthesis partner ${supplierName} for Atlas Services. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
 
   // Universal dynamic scannable barcode/QR image directing to this page for WhatsApp & social platforms
   const barcodeImageUrl = `${BASE_URL}/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(supplierFilter || product.supplierId || 'lotusland')}`;
@@ -225,14 +225,14 @@ export async function generateMetadata({ params, searchParams }) {
           width: 1200,
           height: 630,
           type: 'image/png',
-          alt: `Barcode & QR Direct Link for ${name} — Official Clinical Monograph`,
+          alt: `Barcode & QR Direct Link for ${name} — Clinical Monograph`,
         },
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} — Official Monograph & Specs`,
+      title: `${name} — Clinical Monograph & Specs`,
       description: pharmaDesc,
       images: [barcodeImageUrl],
     },
@@ -241,7 +241,7 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:type': 'image/png',
       'og:image:width': '1200',
       'og:image:height': '630',
-      'og:image:alt': `Barcode & QR Direct Link for ${name} — Official Clinical Monograph`,
+      'og:image:alt': `Barcode & QR Direct Link for ${name} — Clinical Monograph`,
       'article:section': 'Pharmaceutical & Clinical Peptides',
       'article:tag': `${name}, ${supplierName}, RP-HPLC, Peptide Monograph, Atlas Services`,
     },
@@ -357,7 +357,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const slug = resolvedParams?.slug;
   const rawTarget = decodeURIComponent(slug || '').toLowerCase().trim();
   if (rawTarget.includes('verified coa') || rawTarget.includes('coa attached') || rawTarget === 'verified coa attached') {
-    redirect('/catalog');
+    redirect('/c/CAT-MU9L9GBN');
   }
 
   const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;

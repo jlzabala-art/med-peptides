@@ -1056,7 +1056,7 @@ export default function PublicAtlasAIDrawer({
                   </div>
                 ) : clinicalSources.length === 0 ? (
                   <div style={{ backgroundColor: '#ffffff', border: '1px dashed #cbd5e1', borderRadius: '8px', padding: '16px', textAlign: 'center', color: '#64748b', fontSize: '0.78rem' }}>
-                    Official compendial monograph active. Verified analytical CoA available in primary specifications tab.
+                    Clinical compendial monograph active. Verified analytical CoA available in primary specifications tab.
                   </div>
                 ) : (
                   clinicalSources.map((study, sIdx) => (

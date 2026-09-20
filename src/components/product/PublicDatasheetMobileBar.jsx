@@ -39,13 +39,13 @@ export default function PublicDatasheetMobileBar({
         `• *Presentación:* ${formatName}\n` +
         `• *Dosis:* ${doseName}\n` +
         `• *Laboratorio / Síntesis:* ${supplierName}\n` +
-        `• *Ficha Técnica Oficial:* ${dynamicPublicUrl}\n\n` +
+        `• *Ficha Técnica:* ${dynamicPublicUrl}\n\n` +
         `Hola, deseo consultar disponibilidad y solicitar cotización formal para este compuesto.`
       : `🔬 *Clinical Order & Inquiry:* ${name}\n` +
         `• *Format:* ${formatName}\n` +
         `• *Strength:* ${doseName}\n` +
         `• *Synthesis Lab:* ${supplierName}\n` +
-        `• *Official Monograph:* ${dynamicPublicUrl}\n\n` +
+        `• *Clinical Monograph:* ${dynamicPublicUrl}\n\n` +
         `Hello, I would like to request stock availability and formal quotation for this peptide compound.`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');

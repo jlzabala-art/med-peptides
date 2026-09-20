@@ -708,8 +708,8 @@ export default function PublicDatasheetView({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `${name} (${activeFormat?.name || 'Monograph'}) — Official Monograph | Atlas Services × ${supplierName}`,
-          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, sourced through authorized synthesis partner ${supplierName} for Atlas Services. RP-HPLC Purity ≥ 99.0%.`,
+          title: `${name} (${activeFormat?.name || 'Monograph'}) — Monograph | Atlas Services × ${supplierName}`,
+          text: `Clinical Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, sourced through authorized synthesis partner ${supplierName} for Atlas Services. RP-HPLC Purity ≥ 99.0%.`,
           url: dynamicPublicUrl,
         });
         return;
@@ -740,7 +740,7 @@ export default function PublicDatasheetView({
     }
 
     const pharmaMsg = 
-      `🔬 *${name}* — Official Pharmaceutical Monograph & Clinical Specifications\n\n` +
+      `🔬 *${name}* — Clinical Pharmaceutical Monograph & Specifications\n\n` +
       `• *Formulation:* ${formatLabel}\n` +
       `• *Target Dose:* ${selectedStrength?.name || 'Standard'}\n` +
       `• *Synthesis Lab:* ${supplierName} (Verified Quality Standards) for Atlas Services\n` +
@@ -748,7 +748,7 @@ export default function PublicDatasheetView({
       `• *Receptor Target Axis:* ${targetText}\n` +
       adminLine +
       `• *Regulatory Class:* Clinical Research & Analytical Standard (Zero Impurities)\n\n` +
-      `📑 *Access Official Monograph & Certificate of Analysis:*\n${dynamicPublicUrl}`;
+      `📑 *Access Clinical Monograph & Certificate of Analysis:*\n${dynamicPublicUrl}`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(pharmaMsg)}`, '_blank', 'noopener,noreferrer');
   };
@@ -902,9 +902,9 @@ export default function PublicDatasheetView({
 
   return (
     <div className="public-datasheet-root">
-      {/* ── Fixed 2-Tier Sticky Executive Navigation ── */}
+      {/* ── Fixed Executive Navigation (Tier 1 Only on Product Page) ── */}
       <PublicUnifiedHeader
-        track="compounds"
+        track="peptides"
         lang={lang}
         onLangChange={setLang}
         copyUrl={dynamicPublicUrl}
@@ -918,34 +918,29 @@ export default function PublicDatasheetView({
         }}
         onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
         loginRedirect={`/p/${encodeURIComponent(slug)}`}
+        hideTier2={true}
         breadcrumb={[
-          { label: lang === 'es' ? 'Catálogo' : 'Catalog', href: '/catalog' },
-          { label: product?.name || name || 'Peptide Monograph' }
+          { label: lang === 'es' ? 'Catálogo de Productos' : 'Product Catalog', href: '/c/CAT-MU9L9GBN' },
+          { label: product?.canonicalName || product?.name || name || 'Peptide Monograph' }
         ]}
-        anchorTabs={[
-          { id: 'overview', label: lang === 'es' ? 'General' : 'Overview', href: '#overview' },
-          { id: 'clinical-indications', label: lang === 'es' ? 'Indicaciones' : 'Indications', href: '#clinical-indications' },
-          { id: 'pharmacology', label: lang === 'es' ? 'Farmacología' : 'Pharmacology', href: '#pharmacology' },
-          ...(associatedProtocols && associatedProtocols.length > 0 ? [{
-            id: 'clinical-pathways',
-            label: lang === 'es' ? 'Protocolos (/proto)' : 'Protocols (/proto)',
-            href: '#clinical-pathways',
-            count: associatedProtocols.length
-          }] : []),
-          { id: 'reconstitution', label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution' },
-          { id: 'traceability', label: lang === 'es' ? 'Calidad HPLC' : 'HPLC Quality', href: '#traceability' },
-        ]}
-        callout={{
-          message: lang === 'es'
-            ? 'Clínicas y Farmacias: Acceso mayorista (-40%) y receta digital'
-            : 'Medical Clinics: Access wholesale tiers (-40%) & digital Rx',
-          ctaLabel: lang === 'es' ? 'Alta Clínica →' : 'Provider Access →',
-          ctaHref: `/login?tab=register&role=doctor&redirect=/p/${encodeURIComponent(slug)}`
-        }}
       />
 
       {/* ── Standardized Clinical Page Shell ── */}
       <PublicPageShell>
+        {/* ── Breadcrumb & Back to Catalog Action ── */}
+        <div className="pds-top-breadcrumb-bar">
+          <Link
+            href="/c/CAT-MU9L9GBN"
+            className="pds-back-to-catalog-btn"
+            title={lang === 'es' ? 'Volver al Catálogo de Productos' : 'Back to Product Catalog'}
+          >
+            <ArrowLeft size={14} />
+            <span>{lang === 'es' ? 'Catálogo de Productos' : 'Product Catalog'}</span>
+          </Link>
+          <span className="pds-breadcrumb-divider" aria-hidden="true">/</span>
+          <span className="pds-breadcrumb-current">{product?.canonicalName || product?.name || name}</span>
+        </div>
+
         {/* Universal Clinical Page Hero */}
         <PublicPageHero
           badges={
@@ -1024,7 +1019,7 @@ export default function PublicDatasheetView({
                     {lang === 'es' ? 'DISPONIBILIDAD DE LOTE Y PRESENTACIONES' : 'BATCH AVAILABILITY & PRESENTATIONS'}
                   </span>
                   <span className="pds-section-badge">
-                    <CheckCircle2 size={11} /> {t.officialCompendium || 'OFFICIAL COMPENDIUM'}
+                    <CheckCircle2 size={11} /> {t.clinicalCompendium || (lang === 'es' ? 'COMPENDIO CLÍNICO' : 'CLINICAL COMPENDIUM')}
                   </span>
                 </div>
                 <h3 className="pds-section-header-title">
@@ -1497,7 +1492,7 @@ export default function PublicDatasheetView({
                 <div className="pds-label-type-head">
                   <span className="pds-label-badge-icon">🏷️</span>
                   <div>
-                    <h4 className="pds-label-type-title">{t.clientVialLabelTitle || 'Official Patient Vial Label'}</h4>
+                    <h4 className="pds-label-type-title">{t.clientVialLabelTitle || 'Patient Vial Label'}</h4>
                     <span className="pds-label-use-tag active">{t.patientSubqTag || 'For Patient Dispensing (SubQ)'}</span>
                   </div>
                 </div>
@@ -1558,7 +1553,7 @@ export default function PublicDatasheetView({
               {inlineSvg ? (
                 <div
                   className="pds-vial-label-img"
-                  aria-label={`Official Barcode & QR Label for ${name}`}
+                  aria-label={`Barcode & QR Label for ${name}`}
                   dangerouslySetInnerHTML={{ __html: inlineSvg }}
                 />
               ) : svgError ? (

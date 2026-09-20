@@ -67,7 +67,7 @@ export default function DatasheetTeaserCard({ product, lang = 'en' }) {
             </span>
           </div>
           <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-            {isSpanish ? 'Monografía Analítica y Guía de Reconstitución' : 'Official Technical Datasheet & Reconstitution'}
+            {isSpanish ? 'Monografía Analítica y Guía de Reconstitución' : 'Clinical Technical Datasheet & Reconstitution'}
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function DatasheetTeaserCard({ product, lang = 'en' }) {
           e.currentTarget.style.backgroundColor = '#0284c7';
         }}
       >
-        <span>{isSpanish ? 'Ver Ficha Técnica' : 'View Official Datasheet'}</span>
+        <span>{isSpanish ? 'Ver Ficha Técnica' : 'View Technical Datasheet'}</span>
         <ArrowRight size={14} />
       </Link>
     </div>

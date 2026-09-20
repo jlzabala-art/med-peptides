@@ -350,7 +350,7 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
             ))}
           </select>
 
-          <button onClick={handleDownloadPdf} title="Download Official PDF Monograph" style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
+          <button onClick={handleDownloadPdf} title="Download PDF Monograph" style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
             📄 Download Monograph PDF
           </button>
           <button onClick={handleCopyUrl} title={t.copyLink}>

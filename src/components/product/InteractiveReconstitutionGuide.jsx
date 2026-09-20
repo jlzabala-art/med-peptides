@@ -15,7 +15,8 @@ import {
   ShieldAlert,
   Activity,
   ClipboardList,
-  ExternalLink
+  ExternalLink,
+  ChevronDown
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
@@ -1254,7 +1255,7 @@ export default function InteractiveReconstitutionGuide({
             type="button"
             onClick={handleResetToBaseline}
             className="irg-baseline-reset-btn"
-            title={lang === 'es' ? 'Restablecer todos los parámetros a la línea base oficial' : 'Reset all parameters to official monograph baseline'}
+            title={lang === 'es' ? 'Restablecer todos los parámetros a la línea base de la monografía' : 'Reset all parameters to monograph baseline'}
           >
             {lang === 'es' ? '↺ Restablecer a línea base' : '↺ Reset to Standard Baseline'}
           </button>
@@ -1484,30 +1485,85 @@ export default function InteractiveReconstitutionGuide({
               </div>
 
               <div style={{ position: 'relative', width: '100%' }}>
+                {/* Visual Auto-Wrapping Clinical Trigger Container */}
+                <div
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#002544',
+                    color: '#ffffff',
+                    padding: '10px 42px 10px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #0284c7',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <div style={{
+                    fontSize: '0.94rem',
+                    fontWeight: 700,
+                    lineHeight: 1.35,
+                    color: '#ffffff',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal',
+                    textAlign: 'left'
+                  }}>
+                    {activeSelectedProtocol.name}
+                  </div>
+                  <div style={{
+                    fontSize: '0.74rem',
+                    color: '#38bdf8',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexWrap: 'wrap'
+                  }}>
+                    <span>{activeSelectedProtocol.duration || '8 Weeks'}</span>
+                    <span>•</span>
+                    <span>{activeSelectedProtocol.phasesCount || (activeSelectedProtocol.phases ? activeSelectedProtocol.phases.length : 3)} {lang === 'es' ? 'fases clínicas' : 'clinical phases'}</span>
+                    {activeSelectedProtocol.isPrimary && (
+                      <span style={{ background: 'rgba(56, 189, 248, 0.25)', color: '#7dd3fc', padding: '1px 5px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700 }}>
+                        ★ {lang === 'es' ? 'Principal' : 'Primary'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dropdown Chevron Icon */}
+                <div style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  color: '#38bdf8',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  <ChevronDown size={18} />
+                </div>
+
+                {/* Accessible Full-Surface Select Overlay for Native Mobile Wheel & Accessibility */}
                 <select
                   id="irg-protocol-dropdown"
                   value={activeSelectedProtocol.id || activeSelectedProtocol.slug}
                   onChange={(e) => handleProtocolChange(e.target.value)}
                   style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
                     width: '100%',
-                    backgroundColor: '#002544',
-                    color: '#ffffff',
-                    fontSize: '0.94rem',
-                    fontWeight: 700,
-                    padding: '10px 38px 10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #0284c7',
-                    outline: 'none',
+                    height: '100%',
+                    opacity: 0,
                     cursor: 'pointer',
                     appearance: 'none',
                     WebkitAppearance: 'none',
-                    MozAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 12px center',
-                    backgroundSize: '16px',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                    zIndex: 2
                   }}
+                  aria-label={lang === 'es' ? 'Seleccionar Protocolo Clínico' : 'Select Clinical Protocol'}
                 >
                   {(associatedProtocols && associatedProtocols.length > 0 ? associatedProtocols : [primaryProtocol]).filter(Boolean).map(proto => {
                     const dur = proto.duration || '8 Weeks';

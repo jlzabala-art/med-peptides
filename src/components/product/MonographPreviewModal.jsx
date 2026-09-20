@@ -105,7 +105,7 @@ export default function MonographPreviewModal({
       data-print-modal="true"
       role="dialog"
       aria-modal="true"
-      aria-label={`Official Monograph & Label Preview for ${name}`}
+      aria-label={`Clinical Monograph & Label Preview for ${name}`}
     >
       <div className="mpm-container">
         
@@ -192,7 +192,7 @@ export default function MonographPreviewModal({
                       </span>
                     </div>
                     <h1 className="mpm-doc-title">{name}</h1>
-                    <p className="mpm-doc-subtitle">Official Technical Monograph &amp; Clinical Administration Dossier</p>
+                    <p className="mpm-doc-subtitle">Clinical Technical Monograph &amp; Administration Dossier</p>
                   </div>
 
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -502,7 +502,7 @@ export default function MonographPreviewModal({
               onMouseEnter={() => prefetchPdf(currentDownloadUrl)}
               onTouchStart={() => prefetchPdf(currentDownloadUrl)}
               className="mpm-btn-download"
-              title="Download official PDF file directly to device"
+              title="Download PDF file directly to device"
             >
               <Download size={14} />
               <span className="mpm-btn-label-long">Download PDF</span>

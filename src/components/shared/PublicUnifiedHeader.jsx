@@ -16,6 +16,7 @@ import {
 import { Mail, Lock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
+import { useAuth } from '../../context/AuthContext';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
 import PublicProviderCTA from './public/PublicProviderCTA';
 import '../../styles/publicStickyHeader.css';
@@ -26,8 +27,8 @@ export const SUPPORTED_LANGUAGES = [
 ];
 
 export default function PublicUnifiedHeader({
-  // Active catalog track: 'compounds' | 'protocols'
-  track = 'compounds',
+  // Active catalog track: 'peptides' | 'compounds' | 'protocols'
+  track = 'peptides',
   // Active language code
   lang = 'en',
   onLangChange,
@@ -39,8 +40,10 @@ export default function PublicUnifiedHeader({
   onOpenInquiry,
   // Login redirect path
   loginRedirect,
+  // Completely suppress second line (Tier 2) navigation
+  hideTier2 = false,
   // Tier 2: Breadcrumbs
-  breadcrumb = [],                // [ { label: 'Catalog', href: '/catalog' }, { label: 'Tirzepatide' } ]
+  breadcrumb = [],                // [ { label: 'Catalog', href: '/c/CAT-MU9L9GBN' }, { label: 'Tirzepatide' } ]
   // Tier 2: Anchor jumps for page sections
   anchorTabs = [],                // [ { id: 'overview', label: 'Overview', href: '#overview', count?: number } ]
   activeAnchorId: controlledActiveAnchorId = null,
@@ -170,9 +173,19 @@ export default function PublicUnifiedHeader({
     }
   };
 
-  const resolvedRedirect = loginRedirect || pathname || '/catalog';
-
+  const { user, activeRole } = useAuth();
+  const resolvedRedirect = loginRedirect || pathname || '/c/CAT-MU9L9GBN';
   const isSpanish = lang === 'es';
+
+  const getDashboardPath = () => {
+    if (activeRole === 'admin') return '/admin';
+    if (activeRole === 'doctor' || activeRole === 'medical_director') return '/doctor';
+    if (activeRole === 'wholesaler' || activeRole === 'wholeseller') return '/wholesaler';
+    if (activeRole === 'supplier') return '/supplier';
+    if (activeRole === 'clinic') return '/clinic';
+    if (activeRole === 'pharmacy') return '/pharmacy';
+    return '/patient';
+  };
 
   return (
     <>
@@ -182,7 +195,7 @@ export default function PublicUnifiedHeader({
           <div className="puh-tier1-inner">
             {/* Left: Brand + Directory Track Switcher + Status Badge */}
             <div className="puh-brand-group">
-              <Link href="/catalog" className="puh-brand-link" title="Med-Peptides Clinical Intelligence">
+              <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Med-Peptides Clinical Intelligence">
                 <span className="puh-brand-title">Med-Peptides</span>
               </Link>
               
@@ -191,12 +204,12 @@ export default function PublicUnifiedHeader({
               {/* Segmented Directory Switcher */}
               <nav className="puh-directory-switcher" aria-label="Directory Mode">
                 <Link
-                  href="/catalog"
-                  className={`puh-switcher-item ${track === 'compounds' ? 'is-active' : ''}`}
-                  title={isSpanish ? 'Explorar Catálogo de Compuestos y Péptidos' : 'Browse Research Compounds Catalog'}
+                  href="/c/CAT-MU9L9GBN"
+                  className={`puh-switcher-item ${track === 'peptides' || track === 'compounds' ? 'is-active' : ''}`}
+                  title={isSpanish ? 'Explorar Catálogo de Péptidos' : 'Browse Research Peptides Catalog'}
                 >
                   <FlaskConical size={13} />
-                  <span>{isSpanish ? 'Compuestos' : 'Compounds'}</span>
+                  <span>{isSpanish ? 'Péptidos' : 'Peptides'}</span>
                 </Link>
                 <Link
                   href="/proto"
@@ -257,109 +270,122 @@ export default function PublicUnifiedHeader({
                 </span>
               </button>
 
-              {/* Professional Portal Sign In CTA */}
-              <Link
-                href={`/login?redirect=${encodeURIComponent(resolvedRedirect)}`}
-                className="puh-btn puh-btn-login"
-                title={isSpanish ? 'Acceso Profesionales · Ver lotes analíticos, precios mayoristas y pedidos' : 'Practitioner Portal · Access certified CoAs & wholesale pricing'}
-              >
-                <Lock size={13} />
-                <span className="puh-btn-label">{isSpanish ? 'Acceso Portal' : 'Sign In'}</span>
-              </Link>
+              {/* Professional Portal Sign In / Dashboard CTA */}
+              {user ? (
+                <Link
+                  href={getDashboardPath()}
+                  className="puh-btn puh-btn-login"
+                  title={isSpanish ? 'Acceso a mi Panel Profesional' : 'Access Practitioner Dashboard'}
+                >
+                  <Lock size={13} />
+                  <span className="puh-btn-label">{isSpanish ? 'Mi Portal' : 'My Portal'}</span>
+                </Link>
+              ) : (
+                <Link
+                  href={`/login${loginRedirect ? `?redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
+                  className="puh-btn puh-btn-login"
+                  title={isSpanish ? 'Acceso Profesionales · Ver lotes analíticos, precios mayoristas y pedidos' : 'Practitioner Portal · Access certified CoAs & wholesale pricing'}
+                >
+                  <Lock size={13} />
+                  <span className="puh-btn-label">{isSpanish ? 'Acceso Portal' : 'Sign In'}</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
 
         {/* ── Line 2: Contextual Navigation & Value Incentive Strip ── */}
-        <div className="puh-tier2">
-          <div className="puh-tier2-inner">
-            {customTier2 ? (
-              customTier2
-            ) : (
-              <>
-                {/* Left Side: Breadcrumb, In-Page Anchor Tabs, or Filter Tabs */}
-                <div className="puh-tier2-left" ref={tabsContainerRef}>
-                  {/* Breadcrumbs */}
-                  {breadcrumb && breadcrumb.length > 0 && (
-                    <div className="puh-breadcrumb" aria-label="Breadcrumb">
-                      {breadcrumb.map((crumb, idx) => (
-                        <React.Fragment key={idx}>
-                          {idx > 0 && <span className="puh-breadcrumb-sep">/</span>}
-                          {crumb.href ? (
-                            <Link href={crumb.href} className="puh-breadcrumb-link">
-                              {crumb.label}
-                            </Link>
-                          ) : (
-                            <span className="puh-breadcrumb-curr">{crumb.label}</span>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  )}
+        {!hideTier2 && (
+          <div className="puh-tier2">
+            <div className="puh-tier2-inner">
+              {customTier2 ? (
+                customTier2
+              ) : (
+                <>
+                  {/* Left Side: Breadcrumb, In-Page Anchor Tabs, or Filter Tabs */}
+                  <div className="puh-tier2-left" ref={tabsContainerRef}>
+                    {/* Breadcrumbs */}
+                    {breadcrumb && breadcrumb.length > 0 && (
+                      <div className="puh-breadcrumb" aria-label="Breadcrumb">
+                        {breadcrumb.map((crumb, idx) => (
+                          <React.Fragment key={idx}>
+                            {idx > 0 && <span className="puh-breadcrumb-sep">/</span>}
+                            {crumb.href ? (
+                              <Link href={crumb.href} className="puh-breadcrumb-link">
+                                {crumb.label}
+                              </Link>
+                            ) : (
+                              <span className="puh-breadcrumb-curr">{crumb.label}</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
 
-                  {/* Anchor Jump Tabs */}
-                  {anchorTabs && anchorTabs.length > 0 && (
-                    <div className="puh-anchor-tabs" role="tablist">
-                      {anchorTabs.map((tab) => {
-                        const isActive = activeAnchor === tab.id;
-                        return (
-                          <a
+                    {/* Anchor Jump Tabs */}
+                    {anchorTabs && anchorTabs.length > 0 && (
+                      <div className="puh-anchor-tabs" role="tablist">
+                        {anchorTabs.map((tab) => {
+                          const isActive = activeAnchor === tab.id;
+                          return (
+                            <a
+                              key={tab.id}
+                              href={tab.href || `#${tab.id}`}
+                              className={`puh-anchor-tab ${isActive ? 'is-active' : ''}`}
+                              onClick={(e) => handleAnchorClick(e, tab.id)}
+                              role="tab"
+                              aria-selected={isActive}
+                            >
+                              <span>{tab.label}</span>
+                              {typeof tab.count === 'number' && (
+                                <span className="puh-tab-count">({tab.count})</span>
+                              )}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Filter Tabs (e.g. Category/Goal filters) */}
+                    {filterTabs && filterTabs.length > 0 && (
+                      <div className="puh-anchor-tabs" role="tablist">
+                        {filterTabs.map((tab) => (
+                          <button
                             key={tab.id}
-                            href={tab.href || `#${tab.id}`}
-                            className={`puh-anchor-tab ${isActive ? 'is-active' : ''}`}
-                            onClick={(e) => handleAnchorClick(e, tab.id)}
+                            type="button"
+                            className={`puh-anchor-tab ${tab.isActive ? 'is-active' : ''}`}
+                            onClick={() => {
+                              triggerHaptic('selection');
+                              if (tab.onClick) tab.onClick();
+                            }}
                             role="tab"
-                            aria-selected={isActive}
+                            aria-selected={tab.isActive}
                           >
                             <span>{tab.label}</span>
                             {typeof tab.count === 'number' && (
                               <span className="puh-tab-count">({tab.count})</span>
                             )}
-                          </a>
-                        );
-                      })}
-                    </div>
-                  )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Filter Tabs (e.g. Category/Goal filters) */}
-                  {filterTabs && filterTabs.length > 0 && (
-                    <div className="puh-anchor-tabs" role="tablist">
-                      {filterTabs.map((tab) => (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          className={`puh-anchor-tab ${tab.isActive ? 'is-active' : ''}`}
-                          onClick={() => {
-                            triggerHaptic('selection');
-                            if (tab.onClick) tab.onClick();
-                          }}
-                          role="tab"
-                          aria-selected={tab.isActive}
-                        >
-                          <span>{tab.label}</span>
-                          {typeof tab.count === 'number' && (
-                            <span className="puh-tab-count">({tab.count})</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
+                  {/* Right Side: Professional Value-Driven Provider Access CTA */}
+                  {callout && (
+                    <PublicProviderCTA
+                      message={callout.message}
+                      ctaLabel={callout.ctaLabel}
+                      ctaHref={callout.ctaHref}
+                      ctaOnClick={callout.ctaOnClick}
+                      className="puh-callout-strip"
+                    />
                   )}
-                </div>
-
-                {/* Right Side: Professional Value-Driven Provider Access CTA */}
-                {callout && (
-                  <PublicProviderCTA
-                    message={callout.message}
-                    ctaLabel={callout.ctaLabel}
-                    ctaHref={callout.ctaHref}
-                    ctaOnClick={callout.ctaOnClick}
-                    className="puh-callout-strip"
-                  />
-                )}
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </header>
 
       {/* Institutional Inquiry Drawer (Internal instance if not controlled externally) */}
