@@ -2304,3 +2304,35 @@
     width: 100%;
   }
 }
+
+/* ── Enhanced Mobile Touch & Scroll Rules ── */
+@media (max-width: 640px) {
+  .pds-strength-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    width: 100%;
+  }
+  .pds-strength-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .pds-strength-chip {
+    flex-shrink: 0;
+  }
+
+  .atlas-ai-public-fab {
+    bottom: 16px !important;
+    right: 16px !important;
+    padding: 8px 14px !important;
+    font-size: 0.78rem !important;
+    border-radius: 20px !important;
+  }
+
+  .pds-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+}
+

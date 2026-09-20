@@ -1,0 +1,548 @@
+/* ══════════════════════════════════════════════════════════════════
+   ATLAS CLINICAL PUBLIC DESIGN SYSTEM TOKENS & UTILITIES
+   Standards: Google Cloud Platform clarity + Med-Peptides Clinical Identity
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Color Palette ─────────────────────────────────────────────── */
+  --pds-navy-dark: #002244;
+  --pds-navy-primary: #003666;
+  --pds-navy-surface: #002b52;
+  
+  --pds-blue-accent: #0284c7;
+  --pds-cyan-accent: #38bdf8;
+  --pds-cyan-glow: rgba(56, 189, 248, 0.25);
+  --pds-sky-light: #eff6ff;
+  
+  --pds-green-verified: #10b981;
+  --pds-green-surface: #ecfdf5;
+  --pds-green-border: #a7f3d0;
+  
+  --pds-amber-warning: #f59e0b;
+  --pds-amber-surface: #fffbeb;
+  --pds-red-alert: #ef4444;
+  
+  --pds-surface-white: #ffffff;
+  --pds-surface-bg: #f8fafc;
+  --pds-surface-muted: #f1f5f9;
+  
+  --pds-text-primary: #0f172a;
+  --pds-text-secondary: #475569;
+  --pds-text-muted: #64748b;
+  --pds-text-light: #94a3b8;
+  --pds-text-inverse: #ffffff;
+  
+  --pds-border-light: #e2e8f0;
+  --pds-border-focus: #cbd5e1;
+  --pds-border-cyan: rgba(56, 189, 248, 0.35);
+
+  /* ── 4/8px Spacing Grid ────────────────────────────────────────── */
+  --pds-space-1: 4px;
+  --pds-space-2: 8px;
+  --pds-space-3: 12px;
+  --pds-space-4: 16px;
+  --pds-space-6: 24px;
+  --pds-space-8: 32px;
+  --pds-space-12: 48px;
+  --pds-space-16: 64px;
+
+  /* ── Radius & Shadows ──────────────────────────────────────────── */
+  --pds-radius-card: 16px;
+  --pds-radius-subcard: 12px;
+  --pds-radius-btn: 8px;
+  --pds-radius-pill: 9999px;
+  
+  --pds-shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --pds-shadow-card: 0 4px 20px -4px rgba(0, 54, 102, 0.08);
+  --pds-shadow-hover: 0 6px 24px -4px rgba(0, 54, 102, 0.12);
+  --pds-shadow-navy: 0 8px 24px -4px rgba(0, 54, 102, 0.4);
+
+  /* ── Layout Max-Widths ─────────────────────────────────────────── */
+  --pds-max-width: 1360px;
+}
+
+/* ── Universal Public Page Shell Container ─────────────────────── */
+.pds-page-shell {
+  min-height: 100vh;
+  background-color: var(--pds-surface-bg);
+  color: var(--pds-text-primary);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
+  overflow-x: clip;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pds-page-shell-inner {
+  max-width: var(--pds-max-width);
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* ── Shared Page Hero Component ────────────────────────────────── */
+.pds-hero-card {
+  background: var(--pds-surface-white);
+  border: 1px solid var(--pds-border-light);
+  border-radius: var(--pds-radius-card);
+  padding: 2rem 2.25rem;
+  box-shadow: var(--pds-shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.pds-hero-card:hover {
+  border-color: var(--pds-border-focus);
+}
+
+.pds-hero-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.pds-hero-main {
+  flex: 1 1 640px;
+  min-width: 0;
+}
+
+.pds-hero-side {
+  flex-shrink: 0;
+  min-width: 160px;
+}
+
+.pds-hero-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.pds-hero-title {
+  margin: 0 0 0.85rem 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--pds-text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+}
+
+.pds-hero-desc {
+  font-size: 0.98rem;
+  color: var(--pds-text-secondary);
+  line-height: 1.62;
+  margin: 0;
+  max-width: 860px;
+}
+
+/* ── Section Card Component (Navy Header Pattern) ──────────────── */
+.pds-section-card {
+  background-color: var(--pds-surface-white);
+  border-radius: var(--pds-radius-card);
+  border: 1px solid var(--pds-border-light);
+  box-shadow: var(--pds-shadow-card);
+  overflow: hidden;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pds-section-card:hover {
+  border-color: var(--pds-border-focus);
+  box-shadow: var(--pds-shadow-hover);
+}
+
+.pds-section-card.is-subtle {
+  border-top: 3px solid var(--pds-navy-primary);
+}
+
+.pds-section-header {
+  background: linear-gradient(135deg, var(--pds-navy-primary) 0%, var(--pds-navy-dark) 100%);
+  color: var(--pds-text-inverse);
+  padding: 1.15rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.pds-section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.pds-section-header-shield {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pds-cyan-accent);
+  flex-shrink: 0;
+}
+
+.pds-section-header-titles {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pds-section-header-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.pds-section-header-category {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.pds-section-badge {
+  background-color: var(--pds-green-verified);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.pds-section-badge.is-cyan {
+  background-color: #0284c7;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+}
+
+.pds-section-badge.is-purple {
+  background-color: #7c3aed;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.3);
+}
+
+.pds-section-header-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.pds-section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pds-section-card-body {
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.pds-section-card-body.no-padding {
+  padding: 0;
+}
+
+/* ── 4-KPI Metric Cards Grid ───────────────────────────────────── */
+.pds-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pds-kpi-card {
+  background: var(--pds-surface-white);
+  border: 1px solid var(--pds-border-light);
+  border-radius: var(--pds-radius-subcard);
+  padding: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: var(--pds-shadow-subtle);
+  min-width: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.pds-kpi-card:hover {
+  border-color: var(--pds-border-focus);
+  transform: translateY(-1px);
+  box-shadow: var(--pds-shadow-card);
+}
+
+.pds-kpi-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pds-kpi-body {
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+}
+
+.pds-kpi-title {
+  font-size: 0.70rem;
+  color: var(--pds-text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pds-kpi-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--pds-text-primary);
+  line-height: 1.2;
+}
+
+.pds-kpi-subtitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-top: 0.15rem;
+  line-height: 1.25;
+}
+
+/* ── Segmented Control (Google Cloud Inspired) ─────────────────── */
+.pds-segmented-control {
+  display: inline-flex;
+  align-items: center;
+  background: var(--pds-surface-muted);
+  border: 1px solid var(--pds-border-light);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pds-segmented-control::-webkit-scrollbar {
+  display: none;
+}
+
+.pds-segmented-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--pds-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.pds-segmented-item:hover:not(.is-active):not(:disabled) {
+  color: var(--pds-text-primary);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.pds-segmented-item.is-active {
+  background: var(--pds-surface-white);
+  color: var(--pds-navy-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Reusable Provider Access CTA Strip ────────────────────────── */
+.pds-provider-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #e0f2fe;
+  font-size: 0.73rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.pds-provider-cta-msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pds-provider-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--pds-cyan-accent);
+  color: var(--pds-navy-dark);
+  font-weight: 800;
+  font-size: 0.71rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.pds-provider-cta-btn:hover {
+  background: #7dd3fc;
+  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.4);
+}
+
+/* ── QR Verification Module (Desktop & Mobile) ─────────────────── */
+.pds-qr-verification-box {
+  background: var(--pds-surface-white);
+  border: 1px solid var(--pds-border-light);
+  border-radius: var(--pds-radius-subcard);
+  padding: 1.1rem;
+  text-align: center;
+  box-shadow: var(--pds-shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  box-sizing: border-box;
+}
+
+.pds-qr-code-wrap {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: #ffffff;
+  border-radius: 8px;
+  transition: transform 0.15s ease;
+}
+
+.pds-qr-code-wrap:hover {
+  transform: scale(1.03);
+}
+
+/* ── Mobile GCP Verification Strip (Inside Hero) ───────────────── */
+.pds-mobile-verification-bar {
+  display: none;
+  margin-top: 1rem;
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid var(--pds-border-light);
+  border-radius: 8px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Atlas AI Floating Action Button (Responsive Guard) ────────── */
+@media (max-width: 640px) {
+  .atlas-ai-public-fab {
+    bottom: 16px !important;
+    right: 16px !important;
+    padding: 8px 14px !important;
+    font-size: 0.78rem !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* ── Responsive Grid Breakpoints ───────────────────────────────── */
+@media (max-width: 1024px) {
+  .pds-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .pds-hero-card {
+    padding: 1.5rem 1.75rem;
+  }
+  
+  .pds-hero-title {
+    font-size: 1.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .pds-page-shell-inner {
+    padding: 1rem 1rem 3rem 1rem;
+    gap: 1.25rem;
+  }
+  
+  .pds-hero-layout {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .pds-hero-side {
+    display: none; /* Secondary desktop QR replaced by mobile verification strip */
+  }
+  
+  .pds-mobile-verification-bar {
+    display: flex;
+  }
+  
+  .pds-section-header {
+    padding: 0.95rem 1.15rem;
+  }
+  
+  .pds-section-header-shield {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .pds-section-card-body {
+    padding: 1.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pds-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pds-hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .pds-hero-card {
+    padding: 1.15rem 1rem;
+  }
+}

@@ -47,6 +47,9 @@ import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicPageShell from '@/components/shared/public/PublicPageShell';
+import PublicPageHero from '@/components/shared/public/PublicPageHero';
+import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -941,13 +944,12 @@ export default function PublicDatasheetView({
         }}
       />
 
-      {/* ── Main Monograph Container ── */}
-      <main className="pds-container">
-
-        {/* Hero Section */}
-        <section className="pds-hero">
-          <div className="pds-hero-header">
-            <div className="pds-tag-group">
+      {/* ── Standardized Clinical Page Shell ── */}
+      <PublicPageShell>
+        {/* Universal Clinical Page Hero */}
+        <PublicPageHero
+          badges={
+            <>
               <span className="pds-cat-tag">{category}</span>
               <span className="pds-cgmp-tag">
                 {isStrictlyLotusland ? (t.lotuslandVerified || 'Atlas Services Certified') : `${displaySupplierName} Quality Verified`}
@@ -977,16 +979,19 @@ export default function PublicDatasheetView({
                   <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857' }}>{initialBatch}</code>
                 </span>
               )}
-            </div>
-            <h1 className="pds-title">{name}</h1>
-            <p className="pds-target">
-              <strong>{isSolventProduct ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') : (t.targetReceptorAxis || 'Target Receptor Axis:')}</strong>{' '}
-              {targetSystem}
-            </p>
-          </div>
-
-          {description && (
-            <div className="pds-description-card">
+            </>
+          }
+          title={name}
+          description={
+            <>
+              <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.25rem' }}>
+                <strong style={{ color: '#0f172a' }}>{isSolventProduct ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') : (t.targetReceptorAxis || 'Target Receptor Axis:')}</strong>{' '}
+                {targetSystem}
+              </span>
+            </>
+          }
+          meta={description && (
+            <div className="pds-description-card" style={{ marginTop: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h2 className="pds-section-heading" style={{ margin: 0 }}>
                   {t.pharmacologicalOverview || 'Pharmacological Overview'}
@@ -1004,7 +1009,7 @@ export default function PublicDatasheetView({
               <p className="pds-description-body">{description}</p>
             </div>
           )}
-        </section>
+        />
 
         {/* ── Block 1: Batch Availability & Presentations Matrix (Harmonized Navy Header) ── */}
         <section id="presentations-matrix" className="pds-section-card">
@@ -1580,7 +1585,7 @@ export default function PublicDatasheetView({
             </p>
           </div>
         </footer>
-      </main>
+      </PublicPageShell>
 
       {/* Dynamic Flexible Share Monograph Drawer */}
       <ShareProductMonographDrawer

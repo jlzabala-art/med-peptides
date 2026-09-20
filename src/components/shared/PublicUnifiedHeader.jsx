@@ -17,6 +17,7 @@ import { Mail, Lock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
+import PublicProviderCTA from './public/PublicProviderCTA';
 import '../../styles/publicStickyHeader.css';
 
 export const SUPPORTED_LANGUAGES = [
@@ -345,29 +346,15 @@ export default function PublicUnifiedHeader({
                   )}
                 </div>
 
-                {/* Right Side: Professional Value-Driven Callout */}
+                {/* Right Side: Professional Value-Driven Provider Access CTA */}
                 {callout && (
-                  <div className="puh-callout-strip">
-                    <span className="puh-callout-msg">
-                      <ShieldCheck size={14} style={{ color: '#38bdf8', flexShrink: 0 }} />
-                      <span>{callout.message}</span>
-                    </span>
-                    {callout.ctaLabel && (
-                      callout.ctaHref ? (
-                        <Link href={callout.ctaHref} className="puh-callout-btn">
-                          <span>{callout.ctaLabel}</span>
-                        </Link>
-                      ) : (
-                        <button
-                          type="button"
-                          className="puh-callout-btn"
-                          onClick={callout.ctaOnClick}
-                        >
-                          <span>{callout.ctaLabel}</span>
-                        </button>
-                      )
-                    )}
-                  </div>
+                  <PublicProviderCTA
+                    message={callout.message}
+                    ctaLabel={callout.ctaLabel}
+                    ctaHref={callout.ctaHref}
+                    ctaOnClick={callout.ctaOnClick}
+                    className="puh-callout-strip"
+                  />
                 )}
               </>
             )}

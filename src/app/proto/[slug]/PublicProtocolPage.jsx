@@ -28,6 +28,12 @@ import toast from 'react-hot-toast';
 import { Mail, Lock } from 'lucide-react';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicPageShell from '@/components/shared/public/PublicPageShell';
+import PublicPageHero from '@/components/shared/public/PublicPageHero';
+import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
+import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
+import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
+import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav';
 
 const DAY_LABELS_ES = {
   Monday: 'Lunes',
@@ -296,100 +302,79 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         }}
       />
 
-      {/* ── Main Container ── */}
-      <main className="pds-container">
-        {/* Hero Section */}
-        <section className="pds-hero">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <div style={{ flex: '1 1 600px' }}>
-              <div className="pds-tag-group">
-                <span className="pds-cat-tag">{category}</span>
-                <span className="pds-purity-tag">
-                  <Clock size={13} />
-                  <span>{displayDuration}</span>
+      {/* ── Standardized Clinical Page Shell ── */}
+      <PublicPageShell>
+        {/* Universal Clinical Page Hero */}
+        <PublicPageHero
+          badges={
+            <>
+              <span className="pds-cat-tag">{category}</span>
+              <span className="pds-purity-tag">
+                <Clock size={13} />
+                <span>{displayDuration}</span>
+              </span>
+              <span className="pds-cgmp-tag">
+                {lang === 'es' ? 'Estándares Clínicos Atlas Services' : 'Atlas Services Clinical Standards'}
+              </span>
+              <span className="pds-version-tag">
+                <span className="pds-version-dot" />
+                <span>{phases.length || 3} {lang === 'es' ? 'Fases de Tratamiento' : 'Treatment Phases'}</span>
+              </span>
+              <span style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#64748b',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                padding: '0.2rem 0.65rem',
+                borderRadius: '9999px',
+              }}>
+                🔒 {t.certifiedOnlyBadge}
+              </span>
+            </>
+          }
+          title={displayName}
+          description={displayDescription}
+          mobileSecondary={
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheck size={16} style={{ color: '#0d9488', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a' }}>
+                  {t.verifiedProtocol}
                 </span>
-                <span className="pds-cgmp-tag">
-                  {lang === 'es' ? 'Estándares Clínicos Atlas Services' : 'Atlas Services Clinical Standards'}
-                </span>
-                <span className="pds-version-tag">
-                  <span className="pds-version-dot" />
-                  <span>{phases.length || 3} {lang === 'es' ? 'Fases de Tratamiento' : 'Treatment Phases'}</span>
-                </span>
-                <span style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  color: '#64748b',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  padding: '0.2rem 0.65rem',
-                  borderRadius: '9999px',
-                }}>
-                  🔒 {t.certifiedOnlyBadge}
+                <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace', background: '#e2e8f0', padding: '1px 6px', borderRadius: '4px' }}>
+                  {protocolCode}
                 </span>
               </div>
-
-              <h1 className="pds-title" style={{ margin: '0.5rem 0 0.75rem 0', fontSize: '2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                {displayName}
-              </h1>
-
-              {displayDescription && (
-                <p className="pds-desc" style={{ fontSize: '0.95rem', color: '#475569', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
-                  {displayDescription}
-                </p>
-              )}
-
-              {/* Mobile GCP Verification Strip */}
-              <div className="proto-mobile-gcp-bar">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldCheck size={16} style={{ color: '#0d9488', flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a' }}>
-                    {t.verifiedProtocol}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontFamily: 'monospace', background: '#e2e8f0', padding: '1px 6px', borderRadius: '4px' }}>
-                    {protocolCode}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsQrModalOpen(true)}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      padding: '4px 10px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#0d9488',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <QrCode size={12} />
-                    <span>{lang === 'es' ? 'Ver QR' : 'View QR'}</span>
-                  </button>
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsQrModalOpen(true)}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: '#0d9488',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <QrCode size={12} />
+                  <span>{lang === 'es' ? 'Ver QR' : 'View QR'}</span>
+                </button>
               </div>
-            </div>
-
-            {/* Institutional QR Code & Digital Verification (Desktop Only) */}
-            <div className="proto-no-print proto-desktop-qr" style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '1.1rem',
-              textAlign: 'center',
-              minWidth: '150px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
+            </>
+          }
+          desktopSecondary={
+            <div className="proto-no-print pds-qr-verification-box" style={{ minWidth: '150px' }}>
               <div
                 onClick={() => setIsQrModalOpen(true)}
-                style={{ cursor: 'pointer' }}
+                className="pds-qr-code-wrap"
                 title={lang === 'es' ? 'Clic para ampliar o imprimir código QR' : 'Click to enlarge or print QR code'}
               >
                 <QRCodeSVG value={publicUrl} size={110} level="M" />
@@ -422,44 +407,37 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 <span>{lang === 'es' ? 'Ampliar QR' : 'Enlarge QR'}</span>
               </button>
             </div>
-          </div>
-        </section>
+          }
+        />
 
-        {/* ── 4 Executive KPI Metric Cards (Scope: Full Protocol) ── */}
-        <section className="proto-kpis-grid">
-          {/* KPI 1: Duration */}
-          <div className="proto-kpi-card-box">
-            <div className="proto-kpi-card-icon" style={{ background: '#eff6ff', color: '#0284c7' }}>
-              <Clock size={20} />
-            </div>
-            <div className="proto-kpi-card-body">
-              <div className="proto-kpi-card-title">{t.kpiDurationTitle}</div>
-              <div className="proto-kpi-card-value">{displayDuration}</div>
-              <div className="proto-kpi-card-sub" style={{ color: '#0284c7' }}>{phases.length || 3} {t.kpiDurationSubtitle}</div>
-            </div>
-          </div>
-
-          {/* KPI 2: Active Peptides */}
-          <div className="proto-kpi-card-box">
-            <div className="proto-kpi-card-icon" style={{ background: '#f0fdfa', color: '#0d9488' }}>
-              <FlaskConical size={20} />
-            </div>
-            <div className="proto-kpi-card-body">
-              <div className="proto-kpi-card-title">{t.kpiPeptidesTitle}</div>
-              <div className="proto-kpi-card-value">{items.length || 1} {items.length === 1 ? t.kpiFormulation : t.kpiFormulations}</div>
-              <div className="proto-kpi-card-sub" style={{ color: '#0d9488' }}>{items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle}</div>
-            </div>
-          </div>
-
-          {/* KPI 3: Full Cycle Vials (No mention of price! Breakdown by peptide type) */}
-          <div className="proto-kpi-card-box">
-            <div className="proto-kpi-card-icon" style={{ background: '#faf5ff', color: '#7c3aed' }}>
-              <Package size={20} />
-            </div>
-            <div className="proto-kpi-card-body">
-              <div className="proto-kpi-card-title">{t.kpiVialsTitle}</div>
-              <div className="proto-kpi-card-value">{supplySummary.totalVials} {t.kpiVialsUnit}</div>
-              {supplySummary.compounds.length > 1 ? (
+        {/* ── Standardized 4-KPI Metric Grid ── */}
+        <PublicKpiGrid
+          items={[
+            {
+              icon: Clock,
+              iconBg: '#eff6ff',
+              iconColor: '#0284c7',
+              title: t.kpiDurationTitle,
+              value: displayDuration,
+              subtitle: `${phases.length || 3} ${t.kpiDurationSubtitle}`,
+              subColor: '#0284c7'
+            },
+            {
+              icon: FlaskConical,
+              iconBg: '#f0fdfa',
+              iconColor: '#0d9488',
+              title: t.kpiPeptidesTitle,
+              value: `${items.length || 1} ${items.length === 1 ? t.kpiFormulation : t.kpiFormulations}`,
+              subtitle: items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle,
+              subColor: '#0d9488'
+            },
+            {
+              icon: Package,
+              iconBg: '#faf5ff',
+              iconColor: '#7c3aed',
+              title: t.kpiVialsTitle,
+              value: `${supplySummary.totalVials} ${t.kpiVialsUnit}`,
+              subtitle: supplySummary.compounds.length > 1 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.2rem' }}>
                   {supplySummary.compounds.map((c, i) => (
                     <span 
@@ -479,102 +457,52 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                     </span>
                   ))}
                 </div>
-              ) : (
-                <div className="proto-kpi-card-sub" style={{ color: '#7c3aed' }}>
-                  {vialBreakdownText}
-                </div>
-              )}
-            </div>
-          </div>
+              ) : vialBreakdownText,
+              subColor: '#7c3aed'
+            },
+            {
+              icon: Syringe,
+              iconBg: '#fff7ed',
+              iconColor: '#c2410c',
+              title: t.kpiInjectionsTitle,
+              value: `${supplySummary.totalInjections} ${t.kpiInjectionsUnit}`,
+              subtitle: t.kpiInjectionsSubtitle,
+              subColor: '#c2410c'
+            }
+          ]}
+        />
 
-          {/* KPI 4: Administration Events */}
-          <div className="proto-kpi-card-box">
-            <div className="proto-kpi-card-icon" style={{ background: '#fff7ed', color: '#c2410c' }}>
-              <Syringe size={20} />
-            </div>
-            <div className="proto-kpi-card-body">
-              <div className="proto-kpi-card-title">{t.kpiInjectionsTitle}</div>
-              <div className="proto-kpi-card-value">{supplySummary.totalInjections} {t.kpiInjectionsUnit}</div>
-              <div className="proto-kpi-card-sub" style={{ color: '#c2410c' }}>{t.kpiInjectionsSubtitle}</div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Sticky Anchor Quick Navigation Strip (Mobile-First / Zero Overflow) ── */}
-        <nav className="proto-quick-nav">
-          {/* Mobile section jump selector (Regla #23) */}
-          <div className="proto-mobile-section-wrapper">
-            <select
-              className="proto-mobile-section-select"
-              aria-label={lang === 'es' ? 'Saltar a sección' : 'Jump to section'}
-              onChange={(e) => {
-                if (e.target.value) {
-                  const target = document.querySelector(e.target.value);
-                  if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }
-              }}
-              defaultValue=""
-            >
-              <option value="" disabled>
-                {lang === 'es' ? '📑 Saltar a sección...' : '📑 Jump to section...'}
-              </option>
-              <option value="#included-compounds">{lang === 'es' ? '🧬 Péptidos Incluidos' : '🧬 Included Peptides'}</option>
-              <option value="#pathway-timeline">{lang === 'es' ? '📊 Cronograma & Fases' : '📊 Pathway Timeline'}</option>
-              <option value="#reconstitution-console">{lang === 'es' ? '💉 Reconstitución & Jeringa' : '💉 Reconstitution & Syringe'}</option>
-              <option value="#cycle-supplies">{lang === 'es' ? '📦 Suministros & Viales' : '📦 Cycle Supplies & Vials'}</option>
-              <option value="#weekly-calendar">{lang === 'es' ? '📅 Calendario Semanal' : '📅 Weekly Roadmap'}</option>
-              <option value="#biomarkers-safety">{lang === 'es' ? '🔬 Biomarcadores' : '🔬 Clinical Biomarkers'}</option>
-              <option value="#safety-governance">{lang === 'es' ? '🛡️ Seguridad & Exclusiones' : '🛡️ Safety & Exclusions'}</option>
-            </select>
-          </div>
-
-          <div className="proto-quick-nav-pills">
-            {[
-              { label: lang === 'es' ? '🧬 Compuestos' : '🧬 Compounds', href: '#included-compounds' },
-              { label: lang === 'es' ? '📊 Timeline' : '📊 Timeline', href: '#pathway-timeline' },
-              { label: lang === 'es' ? '💉 Reconstitución' : '💉 Reconstitution', href: '#reconstitution-console' },
-              { label: lang === 'es' ? '📦 Suministros' : '📦 Supplies', href: '#cycle-supplies' },
-              { label: lang === 'es' ? '📅 Calendario' : '📅 Roadmap', href: '#weekly-calendar' },
-              { label: lang === 'es' ? '🔬 Biomarcadores' : '🔬 Biomarkers', href: '#biomarkers-safety' },
-              { label: lang === 'es' ? '🛡️ Seguridad' : '🛡️ Safety', href: '#safety-governance' },
-            ].map((nav, i) => (
-              <a
-                key={i}
-                href={nav.href}
-                className="proto-quick-nav-pill"
-              >
-                {nav.label}
-              </a>
-            ))}
-          </div>
-        </nav>
+        {/* ── Standardized Quick Section Jump Navigation ── */}
+        <PublicLocalQuickNav
+          lang={lang}
+          items={[
+            { label: lang === 'es' ? 'Compuestos' : 'Compounds', href: '#included-compounds', icon: FlaskConical },
+            { label: lang === 'es' ? 'Timeline' : 'Timeline', href: '#pathway-timeline', icon: CalendarDays },
+            { label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution-console', icon: Droplets },
+            { label: lang === 'es' ? 'Suministros' : 'Supplies', href: '#cycle-supplies', icon: Package },
+            { label: lang === 'es' ? 'Calendario' : 'Roadmap', href: '#weekly-calendar', icon: Calendar },
+            { label: lang === 'es' ? 'Biomarcadores' : 'Biomarkers', href: '#biomarkers-safety', icon: Activity },
+            { label: lang === 'es' ? 'Seguridad' : 'Safety', href: '#safety-governance', icon: ShieldCheck },
+          ]}
+        />
 
         {/* ── Core Pathway & Sections ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           
           {/* Section 1: Included Compounds */}
-          <section id="included-compounds" className="pds-card proto-section-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #003666', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(0, 54, 102, 0.07)' }}>
-            <div className="proto-section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FlaskConical size={18} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                    {lang === 'es' ? 'Péptidos & Compuestos Activos Incluidos' : 'Included Therapeutic Compounds'}
-                  </h2>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                    {lang === 'es' ? 'Formulaciones activas verificadas bajo estándares analíticos de Atlas Services' : 'Active API formulations verified under Atlas Services analytical standards'}
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '3px 10px', borderRadius: '9999px' }}>
-                {items.length} {lang === 'es' ? 'Compuestos Activos' : 'Active Agents'}
+          <PublicSectionCard
+            id="included-compounds"
+            icon={FlaskConical}
+            category={lang === 'es' ? 'FORMULACIONES ACTIVAS' : 'THERAPEUTIC FORMULATIONS'}
+            badge={`${items.length} ${lang === 'es' ? 'Compuestos Activos' : 'Active Agents'}`}
+            badgeVariant="cyan"
+            title={lang === 'es' ? 'Péptidos & Compuestos Activos Incluidos' : 'Included Therapeutic Compounds'}
+            rightAction={
+              <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600 }}>
+                {lang === 'es' ? 'Estándares Analíticos Atlas' : 'Atlas Analytical Standards'}
               </span>
-            </div>
-
+            }
+          >
             <div className="proto-compounds-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1rem' }}>
               {items.map((item, idx) => {
                 const itemSlug = item.slug || item.productId || item.productSlug || (item.id && !item.id.startsWith('item-') ? item.id : null);
@@ -584,16 +512,17 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   <div key={idx} className="proto-compound-card" style={{
                     border: '1px solid #e2e8f0',
                     borderRadius: '12px',
-                    padding: '1.15rem',
+                    padding: '1.25rem',
                     background: '#ffffff',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                    transition: 'border-color 0.15s ease'
                   }}>
                     <div>
                       <div className="proto-compound-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                        <strong style={{ color: '#0f172a', fontSize: '1rem', fontWeight: 800 }}>
+                        <strong style={{ color: '#0f172a', fontSize: '1.05rem', fontWeight: 800 }}>
                           {itemName}
                         </strong>
                         {itemDosage && (
@@ -612,7 +541,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         </span>
                       </div>
 
-                      <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.5 }}>
+                      <p style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 1rem 0', lineHeight: 1.55 }}>
                         {item.timing || item.schedule || item.instructions || (lang === 'es' ? 'Administrar según el cronograma de titulación por fases.' : 'Administer according to phased titration schedule.')}
                       </p>
                     </div>
@@ -628,9 +557,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                           textDecoration: 'none',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
+                          gap: '6px',
                           borderTop: '1px solid #f1f5f9',
-                          paddingTop: '0.65rem'
+                          paddingTop: '0.75rem'
                         }}
                       >
                         <FileText size={14} />
@@ -642,74 +571,45 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 );
               })}
             </div>
-          </section>
+          </PublicSectionCard>
 
           {/* Section 2: Phased Timeline Gantt */}
-          <section id="pathway-timeline" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#f0fdfa', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Activity size={18} />
+          <PublicSectionCard
+            id="pathway-timeline"
+            icon={Layers}
+            category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
+            title={t.sec2Title}
+            badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
+            badgeVariant="green"
+            rightAction={
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#93c5fd' }}>
+                <Activity size={14} />
+                <span>{t.sec2Subtitle}</span>
               </div>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                  {t.sec2Title}
-                </h2>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                  {t.sec2Subtitle}
-                </div>
-              </div>
-            </div>
-
+            }
+          >
             <ClinicalGanttTimeline protocol={protocol} />
-          </section>
+          </PublicSectionCard>
 
           {/* Section 3: Interactive Reconstitution & Syringe Console */}
-          <section id="reconstitution-console" className="pds-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Syringe size={18} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                    {lang === 'es' ? 'Consola Interactiva de Reconstitución & Calibración de Jeringa' : 'Interactive Reconstitution & Syringe Calibration Console'}
-                  </h2>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
-                    {lang === 'es' ? 'Fórmula de dilución de alta precisión y guía de graduación en jeringa U-100 para exactitud clínica' : 'High-precision dilution formula and U-100 syringe graduation guide for clinical accuracy'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Compound Selector Switcher */}
-              {reconData.length > 1 && (
-                <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '3px', gap: '4px' }}>
-                  {reconData.map((rd, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setActiveReconTab(idx);
-                      }}
-                      style={{
-                        border: 'none',
-                        background: activeReconTab === idx ? '#ffffff' : 'transparent',
-                        color: activeReconTab === idx ? '#0f172a' : '#64748b',
-                        fontWeight: 700,
-                        fontSize: '0.78rem',
-                        padding: '4px 12px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        boxShadow: activeReconTab === idx ? '0 1px 3px rgba(0,0,0,0.06)' : 'none'
-                      }}
-                    >
-                      {rd.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
+          <PublicSectionCard
+            id="reconstitution-console"
+            icon={Syringe}
+            category={lang === 'es' ? 'CONSOLA DE RECONSTITUCIÓN' : 'RECONSTITUTION CONSOLE'}
+            title={lang === 'es' ? 'Consola Interactiva de Reconstitución & Calibración de Jeringa' : 'Interactive Reconstitution & Syringe Calibration Console'}
+            badge={lang === 'es' ? 'Calibrado U-100' : 'U-100 Calibrated'}
+            badgeVariant="cyan"
+            rightAction={
+              reconData.length > 1 ? (
+                <PublicSegmentedControl
+                  size="sm"
+                  items={reconData.map((rd, idx) => ({ id: idx, label: rd.name }))}
+                  activeId={activeReconTab}
+                  onChange={setActiveReconTab}
+                />
+              ) : null
+            }
+          >
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
               {/* Dilution Specifications */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
@@ -760,29 +660,22 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 </div>
               </div>
             </div>
-          </section>
+          </PublicSectionCard>
 
           {/* Section 4: Cycle Dispensing & Logistics Blueprint (No Pricing Mention) */}
-          <section id="cycle-supplies" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #7c3aed', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(124, 58, 237, 0.08)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Package size={18} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                    {t.sec4Title}
-                  </h2>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
-                    {lang === 'es' ? `Requerimientos de formulaciones activas para el ciclo completo de ${displayDuration}` : `Active API vial requirements for full ${displayDuration}`}
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#7c3aed', background: '#f3e8ff', padding: '2px 8px', borderRadius: '9999px' }}>
-                {lang === 'es' ? 'Asignación de Tratamiento Completo' : 'Full Treatment Allocation'}
+          <PublicSectionCard
+            id="cycle-supplies"
+            icon={Package}
+            category={lang === 'es' ? 'DISPENSARIO DEL CICLO' : 'CYCLE DISPENSARY'}
+            title={t.sec4Title}
+            badge={`${supplySummary.totalVials} ${t.kpiVialsUnit}`}
+            badgeVariant="purple"
+            rightAction={
+              <span style={{ fontSize: '0.74rem', color: '#c4b5fd', fontWeight: 600 }}>
+                {lang === 'es' ? `Asignación Completa · ${displayDuration}` : `Full Cycle · ${displayDuration}`}
               </span>
-            </div>
-
+            }
+          >
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
               {/* Peptide Supply Breakdown */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.15rem' }}>
@@ -846,24 +739,22 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 ? 'ℹ️ Nota: Los suministros auxiliares están calculados automáticamente en base a eventos de administración semanales y límites de estabilidad acuosa de 28 días.'
                 : 'ℹ️ Note: Auxiliary supplies are automatically calculated based on exact weekly administration events and 28-day aqueous stability limits.'}
             </div>
-          </section>
+          </PublicSectionCard>
 
           {/* Section 5: Weekly Administration Roadmap */}
-          <section id="weekly-calendar" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #ea580c', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(234, 88, 12, 0.08)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CalendarDays size={18} />
-              </div>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                  {lang === 'es' ? 'Calendario Semanal de Administración' : 'Weekly Administration Roadmap'}
-                </h2>
-                <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
-                  {lang === 'es' ? 'Cadencia estandarizada de administración en ciclo de 7 días' : 'Standardized 7-day administration cadence'}
-                </div>
-              </div>
-            </div>
-
+          <PublicSectionCard
+            id="weekly-calendar"
+            icon={CalendarDays}
+            category={lang === 'es' ? 'CRONOGRAMA DE ADMINISTRACIÓN' : 'ADMINISTRATION SCHEDULE'}
+            title={lang === 'es' ? 'Calendario Semanal de Administración' : 'Weekly Administration Roadmap'}
+            badge={lang === 'es' ? 'Ciclo 7 Días' : '7-Day Regimen'}
+            badgeVariant="cyan"
+            rightAction={
+              <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600 }}>
+                {lang === 'es' ? 'Pauta Estandarizada' : 'Standardized Cadence'}
+              </span>
+            }
+          >
             <div className="proto-roadmap-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
               {weeklySchedule.map((ws, idx) => {
                 const isActiveAdmin = !ws.rest;
@@ -953,13 +844,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                       </div>
                     </div>
 
-                    {/* Col 3: Timing / Schedule Note (Fixed Column for Vertical Alignment) */}
+                    {/* Col 3: Timing / Schedule Note */}
                     <div className="proto-roadmap-time-col" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#475569', fontWeight: 600, whiteSpace: 'nowrap' }}>
                       <Clock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
                       <span>{displayTime}</span>
                     </div>
 
-                    {/* Col 4: Route & Protocol Mode Tag (Right-aligned) */}
+                    {/* Col 4: Route & Protocol Mode Tag */}
                     <div className="proto-roadmap-route-col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                       <span style={{
                         fontSize: '0.72rem',
@@ -978,24 +869,22 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 );
               })}
             </div>
-          </section>
+          </PublicSectionCard>
 
           {/* Section 6: Laboratory Safety Biomarkers */}
-          <section id="biomarkers-safety" className="pds-card" style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderTop: '3px solid #0284c7', borderRadius: '14px', padding: '1.5rem', boxShadow: '0 4px 16px -4px rgba(2, 132, 199, 0.08)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Thermometer size={18} />
-              </div>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                  {t.sec3Title}
-                </h2>
-                <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
-                  {t.sec3Subtitle}
-                </div>
-              </div>
-            </div>
-
+          <PublicSectionCard
+            id="biomarkers-safety"
+            icon={Thermometer}
+            category={lang === 'es' ? 'MONITORIZACIÓN CLÍNICA' : 'CLINICAL MONITORING'}
+            title={t.sec3Title}
+            badge={lang === 'es' ? 'Supervisión de Laboratorio' : 'Laboratory Surveillance'}
+            badgeVariant="green"
+            rightAction={
+              <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600 }}>
+                {t.sec3Subtitle}
+              </span>
+            }
+          >
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
               {biomarkers.map((b, idx) => (
                 <div key={idx} style={{
@@ -1021,25 +910,23 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 </div>
               ))}
             </div>
-          </section>
+          </PublicSectionCard>
 
           {/* Section 7: Safety & Clinical Exclusions */}
-          <section id="safety-governance" className="pds-card" style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '14px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <AlertTriangle size={18} />
-                </div>
-                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#991b1b' }}>
-                  {t.sec6Title}
-                </h2>
-              </div>
-              <span style={{ fontSize: '0.72rem', color: '#b91c1c', fontWeight: 700 }}>
-                {lang === 'es' ? 'Supervisión Médica Obligatoria Previa a la Administración' : 'Physician Consultation Required Prior to Administration'}
+          <PublicSectionCard
+            id="safety-governance"
+            icon={ShieldCheck}
+            category={lang === 'es' ? 'GOBERNANZA CLÍNICA & EXCLUSIONES' : 'CLINICAL GOVERNANCE & EXCLUSIONS'}
+            title={t.sec6Title}
+            badge={lang === 'es' ? 'Supervisión Médica Obligatoria' : 'Physician Consultation Required'}
+            badgeVariant="green"
+            rightAction={
+              <span style={{ fontSize: '0.74rem', color: '#fca5a5', fontWeight: 600 }}>
+                {lang === 'es' ? 'Supervisión Obligatoria' : 'Physician Oversight'}
               </span>
-            </div>
-
-            <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: '#7f1d1d', lineHeight: 1.5 }}>
+            }
+          >
+            <p style={{ margin: '0 0 1rem 0', fontSize: '0.88rem', color: '#475569', lineHeight: 1.6 }}>
               {protocol?.safetyGuidelines || protocol?.contraindications_text || t.contraindicationsDesc}
             </p>
 
@@ -1110,18 +997,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                   </div>
                 </div>
               ))}
-              </div>
-            </section>
+            </div>
+          </PublicSectionCard>
 
-            {/* Institutional Verification & Clinical Governance Notice (Positioned at bottom per GCP Standards) */}
-            <div className="pds-notice-card" style={{ marginTop: '1.75rem', marginBottom: '1.25rem' }}>
-              <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
-              <div className="pds-notice-text">
-                <strong>{t.standardizedBlueprint}</strong>
-                <span>{t.blueprintNotice}</span>
-              </div>
+          {/* Institutional Verification & Clinical Governance Notice */}
+          <div className="pds-notice-card" style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
+            <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
+            <div className="pds-notice-text">
+              <strong>{t.standardizedBlueprint}</strong>
+              <span>{t.blueprintNotice}</span>
             </div>
           </div>
+        </div>
 
         {/* ── Modal QR Code Dialog ── */}
         {isQrModalOpen && (
@@ -1171,7 +1058,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </div>
         )}
-      </main>
+      </PublicPageShell>
 
       {/* ── Single Public Atlas AI Research Copilot Floating Trigger ── */}
       <PublicAtlasAIDrawer
