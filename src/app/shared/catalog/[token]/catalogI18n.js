@@ -59,7 +59,7 @@ export const CATALOG_TRANSLATIONS = {
     'product.leadTime'      : 'Lead time',
     'product.viewSDS'       : 'View SDS / COA',
     'product.molecular'     : 'Molecular Weight',
-    'product.officialMonograph': 'Official Monograph (Atlas Services) ↗',
+    'product.officialMonograph': 'Monograph (Atlas Services) ↗',
     'product.protocolDilution': 'Protocol & Dilution ↗',
 
     // ── Order / cart ──────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ export const CATALOG_TRANSLATIONS = {
     'product.leadTime'      : 'Tiempo de entrega',
     'product.viewSDS'       : 'Ver FDS / COA',
     'product.molecular'     : 'Peso Molecular',
-    'product.officialMonograph': 'Monografía Oficial (Atlas Services) ↗',
+    'product.officialMonograph': 'Monografía (Atlas Services) ↗',
     'product.protocolDilution': 'Protocolo & Dilución ↗',
 
     // ── Order / cart ──────────────────────────────────────────────────────

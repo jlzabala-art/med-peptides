@@ -44,10 +44,10 @@ export async function generateMetadata({ params }) {
 
   const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');
   const title = hasRecipient
-    ? `Official Clinical Peptide Catalog • ${recipientName}`
-    : `Official Clinical Peptide Catalog • ${supplierTitle}`;
+    ? `Clinical Peptide Catalog • ${recipientName}`
+    : `Clinical Peptide Catalog • ${supplierTitle}`;
 
-  const description = `Official clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
+  const description = `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
 
   const appUrl = 'https://med-peptides.com';
   const catalogCode = catalogData.catalogId || token || '';
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }) {
       title,
       description,
       type: 'website',
-      siteName: 'Official Clinical Peptide Catalog',
+      siteName: 'Clinical Peptide Catalog',
       url: `${appUrl}/c/${catalogCode}`,
       locale: 'en_US',
       images: [
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }) {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: 'Official Clinical Peptide Catalog Verification & 3D Barcode',
+          alt: 'Clinical Peptide Catalog Verification & 3D Barcode',
           type: 'image/png',
         }
       ]

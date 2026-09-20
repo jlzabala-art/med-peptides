@@ -122,7 +122,7 @@ export default function SharedCatalogProductListRow({
           )}
 
           <a
-            href={`/p/${encodeURIComponent(prod.slug || prod.id)}`}
+            href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
             target="_blank"
             rel="noopener noreferrer"
             className="pds-catalog-monograph-btn"

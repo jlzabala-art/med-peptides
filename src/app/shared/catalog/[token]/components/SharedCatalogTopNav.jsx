@@ -53,7 +53,7 @@ export default function SharedCatalogTopNav({
           <span className="pds-brand-title">Med-Peptides</span>
           <span className="pds-brand-divider" aria-hidden="true" />
           <span className="pds-badge-pill">
-            {lang === 'es' ? 'CATÁLOGO OFICIAL' : 'OFFICIAL CATALOG'}
+            {lang === 'es' ? 'CATÁLOGO CLÍNICO' : 'CLINICAL CATALOG'}
           </span>
           <span className="portal-verified-badge">
             <ShieldCheck size={12} />

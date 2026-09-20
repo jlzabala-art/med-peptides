@@ -42,13 +42,26 @@ const DAY_LABELS_ES = {
 export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const [lang, setLang] = useState(() => {
     if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang');
+      if (urlLang && SUPPORTED_LANGUAGES.some(l => l.code === urlLang)) return urlLang;
       const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
       if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) return stored;
-      const browser = navigator.language?.slice(0, 2)?.toLowerCase();
-      if (browser && SUPPORTED_LANGUAGES.some(l => l.code === browser)) return browser;
     }
     return 'en';
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleGlobalLang = (e) => {
+        if (e.detail && SUPPORTED_LANGUAGES.some(l => l.code === e.detail)) {
+          setLang(e.detail);
+        }
+      };
+      window.addEventListener('atlas_lang_change', handleGlobalLang);
+      return () => window.removeEventListener('atlas_lang_change', handleGlobalLang);
+    }
+  }, []);
 
   const [copied, setCopied] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);

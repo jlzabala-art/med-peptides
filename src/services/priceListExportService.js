@@ -87,7 +87,7 @@ function normalizeCatalogRows(products = [], role = 'admin') {
 export async function generatePriceListPdf(products = [], options = {}) {
   const role = options.role || 'admin';
   const categoryFilter = options.category || options.categoryFilter || 'All Categories';
-  const title = options.title || `Official Price Catalog · ${categoryFilter}`;
+  const title = options.title || `Price Catalog · ${categoryFilter}`;
 
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const PAGE_W = 297;

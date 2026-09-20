@@ -13,7 +13,7 @@ export default function PharmaBarcodeStamp({
   catalogCode = null,
   batchCode = null,
   code = 'RP-AT-260914-120-0',
-  label = 'OFFICIAL CATALOG ID VERIFICATION',
+  label = 'CATALOG ID VERIFICATION',
   theme = 'dark', // 'dark' (blue executive card) | 'light' (white cards)
   width = 210,
   height = 28

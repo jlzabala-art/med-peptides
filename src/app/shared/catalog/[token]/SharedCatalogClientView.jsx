@@ -434,7 +434,7 @@ export default function SharedCatalogClientView({
       let buffer = '';
       let finalUrl = null;
       let directBase64 = null;
-      let downloadFilename = `Atlas_Health_Official_Catalog_${new Date().toISOString().split('T')[0]}.pdf`;
+      let downloadFilename = `Atlas_Health_Catalog_${new Date().toISOString().split('T')[0]}.pdf`;
 
       while (true) {
         const { value, done } = await reader.read();
@@ -535,7 +535,7 @@ export default function SharedCatalogClientView({
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(224, 242, 254);
-      doc.text('Official Clinical Formulations & Specialty Quotation', 14, 22);
+      doc.text('Clinical Formulations & Specialty Quotation', 14, 22);
       const validContactEmail = catalogMeta?.accountManagerEmail &&
         catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' &&
         catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com' &&
@@ -1328,7 +1328,7 @@ export default function SharedCatalogClientView({
                     }}
                   >
                     <Download size={18} />
-                    <span>{isGeneratingProForma ? 'Generating PDF...' : 'Download Official Pro-Forma (PDF)'}</span>
+                    <span>{isGeneratingProForma ? 'Generating PDF...' : 'Download Pro-Forma (PDF)'}</span>
                   </button>
 
                   <button

@@ -116,32 +116,27 @@ async function getPublicProduct(slug, supplierFilter = null) {
     );
   }
 
-  // Filter variants strictly for target supplier to prevent cross-supplier contamination
-  const isSpecificSupplierRequested = Boolean(supplierFilter && supplierFilter.toLowerCase() !== 'all');
+  // Filter variants strictly for target supplier to prevent cross-supplier contamination.
+  // Clinical standard: Default strictly to Lotusland Limited (Atlas Services) so that public datasheets
+  // show exclusively Lotusland certified formulations without mentioning other suppliers.
+  const targetSupplier = (supplierFilter && supplierFilter.toLowerCase() !== 'all')
+    ? supplierFilter
+    : 'supplier-lotusland';
 
-  if (isSpecificSupplierRequested) {
-    const filtered = (rawVariants || []).filter(v => matchSupplier(v, supplierFilter));
-    if (filtered.length > 0) {
-      rawVariants = filtered;
-      const matchedSupp = filtered[0].supplierName || filtered[0].supplier || supplierFilter;
-      const matchedSuppId = filtered[0].supplierId || (supplierFilter.startsWith('supplier-') ? supplierFilter : `supplier-${supplierFilter}`);
-      raw.supplierName = matchedSupp;
-      raw.supplier = matchedSupp;
-      raw.supplierId = matchedSuppId;
-      raw.suppliers = [matchedSuppId];
-      raw.supplierIds = [matchedSuppId];
-      raw.isSingleSupplierLocked = true;
-    } else {
-      // 🛡️ Graceful Fallback: If requested supplier has no active variants,
-      // fallback to available variants rather than returning 404 (Golden UX Rule)
-      console.warn(`[getPublicProduct] Supplier '${supplierFilter}' not found for ${slug}, falling back to all variants.`);
-      raw.isSingleSupplierLocked = false;
-      raw.supplierName = 'Certified Clinical Laboratories';
-      raw.supplier = 'Multi-Source';
-    }
+  const filtered = (rawVariants || []).filter(v => matchSupplier(v, targetSupplier));
+  if (filtered.length > 0) {
+    rawVariants = filtered;
+    const matchedSupp = filtered[0].supplierName || filtered[0].supplier || targetSupplier;
+    const matchedSuppId = filtered[0].supplierId || (targetSupplier.startsWith('supplier-') ? targetSupplier : `supplier-${targetSupplier}`);
+    raw.supplierName = matchedSupp;
+    raw.supplier = matchedSupp;
+    raw.supplierId = matchedSuppId;
+    raw.suppliers = [matchedSuppId];
+    raw.supplierIds = [matchedSuppId];
+    raw.isSingleSupplierLocked = true;
   } else {
-    // 🌐 Institutional Multi-Supplier View:
-    // Retain all legitimate variants across all authorized suppliers
+    // 🛡️ Graceful Fallback: If requested/default supplier has no active variants,
+    // fallback to available variants rather than returning 404 (Golden UX Rule)
     raw.isSingleSupplierLocked = false;
     raw.supplierName = 'Certified Clinical Laboratories';
     raw.supplier = 'Multi-Source';

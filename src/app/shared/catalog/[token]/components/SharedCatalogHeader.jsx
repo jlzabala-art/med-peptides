@@ -81,10 +81,10 @@ export default function SharedCatalogHeader({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Atlas Services • Official Compendium & Monograph Registry
+                  Atlas Services • Clinical Compendium & Monograph Registry
                 </span>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
-                  Official Clinical Peptide Catalog
+                  Clinical Peptide Catalog
                 </h1>
               </div>
               <span style={{
@@ -167,7 +167,7 @@ export default function SharedCatalogHeader({
               }}
             >
               <Download size={16} />
-              <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
+              <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Catalog (PDF)'}</span>
             </button>
 
             {/* Mobile-only toggle for technical verification assets */}

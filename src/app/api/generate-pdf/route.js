@@ -840,7 +840,7 @@ export async function POST(request) {
 
         const drawHeader = (p) => {
           p.drawRectangle({ x: 0, y: H - 14, width: W, height: 14, color: BRAND });
-          const docLabel = docType === 'quotation' ? L.quotation : 'OFFICIAL CLINICAL PEPTIDE CATALOG';
+          const docLabel = docType === 'quotation' ? L.quotation : 'CLINICAL PEPTIDE CATALOG';
           p.drawText(BRAND_NAME, { x: MRG, y: H - 38, size: 13, font: helveticaBold, color: BRAND });
           const brandW = helveticaBold.widthOfTextAtSize(BRAND_NAME, 13);
           p.drawText(docLabel, { x: MRG + brandW + 12, y: H - 38, size: 10.5, font: helvetica, color: ACCENT });
@@ -864,7 +864,7 @@ export async function POST(request) {
           cover.drawRectangle({ x: 0, y: H - 290, width: W, height: 12, color: ACCENT });
           cover.drawText(BRAND_NAME, { x: MRG, y: H - 100, size: 34, font: helveticaBold, color: rgb(1, 1, 1) });
           cover.drawText(BRAND_SUBTITLE, { x: MRG, y: H - 132, size: 13, font: helvetica, color: rgb(0.75, 0.88, 0.97) });
-          const docLabelCover = docType === 'quotation' ? L.quotation : 'Official Clinical Peptide Catalog';
+          const docLabelCover = docType === 'quotation' ? L.quotation : 'Clinical Peptide Catalog';
           cover.drawText(docLabelCover, { x: MRG, y: H - 180, size: 22, font: helveticaBold, color: rgb(1, 1, 1) });
           
           const coverBadgeText = tierHeaderBadge;

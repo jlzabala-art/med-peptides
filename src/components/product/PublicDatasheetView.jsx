@@ -167,18 +167,32 @@ export default function PublicDatasheetView({
     }
   };
 
-  // Sync language with initialLang param or localStorage preference
+  // Sync language with URL param, initialLang param, or localStorage preference
   useEffect(() => {
-    if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
-      setLang(initialLang);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('atlas_portal_lang', initialLang);
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLang = urlParams.get('lang');
+      if (urlLang && SUPPORTED_LANGUAGES.some(l => l.code === urlLang)) {
+        setLang(urlLang);
+        return;
       }
-    } else if (typeof window !== 'undefined') {
+      if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
+        setLang(initialLang);
+        localStorage.setItem('atlas_portal_lang', initialLang);
+        return;
+      }
       const stored = localStorage.getItem('atlas_portal_lang') || localStorage.getItem('atlas_catalog_lang');
       if (stored && SUPPORTED_LANGUAGES.some(l => l.code === stored)) {
         setLang(stored);
       }
+
+      const handleGlobalLang = (e) => {
+        if (e.detail && SUPPORTED_LANGUAGES.some(l => l.code === e.detail)) {
+          setLang(e.detail);
+        }
+      };
+      window.addEventListener('atlas_lang_change', handleGlobalLang);
+      return () => window.removeEventListener('atlas_lang_change', handleGlobalLang);
     }
   }, [initialLang]);
 

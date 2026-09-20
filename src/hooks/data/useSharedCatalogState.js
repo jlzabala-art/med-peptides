@@ -454,7 +454,7 @@ export function useSharedCatalogState({
   // ── Copy order summary ────────────────────────────────────────────────────
   const handleCopyOrderSummary = useCallback(() => {
     if (cartItems.length === 0) return;
-    let text = `Official Order Inquiry (${catalogMeta?.catalogId || 'Atlas Catalog'})\n`;
+    let text = `Order Inquiry (${catalogMeta?.catalogId || 'Atlas Catalog'})\n`;
     text += `Terms: DAP / Delivered (${activeShipping.flag} ${activeShipping.label}) • Currency: ${currentCurrency}\n\n`;
     cartItems.forEach((item, idx) => {
       const itemPrice = item.price * fxMultiplier;
@@ -635,7 +635,7 @@ export function useSharedCatalogState({
     const manager    = catalogMeta?.accountManagerName || 'Atlas Commercial Desk';
     const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-    let msg = `Hello ${manager},\n\nI am placing a formal inquiry from the official portfolio (Ref: ${cId}).\n\n`;
+    let msg = `Hello ${manager},\n\nI am placing a formal inquiry from the clinical portfolio (Ref: ${cId}).\n\n`;
 
     if (checkoutForm.clinicName || checkoutForm.contactPerson) {
       msg += `🏥 *CLINIC / CLIENT DETAILS*:\n`;
