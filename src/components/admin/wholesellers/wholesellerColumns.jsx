@@ -96,36 +96,99 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
     },
     {
       key: 'pricingTier',
-      header: 'Pricing Tier',
-      width: '18%',
+      header: 'Pricing & Currency',
+      width: '20%',
       sortable: true,
-      render: (row) => (
-        <PricingTierSelectorCell
-          customer={row}
-          customerType="wholesaler"
-          onUpdate={onUpdate}
-        />
-      ),
+      render: (row) => {
+        const currency = row.currency || (row.country?.toLowerCase().includes('emirates') ? 'AED' : (row.country?.toLowerCase().includes('spain') ? 'EUR' : 'USD'));
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <PricingTierSelectorCell
+              customer={row}
+              customerType="wholesaler"
+              onUpdate={onUpdate}
+            />
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '2px 5px',
+                borderRadius: '4px',
+                backgroundColor: '#f8fafc',
+                color: '#475569',
+                border: '1px solid #cbd5e1'
+              }}
+              title={`Invoicing Currency: ${currency}`}
+            >
+              {currency}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: 'contactEmail',
       header: 'Contact',
       width: '18%',
       sortable: true,
-      render: (row) => (
-        <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {(row.contactEmail || row.email) && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)' }}>
-              <Mail size={11} /> {row.contactEmail || row.email}
-            </span>
-          )}
-          {(row.contactPhone || row.phone) && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)' }}>
-              <Phone size={11} /> {row.contactPhone || row.phone}
-            </span>
-          )}
-        </div>
-      ),
+      render: (row) => {
+        const email = row.contactEmail || row.email;
+        const phone = row.contactPhone || row.phone;
+        const cleanDigits = phone ? phone.replace(/[^\d+]/g, '') : '';
+        const waNumber = cleanDigits.replace('+', '');
+
+        return (
+          <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }} onClick={e => e.stopPropagation()}>
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                title={`Send email to ${email}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0284c7', textDecoration: 'none' }}
+                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+              >
+                <Mail size={11} /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</span>
+              </a>
+            )}
+            {phone && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <a
+                  href={`tel:${cleanDigits}`}
+                  title={`Call ${phone}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)', textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  <Phone size={11} /> <span>{phone}</span>
+                </a>
+                {waNumber.length >= 7 && (
+                  <a
+                    href={`https://wa.me/${waNumber}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Open WhatsApp chat with ${row.companyName || row.name || 'Wholesaler'}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      backgroundColor: '#dcfce7',
+                      color: '#16a34a',
+                      border: '1px solid #bbf7d0',
+                      fontSize: '10px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    💬
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'status',

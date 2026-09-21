@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import PageHeader from '../ui/PageHeader';
 import { Tabs } from '../ui/Tabs';
+import AdminAllCustomersDirectory from './customers/AdminAllCustomersDirectory';
 import AdminClinicsTab from './AdminClinicsTab';
 import AdminWholesellersTabClient from './AdminWholesellersTabClient';
 import AdminPatientsTab from './AdminPatientsTab';
@@ -15,14 +16,15 @@ import notifier from '../../services/NotificationService';
  * AdminCustomersTab (Zoho Books Standard)
  * ─────────────────────────────────────────────────────────────────────────────
  * Unifies all customer channels into a single coherent interface:
- * 1. Clinics & Doctors (B2B Accounts)
- * 2. Wholesalers (Bulk Distributors / Resellers)
- * 3. Individuals / Patients (B2C Direct)
- * 4. All Accounts & CRM Overview
+ * 1. All Customers Directory (Consolidated Single Source of Truth)
+ * 2. Clinics & Doctors (B2B Accounts)
+ * 3. Wholesalers (Bulk Distributors / Resellers)
+ * 4. Individuals / Patients (B2C Direct)
+ * 5. All Accounts & CRM Overview
  *
  * Supports cross-counterparty identification (Customer that is also a Supplier).
  */
-export default function AdminCustomersTab({ defaultSubTab = 'clinics' }) {
+export default function AdminCustomersTab({ defaultSubTab = 'all' }) {
   const [activeTab, setActiveTab] = useState(defaultSubTab);
   const [isRegularizing, setIsRegularizing] = useState(false);
 
@@ -49,6 +51,16 @@ export default function AdminCustomersTab({ defaultSubTab = 'clinics' }) {
   };
 
   const tabs = [
+    {
+      id: 'all',
+      label: 'All Customers',
+      icon: Users2,
+      content: (
+        <div style={{ padding: '0.5rem 0' }}>
+          <AdminAllCustomersDirectory onSyncSSOT={handleRegularizeCustomers} isSyncing={isRegularizing} />
+        </div>
+      )
+    },
     {
       id: 'clinics',
       label: 'Clinics & Doctors',

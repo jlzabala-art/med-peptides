@@ -266,15 +266,33 @@ export function useWholesellerData({ initialData = null } = {}) {
   const processedData = useMemo(() => {
     let result = [...wholesellers];
 
-    // 1. Search
+    // 1. Search filter
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(w =>
-        (w.companyName || w.name || '').toLowerCase().includes(term) ||
-        (w.email || '').toLowerCase().includes(term) ||
-        (w.country || '').toLowerCase().includes(term) ||
-        (w.contactPerson || '').toLowerCase().includes(term)
-      );
+      const term = searchTerm.toLowerCase().trim();
+      const cleanTerm = term.replace(/[^\d+]/g, '');
+
+      result = result.filter(w => {
+        const company = (w.companyName || w.name || '').toLowerCase();
+        const email = (w.contactEmail || w.email || '').toLowerCase();
+        const country = (w.country || '').toLowerCase();
+        const city = (w.city || '').toLowerCase();
+        const person = (w.contactPerson || w.contactName || '').toLowerCase();
+        const id = (w.id || '').toLowerCase();
+        const zohoId = (w.zohoContactId || w.zohoContactNumber || w.zohoBiginContactId || '').toLowerCase();
+        const rawPhone = (w.contactPhone || w.phone || w.mobile || '');
+        const cleanPhone = rawPhone.replace(/[^\d+]/g, '');
+
+        return (
+          company.includes(term) ||
+          email.includes(term) ||
+          country.includes(term) ||
+          city.includes(term) ||
+          person.includes(term) ||
+          id.includes(term) ||
+          zohoId.includes(term) ||
+          (cleanTerm.length >= 3 && cleanPhone.includes(cleanTerm))
+        );
+      });
     }
 
     // 2. KPI filters

@@ -128,9 +128,24 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
       const city = (c.city || '').toLowerCase();
       const country = (c.country || '').toLowerCase();
       const type = (c.type || '').toLowerCase();
-      const q = (searchTerm || '').toLowerCase().trim();
+      const email = (c.email || '').toLowerCase();
+      const id = (c.id || '').toLowerCase();
+      const zohoId = (c.zohoContactId || c.zohoContactNumber || '').toLowerCase();
+      const phone = (c.phone || '').replace(/[^\d+]/g, '');
 
-      const matchesSearch = !q || name.includes(q) || city.includes(q) || country.includes(q) || type.includes(q);
+      const q = (searchTerm || '').toLowerCase().trim();
+      const cleanQ = q.replace(/[^\d+]/g, '');
+
+      const matchesSearch = !q ||
+        name.includes(q) ||
+        city.includes(q) ||
+        country.includes(q) ||
+        type.includes(q) ||
+        email.includes(q) ||
+        id.includes(q) ||
+        zohoId.includes(q) ||
+        (cleanQ.length >= 3 && phone.includes(cleanQ));
+
       const matchesTerritory = !selectedTerritory || selectedTerritory === 'All' ||
         country.includes(selectedTerritory.toLowerCase()) ||
         city.includes(selectedTerritory.toLowerCase());
@@ -146,19 +161,58 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     {
       key: 'name',
       header: 'Clinic / Medical Center',
-      width: '30%',
+      width: '32%',
       render: (c) => {
         const typeLabel = c.type ? c.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Clinic';
         const loc = [c.city, c.country].filter(Boolean).join(', ');
+        const hasZohoBooks = Boolean(c.zohoContactId || c.zohoContactNumber);
+        const hasZohoBigin = Boolean(c.zohoBiginContactId);
+
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '34px', height: '34px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0, border: '1px solid #bfdbfe' }}>
               🏥
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.90rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {c.name || c.legalName}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.90rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {c.name || c.legalName}
+                </span>
+                {hasZohoBooks && (
+                  <span
+                    title={`Zoho Books Contact: ${c.zohoContactNumber || c.zohoContactId}`}
+                    style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      backgroundColor: '#f0fdf4',
+                      color: '#15803d',
+                      border: '1px solid #bbf7d0',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Books ✓
+                  </span>
+                )}
+                {hasZohoBigin && (
+                  <span
+                    title="Synchronized with Zoho Bigin CRM"
+                    style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      backgroundColor: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Bigin ✓
+                  </span>
+                )}
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b' }}>
                 <CopyableId value={c.id} iconOnly={true} />
                 <span style={{ color: '#0284c7', fontWeight: 600 }}>{typeLabel}</span>
@@ -175,45 +229,140 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     },
     {
       key: 'pricingTier',
-      header: 'Pricing Tier',
-      width: '18%',
-      render: (c) => (
-        <PricingTierSelectorCell
-          customer={c}
-          customerType="clinic"
-          onUpdate={async (id, data) => {
-            try {
-              const { updateDoc, doc } = await import('firebase/firestore');
-              const { db } = await import('@/firebase');
-              await updateDoc(doc(db, 'clinics', id), data);
-              refresh();
-            } catch (err) {
-              console.error('Failed to update clinic tier:', err);
-              throw err;
-            }
-          }}
-        />
-      )
+      header: 'Pricing & Currency',
+      width: '20%',
+      render: (c) => {
+        const currency = c.currency || (c.country?.toLowerCase().includes('emirates') ? 'AED' : (c.country?.toLowerCase().includes('spain') ? 'EUR' : 'USD'));
+
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <PricingTierSelectorCell
+              customer={c}
+              customerType="clinic"
+              onUpdate={async (id, data) => {
+                try {
+                  const { updateDoc, doc } = await import('firebase/firestore');
+                  const { db } = await import('@/firebase');
+                  await updateDoc(doc(db, 'clinics', id), data);
+                  refresh();
+                } catch (err) {
+                  console.error('Failed to update clinic tier:', err);
+                  throw err;
+                }
+              }}
+            />
+            <span
+              style={{
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: '4px',
+                backgroundColor: '#f8fafc',
+                color: '#475569',
+                border: '1px solid #cbd5e1',
+                lineHeight: 1.2
+              }}
+              title={`Customer Invoicing Currency: ${currency}`}
+            >
+              {currency}
+            </span>
+          </div>
+        );
+      }
     },
     {
       key: 'contact',
-      header: 'Contact',
-      width: '18%',
-      render: (c) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-          <span style={{ fontSize: '0.80rem', fontWeight: 600, color: 'var(--text-main)' }}>
-            📞 {c.phone || '—'}
-          </span>
-          <span style={{ fontSize: '0.72rem', color: '#0369a1' }}>
-            {c.email || (c.website ? new URL(c.website).hostname.replace('www.', '') : '—')}
-          </span>
-        </div>
-      )
+      header: 'Contact & Channels',
+      width: '20%',
+      render: (c) => {
+        const rawPhone = c.phone || '';
+        const cleanDigits = rawPhone.replace(/[^\d+]/g, '');
+        const waNumber = cleanDigits.replace('+', '');
+        const email = c.email || '';
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }} onClick={e => e.stopPropagation()}>
+            {rawPhone ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <a
+                  href={`tel:${cleanDigits}`}
+                  title={`Call ${rawPhone}`}
+                  style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: 'var(--text-main)',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  📞 {rawPhone}
+                </a>
+                {waNumber.length >= 7 && (
+                  <a
+                    href={`https://wa.me/${waNumber}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Open WhatsApp chat with ${c.name || 'Clinic'}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '4px',
+                      backgroundColor: '#dcfce7',
+                      color: '#16a34a',
+                      border: '1px solid #bbf7d0',
+                      fontSize: '0.70rem',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    💬
+                  </a>
+                )}
+              </div>
+            ) : (
+              <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>— No phone —</span>
+            )}
+
+            {email ? (
+              <a
+                href={`mailto:${email}`}
+                title={`Send email to ${email}`}
+                style={{
+                  fontSize: '0.72rem',
+                  color: '#0284c7',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+              >
+                ✉️ {email}
+              </a>
+            ) : c.website ? (
+              <a
+                href={c.website.startsWith('http') ? c.website : `https://${c.website}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{ fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}
+              >
+                🌐 {new URL(c.website.startsWith('http') ? c.website : `https://${c.website}`).hostname.replace('www.', '')}
+              </a>
+            ) : (
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>—</span>
+            )}
+          </div>
+        );
+      }
     },
     {
       key: 'status',
       header: 'Status',
-      width: '12%',
+      width: '10%',
       render: (c) => <StatusBadge status={c.status || 'active'} />
     },
     {
