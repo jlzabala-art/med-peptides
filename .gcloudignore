@@ -2,6 +2,7 @@
 .git
 .github
 /node_modules
+/.node_modules_bad
 !/.next/standalone/node_modules
 !/.next/standalone/node_modules/**
 .next/cache
@@ -16,10 +17,16 @@ backups
 migration_bundle
 HORTMAN
 test-screenshots
+cloudrun
 cloudrun_backend
 .vercel
 *.pdf
+*.png
+*.jpg
+*.jpeg
 tests
+cypress
 docs
+scratch
 .DS_Store
 .env*
