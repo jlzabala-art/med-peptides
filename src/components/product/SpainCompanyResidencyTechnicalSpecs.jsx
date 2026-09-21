@@ -4,11 +4,14 @@
  * Interactive & Highly Visual Specification Engine for Spanish Corporate
  * Acquisition & Law 14/2013 Entrepreneur Residence.
  * Features:
- *  - Interactive Fast-Track Strategy Simulator (Profile / Activity / Stay)
- *  - Visual Schengen Mobility Radar & Interactive Map Infographic
+ *  - Visual Schengen Mobility Radar & Interactive Destination Explorer
+ *  - Visual Side-by-Side Benchmark: New S.L. Incorporation vs. 100% S.L. Acquisition
+ *  - Interactive Fast-Track Strategy Simulator with Structure Architecture Cards
  *  - Visual 4-Stage Milestone Roadmap with Progress Meters
+ *  - Legal Shield & Official Document Vault (Escritura, AEAT, TGSS, UGE-CE)
  *  - Visual DO vs. DON'T Strategic Best Practices Matrix
  *  - Interactive Accordion FAQ with Legal Citations
+ *  - High-Converting Diagnostic Consultation Action Banner
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -40,7 +43,12 @@ import {
   Compass,
   FileText,
   BadgeCheck,
-  AlertTriangle
+  AlertTriangle,
+  Zap,
+  FileKey,
+  ShieldAlert,
+  MapPin,
+  HeartHandshake
 } from 'lucide-react';
 import './SpainCompanyResidencyTechnicalSpecs.css';
 
@@ -55,9 +63,27 @@ export default function SpainCompanyResidencyTechnicalSpecs({
   const [physicalStay, setPhysicalStay] = useState('flexible'); // 'flexible' | 'full'
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
+  // Schengen Explorer State
+  const [selectedCountry, setSelectedCountry] = useState('es');
+
   const toggleFaq = (idx) => {
     setOpenFaqIndex(openFaqIndex === idx ? null : idx);
   };
+
+  // Schengen destination data
+  const schengenDestinations = [
+    { id: 'es', flag: '🇪🇸', name: 'Spain', note: 'Corporate Base · UGE Hub · 0 Border Checks', transit: 'HQ Location · Unlimited Stay' },
+    { id: 'fr', flag: '🇫🇷', name: 'France', note: 'Paris, Lyon, Marseille · Direct High-Speed TGV', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'de', flag: '🇩🇪', name: 'Germany', note: 'Frankfurt, Berlin, Munich · Central EU Finance', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'it', flag: '🇮🇹', name: 'Italy', note: 'Milan, Rome · Direct Mediterranean Flights', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'ch', flag: '🇨🇭', name: 'Switzerland', note: 'Zurich, Geneva · Schengen Associate State', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'nl', flag: '🇳🇱', name: 'Netherlands', note: 'Amsterdam, Rotterdam · Logistics Hub', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'pt', flag: '🇵🇹', name: 'Portugal', note: 'Lisbon, Porto · Direct Iberian Border Transit', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'at', flag: '🇦🇹', name: 'Austria', note: 'Vienna · Central European Business Center', transit: '90 Days / 180 Days Visa-Free' },
+    { id: 'se', flag: '🇸🇪', name: 'Sweden', note: 'Stockholm, Gothenburg · Nordic Innovation', transit: '90 Days / 180 Days Visa-Free' }
+  ];
+
+  const activeDestination = schengenDestinations.find(c => c.id === selectedCountry) || schengenDestinations[0];
 
   // Dynamic Blueprint Calculation
   const blueprint = useMemo(() => {
@@ -66,13 +92,19 @@ export default function SpainCompanyResidencyTechnicalSpecs({
     let remoteExecution = '100% Remote via Consular Power of Attorney';
     let enisaFocus = 'High-Value Strategic Management & Digital Advisory';
     let physicalStayNotice = 'Flexible: No strict 183-day annual stay to renew';
+    let treeBadge = 'Sole Executive Structure';
+    let treeDesc = '100% Shares directly assigned to the Primary Applicant. Sole Administrator appointed in the Spanish Commercial Registry with immediate legal signature.';
 
     if (profileType === 'founders') {
       applicantsCovered = 'Up to 4 Co-Founders with Executive Appointments';
       enisaFocus = 'Multi-Founder Venture with Complementary Executive Profiles';
+      treeBadge = 'Syndicated Co-Founder Structure';
+      treeDesc = 'Equity split among up to 4 qualifying partners. Joint or individual executive directorships registered, enabling concurrent residency applications under a unified ENISA plan.';
     } else if (profileType === 'family') {
       applicantsCovered = 'Primary Applicant + Spouse + Dependent Children';
       enisaFocus = 'Family Unit Legal Residency with Full Work Authorization';
+      treeBadge = 'Family Unit Legal Structure';
+      treeDesc = 'Full family inclusion. Spouse receives independent work authorization (cuenta ajena y propia). Minor children access Spanish public healthcare and international schools.';
     }
 
     if (businessModel === 'trade') {
@@ -93,6 +125,8 @@ export default function SpainCompanyResidencyTechnicalSpecs({
       remoteExecution,
       enisaFocus,
       physicalStayNotice,
+      treeBadge,
+      treeDesc,
       timeframe: '8 – 12 Weeks (Expedited 20-day UGE-CE window)'
     };
   }, [profileType, businessModel, physicalStay]);
@@ -238,7 +272,7 @@ export default function SpainCompanyResidencyTechnicalSpecs({
         </p>
       </div>
 
-      {/* ── 2. Graphical Schengen Mobility Radar & Key Metrics ── */}
+      {/* ── 2. Graphical Schengen Mobility Radar & Interactive Destination Explorer ── */}
       <div className="spain-visual-radar-card">
         <div className="spain-radar-visual">
           <div className="spain-radar-circle outer"></div>
@@ -297,7 +331,150 @@ export default function SpainCompanyResidencyTechnicalSpecs({
         </div>
       </div>
 
-      {/* ── 3. Interactive Blueprint & Strategy Simulator ── */}
+      {/* ── 2B. Interactive Schengen Mobility Destination Navigator ── */}
+      <div className="spain-schengen-nav-box">
+        <div className="spain-schengen-nav-header">
+          <div className="spain-schengen-nav-title">
+            <Plane size={18} className="text-sky-600" />
+            <span className="font-bold text-slate-900 text-sm">Interactive Schengen Zone Mobility Navigator (29 Member States)</span>
+          </div>
+          <span className="spain-schengen-nav-badge">Visa-Free Transit</span>
+        </div>
+
+        <div className="spain-country-chips-row">
+          {schengenDestinations.map(c => (
+            <button
+              key={c.id}
+              type="button"
+              className={`spain-country-chip ${selectedCountry === c.id ? 'active' : ''}`}
+              onClick={() => setSelectedCountry(c.id)}
+            >
+              <span className="chip-flag">{c.flag}</span>
+              <span className="chip-name">{c.name}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="spain-destination-preview">
+          <div className="dest-flag-badge">{activeDestination.flag}</div>
+          <div className="dest-info">
+            <div className="dest-title-row">
+              <strong className="dest-name">{activeDestination.name}</strong>
+              <span className="dest-transit-tag">{activeDestination.transit}</span>
+            </div>
+            <p className="dest-note">{activeDestination.note}</p>
+          </div>
+        </div>
+
+        <div className="spain-stay-rule-callout">
+          <Clock size={16} className="text-amber-600 flex-shrink-0" />
+          <div className="stay-rule-text">
+            <strong>Statutory Physical Stay Flexibility:</strong> Unlike general non-lucrative visas, Law 14/2013 does NOT mandate spending 183 days per year in Spain to renew your residence permit, granting maximum flexibility for international entrepreneurs and global business travelers.
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3. Visual Side-by-Side Benchmark: New Incorporation vs. 100% S.L. Acquisition ── */}
+      <div className="spain-benchmark-section">
+        <div className="spain-benchmark-header">
+          <div className="spain-benchmark-header-left">
+            <Zap size={22} className="text-amber-500" />
+            <div>
+              <h3 className="spain-section-title">Strategic Pathway Benchmark</h3>
+              <p className="spain-section-desc">Why acquiring 100% of an existing Spanish S.L. outpaces incorporating a new entity</p>
+            </div>
+          </div>
+          <span className="spain-benchmark-speed-badge">
+            <Sparkles size={13} /> 5x Faster Turnkey Execution
+          </span>
+        </div>
+
+        <div className="spain-benchmark-grid">
+          {/* Option A: Ex Novo S.L. Incorporation (Friction & Delays) */}
+          <div className="spain-bench-card bench-card-slow">
+            <div className="bench-card-badge-row">
+              <span className="bench-tag-slow">TRADITIONAL ROUTE</span>
+              <span className="bench-time-slow">6 – 9 Months</span>
+            </div>
+            <h4 className="bench-card-title">Brand New S.L. Incorporation</h4>
+            <p className="bench-card-sub">High administrative friction, banking bottlenecks, and prolonged review cycles</p>
+
+            <ul className="bench-card-features">
+              <li className="bench-feat-item negative">
+                <X size={15} className="feat-icon-neg" />
+                <div>
+                  <strong>Provisional NIF Backlog:</strong>
+                  <span>Takes 4–8 weeks to obtain tax certificates before banking setup.</span>
+                </div>
+              </li>
+              <li className="bench-feat-item negative">
+                <X size={15} className="feat-icon-neg" />
+                <div>
+                  <strong>Severe AML Bank Account Friction:</strong>
+                  <span>Spanish banks frequently freeze accounts of newly formed foreign entities for 3–5 months during strict compliance checks.</span>
+                </div>
+              </li>
+              <li className="bench-feat-item negative">
+                <X size={15} className="feat-icon-neg" />
+                <div>
+                  <strong>Theoretical ENISA Vetting:</strong>
+                  <span>Evaluated strictly on theoretical assumptions with zero historical operational proof.</span>
+                </div>
+              </li>
+              <li className="bench-feat-item negative">
+                <X size={15} className="feat-icon-neg" />
+                <div>
+                  <strong>Delayed Immigration Filing:</strong>
+                  <span>Immigration file cannot be submitted until the company is fully registered, delaying residence for up to 9 months.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          {/* Option B: 100% S.L. Acquisition (Fast-Track & Turnkey) */}
+          <div className="spain-bench-card bench-card-fast">
+            <div className="bench-card-badge-row">
+              <span className="bench-tag-fast">RECOMMENDED FAST-TRACK</span>
+              <span className="bench-time-fast">Days 1 – 15</span>
+            </div>
+            <h4 className="bench-card-title">100% Existing S.L. Acquisition</h4>
+            <p className="bench-card-sub">Immediate legal standing, active tax identification (CIF), and expedited UGE-CE filing</p>
+
+            <ul className="bench-card-features">
+              <li className="bench-feat-item positive">
+                <Check size={15} className="feat-icon-pos" />
+                <div>
+                  <strong>Active Tax Identification (CIF) on Day 1:</strong>
+                  <span>Existing Spanish entity ready for immediate notarial transfer without provisional delays.</span>
+                </div>
+              </li>
+              <li className="bench-feat-item positive">
+                <Check size={15} className="feat-icon-pos" />
+                <div>
+                  <strong>Full Banking Readiness:</strong>
+                  <span>Active corporate banking capabilities, bypassing the dreaded foreign founder AML freeze.</span>
+                </div>
+              </li>
+              <li className="bench-feat-item positive">
+                <Check size={15} className="feat-icon-pos" />
+                <div>
+                  <strong>Demonstrable Commercial Substance:</strong>
+                  <span>ENISA business plan framed on an established corporate entity with clear sector alignment.</span>
+                </div>
+              </li>
+              <li className="bench-feat-item positive">
+                <Check size={15} className="feat-icon-pos" />
+                <div>
+                  <strong>Simultaneous 20-Day UGE Filing:</strong>
+                  <span>Residence file lodged immediately, triggering the statutory 20-day government adjudication window.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 4. Interactive Blueprint & Strategy Simulator ── */}
       <div className="spain-simulator-card">
         <div className="spain-sim-header">
           <div className="spain-sim-header-title">
@@ -398,6 +575,18 @@ export default function SpainCompanyResidencyTechnicalSpecs({
           </div>
         </div>
 
+        {/* Dynamic Structure Architecture Card */}
+        <div className="spain-structure-preview-card">
+          <div className="structure-preview-top">
+            <div className="structure-badge">
+              <Users size={14} />
+              <span>{blueprint.treeBadge}</span>
+            </div>
+            <span className="structure-timeline">Expedited: {blueprint.timeframe}</span>
+          </div>
+          <p className="structure-desc">{blueprint.treeDesc}</p>
+        </div>
+
         {/* Dynamic Blueprint Summary Box */}
         <div className="spain-sim-blueprint-display">
           <div className="spain-blueprint-header">
@@ -430,7 +619,7 @@ export default function SpainCompanyResidencyTechnicalSpecs({
         </div>
       </div>
 
-      {/* ── 4. Visual 4-Stage Milestone Roadmap ── */}
+      {/* ── 5. Visual 4-Stage Milestone Roadmap ── */}
       <div className="spain-roadmap-section">
         <div className="spain-roadmap-header">
           <div className="spain-roadmap-header-left">
@@ -477,7 +666,89 @@ export default function SpainCompanyResidencyTechnicalSpecs({
         </div>
       </div>
 
-      {/* ── 5. Visual DOs vs. DON'Ts Best Practice Matrix ── */}
+      {/* ── 6. Legal Shield & Official Document Vault (Bóveda Gráfica de Garantías Legales) ── */}
+      <div className="spain-vault-section">
+        <div className="spain-vault-header">
+          <div className="spain-vault-header-left">
+            <ShieldCheck size={24} className="text-emerald-600" />
+            <div>
+              <h3 className="spain-section-title">Legal Shield & Official Document Vault</h3>
+              <p className="spain-section-desc">Four core verified instruments securing 100% clean title and expedited residency</p>
+            </div>
+          </div>
+          <span className="spain-vault-badge">
+            <BadgeCheck size={14} /> Comprehensive Notarial Due Diligence
+          </span>
+        </div>
+
+        <div className="spain-vault-grid">
+          {/* Document 1: Notarial Deed */}
+          <div className="vault-doc-card">
+            <div className="vault-doc-icon-wrap gold">
+              <Landmark size={22} />
+            </div>
+            <span className="vault-doc-tag">PUBLIC NOTARIAL INSTRUMENT</span>
+            <h4 className="vault-doc-title">Escritura Pública de Compraventa</h4>
+            <p className="vault-doc-desc">
+              100% of company shares transferred before a Spanish Notary Public. Protocolized and filed in the Spanish Commercial Registry. Can be executed 100% remotely via Consular PoA.
+            </p>
+            <div className="vault-doc-seal">
+              <ShieldCheck size={13} className="text-emerald-600" />
+              <span>Registered Mercantile Title</span>
+            </div>
+          </div>
+
+          {/* Document 2: AEAT Tax Clearance */}
+          <div className="vault-doc-card">
+            <div className="vault-doc-icon-wrap blue">
+              <FileCheck2 size={22} />
+            </div>
+            <span className="vault-doc-tag">MINISTRY OF FINANCE (AEAT)</span>
+            <h4 className="vault-doc-title">Certificado Tributario Positivo</h4>
+            <p className="vault-doc-desc">
+              Official Tax Agency clearance certifying zero outstanding debts or tax liabilities, verified with a cryptographic Secure Verification Code (CSV).
+            </p>
+            <div className="vault-doc-seal">
+              <ShieldCheck size={13} className="text-emerald-600" />
+              <span>Zero Fiscal Liability Guarantee</span>
+            </div>
+          </div>
+
+          {/* Document 3: TGSS Social Security Clearance */}
+          <div className="vault-doc-card">
+            <div className="vault-doc-icon-wrap emerald">
+              <FileKey size={22} />
+            </div>
+            <span className="vault-doc-tag">SOCIAL SECURITY TREASURY</span>
+            <h4 className="vault-doc-title">Certificado de No Deuda TGSS</h4>
+            <p className="vault-doc-desc">
+              Official certification confirming zero employee back-pay, zero labor disputes, and complete fulfillment of all employer social obligations.
+            </p>
+            <div className="vault-doc-seal">
+              <ShieldCheck size={13} className="text-emerald-600" />
+              <span>Zero Labor Burden Verified</span>
+            </div>
+          </div>
+
+          {/* Document 4: UGE-CE & ENISA Resolution */}
+          <div className="vault-doc-card">
+            <div className="vault-doc-icon-wrap purple">
+              <Scale size={22} />
+            </div>
+            <span className="vault-doc-tag">MINISTRY OF MIGRATION (UGE-CE)</span>
+            <h4 className="vault-doc-title">Resolución Favorable 3 Años</h4>
+            <p className="vault-doc-desc">
+              Official administrative grant of 3-year residence and work permit issued by the UGE-CE in coordination with ENISA innovation accreditation.
+            </p>
+            <div className="vault-doc-seal">
+              <ShieldCheck size={13} className="text-emerald-600" />
+              <span>Law 14/2013 Statutory Authorization</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 7. Visual DOs vs. DON'Ts Best Practice Matrix ── */}
       <div className="spain-dodont-section">
         <div className="spain-dodont-header">
           <h3 className="spain-section-title">Strategic Best Practices Matrix</h3>
@@ -567,7 +838,7 @@ export default function SpainCompanyResidencyTechnicalSpecs({
         </div>
       </div>
 
-      {/* ── 6. Interactive FAQ Accordion ── */}
+      {/* ── 8. Interactive FAQ Accordion ── */}
       <div className="spain-residency-faq-section">
         <div className="spain-faq-header">
           <HelpCircle className="spain-header-icon" size={22} />
@@ -604,7 +875,7 @@ export default function SpainCompanyResidencyTechnicalSpecs({
         </div>
       </div>
 
-      {/* ── 7. Call to Action / Diagnostic Banner ── */}
+      {/* ── 9. Call to Action / Diagnostic Banner ── */}
       <div className="spain-residency-cta-banner">
         <div className="spain-cta-content">
           <Sparkles className="spain-cta-icon" size={28} />

@@ -51,6 +51,7 @@ import FdaRegulatoryBadge from './FdaRegulatoryBadge';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
 import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
 import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
+import VisualAdministrationGuide from './VisualAdministrationGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -1128,23 +1129,27 @@ export default function PublicDatasheetView({
 
       {/* ── Standardized Clinical Page Shell ── */}
       <PublicPageShell>
-        {/* Universal Clinical Page Hero */}
+        {/* Universal Clinical / Institutional Page Hero */}
         <PublicPageHero
           badges={
             <>
               <span className="pds-cat-tag">{category}</span>
               <span className="pds-cgmp-tag">
-                {isStrictlyLotusland ? (t.lotuslandVerified || 'Atlas Services Certified') : `${displaySupplierName} Quality Verified`}
+                {isCorporateService
+                  ? (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory')
+                  : isStrictlyLotusland 
+                    ? (t.lotuslandVerified || 'Atlas Services Certified') 
+                    : `${displaySupplierName} Quality Verified`}
               </span>
-              <FdaRegulatoryBadge product={product} variant="hero-pill" />
+              {!isCorporateService && <FdaRegulatoryBadge product={product} variant="hero-pill" />}
               <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
                 <span className="pds-version-dot" />
                 <span>Rev {versionInfo.version}</span>
               </span>
-              <span className="pds-updated-tag" title="Verified pharmaceutical specification release date">
+              <span className="pds-updated-tag" title="Verified specification release date">
                 <span>{lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate}</span>
               </span>
-              {initialBatch && (
+              {initialBatch && !isCorporateService && (
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1168,7 +1173,15 @@ export default function PublicDatasheetView({
           description={
             <>
               <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.25rem' }}>
-                <strong style={{ color: '#0f172a' }}>{isSolventProduct ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') : isDiagnosticKit ? (lang === 'es' ? 'Utilidad Diagnóstica y Aplicación:' : 'Diagnostic Utility & Target Axis:') : (t.targetReceptorAxis || 'Target Receptor Axis:')}</strong>{' '}
+                <strong style={{ color: '#0f172a' }}>
+                  {isCorporateService
+                    ? (lang === 'es' ? 'Marco Normativo y Alcance:' : 'Statutory Framework & Scope:')
+                    : isSolventProduct 
+                      ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') 
+                      : isDiagnosticKit 
+                        ? (lang === 'es' ? 'Utilidad Diagnóstica y Aplicación:' : 'Diagnostic Utility & Target Axis:') 
+                        : (t.targetReceptorAxis || 'Target Receptor Axis:')}
+                </strong>{' '}
                 {targetSystem}
               </span>
             </>
@@ -1177,7 +1190,11 @@ export default function PublicDatasheetView({
             <div className="pds-description-card" style={{ marginTop: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h2 className="pds-section-heading" style={{ margin: 0 }}>
-                  {isDiagnosticKit ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') : (t.pharmacologicalOverview || 'Pharmacological Overview')}
+                  {isCorporateService
+                    ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
+                    : isDiagnosticKit 
+                      ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
+                      : (t.pharmacologicalOverview || 'Pharmacological Overview')}
                 </h2>
                 {isTranslating ? (
                   <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
@@ -1195,7 +1212,7 @@ export default function PublicDatasheetView({
         />
 
         {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
-        {!product?.isSingleSupplierLocked && Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
+        {!isCorporateService && !product?.isSingleSupplierLocked && Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
           <div style={{
             margin: '0 0 1.25rem 0',
             padding: '12px 16px',
@@ -1251,6 +1268,7 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 1: Batch Availability & Presentations Matrix (Harmonized Navy Header) ── */}
+        {!isCorporateService && (
         <section id="presentations-matrix" className="pds-section-card">
           <div className="pds-section-header">
             <div className="pds-section-header-left">
@@ -1714,6 +1732,7 @@ export default function PublicDatasheetView({
             </div>
           </div>
         </section>
+        )}
 
         {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, IV Drips, Corporate Services, or Solvent Technical Specs ── */}
         <section id="reconstitution-section" className="pds-section-card">
@@ -1793,6 +1812,11 @@ export default function PublicDatasheetView({
               </div>
 
               <div className="pds-section-card-body" style={{ padding: 0 }}>
+                {/* Visual Step-by-Step Delivery Guide */}
+                <div style={{ padding: '20px 24px 8px 24px' }}>
+                  <VisualAdministrationGuide activeFormatId={activeFormatId} lang={lang} />
+                </div>
+
                 <InteractiveReconstitutionGuide
                   product={product}
                   selectedStrength={selectedStrength}
