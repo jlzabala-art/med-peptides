@@ -44,7 +44,9 @@ export default function DiagnosticTestTechnicalSpecs({
   const isNad = slug.includes('nad');
   const isHba1c = slug.includes('hba1c') || slug.includes('hemoglobin');
   const isOmega = slug.includes('omega');
-  const isVitD = slug.includes('vitamin-d');
+  const isVitD = slug.includes('vitamin-d') || slug.includes('vit-d');
+  const isCortisol = slug.includes('cortisol');
+  const isTestosterone = slug.includes('testosterone');
 
   // Interactive biomarker level simulator state
   const [selectedRangeIndex, setSelectedRangeIndex] = useState(2); // Default to optimal/target
@@ -113,7 +115,7 @@ export default function DiagnosticTestTechnicalSpecs({
       return {
         name: isEs ? 'Hemoglobina Glicosilada (HbA1c)' : 'Glycated Hemoglobin (HbA1c)',
         unit: '% / mmol/mol',
-        method: isEs ? 'Cromatografía de Afinidad por Boronato sobre Sangre Seca' : 'Boronate Affinity Chromatography / Certified DBS Immunoassay',
+        method: isEs ? 'Cromatografía de Afinidad por Boronato / HPLC Certificada NGSP' : 'Boronate Affinity Chromatography / NGSP-Certified DBS Immunoassay',
         lab: 'LifeLab1 (Vilnius, Lithuania)',
         lod: '3.5% (15 mmol/mol)',
         range: '4.0% – 15.0%',
@@ -209,6 +211,122 @@ export default function DiagnosticTestTechnicalSpecs({
             description: isEs
               ? 'Máxima protección cardiovascular, fluidez de membrana celular óptima y resolución activa de procesos inflamatorios.'
               : 'Target longevity zone associated with lowest all-cause cardiovascular mortality and maximal anti-inflammatory resolution.'
+          }
+        ]
+      };
+    }
+
+    if (isCortisol) {
+      return {
+        name: isEs ? 'Cortisol Libre y Total (Línea Basal Matutina)' : 'Free & Total Cortisol (Morning Basal Awakening)',
+        unit: 'nmol/L (µg/dL)',
+        method: isEs ? 'Inmunoensayo por Electroquimioluminiscencia (ECLIA) / LC-MS' : 'Electrochemiluminescence Immunoassay (ECLIA) / LC-MS',
+        lab: 'LifeLab1 (Vilnius, Lithuania)',
+        lod: '1.5 nmol/L (0.05 µg/dL)',
+        range: '5.0 – 1750.0 nmol/L',
+        precision: 'RSD < 5.2%',
+        ranges: [
+          {
+            label: isEs ? 'Agotamiento Adrenal / Hipocortisolemia' : 'Adrenal Burnout / Hypocortisolemia',
+            value: '< 140 nmol/L (< 5.0 µg/dL)',
+            status: 'critical',
+            badge: isEs ? 'Alerta Agotamiento' : 'Adrenal Exhaustion',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Nivel matutino severamente deprimido compatible con fatiga suprarrenal avanzada, síndrome de burnout crónico, hipotensión e incapacidad de respuesta ante el estrés.'
+              : 'Critically depressed morning awakening level indicative of severe HPA axis exhaustion, chronic burnout syndrome, orthostatic hypotension, and impaired stress resilience.'
+          },
+          {
+            label: isEs ? 'Línea Basal Equilibrada' : 'Balanced Circadian Baseline',
+            value: '140 – 550 nmol/L (5.0 – 20.0 µg/dL)',
+            status: 'optimal',
+            badge: isEs ? 'Ritmo Óptimo' : 'Optimal CAR',
+            color: '#0d9488',
+            bgColor: '#f0fdfa',
+            description: isEs
+              ? 'Respuesta de despertar de cortisol (CAR) saludable. Indica una función óptima del eje hipotálamo-hipofisario-adrenal (HPA), vigilia matutina vigorosa y modulación inmunitaria armónica.'
+              : 'Healthy cortisol awakening response (CAR). Reflects balanced hypothalamic-pituitary-adrenal (HPA) axis dynamics, robust morning alertness, and balanced diurnal rhythm.'
+          },
+          {
+            label: isEs ? 'Carga Alostática Elevada' : 'Subclinical Allostatic Stress',
+            value: '551 – 690 nmol/L (20.1 – 25.0 µg/dL)',
+            status: 'warning',
+            badge: isEs ? 'Estrés Crónico' : 'Elevated Stress',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Activación persistente del sistema nervioso simpático. Suele asociarse a estrés ocupacional, fragmentación del sueño, resistencia a la insulina incipiente y tensión arterial límite.'
+              : 'Persistent sympathetic nervous drive. Associated with chronic allostatic load, sleep architecture disruption, early insulin resistance, and elevated cardiovascular strain.'
+          },
+          {
+            label: isEs ? 'Hipercortisolemia Aguda' : 'Hypercortisolemia / Acute Stress',
+            value: '> 690 nmol/L (> 25.0 µg/dL)',
+            status: 'critical',
+            badge: isEs ? 'Catabolismo Alto' : 'Severe Catabolic State',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Exceso glucocorticoide crónico que promueve degradación muscular acelerada (catabolismo proteico), acumulación de grasa visceral, inmunosupresión y disfunción neurocognitiva.'
+              : 'Marked glucocorticoid excess driving muscle catabolism, visceral adiposity, immune suppression, and hippocampal neurotoxicity. Demands clinical intervention.'
+          }
+        ]
+      };
+    }
+
+    if (isTestosterone) {
+      return {
+        name: isEs ? 'Testosterona Total y Biodisponible' : 'Total & Bioavailable Testosterone',
+        unit: 'nmol/L (ng/dL)',
+        method: isEs ? 'Espectrometría de Masas en Tándem LC-MS/MS Certificada CDC' : 'CDC-Standardized LC-MS/MS Tandem Mass Spectrometry',
+        lab: 'LifeLab1 (Vilnius, Lithuania)',
+        lod: '0.1 nmol/L (2.8 ng/dL)',
+        range: '0.2 – 55.0 nmol/L (5.7 – 1580 ng/dL)',
+        precision: 'RSD < 4.9%',
+        ranges: [
+          {
+            label: isEs ? 'Deficiencia / Hipogonadismo' : 'Hypogonadism / Androgen Deficiency',
+            value: '< 10.0 nmol/L (< 288 ng/dL)',
+            status: 'critical',
+            badge: isEs ? 'Déficit Androgénico' : 'Clinically Deficient',
+            color: '#dc2626',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Concentración críticamente disminuida asociada a sarcopenia acelerada, baja densidad mineral ósea, depresión anímica, disfunción eréctil y pérdida de impulso metabólico.'
+              : 'Severe androgen deficiency correlated with accelerated sarcopenia, osteopenia, depressive mood, erectile dysfunction, and reduced metabolic clearance.'
+          },
+          {
+            label: isEs ? 'Rango Límite / Subóptimo' : 'Borderline Suboptimal',
+            value: '10.0 – 15.0 nmol/L (288 – 432 ng/dL)',
+            status: 'warning',
+            badge: isEs ? 'Margen Mejora' : 'Suboptimal Vitality',
+            color: '#d97706',
+            bgColor: '#fffbeb',
+            description: isEs
+              ? 'Nivel androgénico limítrofe habitual en hombres con estrés crónico, obesidad visceral o síndrome metabólico. Se beneficia de secretagogos, optimización de estilo de vida o terapia hormonal.'
+              : 'Suboptimal androgenic reserve typical in metabolic syndrome or chronic stress. Responds well to lifestyle interventions, enclomiphene, or restorative secretagogues.'
+          },
+          {
+            label: isEs ? 'Rango Óptimo de Vitalidad' : 'Optimal Vitality & Longevity Target',
+            value: '15.1 – 28.0 nmol/L (435 – 807 ng/dL)',
+            status: 'optimal',
+            badge: isEs ? 'Objetivo Óptimo' : 'Optimal Target',
+            color: '#0d9488',
+            bgColor: '#f0fdfa',
+            description: isEs
+              ? 'Rango fisiológico óptimo asociado a composición corporal magra, vigor psicofísico, síntesis proteica muscular máxima y salud cardiovascular protectora.'
+              : 'Ideal physiological target supporting lean body mass retention, optimal neurocognitive clarity, robust bone mineral density, and metabolic vigor.'
+          },
+          {
+            label: isEs ? 'Límite Superior Normal' : 'Upper Physiological Normal',
+            value: '28.1 – 35.0+ nmol/L (810 – 1000+ ng/dL)',
+            status: 'super',
+            badge: isEs ? 'Pico Androgénico' : 'Peak Performance',
+            color: '#2563eb',
+            bgColor: '#eff6ff',
+            description: isEs
+              ? 'Nivel alcanzado comúnmente en hombres jóvenes de alto rendimiento o en protocolos de optimización hormonal bajo supervisión médica especializada.'
+              : 'Upper physiological threshold achieved in young athletic baselines or monitored hormone optimization programs. Maximum anabolic support.'
           }
         ]
       };
@@ -415,8 +533,12 @@ export default function DiagnosticTestTechnicalSpecs({
               <strong className="dts-step-title">{isEs ? 'Preparación' : 'Preparation'}</strong>
               <p className="dts-step-desc">
                 {isEs 
-                  ? 'Lava tus manos con agua tibia para activar la circulación sanguínea. Desinfecta la yema del dedo con la toallita con alcohol 70% suministrada y deja secar.'
-                  : 'Wash hands with warm water to promote capillary blood flow. Clean the chosen fingertip with the provided 70% IPA alcohol wipe and allow to air dry.'}
+                  ? ((isCortisol || isTestosterone)
+                      ? 'Toma en ayunas a primera hora de la mañana (dentro de los 30–60 min tras despertar) para evaluar el ritmo circadiano. Lava tus manos con agua tibia y desinfecta con la toallita con alcohol 70%.'
+                      : 'Lava tus manos con agua tibia para activar la circulación sanguínea. Desinfecta la yema del dedo con la toallita con alcohol 70% suministrada y deja secar.')
+                  : ((isCortisol || isTestosterone)
+                      ? 'Morning fasting sample within 30–60 minutes of waking recommended for circadian rhythm accuracy. Wash hands with warm water and disinfect with the 70% IPA alcohol wipe.'
+                      : 'Wash hands with warm water to promote capillary blood flow. Clean the chosen fingertip with the provided 70% IPA alcohol wipe and allow to air dry.')}
               </p>
             </div>
 

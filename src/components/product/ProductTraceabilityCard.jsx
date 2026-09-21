@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { 
   ShieldCheck, 
@@ -12,9 +12,9 @@ import {
   Beaker, 
   Snowflake, 
   FlaskConical, 
-  Hash,
-  Clock,
-  Sparkles
+  Hash, 
+  Clock, 
+  Sparkles 
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -72,6 +72,57 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
     (slug && slug.includes('bloodo')) ||
     (slug && slug.endsWith('-test'))
   );
+
+  const diagnosticMetric = useMemo(() => {
+    const s = String(slug || '').toLowerCase();
+    if (s.includes('hba1c') || s.includes('hemoglobin')) {
+      return {
+        cv: 'CV ≤ 3.2%',
+        lod: 'LoD: 3.5% (NGSP)',
+        method: 'Boronate Affinity HPLC / CE-IVD (NGSP/IFCC)',
+        range: lang === 'es' ? 'LoD: 3.5% · Rango Lineal: 4.0–15.0% HbA1c (CV 3.2%)' : 'LoD: 3.5% · Linear Dynamic Range: 4.0–15.0% HbA1c (CV 3.2%)'
+      };
+    }
+    if (s.includes('omega')) {
+      return {
+        cv: 'CV ≤ 4.8%',
+        lod: 'LoD: 0.05%',
+        method: 'Capillary GC-MS / FID (Fatty Acid Methyl Esters)',
+        range: lang === 'es' ? 'LoD: 0.05% · Rango Dinámico: 1.0–16.0% Índice Omega-3 (CV 4.8%)' : 'LoD: 0.05% · Dynamic Range: 1.0–16.0% Omega-3 Index (CV 4.8%)'
+      };
+    }
+    if (s.includes('vitamin') || s.includes('vit-d')) {
+      return {
+        cv: 'CV ≤ 5.4%',
+        lod: 'LoD: 5.0 ng/mL',
+        method: 'Liquid Chromatography - Tandem Mass Spectrometry (LC-MS/MS)',
+        range: lang === 'es' ? 'LoD: 5.0 ng/mL · Rango Lineal: 10.0–150.0 ng/mL 25(OH)D (CV 5.4%)' : 'LoD: 5.0 ng/mL · Linear Dynamic Range: 10.0–150.0 ng/mL 25(OH)D (CV 5.4%)'
+      };
+    }
+    if (s.includes('cortisol')) {
+      return {
+        cv: 'CV ≤ 5.8%',
+        lod: 'LoD: 1.5 nmol/L',
+        method: 'Chemiluminescent Immunoassay (ECLIA) / Tandem LC-MS',
+        range: lang === 'es' ? 'LoD: 1.5 nmol/L · Rango Dinámico: 5.0–1750.0 nmol/L (CV 5.8%)' : 'LoD: 1.5 nmol/L · Dynamic Range: 5.0–1750.0 nmol/L (CV 5.8%)'
+      };
+    }
+    if (s.includes('testosterone')) {
+      return {
+        cv: 'CV ≤ 4.2%',
+        lod: 'LoD: 0.1 nmol/L',
+        method: 'CDC-Standardized High-Resolution LC-MS/MS (Total Testosterone)',
+        range: lang === 'es' ? 'LoD: 0.1 nmol/L · Rango Lineal: 0.2–55.0 nmol/L (CV 4.2%)' : 'LoD: 0.1 nmol/L · Linear Dynamic Range: 0.2–55.0 nmol/L (CV 4.2%)'
+      };
+    }
+    // Default: NAD+
+    return {
+      cv: 'CV ≤ 6.6%',
+      lod: 'LoD: 0.23 µmol/L',
+      method: 'Enzymatic Cyclic Colorimetric / Spectrophotometry',
+      range: lang === 'es' ? 'LoD: 0.23 µmol/L · Rango Lineal: 5.0–60.0 µmol/L (CV 6.6%)' : 'LoD: 0.23 µmol/L · Linear Dynamic Range: 5.0–60.0 µmol/L (CV 6.6%)'
+    };
+  }, [slug, lang]);
   
   const freshDates = getFreshPharmaceuticalDates();
   const mfgDate = product.mfgDate || freshDates.mfgDate;
@@ -200,11 +251,11 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
             <span className="ptc-kpi-label">
               <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica (CV / RSD)' : 'Analytical Precision (CV / RSD)') : 'Analytical Purity (HPLC)'}
             </span>
-            <span className="ptc-kpi-pill purity-pill">{isDiagnosticKit ? 'CV ≤ 6.6%' : 'RP-HPLC'}</span>
+            <span className="ptc-kpi-pill purity-pill">{isDiagnosticKit ? diagnosticMetric.cv : 'RP-HPLC'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
             <span className="ptc-kpi-value value-purity">
-              {isDiagnosticKit ? 'LoD: 0.23 µmol/L' : purity}
+              {isDiagnosticKit ? diagnosticMetric.lod : purity}
             </span>
           </div>
           <div className="ptc-kpi-sub">
@@ -292,8 +343,8 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
                   </tr>
                   <tr>
                     <td data-label={t.paramCol}>{lang === 'es' ? 'Metodología Cuantitativa' : 'Quantitative Assay Methodology'}</td>
-                    <td data-label={t.methodCol}>Enzymatic Cyclic Colorimetric / Spectrophotometry</td>
-                    <td data-label={t.resultCol}>{lang === 'es' ? 'LoD: 0.23 µmol/L · Rango Lineal: 5.0–60.0 µmol/L (CV 6.6%)' : 'LoD: 0.23 µmol/L · Linear Dynamic Range: 5.0–60.0 µmol/L (CV 6.6%)'}</td>
+                    <td data-label={t.methodCol}>{diagnosticMetric.method}</td>
+                    <td data-label={t.resultCol}>{diagnosticMetric.range}</td>
                     <td data-label={t.statusCol}>
                       <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : 'CONFORMS'}</span>
                     </td>

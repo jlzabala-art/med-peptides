@@ -43,6 +43,7 @@ import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
+import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -1464,181 +1465,186 @@ export default function PublicDatasheetView({
         </section>
 
         {/* ── Block 4: Physical Labels & Dispensing Downloads (Harmonized Navy Header) ── */}
-        <section id="labels-section" className="pds-section-card">
-          <div className="pds-section-header">
-            <div className="pds-section-header-left">
-              <div className="pds-section-header-shield">
-                <QrCode size={22} />
-              </div>
-              <div className="pds-section-header-titles">
-                <div className="pds-section-header-meta-row">
-                  <span className="pds-section-header-category">
-                    {t.physicalLabelsSection || 'PHYSICAL VIAL LABELS & DISPENSING'}
-                  </span>
-                  <span className="pds-section-badge">
-                    <CheckCircle2 size={11} /> 38×90mm THERMAL
-                  </span>
+        {!isDiagnosticKit && (
+          <section id="labels-section" className="pds-section-card">
+            <div className="pds-section-header">
+              <div className="pds-section-header-left">
+                <div className="pds-section-header-shield">
+                  <QrCode size={22} />
                 </div>
-                <h3 className="pds-section-header-title">
-                  {t.physicalLabelsSection || 'Physical Vial Labels & Batch Printing'}
-                </h3>
+                <div className="pds-section-header-titles">
+                  <div className="pds-section-header-meta-row">
+                    <span className="pds-section-header-category">
+                      {t.physicalLabelsSection || 'PHYSICAL VIAL LABELS & DISPENSING'}
+                    </span>
+                    <span className="pds-section-badge">
+                      <CheckCircle2 size={11} /> 38×90mm THERMAL
+                    </span>
+                  </div>
+                  <h3 className="pds-section-header-title">
+                    {t.physicalLabelsSection || 'Physical Vial Labels & Batch Printing'}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="pds-section-header-right">
+                <div className="pds-section-cert-badge">
+                  <Printer size={14} color="#38bdf8" />
+                  <span>Thermal 38×90mm Ready</span>
+                </div>
               </div>
             </div>
 
-            <div className="pds-section-header-right">
-              <div className="pds-section-cert-badge">
-                <Printer size={14} color="#38bdf8" />
-                <span>Thermal 38×90mm Ready</span>
-              </div>
-            </div>
-          </div>
+            <div className="pds-section-card-body" style={{ padding: '1.5rem' }}>
+              <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                {t.physicalLabelsSubtitle || 'Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.'}
+              </p>
 
-          <div className="pds-section-card-body" style={{ padding: '1.5rem' }}>
-            <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
-              {t.physicalLabelsSubtitle || 'Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.'}
-            </p>
-
-            {/* Dual Label Options Grid: Shipping vs Client Vial */}
-            <div className="pds-dual-labels-grid">
-              {/* Option 1: Shipping / Batch Traceability Label */}
-              <div className="pds-label-type-card">
-                <div className="pds-label-type-head">
-                  <span className="pds-label-badge-icon">📦</span>
-                  <div>
-                    <h4 className="pds-label-type-title">{t.shippingTraceabilityLabel || 'Shipping & Traceability Label'}</h4>
-                    <span className="pds-label-use-tag">{t.outboundLogisticsTag || 'For Outbound Box & Logistics'}</span>
+              {/* Dual Label Options Grid: Shipping vs Client Vial */}
+              <div className="pds-dual-labels-grid">
+                {/* Option 1: Shipping / Batch Traceability Label */}
+                <div className="pds-label-type-card">
+                  <div className="pds-label-type-head">
+                    <span className="pds-label-badge-icon">📦</span>
+                    <div>
+                      <h4 className="pds-label-type-title">{t.shippingTraceabilityLabel || 'Shipping & Traceability Label'}</h4>
+                      <span className="pds-label-use-tag">{t.outboundLogisticsTag || 'For Outbound Box & Logistics'}</span>
+                    </div>
+                  </div>
+                  <p className="pds-label-type-desc">
+                    {t.shippingLabelDesc || 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.'}
+                  </p>
+                  <div className="pds-label-type-buttons">
+                    <a 
+                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      download={isMobileDevice ? undefined : `shipping_label_${variantFileSuffix}_38x90.pdf`}
+                      onClick={() => handleDownloadClick('shipping_38x90')}
+                      className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode ${downloadingType === 'shipping_38x90' ? 'loading' : ''}`}
+                      style={downloadingType === 'shipping_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
+                      title="Download 38x90mm Shipping Label (PDF File)"
+                    >
+                      {downloadingType === 'shipping_38x90' ? (
+                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
+                      ) : (
+                        <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
+                      )}
+                    </a>
+                    <a 
+                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      download={isMobileDevice ? undefined : `shipping_labels_sheet_${variantFileSuffix}_a4.pdf`}
+                      onClick={() => handleDownloadClick('shipping_sheet')}
+                      className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'shipping_sheet' ? 'loading' : ''}`}
+                      style={downloadingType === 'shipping_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
+                      title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
+                    >
+                      {downloadingType === 'shipping_sheet' ? (
+                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
+                      ) : (
+                        <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
+                      )}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyLabelUrl('shipping')}
+                      className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'shipping' ? 'copied' : ''}`}
+                      title="Copy direct shareable link to this shipping label"
+                    >
+                      {copiedLabelType === 'shipping' ? (
+                        <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
+                      ) : (
+                        <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
+                      )}
+                    </button>
                   </div>
                 </div>
-                <p className="pds-label-type-desc">
-                  {t.shippingLabelDesc || 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.'}
-                </p>
-                <div className="pds-label-type-buttons">
-                  <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`}
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    download={isMobileDevice ? undefined : `shipping_label_${variantFileSuffix}_38x90.pdf`}
-                    onClick={() => handleDownloadClick('shipping_38x90')}
-                    className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode ${downloadingType === 'shipping_38x90' ? 'loading' : ''}`}
-                    style={downloadingType === 'shipping_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                    title="Download 38x90mm Shipping Label (PDF File)"
-                  >
-                    {downloadingType === 'shipping_38x90' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                    ) : (
-                      <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
-                    )}
-                  </a>
-                  <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    download={isMobileDevice ? undefined : `shipping_labels_sheet_${variantFileSuffix}_a4.pdf`}
-                    onClick={() => handleDownloadClick('shipping_sheet')}
-                    className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'shipping_sheet' ? 'loading' : ''}`}
-                    style={downloadingType === 'shipping_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                    title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
-                  >
-                    {downloadingType === 'shipping_sheet' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                    ) : (
-                      <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
-                    )}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyLabelUrl('shipping')}
-                    className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'shipping' ? 'copied' : ''}`}
-                    title="Copy direct shareable link to this shipping label"
-                  >
-                    {copiedLabelType === 'shipping' ? (
-                      <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
-                    ) : (
-                      <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
-                    )}
-                  </button>
-                </div>
-              </div>
 
-              {/* Option 2: Client Vial Application Label */}
-              <div className="pds-label-type-card highlight">
-                <div className="pds-label-type-head">
-                  <span className="pds-label-badge-icon">🏷️</span>
-                  <div>
-                    <h4 className="pds-label-type-title">{t.clientVialLabelTitle || 'Patient Vial Label'}</h4>
-                    <span className="pds-label-use-tag active">{t.patientSubqTag || 'For Patient Dispensing (SubQ)'}</span>
+                {/* Option 2: Client Vial Application Label */}
+                <div className="pds-label-type-card highlight">
+                  <div className="pds-label-type-head">
+                    <span className="pds-label-badge-icon">🏷️</span>
+                    <div>
+                      <h4 className="pds-label-type-title">{t.clientVialLabelTitle || 'Patient Vial Label'}</h4>
+                      <span className="pds-label-use-tag active">{t.patientSubqTag || 'For Patient Dispensing (SubQ)'}</span>
+                    </div>
+                  </div>
+                  <p className="pds-label-type-desc">
+                    {t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.'}
+                  </p>
+                  <div className="pds-label-type-buttons">
+                    <a 
+                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      download={isMobileDevice ? undefined : `client_vial_label_${variantFileSuffix}_38x90.pdf`}
+                      onClick={() => handleDownloadClick('client_38x90')}
+                      className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf ${downloadingType === 'client_38x90' ? 'loading' : ''}`}
+                      style={downloadingType === 'client_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
+                      title="Download 38x90mm Client Vial Label (PDF File)"
+                    >
+                      {downloadingType === 'client_38x90' ? (
+                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
+                      ) : (
+                        <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
+                      )}
+                    </a>
+                    <a 
+                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      download={isMobileDevice ? undefined : `client_vial_labels_sheet_${variantFileSuffix}_a4.pdf`}
+                      onClick={() => handleDownloadClick('client_sheet')}
+                      className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'client_sheet' ? 'loading' : ''}`}
+                      style={downloadingType === 'client_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
+                      title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
+                    >
+                      {downloadingType === 'client_sheet' ? (
+                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
+                      ) : (
+                        <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
+                      )}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyLabelUrl('client')}
+                      className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'client' ? 'copied' : ''}`}
+                      title="Copy direct shareable link to this client vial label"
+                    >
+                      {copiedLabelType === 'client' ? (
+                        <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
+                      ) : (
+                        <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
+                      )}
+                    </button>
                   </div>
                 </div>
-                <p className="pds-label-type-desc">
-                  {t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.'}
-                </p>
-                <div className="pds-label-type-buttons">
-                  <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`}
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    download={isMobileDevice ? undefined : `client_vial_label_${variantFileSuffix}_38x90.pdf`}
-                    onClick={() => handleDownloadClick('client_38x90')}
-                    className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf ${downloadingType === 'client_38x90' ? 'loading' : ''}`}
-                    style={downloadingType === 'client_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                    title="Download 38x90mm Client Vial Label (PDF File)"
-                  >
-                    {downloadingType === 'client_38x90' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                    ) : (
-                      <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
-                    )}
-                  </a>
-                  <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    download={isMobileDevice ? undefined : `client_vial_labels_sheet_${variantFileSuffix}_a4.pdf`}
-                    onClick={() => handleDownloadClick('client_sheet')}
-                    className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'client_sheet' ? 'loading' : ''}`}
-                    style={downloadingType === 'client_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                    title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
-                  >
-                    {downloadingType === 'client_sheet' ? (
-                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                    ) : (
-                      <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
-                    )}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyLabelUrl('client')}
-                    className={`pds-btn pds-btn-gcp pds-btn-copy-action pds-btn-copy-label ${copiedLabelType === 'client' ? 'copied' : ''}`}
-                    title="Copy direct shareable link to this client vial label"
-                  >
-                    {copiedLabelType === 'client' ? (
-                      <><Check size={14} className="pds-btn-icon text-success" /> <span>{t.copied || 'Copied Link'}</span></>
-                    ) : (
-                      <><Copy size={14} className="pds-btn-icon" /> <span>{t.copyDirectLabelLink || 'Copy Link'}</span></>
-                    )}
-                  </button>
-                </div>
+              </div>
+
+              {/* Live Scannable Label Preview */}
+              <div className="pds-vial-label-preview-wrap">
+                {inlineSvg ? (
+                  <div
+                    className="pds-vial-label-img"
+                    aria-label={`Barcode & QR Label for ${name}`}
+                    dangerouslySetInnerHTML={{ __html: inlineSvg }}
+                  />
+                ) : svgError ? (
+                  <div className="pds-vial-label-error">
+                    <span>⚠ Could not load barcode label. Check your connection.</span>
+                  </div>
+                ) : (
+                  <div className="pds-vial-label-skeleton" aria-label="Loading barcode..." />
+                )}
               </div>
             </div>
+          </section>
+        )}
 
-            {/* Live Scannable Label Preview */}
-            <div className="pds-vial-label-preview-wrap">
-              {inlineSvg ? (
-                <div
-                  className="pds-vial-label-img"
-                  aria-label={`Barcode & QR Label for ${name}`}
-                  dangerouslySetInnerHTML={{ __html: inlineSvg }}
-                />
-              ) : svgError ? (
-                <div className="pds-vial-label-error">
-                  <span>⚠ Could not load barcode label. Check your connection.</span>
-                </div>
-              ) : (
-                <div className="pds-vial-label-skeleton" aria-label="Loading barcode..." />
-              )}
-            </div>
-          </div>
-        </section>
+        {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
+        <BloodoRelatedPeptidesSection product={product} lang={lang} />
 
 
 

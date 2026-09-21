@@ -1,0 +1,255 @@
+/* BloodoRelatedPeptidesSection.css */
+
+.brp-section-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 54, 102, 0.04);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.brp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #0f172a 0%, #003666 55%, #0d9488 100%);
+  color: #ffffff;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brp-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.brp-header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.brp-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.brp-supplier-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5eead4;
+}
+
+.brp-verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  background: rgba(94, 234, 212, 0.18);
+  border: 1px solid rgba(94, 234, 212, 0.35);
+  border-radius: 9999px;
+  color: #ccfbf1;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.brp-header-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.brp-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.brp-purity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 8px;
+  color: #e0f2fe;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.brp-section-body {
+  padding: 1.5rem;
+  background: #f8fafc;
+}
+
+.brp-intro-text {
+  margin: 0 0 1.25rem;
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.55;
+  max-width: 900px;
+}
+
+.brp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.brp-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brp-card:hover {
+  transform: translateY(-2px);
+  border-color: #0d9488;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.08);
+}
+
+.brp-card-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.brp-card-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.brp-target-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #0d9488;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.brp-brand-tag {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.brp-peptide-name {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.brp-card-body {
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.brp-rationale {
+  margin: 0;
+  font-size: 0.81rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.brp-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.brp-spec-pill {
+  font-size: 0.7rem;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.brp-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  background: #003666;
+  color: #ffffff !important;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.brp-view-link:hover {
+  background: #0d9488;
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+.brp-arrow-icon {
+  transition: transform 0.15s ease;
+}
+
+.brp-view-link:hover .brp-arrow-icon {
+  transform: translate(2px, -2px);
+}
+
+@media (max-width: 768px) {
+  .brp-section-header {
+    padding: 1rem;
+  }
+  .brp-section-body {
+    padding: 1rem;
+  }
+  .brp-grid {
+    grid-template-columns: 1fr;
+  }
+}
