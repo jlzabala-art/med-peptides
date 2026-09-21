@@ -60,6 +60,18 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const mw = product.molecularWeight || product.molecular_weight ? `${product.molecularWeight || product.molecular_weight} Da` : null;
   const formula = product.molecularFormula || product.molecular_formula || null;
   const targetSystem = product.targetSystem || product.target || 'Targeted Physiological Receptor Axis';
+
+  const isDiagnosticKit = Boolean(
+    product.category === 'genomics_biomarkers' || 
+    product.category === 'diagnostic_tests' ||
+    product.category === 'tests' ||
+    product.presentation === 'blood_test' || 
+    product.presentation === 'home_test_kit' ||
+    product.format === 'blood_test' || 
+    product.supplierId === 'supplier-bloodo' ||
+    (slug && slug.includes('bloodo')) ||
+    (slug && slug.endsWith('-test'))
+  );
   
   const freshDates = getFreshPharmaceuticalDates();
   const mfgDate = product.mfgDate || freshDates.mfgDate;
@@ -118,27 +130,33 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
       {/* ── Top Quality Header Ribbon ── */}
       <div className="ptc-header">
         <div className="ptc-header-left">
-          <div className="ptc-header-shield">
+          <div className="ptc-header-shield" style={isDiagnosticKit ? { background: 'linear-gradient(135deg, #0d9488 0%, #003666 100%)' } : {}}>
             <ShieldCheck size={24} />
           </div>
           <div className="ptc-header-titles">
             <div className="ptc-header-meta-row">
               <span className="ptc-header-category">
-                {t.batchTraceabilitySection || 'Batch Traceability & Analytical Assurance'}
+                {isDiagnosticKit 
+                  ? (lang === 'es' ? 'Trazabilidad de Ensayo Diagnóstico y Biomarcadores' : 'Clinical Diagnostic & Biomarker Assay Traceability')
+                  : (t.batchTraceabilitySection || 'Batch Traceability & Analytical Assurance')}
               </span>
-              <span className="ptc-verified-badge">
-                <CheckCircle2 size={11} /> {t.verifiedAuthenticTag || 'VERIFIED AUTHENTIC'}
+              <span className="ptc-verified-badge" style={isDiagnosticKit ? { background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0' } : {}}>
+                <CheckCircle2 size={11} /> {isDiagnosticKit ? 'CE-IVDR VERIFIED' : (t.verifiedAuthenticTag || 'VERIFIED AUTHENTIC')}
               </span>
             </div>
             <h3 className="ptc-header-title">
-              {rawName} — Monograph Release Standard
+              {rawName} — {isDiagnosticKit ? (lang === 'es' ? 'Especificación Técnica IVD' : 'In Vitro Diagnostic Technical Specification') : 'Monograph Release Standard'}
             </h3>
           </div>
         </div>
 
-        <div className="ptc-cert-badge">
-          <Award size={15} color="#facc15" />
-          <span>{t.dualStageCertified || 'Dual-Stage RP-HPLC & LC-MS Certified Release'}</span>
+        <div className="ptc-cert-badge" style={isDiagnosticKit ? { background: 'linear-gradient(135deg, #0f172a 0%, #0d9488 100%)', borderColor: '#14b8a6' } : {}}>
+          <Award size={15} color={isDiagnosticKit ? '#5eead4' : '#facc15'} />
+          <span>
+            {isDiagnosticKit 
+              ? (lang === 'es' ? 'Certificación CE-IVDR (UE 2017/746) · LifeLab1' : 'CE-IVDR Certified (EU 2017/746) · LifeLab1 Facility') 
+              : (t.dualStageCertified || 'Dual-Stage RP-HPLC & LC-MS Certified Release')}
+          </span>
         </div>
       </div>
 
@@ -152,7 +170,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         >
           <div className="ptc-kpi-top">
             <span className="ptc-kpi-label">
-              <Hash size={12} className="ptc-kpi-icon" color="#003666" /> Batch / Lot Identifier
+              <Hash size={12} className="ptc-kpi-icon" color="#003666" /> {isDiagnosticKit ? (lang === 'es' ? 'Lote de Fabricación / Kit ID' : 'Kit Batch / Lot Identifier') : 'Batch / Lot Identifier'}
             </span>
             <button 
               type="button" 
@@ -172,63 +190,67 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
           </div>
           <div className="ptc-kpi-sub status-passed">
             <span className="ptc-kpi-dot"></span>
-            <span>Laboratory Release Passed</span>
+            <span>{isDiagnosticKit ? (lang === 'es' ? 'Kit Liberado para Diagnóstico' : 'Diagnostic Release Passed') : 'Laboratory Release Passed'}</span>
           </div>
         </div>
 
-        {/* HPLC Assay Purity */}
+        {/* Diagnostic Precision / Purity */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
             <span className="ptc-kpi-label">
-              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> Analytical Purity (HPLC)
+              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica (CV / RSD)' : 'Analytical Precision (CV / RSD)') : 'Analytical Purity (HPLC)'}
             </span>
-            <span className="ptc-kpi-pill purity-pill">RP-HPLC</span>
+            <span className="ptc-kpi-pill purity-pill">{isDiagnosticKit ? 'CV ≤ 6.6%' : 'RP-HPLC'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
-            <span className="ptc-kpi-value value-purity">{purity}</span>
+            <span className="ptc-kpi-value value-purity">
+              {isDiagnosticKit ? 'LoD: 0.23 µmol/L' : purity}
+            </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span>Specification: ≥ 98.0% (Ph. Eur.)</span>
+            <span>{isDiagnosticKit ? (lang === 'es' ? 'Linealidad Cuantitativa Validada' : 'Validated Quantitative Linearity') : 'Specification: ≥ 98.0% (Ph. Eur.)'}</span>
           </div>
         </div>
 
-        {/* Mass Spectrometry (MS) */}
+        {/* Laboratory / Identity */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
             <span className="ptc-kpi-label">
-              <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" /> Mass Spec Identity (LC-MS)
+              <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" /> {isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Central Analítico' : 'Accredited Testing Facility') : 'Mass Spec Identity (LC-MS)'}
             </span>
-            <span className="ptc-kpi-pill ms-pill">ESI-MS</span>
+            <span className="ptc-kpi-pill ms-pill">{isDiagnosticKit ? 'ISO 15189' : 'ESI-MS'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
-            <span className="ptc-kpi-value font-mono" title={mw || 'MW Confirmed'}>
-              {mw || 'MW Confirmed'}
+            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? 'LifeLab1 (Vilnius, Lithuania)' : (mw || 'MW Confirmed')}>
+              {isDiagnosticKit ? 'LifeLab1 Lab' : (mw || 'MW Confirmed')}
             </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span>Monoisotopic Peak Concordant</span>
+            <span>{isDiagnosticKit ? (lang === 'es' ? 'Vilna, Lituania (Unión Europea)' : 'Vilnius, Lithuania (EU Member State)') : 'Monoisotopic Peak Concordant'}</span>
           </div>
         </div>
 
-        {/* CAS & Formula */}
+        {/* Specimen / CAS */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
             <span className="ptc-kpi-label">
-              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> CAS Registry Identification
+              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> {isDiagnosticKit ? (lang === 'es' ? 'Matriz de Muestra y Regulación' : 'Specimen Matrix & Directive') : 'CAS Registry Identification'}
             </span>
-            <span className="ptc-kpi-pill cas-pill">CAS</span>
+            <span className="ptc-kpi-pill cas-pill">{isDiagnosticKit ? 'CE-IVD' : 'CAS'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
-            <span className="ptc-kpi-value font-mono" title={casNumber}>
-              {casNumber}
+            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? 'DBS (Dried Blood Spot)' : casNumber}>
+              {isDiagnosticKit ? 'Sangre Capilar (DBS)' : casNumber}
             </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span title={formula || 'Synthetic Polypeptide Structure'}>{formula || 'Synthetic Polypeptide'}</span>
+            <span title={isDiagnosticKit ? 'EU 2017/746 In Vitro Diagnostic Directive' : (formula || 'Synthetic Polypeptide Structure')}>
+              {isDiagnosticKit ? 'UE 2017/746 Directiva IVD' : (formula || 'Synthetic Polypeptide')}
+            </span>
           </div>
         </div>
 
-        {product?.sequence && (
+        {!isDiagnosticKit && product?.sequence && (
           <div className="ptc-sequence-wrap">
             <div className="ptc-kpi-label" style={{ marginBottom: '0.35rem' }}>
               Primary Peptide Sequence (Mono-letter Notation)
@@ -243,7 +265,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
       {/* ── Quality Matrix & Chain of Custody Table ── */}
       <div className="ptc-coa-section">
         <h4 style={{ margin: '0 0 0.85rem', fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <CheckCircle2 size={16} color="#16a34a" /> {t.coaTitle}
+          <CheckCircle2 size={16} color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Matriz de Calidad Analítica y Control de Laboratorio' : 'Analytical Quality Matrix & Laboratory Chain of Custody') : t.coaTitle}
         </h4>
 
         <div className="ptc-coa-wrapper">
@@ -258,47 +280,93 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td data-label={t.paramCol}>{lang === 'es' ? 'Aspecto Visual' : lang === 'fr' ? 'Aspect Visuel' : lang === 'de' ? 'Visuelles Erscheinungsbild' : 'Visual Appearance'}</td>
-                <td data-label={t.methodCol}>Ph. Eur. 2.9.1 / Visual</td>
-                <td data-label={t.resultCol}>{lang === 'es' ? 'Polvo / liofilizado estéril blanco' : lang === 'fr' ? 'Poudre / lyophilisat stérile blanc' : lang === 'de' ? 'Weißes lyophilisiertes steriles Pulver' : 'White lyophilized sterile cake / powder'}</td>
-                <td data-label={t.statusCol}>
-                  <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'CONFORMS'}</span>
-                </td>
-              </tr>
-
-              <tr>
-                <td data-label={t.paramCol}>{lang === 'es' ? 'Identidad Molecular' : lang === 'fr' ? 'Identité Moléculaire' : lang === 'de' ? 'Molekulare Identität' : 'Molecular Identity'}</td>
-                <td data-label={t.methodCol}>ESI-Q-TOF Mass Spectrometry</td>
-                <td data-label={t.resultCol}>{lang === 'es' ? `Teórico: ${mw || '4731.3 Da'} · Observado: Coincide` : lang === 'fr' ? `Théorique : ${mw || '4731.3 Da'} · Observé : Conforme` : `Theoretical: ${mw || '4731.3 Da'} · Observed: Match`}</td>
-                <td data-label={t.statusCol}>
-                  <span className="ptc-status-badge">{lang === 'es' ? 'CONFIRMADO' : lang === 'fr' ? 'CONFIRMÉ' : lang === 'de' ? 'BESTÄTIGT' : 'CONFIRMED'}</span>
-                </td>
-              </tr>
-              <tr>
-                <td data-label={t.paramCol}>{lang === 'es' ? 'Endotoxinas Bacterianas' : lang === 'fr' ? 'Endotoxines Bactériennes' : lang === 'de' ? 'Bakterielle Endotoxine' : 'Bacterial Endotoxins'}</td>
-                <td data-label={t.methodCol}>LAL Gel Clot Test (USP &lt;85&gt;)</td>
-                <td data-label={t.resultCol}>&lt; 0.05 EU/mg ({lang === 'es' ? 'Grado Clínico Estricto' : 'Strict Clinical Grade'})</td>
-                <td data-label={t.statusCol}>
-                  <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED'}</span>
-                </td>
-              </tr>
-              <tr>
-                <td data-label={t.paramCol}>{lang === 'es' ? 'Garantía de Esterilidad (SAL)' : lang === 'fr' ? 'Assurance de Stérilité (SAL)' : 'Sterility Assurance Level'}</td>
-                <td data-label={t.methodCol}>Membrane Filtration (USP &lt;71&gt;)</td>
-                <td data-label={t.resultCol}>SAL 10⁻⁶ ({lang === 'es' ? 'Cero crecimiento a 14 días' : 'Zero growth at 14 days'})</td>
-                <td data-label={t.statusCol}>
-                  <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED'}</span>
-                </td>
-              </tr>
-              <tr>
-                <td data-label={t.paramCol}>{lang === 'es' ? 'Almacenamiento y Cadena de Frío' : lang === 'fr' ? 'Stockage et Chaîne du Froid' : 'Storage & Cold Chain'}</td>
-                <td data-label={t.methodCol}>Validated Stability Protocol</td>
-                <td data-label={t.resultCol}>-20°C ({lang === 'es' ? 'Liofilizado' : 'Lyophilized'}) · 2°C–8°C ({lang === 'es' ? 'Líquido' : 'Liquid'})</td>
-                <td data-label={t.statusCol}>
-                  <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'COMPLIANT'}</span>
-                </td>
-              </tr>
+              {isDiagnosticKit ? (
+                <>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Matriz Biológica y Toma de Muestra' : 'Biological Matrix & Specimen'}</td>
+                    <td data-label={t.methodCol}>Capillary Dried Blood Spot (DBS Card)</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? '3 gotas en papel filtro calibrado · Estabilidad ambiental 15–25°C' : '3 spots on calibrated collection card · Ambient stability 15–25°C'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'VALIDADO' : 'VALIDATED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Metodología Cuantitativa' : 'Quantitative Assay Methodology'}</td>
+                    <td data-label={t.methodCol}>Enzymatic Cyclic Colorimetric / Spectrophotometry</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'LoD: 0.23 µmol/L · Rango Lineal: 5.0–60.0 µmol/L (CV 6.6%)' : 'LoD: 0.23 µmol/L · Linear Dynamic Range: 5.0–60.0 µmol/L (CV 6.6%)'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : 'CONFORMS'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Control de Calidad Interno (IQC)' : 'Internal Quality Control (IQC)'}</td>
+                    <td data-label={t.methodCol}>3-Level Calibrators per Analytical Run</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Dentro de 2 Desviaciones Estándar (Westgard Multi-rules)' : 'Within 2 Standard Deviations (Westgard Multi-rules)'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : 'PASSED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Acreditación y Cumplimiento de Laboratorio' : 'Laboratory Accreditation & Compliance'}</td>
+                    <td data-label={t.methodCol}>LifeLab1 (Vilkpėdės str. 22, Vilnius)</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Conforme ISO 15189 / Marca CE Directiva IVDR (UE 2017/746)' : 'ISO 15189 Compliant / CE-marked IVDR (EU 2017/746)'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'ACREDITADO' : 'ACCREDITED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Emisión de Informe Digital y TAT' : 'Digital Laboratory Report & TAT'}</td>
+                    <td data-label={t.methodCol}>Encrypted HL7 / FHIR Clinical Portal & PDF</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Entrega en 3 a 5 días hábiles desde recepción en laboratorio' : '3 to 5 business days from receipt at testing facility'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'GARANTIZADO' : 'GUARANTEED'}</span>
+                    </td>
+                  </tr>
+                </>
+              ) : (
+                <>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Aspecto Visual' : lang === 'fr' ? 'Aspect Visuel' : lang === 'de' ? 'Visuelles Erscheinungsbild' : 'Visual Appearance'}</td>
+                    <td data-label={t.methodCol}>Ph. Eur. 2.9.1 / Visual</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? 'Polvo / liofilizado estéril blanco' : lang === 'fr' ? 'Poudre / lyophilisat stérile blanc' : lang === 'de' ? 'Weißes lyophilisiertes steriles Pulver' : 'White lyophilized sterile cake / powder'}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'CONFORMS'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Identidad Molecular' : lang === 'fr' ? 'Identité Moléculaire' : lang === 'de' ? 'Molekulare Identität' : 'Molecular Identity'}</td>
+                    <td data-label={t.methodCol}>ESI-Q-TOF Mass Spectrometry</td>
+                    <td data-label={t.resultCol}>{lang === 'es' ? `Teórico: ${mw || '4731.3 Da'} · Observado: Coincide` : lang === 'fr' ? `Théorique : ${mw || '4731.3 Da'} · Observé : Conforme` : `Theoretical: ${mw || '4731.3 Da'} · Observed: Match`}</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFIRMADO' : lang === 'fr' ? 'CONFIRMÉ' : lang === 'de' ? 'BESTÄTIGT' : 'CONFIRMED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Endotoxinas Bacterianas' : lang === 'fr' ? 'Endotoxines Bactériennes' : lang === 'de' ? 'Bakterielle Endotoxine' : 'Bacterial Endotoxins'}</td>
+                    <td data-label={t.methodCol}>LAL Gel Clot Test (USP &lt;85&gt;)</td>
+                    <td data-label={t.resultCol}>&lt; 0.05 EU/mg ({lang === 'es' ? 'Grado Clínico Estricto' : 'Strict Clinical Grade'})</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Garantía de Esterilidad (SAL)' : lang === 'fr' ? 'Assurance de Stérilité (SAL)' : 'Sterility Assurance Level'}</td>
+                    <td data-label={t.methodCol}>Membrane Filtration (USP &lt;71&gt;)</td>
+                    <td data-label={t.resultCol}>SAL 10⁻⁶ ({lang === 'es' ? 'Cero crecimiento a 14 días' : 'Zero growth at 14 days'})</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'APROBADO' : lang === 'fr' ? 'RÉUSSI' : lang === 'de' ? 'BESTANDEN' : 'PASSED'}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label={t.paramCol}>{lang === 'es' ? 'Almacenamiento y Cadena de Frío' : lang === 'fr' ? 'Stockage et Chaîne du Froid' : 'Storage & Cold Chain'}</td>
+                    <td data-label={t.methodCol}>Validated Stability Protocol</td>
+                    <td data-label={t.resultCol}>-20°C ({lang === 'es' ? 'Liofilizado' : 'Lyophilized'}) · 2°C–8°C ({lang === 'es' ? 'Líquido' : 'Liquid'})</td>
+                    <td data-label={t.statusCol}>
+                      <span className="ptc-status-badge">{lang === 'es' ? 'CONFORME' : lang === 'fr' ? 'CONFORME' : lang === 'de' ? 'KONFORM' : 'COMPLIANT'}</span>
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>

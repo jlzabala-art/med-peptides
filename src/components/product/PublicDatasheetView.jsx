@@ -42,6 +42,7 @@ import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import SolventTechnicalSpecs from './SolventTechnicalSpecs';
+import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -269,17 +270,60 @@ export default function PublicDatasheetView({
     );
   }, [product]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : 'Clinical Peptide');
+  const isDiagnosticKit = useMemo(() => {
+    const slug = (product?.slug || product?.id || '').toLowerCase();
+    const cat = (product?.category || '').toLowerCase();
+    const pt = (product?.productType || '').toLowerCase();
+    const pName = (product?.name || product?.title || '').toLowerCase();
+    const pres = (product?.presentation || '').toLowerCase();
+    const fmt = (product?.format || '').toLowerCase();
+    const supp = (product?.supplierId || '').toLowerCase();
+    return Boolean(
+      cat === 'genomics_biomarkers' || 
+      cat === 'diagnostic_tests' ||
+      cat === 'tests' ||
+      pres === 'blood_test' || 
+      pres === 'home_test_kit' ||
+      fmt === 'blood_test' || 
+      supp === 'supplier-bloodo' ||
+      slug.includes('bloodo') ||
+      slug.endsWith('-test') ||
+      pName.includes('test kit') ||
+      pName.includes('level test')
+    );
+  }, [product]);
+
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : 'Clinical Peptide'));
   const category = isSolventProduct 
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
+    : isDiagnosticKit
+    ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
     : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
-  const casNumber = isSolventProduct ? '100-51-6 (Benzyl Alcohol USP)' : (product?.casNumber || product?.cas || 'Documented on Monograph');
-  const formula = isSolventProduct ? 'H₂O + C₇H₈O (0.9%)' : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
-  const mw = isSolventProduct ? '18.02 g/mol (H₂O)' : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
-  const purity = isSolventProduct ? 'USP Pharmacopeial Grade (Sterile)' : (product?.purity || '≥ 99.4% (RP-HPLC)');
-  const sequence = isSolventProduct ? null : (product?.sequence || product?.molecular?.sequence || null);
+  const casNumber = isSolventProduct 
+    ? '100-51-6 (Benzyl Alcohol USP)' 
+    : isDiagnosticKit
+    ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
+    : (product?.casNumber || product?.cas || 'Documented on Monograph');
+  const formula = isSolventProduct 
+    ? 'H₂O + C₇H₈O (0.9%)' 
+    : isDiagnosticKit
+    ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
+    : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
+  const mw = isSolventProduct 
+    ? '18.02 g/mol (H₂O)' 
+    : isDiagnosticKit
+    ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
+    : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
+  const purity = isSolventProduct 
+    ? 'USP Pharmacopeial Grade (Sterile)' 
+    : isDiagnosticKit
+    ? (lang === 'es' ? 'Precisión CV ≤ 6.6% (LoD 0.23 µmol/L)' : 'Precision CV ≤ 6.6% (LoD 0.23 µmol/L)')
+    : (product?.purity || '≥ 99.4% (RP-HPLC)');
+  const sequence = (isSolventProduct || isDiagnosticKit) ? null : (product?.sequence || product?.molecular?.sequence || null);
   const targetSystem = isSolventProduct
     ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
+    : isDiagnosticKit
+    ? (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring')
     : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
   const description = dynamicTranslations[lang]?.description
     || getLocalizedField(product, 'description', lang) 
@@ -774,33 +818,39 @@ export default function PublicDatasheetView({
 
           const diluentText = isSolventProduct
             ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
-            : isPenOrCart 
-              ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-              : isOral 
-                ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                : isSpray
-                  ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
-                  : `${recon.volume} mL BAC Water`;
+            : isDiagnosticKit
+              ? (lang === 'es' ? 'Kit Todo Incluido (Lancetas + Tarjeta DBS)' : 'Self-Contained Kit (Lancets + DBS Card)')
+              : isPenOrCart 
+                ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
+                : isOral 
+                  ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                  : isSpray
+                    ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
+                    : `${recon.volume} mL BAC Water`;
 
           const concText = isSolventProduct
             ? '0.9% Benzyl Alcohol USP'
-            : isPenOrCart 
-              ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-              : isOral 
-                ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                : isSpray
-                  ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
-                  : `${recon.concentration} mg/mL`;
+            : isDiagnosticKit
+              ? (lang === 'es' ? 'Rango: 5.0–60.0 µmol/L (LoD 0.23)' : 'Range: 5.0–60.0 µmol/L (LoD 0.23)')
+              : isPenOrCart 
+                ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
+                : isOral 
+                  ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                  : isSpray
+                    ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
+                    : `${recon.concentration} mg/mL`;
 
           const adminText = isSolventProduct
             ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
-            : isPenOrCart 
-              ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-              : isOral 
-                ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                : isSpray
-                  ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
-                  : 'Subcutaneous / IM (U-100)';
+            : isDiagnosticKit
+              ? (lang === 'es' ? 'Punción Capilar (DBS Yema de Dedo)' : 'Capillary Fingerstick (DBS Card)')
+              : isPenOrCart 
+                ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+                : isOral 
+                  ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                  : isSpray
+                    ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
+                    : 'Subcutaneous / IM (U-100)';
 
           rows.push({
             key: `${activeSupplierObj.id}-${fmt.id}-${st.id}`,
@@ -816,7 +866,7 @@ export default function PublicDatasheetView({
             isOral,
             isSpray,
             isCurrentlyActive,
-            purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : '≥ 99.0% (RP-HPLC)'),
+            purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : '≥ 99.0% (RP-HPLC)')),
             supplierName: activeSupplierObj.name || 'Lotusland Limited',
             supplierId: activeSupplierObj.id
           });
@@ -842,33 +892,39 @@ export default function PublicDatasheetView({
 
             const diluentText = isSolventProduct
               ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
-              : isPenOrCart 
-                ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-                : isOral 
-                  ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                  : isSpray
-                    ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
-                    : `${recon.volume} mL BAC Water`;
+              : isDiagnosticKit
+                ? (lang === 'es' ? 'Kit Todo Incluido (Lancetas + Tarjeta DBS)' : 'Self-Contained Kit (Lancets + DBS Card)')
+                : isPenOrCart 
+                  ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
+                  : isOral 
+                    ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                    : isSpray
+                      ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
+                      : `${recon.volume} mL BAC Water`;
 
             const concText = isSolventProduct
               ? '0.9% Benzyl Alcohol USP'
-              : isPenOrCart 
-                ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-                : isOral 
-                  ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                  : isSpray
-                    ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
-                    : `${recon.concentration} mg/mL`;
+              : isDiagnosticKit
+                ? (lang === 'es' ? 'Rango: 5.0–60.0 µmol/L (LoD 0.23)' : 'Range: 5.0–60.0 µmol/L (LoD 0.23)')
+                : isPenOrCart 
+                  ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
+                  : isOral 
+                    ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                    : isSpray
+                      ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
+                      : `${recon.concentration} mg/mL`;
 
             const adminText = isSolventProduct
               ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
-              : isPenOrCart 
-                ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                : isOral 
-                  ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                  : isSpray
-                    ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
-                    : 'Subcutaneous / IM (U-100)';
+              : isDiagnosticKit
+                ? (lang === 'es' ? 'Punción Capilar (DBS Yema de Dedo)' : 'Capillary Fingerstick (DBS Card)')
+                : isPenOrCart 
+                  ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+                  : isOral 
+                    ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                    : isSpray
+                      ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
+                      : 'Subcutaneous / IM (U-100)';
 
             rows.push({
               key: `${supp.id}-${fId}-${st.id}`,
@@ -884,7 +940,7 @@ export default function PublicDatasheetView({
               isOral,
               isSpray,
               isCurrentlyActive,
-              purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : '≥ 99.0% (RP-HPLC)'),
+              purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : '≥ 99.0% (RP-HPLC)')),
               supplierName: supp.name || supp.id,
               supplierId: supp.id
             });
@@ -898,7 +954,7 @@ export default function PublicDatasheetView({
       if (diff !== 0) return diff;
       return a.supplierName.localeCompare(b.supplierName);
     });
-  }, [activeSupplierId, activeSupplierObj, availableFormats, sortedStrengths, hierarchy.variantIndex, activeFormatId, selectedStrengthId, isSolventProduct, suppliersList, lang]);
+  }, [activeSupplierId, activeSupplierObj, availableFormats, sortedStrengths, hierarchy.variantIndex, activeFormatId, selectedStrengthId, isSolventProduct, isDiagnosticKit, suppliersList, lang]);
 
   return (
     <div className="public-datasheet-root">
@@ -966,7 +1022,7 @@ export default function PublicDatasheetView({
           description={
             <>
               <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.25rem' }}>
-                <strong style={{ color: '#0f172a' }}>{isSolventProduct ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') : (t.targetReceptorAxis || 'Target Receptor Axis:')}</strong>{' '}
+                <strong style={{ color: '#0f172a' }}>{isSolventProduct ? (lang === 'es' ? 'Función en el Compendio:' : 'Compendium Function:') : isDiagnosticKit ? (lang === 'es' ? 'Utilidad Diagnóstica y Aplicación:' : 'Diagnostic Utility & Target Axis:') : (t.targetReceptorAxis || 'Target Receptor Axis:')}</strong>{' '}
                 {targetSystem}
               </span>
             </>
@@ -975,7 +1031,7 @@ export default function PublicDatasheetView({
             <div className="pds-description-card" style={{ marginTop: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <h2 className="pds-section-heading" style={{ margin: 0 }}>
-                  {t.pharmacologicalOverview || 'Pharmacological Overview'}
+                  {isDiagnosticKit ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') : (t.pharmacologicalOverview || 'Pharmacological Overview')}
                 </h2>
                 {isTranslating ? (
                   <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
@@ -1099,7 +1155,10 @@ export default function PublicDatasheetView({
               const isCartridge = fmt.id.includes('cartridge');
               let icon = '🧪';
               let subtitle = t.formatSubVial || 'Lyophilized SubQ Cake (Sterile Vial)';
-              if (isPen) {
+              if (isDiagnosticKit || fmt.id.includes('test') || fmt.id.includes('blood')) {
+                icon = '🩸';
+                subtitle = lang === 'es' ? 'Kit Diagnóstico Capilar DBS (CE-IVDR)' : 'Capillary DBS Diagnostic Kit (CE-IVDR)';
+              } else if (isPen) {
                 icon = '🖊️';
                 subtitle = t.formatSubPen || 'Prefilled Multi-Dose Dial Device';
               } else if (isCartridge) {
@@ -1139,7 +1198,11 @@ export default function PublicDatasheetView({
           {/* Strengths Chips */}
           <div className="pds-strengths-wrapper">
             <div className="pds-strengths-label-row">
-              <span className="pds-sublabel">{t.selectAvailableStrength || 'Select Available Strength / Dose:'}</span>
+              <span className="pds-sublabel">
+                {isDiagnosticKit 
+                  ? (lang === 'es' ? 'Presentación de Kit / Unidades:' : 'Kit Format / Sample Units:') 
+                  : (t.selectAvailableStrength || 'Select Available Strength / Dose:')}
+              </span>
               <span className="pds-count-badge">{filteredStrengths.length} {t.optionsAvailable || 'options available'}</span>
             </div>
 
@@ -1164,24 +1227,30 @@ export default function PublicDatasheetView({
           <div className="pds-selected-detail-card">
             <div className="pds-detail-grid">
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{t.activeContent || 'Active Content'}</span>
-                <span className="pds-dval font-bold text-sky-950">{selectedStrength?.name || (isSolventProduct ? '30 mL' : '10 mg')}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Contenido del Kit' : 'Kit Contents') : (t.activeContent || 'Active Content')}</span>
+                <span className="pds-dval font-bold text-sky-950">
+                  {selectedStrength?.name || (isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : '10 mg')}
+                </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{t.adminRoute || 'Administration Route'}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t.adminRoute || 'Administration Route')}</span>
                 <span className="pds-dval">
                   {isSolventProduct 
                     ? (lang === 'es' ? 'Vehículo de Reconstitución (No Inyección Directa)' : 'Reconstitution Vehicle (Not for Direct Injection)')
-                    : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
+                    : isDiagnosticKit
+                      ? (lang === 'es' ? 'Punción Capilar en Dedo (3 gotas en tarjeta DBS)' : 'Capillary Fingerstick (3 spots on DBS Card)')
+                      : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
                 </span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">
                   {isSolventProduct 
                     ? (lang === 'es' ? 'Función Diluyente' : 'Diluent Function')
-                    : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
-                      ? (t.deviceDelivery || 'Device Delivery') 
-                      : (t.recommendedRecon || 'Recommended Reconstitution')}
+                    : isDiagnosticKit
+                      ? (lang === 'es' ? 'Metodología Analítica' : 'Analytical Methodology')
+                      : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
+                        ? (t.deviceDelivery || 'Device Delivery') 
+                        : (t.recommendedRecon || 'Recommended Reconstitution')}
                 </span>
                 <span className="pds-dval">
                   {isSolventProduct ? (
@@ -1189,6 +1258,13 @@ export default function PublicDatasheetView({
                       {lang === 'es' ? 'Solvente de Reconstitución Multidosis' : 'Universal Multi-Dose Peptide Diluent'}
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
                         → {lang === 'es' ? 'Diluir 1.0 – 3.0 mL en viales liofilizados' : 'Dilute 1.0 – 3.0 mL into lyophilized vials'}
+                      </span>
+                    </>
+                  ) : isDiagnosticKit ? (
+                    <>
+                      {lang === 'es' ? 'Ensayo Cíclico Enzimático (Espectrofotometría)' : 'Enzymatic Cyclic Assay (Spectrophotometry)'}
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {lang === 'es' ? 'Rango Lineal 5.0–60.0 µmol/L · LoD: 0.23 µmol/L' : 'Linear Range 5.0–60.0 µmol/L · LoD: 0.23 µmol/L'}
                       </span>
                     </>
                   ) : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) ? (
@@ -1209,23 +1285,27 @@ export default function PublicDatasheetView({
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{t.lyophilizationExcipient || 'Lyophilization / Excipient'}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Regulación y Calidad' : 'Regulatory Standard') : (t.lyophilizationExcipient || 'Lyophilization / Excipient')}</span>
                 <span className="pds-dval">
                   {isSolventProduct
                     ? '0.9% Benzyl Alcohol USP (Antimicrobial Preservative)'
-                    : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
-                      ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
-                      : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
+                    : isDiagnosticKit
+                      ? 'CE-IVDR (UE 2017/746) · ISO 15189'
+                      : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
+                        ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
+                        : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{t.sourcingBatchRelease || 'Sourcing & Batch Release'}</span>
-                <span className="pds-dval">{displaySupplierName} ({t.verifiedClinicalQuality || 'Verified Clinical Quality'})</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Analítico' : 'Testing Laboratory') : (t.sourcingBatchRelease || 'Sourcing & Batch Release')}</span>
+                <span className="pds-dval">
+                  {isDiagnosticKit ? 'LifeLab1 (Vilna, Lituania) / Bloodo' : `${displaySupplierName} (${t.verifiedClinicalQuality || 'Verified Clinical Quality'})`}
+                </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{t.analyticalPurity || 'Analytical Purity'}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica' : 'Analytical Precision') : (t.analyticalPurity || 'Analytical Purity')}</span>
                 <span className="pds-dval font-bold text-sky-950">
-                  {isSolventProduct ? 'USP Pharmacopeia (Sterile, Non-Pyrogenic)' : `≥ 99.0% (${t.rpHplcVerified || 'RP-HPLC Verified'})`}
+                  {isSolventProduct ? 'USP Pharmacopeia (Sterile, Non-Pyrogenic)' : isDiagnosticKit ? 'CV ≤ 6.6% (Validado)' : `≥ 99.0% (${t.rpHplcVerified || 'RP-HPLC Verified'})`}
                 </span>
               </div>
             </div>
@@ -1253,13 +1333,13 @@ export default function PublicDatasheetView({
                 <table className="pds-strengths-table">
                   <thead>
                     <tr>
-                      <th>{lang === 'es' ? 'Concentración / Dosis' : 'Strength / Dose'}</th>
-                      <th>{lang === 'es' ? 'Formato de Presentación' : 'Presentation Format'}</th>
-                      <th>{lang === 'es' ? 'Diluyente de Reconstitución' : 'Reconstitution Diluent'}</th>
-                      <th>{t.solutionConcentrationCol || 'Solution Concentration (mg/mL)'}</th>
-                      <th>{lang === 'es' ? 'Vía de Administración' : 'Administration'}</th>
-                      <th>{lang === 'es' ? 'Grado Analítico' : 'Analytical Grade'}</th>
-                      <th>{lang === 'es' ? 'Verificación de Laboratorio' : 'Laboratory Verification'}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Presentación de Kit' : 'Kit Presentation') : (lang === 'es' ? 'Concentración / Dosis' : 'Strength / Dose')}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Tipo de Muestra' : 'Specimen Type') : (lang === 'es' ? 'Formato de Presentación' : 'Presentation Format')}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Componentes del Kit' : 'Kit Components') : (lang === 'es' ? 'Diluyente de Reconstitución' : 'Reconstitution Diluent')}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Rango Analítico / LoD' : 'Assay Range / LoD') : (t.solutionConcentrationCol || 'Solution Concentration (mg/mL)')}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Método de Muestreo' : 'Sampling Method') : (lang === 'es' ? 'Vía de Administración' : 'Administration')}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Certificación y Regulación' : 'Certification & Standard') : (lang === 'es' ? 'Grado Analítico' : 'Analytical Grade')}</th>
+                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Analizador' : 'Testing Laboratory') : (lang === 'es' ? 'Verificación de Laboratorio' : 'Laboratory Verification')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1314,10 +1394,17 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 2: Reconstitution or Solvent Technical Specs ── */}
+        {/* ── Block 2: Reconstitution, Diagnostic Specs, or Solvent Technical Specs ── */}
         <section id="reconstitution-section" className="pds-section-card">
           {isSolventProduct ? (
             <SolventTechnicalSpecs product={product} lang={lang} />
+          ) : isDiagnosticKit ? (
+            <DiagnosticTestTechnicalSpecs
+              product={product}
+              selectedDose={selectedStrength?.name || currentDose}
+              supplierName={displaySupplierName}
+              lang={lang}
+            />
           ) : (
             <>
               <div className="pds-section-header">
@@ -1606,10 +1693,10 @@ export default function PublicDatasheetView({
           molecular: product?.molecularWeight || product?.molecularFormula || 'N/A',
           sequence: product?.sequence || null,
           details: {
-            category: isSolventProduct ? 'Sterile Reconstitution Solvent' : (product?.category || 'Peptides'),
-            storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
-            reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : '1.0mL - 2.0mL sterile bacteriostatic water',
-            activeSupplier: displaySupplierName || 'Atlas Services',
+            category: isSolventProduct ? 'Sterile Reconstitution Solvent' : isDiagnosticKit ? 'CE-IVDR Clinical Diagnostic Test' : (product?.category || 'Peptides'),
+            storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : isDiagnosticKit ? 'Ambient 15-25°C dry storage. Dried blood spot stable up to 14 days at room temp.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
+            reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : isDiagnosticKit ? 'No reconstitution required. Direct capillary dried blood spot (DBS) collection.' : '1.0mL - 2.0mL sterile bacteriostatic water',
+            activeSupplier: displaySupplierName || (isDiagnosticKit ? 'LifeLab1 / Bloodo' : 'Atlas Services'),
           }
         }}
         storageKey={`monograph_${slug}`}

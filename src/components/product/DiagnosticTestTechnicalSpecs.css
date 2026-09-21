@@ -1,0 +1,364 @@
+/* ══════════════════════════════════════════════════════════════════
+   DiagnosticTestTechnicalSpecs.css
+   Modern, medical-grade styling for Diagnostic Kit Datasheets (Bloodo)
+   ══════════════════════════════════════════════════════════════════ */
+
+.dts-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(0, 54, 102, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.dts-body {
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── 1. Analytical Metrics Grid ── */
+.dts-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.dts-metric-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.dts-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(0, 54, 102, 0.08);
+  border-color: #cbd5e1;
+}
+
+.dts-metric-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.dts-metric-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #003666;
+  line-height: 1.35;
+}
+
+.dts-metric-sub {
+  font-size: 0.76rem;
+  color: #0d9488;
+  font-weight: 600;
+}
+
+/* ── 2. Interactive Simulator Card ── */
+.dts-simulator-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.dts-simulator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.dts-simulator-kicker {
+  font-size: 0.70rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0d9488;
+}
+
+.dts-simulator-title {
+  margin: 0.15rem 0 0 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #003666;
+}
+
+.dts-interactive-hint {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f1f5f9;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.dts-range-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.dts-range-btn {
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.dts-range-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+.dts-range-btn.active {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+.dts-range-btn-value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+}
+
+.dts-range-btn-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.dts-range-detail {
+  border-left: 4px solid #0d9488;
+  border-radius: 0 10px 10px 0;
+  padding: 1.15rem 1.35rem;
+  transition: all 0.25s ease;
+}
+
+.dts-range-detail-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.dts-range-status-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  letter-spacing: 0.03em;
+}
+
+.dts-range-value-large {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.dts-range-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+/* ── 3. 3-Step Protocol ── */
+.dts-protocol-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.dts-protocol-title {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #003666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dts-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.dts-step {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.dts-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #003666;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.dts-step-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.4rem;
+}
+
+.dts-step-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* ── 4. Included Contents Checklist ── */
+.dts-contents-card {
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+}
+
+.dts-contents-title {
+  margin: 0 0 1rem 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #003666;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dts-contents-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem 1.5rem;
+}
+
+.dts-content-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+/* ── 5. Laboratory & Accreditation Footer ── */
+.dts-footer-banner {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dts-footer-text {
+  max-width: 650px;
+}
+
+.dts-footer-headline {
+  font-size: 0.92rem;
+  color: #003666;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.25rem;
+}
+
+.dts-footer-sub {
+  margin: 0;
+  font-size: 0.80rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.dts-footer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.dts-accreditation-tag {
+  background: #ffffff;
+  color: #0d9488;
+  border: 1px solid #5eead4;
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ── Responsive Mobile Breakpoints ── */
+@media (max-width: 900px) {
+  .dts-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dts-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .dts-contents-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dts-body {
+    padding: 1.25rem;
+    gap: 1.5rem;
+  }
+  .dts-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  .dts-range-selector {
+    grid-template-columns: 1fr;
+  }
+  .dts-footer-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
