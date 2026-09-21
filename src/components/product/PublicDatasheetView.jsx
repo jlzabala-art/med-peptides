@@ -45,6 +45,7 @@ import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
+import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -304,37 +305,68 @@ export default function PublicDatasheetView({
     return sId === 'supplier-eternadx' || sName.includes('eterna') || pSlug.includes('eterna') || pName.includes('eterna') || sample.includes('saliva');
   }, [product, slug]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : 'Clinical Peptide')));
+  const isIvDrip = useMemo(() => {
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    const cat = (product?.category || product?.categoryId || '').toLowerCase();
+    const pt = (product?.product_type || product?.productType || '').toLowerCase();
+    const pName = (product?.name || product?.title || '').toLowerCase();
+    const pres = (product?.presentation || '').toLowerCase();
+    return Boolean(
+      cat === 'iv_drips' || 
+      cat === 'iv_therapy' ||
+      pt === 'iv_drip' || 
+      pres === 'iv_drip' || 
+      pres === 'infusion_bag' ||
+      pSlug.includes('iv-drip') || 
+      pSlug.includes('drip-plus') || 
+      pName.includes('iv drip') ||
+      (Array.isArray(product?.ingredients) && product.ingredients.length > 0 && pSlug.includes('drip'))
+    );
+  }, [product, slug]);
+
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : 'Clinical Peptide'))));
   const category = isSolventProduct 
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
+    : isIvDrip
+    ? (lang === 'es' ? 'Terapia Intravenosa y Nutrición Parenteral' : 'Sterile IV Infusion & Micronutrient Formulation')
     : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
   const casNumber = isSolventProduct 
     ? '100-51-6 (Benzyl Alcohol USP)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
+    : isIvDrip
+    ? 'USP <797> Compounded Parenteral'
     : (product?.casNumber || product?.cas || 'Documented on Monograph');
   const formula = isSolventProduct 
     ? 'H₂O + C₇H₈O (0.9%)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
+    : isIvDrip
+    ? `${product?.ingredients?.length || 12} Active Compounds (${product?.volume_ml || 50} mL)`
     : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
   const mw = isSolventProduct 
     ? '18.02 g/mol (H₂O)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
+    : isIvDrip
+    ? `Total Actives: ${(product?.totalActiveMg || 10000).toLocaleString()} mg`
     : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
   const purity = isSolventProduct 
     ? 'USP Pharmacopeial Grade (Sterile)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Precisión CV ≤ 6.6% (LoD 0.23 µmol/L)' : 'Precision CV ≤ 6.6% (LoD 0.23 µmol/L)')
+    : isIvDrip
+    ? 'USP <797> Sterile / ISO Class 5 Certified'
     : (product?.purity || '≥ 99.4% (RP-HPLC)');
-  const sequence = (isSolventProduct || isDiagnosticKit) ? null : (product?.sequence || product?.molecular?.sequence || null);
+  const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip) ? null : (product?.sequence || product?.molecular?.sequence || null);
   const targetSystem = isSolventProduct
     ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring')
+    : isIvDrip
+    ? (lang === 'es' ? 'Optimización Celular, Inmunidad y Longevidad Intravenosa' : 'Parenteral Cellular Optimization, Immunity & Longevity')
     : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
   const description = dynamicTranslations[lang]?.description
     || getLocalizedField(product, 'description', lang) 
@@ -1628,7 +1660,7 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, or Solvent Technical Specs ── */}
+        {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, IV Drips, or Solvent Technical Specs ── */}
         <section id="reconstitution-section" className="pds-section-card">
           {isSolventProduct ? (
             <SolventTechnicalSpecs product={product} lang={lang} />
@@ -1638,6 +1670,13 @@ export default function PublicDatasheetView({
             <DiagnosticTestTechnicalSpecs
               product={product}
               selectedDose={selectedStrength?.name || currentDose}
+              supplierName={displaySupplierName}
+              lang={lang}
+            />
+          ) : isIvDrip ? (
+            <IvDripTechnicalSpecs
+              product={product}
+              selectedDose={selectedStrength?.name || '50 mL Infusion'}
               supplierName={displaySupplierName}
               lang={lang}
             />
