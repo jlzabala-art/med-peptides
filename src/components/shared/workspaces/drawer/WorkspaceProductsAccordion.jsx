@@ -10,6 +10,7 @@ import {
   Droplet,
   Search,
   X,
+  Sparkles,
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
@@ -46,6 +47,7 @@ export default function WorkspaceProductsAccordion({
   isPatient = false,
   onAddClinicalRegimen,
   stepperMode = false,
+  onOpenShareDatasheets = null,
 }) {
   const [expandedItemIds, setExpandedItemIds] = useState({});
   const [activePicker, setActivePicker] = useState(null); // 'products' | 'protocols' | 'kits' | null
@@ -288,6 +290,29 @@ export default function WorkspaceProductsAccordion({
                   >
                     <FileText size={13} /> Load Protocol
                   </button>
+                  {onOpenShareDatasheets && (
+                    <button
+                      type="button"
+                      onClick={onOpenShareDatasheets}
+                      style={{
+                        padding: '6px 10px',
+                        backgroundColor: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '7px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        color: '#003666',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        touchAction: 'manipulation',
+                      }}
+                      title="Share clinical datasheets of staged compounds via AI-generated Pharma English email"
+                    >
+                      <Sparkles size={13} color="#0284c7" /> Share Datasheets (AI)
+                    </button>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

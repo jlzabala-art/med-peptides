@@ -31,8 +31,8 @@ import WorkspaceMiniSummaryStrip from './drawer/WorkspaceMiniSummaryStrip';
 import WorkspaceProductsAccordion from './drawer/WorkspaceProductsAccordion';
 import WorkspaceRecipientAccordion from './drawer/WorkspaceRecipientAccordion';
 import WorkspaceShippingAccordion from './drawer/WorkspaceShippingAccordion';
-import WorkspaceFinancialAccordion from './drawer/WorkspaceFinancialAccordion';
 import WorkspacePdfPreviewSheet from './drawer/WorkspacePdfPreviewSheet';
+import WorkspaceShareDatasheetModal from './drawer/WorkspaceShareDatasheetModal';
 import { useWorkspaceActions } from './hooks/useWorkspaceActions';
 import { useContextualBinding } from './hooks/useContextualBinding';
 import { estimateWorkspaceLogistics } from '@/utils/logisticsEstimator';
@@ -104,6 +104,7 @@ export default function WorkspaceDrawer() {
 
   const [isSaveKitModalOpen, setIsSaveKitModalOpen] = useState(false);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [showShareDatasheetModal, setShowShareDatasheetModal] = useState(false);
   const [protocols, setProtocols] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
   const [searchingCatalog, setSearchingCatalog] = useState(false);
@@ -479,6 +480,7 @@ export default function WorkspaceDrawer() {
               isWholesaler={isWholesaler}
               isPatient={isPatient}
               onAddClinicalRegimen={handleAddClinicalRegimen}
+              onOpenShareDatasheets={() => setShowShareDatasheetModal(true)}
             />
           </div>
 
@@ -842,35 +844,67 @@ export default function WorkspaceDrawer() {
                     </div>
                   ) : null}
 
-                  {/* Document Summary Quick View */}
-                  <button
-                    type="button"
-                    onClick={() => setShowPdfPreview(true)}
-                    style={{
-                      width: '100%',
-                      padding: '6px',
-                      backgroundColor: '#f8fafc',
-                      color: '#475569',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      touchAction: 'manipulation',
-                    }}
-                  >
-                    <FileText size={13} /> 👁️ Quick Document Preview
-                  </button>
+                  {/* Share Datasheets via AI Email & Document Summary Quick View */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', width: '100%' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowShareDatasheetModal(true)}
+                      style={{
+                        padding: '7px 8px',
+                        backgroundColor: '#eff6ff',
+                        color: '#003666',
+                        borderRadius: '8px',
+                        border: '1.5px solid #bfdbfe',
+                        fontSize: '0.74rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        touchAction: 'manipulation',
+                        boxShadow: '0 1px 3px rgba(0, 54, 102, 0.08)',
+                      }}
+                      title="Share clinical datasheets of active workspace compounds via formal Pharma English email"
+                    >
+                      <Sparkles size={13} color="#0284c7" /> Share Datasheets (AI)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPdfPreview(true)}
+                      style={{
+                        padding: '7px 8px',
+                        backgroundColor: '#f8fafc',
+                        color: '#475569',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        touchAction: 'manipulation',
+                      }}
+                    >
+                      <FileText size={13} /> 👁️ Quick Preview
+                    </button>
+                  </div>
                 </>
               )}
             </>
           )}
         </div>
       </div>
+
+      {/* Share Datasheet via AI Email Modal */}
+      <WorkspaceShareDatasheetModal
+        isOpen={showShareDatasheetModal}
+        onClose={() => setShowShareDatasheetModal(false)}
+        activeWs={activeWs}
+        items={items}
+      />
 
       {/* Save Kit In-App Modal (replacing window.prompt) */}
       <SaveKitModal
