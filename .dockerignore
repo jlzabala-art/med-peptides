@@ -12,11 +12,13 @@
 .husky
 
 # Ignore functions subdirectories (deployed separately to Cloud Functions)
-functions
-functions-ai
-functions-cron
-functions-finance
-functions-triggers
+functions/
+functions-ai/
+functions-cron/
+functions-finance/
+functions-triggers/
+!functions-config-manifest.json
+!**/functions-config-manifest.json
 
 # Ignore large local folders, bundles, PDFs, and backups
 backups

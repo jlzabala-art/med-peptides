@@ -11,8 +11,10 @@
 .firebase
 *.log
 *.md
-functions
-functions-*
+functions/
+functions-*/
+!functions-config-manifest.json
+!**/functions-config-manifest.json
 backups
 migration_bundle
 HORTMAN
