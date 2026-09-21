@@ -371,31 +371,50 @@ export default function CatalogOffersPricingDrawer({
         if (displayCurrency === 'AED') converted = rawUsd * (settings?.exchangeRates?.uae || 3.67);
       }
 
+      const totalMg = calculateTotalMg(v) || calculateTotalMg(selectedProduct);
+      const perMgText = (converted != null && !isNaN(converted) && totalMg && totalMg > 0)
+        ? `• ${currencySymbol}${(converted / totalMg).toFixed(2)}/mg`
+        : null;
+
       if (commercialChannel === 'cost') {
         return (
-          <InlineEditableCell
-            value={converted}
-            type="number"
-            format={(val) => (val != null && !isNaN(val)) ? `${currencySymbol}${Number(val).toFixed(2)}` : '—'}
-            onSave={(newVal) => updateVariantField(v.id, priceField, Number(newVal))}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: '1.2' }}>
+            <InlineEditableCell
+              value={converted}
+              type="number"
+              format={(val) => (val != null && !isNaN(val)) ? `${currencySymbol}${Number(val).toFixed(2)}` : '—'}
+              onSave={(newVal) => updateVariantField(v.id, priceField, Number(newVal))}
+            />
+            {perMgText && (
+              <span style={{ fontSize: '0.67rem', fontWeight: 600, color: '#0284c7', marginTop: '1px' }}>
+                {perMgText}
+              </span>
+            )}
+          </div>
         );
       }
 
       return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#003666' }}>
-            {converted != null && !isNaN(converted) ? `${currencySymbol}${Number(converted).toFixed(2)}` : '—'}
-          </span>
-          {res.isAuto && (
-            <span style={{ fontSize: '0.65rem', color: '#64748b', background: '#f1f5f9', padding: '1px 4px', borderRadius: '3px' }}>
-              auto
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: '1.2' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#003666' }}>
+              {converted != null && !isNaN(converted) ? `${currencySymbol}${Number(converted).toFixed(2)}` : '—'}
+            </span>
+            {res.isAuto && (
+              <span style={{ fontSize: '0.65rem', color: '#64748b', background: '#f1f5f9', padding: '1px 4px', borderRadius: '3px' }}>
+                auto
+              </span>
+            )}
+          </div>
+          {perMgText && (
+            <span style={{ fontSize: '0.67rem', fontWeight: 600, color: '#0284c7', marginTop: '1px' }}>
+              {perMgText}
             </span>
           )}
         </div>
       );
     }
-  }), [priceHeader, priceField, commercialChannel, priceView, displayCurrency, settings, currencySymbol]);
+  }), [priceHeader, priceField, commercialChannel, priceView, displayCurrency, settings, currencySymbol, selectedProduct]);
 
   const activeMgCol = useMemo(() => ({
     key: 'price_per_mg',

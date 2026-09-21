@@ -69,8 +69,10 @@ export default function SupplierAgreementCard({
   
   // 1. Single Unit Calculations
   const unitNetCost = Number(variant.cost_1 || variant.unit_price || variant.price || suppPricing.netCost || (isRaw ? 3.55 : 30.80));
-  const discountPercent = variant.discountPercent ?? suppPricing.discountPercent ?? 25;
-  const listPrice = Number(variant.listPrice || suppPricing.listPrice || Math.round((unitNetCost / (1 - (discountPercent / 100))) * 100) / 100);
+  const discountPercent = variant.discountPercent ?? suppPricing.discountPercent ?? (isLotusland && isRaw ? 25 : null);
+  const listPrice = (variant.listPrice || suppPricing.listPrice)
+    ? Number(variant.listPrice || suppPricing.listPrice)
+    : (discountPercent ? Math.round((unitNetCost / (1 - (discountPercent / 100))) * 100) / 100 : null);
 
   // 2. 10-Unit Pack Calculations
   const explicitKitCost = Number(variant.cost_10 || variant.supplierKitCostUSD || suppPricing.kitCost || 0);
@@ -245,29 +247,31 @@ export default function SupplierAgreementCard({
                 <span style={{ fontSize: '0.9rem', fontWeight: 750, color: '#0f172a' }}>
                   {supplierName}
                 </span>
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '4px',
-                  padding: '1px 6px',
-                  fontSize: '0.70rem',
-                  fontWeight: 800,
-                  color: '#166534'
-                }}>
-                  {onUpdateVariantField ? (
-                    <InlineEditableCell
-                      value={discountPercent}
-                      type="number"
-                      prefix="-"
-                      suffix="% Discount"
-                      onSave={(newVal) => onUpdateVariantField(variant.id, 'discountPercent', Number(newVal))}
-                    />
-                  ) : (
-                    <span>-{discountPercent}% Discount</span>
-                  )}
-                </span>
+                {discountPercent != null && discountPercent > 0 && (
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '4px',
+                    padding: '1px 6px',
+                    fontSize: '0.70rem',
+                    fontWeight: 800,
+                    color: '#166534'
+                  }}>
+                    {onUpdateVariantField ? (
+                      <InlineEditableCell
+                        value={discountPercent}
+                        type="number"
+                        prefix="-"
+                        suffix="% Discount"
+                        onSave={(newVal) => onUpdateVariantField(variant.id, 'discountPercent', Number(newVal))}
+                      />
+                    ) : (
+                      <span>-{discountPercent}% Discount</span>
+                    )}
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '1px' }}>
                 <Calendar size={12} />

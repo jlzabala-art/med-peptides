@@ -112,9 +112,16 @@ export default function MobileVariantCard({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '1.1rem', fontWeight: 850, color: '#0f172a' }}>
-                {primaryPrice}
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: '1.2' }}>
+                <span style={{ fontSize: '1.05rem', fontWeight: 850, color: '#0f172a' }}>
+                  {primaryPrice}
+                </span>
+                {normalizedPrice && (
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7' }}>
+                    {normalizedPrice}
+                  </span>
+                )}
+              </div>
               <button 
                 type="button"
                 onClick={(e) => {

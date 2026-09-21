@@ -6,8 +6,9 @@ import SegmentedControl from '../../ui/SegmentedControl';
 import CurrencySelector from '../../ui/CurrencySelector';
 import MobileVariantCard from './MobileVariantCard';
 import VariantTimelinePanel from './VariantTimelinePanel';
-import { COMMERCIAL_CHANNELS } from '../../../utils/commercialPricingHelper';
-import { ChevronDown, ChevronRight, Building2, Layers, ListFilter, ShieldCheck, FileText, Share2, Download, DollarSign, TrendingUp, Clock, Zap } from 'lucide-react';
+import { COMMERCIAL_CHANNELS, resolveChannelPrice } from '../../../utils/commercialPricingHelper';
+import { calculateTotalMg } from '../../../utils/calculateTotalMg';
+import { ChevronDown, ChevronRight, Building2, Layers, ListFilter, ShieldCheck, FileText, Share2, Download, DollarSign, TrendingUp, Clock, Zap, ArrowUpDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ShareProductMonographDrawer from './drawers/ShareProductMonographDrawer';
 import GcpSupplierFilterBar from './components/GcpSupplierFilterBar';
@@ -105,6 +106,22 @@ export default function VariantAccordion({
   isApi = false,
   updateVariantField
 }) {
+  const isService = selectedProduct?.category?.toLowerCase().includes('service') ||
+                    selectedProduct?.category?.toLowerCase().includes('subscription') ||
+                    selectedProduct?.productType === 'service' ||
+                    selectedProduct?.primaryType === 'service' ||
+                    selectedProduct?.product_type === 'service';
+
+  const isGenomicsOrTest = selectedProduct?.category?.toLowerCase().includes('genom') ||
+                           selectedProduct?.category?.toLowerCase().includes('biomarker') ||
+                           selectedProduct?.category === 'genomics_biomarkers' ||
+                           selectedProduct?.category?.toLowerCase().includes('diagnostic') ||
+                           selectedProduct?.productType === 'genomics_biomarkers' ||
+                           selectedProduct?.product_type === 'dna_testing_kit';
+
+  const isPeptide = !isGenomicsOrTest && !isService;
+  const [sortBy, setSortBy] = useState(isPeptide ? 'cost_per_mg' : 'dosage'); // 'cost_per_mg' | 'dosage' | 'supplier'
+
   const [groupBy, setGroupBy] = useState('supplier'); // 'supplier' | 'none'
   const [selectedSupplierFilter, setSelectedSupplierFilter] = useState('all');
   const [variantTypeFilter, setVariantTypeFilter] = useState('all'); // 'all' | 'finished' | 'raw_material'
@@ -120,19 +137,6 @@ export default function VariantAccordion({
 
   // Active nature (API in Grams vs Clinical Units)
   const activeIsApi = variantTypeFilter === 'raw_material' || (variantTypeFilter === 'all' && rawCount > 0 && finishedCount === 0) || isApi;
-
-  const isService = selectedProduct?.category?.toLowerCase().includes('service') ||
-                    selectedProduct?.category?.toLowerCase().includes('subscription') ||
-                    selectedProduct?.productType === 'service' ||
-                    selectedProduct?.primaryType === 'service' ||
-                    selectedProduct?.product_type === 'service';
-
-  const isGenomicsOrTest = selectedProduct?.category?.toLowerCase().includes('genom') ||
-                           selectedProduct?.category?.toLowerCase().includes('biomarker') ||
-                           selectedProduct?.category === 'genomics_biomarkers' ||
-                           selectedProduct?.category?.toLowerCase().includes('diagnostic') ||
-                           selectedProduct?.productType === 'genomics_biomarkers' ||
-                           selectedProduct?.product_type === 'dna_testing_kit';
 
   // Filter variants by type first
   const typeFilteredVariants = useMemo(() => {
@@ -177,7 +181,18 @@ export default function VariantAccordion({
     return isNaN(num) ? Infinity : num;
   };
 
-  // 1. Group variants by supplier, sort variants within each group ascending by dosage
+  // Helper: calculate normalized cost per mg for sorting
+  const getVariantCostPerMg = (v) => {
+    const res = resolveChannelPrice(v, commercialChannel, priceView);
+    const cost = res.price;
+    const totalMg = calculateTotalMg(v) || calculateTotalMg(selectedProduct) || (v.doseMg ?? v.totalMg);
+    if (cost != null && !isNaN(cost) && cost > 0 && totalMg != null && !isNaN(totalMg) && totalMg > 0) {
+      return cost / totalMg;
+    }
+    return Infinity;
+  };
+
+  // 1. Group variants by supplier, sort variants within each group
   const supplierGroups = useMemo(() => {
     const map = new Map();
 
@@ -199,28 +214,56 @@ export default function VariantAccordion({
       group.variants.push(v);
     });
 
-    // Sort variants within each supplier: ascending by dosage (lowest first)
+    // Sort variants within each supplier group
     map.forEach(group => {
-      group.variants.sort((a, b) => parseDosageMg(a) - parseDosageMg(b));
+      group.variants.sort((a, b) => {
+        if (sortBy === 'cost_per_mg') {
+          const cA = getVariantCostPerMg(a);
+          const cB = getVariantCostPerMg(b);
+          if (cA !== cB && !isNaN(cA) && !isNaN(cB)) return cA - cB;
+          return parseDosageMg(a) - parseDosageMg(b);
+        }
+        if (sortBy === 'dosage') {
+          return parseDosageMg(a) - parseDosageMg(b);
+        }
+        return 0;
+      });
+      const validPerMg = group.variants.map(v => getVariantCostPerMg(v)).filter(x => x !== Infinity && !isNaN(x));
+      group.bestCostPerMg = validPerMg.length > 0 ? Math.min(...validPerMg) : Infinity;
     });
 
-    // Sort supplier groups: ascending by number of variants (fewest first)
+    // Sort supplier groups
     return Array.from(map.values()).sort((a, b) => {
+      if (sortBy === 'cost_per_mg') {
+        if (a.bestCostPerMg !== b.bestCostPerMg && !isNaN(a.bestCostPerMg) && !isNaN(b.bestCostPerMg)) {
+          return a.bestCostPerMg - b.bestCostPerMg;
+        }
+      }
       const diff = a.variants.length - b.variants.length;
       if (diff !== 0) return diff;
       return a.name.localeCompare(b.name);
     });
-  }, [typeFilteredVariants, resolveSupplierName]);
+  }, [typeFilteredVariants, resolveSupplierName, sortBy, commercialChannel, priceView, selectedProduct]);
 
   // 2. Filtered variants based on supplier filter tab
   const filteredVariants = useMemo(() => {
-    if (selectedSupplierFilter === 'all') return typeFilteredVariants;
-    return typeFilteredVariants.filter(v => {
-      const suppName = resolveSupplierName ? resolveSupplierName(v) : (v.supplierName || v.supplier || '');
-      const key = v.supplierId || suppName;
-      return key === selectedSupplierFilter || suppName === selectedSupplierFilter;
+    let list = typeFilteredVariants;
+    if (selectedSupplierFilter !== 'all') {
+      list = list.filter(v => {
+        const suppName = resolveSupplierName ? resolveSupplierName(v) : (v.supplierName || v.supplier || '');
+        const key = v.supplierId || suppName;
+        return key === selectedSupplierFilter || suppName === selectedSupplierFilter;
+      });
+    }
+    return [...list].sort((a, b) => {
+      if (sortBy === 'cost_per_mg') {
+        const cA = getVariantCostPerMg(a);
+        const cB = getVariantCostPerMg(b);
+        if (cA !== cB && !isNaN(cA) && !isNaN(cB)) return cA - cB;
+      }
+      return parseDosageMg(a) - parseDosageMg(b);
     });
-  }, [typeFilteredVariants, selectedSupplierFilter, resolveSupplierName]);
+  }, [typeFilteredVariants, selectedSupplierFilter, resolveSupplierName, sortBy, commercialChannel, priceView, selectedProduct]);
 
   // 3. Clean columns without redundant supplier column for grouped view
   const finishedSupplierColumns = useMemo(() => {
@@ -290,27 +333,60 @@ export default function VariantAccordion({
             />
           </div>
 
-          {/* View Mode (Group by Supplier vs Flat) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              color: '#64748b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              whiteSpace: 'nowrap'
-            }}>
-              View:
-            </span>
-            <SegmentedControl
-              value={groupBy}
-              onChange={setGroupBy}
-              options={[
-                { id: 'supplier', label: 'By Supplier' },
-                { id: 'none', label: 'Flat List' }
-              ]}
-              layoutIdPrefix="variant-group-selector"
-            />
+          {/* Controls: Sort Order & View Mode */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {/* Sort Toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#64748b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                <TrendingUp size={12} style={{ color: '#0284c7' }} /> Sort:
+              </span>
+              <SegmentedControl
+                value={sortBy}
+                onChange={setSortBy}
+                options={isPeptide ? [
+                  { id: 'cost_per_mg', label: '⚡ Best $/mg' },
+                  { id: 'dosage', label: '💊 Dosage' },
+                  { id: 'supplier', label: '🏢 Supplier' }
+                ] : [
+                  { id: 'dosage', label: '💊 Dosage' },
+                  { id: 'supplier', label: '🏢 Supplier' }
+                ]}
+                layoutIdPrefix="variant-sort-selector"
+              />
+            </div>
+
+            {/* View Mode (Group by Supplier vs Flat) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#64748b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                whiteSpace: 'nowrap'
+              }}>
+                View:
+              </span>
+              <SegmentedControl
+                value={groupBy}
+                onChange={setGroupBy}
+                options={[
+                  { id: 'supplier', label: 'By Supplier' },
+                  { id: 'none', label: 'Flat List' }
+                ]}
+                layoutIdPrefix="variant-group-selector"
+              />
+            </div>
           </div>
         </div>
 
