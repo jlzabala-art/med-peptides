@@ -1,0 +1,90 @@
+/**
+ * gcp-pills.css
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Google Cloud Console Architecture Inspired Atomic Pill & Badge Standards.
+ * Eliminates layout discrepancies and ensures 100% height & vertical alignment
+ * consistency across all viewports (mobile, tablet, desktop).
+ */
+
+/* ── Base Atomic Token ── */
+.gcp-pill-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* ── Standard Size Scales ── */
+.gcp-pill-sm {
+  height: 20px !important;
+  padding: 0 6px !important;
+  font-size: 0.68rem !important;
+  border-radius: 4px;
+}
+
+.gcp-pill-md {
+  height: 24px !important;
+  padding: 0 8px !important;
+  font-size: 0.74rem !important;
+  border-radius: 6px;
+}
+
+.gcp-pill-lg {
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 0.82rem !important;
+  border-radius: 8px;
+}
+
+/* ── Semantic Variants (Strict GCP Color Matrix) ── */
+.gcp-pill-green {
+  background-color: #f0fdf4 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.gcp-pill-blue {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+.gcp-pill-sky {
+  background-color: #f0f9ff !important;
+  color: #0369a1 !important;
+  border: 1px solid #bae6fd !important;
+}
+
+.gcp-pill-amber {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+}
+
+.gcp-pill-purple {
+  background-color: #faf5ff !important;
+  color: #7e22ce !important;
+  border: 1px solid #e9d5ff !important;
+}
+
+.gcp-pill-slate {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.gcp-pill-red {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+}

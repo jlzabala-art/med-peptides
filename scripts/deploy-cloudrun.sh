@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+# Ensure gcloud uses Python 3.10+
+if [ -f "/Users/joseluiszabala/.local/share/uv/python/cpython-3.10.17-macos-aarch64-none/bin/python3.10" ]; then
+  export CLOUDSDK_PYTHON="/Users/joseluiszabala/.local/share/uv/python/cpython-3.10.17-macos-aarch64-none/bin/python3.10"
+fi
+
 # Deploy Next.js Standalone Container directly to Google Cloud Run
 PROJECT_ID="med-peptides-app"
 REGION="us-central1"

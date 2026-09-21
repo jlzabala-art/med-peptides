@@ -15,7 +15,7 @@ import {
   Sparkles
 } from '@/lib/icons';
 import { getCuratedPeptideLiterature } from '@/data/peptideLiteratureRegistry';
-import { getPubMedLiterature } from '@/services/pubmedService';
+import PublicationsSkeleton from './skeletons/PublicationsSkeleton';
 import './PeptidePublicationsSection.css';
 
 export default function PeptidePublicationsSection({ product, lang = 'en' }) {
@@ -26,7 +26,7 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
   const productName = product?.canonicalName || product?.name || product?.title || 'This Compound';
   const curatedArticles = useMemo(() => getCuratedPeptideLiterature(product), [product]);
 
-  // If not in curated registry, query dynamic PubMed service
+  // If not in curated registry, query internal cached literature API
   useEffect(() => {
     if (curatedArticles && curatedArticles.length > 0) return;
     if (!product) return;
@@ -34,21 +34,26 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
     let isMounted = true;
     setIsLoading(true);
 
-    getPubMedLiterature(product)
+    const slug = product.slug || product.id || encodeURIComponent(productName.toLowerCase().replace(/\s+/g, '-'));
+    fetch(`/api/literature/${slug}?name=${encodeURIComponent(productName)}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         if (isMounted) {
-          setDynamicArticles(data || []);
+          setDynamicArticles(Array.isArray(data) ? data : []);
         }
       })
       .catch(err => {
-        console.warn('[PeptidePublicationsSection] PubMed query warning:', err);
+        console.warn('[PeptidePublicationsSection] Literature API query warning:', err);
       })
       .finally(() => {
         if (isMounted) setIsLoading(false);
       });
 
     return () => { isMounted = false; };
-  }, [product, curatedArticles]);
+  }, [product, curatedArticles, productName]);
 
   const displayArticles = curatedArticles.length > 0 ? curatedArticles : dynamicArticles;
 
@@ -98,9 +103,8 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
         </p>
 
         {isLoading ? (
-          <div className="pds-pub-loading">
-            <Loader2 size={28} className="spinner" style={{ animation: 'spin 1s linear infinite', color: '#0284c7' }} />
-            <span>Querying National Library of Medicine (NCBI / PubMed)...</span>
+          <div className="pds-publications-grid has-single-item">
+            <PublicationsSkeleton />
           </div>
         ) : (
           <div className={`pds-publications-grid ${displayArticles.length === 1 ? 'has-single-item' : ''} ${displayArticles.length % 2 !== 0 ? 'has-odd-count' : 'has-even-count'} count-${displayArticles.length}`}>

@@ -316,13 +316,33 @@
   margin-bottom: 0.75rem;
 }
 
+.pds-cat-tag,
+.pds-purity-tag,
+.pds-cgmp-tag,
+.pds-supplier-tag,
+.pds-version-tag,
+.pds-fda-hero-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  height: 24px !important;
+  max-height: 24px !important;
+  line-height: 1 !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
 .pds-cat-tag {
   background: #eff6ff;
   color: #1d4ed8;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.7rem;
-  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -331,59 +351,26 @@
   background: #f0fdf4;
   color: #15803d;
   border: 1px solid #bbf7d0;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.7rem;
-  border-radius: 9999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
 }
 
 .pds-cgmp-tag {
   background: #faf5ff;
   color: #7e22ce;
   border: 1px solid #e9d5ff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.7rem;
-  border-radius: 9999px;
-}
-
-.pds-fda-hero-pill {
-  height: 24px !important;
-  max-height: 24px !important;
-  line-height: 1 !important;
-  padding: 0 8px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  box-sizing: border-box !important;
-  vertical-align: middle !important;
-  font-size: 0.74rem !important;
-  font-weight: 700 !important;
 }
 
 .pds-supplier-tag {
-  background: #f1f5f9;
+  background: #f8fafc;
   color: #334155;
   border: 1px solid #cbd5e1;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.7rem;
-  border-radius: 9999px;
 }
 
 .pds-version-tag {
   background: #f0fdfa;
   color: #0d9488;
   border: 1px solid #99f6e4;
-  font-size: 0.72rem;
+  font-size: 0.72rem !important;
   font-weight: 800;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   letter-spacing: 0.02em;
 }
 

@@ -39,27 +39,14 @@ export default function FdaRegulatoryBadge({
         <button
           type="button"
           onClick={handleClick}
-          className="pds-fda-hero-pill"
+          className="pds-fda-hero-pill gcp-pill-base gcp-pill-md"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            padding: '0 8px',
-            height: '24px',
-            lineHeight: 1,
             borderRadius: '9999px',
             backgroundColor: colorScheme.bg,
             border: `1px solid ${colorScheme.border}`,
             color: colorScheme.text,
-            fontSize: '0.74rem',
-            fontWeight: 700,
             cursor: showModalOnClick ? 'pointer' : 'default',
-            whiteSpace: 'nowrap',
-            transition: 'all 0.15s ease',
             outline: 'none',
-            boxSizing: 'border-box',
-            verticalAlign: 'middle',
-            fontFamily: 'inherit',
             ...style
           }}
           title={`${info.badgeLabel} — Click for clinical regulatory monograph`}
@@ -80,6 +67,7 @@ export default function FdaRegulatoryBadge({
       {variant === 'pill' && (
         <span
           onClick={handleClick}
+          className="gcp-pill-base gcp-pill-sm"
           style={{
             display: 'inline-flex',
             alignItems: 'center',

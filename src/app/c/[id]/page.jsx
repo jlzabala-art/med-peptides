@@ -4,7 +4,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import SharedCatalogPage, { generateMetadata as sharedGenerateMetadata } from '@/app/shared/catalog/[token]/page';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60; // 60-second ISR edge cache for shared catalogs
 
 /**
  * OpenGraph Metadata for WhatsApp & Social Unfurling

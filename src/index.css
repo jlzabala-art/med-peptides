@@ -4,6 +4,7 @@
    ============================================================ */
 
 @import './styles/theme.css';
+@import './styles/tokens/gcp-pills.css';
 @import './styles/master.css';
 @import './styles/tailwind-shims.css';
 /* Responsive admin overrides — imported last for highest specificity (Tailwind v4 @import fix) */
