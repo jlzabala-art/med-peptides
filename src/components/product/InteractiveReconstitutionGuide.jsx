@@ -20,6 +20,7 @@ import {
   FileText,
   Layers
 } from '@/lib/icons';
+import ClinicalHandlingProtocolStepper from './ClinicalHandlingProtocolStepper';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
@@ -2303,50 +2304,13 @@ export default function InteractiveReconstitutionGuide({
 
       </div>
 
-      {/* ── Step-by-Step Clinical Handling Protocol (Wording Refined) ── */}
-      <div className="irg-protocol-steps">
-        <h3 className="irg-steps-heading">
-          {t.reconstitutionSection || 'Reconstitution Protocol & Clinical Cold-Chain Handling'}
-        </h3>
-
-        <div className="irg-steps-grid">
-          {/* Step 1 */}
-          <div className="irg-step-card">
-            <div className="irg-step-number">1</div>
-            <div className="irg-step-content">
-              <h4 className="irg-step-title">{t.prepStep}</h4>
-              <p className="irg-step-desc">{t.prepText}</p>
-            </div>
-          </div>
-
-          {/* Step 2 - Dynamically updates with current selected BAC volume */}
-          <div className="irg-step-card">
-            <div className="irg-step-number">2</div>
-            <div className="irg-step-content">
-              <h4 className="irg-step-title">{t.solventStep}</h4>
-              <p className="irg-step-desc">{dynamicSolventText}</p>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="irg-step-card">
-            <div className="irg-step-number">3</div>
-            <div className="irg-step-content">
-              <h4 className="irg-step-title">{t.dissolutionStep}</h4>
-              <p className="irg-step-desc">{t.dissolutionText}</p>
-            </div>
-          </div>
-
-          {/* Step 4 */}
-          <div className="irg-step-card">
-            <div className="irg-step-number">4</div>
-            <div className="irg-step-content">
-              <h4 className="irg-step-title">{t.storageStep}</h4>
-              <p className="irg-step-desc">{t.storageText}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── Visual Step-by-Step Clinical Handling Protocol Stepper (Low Text, Highly Graphical) ── */}
+      <ClinicalHandlingProtocolStepper
+        product={product}
+        activeFormatId={activeFormatId}
+        lang={lang}
+        dynamicSolventText={dynamicSolventText}
+      />
 
       {/* ── Prescriber Directive & Clinical Governance Notice (Pharma English) ── */}
       <div className="irg-prescriber-notice">

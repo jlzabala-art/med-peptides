@@ -65,6 +65,13 @@ export default function SharedCatalogHeader({
   const validity = useValidityCountdown(catalogMeta);
   const theme = pharmaMarginTheme || DEFAULT_PHARMA_MARGIN_THEME;
   const [showVerificationDetails, setShowVerificationDetails] = useState(false);
+
+  const rawRecipientName = catalogMeta?.recipientName || '';
+  const isWholesaler = catalogMeta?.recipientType === 'wholeseller' || catalogMeta?.recipientType === 'wholesaler';
+  const cleanRecipientName = isWholesaler && rawRecipientName.includes('·')
+    ? rawRecipientName.split('·')[0].trim()
+    : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
+
   return (
     <>
       {/* Executive Header Card with Dynamic Pharma Margin Theme & Optimized Laptop Layout */}
@@ -81,17 +88,17 @@ export default function SharedCatalogHeader({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  {catalogMeta?.recipientType === 'wholeseller' && catalogMeta?.recipientName
-                    ? `Authorized Wholesaler Partner: ${catalogMeta.recipientName}`
-                    : catalogMeta?.recipientName
-                    ? `Authorized Clinical Partner: ${catalogMeta.recipientName}`
+                  {isWholesaler && cleanRecipientName
+                    ? `Authorized Wholesaler Partner: ${cleanRecipientName}`
+                    : cleanRecipientName
+                    ? `Authorized Clinical Partner: ${cleanRecipientName}`
                     : 'Atlas Services • Clinical Compendium & Monograph Registry'}
                 </span>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
-                  {catalogMeta?.recipientName
-                    ? (catalogMeta?.recipientType === 'wholeseller'
-                        ? `Wholesale Peptide Catalog • ${catalogMeta.recipientName}`
-                        : `Clinical Peptide Catalog • ${catalogMeta.recipientName}`)
+                  {cleanRecipientName
+                    ? (isWholesaler
+                        ? `Wholesale Peptide Catalog • ${cleanRecipientName}`
+                        : `Clinical Peptide Catalog • ${cleanRecipientName}`)
                     : 'Clinical Peptide Catalog'}
                 </h1>
               </div>
