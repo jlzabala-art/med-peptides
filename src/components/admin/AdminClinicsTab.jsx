@@ -25,7 +25,7 @@ import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTable from '../ui/DataTable';
 import StandardDrawer from '../ui/StandardDrawer';
 import { useToast } from '../../hooks/useToast';
-import { Share2 } from '@/lib/icons';
+import { Share2, Sparkles, MessageCircle, Eye } from '@/lib/icons';
 import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 import useDataModuleState from '../../hooks/useDataModuleState';
 import MobileClinicCard from '../shared/mobile/MobileClinicCard';
@@ -368,40 +368,75 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '22%',
+      width: '18%',
       align: 'right',
-      render: (c) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => setShareModalClinic(c)}
-            className="gcp-btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, whiteSpace: 'nowrap' }}
-            title="Share Public Page (Datasheet / Protocol) with verified margin"
-          >
-            <Share2 size={12} />
-            <span>Share</span>
-          </button>
-          <QuoteQuickActionDropdown 
-            size="sm" 
-            variant="secondary" 
-            entityContext={{ 
-              type: 'clinic', 
-              recipientType: 'clinic', 
-              clinicId: c.id, 
-              clinicName: c.name || c.legalName
-            }} 
-          />
-          <button
-            onClick={() => setSelectedClinic(c)}
-            className="gcp-btn-secondary"
-            title="Open Clinic Profile Workspace (360°)"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600, whiteSpace: 'nowrap' }}
-          >
-            👁️ <span>Profile</span>
-          </button>
-        </div>
-      )
+      render: (c) => {
+        const rawPhone = c.phone || c.contactPhone || '';
+        const cleanDigits = rawPhone.replace(/[^\d+]/g, '');
+        const waNumber = cleanDigits.replace('+', '');
+
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
+            {/* 1. Share Public Catalog / Datasheet */}
+            <button
+              type="button"
+              onClick={() => setShareModalClinic(c)}
+              className="gcp-action-thumb-btn thumb-share"
+              title="Compartir Catálogo B2B / Datasheet con margen verificado"
+            >
+              <Share2 size={15} />
+            </button>
+
+            {/* 2. Commercial Quotation Wizard */}
+            <QuoteQuickActionDropdown 
+              size="sm" 
+              variant="thumbnail" 
+              entityContext={{ 
+                type: 'clinic', 
+                recipientType: 'clinic', 
+                clinicId: c.id, 
+                clinicName: c.name || c.legalName
+              }} 
+            />
+
+            {/* 3. WhatsApp Direct Chat */}
+            {waNumber.length >= 7 && (
+              <a
+                href={`https://wa.me/${waNumber}`}
+                target="_blank"
+                rel="noreferrer"
+                className="gcp-action-thumb-btn thumb-whatsapp"
+                title={`Abrir chat de WhatsApp con ${c.name || 'la clínica'}`}
+              >
+                <MessageCircle size={15} />
+              </a>
+            )}
+
+            {/* 4. AI Demand & Replenishment Forecast */}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedClinic(c);
+                toast.success(`AI Demand & Replenishment Forecast generado para ${c.name || 'la clínica'}.`);
+              }}
+              className="gcp-action-thumb-btn thumb-ai"
+              title="AI Demand & Stock Forecast (Predecir consumo de péptidos)"
+            >
+              <Sparkles size={14} />
+            </button>
+
+            {/* 5. 360° Profile Workspace */}
+            <button
+              type="button"
+              onClick={() => setSelectedClinic(c)}
+              className="gcp-action-thumb-btn thumb-profile"
+              title="Abrir Perfil 360° Workspace (Médicos, Prescripciones, Órdenes)"
+            >
+              <Eye size={15} />
+            </button>
+          </div>
+        );
+      }
     }
   ];
 

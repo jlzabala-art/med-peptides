@@ -116,6 +116,96 @@
   border-color: #fad2cf;
 }
 
+/* Quick Actions Thumbnail Buttons */
+.gcp-action-thumb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--gcp-border, #e2e8f0);
+  background-color: var(--gcp-bg-card, #ffffff);
+  color: var(--gcp-text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+}
+
+.gcp-action-thumb-btn:hover {
+  background-color: var(--gcp-bg-main, #f8fafc);
+  border-color: #cbd5e1;
+  color: var(--gcp-text-main, #0f172a);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07);
+}
+
+.gcp-action-thumb-btn.thumb-share {
+  color: #16a34a;
+}
+.gcp-action-thumb-btn.thumb-share:hover {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.gcp-action-thumb-btn.thumb-quote {
+  color: #2563eb;
+}
+.gcp-action-thumb-btn.thumb-quote:hover {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.gcp-action-thumb-btn.thumb-profile {
+  color: #0d9488;
+}
+.gcp-action-thumb-btn.thumb-profile:hover {
+  background-color: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
+}
+
+.gcp-action-thumb-btn.thumb-whatsapp {
+  color: #16a34a;
+}
+.gcp-action-thumb-btn.thumb-whatsapp:hover {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.gcp-action-thumb-btn.thumb-ai {
+  color: #7c3aed;
+}
+.gcp-action-thumb-btn.thumb-ai:hover {
+  background-color: #faf5ff;
+  border-color: #d8b4fe;
+  color: #6d28d9;
+}
+
+.gcp-action-thumb-btn.thumb-books {
+  color: #ea580c;
+}
+.gcp-action-thumb-btn.thumb-books:hover {
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+.gcp-action-thumb-btn.thumb-more {
+  color: #64748b;
+}
+.gcp-action-thumb-btn.thumb-more:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
 /* Forms */
 .gcp-input {
   width: 100%;

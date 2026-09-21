@@ -444,23 +444,21 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '10%',
+      width: '12%',
       align: 'right',
       render: (row) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => setShareModalCustomer(row)}
-            className="gcp-btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}
-            title="Share Public B2B Catalog / Datasheet"
+            className="gcp-action-thumb-btn thumb-share"
+            title="Compartir Catálogo B2B / Datasheet"
           >
-            <Share2 size={12} />
-            <span className="hide-mobile">Share</span>
+            <Share2 size={15} />
           </button>
           <QuoteQuickActionDropdown
             size="sm"
-            variant="secondary"
+            variant="thumbnail"
             entityContext={{
               type: row.customerType || 'customer',
               recipientType: row.customerType || 'customer',
@@ -471,11 +469,10 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           <button
             type="button"
             onClick={() => setSelectedCustomer(row)}
-            className="gcp-btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}
-            title="Open Customer Profile (360°)"
+            className="gcp-action-thumb-btn thumb-profile"
+            title="Abrir Perfil del Cliente (360°)"
           >
-            👁️
+            <Eye size={15} />
           </button>
         </div>
       )

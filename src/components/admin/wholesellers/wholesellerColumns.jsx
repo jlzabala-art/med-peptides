@@ -200,23 +200,21 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '22%',
+      width: '18%',
       align: 'right',
       render: (row) => (
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px' }} onClick={e => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => onSharePage?.(row)}
-            className="gcp-btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, whiteSpace: 'nowrap' }}
-            title="Share Public Catalog with verified margin"
+            className="gcp-action-thumb-btn thumb-share"
+            title="Compartir Catálogo B2B / Datasheet con margen verificado"
           >
-            <Share2 size={12} />
-            <span>Share</span>
+            <Share2 size={15} />
           </button>
           <QuoteQuickActionDropdown 
             size="sm" 
-            variant="secondary" 
+            variant="thumbnail" 
             entityContext={{ 
               type: 'wholesaler', 
               recipientType: 'wholesaler', 
@@ -227,12 +225,10 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
           <button
             type="button"
             onClick={() => onOpenWorkspace?.(row)}
-            className="gcp-btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600, whiteSpace: 'nowrap' }}
-            title="Open Wholesaler 360° Profile Workspace"
+            className="gcp-action-thumb-btn thumb-profile"
+            title="Abrir Perfil 360° Workspace del Distribuidor"
           >
-            <Eye size={13} />
-            <span>Profile</span>
+            <Eye size={15} />
           </button>
         </div>
       ),

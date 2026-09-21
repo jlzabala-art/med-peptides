@@ -72,17 +72,16 @@ export default function QuoteQuickActionDropdown({
   };
 
   const getButtonStyle = () => {
-    if (variant === 'icon') {
+    if (variant === 'icon' || variant === 'thumbnail') {
       return {
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        padding: '0.3rem',
-        color: 'var(--color-primary, #0d9488)',
+        width: '32px',
+        height: '32px',
+        padding: 0,
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '2px',
-        borderRadius: '6px'
+        justifyContent: 'center',
+        cursor: 'pointer',
+        flexShrink: 0
       };
     }
     if (variant === 'secondary') {
@@ -119,17 +118,20 @@ export default function QuoteQuickActionDropdown({
     };
   };
 
+  const isThumb = variant === 'icon' || variant === 'thumbnail';
+
   return (
     <>
       <button
         ref={buttonRef}
         onClick={toggleMenu}
         style={getButtonStyle()}
-        title="Create commercial quotation"
+        className={isThumb ? 'gcp-action-thumb-btn thumb-quote' : ''}
+        title="Crear Cotización Comercial (Paciente / Clínica / Mayorista)"
       >
-        <FileText size={size === 'sm' ? 14 : 16} />
-        {variant !== 'icon' && <span>{buttonLabel}</span>}
-        <ChevronDown size={13} style={{ opacity: 0.8, marginLeft: '1px' }} />
+        <FileText size={isThumb ? 15 : (size === 'sm' ? 14 : 16)} />
+        {!isThumb && <span>{buttonLabel}</span>}
+        {!isThumb && <ChevronDown size={13} style={{ opacity: 0.8, marginLeft: '1px' }} />}
       </button>
 
       {isOpen && typeof document !== 'undefined' && createPortal(
