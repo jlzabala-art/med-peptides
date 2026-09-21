@@ -21,6 +21,23 @@ export const formatDosage = (val, variant = null) => {
   if (!val) return '';
   const str = String(val).trim();
 
+  // If it's an IV Drip (e.g. "50 mL Infusion" or variant.presentation === 'iv_drip')
+  if (variant?.presentation === 'iv_drip' || variant?.presentation === 'infusion_bag' || /infusion|iv\s*drip|50\s*ml\s*infusion/i.test(str)) {
+    const totalActives = variant?.totalMg ? `${(variant.totalMg / 1000).toFixed(1)}g Actives` : null;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
+        <span style={{ fontWeight: 750, fontSize: '0.84rem', color: '#065f46', whiteSpace: 'nowrap' }}>
+          50 mL Infusion
+        </span>
+        {totalActives && (
+          <span style={{ fontSize: '0.62rem', fontWeight: 600, color: '#047857', background: '#ecfdf5', padding: '1px 5px', borderRadius: '3px', border: '1px solid #a7f3d0', marginTop: '1px', whiteSpace: 'nowrap' }}>
+            {totalActives}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   // If it's custom compounding / raw magistral material (Fagron)
   if (/^custom(\s*\/\s*magistral)?$/i.test(str) || /^magistral$/i.test(str) || /^api\s+bulk$/i.test(str)) {
     return (

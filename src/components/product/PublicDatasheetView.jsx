@@ -19,6 +19,7 @@ import {
   AlertTriangle, 
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   Info,
   Box,
   QrCode,

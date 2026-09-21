@@ -219,6 +219,23 @@ export const VariantSchema = z.object({
   supplierPricing: SupplierPricingSchema.optional(),
 });
 
+// 💧 Estructura de Principios Activos y Protocolo de Infusión IV (IV Drip & Compounding Formulations)
+export const IngredientSchema = z.object({
+  name: z.string(),
+  amount: z.number().positive(),
+  unit: z.string().default('mg'),
+  category: z.string().optional(),
+  role: z.string().optional(),
+});
+
+export const InfusionProtocolSchema = z.object({
+  carrierVolume: z.string().optional(),
+  durationMinutes: z.string().optional(),
+  infusionRate: z.string().optional(),
+  storageCondition: z.string().optional(),
+  inUseStability: z.string().optional(),
+});
+
 export const ProductSchema = z.object({
   id: z.string().min(1, 'Product ID is required'),
   name: z.string().min(1, 'Product Name is required'),
@@ -227,6 +244,7 @@ export const ProductSchema = z.object({
   // 🔑 Clasificación Primaria y Subcategoría
   productType: z.enum([
     'finished_product',    // 💊 Plumas, Sprays, Cápsulas, Soluciones listas
+    'iv_drip',            // 💧 Infusiones parenterales IV
     'raw_material',       // 🧪 APIs Liofilizados, Granel, Diluyentes, Excipientes
     'api_raw_material',   // 🧪 Raw Material / Active Pharmaceutical Ingredient
     'diagnostic',         // 🔬 Diagnostic & Biomarker Tests
@@ -235,7 +253,7 @@ export const ProductSchema = z.object({
     'logistics_service'   // 🚚 Servicios de transporte y courier médico
   ]).default('finished_product'),
   
-  category: z.string().min(1, 'Category is required'), // ej: "Peptides", "Longevity", "Logistics"
+  category: z.string().min(1, 'Category is required'), // ej: "Peptides", "Longevity", "iv_drips"
   subcategory: z.string().optional(), // ej: "Cold Chain Logistics", "Medical Courier"
   
   description: z.string().optional(),
@@ -246,6 +264,7 @@ export const ProductSchema = z.object({
   requiresPrescription: z.boolean().default(true),
   dosage: z.string().optional(),
   route: z.string().optional(),
+  routeOfAdministration: z.string().optional(),
   supplier: z.string().optional(),
   supplierPricing: SupplierPricingSchema.optional(),
   protocolCount: z.number().int().nonnegative().default(0),
@@ -253,6 +272,14 @@ export const ProductSchema = z.object({
   // 🔬 Bloques API Opcionales (para Raw Materials / APIs Liofilizados)
   molecular: PeptideMolecularInfoSchema.optional(),
   apiSpecs: PeptideApiSpecsSchema.optional(),
+
+  // 💧 Bloques de Infusiones IV y Formulaciones Compuestas
+  ingredients: z.array(IngredientSchema).optional(),
+  infusionProtocol: InfusionProtocolSchema.optional(),
+  totalActiveMg: z.number().optional(),
+  volume_ml: z.number().optional(),
+  hasSeparateVial: z.boolean().optional(),
+  separateVialNotes: z.string().optional(),
 
   // 🚚 Especificaciones Logísticas Opcionales (para Servicios de Transporte / Courier)
   logisticsSpecs: LogisticsSpecsSchema.optional(),

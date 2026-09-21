@@ -56,6 +56,7 @@ export const VARIANT_TYPES = Object.freeze([
   'raw_material',
   'clinical_supplies',
   'diagnostic',
+  'iv_drip',
   'service',
 ]);
 
@@ -90,6 +91,7 @@ export const PEN_TYPES = Object.freeze([
  * - clinical_supplies: accessories, diluents & equipment
  * - dual             : legacy alias for products with both finished and raw variants
  * - diagnostic       : testing kits and biomarkers
+ * - iv_drip          : intravenous parenteral infusion formulations
  * - service          : professional healthcare services
  * @readonly
  */
@@ -98,6 +100,7 @@ export const VALID_TYPES = Object.freeze([
   'raw_material',
   'clinical_supplies',
   'diagnostic',
+  'iv_drip',
   'dual',
   'service',
   'logistics_service',
@@ -129,7 +132,7 @@ export function deriveProductTypes(variants = [], fallbackType = 'finished_produ
   const availableTypes = uniqueTypes.length > 0 ? uniqueTypes : [fallbackType || 'finished_product'];
 
   // Priority order for assigning primaryType (for SEO and general catalog overview):
-  const priorityOrder = ['finished_product', 'raw_material', 'diagnostic', 'service', 'clinical_supplies'];
+  const priorityOrder = ['finished_product', 'iv_drip', 'raw_material', 'diagnostic', 'service', 'clinical_supplies'];
   const primaryType = priorityOrder.find(t => availableTypes.includes(t)) || availableTypes[0];
 
   return {
@@ -150,7 +153,8 @@ export const LEGACY_TYPE_MAP = Object.freeze({
   hormone:               'finished_product',
   small_molecule:        'finished_product',
   injectable_nutrient:   'finished_product',
-  iv_protocol:           'finished_product',
+  iv_protocol:           'iv_drip',
+  iv_drip:               'iv_drip',
   topical_cosmetic:      'finished_product',
   professional_material: 'finished_product',
   compounding_material:  'finished_product',
@@ -171,6 +175,8 @@ export const LEGACY_TYPE_MAP = Object.freeze({
  */
 export const VALID_CATEGORIES = Object.freeze([
   'peptide',          // injectable peptides, GLP-1s, GHRH, GHRP, hormonal peptides
+  'iv_drips',         // master parenteral intravenous infusion formulations
+  'iv_therapy',       // IV micronutrient and antioxidant protocols
   'supplement',       // oral supplements, nutraceuticals, vitamins, weight loss
   'metabolic',        // metabolic health, weight management, GLP-1 agonists
   'hormone',          // hormones (testosterone, progesterone, DHEA, estradiol)
@@ -220,6 +226,15 @@ export const PRODUCT_FIELD_CONTRACT = Object.freeze({
   description:   { type: 'string',    required: false, default: '' },
   shortDesc:     { type: 'string',    required: false, default: '' },
   imageUrl:      { type: 'string',    required: false, default: '' },
+
+  // ── IV Drip & Compounding Formulations ──
+  ingredients:           { type: 'object[]', required: false, default: [] },
+  infusionProtocol:      { type: 'object',   required: false, default: null },
+  totalActiveMg:         { type: 'number',   required: false, default: null },
+  volume_ml:             { type: 'number',   required: false, default: null },
+  hasSeparateVial:       { type: 'boolean',  required: false, default: false },
+  separateVialNotes:     { type: 'string',   required: false, default: '' },
+  routeOfAdministration: { type: 'string',   required: false, default: '' },
 
   // ── Search & classification ──
   goals:            { type: 'string[]', required: false, default: [] },
