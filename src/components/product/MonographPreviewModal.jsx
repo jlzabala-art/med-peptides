@@ -51,6 +51,14 @@ export default function MonographPreviewModal({
   const mw = product.molecularWeight || product.molecular?.molecularWeight || '4731.33';
   const purity = (product.purity || '99.0').replace(/[^0-9.]/g, '') || '99.0';
   const formatName = activeFormat?.name || 'Vial (Lyophilized)';
+  const isBlend = Boolean(
+    product?.isBlend ||
+    String(product?.category || '').toLowerCase().includes('blend') ||
+    String(name || '').includes('+') ||
+    String(name || '').includes('/') ||
+    String(slug || '').includes('klow') ||
+    String(slug || '').includes('glow')
+  );
   const doseName = selectedStrength?.name || selectedStrength?.dosage || selectedStrength?.dose || (typeof selectedStrength === 'string' ? selectedStrength : null) || product.dosage || '10 mg';
 
   let rawLot = (typeof initialBatch !== 'undefined' && initialBatch ? initialBatch : null) || product.vialCode || product.batchNumber || product.batch;

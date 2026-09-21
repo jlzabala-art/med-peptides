@@ -31,6 +31,8 @@ const BAC_PRESETS = Object.freeze([1.0, 2.0, 2.5, 3.0, 5.0]);
 const DOSE_PRESETS_MG = Object.freeze([0.5, 1.0, 2.5, 5.0, 7.5, 10.0]);
 const BLEND_DOSE_PRESETS_MG = Object.freeze([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0]);
 const DOSE_PRESETS_MCG = Object.freeze([100, 250, 500, 750, 1000]);
+const PEN_DOSE_PRESETS_MG = Object.freeze([0.25, 0.5, 1.0, 2.0, 2.5, 5.0]);
+const PEN_DOSE_PRESETS_MCG = Object.freeze([100, 250, 500, 750, 1000]);
 
 /**
  * Resolves dosage and unit specifically for the target peptide compound from a protocol phase

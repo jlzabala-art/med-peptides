@@ -660,6 +660,8 @@ export default function PublicDatasheetView({
     return f.includes('cartridge');
   }, [activeFormatId]);
 
+  const isPenOrCart = isPenFormat || isCartridgeFormat;
+
   const isSprayFormat = useMemo(() => {
     const f = (activeFormatId || '').toLowerCase();
     return f.includes('spray') || f.includes('nasal');
@@ -1060,7 +1062,7 @@ export default function PublicDatasheetView({
         inquiryEntity={{
           name: product?.name || name,
           slug,
-          code: effectiveBatchCode || activeVariant?.code || activeVariant?.sku || '',
+          code: effectiveBatchCode || '',
           strength: selectedStrengthId || '',
           category: category || 'Research Peptides'
         }}
@@ -1670,7 +1672,7 @@ export default function PublicDatasheetView({
           ) : isDiagnosticKit ? (
             <DiagnosticTestTechnicalSpecs
               product={product}
-              selectedDose={selectedStrength?.name || currentDose}
+              selectedDose={selectedStrength?.name || 'Standard'}
               supplierName={displaySupplierName}
               lang={lang}
             />
