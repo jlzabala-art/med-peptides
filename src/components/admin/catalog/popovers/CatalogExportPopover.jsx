@@ -12,9 +12,10 @@ import StandardDrawer from '@/components/ui/StandardDrawer';
 
 const SUPPLIER_SCOPES = [
   { id: 'lotusland',    label: 'Lotusland / RegenPept',      badge: '104 variants', currency: 'USD', filter: 'lotusland',          catalogueFilter: 'RegenPept' },
+  { id: 'magenta',      label: 'Magenta (Pens & Sprays)',    badge: '101 variants', currency: 'AED', filter: 'supplier-magenta' },
   { id: 'europeptides', label: 'EuroPeptides',                badge: '54 variants',  currency: 'USD', filter: 'europeptides' },
   { id: 'larimedical',  label: 'LARIMEDICAL (Sterilia)',      badge: '8 variants',   currency: 'EUR', filter: 'supplier-larimedical' },
-  { id: 'all',          label: 'Global Catalog (All Suppliers)', badge: '166+ variants', currency: 'USD', filter: null },
+  { id: 'all',          label: 'Global Catalog (All Suppliers)', badge: '260+ variants', currency: 'USD', filter: null },
   { id: 'filtered',     label: 'Active Table Filters',        badge: 'Current View', currency: 'USD', filter: 'filtered' },
 ];
 
@@ -192,6 +193,7 @@ export default function CatalogExportPopover({
   const handleTriggerWebShare = () => {
     const scopeObj = SUPPLIER_SCOPES.find(s => s.id === selectedScope) || SUPPLIER_SCOPES[0];
     const supplierId = scopeObj.id === 'lotusland'     ? 'supplier-lotusland'
+                     : scopeObj.id === 'magenta'       ? 'supplier-magenta'
                      : scopeObj.id === 'larimedical'   ? 'supplier-larimedical'
                      : scopeObj.id === 'europeptides'  ? 'supplier-europeptides'
                      : scopeObj.id === 'filtered'      ? null : 'all';

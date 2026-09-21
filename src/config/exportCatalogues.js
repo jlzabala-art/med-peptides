@@ -19,6 +19,18 @@ export const EXPORT_CATALOGUES = [
     description: '104 variants portfolio (Peptides & Research Supplies)'
   },
   {
+    id: 'magenta',
+    supplierId: 'supplier-magenta',
+    brandName: 'Magenta Medical (Pens & Sprays)',
+    catalogueFilter: null,
+    flag: '🇦🇪',
+    defaultCurrency: 'AED',
+    warehouse: 'UAE Hub - Dubai',
+    defaultCostMarginAvailable: true,
+    variantCount: 101,
+    description: '101 variants portfolio (Pre-filled Pens, 3 mL Refill Cartridges & Nasal Sprays)'
+  },
+  {
     id: 'larimedical',
     supplierId: 'supplier-larimedical',
     brandName: 'LARIMEDICAL (Sterilia)',

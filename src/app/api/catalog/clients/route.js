@@ -22,11 +22,11 @@ export async function GET(request) {
     const seen = new Set();
 
     // ── 1. Wholesellers ───────────────────────────────────────────────────
-    const wsSnap = await adminDb.collection('wholesellers').limit(limit).get();
+    const wsSnap = await adminDb.collection('wholesellers').limit(limit).get().catch(() => ({ docs: [] }));
     const wholesellers = [];
     wsSnap.docs.forEach(doc => {
       const d = doc.data();
-      const name = d.companyName || d.name || d.businessName || '';
+      const name = d.displayName || d.companyName || d.name || d.businessName || '';
       const email = d.email || d.contactEmail || '';
       if (!name && !email) return;
       const key = email || doc.id;
@@ -38,14 +38,43 @@ export async function GET(request) {
         email,
         type: 'wholeseller',
         country: d.country || d.location || '',
-        phone: d.phone || '',
+        phone: d.phone || d.mobile || '',
       };
       results.push(item);
       wholesellers.push(item);
     });
 
+    // ── 1b. Customers (Wholesalers, Clinics, Doctors) ──────────────────────
+    const custSnap = await adminDb.collection('customers')
+      .where('customerType', 'in', ['wholesaler', 'wholeseller', 'clinic', 'doctor'])
+      .limit(limit)
+      .get()
+      .catch(() => ({ docs: [] }));
+    custSnap.docs.forEach(doc => {
+      const d = doc.data();
+      const name = d.displayName || d.companyName || d.legalName || d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim();
+      const email = d.email || '';
+      if (!name && !email) return;
+      const key = email || doc.id;
+      if (seen.has(key)) return;
+      seen.add(key);
+      const normType = (d.customerType === 'wholesaler' || d.customerType === 'wholeseller') ? 'wholeseller' : d.customerType;
+      const item = {
+        id: doc.id,
+        name: name || email,
+        email,
+        type: normType,
+        country: d.country || '',
+        phone: d.phone || '',
+      };
+      results.push(item);
+      if (normType === 'wholeseller') wholesellers.push(item);
+      if (normType === 'clinic') clinics.push(item);
+      if (normType === 'doctor') doctors.push(item);
+    });
+
     // ── 2. Clinics ────────────────────────────────────────────────────────
-    const clinicSnap = await adminDb.collection('clinics').limit(limit).get();
+    const clinicSnap = await adminDb.collection('clinics').limit(limit).get().catch(() => ({ docs: [] }));
     const clinics = [];
     clinicSnap.docs.forEach(doc => {
       const d = doc.data();
@@ -70,9 +99,10 @@ export async function GET(request) {
     // ── 3. Users with relevant roles ──────────────────────────────────────
     const roleSnap = await adminDb
       .collection('users')
-      .where('role', 'in', ['doctor', 'clinic', 'wholeseller', 'admin', 'manager', 'sales', 'superadmin'])
+      .where('role', 'in', ['doctor', 'clinic', 'wholeseller', 'wholesaler', 'admin', 'manager', 'sales', 'superadmin'])
       .limit(limit)
-      .get();
+      .get()
+      .catch(() => ({ docs: [] }));
 
     const managers = [
       { id: 'desk', name: 'Atlas Commercial Desk', email: 'orders@atlas-solutions.com', role: 'desk' },
@@ -81,7 +111,7 @@ export async function GET(request) {
 
     roleSnap.docs.forEach(doc => {
       const d = doc.data();
-      const name = d.displayName || d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim() || d.email;
+      const name = d.displayName || d.companyName || d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim() || d.email;
       const email = d.email || '';
       if (!name && !email) return;
 
@@ -99,16 +129,19 @@ export async function GET(request) {
       const key = email || doc.id;
       if (!seen.has(key)) {
         seen.add(key);
+        const normRole = (d.role === 'wholesaler' || d.role === 'wholeseller') ? 'wholeseller' : d.role;
         const item = {
           id: doc.id,
           name: name || email,
           email,
-          type: d.role || 'user',
-          country: d.country || '',
-          phone: d.phone || '',
+          type: normRole || 'user',
+          country: d.country || d.shippingCountry || '',
+          phone: d.phone || d.mobile || '',
         };
         results.push(item);
-        if (d.role === 'doctor') doctors.push(item);
+        if (normRole === 'doctor') doctors.push(item);
+        if (normRole === 'wholeseller') wholesellers.push(item);
+        if (normRole === 'clinic') clinics.push(item);
       }
     });
 
@@ -140,7 +173,12 @@ export async function GET(request) {
     const reqType = (searchParams.get('type') || '').toLowerCase().trim();
     let filtered = results;
     if (reqType && reqType !== 'all') {
-      filtered = filtered.filter(r => r.type?.toLowerCase() === reqType);
+      const isWs = reqType === 'wholeseller' || reqType === 'wholesaler';
+      filtered = filtered.filter(r => {
+        const t = (r.type || '').toLowerCase();
+        if (isWs) return t === 'wholeseller' || t === 'wholesaler';
+        return t === reqType;
+      });
     }
     if (q) {
       filtered = filtered.filter(r =>

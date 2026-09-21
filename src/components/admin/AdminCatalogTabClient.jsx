@@ -195,6 +195,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
 
     const variantCount = extraParams.variantCount || (
       loadingKey.includes('lotusland') ? 104 :
+      loadingKey.includes('magenta') ? 101 :
       loadingKey.includes('larimedical') ? 8 :
       loadingKey.includes('europeptides') ? 54 : null
     );
@@ -385,6 +386,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
 
     const variantCount = extraParams.variantCount || (
       loadingKey.includes('lotusland') ? 104 :
+      loadingKey.includes('magenta') ? 101 :
       loadingKey.includes('larimedical') ? 8 :
       loadingKey.includes('europeptides') ? 54 : null
     );
@@ -487,6 +489,8 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     onLarimedicalWeb:    () => handleSupplierWebShare('supplier-larimedical', 'LARIMEDICAL (Sterilia)', 'larimedical-web', { currency: 'EUR' }),
     onEuropeptidesPDF:   () => handleSupplierPDF('europeptides', 'EuroPeptides', 'europeptides-pdf'),
     onEuropeptidesWeb:   () => handleSupplierWebShare('supplier-europeptides', 'EuroPeptides', 'europeptides-web'),
+    onMagentaPDF:        () => handleSupplierPDF('supplier-magenta', 'Magenta (Pens & Sprays)', 'magenta-pdf', { currency: 'AED' }),
+    onMagentaWeb:        () => handleSupplierWebShare('supplier-magenta', 'Magenta (Pens & Sprays)', 'magenta-web', { currency: 'AED' }),
     onOpenExportHub:     handleOpenExportHub,
     markupPercent,
     setMarkupPercent,

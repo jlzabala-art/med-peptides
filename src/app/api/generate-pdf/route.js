@@ -164,6 +164,7 @@ const SUPPLIER_WAREHOUSES = {
   'bioniq': 'Authorized Logistics Depot',
   'vallida': 'Authorized Logistics Depot',
   'bloodo': 'EU Verified Logistics Hub',
+  'magenta': 'UAE / Middle East Logistics Hub',
 };
 
 function getSupplierWarehouse(supplierName, country, catalogBrand) {
