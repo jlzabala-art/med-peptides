@@ -73,11 +73,21 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
             placeholder="Company name"
             onSave={(val) => onUpdate?.(row.id, { companyName: val })}
           />
-          <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
             <CopyableId value={row.id} />
             {row.country && (
               <span style={{ color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '2px', whiteSpace: 'nowrap' }}>
                 • 🌐 {row.country}
+              </span>
+            )}
+            {row.zohoBiginContactId && (
+              <span style={{ fontSize: '10px', background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }} title={`Zoho Bigin ID: ${row.zohoBiginContactId}`}>
+                Bigin ✓
+              </span>
+            )}
+            {row.zohoContactId && (
+              <span style={{ fontSize: '10px', background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }} title={`Zoho Books ID: ${row.zohoContactId} (${row.zohoContactNumber || ''})`}>
+                Books ✓
               </span>
             )}
           </div>

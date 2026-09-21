@@ -1107,6 +1107,62 @@ export default function PublicDatasheetView({
           )}
         />
 
+        {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
+        {Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
+          <div style={{
+            margin: '0 0 1.25rem 0',
+            padding: '12px 16px',
+            borderRadius: '10px',
+            background: 'var(--surface-alt, #f8fafc)',
+            border: '1px solid var(--border, #e2e8f0)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FlaskConical size={16} color="#003666" />
+              <span style={{ fontSize: '0.80rem', fontWeight: 800, color: 'var(--text-main, #0f172a)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {lang === 'es' ? 'Presentaciones de Laboratorio Certificadas:' : 'Certified Laboratory Formulations:'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {product.availableSuppliers.map(supp => {
+                const isCurrent = (product.activeSupplierId || '').includes(supp.id.replace('supplier-', '')) || (product.supplierId || '').includes(supp.id.replace('supplier-', ''));
+                const label = supp.isPen
+                  ? (lang === 'es' ? '🖊️ Bolígrafo Precargado SubQ (Magenta)' : '🖊️ Pre-filled SubQ Pen (Magenta)')
+                  : supp.isSpray
+                    ? (lang === 'es' ? '👃 Spray Nasal Dosificado' : '👃 Metered Nasal Spray')
+                    : (lang === 'es' ? '💉 Vial Liofilizado SubQ (Lotusland)' : '💉 Lyophilized SubQ Vial (Lotusland)');
+                return (
+                  <a
+                    key={supp.id}
+                    href={`/p/${encodeURIComponent(slug)}?supplier=${supp.id}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.80rem',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      transition: 'all 0.15s ease',
+                      background: isCurrent ? '#003666' : '#ffffff',
+                      color: isCurrent ? '#ffffff' : '#334155',
+                      border: isCurrent ? '1px solid #003666' : '1px solid #cbd5e1',
+                      boxShadow: isCurrent ? '0 2px 4px rgba(0,54,102,0.15)' : 'none'
+                    }}
+                  >
+                    {label}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* ── Block 1: Batch Availability & Presentations Matrix (Harmonized Navy Header) ── */}
         <section id="presentations-matrix" className="pds-section-card">
           <div className="pds-section-header">
@@ -1595,14 +1651,27 @@ export default function PublicDatasheetView({
                   <div className="pds-section-header-titles">
                     <div className="pds-section-header-meta-row">
                       <span className="pds-section-header-category">
-                        {t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY'}
+                        {isPenOrCart
+                          ? (lang === 'es' ? 'TITULACIÓN Y CALIBRACIÓN DE DIAL' : 'DOSIMETRY & DIAL TITRATION')
+                          : isSprayFormat
+                            ? (lang === 'es' ? 'DOSIMETRÍA INTRANASAL TRANSMUCOSA' : 'INTRANASAL DOSIMETRY')
+                            : (t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY')}
                       </span>
                       <span className="pds-section-badge">
-                        <CheckCircle2 size={11} /> {t.interactiveCalcBadge || 'PRECISION SIMULATOR'}
+                        <CheckCircle2 size={11} />{' '}
+                        {isPenOrCart
+                          ? (lang === 'es' ? 'SIMULADOR MULTIDOSIS' : 'MULTI-DOSE PEN SIMULATOR')
+                          : isSprayFormat
+                            ? (lang === 'es' ? 'BOMBA DOSIFICADA' : 'METERED MUCOSAL PUMP')
+                            : (t.interactiveCalcBadge || 'PRECISION SIMULATOR')}
                       </span>
                     </div>
                     <h3 className="pds-section-header-title">
-                      {t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator'}
+                      {isPenOrCart
+                        ? (lang === 'es' ? 'Guía de Calibración de Dial en Bolígrafo Precargado' : 'Pre-filled Pen Dial Titration & Administration Guide')
+                        : isSprayFormat
+                          ? (lang === 'es' ? 'Guía Clínica de Administración Intranasal Dosificada' : 'Clinical Intranasal Metered Dose Guide')
+                          : (t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator')}
                     </h3>
                   </div>
                 </div>
@@ -1610,7 +1679,13 @@ export default function PublicDatasheetView({
                 <div className="pds-section-header-right">
                   <div className="pds-section-cert-badge">
                     <Droplets size={14} color="#38bdf8" />
-                    <span>U-100 Standard (1.0 mL = 100 U)</span>
+                    <span>
+                      {isPenOrCart
+                        ? 'ISO 11608-2 Micro-Dial (1 Click = 0.01 mL)'
+                        : isSprayFormat
+                          ? (lang === 'es' ? '0.1 mL por Pulverización' : '0.1 mL Metered Mucosal Actuation')
+                          : 'U-100 Standard (1.0 mL = 100 U)'}
+                    </span>
                   </div>
                 </div>
               </div>

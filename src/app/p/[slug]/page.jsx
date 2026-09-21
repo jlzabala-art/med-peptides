@@ -116,6 +116,28 @@ async function getPublicProduct(slug, supplierFilter = null) {
     );
   }
 
+  // Discover all distinct suppliers available for this product across its raw variants
+  const allAvailableSuppliers = [];
+  const seenSupplierKeys = new Set();
+  for (const v of (rawVariants || [])) {
+    const sId = v.supplierId || '';
+    if (!sId) continue;
+    const cleanId = sId.startsWith('supplier-') ? sId : `supplier-${sId}`;
+    if (!seenSupplierKeys.has(cleanId)) {
+      seenSupplierKeys.add(cleanId);
+      const isMagenta = cleanId.includes('magenta');
+      const isLotusland = cleanId.includes('lotus');
+      const sName = v.supplierName || (isMagenta ? 'Magenta' : isLotusland ? 'Lotusland' : cleanId);
+      const pStr = String(v.presentation || '').toLowerCase();
+      allAvailableSuppliers.push({
+        id: cleanId,
+        name: sName,
+        isPen: isMagenta || pStr.includes('pen') || pStr.includes('cartridge'),
+        isSpray: pStr.includes('spray') || pStr.includes('nasal')
+      });
+    }
+  }
+
   // Filter variants strictly for target supplier to prevent cross-supplier contamination.
   // Clinical standard: Default strictly to Lotusland Limited (Atlas Services) so that public datasheets
   // show exclusively Lotusland certified formulations without mentioning other suppliers.
@@ -151,6 +173,8 @@ async function getPublicProduct(slug, supplierFilter = null) {
   const result = {
     ...sanitized,
     isSingleSupplierLocked: Boolean(raw.isSingleSupplierLocked),
+    availableSuppliers: allAvailableSuppliers,
+    activeSupplierId: raw.supplierId || targetSupplier,
     processedHierarchy,
   };
 

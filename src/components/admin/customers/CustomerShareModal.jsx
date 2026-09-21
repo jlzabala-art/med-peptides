@@ -17,19 +17,40 @@ export default function CustomerShareModal({
   const [selectedPeptide, setSelectedPeptide] = useState('bpc-157');
   const [supplier, setSupplier] = useState('lotusland'); // Default Lotusland as requested
   const [showPrices, setShowPrices] = useState(true);
-  const [marginPercent, setMarginPercent] = useState(25);
+  const [marginPercent, setMarginPercent] = useState(20);
+  const [currency, setCurrency] = useState('AED');
   const [channel, setChannel] = useState('whatsapp');
   const [generating, setGenerating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Initialize margin from customer tier when modal opens
+  // Initialize margin & currency from customer profile when modal opens
   useEffect(() => {
     if (customer) {
-      const tier = resolveCustomerTier(customer, customerType);
-      if (tier && typeof tier.margin === 'number') {
-        setMarginPercent(tier.margin);
+      // 1. Commercial Markup: Check explicit commercial markup first (Golden Standard)
+      const explicitMarkup = customer.commercialMarkup ?? customer.markup ?? customer.discountMargin;
+      if (typeof explicitMarkup === 'number' && explicitMarkup > 0) {
+        setMarginPercent(explicitMarkup);
+      } else {
+        const tier = resolveCustomerTier(customer, customerType);
+        if (tier && typeof tier.margin === 'number') {
+          setMarginPercent(tier.margin);
+        }
       }
+
+      // 2. Currency auto-detection from country / currency field
+      const cCountry = String(customer.country || customer.shippingCountry || '').toLowerCase();
+      const cCurrency = String(customer.currency || '').toUpperCase();
+      if (cCurrency && ['AED', 'EUR', 'USD', 'GBP'].includes(cCurrency)) {
+        setCurrency(cCurrency);
+      } else if (cCountry.includes('emirates') || cCountry.includes('uae') || cCountry.includes('dubai')) {
+        setCurrency('AED');
+      } else if (cCountry.includes('spain') || cCountry.includes('poland') || cCountry.includes('france') || cCountry.includes('germany') || cCountry.includes('europe')) {
+        setCurrency('EUR');
+      } else {
+        setCurrency('USD');
+      }
+
       setGeneratedUrl('');
       setCopied(false);
     }
@@ -51,6 +72,7 @@ export default function CustomerShareModal({
           catalogueFilter: supplier,
           category: 'all',
           priceMarkupPercent: showPrices ? Number(marginPercent) : 0,
+          currency: currency,
           priceSource: customerType === 'wholesaler' ? 'wholeseller' : 'clinic',
           recipientUserId: customer.id,
           recipientName: customerName,
@@ -58,7 +80,7 @@ export default function CustomerShareModal({
           recipientPhone: customer.contactPhone || customer.phone || '',
           recipientType: customerType,
           channel: channel,
-          notes: `Public page share: ${pageType} with ${supplier} supplier & ${showPrices ? marginPercent : 0}% margin.`
+          notes: `Public page share: ${pageType} with ${supplier} supplier & ${showPrices ? marginPercent : 0}% margin (${currency}).`
         })
       });
 
@@ -272,26 +294,50 @@ export default function CustomerShareModal({
           </div>
 
           {showPrices && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ flex: 1 }}>
-                <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Confirmed Profit Margin (%):</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="200"
-                  value={marginPercent}
-                  onChange={e => setMarginPercent(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '6px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    fontWeight: 700,
-                    marginTop: '2px'
-                  }}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Confirmed Profit Margin (%):</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="200"
+                    value={marginPercent}
+                    onChange={e => setMarginPercent(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontWeight: 700,
+                      marginTop: '2px'
+                    }}
+                  />
+                </div>
+
+                <div style={{ width: '130px' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Catalog Currency:</span>
+                  <select
+                    value={currency}
+                    onChange={e => setCurrency(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '6px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontWeight: 700,
+                      marginTop: '2px',
+                      background: '#ffffff'
+                    }}
+                  >
+                    <option value="AED">AED (UAE)</option>
+                    <option value="EUR">EUR (Spain / EU)</option>
+                    <option value="USD">USD (Global)</option>
+                  </select>
+                </div>
               </div>
-              <div style={{ flex: 1, fontSize: '0.75rem', color: '#475569', backgroundColor: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+
+              <div style={{ fontSize: '0.75rem', color: '#475569', backgroundColor: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
                 Catalog prices will be calculated as: <code>Base Cost + {marginPercent}%</code>.
               </div>
             </div>

@@ -26,9 +26,11 @@ import AccountManagerSelect from '../ui/AccountManagerSelect';
 import { DataTableSkeleton } from '../ui';
 import StatusBadge from '../ui/StatusBadge';
 import Building2 from 'lucide-react/dist/esm/icons/building-2';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import { CheckCircle, XCircle, Users, Mail, Download, Archive, Package, Globe } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
+import ZohoBiginSyncModal from './wholesellers/ZohoBiginSyncModal';
 
 // ── KPI Cards ─────────────────────────────────────────────────────────────────
 function WholesellerKPIs({ kpiStats, isLoading, activeKpiFilter, setActiveKpiFilter }) {
@@ -147,6 +149,7 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState('');
   const [shareModalWholesaler, setShareModalWholesaler] = useState(null);
+  const [biginModalOpen, setBiginModalOpen] = useState(false);
 
   if (loading && !wholesellers.length) {
     return (
@@ -219,6 +222,14 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
 
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button
+              type="button"
+              className="gcp-btn-secondary"
+              onClick={() => setBiginModalOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.80rem', fontWeight: 600, borderRadius: '6px' }}
+            >
+              <RefreshCw size={14} /> Sync Bigin
+            </button>
+            <button
               className="gcp-btn-primary"
               onClick={() => setCreateDrawerOpen(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 14px', fontSize: '0.80rem', fontWeight: 700, borderRadius: '6px' }}
@@ -242,11 +253,26 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
             setActiveKpiFilter={setActiveKpiFilter}
           />
         }
-        primaryAction={{
-          label: 'New Wholeseller',
-          icon: Building2,
-          onClick: () => setCreateDrawerOpen(true),
-        }}
+        actions={
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              type="button"
+              className="gcp-btn-secondary"
+              onClick={() => setBiginModalOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.80rem', fontWeight: 600, borderRadius: '6px' }}
+            >
+              <RefreshCw size={14} /> Sync Zoho Bigin
+            </button>
+            <button
+              type="button"
+              className="gcp-btn-primary"
+              onClick={() => setCreateDrawerOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.80rem', fontWeight: 700, borderRadius: '6px' }}
+            >
+              <Building2 size={15} /> New Wholeseller
+            </button>
+          </div>
+        }
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         searchPlaceholder="Search wholesellers by name, country, contact..."
@@ -395,6 +421,13 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
           />
         </div>
       </Modal>
+
+      {/* Zoho Bigin Sync & Import Modal */}
+      <ZohoBiginSyncModal
+        isOpen={biginModalOpen}
+        onClose={() => setBiginModalOpen(false)}
+        onWholesalerImported={() => refresh()}
+      />
     </>
   );
 }

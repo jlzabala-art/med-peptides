@@ -808,9 +808,12 @@ export default function InteractiveReconstitutionGuide({
   const sprayMgPerActuation = sprayConcentrationMgMl * sprayActuationVolumeMl;
   const sprayMcgPerActuation = Math.round(sprayMgPerActuation * 1000);
   const [sprayPuffs, setSprayPuffs] = useState(1);
+  const [penPresentationMode, setPenPresentationMode] = useState(isCartridge ? 'cartridge' : 'pen');
 
   // ── Dedicated Pre-filled Pen & Cartridge View ──────────────────────────────
   if (isPenOrCartridge) {
+    const isCartridgeActive = penPresentationMode === 'cartridge' || isCartridge;
+
     return (
       <div className="irg-wrapper">
         {/* ── Header ── */}
@@ -818,16 +821,16 @@ export default function InteractiveReconstitutionGuide({
           <div className="irg-header-left">
             <div className="irg-badge" style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}>
               <Sparkles size={13} />
-              <span>{isCartridge ? (lang === 'es' ? 'Cartucho de Recambio 3 mL' : '3 mL Refill Cartridge System') : (lang === 'es' ? 'Bolígrafo Inyector Multidosis' : 'Multi-Dose Pen Delivery System')}</span>
+              <span>{isCartridgeActive ? (lang === 'es' ? 'Cartucho de Recambio 3 mL' : '3 mL Refill Cartridge System') : (lang === 'es' ? 'Bolígrafo Inyector Multidosis' : 'Multi-Dose Pen Delivery System')}</span>
             </div>
             <h2 className="irg-title">
               <Thermometer size={20} color="#003666" />
-              {isCartridge
+              {isCartridgeActive
                 ? (lang === 'es' ? 'Cartucho de Recambio 3 mL — Calibración de Dial y Compatibilidad' : '3 mL Refill Cartridge — Dial Dosing & Compatibility Guide')
                 : (t.penCalcTitle || (lang === 'es' ? 'Guía de Dosificación en Dial y Administración' : 'Pre-filled Pen Dial Dosing & Administration Guide'))}
             </h2>
             <p className="irg-subtitle">
-              {isCartridge
+              {isCartridgeActive
                 ? (lang === 'es'
                     ? 'Cartucho de vidrio borosilicato de 3 mL precargado para recarga de bolígrafos dosificadores reutilizables. Sin reconstitución manual requerida.'
                     : 'Pre-filled 3 mL borosilicate glass cartridge engineered for reusable dial pen reloading. Zero manual reconstitution required.')
@@ -842,6 +845,61 @@ export default function InteractiveReconstitutionGuide({
         <div className="irg-workspace">
           {/* Left Column: Parameter Controls */}
           <div className="irg-controls-panel">
+            {/* Presentation Format Switcher: Device vs Refill */}
+            <div style={{
+              display: 'flex',
+              background: '#f1f5f9',
+              padding: '3px',
+              borderRadius: '8px',
+              gap: '4px',
+              marginBottom: '14px'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setPenPresentationMode('pen');
+                }}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: !isCartridgeActive ? '#ffffff' : 'transparent',
+                  color: !isCartridgeActive ? '#003666' : '#64748b',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  boxShadow: !isCartridgeActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {lang === 'es' ? '🖊️ Bolígrafo Completo' : '🖊️ Complete Pen Device'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setPenPresentationMode('cartridge');
+                }}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: isCartridgeActive ? '#ffffff' : 'transparent',
+                  color: isCartridgeActive ? '#003666' : '#64748b',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  boxShadow: isCartridgeActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {lang === 'es' ? '🔄 Recambio Cartucho 3 mL' : '🔄 3 mL Refill Cartridge'}
+              </button>
+            </div>
+
             {/* Device Info */}
             <div className="irg-control-group">
               <div className="irg-control-label-row">
