@@ -376,7 +376,6 @@ export default function CatalogOffersPricingDrawer({
           <InlineEditableCell
             value={converted}
             type="number"
-            prefix={currencySymbol}
             format={(val) => (val != null && !isNaN(val)) ? `${currencySymbol}${Number(val).toFixed(2)}` : '—'}
             onSave={(newVal) => updateVariantField(v.id, priceField, Number(newVal))}
           />
