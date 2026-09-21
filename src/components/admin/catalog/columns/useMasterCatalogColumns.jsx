@@ -332,21 +332,42 @@ export function useMasterCatalogColumns({
       nowrap: true,
       mobilePriority: 2,
       render: (row) => {
-        const allSuppliers = Array.from(new Set([
-          row.supplierId,
-          row.supplier,
-          ...(Array.isArray(row.supplierIds) ? row.supplierIds : []),
-          ...(Array.isArray(row.suppliers) ? row.suppliers : []).map(s => typeof s === 'object' ? s.id || s.name : s),
-          ...(row.variants || []).map(v => v.supplierId || v.supplier)
-        ].filter(Boolean).map(s => String(s).toLowerCase().replace(/^supplier-/, ''))));
+        // Collect canonical supplier IDs only (never mix company names with IDs)
+        const supplierIdSet = new Set();
+        if (row.supplierId && typeof row.supplierId === 'string' && !row.supplierId.includes(' ')) {
+          supplierIdSet.add(row.supplierId.toLowerCase().replace(/^supplier-/, ''));
+        }
+        if (Array.isArray(row.supplierIds)) {
+          row.supplierIds.forEach(id => {
+            if (id && typeof id === 'string' && !id.includes(' ')) {
+              supplierIdSet.add(id.toLowerCase().replace(/^supplier-/, ''));
+            }
+          });
+        }
+        if (Array.isArray(row.suppliers)) {
+          row.suppliers.forEach(s => {
+            const id = typeof s === 'object' && s !== null ? s.id : s;
+            if (id && typeof id === 'string' && (id.startsWith('supplier-') || !id.includes(' '))) {
+              supplierIdSet.add(id.toLowerCase().replace(/^supplier-/, ''));
+            }
+          });
+        }
+        (row.variants || []).forEach(v => {
+          if (v.supplierId && typeof v.supplierId === 'string' && !v.supplierId.includes(' ')) {
+            supplierIdSet.add(v.supplierId.toLowerCase().replace(/^supplier-/, ''));
+          }
+        });
 
-        const totalCount = allSuppliers.length > 0 ? allSuppliers.length : (typeof row.supplierCount === 'number' && row.supplierCount > 0 ? row.supplierCount : 1);
+        const allSuppliers = Array.from(supplierIdSet);
+        const totalCount = allSuppliers.length > 0
+          ? allSuppliers.length
+          : (typeof row.supplierCount === 'number' && row.supplierCount > 0 ? row.supplierCount : 1);
         const hasSupplierFilter = filterSupplier.length > 0;
         let matchingCount = totalCount;
         if (hasSupplierFilter) {
           const matched = filterSupplier.filter(filterVal => {
             const cleanFilter = String(filterVal).toLowerCase().replace(/^supplier-/, '');
-            return allSuppliers.includes(cleanFilter);
+            return supplierIdSet.has(cleanFilter);
           });
           matchingCount = matched.length > 0 ? Math.min(matched.length, totalCount) : 1;
         }

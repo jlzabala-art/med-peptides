@@ -478,27 +478,42 @@ export async function buildCatalogSummary(searchParams) {
         }
       });
 
-      // Also ingest supplier IDs directly from product document metadata (e.g. supplierIds, suppliers, supplierId)
+      // Ingest canonical supplier IDs directly from product document metadata
       const rawDocSuppliers = [
         ...(Array.isArray(data.supplierIds) ? data.supplierIds : []),
         ...(Array.isArray(data.suppliers) ? data.suppliers : []),
-        data.supplierId,
-        data.supplier
+        data.supplierId
       ].filter(Boolean);
 
       rawDocSuppliers.forEach(item => {
-        const sId = typeof item === 'string' ? item : item.id;
-        if (sId && !suppliers.has(sId)) {
-          const sName = typeof item === 'string' ? (item.replace(/^supplier-/, '').toUpperCase()) : (item.name || item.id);
+        const sId = typeof item === 'string' ? item : item?.id;
+        // Strict guard: ensure sId is a valid supplier identifier (never a human name with spaces)
+        if (sId && typeof sId === 'string' && !sId.includes(' ') && !suppliers.has(sId)) {
+          const sName = typeof item === 'object' && item?.name
+            ? item.name
+            : (data.supplierName || (sId.startsWith('supplier-') ? sId.replace(/^supplier-/, '').toUpperCase() : sId));
           suppliers.set(sId, {
             id: sId,
-            name: typeof item === 'object' && item.name ? item.name : sName,
+            name: sName,
             price: null,
             kitPrice: null,
             stock: null
           });
         }
       });
+
+      // Single fallback only if no supplier could be resolved anywhere
+      if (suppliers.size === 0 && (data.supplierId || data.supplierName || data.supplier)) {
+        const sId = data.supplierId || 'supplier-unknown';
+        const sName = data.supplierName || data.supplier || 'Unknown Supplier';
+        suppliers.set(sId, {
+          id: sId,
+          name: sName,
+          price: null,
+          kitPrice: null,
+          stock: null
+        });
+      }
 
       kpiTotalCanonical++;
       kpiTotalVariants += productVariants.length;
@@ -590,8 +605,8 @@ export async function buildCatalogSummary(searchParams) {
       const out = { 
         ...g, 
         suppliers: supplierList,
-        supplierIds: (Array.isArray(g.supplierIds) && g.supplierIds.length > 0) ? g.supplierIds : supplierIdsList,
-        supplierCount: Math.max(supplierList.length, supplierIdsList.length, (Array.isArray(g.supplierIds) ? g.supplierIds.length : 0))
+        supplierIds: supplierIdsList,
+        supplierCount: supplierIdsList.length
       };
       delete out._supplierMap;
       return out;
