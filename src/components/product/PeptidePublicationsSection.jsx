@@ -102,99 +102,108 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
             <span>Querying National Library of Medicine (NCBI / PubMed)...</span>
           </div>
         ) : (
-          <div className="pds-publications-grid">
+          <div className={`pds-publications-grid ${displayArticles.length === 1 ? 'single-item' : ''}`}>
             {displayArticles.map((article, idx) => {
               const articleId = article.id || article.pmid || `pub-${idx}`;
               const isCurated = Boolean(article.clinicalSummary);
               const pubmedUrl = article.pubmedUrl || (article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : null);
+              const isSingle = displayArticles.length === 1;
 
               return (
-                <article key={articleId} className="pds-pub-card">
-                  {/* Journal Strip */}
-                  <div className="pds-pub-meta-bar">
-                    <div className="pds-pub-journal-pill">
-                      <span className="pds-pub-journal-name">{article.journal}</span>
-                      {article.year && (
-                        <span className="pds-pub-year">
-                          <Clock size={11} /> {article.year}
+                <article key={articleId} className={`pds-pub-card ${isSingle ? 'pds-pub-card-horizontal' : ''}`}>
+                  {/* Left Column: Metadata, Title, Authors & Action Link */}
+                  <div className="pds-pub-card-primary">
+                    <div className="pds-pub-card-meta-wrap">
+                      {/* Journal Strip */}
+                      <div className="pds-pub-meta-bar">
+                        <div className="pds-pub-journal-pill">
+                          <span className="pds-pub-journal-name">{article.journal}</span>
+                          {article.year && (
+                            <span className="pds-pub-year">
+                              <Clock size={11} /> {article.year}
+                            </span>
+                          )}
+                        </div>
+                        {article.evidenceType && (
+                          <span className="pds-pub-evidence-tag">
+                            {article.evidenceType}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Article Title */}
+                      <h4 className="pds-pub-title">
+                        {article.title}
+                      </h4>
+
+                      {/* Authors */}
+                      {article.authors && (
+                        <div className="pds-pub-authors">
+                          <span className="pds-pub-authors-label">Investigators:</span> {article.authors}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Action Row: Read full article */}
+                    <div className="pds-pub-footer">
+                      {pubmedUrl ? (
+                        <a
+                          href={pubmedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pds-pub-action-link"
+                          title="Read complete peer-reviewed paper on NCBI PubMed"
+                        >
+                          <span>Read Full Paper on PubMed</span>
+                          {article.pmid && <code className="pds-pub-pmid-tag">PMID: {article.pmid}</code>}
+                          <ExternalLink size={14} />
+                        </a>
+                      ) : (
+                        <span className="pds-pub-academic-cite">
+                          Indexed Peer-Reviewed Medical Monograph
                         </span>
                       )}
                     </div>
-                    {article.evidenceType && (
-                      <span className="pds-pub-evidence-tag">
-                        {article.evidenceType}
-                      </span>
-                    )}
                   </div>
 
-                  {/* Article Title */}
-                  <h4 className="pds-pub-title">
-                    {article.title}
-                  </h4>
-
-                  {/* Authors */}
-                  {article.authors && (
-                    <div className="pds-pub-authors">
-                      <span className="pds-pub-authors-label">Investigators:</span> {article.authors}
-                    </div>
-                  )}
-
-                  {/* Executive Clinical Summary */}
-                  {article.clinicalSummary ? (
-                    <div className="pds-pub-summary-box">
-                      <div className="pds-pub-summary-header">
-                        <FileText size={13} color="#0369a1" />
-                        <span>Executive Study Summary & Conclusions:</span>
+                  {/* Right Column: Executive Summary & Key Findings */}
+                  <div className="pds-pub-card-secondary">
+                    {/* Executive Clinical Summary */}
+                    {article.clinicalSummary ? (
+                      <div className="pds-pub-summary-box">
+                        <div className="pds-pub-summary-header">
+                          <FileText size={13} color="#0369a1" />
+                          <span>Executive Study Summary & Conclusions:</span>
+                        </div>
+                        <p className="pds-pub-summary-text">
+                          {article.clinicalSummary}
+                        </p>
                       </div>
-                      <p className="pds-pub-summary-text">
-                        {article.clinicalSummary}
-                      </p>
-                    </div>
-                  ) : article.abstract ? (
-                    <div className="pds-pub-summary-box">
-                      <div className="pds-pub-summary-header">
-                        <FileText size={13} color="#0369a1" />
-                        <span>Abstract Preview:</span>
+                    ) : article.abstract ? (
+                      <div className="pds-pub-summary-box">
+                        <div className="pds-pub-summary-header">
+                          <FileText size={13} color="#0369a1" />
+                          <span>Abstract Preview:</span>
+                        </div>
+                        <p className="pds-pub-summary-text">
+                          {article.abstract}
+                        </p>
                       </div>
-                      <p className="pds-pub-summary-text">
-                        {article.abstract}
-                      </p>
-                    </div>
-                  ) : null}
+                    ) : null}
 
-                  {/* Key Scientific Findings */}
-                  {article.keyFindings && article.keyFindings.length > 0 && (
-                    <div className="pds-pub-findings-box">
-                      <span className="pds-pub-findings-label">Key Scientific Findings:</span>
-                      <ul className="pds-pub-findings-list">
-                        {article.keyFindings.map((finding, fIdx) => (
-                          <li key={fIdx}>
-                            <CheckCircle2 size={13} color="#16a34a" style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <span>{finding}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Card Action Row: Read full article */}
-                  <div className="pds-pub-footer">
-                    {pubmedUrl ? (
-                      <a
-                        href={pubmedUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="pds-pub-action-link"
-                        title="Read complete peer-reviewed paper on NCBI PubMed"
-                      >
-                        <span>Read Full Paper on PubMed</span>
-                        {article.pmid && <code className="pds-pub-pmid-tag">PMID: {article.pmid}</code>}
-                        <ExternalLink size={14} />
-                      </a>
-                    ) : (
-                      <span className="pds-pub-academic-cite">
-                        Indexed Peer-Reviewed Medical Monograph
-                      </span>
+                    {/* Key Scientific Findings */}
+                    {article.keyFindings && article.keyFindings.length > 0 && (
+                      <div className="pds-pub-findings-box">
+                        <span className="pds-pub-findings-label">Key Scientific Findings:</span>
+                        <ul className="pds-pub-findings-list">
+                          {article.keyFindings.map((finding, fIdx) => (
+                            <li key={fIdx}>
+                              <CheckCircle2 size={13} color="#16a34a" style={{ flexShrink: 0, marginTop: '2px' }} />
+                              <span>{finding}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
                 </article>
