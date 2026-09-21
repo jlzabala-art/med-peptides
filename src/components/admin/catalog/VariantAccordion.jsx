@@ -43,6 +43,44 @@ export function getSupplierLeadTime(suppIdOrName) {
   return { label: '⚡ 3-5 Business Days', color: '#475569', bg: '#f8fafc', border: '#e2e8f0' };
 }
 
+// Native invoicing currencies by supplier
+const SUPPLIER_ORIGINAL_CURRENCIES = {
+  'supplier-centrico': { code: 'AED', symbol: 'AED', flag: '🇦🇪', label: 'AED' },
+  'centrico': { code: 'AED', symbol: 'AED', flag: '🇦🇪', label: 'AED' },
+  'supplier-magenta': { code: 'AED', symbol: 'AED', flag: '🇦🇪', label: 'AED' },
+  'magenta': { code: 'AED', symbol: 'AED', flag: '🇦🇪', label: 'AED' },
+  'supplier-lotusland': { code: 'USD', symbol: '$', flag: '🇺🇸', label: 'USD ($)' },
+  'lotusland': { code: 'USD', symbol: '$', flag: '🇺🇸', label: 'USD ($)' },
+  'supplier-europeptides': { code: 'EUR', symbol: '€', flag: '🇪🇺', label: 'EUR (€)' },
+  'europeptides': { code: 'EUR', symbol: '€', flag: '🇪🇺', label: 'EUR (€)' },
+  'supplier-fagron-iberia': { code: 'EUR', symbol: '€', flag: '🇪🇸', label: 'EUR (€)' },
+  'supplier-fagron-genomics': { code: 'EUR', symbol: '€', flag: '🇪🇸', label: 'EUR (€)' },
+  'supplier-pod-poland': { code: 'EUR', symbol: '€', flag: '🇵🇱', label: 'EUR (€)' },
+  'supplier-bioniq': { code: 'GBP', symbol: '£', flag: '🇬🇧', label: 'GBP (£)' },
+  'supplier-nplabs': { code: 'EUR', symbol: '€', flag: '🇬🇷', label: 'EUR (€)' },
+  'nplabs': { code: 'EUR', symbol: '€', flag: '🇬🇷', label: 'EUR (€)' }
+};
+
+export function getSupplierOriginalCurrency(suppIdOrName, variants = []) {
+  const firstWithCurr = (variants || []).find(v => v.originalCurrency || v.costCurrency || v.supplierPricing?.currency);
+  if (firstWithCurr) {
+    const code = (firstWithCurr.originalCurrency || firstWithCurr.costCurrency || firstWithCurr.supplierPricing?.currency || '').toUpperCase();
+    if (code === 'AED') return { code: 'AED', symbol: 'AED', flag: '🇦🇪', label: 'AED' };
+    if (code === 'USD') return { code: 'USD', symbol: '$', flag: '🇺🇸', label: 'USD ($)' };
+    if (code === 'EUR') return { code: 'EUR', symbol: '€', flag: '🇪🇺', label: 'EUR (€)' };
+    if (code === 'GBP') return { code: 'GBP', symbol: '£', flag: '🇬🇧', label: 'GBP (£)' };
+  }
+
+  if (!suppIdOrName) return { code: 'USD', symbol: '$', flag: '🌐', label: 'USD ($)' };
+  const key = String(suppIdOrName).toLowerCase().trim();
+  if (SUPPLIER_ORIGINAL_CURRENCIES[key]) return SUPPLIER_ORIGINAL_CURRENCIES[key];
+  if (key.includes('centrico') || key.includes('magenta')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-magenta'];
+  if (key.includes('lotus')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-lotusland'];
+  if (key.includes('europept') || key.includes('fagron') || key.includes('np') || key.includes('poland') || key.includes('pod')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-europeptides'];
+  if (key.includes('bioniq')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-bioniq'];
+  return { code: 'USD', symbol: '$', flag: '🌐', label: 'USD ($)' };
+}
+
 /**
  * VariantAccordion
  * ─────────────────────────────────────────────────────────────────────────────
@@ -532,6 +570,31 @@ export default function VariantAccordion({
                             borderRadius: '4px'
                           }}>
                             <Clock size={10} /> {lt.label}
+                          </span>
+                        );
+                      })()}
+
+                      {(() => {
+                        const origCurr = getSupplierOriginalCurrency(group.key || group.name, group.variants);
+                        return (
+                          <span
+                            title={`Supplier primary invoicing currency is ${origCurr.code}`}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              color: '#334155',
+                              backgroundColor: '#f8fafc',
+                              border: '1px solid #cbd5e1',
+                              padding: '1px 6px',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            <span style={{ fontSize: '0.75rem' }}>{origCurr.flag}</span>
+                            <span style={{ color: '#64748b' }}>Currency:</span>
+                            <span style={{ color: '#0f172a', fontWeight: 800 }}>{origCurr.label}</span>
                           </span>
                         );
                       })()}

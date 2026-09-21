@@ -559,17 +559,17 @@ export default function CatalogOffersPricingDrawer({
             aria-label="Add to Workspace"
             onClick={(e) => { e.stopPropagation(); handleAddToWorkspace(v); }}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: '3px',
-              padding: '3px 7px', height: '28px',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '28px', height: '28px',
               background: '#dcfce7', border: '1px solid #86efac', borderRadius: '6px',
-              cursor: 'pointer', color: '#15803d', fontSize: '0.7rem', fontWeight: 700,
+              cursor: 'pointer', color: '#15803d',
               boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'all 0.15s ease',
-              flexShrink: 0, whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
             onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#bbf7d0'; e.currentTarget.style.borderColor = '#4ade80'; }}
             onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#dcfce7'; e.currentTarget.style.borderColor = '#86efac'; }}
           >
-            <ShoppingCart size={11} /> WS
+            <ShoppingCart size={13} />
           </button>
           {/* Clone */}
           <button
