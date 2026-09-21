@@ -71,6 +71,19 @@ export default function PublicAtlasAIDrawer({
     }
   }, [sessionKey]);
 
+  // Global event listener to open drawer with pre-filled inquiry from publication cards
+  useEffect(() => {
+    const handleOpen = (e) => {
+      setIsOpen(true);
+      if (e.detail?.initialQuery) {
+        setMessage(e.detail.initialQuery);
+        setActiveTab('chat');
+      }
+    };
+    window.addEventListener('open-public-atlas-ai', handleOpen);
+    return () => window.removeEventListener('open-public-atlas-ai', handleOpen);
+  }, []);
+
   // 2. Fetch current IP quota status
   useEffect(() => {
     let isMounted = true;

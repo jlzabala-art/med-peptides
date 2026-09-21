@@ -350,6 +350,19 @@
   border-radius: 9999px;
 }
 
+.pds-fda-hero-pill {
+  height: 24px !important;
+  max-height: 24px !important;
+  line-height: 1 !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+}
+
 .pds-supplier-tag {
   background: #f1f5f9;
   color: #334155;

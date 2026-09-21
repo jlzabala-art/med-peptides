@@ -11,7 +11,8 @@ import {
   Activity, 
   Loader2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Sparkles
 } from '@/lib/icons';
 import { getCuratedPeptideLiterature } from '@/data/peptideLiteratureRegistry';
 import { getPubMedLiterature } from '@/services/pubmedService';
@@ -102,16 +103,15 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
             <span>Querying National Library of Medicine (NCBI / PubMed)...</span>
           </div>
         ) : (
-          <div className={`pds-publications-grid ${displayArticles.length === 1 ? 'single-item' : ''}`}>
+          <div className={`pds-publications-grid ${displayArticles.length === 1 ? 'has-single-item' : ''} ${displayArticles.length % 2 !== 0 ? 'has-odd-count' : 'has-even-count'} count-${displayArticles.length}`}>
             {displayArticles.map((article, idx) => {
               const articleId = article.id || article.pmid || `pub-${idx}`;
               const isCurated = Boolean(article.clinicalSummary);
               const pubmedUrl = article.pubmedUrl || (article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : null);
-              const isSingle = displayArticles.length === 1;
 
               return (
-                <article key={articleId} className={`pds-pub-card ${isSingle ? 'pds-pub-card-horizontal' : ''}`}>
-                  {/* Left Column: Metadata, Title, Authors & Action Link */}
+                <article key={articleId} className={`pds-pub-card pds-pub-card-horizontal ${displayArticles.length === 1 ? 'is-single-card' : ''}`}>
+                  {/* Left Column: Metadata, Title, Authors & Action Links */}
                   <div className="pds-pub-card-primary">
                     <div className="pds-pub-card-meta-wrap">
                       {/* Journal Strip */}
@@ -144,7 +144,7 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
                       )}
                     </div>
 
-                    {/* Card Action Row: Read full article */}
+                    {/* Card Action Row: Read full article & Ask Clinical AI */}
                     <div className="pds-pub-footer">
                       {pubmedUrl ? (
                         <a
@@ -154,15 +154,31 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
                           className="pds-pub-action-link"
                           title="Read complete peer-reviewed paper on NCBI PubMed"
                         >
-                          <span>Read Full Paper on PubMed</span>
+                          <span>Read on PubMed</span>
                           {article.pmid && <code className="pds-pub-pmid-tag">PMID: {article.pmid}</code>}
-                          <ExternalLink size={14} />
+                          <ExternalLink size={13} />
                         </a>
                       ) : (
                         <span className="pds-pub-academic-cite">
                           Indexed Peer-Reviewed Medical Monograph
                         </span>
                       )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
+                            detail: {
+                              initialQuery: `What does the clinical study "${article.title}" (${article.journal}${article.year ? `, ${article.year}` : ''}) establish regarding ${productName}?`,
+                            }
+                          }));
+                        }}
+                        className="pds-pub-ai-btn"
+                        title={`Consult Atlas Clinical AI regarding ${article.title}`}
+                      >
+                        <Sparkles size={13} color="#0284c7" />
+                        <span>Ask Clinical AI</span>
+                      </button>
                     </div>
                   </div>
 

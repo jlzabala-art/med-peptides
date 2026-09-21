@@ -33,6 +33,7 @@ export async function POST(req) {
     const recipientEmail = sanitizeText(body?.recipientEmail, 150) || '';
     const workspaceName = sanitizeText(body?.workspaceName, 150) || 'Clinical Requisition Dossier';
     const customNotes = sanitizeText(body?.customNotes, 500) || '';
+    const audience = sanitizeText(body?.audience, 50) || 'doctor';
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'At least one compound is required in the workspace to generate documentation.' }, { status: 400 });
@@ -160,7 +161,16 @@ Recipient Information:
 - Recipient Name: ${recipientName}
 - Recipient Email: ${recipientEmail || 'Colleague / Prescribing Physician'}
 - Dossier Reference: ${workspaceName}
+- Target Audience Profile: ${audience === 'wholesaler' ? 'B2B Pharmacy Wholesaler / Medical Distributor' : audience === 'patient' ? 'Patient / Private Wellness Client' : 'Prescribing Physician / Medical Director'}
 ${customNotes ? `- Clinical Notes from Provider: ${customNotes}` : ''}
+
+Audience Profile Instructions:
+${audience === 'wholesaler' 
+  ? 'Focus heavily on commercial reliability, batch-to-batch CoA consistency, European Pharmacopoeia (Ph. Eur.) compliance, cold-chain logistics stability, and dual-stage HPLC purity benchmarks (≥ 99.0%).'
+  : audience === 'patient'
+  ? 'Maintain high clinical accuracy but adopt an educational, reassuring, and completely safe tone emphasizing sterility (SAL 10⁻⁶), lack of endotoxins, and clear pharmacological purpose without confusing jargon.'
+  : 'Deepen focus on pharmacodynamics, receptor affinity axes (e.g. GLP-1/GIP co-agonism, GH secretagogue axis, cellular repair pathways), and clinical trial endpoints.'
+}
 
 Staged Compounds in this Requisition:
 ${JSON.stringify(compoundManifest, null, 2)}

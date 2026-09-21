@@ -126,6 +126,67 @@
   background: rgba(255, 255, 255, 0.22);
 }
 
+/* Audience Persona Bar */
+.ws-datasheet-audience-bar {
+  background-color: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.65rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.ws-datasheet-audience-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #334155;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+}
+
+.ws-datasheet-audience-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ws-datasheet-audience-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  min-height: 28px;
+}
+
+.ws-datasheet-audience-chip:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.ws-datasheet-audience-chip.active {
+  background: linear-gradient(135deg, #003666 0%, #0284c7 100%);
+  border-color: #003666;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.2);
+}
+
 /* Sender & Recipient Strip */
 .ws-datasheet-meta-strip {
   background-color: #f8fafc;

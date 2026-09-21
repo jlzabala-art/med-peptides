@@ -43,8 +43,10 @@ export default function FdaRegulatoryBadge({
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
+            gap: '5px',
+            padding: '0 8px',
+            height: '24px',
+            lineHeight: 1,
             borderRadius: '9999px',
             backgroundColor: colorScheme.bg,
             border: `1px solid ${colorScheme.border}`,
@@ -54,16 +56,22 @@ export default function FdaRegulatoryBadge({
             cursor: showModalOnClick ? 'pointer' : 'default',
             whiteSpace: 'nowrap',
             transition: 'all 0.15s ease',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
             outline: 'none',
+            boxSizing: 'border-box',
+            verticalAlign: 'middle',
+            fontFamily: 'inherit',
             ...style
           }}
           title={`${info.badgeLabel} — Click for clinical regulatory monograph`}
         >
-          <span style={{ fontSize: '0.85rem', lineHeight: 1 }}>{colorScheme.icon}</span>
+          {info.status === 'fda_approved' ? (
+            <CheckCircle2 size={12} color="#15803d" style={{ flexShrink: 0 }} />
+          ) : (
+            <ShieldCheck size={12} color={colorScheme.accent || colorScheme.text} style={{ flexShrink: 0 }} />
+          )}
           <span>{info.shortBadge || info.badgeLabel}</span>
           {showModalOnClick && (
-            <Info size={12} style={{ opacity: 0.65, marginLeft: '2px', flexShrink: 0 }} />
+            <Info size={11} style={{ opacity: 0.65, marginLeft: '1px', flexShrink: 0 }} />
           )}
         </button>
       )}

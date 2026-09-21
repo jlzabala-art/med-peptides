@@ -33,8 +33,9 @@ export default function WorkspaceShareDatasheetModal({
   const [customNotes, setCustomNotes] = useState('');
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedLinks, setCopiedLinks] = useState(false);
+  const [audience, setAudience] = useState('doctor'); // 'doctor' | 'wholesaler' | 'patient'
 
-  // Initialize recipient from active workspace target
+  // Initialize recipient & audience from active workspace target
   useEffect(() => {
     if (isOpen && activeWs) {
       const target = activeWs.targetEntity;
@@ -42,11 +43,19 @@ export default function WorkspaceShareDatasheetModal({
       const initialEmail = target?.email || '';
       setRecipientName(initialName);
       setRecipientEmail(initialEmail);
+
+      if (activeWs.type === 'wholesaler' || target?.role === 'wholesaler' || target?.accountType === 'wholesaler') {
+        setAudience('wholesaler');
+      } else if (activeWs.type === 'patient' || target?.role === 'patient') {
+        setAudience('patient');
+      } else {
+        setAudience('doctor');
+      }
     }
   }, [isOpen, activeWs]);
 
   // Generate Email using Gemini API
-  const handleGenerate = useCallback(async (isRegeneration = false) => {
+  const handleGenerate = useCallback(async (isRegeneration = false, targetAudience = audience) => {
     if (!items || items.length === 0) {
       notifier.warning('Please add at least one compound to the workspace first.');
       return;
@@ -63,6 +72,7 @@ export default function WorkspaceShareDatasheetModal({
           recipientName: recipientName.trim() || 'Healthcare Practitioner',
           recipientEmail: recipientEmail.trim(),
           customNotes: customNotes.trim(),
+          audience: targetAudience || 'doctor',
         }),
       });
 
@@ -75,7 +85,7 @@ export default function WorkspaceShareDatasheetModal({
       setGeneratedData(data);
       setCustomSubject(data.subject || '');
       if (isRegeneration) {
-        notifier.success('Regenerated Pharma English documentation with Gemini AI!');
+        notifier.success(`Regenerated documentation for ${targetAudience} profile!`);
       }
     } catch (err) {
       console.error('[Share Datasheets Modal] Error:', err);
@@ -83,7 +93,14 @@ export default function WorkspaceShareDatasheetModal({
     } finally {
       setLoading(false);
     }
-  }, [items, activeWs, recipientName, recipientEmail, customNotes]);
+  }, [items, activeWs, recipientName, recipientEmail, customNotes, audience]);
+
+  // Handle audience change and re-draft
+  const handleAudienceChange = (newAudience) => {
+    if (newAudience === audience && generatedData) return;
+    setAudience(newAudience);
+    handleGenerate(true, newAudience);
+  };
 
   // Trigger initial generation when modal opens and has items
   useEffect(() => {
@@ -182,6 +199,39 @@ export default function WorkspaceShareDatasheetModal({
           >
             <X size={18} />
           </button>
+        </div>
+
+        {/* Audience Persona Bar */}
+        <div className="ws-datasheet-audience-bar">
+          <span className="ws-datasheet-audience-label">
+            <Sparkles size={13} color="#2563eb" /> Audience Persona:
+          </span>
+          <div className="ws-datasheet-audience-chips">
+            <button
+              type="button"
+              className={`ws-datasheet-audience-chip ${audience === 'doctor' ? 'active' : ''}`}
+              onClick={() => handleAudienceChange('doctor')}
+              title="Tailor Pharma English tone for Doctors and Prescribers"
+            >
+              🩺 Doctor / Prescriber
+            </button>
+            <button
+              type="button"
+              className={`ws-datasheet-audience-chip ${audience === 'wholesaler' ? 'active' : ''}`}
+              onClick={() => handleAudienceChange('wholesaler')}
+              title="Tailor tone for B2B Wholesalers and Distributors"
+            >
+              🏢 Wholesaler / B2B
+            </button>
+            <button
+              type="button"
+              className={`ws-datasheet-audience-chip ${audience === 'patient' ? 'active' : ''}`}
+              onClick={() => handleAudienceChange('patient')}
+              title="Tailor tone for Private Patients and Clients"
+            >
+              🛡️ Patient / Private
+            </button>
+          </div>
         </div>
 
         {/* Sender & Recipient Strip */}
