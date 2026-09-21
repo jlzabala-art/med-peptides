@@ -23,6 +23,18 @@ export default function SharedCatalogProductListRow({
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
 
+  const resolvedSupplier = React.useMemo(() => {
+    const rawProdSupp = prod?.supplierId || prod?.variants?.[0]?.supplierId || prod?.supplier || prod?.variants?.[0]?.supplier;
+    const rawCatSupp = catalogMeta?.supplierId || catalogMeta?.catalogueFilter || catalogMeta?.supplierFilter;
+    const suppCandidate = rawCatSupp || rawProdSupp || '';
+    const norm = String(suppCandidate).toLowerCase();
+    if (norm.includes('magenta')) return 'supplier-magenta';
+    if (norm.includes('lotusland') || norm.includes('atlas')) return 'supplier-lotusland';
+    if (rawCatSupp && rawCatSupp !== 'all') return rawCatSupp;
+    if (rawProdSupp) return rawProdSupp;
+    return 'supplier-lotusland';
+  }, [prod, catalogMeta]);
+
   return (
     <div className={`catalog-list-item ${isExpanded ? 'is-expanded' : ''}`}>
       {/* Product Row Header — Balanced GCP Mobile & Desktop Layout */}
@@ -68,7 +80,7 @@ export default function SharedCatalogProductListRow({
 
           <div className="catalog-row-buttons">
             <a
-              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
+              href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
               target="_blank"
               rel="noopener noreferrer"
               className="catalog-row-monograph-btn"

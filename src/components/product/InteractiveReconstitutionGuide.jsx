@@ -280,6 +280,27 @@ export default function InteractiveReconstitutionGuide({
     };
   }, [vialMg, bacWaterMl, doseUnit, doseValue]);
 
+  // ── Dynamic Reconstitution Solvent Step Text ──────────────────────────────
+  const dynamicSolventText = useMemo(() => {
+    const volStr = `${safeBacMl.toFixed(1)} mL`;
+    if (t?.solventTextWithVol) {
+      return t.solventTextWithVol.replace('{volume}', volStr);
+    }
+    if (t?.solventText && t.solventText.includes('{volume}')) {
+      return t.solventText.replace('{volume}', volStr);
+    }
+    if (lang === 'es') {
+      return `Extraiga con aguja estéril exactamente ${volStr} de Agua Bacteriostática (BAC con 0.9% alcohol bencílico) e inyéctela lentamente deslizándola por la pared interior de cristal en un ángulo de 45°. Nunca proyecte el líquido directamente sobre la masa liofilizada para preservar la conformación molecular del péptido.`;
+    }
+    if (lang === 'fr') {
+      return `Prélevez avec une aiguille stérile exactement ${volStr} d'Eau Bactériostatique (BAC) et injectez lentement le long de la paroi interne en verre à un angle de 45°. Ne jamais pulvériser directement sur le gâteau lyophilisé.`;
+    }
+    if (lang === 'de') {
+      return `Ziehen Sie mit einer sterilen Nadel genau ${volStr} bakteriostatisches Wasser (BAC) auf und spritzen Sie es langsam im 45°-Winkel an der inneren Glaswand entlang ein. Niemals direkt auf das Lyophilisat spritzen.`;
+    }
+    return `Using a sterile syringe, draw exactly ${volStr} of Bacteriostatic (BAC) Water (0.9% benzyl alcohol) and inject slowly down the interior glass wall at a 45° angle. Never spray directly onto the lyophilized cake to preserve tertiary peptide structure.`;
+  }, [t, safeBacMl, lang]);
+
   // ── Dynamic Clinical Phase Protocols (Supports N dynamic phases + Custom) ──
   const clinicalPhases = useMemo(() => {
     const pName = String(product?.name || product?.slug || product?.id || '').toLowerCase();

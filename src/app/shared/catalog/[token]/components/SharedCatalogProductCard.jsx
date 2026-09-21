@@ -28,6 +28,25 @@ export default function SharedCatalogProductCard({
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
 
+  const resolvedSupplier = React.useMemo(() => {
+    const rawProdSupp = prod?.supplierId || prod?.variants?.[0]?.supplierId || prod?.supplier || prod?.variants?.[0]?.supplier;
+    const rawCatSupp = catalogMeta?.supplierId || catalogMeta?.catalogueFilter || catalogMeta?.supplierFilter;
+    const suppCandidate = rawCatSupp || rawProdSupp || '';
+    const norm = String(suppCandidate).toLowerCase();
+    if (norm.includes('magenta')) return 'supplier-magenta';
+    if (norm.includes('lotusland') || norm.includes('atlas')) return 'supplier-lotusland';
+    if (rawCatSupp && rawCatSupp !== 'all') return rawCatSupp;
+    if (rawProdSupp) return rawProdSupp;
+    return 'supplier-lotusland';
+  }, [prod, catalogMeta]);
+
+  const monographLabel = React.useMemo(() => {
+    if (resolvedSupplier.includes('magenta')) {
+      return t ? t('product.officialMonographMagenta', 'Monograph (Magenta) ↗') : 'Monograph (Magenta) ↗';
+    }
+    return t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗';
+  }, [resolvedSupplier, t]);
+
   function getRelatedProtocols(product, allProtocols) {
     if (!allProtocols || allProtocols.length === 0 || !product) return [];
     const prodNameLower = (product.canonicalName || product.name || '').toLowerCase().trim();
@@ -109,14 +128,14 @@ export default function SharedCatalogProductCard({
                   {prod.category}
                 </span>
                 <a
-                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
+                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="pds-catalog-monograph-btn"
-                  title={t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}
+                  title={monographLabel}
                 >
                   <FileText size={13} />
-                  <span>{t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}</span>
+                  <span>{monographLabel}</span>
                 </a>
               </div>
             ) : (
@@ -133,14 +152,14 @@ export default function SharedCatalogProductCard({
                   {prod.category}
                 </span>
                 <a
-                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland`}
+                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="pds-catalog-monograph-btn"
-                  title={t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}
+                  title={monographLabel}
                 >
                   <FileText size={13} />
-                  <span>{t ? t('product.officialMonograph', 'Monograph (Atlas Services) ↗') : 'Monograph (Atlas Services) ↗'}</span>
+                  <span>{monographLabel}</span>
                 </a>
               </div>
             )}
@@ -246,7 +265,7 @@ export default function SharedCatalogProductCard({
                       )}
                       <span>•</span>
                       <a
-                        href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=supplier-lotusland${v.dosage ? `&dose=${encodeURIComponent(v.dosage)}` : ''}${v.presentation ? `&presentation=${encodeURIComponent(v.presentation)}` : ''}`}
+                        href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}${v.dosage ? `&dose=${encodeURIComponent(v.dosage)}` : ''}${v.presentation ? `&presentation=${encodeURIComponent(v.presentation)}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="pds-variant-protocol-pill"
