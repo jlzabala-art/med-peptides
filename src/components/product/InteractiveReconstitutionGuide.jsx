@@ -79,6 +79,8 @@ export default function InteractiveReconstitutionGuide({
   availableStrengths = [],
   activeFormatId = 'vial',
   activeFormat = null,
+  availableFormats = [],
+  onFormatChange = null,
   supplierName = '',
   lang = 'en',
   primaryProtocol = null,
@@ -861,6 +863,10 @@ export default function InteractiveReconstitutionGuide({
                 onClick={() => {
                   triggerHaptic('selection');
                   setPenPresentationMode('pen');
+                  if (typeof onFormatChange === 'function') {
+                    const penFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('pen') && !(f.id || '').toLowerCase().includes('cartridge'));
+                    if (penFmt) onFormatChange(penFmt.id);
+                  }
                 }}
                 style={{
                   flex: 1,
@@ -883,6 +889,10 @@ export default function InteractiveReconstitutionGuide({
                 onClick={() => {
                   triggerHaptic('selection');
                   setPenPresentationMode('cartridge');
+                  if (typeof onFormatChange === 'function') {
+                    const cartFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge'));
+                    if (cartFmt) onFormatChange(cartFmt.id);
+                  }
                 }}
                 style={{
                   flex: 1,
@@ -1063,7 +1073,7 @@ export default function InteractiveReconstitutionGuide({
                 {/* Pen Barrel Body */}
                 <div className="irg-pen-body">
                   <span className="irg-pen-brand-label">
-                    {supplierName ? `${supplierName}` : 'Med-Peptides'}
+                    ATLAS CLINICAL
                   </span>
                   <div className="irg-pen-dial-window" title="Dose Dial Indicator">
                     <span className="irg-pen-dial-number font-mono">{penClicks}</span>

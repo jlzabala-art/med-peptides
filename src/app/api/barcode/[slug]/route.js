@@ -183,6 +183,31 @@ export async function GET(request, { params }) {
     // 3. Generate 1D Barcode SVG
     const barcode1dSvg = generateBarcode1dSvg(product.skuNumber, 360, 44);
 
+    // Determine presentation type
+    const presLower = String(searchParams.get('presentation') || searchParams.get('format') || 'vial').toLowerCase();
+    const isPen = presLower.includes('pen') && !presLower.includes('cartridge');
+    const isCart = presLower.includes('cartridge');
+    const isSpray = presLower.includes('spray') || presLower.includes('nasal');
+    const isOral = presLower.includes('capsule') || presLower.includes('tablet') || presLower.includes('oral');
+
+    const presSubtitle = isPen
+      ? 'PRE-FILLED MULTI-DOSE SUBQ PEN (3 mL)'
+      : isCart
+        ? 'PRE-FILLED 3 mL REFILL CARTRIDGE'
+        : isSpray
+          ? 'CALIBRATED INTRANASAL SPRAY DEVICE'
+          : isOral
+            ? 'GASTRO-RESISTANT ORAL CAPSULES'
+            : 'STERILE LYOPHILIZED SUBCUTANEOUS VIAL';
+
+    const storageText = (isPen || isCart)
+      ? 'Pre-formulated Sterile Solution (Zero Mixing Required) · 2°C–8°C'
+      : isSpray
+        ? 'Isotonic Transmucosal Solution (Zero BAC Mixing) · 15°C–25°C'
+        : isOral
+          ? 'Solid Dose Unit Formulation · Room Temperature 15°C–25°C'
+          : 'Bacteriostatic Water (BAC 0.9%) · Cold-Chain 2°C–8°C (Do Not Freeze)';
+
     // 4. Compose Master SVG (1200x630) — served directly, no conversion needed
     const masterSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -230,7 +255,7 @@ export async function GET(request, { params }) {
     ${escapeXml(product.name.toUpperCase())}
   </text>
   <text x="60" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0284C7" letter-spacing="0.05em">
-    STERILE LYOPHILIZED SUBCUTANEOUS VIAL
+    ${escapeXml(presSubtitle)}
   </text>
 
   <!-- Analytical Purity Pill -->
@@ -248,7 +273,7 @@ export async function GET(request, { params }) {
   <line x1="82" y1="345" x2="658" y2="345" stroke="#E2E8F0" stroke-width="1" />
 
   <text x="82" y="375" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="800" fill="#64748B" letter-spacing="0.05em">RECONSTITUTION &amp; STORAGE</text>
-  <text x="82" y="397" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#334155">Bacteriostatic Water (BAC 0.9%) · Cold-Chain 2°C–8°C (Do Not Freeze)</text>
+  <text x="82" y="397" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#334155">${escapeXml(storageText)}</text>
 
   <!-- 1D Linear Barcode Box -->
   <g transform="translate(60, 440)">
@@ -286,7 +311,7 @@ export async function GET(request, { params }) {
   <!-- Bottom Institutional Footer -->
   <line x1="60" y1="560" x2="1140" y2="560" stroke="#E2E8F0" stroke-width="1.5" />
   <text x="60" y="585" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#64748B">
-    Document Ref: PDS-${escapeXml(slug.toUpperCase())}-2026 · Authorized Clinical Reference · Lotusland Synthesis Alliance
+    Document Ref: PDS-${escapeXml(slug.toUpperCase())}-2026 · Authorized Clinical Reference
   </text>
   <text x="1140" y="585" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#0284C7">
     Verified on Atlas Health Clinical Engine 2026

@@ -587,10 +587,22 @@ export default function PublicDatasheetView({
     return supplierFilteredFormats;
   }, [isStrictlyLotusland, supplierFilteredFormats]);
 
-  // Fallback if no hierarchy is present
-  const availableFormats = sanitizedFormats.length > 0 ? sanitizedFormats : [
-    { id: 'vial', name: 'Lyophilized Subcutaneous Vial', strengths: sortedStrengths.map(s => s.id) }
-  ];
+  // Priority-ordered available formats: Prefilled Pen always comes before Cartridge / Refill
+  const availableFormats = useMemo(() => {
+    const list = sanitizedFormats.length > 0 ? [...sanitizedFormats] : [
+      { id: 'vial', name: 'Lyophilized Subcutaneous Vial', strengths: sortedStrengths.map(s => s.id) }
+    ];
+    const getOrder = (id) => {
+      const s = String(id || '').toLowerCase();
+      if (s.includes('pen') && !s.includes('cartridge')) return 1;
+      if (s.includes('vial')) return 2;
+      if (s.includes('cartridge')) return 3;
+      if (s.includes('spray') || s.includes('nasal')) return 4;
+      if (s.includes('oral') || s.includes('capsule')) return 5;
+      return 10;
+    };
+    return list.sort((a, b) => getOrder(a.id) - getOrder(b.id));
+  }, [sanitizedFormats, sortedStrengths]);
 
   const [activeFormatId, setActiveFormatId] = useState(() => {
     if (initialFormat) {
@@ -598,7 +610,9 @@ export default function PublicDatasheetView({
       const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
       if (found) return found.id;
     }
-    return availableFormats[0]?.id || 'vial';
+    // Prefer pre-filled pen over refill cartridge on initial load
+    const penFmt = availableFormats.find(f => f.id.toLowerCase().includes('pen') && !f.id.toLowerCase().includes('cartridge'));
+    return penFmt?.id || availableFormats[0]?.id || 'vial';
   });
 
   // Keep activeFormatId valid when available formats change
@@ -1143,7 +1157,7 @@ export default function PublicDatasheetView({
         />
 
         {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
-        {Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
+        {!product?.isSingleSupplierLocked && Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
           <div style={{
             margin: '0 0 1.25rem 0',
             padding: '12px 16px',
@@ -1739,6 +1753,8 @@ export default function PublicDatasheetView({
                   availableStrengths={sortedStrengths}
                   activeFormatId={activeFormatId}
                   activeFormat={activeFormat}
+                  availableFormats={availableFormats}
+                  onFormatChange={setActiveFormatId}
                   supplierName={displaySupplierName}
                   lang={lang}
                   primaryProtocol={primaryProtocol}
@@ -1863,12 +1879,24 @@ export default function PublicDatasheetView({
                   <div className="pds-label-type-head">
                     <span className="pds-label-badge-icon">🏷️</span>
                     <div>
-                      <h4 className="pds-label-type-title">{t.clientVialLabelTitle || 'Patient Vial Label'}</h4>
-                      <span className="pds-label-use-tag active">{t.patientSubqTag || 'For Patient Dispensing (SubQ)'}</span>
+                      <h4 className="pds-label-type-title">
+                        {isPenOrCart
+                          ? (lang === 'es' ? 'Etiqueta de Bolígrafo / Cartucho' : 'Patient Pen / Cartridge Label')
+                          : (t.clientVialLabelTitle || 'Patient Vial Label')}
+                      </h4>
+                      <span className="pds-label-use-tag active">
+                        {isPenOrCart
+                          ? (lang === 'es' ? 'Dispensación para Paciente (SubQ Pen)' : 'For Patient Dispensing (SubQ Pen)')
+                          : (t.patientSubqTag || 'For Patient Dispensing (SubQ)')}
+                      </span>
                     </div>
                   </div>
                   <p className="pds-label-type-desc">
-                    {t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.'}
+                    {isPenOrCart
+                      ? (lang === 'es'
+                          ? 'Etiqueta clínica de alta adherencia para bolígrafos y cartuchos de recambio. Muestra potencia de la formulación, lote estéril, instrucciones de dosificación por dial y QR de verificación directa.'
+                          : 'High-adhesion clinical label for patient dial pens and refill cartridges. Displays formulation potency, sterile batch number, dial dosage instructions, and direct-lookup verification QR.')
+                      : (t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.')}
                   </p>
                   <div className="pds-label-type-buttons">
                     <a 
