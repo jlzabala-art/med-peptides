@@ -710,7 +710,8 @@
   }
 
   .ptc-kpi-label {
-    font-size: 0.60rem;
+    font-size: 0.65rem;
+    font-weight: 700;
     letter-spacing: 0.02em;
     gap: 0.25rem;
   }

@@ -223,8 +223,8 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
           title="Click to copy batch identifier"
         >
           <div className="ptc-kpi-top">
-            <span className="ptc-kpi-label">
-              <Hash size={12} className="ptc-kpi-icon" color="#003666" /> {isDiagnosticKit ? (lang === 'es' ? 'Lote de Fabricación / Kit ID' : 'Kit Batch / Lot Identifier') : 'Batch / Lot Identifier'}
+            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Identificador de Lote de Fabricación' : 'Kit Batch / Lot Identifier') : 'Batch and Lot Traceability Identifier'}>
+              <Hash size={12} className="ptc-kpi-icon" color="#003666" /> {isDiagnosticKit ? 'Kit ID' : 'Batch ID'}
             </span>
             <button 
               type="button" 
@@ -251,8 +251,8 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         {/* Diagnostic Precision / Purity */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
-            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica (CV / RSD)' : 'Analytical Precision (CV / RSD)') : 'Reversed-Phase High-Performance Liquid Chromatography (RP-HPLC)'}>
-              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica' : 'Analytical Precision') : 'Analytical Purity'}
+            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Precisión Analítica (CV / RSD)' : 'Analytical Precision (CV / RSD)') : 'Reversed-Phase High-Performance Liquid Chromatography (RP-HPLC) Purity'}>
+              <Sparkles size={12} className="ptc-kpi-icon" color="#16a34a" /> {isDiagnosticKit ? (lang === 'es' ? 'Precisión' : 'Precision') : 'Purity'}
             </span>
             <span className="ptc-kpi-pill purity-pill" title="Reversed-Phase HPLC">{isDiagnosticKit ? diagnosticMetric.cv : 'RP-HPLC'}</span>
           </div>
@@ -269,8 +269,8 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         {/* Laboratory / Identity */}
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
-            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Central Analítico Acreditado' : 'Accredited Central Testing Laboratory') : 'Mass Spectrometry Identity Confirmation (LC-MS / ESI-MS)'}>
-              <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" /> {isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Central' : 'Testing Laboratory') : 'Mass Spec Identity'}
+            <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Central Analítico Acreditado' : 'Accredited Central Testing Laboratory') : 'Mass Spectrometry Molecular Identity Confirmation (LC-MS / ESI-MS)'}>
+              <Beaker size={12} className="ptc-kpi-icon" color="#0284c7" /> {isDiagnosticKit ? (lang === 'es' ? 'Laboratorio' : 'Testing Lab') : 'Mass Spec'}
             </span>
             <span className="ptc-kpi-pill ms-pill" title="Electrospray Ionization Liquid Chromatography-Mass Spectrometry">{isDiagnosticKit ? 'ISO 15189' : 'ESI-MS'}</span>
           </div>
@@ -288,7 +288,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         <div className="ptc-kpi-card">
           <div className="ptc-kpi-top">
             <span className="ptc-kpi-label" title={isDiagnosticKit ? (lang === 'es' ? 'Matriz de Muestra y Regulación' : 'Specimen Matrix & Directive') : 'Chemical Abstracts Service (CAS) Registry Identification'}>
-              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> {isDiagnosticKit ? (lang === 'es' ? 'Matriz de Muestra' : 'Specimen Matrix') : 'CAS Identification'}
+              <FlaskConical size={12} className="ptc-kpi-icon" color="#8b5cf6" /> {isDiagnosticKit ? (lang === 'es' ? 'Muestra' : 'Specimen') : 'CAS Number'}
             </span>
             <span className="ptc-kpi-pill cas-pill">{isDiagnosticKit ? 'CE-IVD' : 'CAS'}</span>
           </div>
