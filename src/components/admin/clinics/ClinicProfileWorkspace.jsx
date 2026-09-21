@@ -555,24 +555,36 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
             <FileUp size={14} /> Import Rx
           </button>
           <button
+            type="button"
             onClick={onClose}
-            className="gcp-btn-secondary"
+            aria-label="Cerrar panel"
+            title="Cerrar panel (Esc)"
             style={{
-              padding: '6px 14px',
-              fontSize: '0.78rem',
-              fontWeight: 600,
+              width: '36px',
+              height: '36px',
               borderRadius: '8px',
-              cursor: 'pointer',
+              border: '1px solid var(--border, #e2e8f0)',
+              backgroundColor: '#ffffff',
+              color: '#64748b',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #cbd5e1',
-              color: '#334155'
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
             }}
-            title="Cerrar panel"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
+              e.currentTarget.style.color = '#0f172a';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ffffff';
+              e.currentTarget.style.color = '#64748b';
+              e.currentTarget.style.borderColor = 'var(--border, #e2e8f0)';
+            }}
           >
-            <X size={15} /> Cerrar
+            <X size={18} />
           </button>
         </div>
       </div>
@@ -1386,23 +1398,6 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            type="button"
-            onClick={onClose}
-            className="gcp-btn-secondary"
-            style={{
-              padding: '8px 20px',
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              borderRadius: '8px',
-              cursor: 'pointer',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155'
-            }}
-          >
-            Cerrar
-          </button>
           <button
             type="button"
             onClick={() => {

@@ -115,6 +115,8 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
   const [kpiScope, setKpiScope] = useState('filtered');
   const selectedTerritory = getUrlParam('territory', 'All');
   const setSelectedTerritory = (val) => updateUrlParam('territory', val);
+  const selectedType = getUrlParam('type', 'All');
+  const setSelectedType = (val) => updateUrlParam('type', val);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [shareModalClinic, setShareModalClinic] = useState(null);
@@ -126,13 +128,19 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
       const city = (c.city || '').toLowerCase();
       const country = (c.country || '').toLowerCase();
       const type = (c.type || '').toLowerCase();
-      const q = searchTerm.toLowerCase();
+      const q = (searchTerm || '').toLowerCase().trim();
 
       const matchesSearch = !q || name.includes(q) || city.includes(q) || country.includes(q) || type.includes(q);
-      const matchesTerritory = selectedTerritory === 'All' || country.includes(selectedTerritory.toLowerCase()) || city.includes(selectedTerritory.toLowerCase());
-      return matchesSearch && matchesTerritory;
+      const matchesTerritory = !selectedTerritory || selectedTerritory === 'All' ||
+        country.includes(selectedTerritory.toLowerCase()) ||
+        city.includes(selectedTerritory.toLowerCase());
+      const matchesType = !selectedType || selectedType === 'All' ||
+        type === selectedType.toLowerCase() ||
+        type.includes(selectedType.toLowerCase());
+
+      return matchesSearch && matchesTerritory && matchesType;
     });
-  }, [clinics, searchTerm, selectedTerritory]);
+  }, [clinics, searchTerm, selectedTerritory, selectedType]);
 
   const columns = [
     {
@@ -403,7 +411,7 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
           {!loading && (
             <ClinicKPIs
               data={kpiScope === 'global' ? clinics : filtered}
-              isFiltered={Boolean(searchTerm.trim() || (selectedTerritory && selectedTerritory !== 'All'))}
+              isFiltered={Boolean(searchTerm.trim() || (selectedTerritory && selectedTerritory !== 'All') || (selectedType && selectedType !== 'All'))}
               scope={kpiScope}
               onScopeChange={setKpiScope}
               totalCount={clinics.length}
@@ -413,14 +421,60 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
           <GlobalSearchBar
             namespace="admin-clinics"
             placeholder="Search clinics by name, network, or territory..."
-            searchTerm={searchTerm}
-            onSearchChange={updateSearchTerm}
+            value={searchTerm}
+            onChange={updateSearchTerm}
             resultCount={loading ? undefined : filtered.length}
             bulkActions={bulkActions}
             selectedIds={selectedIds}
+            filters={[
+              selectedTerritory && selectedTerritory !== 'All' && {
+                key: 'territory',
+                label: 'Territory',
+                value: selectedTerritory,
+                onRemove: () => setSelectedTerritory('All')
+              },
+              selectedType && selectedType !== 'All' && {
+                key: 'type',
+                label: 'Type',
+                value: selectedType.replace(/_/g, ' '),
+                onRemove: () => setSelectedType('All')
+              }
+            ].filter(Boolean)}
+            filterOptions={[
+              {
+                key: 'territory',
+                label: 'Territory',
+                value: selectedTerritory === 'All' ? '' : selectedTerritory,
+                options: [
+                  { label: 'All Territories', value: '' },
+                  { label: 'Dubai (UAE)', value: 'Dubai' },
+                  { label: 'Doha (Qatar)', value: 'Doha' },
+                  { label: 'United Arab Emirates', value: 'United Arab Emirates' },
+                  { label: 'Qatar', value: 'Qatar' }
+                ],
+                onChange: (val) => setSelectedTerritory(val || 'All')
+              },
+              {
+                key: 'type',
+                label: 'Facility Type',
+                value: selectedType === 'All' ? '' : selectedType,
+                options: [
+                  { label: 'All Types', value: '' },
+                  { label: 'Longevity Clinic', value: 'longevity_clinic' },
+                  { label: 'Aesthetic Center', value: 'aesthetic_center' },
+                  { label: 'Hospital', value: 'hospital' },
+                  { label: 'Polyclinic', value: 'polyclinic' }
+                ],
+                onChange: (val) => setSelectedType(val || 'All')
+              }
+            ]}
           />
           
-          <TerritoryFilter selectedTerritory={selectedTerritory} onSelectTerritory={setSelectedTerritory} />
+          <TerritoryFilter
+            clinics={clinics}
+            selectedTerritory={selectedTerritory}
+            onSelectTerritory={setSelectedTerritory}
+          />
           
           <div style={{ backgroundColor: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden', marginTop: '1rem' }}>
             <DataTable

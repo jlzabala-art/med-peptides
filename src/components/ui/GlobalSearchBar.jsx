@@ -64,8 +64,10 @@ import { trackSearchClick } from '@/services/algoliaInsights';
  * />
  */
 export default function GlobalSearchBar({
-  value = '',
+  value,
+  searchTerm,
   onChange,
+  onSearchChange,
   placeholder = 'Search...',
   resultCount,
   isLoading = false,
@@ -80,6 +82,8 @@ export default function GlobalSearchBar({
   filters = [],          // Active filter chips rendered below the bar
   filterOptions = [],    // Quick-filter dropdowns rendered inside the bar
 }) {
+  const effectiveValue = value !== undefined ? value : (searchTerm !== undefined ? searchTerm : '');
+  const effectiveOnChange = onChange || onSearchChange;
   const router = useRouter();
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -109,7 +113,7 @@ export default function GlobalSearchBar({
 
   // Debounced Algolia instant suggestions query & Natural Language /ai support
   useEffect(() => {
-    const trimmedVal = (value || '').trim();
+    const trimmedVal = (effectiveValue || '').trim();
     if (trimmedVal.startsWith('/ai') || trimmedVal.startsWith('/copilot')) {
       const q = trimmedVal.replace(/^\/(ai|copilot)\s*/i, '').trim();
       setSuggestions([
@@ -128,7 +132,7 @@ export default function GlobalSearchBar({
       return;
     }
 
-    if (!value || value.trim().length < 2) {
+    if (!effectiveValue || effectiveValue.trim().length < 2) {
       setSuggestions([]);
       setIsSearchingSuggestions(false);
       setSelectedIndex(-1);
@@ -139,7 +143,7 @@ export default function GlobalSearchBar({
     setIsSearchingSuggestions(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await searchAlgolia(value.trim());
+        const res = await searchAlgolia(effectiveValue.trim());
         if (isMounted) {
           // Products are now natively deduplicated by Algolia (attributeForDistinct: canonicalKey)
           const seenProdKeys = new Set();
@@ -264,23 +268,23 @@ export default function GlobalSearchBar({
   const handleChange = useCallback(
     (e) => {
       const term = e.target.value;
-      onChange?.(term);
+      effectiveOnChange?.(term);
       if (!term) {
         setShowDropdown(showRecent && recentSearches.length > 0);
       } else if (term.trim().length >= 2) {
         setShowDropdown(true);
       }
     },
-    [onChange, showRecent, recentSearches]
+    [effectiveOnChange, showRecent, recentSearches]
   );
 
   const handleClear = useCallback(() => {
-    onChange?.('');
+    effectiveOnChange?.('');
     inputRef.current?.focus();
     if (showRecent && recentSearches.length > 0) {
       setShowDropdown(true);
     }
-  }, [onChange, showRecent, recentSearches]);
+  }, [effectiveOnChange, showRecent, recentSearches]);
 
   const saveRecentSearch = useCallback(
     (term) => {
@@ -304,7 +308,7 @@ export default function GlobalSearchBar({
         saveRecentSearch(item.name);
         setShowDropdown(false);
         setSelectedIndex(-1);
-        onChange?.('');
+        effectiveOnChange?.('');
         return;
       }
 
@@ -328,10 +332,10 @@ export default function GlobalSearchBar({
       }
 
       // In-page selection
-      onChange?.(item.name);
+      effectiveOnChange?.(item.name);
       inputRef.current?.focus();
     },
-    [onChange, saveRecentSearch, isProtocolsPage, router]
+    [effectiveOnChange, saveRecentSearch, isProtocolsPage, router]
   );
 
   const handleKeyDown = useCallback(
@@ -348,7 +352,7 @@ export default function GlobalSearchBar({
         return;
       }
       if (e.key === 'Enter') {
-        const trimmed = (value || '').trim();
+        const trimmed = (effectiveValue || '').trim();
         if (trimmed.startsWith('/ai') || trimmed.startsWith('/copilot')) {
           e.preventDefault();
           const query = trimmed.replace(/^\/(ai|copilot)\s*/i, '').trim();
@@ -356,7 +360,7 @@ export default function GlobalSearchBar({
           saveRecentSearch(trimmed);
           setShowDropdown(false);
           setSelectedIndex(-1);
-          onChange?.('');
+          effectiveOnChange?.('');
           return;
         }
 
@@ -374,16 +378,16 @@ export default function GlobalSearchBar({
         handleClear();
       }
     },
-    [value, suggestions, selectedIndex, handleSuggestionClick, saveRecentSearch, handleClear, onChange]
+    [effectiveValue, suggestions, selectedIndex, handleSuggestionClick, saveRecentSearch, handleClear, effectiveOnChange]
   );
 
   const handleRecentClick = useCallback(
     (term) => {
-      onChange?.(term);
+      effectiveOnChange?.(term);
       setShowDropdown(false);
       inputRef.current?.focus();
     },
-    [onChange]
+    [effectiveOnChange]
   );
 
   const clearRecent = useCallback(() => {
@@ -428,7 +432,7 @@ export default function GlobalSearchBar({
             type="text"
             className="atlas-search__input"
             placeholder={effectivePlaceholder}
-            value={value}
+            value={effectiveValue}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
@@ -445,7 +449,7 @@ export default function GlobalSearchBar({
           )}
 
           {/* Clear button */}
-          {value && (
+          {effectiveValue && (
             <button className="atlas-search__clear" onClick={handleClear} title="Clear search (Esc)">
               <X size={14} />
             </button>
