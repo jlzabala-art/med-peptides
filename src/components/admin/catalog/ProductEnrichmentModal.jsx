@@ -14,9 +14,23 @@ const ENRICHMENT_STEPS = [
   { id: 4, label: 'Completeness Sync (100%)', icon: FileCheck, desc: 'Validating and persisting authoritative records' },
 ];
 
+const CATEGORY_OPTIONS = [
+  { id: 'peptide', label: '🧬 Peptides & Hormones' },
+  { id: 'supplement', label: '🌿 Supplements & Nutraceuticals' },
+  { id: 'diagnostic_test', label: '🔬 Diagnostic & Genetic Tests' },
+  { id: 'raw_material', label: '⚗️ Raw Materials & APIs (Compounding)' },
+  { id: 'excipient_vehicle', label: '🧴 Excipients & Vehicles' },
+  { id: 'medical_device_consumable', label: '💉 Consumables & Devices' },
+  { id: 'service', label: '📅 Services & Subscriptions' },
+  { id: 'skincare', label: '✨ Skincare & Topicals' },
+];
+
 export default function ProductEnrichmentModal({ isOpen, onClose, product: initialProduct, onEnriched }) {
   const [isEnriching, setIsEnriching] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(initialProduct);
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialProduct?.categoryId || initialProduct?.category || 'peptide'
+  );
   const [currentStep, setCurrentStep] = useState(1);
   const [animatedScore, setAnimatedScore] = useState(0);
   const autoEnrichTriggeredRef = useRef(null);
@@ -24,28 +38,38 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
   useEffect(() => {
     setCurrentProduct(initialProduct);
     if (initialProduct) {
-      const comp = calculateProductCompleteness(initialProduct);
+      const initialCat = initialProduct.categoryId || initialProduct.category || 'peptide';
+      setSelectedCategory(initialCat);
+      const comp = calculateProductCompleteness({
+        ...initialProduct,
+        categoryId: initialCat,
+        category: initialCat
+      });
       setAnimatedScore(comp.score);
     }
   }, [initialProduct]);
 
-  const activeProduct = currentProduct || initialProduct;
+  const activeProduct = currentProduct
+    ? { ...currentProduct, categoryId: selectedCategory, category: selectedCategory }
+    : (initialProduct ? { ...initialProduct, categoryId: selectedCategory, category: selectedCategory } : null);
+
   const completeness = activeProduct ? calculateProductCompleteness(activeProduct) : null;
   const { score = 0, color = '#64748b', bgColor = '#f8fafc', borderColor = '#e2e8f0', statusLabel = '', missingFields = [], schemaType = 'General' } = completeness || {};
 
-  // Auto-start enrichment when opened if score < 100%
-  useEffect(() => {
-    if (isOpen && activeProduct && activeProduct.id && score < 100 && !isEnriching) {
-      // Trigger once per open product instance
-      if (autoEnrichTriggeredRef.current !== activeProduct.id) {
-        autoEnrichTriggeredRef.current = activeProduct.id;
-        handleAutoEnrich();
-      }
+  const handleCategoryChange = (newCat) => {
+    setSelectedCategory(newCat);
+    if (currentProduct || initialProduct) {
+      const updated = {
+        ...(currentProduct || initialProduct),
+        categoryId: newCat,
+        category: newCat
+      };
+      setCurrentProduct(updated);
+      const newComp = calculateProductCompleteness(updated);
+      setAnimatedScore(newComp.score);
+      notifier.info(`Switched template to ${newCat.replace(/_/g, ' ')}`);
     }
-    if (!isOpen) {
-      autoEnrichTriggeredRef.current = null;
-    }
-  }, [isOpen, activeProduct?.id, score]);
+  };
 
   const handleAutoEnrich = async () => {
     if (!activeProduct || isEnriching) return;
@@ -72,7 +96,8 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
         body: JSON.stringify({
           productId: activeProduct.id,
           canonicalName: activeProduct.canonicalName || activeProduct.name,
-          currentProduct: activeProduct
+          currentProduct: activeProduct,
+          categoryId: selectedCategory
         })
       });
 
@@ -85,6 +110,8 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
 
         const enrichedProd = {
           ...data.product,
+          categoryId: selectedCategory,
+          category: selectedCategory,
           variants: data.variants && data.variants.length > 0 ? data.variants : (activeProduct.variants || [])
         };
         setCurrentProduct(enrichedProd);
@@ -199,6 +226,50 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
             backgroundColor: activeColor,
             transition: 'width 0.4s ease-out'
           }} />
+        </div>
+
+        {/* Category Template Selector */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.75rem',
+          padding: '0.85rem 1rem',
+          backgroundColor: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Enrichment Template (Category)
+            </span>
+            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              Applying {schemaType} criteria
+            </span>
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            disabled={isEnriching}
+            aria-label="Enrichment Category Template"
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '6px',
+              border: '1px solid #cbd5e1',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              color: '#0f172a',
+              backgroundColor: '#ffffff',
+              cursor: isEnriching ? 'not-allowed' : 'pointer',
+              outline: 'none',
+              minWidth: '210px'
+            }}
+          >
+            {CATEGORY_OPTIONS.map(opt => (
+              <option key={opt.id} value={opt.id}>{opt.label}</option>
+            ))}
+          </select>
         </div>
 
         {/* Live Stepper when Enriching */}

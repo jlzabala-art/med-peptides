@@ -12,6 +12,7 @@ import {
   Snowflake, 
   FlaskConical, 
   Droplet, 
+  Droplets,
   Clock, 
   Stethoscope, 
   Sun,
@@ -28,8 +29,28 @@ function detectProductFamily(row) {
   const cat = String(row.category || '').toLowerCase();
   const tags = (row.tags || []).map(t => String(t).toLowerCase());
   const types = getProductAvailableTypes(row).map(t => String(t).toLowerCase());
+  const sample = String(row.sampleType || row.sample || '').toLowerCase();
+  const pres = String(row.presentation || row.format || '').toLowerCase();
+  const subcat = String(row.subcategory || '').toLowerCase();
+  const supp = String(row.supplierId || row.supplierName || row.supplier || '').toLowerCase();
 
-  // 1. Diagnostics & Genomics Tests
+  // 1a. Capillary & Venous Blood Diagnostics (Bloodo DBS, finger-prick biomarker kits)
+  const isBloodTest = 
+    sample.includes('blood') ||
+    sample.includes('dbs') ||
+    sample.includes('capillary') ||
+    pres.includes('blood_test') ||
+    subcat.includes('blood') ||
+    tags.some(t => t.includes('blood')) ||
+    supp.includes('bloodo') ||
+    name.includes('bloodo') ||
+    (name.includes('test') && (name.includes('testosterone') || name.includes('hba1c') || name.includes('cortisol') || name.includes('omega') || name.includes('vitamin d') || name.includes('nad')));
+
+  if (isBloodTest) {
+    return 'blood_diagnostic';
+  }
+
+  // 1b. Saliva, Buccal & Genomics/Epigenetic DNA Tests (Eterna, TrichoTest, TeloTest, NutriGen...)
   if (
     types.includes('diagnostic') ||
     cat.includes('diagnostic') ||
@@ -39,6 +60,8 @@ function detectProductFamily(row) {
     name.includes('trichotest') ||
     name.includes('nutrigen') ||
     name.includes('dna') ||
+    name.includes('eterna') ||
+    supp.includes('eterna') ||
     tags.some(t => t.includes('genomics') || t.includes('test'))
   ) {
     return 'genomics_diagnostic';
@@ -304,9 +327,139 @@ export default function CatalogVariantExpander({
       }
 
       /* ─────────────────────────────────────────────────────────────
-         3. DIAGNOSTICS & GENOMIC TESTING KITS (TrichoTest, TeloTest...)
+         3a. BLOOD DIAGNOSTICS & CAPILLARY BIOMARKER KITS (Bloodo DBS)
+         ───────────────────────────────────────────────────────────── */
+      case 'blood_diagnostic': {
+        const sampleText = row.sampleType || 'Capillary Blood (Dried Blood Spot - DBS)';
+        const pNameLower = String(row.canonicalName || row.name || row.id || '').toLowerCase();
+        
+        // Resolve clinical methodology dynamically or per specific blood test
+        const isTesto = pNameLower.includes('testosterone');
+        const isNad = pNameLower.includes('nad');
+        const isHba1c = pNameLower.includes('hba1c') || pNameLower.includes('hemoglobin');
+        const isOmega = pNameLower.includes('omega');
+        const isVitD = pNameLower.includes('vitamin d') || pNameLower.includes('vit-d');
+        const isCortisol = pNameLower.includes('cortisol');
+
+        let defaultMethodTitle = 'Quantitative LC-MS/MS & Immunoassays';
+        let defaultMethodSub = 'LifeLab1 (Vilnius, Lithuania) • High Analytical Precision (RSD < 5%)';
+        let defaultScopeTitle = goalsList || 'Endocrine & Metabolic Biomarker Profile';
+        let defaultScopeSub = 'Quantitative capillary micro-sample analysis for targeted therapy optimization';
+
+        if (isTesto) {
+          defaultMethodTitle = 'CDC-Standardized LC-MS/MS & ECLIA';
+          defaultMethodSub = 'Quantifies Total & Free Testosterone, SHBG, Albumin & Free Androgen Index';
+          defaultScopeTitle = 'Hormonal Balance & Androgenic Health';
+          defaultScopeSub = 'Monitors hypogonadism, anabolic/anti-aging therapies and physical vitality';
+        } else if (isNad) {
+          defaultMethodTitle = 'Enzymatic Cyclic Spectrophotometric Assay';
+          defaultMethodSub = 'Measures Total Intracellular NAD (NAD⁺ & NADH) • Limit of Detection: 0.23 µmol/L';
+          defaultScopeTitle = 'Mitochondrial Bioenergetics & Longevity';
+          defaultScopeSub = 'Evaluates cellular energy depletion, PARP1/sirtuin activation & therapy response';
+        } else if (isHba1c) {
+          defaultMethodTitle = 'Turbidimetric Inhibition Immunoassay (TINIA)';
+          defaultMethodSub = 'Standardized to IFCC & DCCT/NGSP Reference Laboratory Networks';
+          defaultScopeTitle = 'Glycemic Regulation & Metabolic Longevity';
+          defaultScopeSub = '3-month average glucose homeostasis & cardiometabolic risk monitoring';
+        } else if (isOmega) {
+          defaultMethodTitle = 'Capillary Gas Chromatography (GC-FID / GC-MS)';
+          defaultMethodSub = 'Analyzes 24 fatty acids in erythrocyte membranes • Precision RSD < 4.5%';
+          defaultScopeTitle = 'Cellular Inflammation & Cardiovascular Profile';
+          defaultScopeSub = 'Omega-3 Index, Omega-6:3 ratio & trans-fatty acid cellular integration';
+        } else if (isVitD) {
+          defaultMethodTitle = 'Liquid Chromatography Tandem Mass Spectrometry (LC-MS/MS)';
+          defaultMethodSub = 'Differentiates 25-OH Vitamin D2 and D3 with zero cross-reactivity';
+          defaultScopeTitle = 'Immune, Bone & Endocrine Homeostasis';
+          defaultScopeSub = 'Optimizes clinical dosing for osteo-immune resilience and hormonal health';
+        } else if (isCortisol) {
+          defaultMethodTitle = 'Electrochemiluminescence Immunoassay (ECLIA)';
+          defaultMethodSub = 'Morning basal awakening calibration • High sensitivity LOD: 1.5 nmol/L';
+          defaultScopeTitle = 'Adrenal Function & HPA Axis Stress Dynamics';
+          defaultScopeSub = 'Identifies hypocortisolemia/burnout vs allostatic hypercortisolemic overload';
+        }
+
+        const methodTitle = row.methodology || defaultMethodTitle;
+        const certTitle = row.labAccreditation || 'CE-IVD Marked (EU 2017/746 IVDR)';
+        const tatTitle = row.turnaroundTime || '3 – 5 Business Days Processing';
+
+        return (
+          <>
+            {/* Card 1: Sample Matrix */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}>
+                  <Droplets size={13} />
+                </div>
+                <span className="meta-card-tag">Diagnostic Sample Matrix</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#dc2626' }}>
+                {sampleText}
+              </div>
+              <div className="meta-card-sub">
+                At-Home Finger-Prick Collection • Micro-sample Matrix Preservation
+              </div>
+            </div>
+
+            {/* Card 2: Analytical Assay */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+                  <Activity size={13} />
+                </div>
+                <span className="meta-card-tag">Clinical Analytical Assay</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#059669' }}>
+                {methodTitle}
+              </div>
+              <div className="meta-card-sub">
+                {defaultMethodSub}
+              </div>
+            </div>
+
+            {/* Card 3: Regulatory & Lab Standards */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                  <ShieldCheck size={13} />
+                </div>
+                <span className="meta-card-tag">Regulatory & Lab Standards</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0284c7' }}>
+                {certTitle}
+              </div>
+              <div className="meta-card-sub">
+                ISO 13485 & ISO 15189 Certified Clinical Diagnostics Laboratory (LifeLab1)
+              </div>
+            </div>
+
+            {/* Card 4: Turnaround Time & Report */}
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+                  <Clock size={13} />
+                </div>
+                <span className="meta-card-tag">Turnaround Time & Report</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0f172a' }}>
+                {tatTitle}
+              </div>
+              <div className="meta-card-sub">
+                Prepaid return logistics • Encrypted patient portal with actionable clinical report
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         3b. SALIVA / BUCCAL GENOMICS & EPIGENETIC KITS (Eterna, TrichoTest...)
          ───────────────────────────────────────────────────────────── */
       case 'genomics_diagnostic': {
+        const sampleText = row.sampleType || 'Buccal Swab (Saliva DNA Matrix)';
+        const methodText = row.methodology || 'High-Density DNA Microarray & qPCR Genotyping Technology';
+        const certText = row.labAccreditation || 'CLIA / CAP / ISO 15189 Accredited Lab';
+        const tatText = row.turnaroundTime || '10 – 14 Business Days Processing';
+
         return (
           <>
             <div className="meta-card">
@@ -317,10 +470,10 @@ export default function CatalogVariantExpander({
                 <span className="meta-card-tag">Genomic Methodology & Sample</span>
               </div>
               <div className="meta-card-title" style={{ color: '#7c3aed' }}>
-                Buccal Swab (Saliva DNA Matrix)
+                {sampleText}
               </div>
               <div className="meta-card-sub">
-                High-Density DNA Microarray & qPCR Genotyping Technology
+                {methodText}
               </div>
             </div>
 
@@ -347,7 +500,7 @@ export default function CatalogVariantExpander({
                 <span className="meta-card-tag">Diagnostic Certification</span>
               </div>
               <div className="meta-card-title" style={{ color: '#0284c7' }}>
-                CLIA / CAP / ISO 15189 Accredited Lab
+                {certText}
               </div>
               <div className="meta-card-sub">
                 Evidence-based clinical decision support algorithm (Grade A/B clinical studies)
@@ -362,7 +515,7 @@ export default function CatalogVariantExpander({
                 <span className="meta-card-tag">Turnaround Time & Report</span>
               </div>
               <div className="meta-card-title" style={{ color: '#0f172a' }}>
-                10 – 14 Business Days Processing
+                {tatText}
               </div>
               <div className="meta-card-sub">
                 Interactive digital portal report with actionable treatment formulas

@@ -238,9 +238,9 @@ const EXCIPIENT_VEHICLE_SCHEMA = [
 const API_RAW_MATERIAL_SCHEMA = [
   // Chemical & Molecular Identity (25pts)
   { key: 'casNumber', label: 'CAS Registry Number', weight: 8, category: 'Scientific',
-    check: p => !!(p.casNumber || p.scientificData?.casNumber || p.molecular?.casNumber || p.cas) },
+    check: p => !!(p.casNumber || p.scientificData?.casNumber || p.molecular?.casNumber || p.cas || p.cas_number) },
   { key: 'molecularSpecs', label: 'Molecular Specs (MW / Formula)', weight: 7, category: 'Scientific',
-    check: p => !!(p.molecularWeight || p.molecularFormula || p.scientificData?.molecularWeight || p.scientificData?.molecularFormula || p.molecular?.molecularWeight || p.science?.molecularFormula) },
+    check: p => !!(p.molecularWeight || p.molecularFormula || p.scientificData?.molecularWeight || p.scientificData?.molecularFormula || p.molecular?.molecularWeight || p.molecular?.molecularFormula || p.science?.molecularFormula) },
   { key: 'pubchemCid', label: 'PubChem CID / IUPAC', weight: 5, category: 'Scientific',
     check: p => !!(p.pubchemCid || p.scientificData?.pubchemCid || p.molecular?.pubchemCid || p.scientificData?.iupacName) },
   { key: 'mechanismOfAction', label: 'Mechanism of Action / Pharmacology', weight: 5, category: 'Scientific',
@@ -248,11 +248,11 @@ const API_RAW_MATERIAL_SCHEMA = [
 
   // Compounding & Master Formulation (25pts)
   { key: 'compoundingRules', label: 'Compounding Dosage & Range', weight: 10, category: 'Compounding',
-    check: p => !!(p.compoundingRules?.recommendedConcentration || p.compoundingRules?.dosageRange || p.compoundingRules?.recommendedDose || p.compoundingRules?.minConcentration || p.compoundingRules) },
+    check: p => !!(p.compoundingRules?.recommendedConcentration || p.compoundingRules?.dosageRange || p.compoundingRules?.recommendedDose || p.compoundingRules?.minConcentration || p.dosage || p.dosageRange || p.typeData?.dosageRange || p.compoundingRules) },
   { key: 'vehicleCompatibility', label: 'Vehicle Compatibility & Solubility', weight: 8, category: 'Compounding',
     check: p => !!(p.compoundingRules?.compatibleVehicles?.length > 0 || p.compoundingRules?.vehicleRecommended || p.scientificData?.solubility || p.solubility || p.diluent) },
   { key: 'stabilityPh', label: 'Optimal pH Stability & Storage', weight: 7, category: 'Compounding',
-    check: p => !!(p.compoundingRules?.optimalPh || p.compoundingRules?.incompatibilities || p.scientificData?.stability || p.storageConditions || p.storage) },
+    check: p => !!(p.compoundingRules?.optimalPh || p.compoundingRules?.incompatibilities || p.scientificData?.stability || p.storageConditions || p.storage || p.scientificData?.storage) },
 
   // Sourcing, Bulk Formats & Pricing (25pts)
   { key: 'supplier', label: 'Supplier Linked (e.g. Fagron Iberia)', weight: 10, category: 'Supply Chain',
@@ -262,15 +262,13 @@ const API_RAW_MATERIAL_SCHEMA = [
   { key: 'pricing', label: 'Bulk Unit Pricing', weight: 7, category: 'Commercial',
     check: p => (p.variants?.some(v => v.price > 0 || v.unit_price > 0 || v.cost_price > 0 || v.trade_price > 0)) || p.price > 0 || p.min_unit_price > 0 || p.canonical_price_usd > 0 },
 
-  // Clinical Programs & Therapeutic Goals (15pts)
-  { key: 'programs', label: 'Genomics Test Programs (Telo/Tricho/Nutri)', weight: 10, category: 'Genomics',
-    check: p => (Array.isArray(p.programs) && p.programs.length > 0) || (Array.isArray(p.tags) && p.tags.some(t => String(t).startsWith('fagron-genomics-') || t === 'Fagron Genomics')) },
+  // Storage & Quality Standards (25pts)
+  { key: 'storageConditions', label: 'Storage & Handling Protocol', weight: 10, category: 'Clinical',
+    check: p => !!(p.storageConditions || p.storage || p.scientificData?.storage || p.apiSpecs?.storageConditionLyophilized || p.stability || p.scientificData?.stability) },
   { key: 'primaryGoal', label: 'Clinical / Health Target', weight: 5, category: 'Metadata',
     check: p => !!(p.primaryGoal || p.goal || p.clinicalGoals?.length > 0 || p.goals?.length > 0) },
-
-  // Quality Standard & Purity (10pts)
   { key: 'purity', label: 'HPLC Purity / Grade (USP/EP)', weight: 5, category: 'Supply Chain',
-    check: p => !!(p.purity || p.grade || p.apiSpecs?.purityPercentage || p.variants?.some(v => v.purity || v.grade)) },
+    check: p => !!(p.purity || p.grade || p.scientificData?.grade || p.apiSpecs?.purityPercentage || p.variants?.some(v => v.purity || v.grade)) },
   { key: 'coa', label: 'Certificate of Analysis (CoA)', weight: 5, category: 'Supply Chain',
     check: p => !!(p.hasCOA || p.coaUrl || p.variants?.some(v => v.hasCOA)) },
 ];
@@ -280,6 +278,8 @@ export function isVehicleProduct(product) {
   const cat = (product.categoryId || product.category || '').toLowerCase().trim();
   const name = (product.name || product.canonicalName || '').toLowerCase();
   return (
+    cat === 'excipient_vehicle' ||
+    cat === 'excipient' ||
     cat.includes('vehicle') ||
     cat.includes('excipient') ||
     cat.includes('base') ||
@@ -300,18 +300,24 @@ export function isApiProduct(product) {
   const type = (product.productType || product.type || product.product_type || '').toLowerCase().trim();
   const name = (product.name || product.canonicalName || '').toLowerCase();
   
-  // Finished peptides, hormones, and finished products belong to PEPTIDE/HORMONE schema
+  // Finished products never map to raw API schema unless explicitly raw material
   if (type === 'finished_product') return false;
+
+  // Specific high-level categories take absolute precedence over format type
+  if (cat === 'supplement' || cat === 'nutricosmetics' || cat === 'nutraceutical') return false;
+  if (cat === 'diagnostic_test' || cat === 'genetic_test' || cat === 'biomarker_test' || cat === 'genomics_biomarkers' || cat === 'genomics') return false;
+  if (cat === 'service' || cat === 'subscription') return false;
+  if (cat === 'clinical_supplies' || cat === 'medical_device_consumable' || cat === 'equipment' || cat === 'capsules_and_consumables') return false;
+  if (cat === 'skincare') return false;
+
   if (cat === 'peptide' || cat === 'peptides' || cat === 'hormone' || cat === 'hormone optimization') {
-    if (type !== 'raw_material' && type !== 'api_raw_material') return false;
+    return false;
   }
   
   // Explicit raw material / bulk API indicators
-  if (type === 'raw_material' || type === 'api_raw_material' || product.is_raw_material === true || product.isApi === true) return true;
   if (cat === 'raw_material' || cat === 'api_raw_material' || cat === 'active_ingredient' || cat === 'api') return true;
+  if (type === 'raw_material' || type === 'api_raw_material' || product.is_raw_material === true || product.isApi === true) return true;
   if (product.compoundingRules && !isVehicleProduct(product)) return true;
-  if (Array.isArray(product.programs) && product.programs.length > 0) return true;
-  if (Array.isArray(product.tags) && product.tags.some(t => String(t).startsWith('fagron-genomics-') || t === 'Fagron Genomics')) return true;
   if (Array.isArray(product.availableTypes) && product.availableTypes.includes('raw_material') && !product.availableTypes.includes('finished_product')) return true;
   if (Array.isArray(product.variants) && product.variants.some(v => v.type === 'raw_material' || v.format?.toLowerCase() === 'bulk_powder' || v.format?.toLowerCase() === 'raw_api')) return true;
   
@@ -328,59 +334,28 @@ const HORMONE_SCHEMA = PEPTIDE_SCHEMA.map(f =>
 // ─── Schema Resolver ──────────────────────────────────────────────────────────
 /**
  * Resolves the scoring schema based on category or productType.
- * Priority: isVehicleProduct → isApiProduct → product.category → product.productType → infer from content
+ * Priority: Authoritative Category (categoryId / category) → isVehicleProduct → isApiProduct → fallbacks
  */
 function resolveSchema(product) {
-  // 1. Check if it's a Galenic Vehicle / Compounding Base first
-  if (isVehicleProduct(product)) {
-    return EXCIPIENT_VEHICLE_SCHEMA;
-  }
-
-  // 2. Check if it's an API / Raw Material / Compounding item
-  if (isApiProduct(product)) {
-    return API_RAW_MATERIAL_SCHEMA;
-  }
-
   // categoryId is authoritative (Phase 1); category kept as fallback
   const cat = (product?.categoryId || product?.category || '').toLowerCase().trim();
   const type = (product?.productType || product?.type || '').toLowerCase().trim();
   const name = (product?.name || product?.canonicalName || '').toLowerCase();
 
-  // Vehicles / Excipients / Topical Bases (TrichoSol, TrichoSerum, Pentravan, Nourivan...)
-  if (
-    cat.includes('vehicle') ||
-    cat.includes('excipient') ||
-    cat.includes('base') ||
-    cat.includes('tricholog') ||
-    name.includes('trichosol') ||
-    name.includes('trichoserum') ||
-    name.includes('pentravan') ||
-    name.includes('nourivan') ||
-    name.includes('syrspend') ||
-    name.includes('versabase')
-  ) {
+  // 1. Vehicles / Excipients / Compounding Bases
+  if (cat === 'excipient_vehicle' || cat === 'excipient' || isVehicleProduct(product)) {
     return EXCIPIENT_VEHICLE_SCHEMA;
   }
 
-  // Raw Active Pharmaceutical Ingredients (APIs) & Compounding Chemicals
+  // 2. Diagnostic & Genetic Tests (Blood, Saliva, DNA, Epigenetics)
   if (
-    cat === 'raw_material' || 
-    cat === 'api_raw_material' || 
-    cat === 'api' || 
-    type === 'raw_material' || 
-    type === 'api_raw_material'
-  ) return API_RAW_MATERIAL_SCHEMA;
-
-  // Tests / Genomics / Biomarkers
-  if (
+    cat === 'diagnostic_test' ||
+    cat === 'genetic_test' ||
+    cat === 'biomarker_test' ||
     cat === 'genomics_biomarkers' ||
     cat === 'genomics' ||
     cat === 'diagnostic' ||
-    cat === 'diagnostic_test' || 
-    cat === 'genetic_test' || 
     cat === 'lab_test' ||
-    cat.includes('genom') ||
-    cat.includes('biomarker') ||
     type === 'test' ||
     type === 'genomics_biomarkers' ||
     type === 'dna_testing_kit' ||
@@ -388,27 +363,49 @@ function resolveSchema(product) {
     name.includes('dna test') ||
     name.includes('trichotest') ||
     name.includes('nutrigen')
-  ) return DIAGNOSTIC_TEST_SCHEMA;
+  ) {
+    return DIAGNOSTIC_TEST_SCHEMA;
+  }
 
-  // Peptides & Hormones
+  // 3. Dietary Supplements & Nutraceuticals (Explicit category takes precedence over raw_material type)
+  if (
+    cat === 'supplement' ||
+    cat === 'nutricosmetics' ||
+    cat === 'weight_loss' ||
+    cat === 'nutraceutical'
+  ) {
+    return SUPPLEMENT_SCHEMA;
+  }
+
+  // 4. Raw Active Pharmaceutical Ingredients (APIs) & Compounding Chemicals
+  if (
+    cat === 'raw_material' || 
+    cat === 'api_raw_material' || 
+    cat === 'api' ||
+    isApiProduct(product)
+  ) {
+    return API_RAW_MATERIAL_SCHEMA;
+  }
+
+  // 5. Peptides & Hormones
   if (cat === 'hormone') return HORMONE_SCHEMA;
   if (['peptide', 'peptides', 'hormone optimization'].includes(cat)) return PEPTIDE_SCHEMA;
   if (cat.startsWith('cardiovascular') || cat.startsWith('metabolic')) return PEPTIDE_SCHEMA;
 
-  // Supplements / Nutraceuticals
-  if (['supplement', 'nutricosmetics', 'weight_loss', 'nutraceutical'].includes(cat)) return SUPPLEMENT_SCHEMA;
+  // 6. Medical Equipment / Consumables / Clinical Supplies
+  if (['clinical_supplies', 'medical_device_consumable', 'equipment', 'consumables', 'capsules_and_consumables'].includes(cat)) {
+    return EQUIPMENT_SCHEMA;
+  }
 
-  // Equipment / Medical Consumables / Clinical Supplies
-  if (['clinical_supplies', 'medical_device_consumable', 'equipment', 'consumables'].includes(cat)) return EQUIPMENT_SCHEMA;
+  // 7. Services & Subscriptions
+  if (cat === 'service' || cat === 'subscription' || cat === 'logistics_service' || type === 'subscription') {
+    return SERVICE_SCHEMA;
+  }
 
-  // Vehicles / Excipients
-  if (['excipient_vehicle', 'excipient'].includes(cat)) return EXCIPIENT_VEHICLE_SCHEMA;
-
-  // Services & Logistics
-  if (cat === 'service' || cat === 'logistics_service' || type === 'subscription') return SERVICE_SCHEMA;
-
-  // Skincare & Cosmeceuticals
-  if (cat === 'skincare' || cat === 'skin_anti_aging') return SKINCARE_SCHEMA;
+  // 8. Skincare & Cosmeceuticals
+  if (cat === 'skincare' || cat === 'skin_anti_aging') {
+    return SKINCARE_SCHEMA;
+  }
 
   // Type-based fallbacks
   if (/api|raw material|bulk|materia prima/i.test(name)) return API_RAW_MATERIAL_SCHEMA;
@@ -463,38 +460,32 @@ export function calculateProductCompleteness(product) {
 }
 
 function resolveSchemaLabel(product) {
-  if (isVehicleProduct(product)) return 'Galenic Vehicle / Excipient';
-  if (isApiProduct(product)) return 'Active API / Compounding';
-
-  // categoryId is authoritative (Phase 1); category kept as fallback
   const cat = (product?.categoryId || product?.category || '').toLowerCase().trim();
   const type = (product?.productType || product?.type || '').toLowerCase().trim();
   const name = (product?.name || product?.canonicalName || '').toLowerCase();
 
+  if (cat === 'excipient_vehicle' || cat === 'excipient' || isVehicleProduct(product)) return 'Galenic Vehicle / Excipient';
   if (
-    cat.includes('vehicle') ||
-    cat.includes('excipient') ||
-    cat.includes('base') ||
-    cat.includes('tricholog') ||
-    name.includes('trichosol') ||
-    name.includes('trichoserum') ||
-    name.includes('pentravan') ||
-    name.includes('nourivan') ||
-    name.includes('syrspend') ||
-    name.includes('versabase')
-  ) {
-    return 'Galenic Vehicle / Excipient';
-  }
+    cat === 'diagnostic_test' ||
+    cat === 'genetic_test' ||
+    cat === 'biomarker_test' ||
+    cat === 'genomics_biomarkers' ||
+    cat === 'genomics' ||
+    cat === 'diagnostic' ||
+    cat === 'lab_test' ||
+    type === 'test' ||
+    name.includes('dna test') ||
+    name.includes('trichotest')
+  ) return 'Diagnostic & Genetic Test';
 
-  if (cat === 'raw_material' || cat === 'api_raw_material' || cat === 'api' || type === 'raw_material' || type === 'api_raw_material') return 'Active API / Compounding';
-  if (cat === 'genomics_biomarkers' || cat === 'genomics' || cat === 'diagnostic' || cat === 'diagnostic_test' || cat === 'genetic_test' || cat === 'lab_test' || cat.includes('genom') || type === 'test' || type === 'genomics_biomarkers' || name.includes('dna test') || name.includes('trichotest')) return 'Genomics & Biomarkers';
+  if (cat === 'supplement' || cat === 'nutricosmetics' || cat === 'weight_loss' || cat === 'nutraceutical') return 'Supplement / Nutraceutical';
+  if (cat === 'raw_material' || cat === 'api_raw_material' || cat === 'api' || isApiProduct(product)) return 'Active API / Compounding';
   if (cat === 'hormone') return 'Hormone';
-  if (['peptide', 'hormone optimization'].includes(cat)) return 'Peptide / API';
+  if (['peptide', 'peptides', 'hormone optimization'].includes(cat)) return 'Peptide / API';
   if (cat.startsWith('cardiovascular') || cat.startsWith('metabolic')) return 'Pharma Compound';
-  if (['supplement', 'nutricosmetics', 'weight_loss', 'nutraceutical'].includes(cat)) return 'Supplement';
-  if (['medical_device_consumable', 'equipment', 'excipient_vehicle', 'excipient'].includes(cat)) return 'Medical Device';
-  if (cat === 'service' || type === 'subscription') return 'Service';
-  if (cat === 'skincare') return 'Skincare';
+  if (['clinical_supplies', 'medical_device_consumable', 'equipment', 'consumables', 'capsules_and_consumables'].includes(cat)) return 'Medical Device / Supply';
+  if (cat === 'service' || cat === 'subscription' || type === 'subscription') return 'Service';
+  if (cat === 'skincare' || cat === 'skin_anti_aging') return 'Skincare';
   if (/api|raw material|bulk|materia prima/i.test(name)) return 'Active API / Compounding';
   if (/peptide|bpc|tb-500|nad\+|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) return 'Peptide / API';
   return 'General';

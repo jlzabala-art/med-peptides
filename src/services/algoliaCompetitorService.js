@@ -73,6 +73,83 @@ const MARKET_FALLBACK_BENCHMARKS = {
   'ss-31':       { avgPrice: 85.0, avgPpm: 17.0, minPrice: 69.0, maxPrice: 105.0, competitors: ['Limitless Life', 'Direct Peptides', 'Peptide Sciences'] },
 };
 
+// ── Diagnostic Manufacturer Retail Benchmarks (MSRP directly from manufacturer websites) ──
+export const DIAGNOSTIC_MANUFACTURER_BENCHMARKS = {
+  'testosterone': {
+    name: 'Bloodo™ Testosterone+ Test',
+    manufacturer: 'Bloodo',
+    manufacturerUrl: 'https://bloodo.com',
+    retailMSRP: 99.0,
+    currency: 'EUR',
+    format: '1 Blood Test (DBS)',
+    competitors: [
+      { name: 'bloodo.com (Official DTC Retail)', price: 99.0, url: 'https://bloodo.com' },
+      { name: 'Medichecks UK (Male Hormone)', price: 109.0 },
+      { name: 'LetsGetChecked (Male Hormone Plus)', price: 139.0 }
+    ]
+  },
+  'nad': {
+    name: 'Bloodo™ NAD Level Test',
+    manufacturer: 'Bloodo',
+    manufacturerUrl: 'https://bloodo.com',
+    retailMSRP: 199.0,
+    currency: 'EUR',
+    format: '1 Blood Test (DBS)',
+    competitors: [
+      { name: 'bloodo.com (Official DTC Retail)', price: 199.0, url: 'https://bloodo.com' },
+      { name: 'Jinfiniti Precision (Intracellular NAD)', price: 248.0 }
+    ]
+  },
+  'vitamin-d': {
+    name: 'Bloodo™ Vitamin D Test',
+    manufacturer: 'Bloodo',
+    manufacturerUrl: 'https://bloodo.com',
+    retailMSRP: 59.0,
+    currency: 'EUR',
+    format: '1 Blood Test (DBS)',
+    competitors: [
+      { name: 'bloodo.com (Official DTC Retail)', price: 59.0, url: 'https://bloodo.com' },
+      { name: 'Cerascreen Vit D (Capillary)', price: 49.0 }
+    ]
+  },
+  'hba1c': {
+    name: 'Bloodo™ Hemoglobin A1c (HbA1c) Test',
+    manufacturer: 'Bloodo',
+    manufacturerUrl: 'https://bloodo.com',
+    retailMSRP: 59.0,
+    currency: 'EUR',
+    format: '1 Blood Test (DBS)',
+    competitors: [
+      { name: 'bloodo.com (Official DTC Retail)', price: 59.0, url: 'https://bloodo.com' },
+      { name: 'LetsGetChecked HbA1c', price: 69.0 }
+    ]
+  },
+  'omega': {
+    name: 'Bloodo™ Omega Ratio & Index Test',
+    manufacturer: 'Bloodo',
+    manufacturerUrl: 'https://bloodo.com',
+    retailMSRP: 79.0,
+    currency: 'EUR',
+    format: '1 Blood Test (DBS)',
+    competitors: [
+      { name: 'bloodo.com (Official DTC Retail)', price: 79.0, url: 'https://bloodo.com' },
+      { name: 'OmegaQuant Complete', price: 99.0 }
+    ]
+  },
+  'cortisol': {
+    name: 'Bloodo™ Cortisol Test',
+    manufacturer: 'Bloodo',
+    manufacturerUrl: 'https://bloodo.com',
+    retailMSRP: 79.0,
+    currency: 'EUR',
+    format: '1 Blood Test (DBS)',
+    competitors: [
+      { name: 'bloodo.com (Official DTC Retail)', price: 79.0, url: 'https://bloodo.com' },
+      { name: 'LetsGetChecked Cortisol', price: 89.0 }
+    ]
+  }
+};
+
 /**
  * Normalizes compound name for matching
  */
@@ -223,9 +300,41 @@ export function extractVariantDosageMg(variant = {}, product = {}) {
 }
 
 /**
+ * Checks if a variant/product qualifies as a diagnostic kit or testing service
+ */
+export function isDiagnosticProduct(variant = {}, product = {}) {
+  const vType = (variant.type || variant.productType || product.primaryType || product.productType || '').toLowerCase();
+  const vFormat = (variant.format || variant.presentation || product.format || product.presentation || '').toLowerCase();
+  const cat = (product.category || '').toLowerCase();
+  const subcat = (product.subcategory || '').toLowerCase();
+  const pName = (product.canonicalName || product.name || variant.name || '').toLowerCase();
+  const tags = (product.tags || []).map(t => String(t).toLowerCase());
+
+  return (
+    vType === 'diagnostic' ||
+    vType === 'diagnostic_test' ||
+    cat === 'diagnostic_test' ||
+    cat.includes('diagnostic') ||
+    cat.includes('genomic') ||
+    subcat.includes('test') ||
+    subcat.includes('blood') ||
+    vFormat.includes('test') ||
+    vFormat.includes('blood') ||
+    pName.includes('bloodo') ||
+    pName.includes('eterna') ||
+    pName.includes('testosterone+') ||
+    pName.includes('nad level test') ||
+    tags.some(t => t.includes('test') || t.includes('diagnostic') || t.includes('blood'))
+  );
+}
+
+/**
  * Checks if a variant/product qualifies as a finished peptide (vial, injectable, lyophilized)
  */
 export function isFinishedPeptide(variant = {}, product = {}) {
+  if (isDiagnosticProduct(variant, product)) {
+    return false;
+  }
   const vType = (variant.type || variant.productType || product.primaryType || product.productType || '').toLowerCase();
   const vFormat = (variant.format || variant.presentation || product.format || product.presentation || '').toLowerCase();
   const cat = (product.category || '').toLowerCase();
@@ -244,12 +353,12 @@ export function isFinishedPeptide(variant = {}, product = {}) {
 }
 
 /**
- * Retrieves variant-level market benchmark and competitor prices for a specific finished peptide variant.
+ * Retrieves variant-level market benchmark and competitor prices for a specific finished peptide or diagnostic test variant.
  *
  * @param {Object} params
  * @param {Object} params.product - Product document/object
  * @param {Object} params.variant - Variant document/object
- * @param {number} [params.ourPrice=0] - Our price in USD for this variant
+ * @param {number} [params.ourPrice=0] - Our price in USD/EUR for this variant
  * @returns {Promise<Object>}
  */
 export async function getVariantCompetitorBenchmark({
@@ -257,7 +366,97 @@ export async function getVariantCompetitorBenchmark({
   variant = {},
   ourPrice = 0,
 }) {
-  const pName = product.canonicalName || product.name || variant.name || 'Peptide';
+  const pName = product.canonicalName || product.name || variant.name || 'Product';
+  const supName = variant.supplierName || 
+    (variant.supplierId ? variant.supplierId.replace(/^supplier-/, '').replace(/^[a-z]/, c => c.toUpperCase()) : '') || 
+    variant.supplier || 
+    (product.supplierName || product.supplier || 'Supplier');
+
+  // ── BRANCH A: Diagnostic Testing Kits (Benchmark vs Manufacturer Official Web Retail) ──
+  if (isDiagnosticProduct(variant, product)) {
+    const pNameLower = pName.toLowerCase();
+    
+    // Match manufacturer benchmark
+    let benchKey = 'testosterone';
+    if (pNameLower.includes('nad')) benchKey = 'nad';
+    else if (pNameLower.includes('vitamin d') || pNameLower.includes('vit-d')) benchKey = 'vitamin-d';
+    else if (pNameLower.includes('hba1c') || pNameLower.includes('hemoglobin')) benchKey = 'hba1c';
+    else if (pNameLower.includes('omega')) benchKey = 'omega';
+    else if (pNameLower.includes('cortisol')) benchKey = 'cortisol';
+    else if (pNameLower.includes('testosterone')) benchKey = 'testosterone';
+
+    const bench = DIAGNOSTIC_MANUFACTURER_BENCHMARKS[benchKey] || {
+      name: pName,
+      manufacturer: 'Bloodo',
+      manufacturerUrl: 'https://bloodo.com',
+      retailMSRP: 99.0,
+      currency: 'EUR',
+      format: '1 Test Kit',
+      competitors: [
+        { name: 'bloodo.com (Official DTC Retail)', price: 99.0, url: 'https://bloodo.com' }
+      ]
+    };
+
+    const manufacturerMSRP = Number(
+      product.manufacturerRetailPrice ||
+      variant.manufacturerRetailPrice ||
+      bench.retailMSRP ||
+      99.0
+    );
+
+    const cost = Number(
+      variant.unit_price ||
+      variant.cost ||
+      variant.pricing?.acquisition?.tiers?.[0]?.unitCost ||
+      variant.cost_tiers?.cost_1 ||
+      (manufacturerMSRP * 0.5) // Default 50% wholesale cost of MSRP
+    );
+
+    const targetRetailPrice = Number((variant.retailPrice || (cost > 0 ? cost * 1.5 : manufacturerMSRP)).toFixed(2));
+    const effectivePrice = ourPrice > 0 ? ourPrice : targetRetailPrice;
+
+    // Compare our price (clinic / wholesale / retail) vs Manufacturer Web Retail MSRP
+    const marketDeltaPercent = Number((((manufacturerMSRP - effectivePrice) / manufacturerMSRP) * 100).toFixed(1));
+    let status = 'competitive';
+    if (marketDeltaPercent >= 5) status = 'cheaper'; // We are cheaper than official manufacturer web retail!
+    else if (marketDeltaPercent <= -5) status = 'higher'; // Our price exceeds manufacturer web MSRP
+    else status = 'competitive'; // Aligned with web MSRP
+
+    const variantLabel = variant.dosage || variant.presentation || '1 Blood Test Kit (DBS)';
+
+    return {
+      isDiagnostic: true,
+      variantId: variant.id || 'var-default',
+      variantLabel,
+      dosageMg: null,
+      format: '1 Blood Test (DBS)',
+      supplierId: variant.supplierId || variant.supplier || product.supplierId || 'supplier-bloodo',
+      supplierName: supName,
+      productName: pName,
+      supplierCost: cost,
+      costPpm: 0,
+      targetRetailPrice,
+      targetRetailPpm: 0,
+      grossProfit: Number((targetRetailPrice - cost).toFixed(2)),
+      markupPercent: 50.0,
+      ourPrice: effectivePrice,
+      ourPpm: 0,
+      avgPrice: manufacturerMSRP,
+      minPrice: Number((manufacturerMSRP * 0.9).toFixed(2)),
+      maxPrice: Number((manufacturerMSRP * 1.25).toFixed(2)),
+      avgPpm: 0,
+      manufacturerRetailPrice: manufacturerMSRP,
+      manufacturerUrl: bench.manufacturerUrl || 'https://bloodo.com',
+      priceDeltaPercent: marketDeltaPercent,
+      status,
+      isCompetitive: marketDeltaPercent >= -5,
+      competitors: bench.competitors || [
+        { name: 'bloodo.com (Official DTC Retail)', price: manufacturerMSRP, url: 'https://bloodo.com' }
+      ],
+    };
+  }
+
+  // ── BRANCH B: Finished Peptides (Vials, Lyophilized Formulations) ──
   const dosageMg = extractVariantDosageMg(variant, product);
   const rawFormat = variant.format || variant.presentation || product.format || 'Vial';
   const formatLabel = rawFormat.charAt(0).toUpperCase() + rawFormat.slice(1);
@@ -317,12 +516,8 @@ export async function getVariantCompetitorBenchmark({
     else status = 'competitive'; // Parity with market
   }
 
-  const supName = variant.supplierName || 
-    (variant.supplierId ? variant.supplierId.replace(/^supplier-/, '').replace(/^[a-z]/, c => c.toUpperCase()) : '') || 
-    variant.supplier || 
-    (product.supplierName || product.supplier || 'Lotusland');
-
   return {
+    isDiagnostic: false,
     variantId: variant.id || 'var-default',
     variantLabel,
     dosageMg,
@@ -350,7 +545,7 @@ export async function getVariantCompetitorBenchmark({
 }
 
 /**
- * Retrieves full competitor comparison matrix for all finished peptide variants of a product.
+ * Retrieves full competitor comparison matrix for all variants (finished peptides or diagnostic kits) of a product.
  *
  * @param {Object} params
  * @param {Object} params.product
@@ -378,19 +573,22 @@ export async function getProductVariantsCompetitorReport({
     return !sameDosageExists;
   });
 
-  const finishedVariants = nonStubVariants.filter(v => isFinishedPeptide(v, product));
+  const benchmarkableVariants = nonStubVariants.filter(v => isFinishedPeptide(v, product) || isDiagnosticProduct(v, product));
 
-  if (finishedVariants.length === 0) {
+  if (benchmarkableVariants.length === 0) {
     return {
       hasFinishedPeptides: false,
+      isDiagnostic: false,
       productName: product.canonicalName || product.name || '',
       variants: [],
       summary: null,
     };
   }
 
+  const isDiag = benchmarkableVariants.some(v => isDiagnosticProduct(v, product));
+
   const reports = await Promise.all(
-    finishedVariants.map(async (v) => {
+    benchmarkableVariants.map(async (v) => {
       const resolved = resolveChannelPrice(v, channel);
       const price = Number(
         v.resolvedPrice?.perUnit ||
@@ -419,7 +617,8 @@ export async function getProductVariantsCompetitorReport({
   const higherCount = reports.filter(r => r.status === 'higher').length;
 
   return {
-    hasFinishedPeptides: true,
+    hasFinishedPeptides: !isDiag,
+    isDiagnostic: isDiag,
     productName: product.canonicalName || product.name || '',
     variants: reports,
     summary: {
@@ -428,6 +627,7 @@ export async function getProductVariantsCompetitorReport({
       competitiveCount,
       higherCount,
       overallAdvantage: cheaperCount >= higherCount,
+      isDiagnostic: isDiag,
     },
   };
 }

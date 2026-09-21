@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { TrendingUp, ExternalLink, Sliders, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
-import { getProductVariantsCompetitorReport, isFinishedPeptide } from '../../../services/algoliaCompetitorService';
+import { getProductVariantsCompetitorReport, isFinishedPeptide, isDiagnosticProduct } from '../../../services/algoliaCompetitorService';
 import DataTable from '../../ui/DataTable';
 
 /**
  * VariantCompetitorComparisonTable
  * ─────────────────────────────────────────────────────────────────────────────
  * Renders a variant-level market price comparison table for finished peptides
- * (vials, lyophilized injectable formulations) against top industry competitors.
+ * (vials, lyophilized injectable formulations) and diagnostic kits (Bloodo DBS).
  * 
  * Supports two modes:
  * - 'summary' (default): Ultra-clean 3-column view for catalog expander with
@@ -26,10 +26,10 @@ export default function VariantCompetitorComparisonTable({
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if product qualifies for finished peptide competitor benchmark
+  // Check if product qualifies for finished peptide or diagnostic competitor benchmark
   const targetVariants = useMemo(() => {
     const vars = variants.length > 0 ? variants : (product.variants || [product]);
-    return vars.filter(v => isFinishedPeptide(v, product));
+    return vars.filter(v => isFinishedPeptide(v, product) || isDiagnosticProduct(v, product));
   }, [variants, product]);
 
   useEffect(() => {
@@ -57,10 +57,11 @@ export default function VariantCompetitorComparisonTable({
   }, [product, targetVariants, channel]);
 
   if (targetVariants.length === 0) {
-    return null; // Only render for finished peptide products
+    return null; // Only render for benchmarkable products
   }
 
   const isSummary = mode === 'summary';
+  const isDiagnostic = Boolean(report?.isDiagnostic || report?.summary?.isDiagnostic || isDiagnosticProduct(product, product));
 
   return (
     <div style={{
@@ -90,8 +91,8 @@ export default function VariantCompetitorComparisonTable({
             width: '24px',
             height: '24px',
             borderRadius: '6px',
-            backgroundColor: '#eff6ff',
-            color: '#0284c7',
+            backgroundColor: isDiagnostic ? '#fef2f2' : '#eff6ff',
+            color: isDiagnostic ? '#dc2626' : '#0284c7',
           }}>
             <TrendingUp size={14} />
           </div>
@@ -100,7 +101,9 @@ export default function VariantCompetitorComparisonTable({
               Market Benchmark & Position
             </span>
             <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '6px' }}>
-              · Finished Vials vs US/EU Market
+              {isDiagnostic 
+                ? '· Diagnostic Kits vs Manufacturer Retail (bloodo.com)' 
+                : '· Finished Vials vs US/EU Market'}
             </span>
           </div>
         </div>
@@ -116,7 +119,9 @@ export default function VariantCompetitorComparisonTable({
               color: report.summary.cheaperCount > 0 ? '#166534' : '#475569',
               border: `1px solid ${report.summary.cheaperCount > 0 ? '#bbf7d0' : '#e2e8f0'}`,
             }}>
-              {report.summary.cheaperCount} of {report.summary.totalVariants} variants cheaper than web at +50% markup
+              {isDiagnostic
+                ? `${report.summary.cheaperCount} of ${report.summary.totalVariants} variants competitive vs manufacturer web MSRP`
+                : `${report.summary.cheaperCount} of ${report.summary.totalVariants} variants cheaper than web at +50% markup`}
             </span>
 
             {onOpenPricingDrawer && (

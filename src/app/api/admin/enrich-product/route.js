@@ -13,7 +13,7 @@ export async function POST(request) {
       return authCheck.response;
     }
 
-    const { productId, canonicalName, currentProduct } = await request.json();
+    const { productId, canonicalName, currentProduct, categoryId } = await request.json();
 
     if (!productId && !canonicalName) {
       return NextResponse.json({ error: 'productId or canonicalName required' }, { status: 400 });
@@ -61,6 +61,12 @@ export async function POST(request) {
 
     if (!productData) {
       productData = { id: targetId, name: canonicalName || targetId };
+    }
+
+    // Apply explicit category override if supplied by admin
+    if (categoryId) {
+      productData.categoryId = categoryId;
+      productData.category = categoryId;
     }
 
     // Run authoritative clinical & molecular enrichment
@@ -185,17 +191,32 @@ export async function POST(request) {
     }
 
     // Ensure canonical taxonomy before write
-    enriched.categoryId = enriched.categoryId || enriched.category || 'peptide';
+    enriched.categoryId = categoryId || enriched.categoryId || enriched.category || 'supplement';
     enriched.category = enriched.categoryId;
     enriched.type = enriched.type || enriched.productType || 'finished_product';
     enriched.productType = enriched.type;
+
+    // Ensure parent variant array (if present) has valid pricing
+    const fallbackPrice = Number(enriched.price || enriched.canonical_price_usd || enriched.min_unit_price || 45.00);
+    if (Array.isArray(enriched.variants) && enriched.variants.length > 0) {
+      enriched.variants = enriched.variants.map(v => {
+        const vPrice = Number(v.price || v.unit_price || 0);
+        const finalPrice = vPrice > 0 ? vPrice : fallbackPrice;
+        return {
+          ...v,
+          price: finalPrice,
+          unit_price: finalPrice,
+          categoryId: enriched.categoryId,
+          category: enriched.categoryId,
+          updatedAt: new Date().toISOString()
+        };
+      });
+    }
 
     let enrichedVariants = [];
 
     // Save to Firestore via Admin SDK
     if (docRef) {
-      await docRef.set(enriched, { merge: true });
-
       // Enrich all variants in the subcollection
       const variantsSnap = await docRef.collection('variants').get();
       if (!variantsSnap.empty) {
@@ -204,9 +225,13 @@ export async function POST(request) {
           const vData = vDoc.data();
           const normalized = normalizeProductMeta(vData);
           const vType = normalized.productType === 'raw_material' ? 'raw_material' : (normalized.productType === 'clinical_supplies' ? 'clinical_supplies' : 'finished_product');
-          
+          const currentPrice = Number(vData.price || vData.unit_price || vData.trade_price || 0);
+          const finalPrice = currentPrice > 0 ? currentPrice : fallbackPrice;
+
           const enrichedVariant = {
             ...vData,
+            price: finalPrice,
+            unit_price: finalPrice,
             presentation: normalized.presentation || vData.presentation,
             dosage: normalized.dosage || vData.dosage,
             type: vType,
@@ -223,6 +248,12 @@ export async function POST(request) {
         
         await batch.commit();
       }
+
+      if (enrichedVariants.length > 0) {
+        enriched.variants = enrichedVariants;
+      }
+
+      await docRef.set(enriched, { merge: true });
     }
 
     const newCompleteness = calculateProductCompleteness(enriched);

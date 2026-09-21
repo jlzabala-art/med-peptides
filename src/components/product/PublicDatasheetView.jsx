@@ -44,6 +44,7 @@ import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
+import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -294,7 +295,16 @@ export default function PublicDatasheetView({
     );
   }, [product]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : 'Clinical Peptide'));
+  const isEternaDiagnostic = useMemo(() => {
+    const sId = (product?.supplierId || '').toLowerCase();
+    const sName = (product?.supplierName || '').toLowerCase();
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    const pName = (product?.name || product?.canonicalName || '').toLowerCase();
+    const sample = (product?.sampleType || '').toLowerCase();
+    return sId === 'supplier-eternadx' || sName.includes('eterna') || pSlug.includes('eterna') || pName.includes('eterna') || sample.includes('saliva');
+  }, [product, slug]);
+
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : 'Clinical Peptide')));
   const category = isSolventProduct 
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
     : isDiagnosticKit
@@ -1395,10 +1405,12 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 2: Reconstitution, Diagnostic Specs, or Solvent Technical Specs ── */}
+        {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, or Solvent Technical Specs ── */}
         <section id="reconstitution-section" className="pds-section-card">
           {isSolventProduct ? (
             <SolventTechnicalSpecs product={product} lang={lang} />
+          ) : isEternaDiagnostic ? (
+            <EternaGeneticTechnicalSpecs product={product} lang={lang} />
           ) : isDiagnosticKit ? (
             <DiagnosticTestTechnicalSpecs
               product={product}

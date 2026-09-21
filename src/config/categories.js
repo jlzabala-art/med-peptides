@@ -2,6 +2,7 @@ export const PRODUCT_CATEGORIES = [
   { id: 'peptide',                   label: 'Peptides' },
   { id: 'supplement',                label: 'Supplements' },
   { id: 'hormone',                   label: 'Hormones' },
+  { id: 'raw_material',              label: 'Raw Materials & APIs' },
   { id: 'excipient_vehicle',         label: 'Excipients & Vehicles' },
   { id: 'medical_device_consumable', label: 'Consumables & Devices' },
   { id: 'diagnostic_test',           label: 'Diagnostic Tests' },
