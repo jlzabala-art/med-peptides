@@ -290,16 +290,16 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
           <div className="brp-header-titles">
             <div className="brp-header-meta">
               <span className="brp-supplier-pill">
-                LOTUSLAND LIMITED · THERAPEUTIC COMPANIONS
+                {isEs ? 'ACOMPAÑAMIENTO TERAPÉUTICO CLÍNICO' : 'CLINICAL THERAPEUTIC COMPANIONS'}
               </span>
               <span className="brp-verified-pill">
-                <CheckCircle2 size={11} /> {isEs ? 'CATÁLOGO CERTIFICADO' : 'VERIFIED LOTUSLAND CATALOG'}
+                <CheckCircle2 size={11} /> {isEs ? 'CATÁLOGO CLÍNICO CERTIFICADO' : 'VERIFIED CLINICAL CATALOG'}
               </span>
             </div>
             <h3 className="brp-header-title">
               {isEs 
-                ? 'Péptidos Terapéuticos Relacionados (Catálogo Lotusland Limited)' 
-                : 'Targeted Therapeutic Peptides (Lotusland Limited Catalog)'}
+                ? 'Péptidos Terapéuticos Relacionados' 
+                : 'Targeted Therapeutic Peptides'}
             </h3>
           </div>
         </div>
@@ -315,38 +315,33 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
       <div className="brp-section-body">
         <p className="brp-intro-text">
           {isEs 
-            ? 'Compuestos peptídicos del catálogo certificado de Lotusland Limited con sólida evidencia preclínica y clínica para optimización fisiológica, intervención metabólica o modulación según los biomarcadores evaluados en este panel diagnóstico.' 
-            : 'Evidence-based peptide compounds from the verified Lotusland Limited catalog indicated for physiological modulation, clinical optimization, or therapeutic intervention based on this biomarker profile.'}
+            ? 'Compuestos peptídicos con sólida evidencia preclínica y clínica indicados para optimización fisiológica, intervención metabólica o modulación según los biomarcadores evaluados en este panel diagnóstico.' 
+            : 'Evidence-based peptide compounds indicated for physiological modulation, clinical optimization, or therapeutic intervention based on this biomarker profile.'}
         </p>
 
-        <div className="brp-grid">
+        <div className="brp-rows-list">
           {peptidesList.map((pep) => {
             const peptideUrl = `/p/${encodeURIComponent(pep.slug)}?supplier=supplier-lotusland`;
             const rationale = isEs ? (pep.rationaleEs || pep.rationaleEn) : pep.rationaleEn;
 
             return (
-              <div key={pep.slug} className="brp-card">
-                <div className="brp-card-top">
-                  <div className="brp-card-meta-row">
-                    <span className="brp-target-tag">
-                      <Sparkles size={11} /> {pep.target}
-                    </span>
-                    <span className="brp-brand-tag">
-                      Lotusland Limited
-                    </span>
-                  </div>
+              <div key={pep.slug} className="brp-row">
+                <div className="brp-row-lead">
+                  <span className="brp-target-tag">
+                    <Sparkles size={11} /> {pep.target}
+                  </span>
                   <h4 className="brp-peptide-name">
                     {pep.name}
                   </h4>
                 </div>
 
-                <div className="brp-card-body">
+                <div className="brp-row-description">
                   <p className="brp-rationale">
                     {rationale}
                   </p>
                 </div>
 
-                <div className="brp-card-footer">
+                <div className="brp-row-actions">
                   <span className="brp-spec-pill">
                     {isEs ? 'Pureza ≥ 99.0% · RP-HPLC' : 'Purity ≥ 99.0% · RP-HPLC'}
                   </span>
