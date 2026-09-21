@@ -50,6 +50,7 @@ import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
 import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
+import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -129,11 +130,21 @@ export default function PublicDatasheetView({
     return associatedProtocols.filter(p => (p.id || p.slug) !== primId);
   }, [associatedProtocols, primaryProtocol]);
 
-  const isCorporateService = useMemo(() => {
+  const isSpainResidency = useMemo(() => {
+    const slugLower = String(slug || product?.slug || product?.id || '').toLowerCase();
+    const nameLower = String(product?.canonicalName || product?.name || '').toLowerCase();
+    return slugLower.includes('spain-company') || slugLower.includes('spain-residency') || nameLower.includes('spanish corporate');
+  }, [slug, product]);
+
+  const isUaeCorporateService = useMemo(() => {
     const slugLower = String(slug || product?.slug || product?.id || '').toLowerCase();
     const nameLower = String(product?.canonicalName || product?.name || '').toLowerCase();
     return slugLower.includes('uae-company') || slugLower.includes('company-setup') || nameLower.includes('uae company setup');
   }, [slug, product]);
+
+  const isCorporateService = useMemo(() => {
+    return isSpainResidency || isUaeCorporateService || product?.isCorporateService === true || product?.category === 'corporate_services' || product?.type === 'service';
+  }, [isSpainResidency, isUaeCorporateService, product]);
 
   const [shortMonographUrl, setShortMonographUrl] = useState('');
 
@@ -1706,7 +1717,13 @@ export default function PublicDatasheetView({
 
         {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, IV Drips, Corporate Services, or Solvent Technical Specs ── */}
         <section id="reconstitution-section" className="pds-section-card">
-          {isCorporateService ? (
+          {isSpainResidency ? (
+            <SpainCompanyResidencyTechnicalSpecs
+              product={product}
+              lang={lang}
+              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            />
+          ) : isUaeCorporateService ? (
             <UaeCompanySetupTechnicalSpecs product={product} lang={lang} />
           ) : isSolventProduct ? (
             <SolventTechnicalSpecs product={product} lang={lang} />

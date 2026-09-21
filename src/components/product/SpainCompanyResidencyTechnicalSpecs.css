@@ -1,0 +1,628 @@
+/**
+ * src/components/product/SpainCompanyResidencyTechnicalSpecs.css
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Responsive stylesheet for Spain Corporate Acquisition & Residence Specs.
+ * Built for Mobile-First, iPad, and Laptop displays. Zero horizontal scroll.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+.spain-residency-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #1e293b;
+}
+
+/* ── 1. Header & Badge Row ── */
+.spain-residency-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spain-residency-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.spain-res-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.spain-res-pill-gold {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.spain-res-pill-blue {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #dbeafe;
+}
+
+.spain-res-pill-green {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.spain-res-pill-purple {
+  background: #faf5ff;
+  color: #6b21a8;
+  border: 1px solid #f3e8ff;
+}
+
+.spain-residency-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.spain-residency-subtitle {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 900px;
+}
+
+/* ── 2. Comparison Box ── */
+.spain-residency-comparison-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.spain-comparison-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spain-comparison-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.spain-comparison-note {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.spain-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.spain-comparison-col {
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.spain-comparison-highlight {
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+}
+
+.spain-comparison-standard {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+.spain-col-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spain-col-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.spain-tag-recommended {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.spain-tag-delayed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.spain-col-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.spain-col-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.spain-col-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.spain-icon-check {
+  color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.spain-icon-alert {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── 3. Roadmap Section ── */
+.spain-residency-roadmap-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.spain-roadmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.spain-roadmap-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spain-header-icon {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.spain-section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.spain-section-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.spain-timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.spain-roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.spain-roadmap-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.spain-roadmap-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.spain-roadmap-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spain-step-number {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+
+.spain-step-time {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.spain-step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.spain-step-desc {
+  font-size: 0.84rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.spain-step-deliverables {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+
+.spain-deliv-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.spain-step-deliverables ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spain-step-deliverables li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #334155;
+}
+
+.spain-deliv-check {
+  color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── 4. Key Statutory Rights Grid ── */
+.spain-residency-benefits-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.spain-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.spain-benefit-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.spain-benefit-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spain-benefit-icon-wrapper.gold {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.spain-benefit-icon-wrapper.blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.spain-benefit-icon-wrapper.green {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.spain-benefit-icon-wrapper.purple {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
+.spain-benefit-icon-wrapper.teal {
+  background: #ccfbf1;
+  color: #0d9488;
+}
+
+.spain-benefit-icon-wrapper.red {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.spain-benefit-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.spain-benefit-text {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ── 5. Frequently Asked Questions (Accordion) ── */
+.spain-residency-faq-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.spain-faq-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spain-faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spain-faq-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.spain-faq-card.active {
+  border-color: #2563eb;
+}
+
+.spain-faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.spain-faq-question {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.spain-faq-card.active .spain-faq-question {
+  color: #2563eb;
+}
+
+.spain-faq-chevron {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.spain-faq-body {
+  padding: 0 20px 18px 20px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+}
+
+.spain-faq-answer {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ── 6. Call to Action Banner ── */
+.spain-residency-cta-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.spain-cta-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 650px;
+}
+
+.spain-cta-icon {
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+.spain-cta-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.spain-cta-desc {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.spain-cta-action {
+  flex-shrink: 0;
+}
+
+.spain-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  min-height: 48px;
+}
+
+.spain-cta-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.spain-cta-button:active {
+  transform: translateY(0);
+}
+
+/* ── Responsive Queries (Mobile, iPad, Laptop) ── */
+
+/* iPad and medium tablets (≤ 1024px) */
+@media (max-width: 1024px) {
+  .spain-roadmap-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .spain-benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Devices (≤ 768px) */
+@media (max-width: 768px) {
+  .spain-residency-specs {
+    gap: 24px;
+  }
+
+  .spain-residency-title {
+    font-size: 1.25rem;
+  }
+
+  .spain-residency-subtitle {
+    font-size: 0.88rem;
+  }
+
+  .spain-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spain-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spain-cta-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+  }
+
+  .spain-cta-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .spain-cta-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
