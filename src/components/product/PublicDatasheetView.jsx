@@ -524,7 +524,20 @@ export default function PublicDatasheetView({
   };
 
   const sortedStrengths = useMemo(() => {
-    return [...rawStrengths].sort((a, b) => parseNum(a.name || a.id) - parseNum(b.name || b.id));
+    const seen = new Set();
+    const deduped = [];
+    for (const s of rawStrengths) {
+      const key = String(s.id || s.name || '')
+        .toLowerCase()
+        .replace(/,/g, '')
+        .replace(/\s*\/\s*vial$/i, '')
+        .replace(/[-_\s]+/g, '');
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduped.push(s);
+      }
+    }
+    return deduped.sort((a, b) => parseNum(a.name || a.id) - parseNum(b.name || b.id));
   }, [rawStrengths]);
 
   // Strictly Lotusland check: true ONLY if supplier is explicitly Lotusland

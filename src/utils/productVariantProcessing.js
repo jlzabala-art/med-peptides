@@ -11,6 +11,39 @@ export function getHumanFormatName(formatId, rawFormat) {
   return noUnderscores.replace(/\b\w/g, c => c.toUpperCase());
 }
 
+/**
+ * Normalizes strength identifiers and display names to prevent duplicate dosage
+ * options caused by thousands-separator commas, trailing unit labels, or formatting variations.
+ * e.g., "1,000 mg", "1000 mg / vial", "1000mg" all resolve to:
+ * { id: "1000_mg", name: "1000 mg" }
+ */
+export function normalizeCanonicalStrength(rawVal) {
+  if (!rawVal) return { id: 'unknown_strength', name: 'Standard' };
+  let str = String(rawVal).trim();
+
+  // Normalize thousand commas in numbers: e.g. 1,000 -> 1000, 10,000 -> 10000
+  let cleanedName = str.replace(/(\d+),(\d{3})/g, '$1$2').trim();
+
+  // If ends with / vial (standard single vial), strip it so "1000 mg / vial" matches "1000 mg"
+  if (/\s*\/\s*vial$/i.test(cleanedName)) {
+    cleanedName = cleanedName.replace(/\s*\/\s*vial$/i, '').trim();
+  }
+
+  // Generate standardized unique ID
+  const normalizedId = cleanedName
+    .toLowerCase()
+    .replace(/,/g, '')
+    .replace(/(\d+)\s*(mg|mcg|iu|g|ml|test)/gi, '$1_$2')
+    .replace(/[\s/]+/g, '_')
+    .replace(/_{2,}/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return {
+    id: normalizedId || 'unknown_strength',
+    name: cleanedName || 'Standard'
+  };
+}
+
 export function processProductVariants(variants) {
   if (!variants || !Array.isArray(variants)) return { suppliers: [], formats: [], strengths: [], variantIndex: {} };
 
@@ -27,9 +60,9 @@ export function processProductVariants(variants) {
     let rawFormat = v.formatId || v.format || v.presentation || 'vial';
     let formatId = rawFormat.toLowerCase().replace(/\s+/g, '_');
     
-    // Normalize strength
+    // Normalize strength using canonical helper
     let rawStrength = v.strengthId || v.dosage || v.dose || v.strength || v.name || 'unknown_strength';
-    let strengthId = rawStrength.toString().toLowerCase().replace(/\s+/g, '_');
+    let { id: strengthId, name: strengthDisplayName } = normalizeCanonicalStrength(rawStrength);
 
     // Pod Poland Specific fix - Data normalization (not fuzzy matching in the view layer)
     // We normalize the data at ingestion/processing time
@@ -43,7 +76,7 @@ export function processProductVariants(variants) {
         // We shouldn't guess, but we need a valid ID. Ideally the DB would be updated.
         if (strengthId === 'unknown_strength' || strengthId === 'standard') {
             strengthId = `sku_${v.sku.toLowerCase()}`;
-            rawStrength = v.sku;
+            strengthDisplayName = v.sku;
         }
       }
     }
@@ -70,7 +103,7 @@ export function processProductVariants(variants) {
     if (!strengthMap.has(strengthId)) {
       strengthMap.set(strengthId, {
         id: strengthId,
-        name: rawStrength
+        name: strengthDisplayName
       });
     }
 
@@ -86,8 +119,13 @@ export function processProductVariants(variants) {
 
     // 4. Index the variant by the hierarchy: supplierId -> formatId -> strengthId
     const indexKey = `${supplierId}::${formatId}::${strengthId}`;
-    if (!variantIndex[indexKey] || v.isPreferred) { // prioritize preferred if duplicates
-        variantIndex[indexKey] = v;
+    if (!variantIndex[indexKey]) {
+      variantIndex[indexKey] = v;
+    } else {
+      // Merge duplicate entries so pricing, SKU, and availability are preserved
+      const prev = variantIndex[indexKey];
+      const preferNew = v.isPreferred || (!prev.sku && v.sku) || (!prev.cost_tiers && v.cost_tiers) || (prev.unit_price == null && v.unit_price != null);
+      variantIndex[indexKey] = preferNew ? { ...prev, ...v } : { ...v, ...prev };
     }
   });
 
@@ -108,3 +146,4 @@ export function processProductVariants(variants) {
 
   return { suppliers, formats, strengths, variantIndex };
 }
+
