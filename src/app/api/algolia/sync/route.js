@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { algoliasearch } from 'algoliasearch';
 import { deriveCanonicalIdentity } from '@/utils/canonicalProductRegistry';
+import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 
 const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'G722EVODUJ';
 const ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY;
@@ -80,6 +81,7 @@ export async function POST(request) {
 
       const canonicalIdentity = deriveCanonicalIdentity(record);
       const variantsList = Array.isArray(record.variants) ? record.variants : [];
+      const fdaStatus = getFdaPeptideStatus(record.name || record.title || record.canonicalName || '');
 
       formattedRecord = {
         objectID: targetId,
@@ -104,6 +106,12 @@ export async function POST(request) {
         hasGmp: Boolean(record.hasGmp),
         productType: record.productType || record.type || '',
         sku: record.sku || '',
+        // FDA Regulatory Facets
+        fdaStatus: fdaStatus.status,
+        fdaStatusLabel: fdaStatus.badgeLabel,
+        isFda503aRecommended: Boolean(fdaStatus.is503aRecommended),
+        isFdaApproved: Boolean(fdaStatus.isFdaApproved),
+        fdaCategory: fdaStatus.category || '',
         updatedAt_ts: getTimestamp(record.updatedAt || record.createdAt)
       };
     } else if (indexName === 'prescriptions') {

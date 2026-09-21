@@ -9,6 +9,7 @@
  */
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 import logger from '../utils/logger.js';
+import { expandClinicalQuery } from '../data/algoliaMedicalSynonyms.js';
 
 const APP_ID = (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '') || 'G722EVODUJ';
 const SEARCH_KEY = (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '') || '609364d52903d7aefa3080d0fe63db2a';
@@ -109,7 +110,7 @@ export function checkAlgoliaQuota() {
  * @param {boolean} [options.distinct=true] - Collapse duplicate peptide hits by canonicalKey natively
  * @param {number} [options.hitsPerPage=15]
  */
-export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15 } = {}) {
+export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15, facetFilters, filters } = {}) {
   const currentClient = getClient();
   if (!currentClient) {
     return { products: [], protocols: [], source: 'disabled' };
@@ -119,8 +120,11 @@ export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15 }
     return { products: [], protocols: [], source: 'skipped' };
   }
 
-  const cleanQuery = query.trim();
-  const cacheKey = `basic:${cleanQuery.toLowerCase()}:${distinct ? 1 : 0}:${hitsPerPage}`;
+  const rawClean = query.trim();
+  const cleanQuery = expandClinicalQuery(rawClean);
+  const facetKey = Array.isArray(facetFilters) ? facetFilters.join(',') : (facetFilters || '');
+  const filterKey = filters || '';
+  const cacheKey = `basic:${rawClean.toLowerCase()}:${distinct ? 1 : 0}:${hitsPerPage}:${facetKey}:${filterKey}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -131,17 +135,25 @@ export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15 }
   }
 
   try {
+    const productReq = {
+      indexName: 'products',
+      query: cleanQuery,
+      hitsPerPage,
+      distinct: distinct ? 1 : 0,
+      clickAnalytics: true
+    };
+    if (facetFilters) productReq.facetFilters = facetFilters;
+    if (filters) productReq.filters = filters;
+
+    const protocolReq = {
+      indexName: 'protocols',
+      query: cleanQuery,
+      hitsPerPage: 6,
+      clickAnalytics: true
+    };
+
     const results = await currentClient.search({
-      requests: [
-        {
-          indexName: 'products',
-          query: cleanQuery,
-          hitsPerPage,
-          distinct: distinct ? 1 : 0,
-          clickAnalytics: true
-        },
-        { indexName: 'protocols', query: cleanQuery, hitsPerPage: 6, clickAnalytics: true },
-      ]
+      requests: [productReq, protocolReq]
     });
 
     incrementUsage();
@@ -177,8 +189,9 @@ export async function searchAlgoliaFederated(
     return { products: [], protocols: [], patients: [], prescriptions: [], clinics: [], users: [] };
   }
 
-  const cleanQuery = query.trim();
-  const cacheKey = `federated:${cleanQuery.toLowerCase()}:${indices.join(',')}:${distinct ? 1 : 0}:${hitsPerPage}`;
+  const rawClean = query.trim();
+  const cleanQuery = expandClinicalQuery(rawClean);
+  const cacheKey = `federated:${rawClean.toLowerCase()}:${indices.join(',')}:${distinct ? 1 : 0}:${hitsPerPage}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
