@@ -553,9 +553,15 @@ service cloud.firestore {
     match /purchase_rfqs/{id} { allow read, write: if isAdmin(); }
     match /purchaseOrders/{id} { allow read, write: if isAdmin(); }
     match /purchaseBills/{id} { allow read, write: if isAdmin(); }
+    match /suppliers/{id} { allow read, write: if isAdmin(); }
 
     // ── SALES (O2C) ──
+    match /quotations/{id} { allow read, write: if isAuthenticated() && (isAdmin() || isWholesaler() || isDoctor()); }
     match /b2b_quotations/{id} { allow read, write: if isAuthenticated() && (isAdmin() || isWholesaler() || isDoctor()); }
+    match /customers/{id} {
+      allow read: if isAuthenticated() && (isAdmin() || isWholesaler() || isDoctor());
+      allow write: if isAdmin();
+    }
     match /sales_orders/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
     match /b2b_invoices/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
     match /b2b_payments/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }

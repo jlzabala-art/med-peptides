@@ -94,7 +94,7 @@ export default function AdminQuotationsTab() {
   }, [loadKpis]);
 
   // Firestore Collection for Quotations
-  const { data: rawQuotations = [], isLoading: loadingQuotes, refresh: refreshQuotes } = useFirestoreCollection('quotations', {
+  const { data: rawQuotations = [], isLoading: loadingQuotes, error: quotesError, refetch: refreshQuotes } = useFirestoreCollection('quotations', {
     limitCount: 300,
     orderByFields: [['createdAt', 'desc']],
   });
@@ -1316,7 +1316,19 @@ export default function AdminQuotationsTab() {
       />
 
       {/* 4. Unified DataTable with Master-Detail, Bulk Actions & CopyableId */}
-      {loadingQuotes ? (
+      {quotesError ? (
+        <div style={{ padding: '2rem', margin: '1rem 0', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', textAlign: 'center' }}>
+          <p style={{ color: '#991b1b', fontWeight: 600, margin: '0 0 0.5rem 0' }}>
+            Error loading quotations: {quotesError.message || 'Permission denied or network issue'}
+          </p>
+          <button 
+            onClick={() => refreshQuotes && refreshQuotes()}
+            style={{ padding: '0.4rem 1rem', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : loadingQuotes ? (
         <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
           Loading quotations registry...
         </div>
