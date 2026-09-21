@@ -1,11 +1,12 @@
 import React from 'react';
 import { ShieldCheck, FlaskConical, Truck, Beaker, FileText } from '@/lib/icons';
+import FdaRegulatoryBadge from '@/components/product/FdaRegulatoryBadge';
 
 /**
  * PeptideTrustBadges
- * Displays HPLC, purity >= 99%, lab testing and transit badges + CoA action button.
+ * Displays HPLC, purity >= 99%, lab testing, FDA 503A status, and transit badges + CoA action button.
  */
-export default function PeptideTrustBadges({ presentationClass = 'vial', onOpenCoa }) {
+export default function PeptideTrustBadges({ presentationClass = 'vial', product, onOpenCoa }) {
   const isVial = presentationClass === 'vial';
   const badges = isVial
     ? [
@@ -21,6 +22,11 @@ export default function PeptideTrustBadges({ presentationClass = 'vial', onOpenC
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* FDA Regulatory Status Badge */}
+      {product && (
+        <FdaRegulatoryBadge product={product} variant="badge" style={{ width: '100%' }} />
+      )}
+
       {/* Trust badges row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
         {badges.map((badge, i) => (

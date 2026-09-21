@@ -5,13 +5,57 @@ import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTr
 export default function RegulatoryTab({ form, setForm }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* FDA Regulatory Status & 503A Bulks List Card */}
+        <Card padding="md" style={{ backgroundColor: '#ffffff', borderColor: '#bfdbfe', borderWidth: '1px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#1d4ed8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              🛡️ U.S. FDA & PCAC 503A Regulatory Classification
+            </h3>
+            <span style={{ fontSize: '0.70rem', backgroundColor: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '12px', fontWeight: 700, border: '1px solid #bfdbfe' }}>
+              July 2026 PCAC Review
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>
+                FDA Regulatory Category
+              </label>
+              <select
+                value={form.fdaStatus || 'fda_pcac_503a_recommended'}
+                onChange={e => setForm({ ...form, fdaStatus: e.target.value })}
+                style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#ffffff', color: '#0f172a' }}
+              >
+                <option value="fda_pcac_503a_recommended">🛡️ FDA PCAC 503A Recommended (July 2026)</option>
+                <option value="fda_approved">✅ FDA Approved Drug (NDA / ANDA)</option>
+                <option value="fda_category_2_restricted">⚠️ FDA Category 2 / Restricted Compounding</option>
+                <option value="clinical_investigational">🔬 Clinical Trial Investigational (IND)</option>
+                <option value="research_analytical_standard">⚗️ Analytical Reference Standard</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '4px' }}>
+                Advisory Finding / Ruling Notes
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Recommended for 503A Bulks List inclusion"
+                value={form.fdaRulingNotes || ''}
+                onChange={e => setForm({ ...form, fdaRulingNotes: e.target.value })}
+                style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#ffffff', color: '#0f172a' }}
+              />
+            </div>
+          </div>
+        </Card>
+
         {/* Compliance Dashboard Card */}
-        <Card padding="md" style={{ backgroundColor: '#0f172a', borderColor: '#e2e8f0' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Compliance Dashboard</h3>
+        <Card padding="md" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Global Compliance Dashboard</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Global Registration Status</label>
-              <select value={form.registrationStatus} onChange={e => setForm({...form, registrationStatus: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#0f172a' }}>
+              <select value={form.registrationStatus} onChange={e => setForm({...form, registrationStatus: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#ffffff', color: '#0f172a' }}>
                 <option value="Registered">Registered</option>
                 <option value="Pending">Pending</option>
                 <option value="Rejected">Rejected</option>
@@ -20,7 +64,7 @@ export default function RegulatoryTab({ form, setForm }) {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Expiry Date of current license</label>
-              <input type="date" value={form.expiryDate} onChange={e => setForm({...form, expiryDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#0f172a' }} />
+              <input type="date" value={form.expiryDate} onChange={e => setForm({...form, expiryDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#ffffff', color: '#0f172a' }} />
             </div>
           </div>
 

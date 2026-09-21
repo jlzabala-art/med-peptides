@@ -61,6 +61,7 @@ import PeptideDetailStyles from './detail/PeptideDetailStyles';
 import PeptideTrustBadges from './detail/PeptideTrustBadges';
 import PeptideClinicalEvidence from './detail/PeptideClinicalEvidence';
 import PeptideResearchAccordions from './detail/PeptideResearchAccordions';
+import FdaRegulatoryBadge from '@/components/product/FdaRegulatoryBadge';
 
 import { collection, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import * as protocolRepository from '@/repositories/protocolRepository';
@@ -713,6 +714,7 @@ export default function PeptideDetail({
                 />
                 <PeptideTrustBadges
                   presentationClass={presentationClass}
+                  product={activeProduct}
                   onOpenCoa={() => setShowPurityModal(true)}
                 />
               </div>
@@ -771,6 +773,9 @@ export default function PeptideDetail({
                   )}
                 </div>
               )}
+
+              {/* 🛡️ FDA & Regulatory Compliance Overview Banner */}
+              <FdaRegulatoryBadge product={activeProduct} variant="banner" style={{ marginTop: '0.25rem' }} />
 
               {/* 🔬 1-Click Bridge: Official Technical Datasheet & HPLC Certificate */}
               <DatasheetTeaserCard product={activeProduct} />

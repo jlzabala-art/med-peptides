@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
 import { Bot, ArrowRight, ShoppingCart, BookOpen, Check, Activity, Beaker, FlaskConical } from '@/lib/icons';
+import FdaRegulatoryBadge from '../product/FdaRegulatoryBadge';
 
 // Icons
 
@@ -200,8 +201,11 @@ export default function UniversalProductCard({
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
               {displayTitle}
             </h3>
-            {renderMetadata()}
-            
+            {/* FDA Regulatory & 503A Status Badge */}
+            <div style={{ marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <FdaRegulatoryBadge product={product} variant="pill" />
+            </div>
+
             {/* Custom Tags */}
             {tags && tags.length > 0 && (
               <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>

@@ -113,7 +113,7 @@ export default function CustomerSharedLinksCard({
             </div>
             <div>
               <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
-                Documentos y Catálogos Compartidos
+                Shared Documents & B2B Catalogs
               </span>
               <span
                 style={{
@@ -126,7 +126,7 @@ export default function CustomerSharedLinksCard({
                   borderRadius: '10px'
                 }}
               >
-                {shares.length} {shares.length === 1 ? 'documento' : 'documentos'}
+                {shares.length} {shares.length === 1 ? 'document' : 'documents'}
               </span>
             </div>
           </div>
@@ -135,15 +135,15 @@ export default function CustomerSharedLinksCard({
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem' }}>
             <span style={{ color: '#94a3b8' }}>•</span>
             <span style={{ color: '#64748b' }}>
-              Condiciones: <strong style={{ color: '#334155' }}>{paymentTerms}</strong>
+              Terms: <strong style={{ color: '#334155' }}>{paymentTerms}</strong>
             </span>
             <span style={{ color: '#94a3b8' }}>•</span>
             <span style={{ color: '#64748b' }}>
-              Límite: <strong style={{ color: '#15803d' }}>${creditLimit}</strong>
+              Credit Limit: <strong style={{ color: '#15803d' }}>${creditLimit}</strong>
             </span>
             <span style={{ color: '#94a3b8' }}>•</span>
             <span style={{ color: '#64748b' }}>
-              Gestor: <strong style={{ color: '#334155' }}>{accountManager}</strong>
+              Manager: <strong style={{ color: '#334155' }}>{accountManager}</strong>
             </span>
           </div>
         </div>
@@ -162,10 +162,10 @@ export default function CustomerSharedLinksCard({
               gap: '5px',
               borderRadius: '6px'
             }}
-            title="Recargar telemetría y documentos"
+            title="Reload telemetry and shared documents"
           >
             <RefreshCw size={13} className={loading ? 'spin' : ''} />
-            <span>Refrescar</span>
+            <span>Refresh</span>
           </button>
 
           <button
@@ -182,7 +182,7 @@ export default function CustomerSharedLinksCard({
               borderRadius: '6px'
             }}
           >
-            <Share2 size={13} /> + Compartir Documento
+            <Share2 size={13} /> + Share Document
           </button>
 
           {onOpenWorkspace && (
@@ -202,9 +202,9 @@ export default function CustomerSharedLinksCard({
                 borderColor: '#cbd5e1',
                 color: '#334155'
               }}
-              title="Abrir vista detallada 360°"
+              title="Open detailed 360° profile workspace"
             >
-              <Building2 size={13} /> Perfil 360°
+              <Building2 size={13} /> 360° Profile
             </button>
           )}
         </div>
@@ -214,7 +214,7 @@ export default function CustomerSharedLinksCard({
       {loading ? (
         <div style={{ padding: '28px', textAlign: 'center', fontSize: '0.82rem', color: '#64748b' }}>
           <RefreshCw size={16} className="spin" style={{ display: 'inline', marginRight: '8px' }} />
-          Cargando documentos compartidos y telemetría...
+          Loading shared documents and telemetry...
         </div>
       ) : shares.length === 0 ? (
         <div
@@ -240,10 +240,10 @@ export default function CustomerSharedLinksCard({
             <Share2 size={20} />
           </div>
           <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1e293b' }}>
-            No hay documentos ni catálogos compartidos aún con {customerName}
+            No shared documents or catalogs yet for {customerName}
           </div>
           <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '3px', marginBottom: '14px' }}>
-            Genera un enlace público B2B con margen personalizado y catálogo pre-filtrado para registrar telemetría de visitas y cotizaciones.
+            Generate a personalized public B2B link with verified margins and a pre-filtered catalog to track visits and quotations.
           </div>
           <button
             type="button"
@@ -251,7 +251,7 @@ export default function CustomerSharedLinksCard({
             className="gcp-btn-primary"
             style={{ padding: '6px 16px', fontSize: '0.80rem', fontWeight: 600, borderRadius: '6px' }}
           >
-            <Share2 size={13} style={{ marginRight: '6px' }} /> Generar Primer Catálogo Compartido
+            <Share2 size={13} style={{ marginRight: '6px' }} /> Generate First Shared Catalog
           </button>
         </div>
       ) : (
@@ -276,12 +276,12 @@ export default function CustomerSharedLinksCard({
                   textTransform: 'uppercase'
                 }}
               >
-                <th style={{ padding: '10px 16px', width: '32%' }}>Documento</th>
-                <th style={{ padding: '10px 14px', width: '16%' }}>Tipo</th>
-                <th style={{ padding: '10px 14px', width: '18%' }}>Fecha</th>
-                <th style={{ padding: '10px 14px', width: '12%' }}>Margen</th>
-                <th style={{ padding: '10px 14px', width: '14%' }}>Estado</th>
-                <th style={{ padding: '10px 16px', width: '8%', textAlign: 'right' }}>Acciones</th>
+                <th style={{ padding: '10px 16px', width: '32%' }}>Document</th>
+                <th style={{ padding: '10px 14px', width: '16%' }}>Type</th>
+                <th style={{ padding: '10px 14px', width: '18%' }}>Issued Date</th>
+                <th style={{ padding: '10px 14px', width: '12%' }}>Markup</th>
+                <th style={{ padding: '10px 14px', width: '14%' }}>Telemetry Status</th>
+                <th style={{ padding: '10px 16px', width: '8%', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -298,10 +298,10 @@ export default function CustomerSharedLinksCard({
                       hour: '2-digit',
                       minute: '2-digit'
                     })
-                  : 'Reciente';
+                  : 'Recent';
 
-                const docTitle = share.catalogTitle || share.title || 'Catálogo B2B de Productos';
-                const docType = share.documentType || (share.quoteId ? 'Cotización B2B' : 'Catálogo Digital');
+                const docTitle = share.catalogTitle || share.title || 'B2B Product Catalog';
+                const docType = share.documentType || (share.quoteId ? 'B2B Quote' : 'Digital Catalog');
                 const marginVal = Number(share.margin ?? share.markup ?? 20);
                 const supplier = share.supplierLabel || share.supplierId || 'Lotusland';
 
@@ -315,7 +315,7 @@ export default function CustomerSharedLinksCard({
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fafafa'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                   >
-                    {/* 1. DOCUMENTO */}
+                    {/* 1. DOCUMENT */}
                     <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>📋</span>
@@ -337,7 +337,7 @@ export default function CustomerSharedLinksCard({
                       </div>
                     </td>
 
-                    {/* 2. TIPO */}
+                    {/* 2. TYPE */}
                     <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                       <span
                         style={{
@@ -357,7 +357,7 @@ export default function CustomerSharedLinksCard({
                       </span>
                     </td>
 
-                    {/* 3. FECHA */}
+                    {/* 3. DATE */}
                     <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#475569', fontSize: '0.76rem' }}>
                         <Clock size={12} color="#94a3b8" />
@@ -365,7 +365,7 @@ export default function CustomerSharedLinksCard({
                       </div>
                     </td>
 
-                    {/* 4. MARGEN */}
+                    {/* 4. MARGIN */}
                     <td style={{ padding: '12px 14px', verticalAlign: 'middle' }}>
                       <span
                         style={{
@@ -384,7 +384,7 @@ export default function CustomerSharedLinksCard({
                       </span>
                     </td>
 
-                    {/* 5. ESTADO / TELEMETRÍA */}
+                    {/* 5. TELEMETRY STATUS */}
                     <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       {isOpened ? (
                         <span
@@ -401,7 +401,7 @@ export default function CustomerSharedLinksCard({
                             border: '1px solid #bbf7d0'
                           }}
                         >
-                          <Eye size={12} /> {visits > 1 ? `Abierto (${visits}x)` : 'Abierto ✓'}
+                          <Eye size={12} /> {visits > 1 ? `Viewed (${visits}x)` : 'Viewed ✓'}
                         </span>
                       ) : (
                         <span
@@ -418,12 +418,12 @@ export default function CustomerSharedLinksCard({
                             border: '1px solid #fde68a'
                           }}
                         >
-                          Pendiente
+                          Awaiting View
                         </span>
                       )}
                     </td>
 
-                    {/* 6. ACCIONES */}
+                    {/* 6. ACTIONS */}
                     <td style={{ padding: '12px 16px', verticalAlign: 'middle', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                         <button
@@ -438,14 +438,14 @@ export default function CustomerSharedLinksCard({
                             alignItems: 'center',
                             gap: '4px'
                           }}
-                          title="Copiar enlace directo"
+                          title="Copy direct shareable link"
                         >
                           {copiedId === share.id ? (
                             <Check size={12} color="#16a34a" />
                           ) : (
                             <Copy size={12} />
                           )}
-                          <span className="hide-mobile">Copiar</span>
+                          <span className="hide-mobile">Copy</span>
                         </button>
 
                         <a
@@ -462,7 +462,7 @@ export default function CustomerSharedLinksCard({
                             color: '#0284c7',
                             textDecoration: 'none'
                           }}
-                          title="Abrir enlace en pestaña nueva"
+                          title="Open link in new tab"
                         >
                           <ExternalLink size={12} />
                         </a>

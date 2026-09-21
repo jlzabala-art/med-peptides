@@ -57,6 +57,25 @@ export const PeptideApiSpecsSchema = z.object({
   }).optional()
 });
 
+// 🛡️ Clasificación Regulatoria y Estatus FDA (FDA Regulatory & 503A Status)
+export const FdaRegulatorySchema = z.object({
+  status: z.enum([
+    'fda_approved',
+    'fda_pcac_503a_recommended',
+    'fda_category_2_restricted',
+    'clinical_investigational',
+    'research_analytical_standard'
+  ]).default('research_analytical_standard'),
+  badgeLabel: z.string().optional(),
+  shortBadge: z.string().optional(),
+  rulingDate: z.string().optional(), // ej: "July 2026"
+  advisoryBody: z.string().default('FDA Pharmacy Compounding Advisory Committee (PCAC)'),
+  voteResult: z.string().optional(),
+  summary: z.string().optional(),
+  legalNotice: z.string().optional(),
+  fdaDocUrl: z.string().optional(),
+});
+
 // 🚚 Especificaciones de Servicios Logísticos y Envíos (Cold Chain / Medical Logistics)
 export const LogisticsLocationSchema = z.object({
   name: z.string().optional(),                 // Ej: "Magenta Health Dubai" o "KM+ clinic"
@@ -237,6 +256,9 @@ export const ProductSchema = z.object({
 
   // 🚚 Especificaciones Logísticas Opcionales (para Servicios de Transporte / Courier)
   logisticsSpecs: LogisticsSpecsSchema.optional(),
+  
+  // 🛡️ Clasificación FDA / 503A Opcional
+  fdaRegulatory: FdaRegulatorySchema.optional(),
   
   variants: z.array(VariantSchema).optional(),
   createdAt: z.any().optional(),

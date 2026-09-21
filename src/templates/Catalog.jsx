@@ -17,6 +17,7 @@ import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
 import FAQModal from '../components/discovery/FAQModal';
 import SymptomMatchmakerWidget from '../components/public/SymptomMatchmakerWidget';
 import { getFAQForProduct } from '../utils/discoveryEngine';
+import { getFdaPeptideStatus } from '../data/fdaPeptidesRegistry';
 
 const Catalog = React.memo(function Catalog({ 
   region, setRegion, 
@@ -74,6 +75,7 @@ const Catalog = React.memo(function Catalog({
   });
 
   const [activeCategory, setActiveCategory] = useState(initialCategory || null);
+  const [fdaStatusFilter, setFdaStatusFilter] = useState(null);
   const [productCategories, setProductCategories] = useState(_fallbackCategories);
 
   // Load product categories from Firestore
@@ -157,20 +159,29 @@ const Catalog = React.memo(function Catalog({
 
   // Determine what products to show
   const productsToDisplay = useMemo(() => {
+    let list = [];
     if (activeCategory) {
-      return groupedProducts[activeCategory] || [];
+      list = groupedProducts[activeCategory] || [];
+    } else {
+      // If no category selected, flat map all grouped products
+      productCategories.forEach(cat => {
+        const prods = groupedProducts[cat] || [];
+        if (prods.length > 0) {
+          list.push(...prods);
+        }
+      });
     }
-    // If no category selected, show all (or grouped by category)
-    // For simplicity in the new layout, we flat map all grouped products
-    const all = [];
-    productCategories.forEach(cat => {
-      const prods = groupedProducts[cat] || [];
-      if (prods.length > 0) {
-        all.push(...prods);
-      }
-    });
-    return all;
-  }, [activeCategory, groupedProducts, productCategories]);
+
+    // Apply FDA Regulatory filter if selected
+    if (fdaStatusFilter) {
+      return list.filter(p => {
+        const fda = getFdaPeptideStatus(p);
+        return fda?.status === fdaStatusFilter;
+      });
+    }
+
+    return list;
+  }, [activeCategory, groupedProducts, productCategories, fdaStatusFilter]);
 
   return (
     <section id="products" className="section section-light template-root" style={{ paddingTop: 'clamp(2rem, 5vw, 4rem)' }}>
@@ -187,8 +198,7 @@ const Catalog = React.memo(function Catalog({
           <div className={styles.catalogHeader}>
             <h1 className={styles.catalogTitle}>Research Catalog</h1>
             <p className={styles.catalogSubtitle}>
-              Explore our complete inventory of high-purity research reagents, organized by scientific pathway. 
-              Utilize the sidebar to filter by focus area.
+              Explore our complete inventory of high-purity research reagents, organized by scientific pathway and FDA regulatory classification.
             </p>
           </div>
 
@@ -202,6 +212,8 @@ const Catalog = React.memo(function Catalog({
                 onSelectCategory={setActiveCategory}
                 groupedProducts={groupedProducts}
                 isProfessional={isProfessional}
+                fdaStatusFilter={fdaStatusFilter}
+                onSelectFdaStatus={setFdaStatusFilter}
               />
 
               <div className={styles.productGrid}>
