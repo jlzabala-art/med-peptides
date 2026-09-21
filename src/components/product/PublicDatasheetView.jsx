@@ -617,6 +617,31 @@ export default function PublicDatasheetView({
       || null;
   }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
 
+  const isPenFormat = useMemo(() => {
+    const f = (activeFormatId || '').toLowerCase();
+    return f.includes('pen');
+  }, [activeFormatId]);
+
+  const isCartridgeFormat = useMemo(() => {
+    const f = (activeFormatId || '').toLowerCase();
+    return f.includes('cartridge');
+  }, [activeFormatId]);
+
+  const isSprayFormat = useMemo(() => {
+    const f = (activeFormatId || '').toLowerCase();
+    return f.includes('spray') || f.includes('nasal');
+  }, [activeFormatId]);
+
+  const hasPenFormat = useMemo(() => {
+    return availableFormats.some(f => (f.id || '').toLowerCase().includes('pen'));
+  }, [availableFormats]);
+
+  const hasCartridgeFormat = useMemo(() => {
+    return availableFormats.some(f => (f.id || '').toLowerCase().includes('cartridge'));
+  }, [availableFormats]);
+
+  const isPenAndCartridgeEcosystem = hasPenFormat && hasCartridgeFormat;
+
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
     if (initialBatch && String(initialBatch).trim().length > 0 && !String(initialBatch).toLowerCase().includes('dummy')) {
@@ -910,7 +935,9 @@ export default function PublicDatasheetView({
             const v = variantIndex[vKey];
             const recon = getReconstitutionVolume(st.name);
             const isCurrentlyActive = fId === activeFormatId && st.id === selectedStrengthId;
-            const isPenOrCart = fId.includes('pen') || fId.includes('cartridge');
+            const isPen = fId.includes('pen');
+            const isCart = fId.includes('cartridge');
+            const isPenOrCart = isPen || isCart;
             const isOral = fId.includes('capsule') || fId.includes('tablet') || fId.includes('oral');
             const isSpray = fId.includes('spray') || fId.includes('nasal');
 
@@ -918,37 +945,43 @@ export default function PublicDatasheetView({
               ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
               : isDiagnosticKit
                 ? (lang === 'es' ? 'Kit Todo Incluido (Lancetas + Tarjeta DBS)' : 'Self-Contained Kit (Lancets + DBS Card)')
-                : isPenOrCart 
-                  ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-                  : isOral 
-                    ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                    : isSpray
-                      ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
-                      : `${recon.volume} mL BAC Water`;
+                : isPen
+                  ? (lang === 'es' ? 'Solución Precargada (Sin BAC · Cero mezcla)' : 'Pre-filled Solution (Zero BAC mixing)')
+                  : isCart
+                    ? (lang === 'es' ? 'Cartucho 3 mL Recambio (Sin BAC)' : '3 mL Refill Cartridge (Zero BAC)')
+                    : isOral 
+                      ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                      : isSpray
+                        ? (lang === 'es' ? 'Solución Intranasal Tamponada (Sin BAC)' : 'Pre-metered Buffered Solution (Zero BAC)')
+                        : `${recon.volume} mL BAC Water`;
 
             const concText = isSolventProduct
               ? '0.9% Benzyl Alcohol USP'
               : isDiagnosticKit
                 ? (lang === 'es' ? 'Rango: 5.0–60.0 µmol/L (LoD 0.23)' : 'Range: 5.0–60.0 µmol/L (LoD 0.23)')
-                : isPenOrCart 
-                  ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-                  : isOral 
-                    ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                    : isSpray
-                      ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
-                      : `${recon.concentration} mg/mL`;
+                : isPen
+                  ? (lang === 'es' ? '3.0 mL (Multidosis Calibrada)' : '3.0 mL (Calibrated Multi-dose)')
+                  : isCart
+                    ? (lang === 'es' ? '3.0 mL (Cartucho Borosilicato Tipo I)' : '3.0 mL (Borosilicate Refill)')
+                    : isOral 
+                      ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                      : isSpray
+                        ? (lang === 'es' ? '10 mL (~100 sprays · 0.1 mL/puff)' : '10 mL (~100 sprays · 0.1 mL/puff)')
+                        : `${recon.concentration} mg/mL`;
 
             const adminText = isSolventProduct
               ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
               : isDiagnosticKit
                 ? (lang === 'es' ? 'Punción Capilar (DBS Yema de Dedo)' : 'Capillary Fingerstick (DBS Card)')
-                : isPenOrCart 
+                : isPen
                   ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                  : isOral 
-                    ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                    : isSpray
-                      ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
-                      : 'Subcutaneous / IM (U-100)';
+                  : isCart
+                    ? (lang === 'es' ? 'Recambio 3 mL para Pluma' : '3 mL Reusable Pen Refill')
+                    : isOral 
+                      ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                      : isSpray
+                        ? (lang === 'es' ? 'Mucosa Intranasal (Sin Agujas)' : 'Intranasal Mucosal (Needle-Free)')
+                        : 'Subcutaneous / IM (U-100)';
 
             rows.push({
               key: `${supp.id}-${fId}-${st.id}`,
@@ -961,6 +994,8 @@ export default function PublicDatasheetView({
               adminText,
               recon,
               isPenOrCart,
+              isPen,
+              isCart,
               isOral,
               isSpray,
               isCurrentlyActive,
@@ -1247,6 +1282,81 @@ export default function PublicDatasheetView({
             </div>
           </div>
 
+          {/* Refill Cross-Format Callouts (Pen vs 3 mL Refill Cartridge) */}
+          {isPenAndCartridgeEcosystem && isPenFormat && (
+            <div className="pds-refill-callout pds-refill-to-cartridge">
+              <div className="pds-refill-callout-icon">💡</div>
+              <div className="pds-refill-callout-content">
+                <strong>{lang === 'es' ? '¿Ya dispones del aplicador Dial Pen?' : 'Already have the reusable Dial Pen device?'}</strong>
+                <p>
+                  {lang === 'es'
+                    ? 'Ahorra en tus ciclos adquiriendo exclusivamente el Cartucho de Recambio (Refill 3 mL). El dispositivo aplicador es reutilizable y compatible con los recambios.'
+                    : 'Save on ongoing therapy by purchasing the 3 mL Refill Cartridge. The pen device is fully reusable and accepts replacement cartridges.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="pds-refill-switch-btn"
+                onClick={() => {
+                  const cartFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge'));
+                  if (cartFmt) {
+                    setActiveFormatId(cartFmt.id);
+                    triggerHaptic('selection');
+                  }
+                }}
+              >
+                <span>{lang === 'es' ? 'Ver Cartucho de Recambio' : 'Switch to Refill Cartridge'}</span>
+                <ArrowUpRight size={14} />
+              </button>
+            </div>
+          )}
+
+          {isPenAndCartridgeEcosystem && isCartridgeFormat && (
+            <div className="pds-refill-callout pds-refill-to-pen">
+              <div className="pds-refill-callout-icon">🔄</div>
+              <div className="pds-refill-callout-content">
+                <strong>{lang === 'es' ? 'Cartucho de Recambio 3 mL (Refill)' : '3 mL Replacement Cartridge (Refill)'}</strong>
+                <p>
+                  {lang === 'es'
+                    ? 'Este cartucho de vidrio pre-llenado requiere un bolígrafo dosificador compatible para su administración. Si es tu primer tratamiento o no tienes el aplicador, selecciona el Pen completo.'
+                    : 'This pre-filled glass cartridge requires a compatible reusable dial pen for administration. If this is your first cycle or you need the device, select the Pre-filled Pen.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="pds-refill-switch-btn"
+                onClick={() => {
+                  const penFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('pen'));
+                  if (penFmt) {
+                    setActiveFormatId(penFmt.id);
+                    triggerHaptic('selection');
+                  }
+                }}
+              >
+                <span>{lang === 'es' ? 'Ver Bolígrafo Completo' : 'View Complete Pen Device'}</span>
+                <ArrowUpRight size={14} />
+              </button>
+            </div>
+          )}
+
+          {/* Intranasal Spray Callout */}
+          {isSprayFormat && (
+            <div className="pds-spray-callout">
+              <div className="pds-spray-callout-icon">💨</div>
+              <div className="pds-spray-callout-content">
+                <strong>{lang === 'es' ? 'Sistema de Atomización Mucosal Intranasal (Sin Agujas)' : 'Intranasal Mucosal Atomization System (Needle-Free)'}</strong>
+                <p>
+                  {lang === 'es'
+                    ? 'Formulación líquida isotónica calibrada para absorción directa a través de la mucosa nasal (vía olfatoria y trigémino direct-to-brain). Válvula dosificadora de 0.1 mL por spray. Cero reconstitución BAC.'
+                    : 'Calibrated isotonic formulation engineered for direct mucosal absorption (olfactory and trigeminal direct-to-brain pathway). Sterile metered pump delivers 0.1 mL per spray. Zero BAC mixing required.'}
+                </p>
+              </div>
+              <div className="pds-spray-callout-badge">
+                <span>{lang === 'es' ? '0.1 mL / spray calibrado' : '0.1 mL metered puff'}</span>
+              </div>
+            </div>
+          )}
+
           {/* Active Specification Detail Box */}
           <div className="pds-selected-detail-card">
             <div className="pds-detail-grid">
@@ -1263,7 +1373,13 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? 'Vehículo de Reconstitución (No Inyección Directa)' : 'Reconstitution Vehicle (Not for Direct Injection)')
                     : isDiagnosticKit
                       ? (lang === 'es' ? 'Punción Capilar en Dedo (3 gotas en tarjeta DBS)' : 'Capillary Fingerstick (3 spots on DBS Card)')
-                      : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
+                      : isSprayFormat
+                        ? (lang === 'es' ? 'Atomización Transmucosa Intranasal (Sin Agujas)' : 'Intranasal Transmucosal Atomization (Needle-Free)')
+                        : isCartridgeFormat
+                          ? (lang === 'es' ? 'Cartucho de Recambio 3 mL (Bolígrafo Reutilizable)' : '3 mL Refill Cartridge (Reusable Dial Pen)')
+                          : isPenFormat
+                            ? (lang === 'es' ? 'Inyección Subcutánea Micro-Dial (Selector Clics)' : 'Subcutaneous Micro-Dial Injection (Click Dial)')
+                            : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
                 </span>
               </div>
               <div className="pds-detail-col">
@@ -1272,9 +1388,13 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? 'Función Diluyente' : 'Diluent Function')
                     : isDiagnosticKit
                       ? (lang === 'es' ? 'Metodología Analítica' : 'Analytical Methodology')
-                      : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
-                        ? (t.deviceDelivery || 'Device Delivery') 
-                        : (t.recommendedRecon || 'Recommended Reconstitution')}
+                      : isSprayFormat
+                        ? (lang === 'es' ? 'Mecanismo de Atomización' : 'Atomization Mechanism')
+                        : isCartridgeFormat
+                          ? (lang === 'es' ? 'Compatibilidad de Recambio' : 'Refill Compatibility')
+                          : isPenFormat
+                            ? (t.deviceDelivery || 'Device Delivery') 
+                            : (t.recommendedRecon || 'Recommended Reconstitution')}
                 </span>
                 <span className="pds-dval">
                   {isSolventProduct ? (
@@ -1291,7 +1411,21 @@ export default function PublicDatasheetView({
                         → {lang === 'es' ? 'Rango Lineal 5.0–60.0 µmol/L · LoD: 0.23 µmol/L' : 'Linear Range 5.0–60.0 µmol/L · LoD: 0.23 µmol/L'}
                       </span>
                     </>
-                  ) : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) ? (
+                  ) : isSprayFormat ? (
+                    <>
+                      {lang === 'es' ? 'Válvula Dosificadora 0.1 mL / spray' : 'Metered Mucosal Pump (0.1 mL / spray)'}
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {lang === 'es' ? 'Absorción directa Nose-to-Brain (Sin dilución BAC)' : 'Direct Nose-to-Brain Pathway (No BAC mixing)'}
+                      </span>
+                    </>
+                  ) : isCartridgeFormat ? (
+                    <>
+                      {lang === 'es' ? 'Cartucho Sellado de Recambio 3 mL' : 'Pre-dissolved 3 mL Refill Cartridge'}
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {lang === 'es' ? 'Inserción directa en bolígrafo dosificador (0% mezcla BAC)' : 'Direct insertion into dial pen (Zero BAC mixing)'}
+                      </span>
+                    </>
+                  ) : isPenFormat ? (
                     <>
                       {t.preDissolvedLiquid || 'Pre-dissolved SubQ Liquid (Ready to Use)'}
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
@@ -1315,9 +1449,13 @@ export default function PublicDatasheetView({
                     ? '0.9% Benzyl Alcohol USP (Antimicrobial Preservative)'
                     : isDiagnosticKit
                       ? 'CE-IVDR (UE 2017/746) · ISO 15189'
-                      : ((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
-                        ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
-                        : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
+                      : isSprayFormat
+                        ? (lang === 'es' ? 'Solución Tamponada Isotónica Estéril (pH 6.8–7.4)' : 'Sterile Buffered Isotonic Solution (pH 6.8–7.4)')
+                        : isCartridgeFormat
+                          ? (lang === 'es' ? 'Vidrio Borosilicato Tipo I · Émbolo Teflón' : 'Type I Borosilicate Glass · Teflon Plunger')
+                          : isPenFormat
+                            ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
+                            : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
                 </span>
               </div>
               <div className="pds-detail-col">
@@ -1359,8 +1497,24 @@ export default function PublicDatasheetView({
                     <tr>
                       <th>{isDiagnosticKit ? (lang === 'es' ? 'Presentación de Kit' : 'Kit Presentation') : (lang === 'es' ? 'Concentración / Dosis' : 'Strength / Dose')}</th>
                       <th>{isDiagnosticKit ? (lang === 'es' ? 'Tipo de Muestra' : 'Specimen Type') : (lang === 'es' ? 'Formato de Presentación' : 'Presentation Format')}</th>
-                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Componentes del Kit' : 'Kit Components') : (lang === 'es' ? 'Diluyente de Reconstitución' : 'Reconstitution Diluent')}</th>
-                      <th>{isDiagnosticKit ? (lang === 'es' ? 'Rango Analítico / LoD' : 'Assay Range / LoD') : (t.solutionConcentrationCol || 'Solution Concentration (mg/mL)')}</th>
+                      <th>
+                        {isDiagnosticKit 
+                          ? (lang === 'es' ? 'Componentes del Kit' : 'Kit Components') 
+                          : isSprayFormat 
+                            ? (lang === 'es' ? 'Formulación y Vehículo' : 'Formulation & Vehicle') 
+                            : (isPenFormat || isCartridgeFormat) 
+                              ? (lang === 'es' ? 'Sistema / Reconstitución' : 'Delivery / Reconstitution') 
+                              : (lang === 'es' ? 'Diluyente de Reconstitución' : 'Reconstitution Diluent')}
+                      </th>
+                      <th>
+                        {isDiagnosticKit 
+                          ? (lang === 'es' ? 'Rango Analítico / LoD' : 'Assay Range / LoD') 
+                          : isSprayFormat 
+                            ? (lang === 'es' ? 'Volumen / Dosis por Envase' : 'Device Volume / Actuations') 
+                            : (isPenFormat || isCartridgeFormat) 
+                              ? (lang === 'es' ? 'Volumen del Dispositivo' : 'Device Volume') 
+                              : (t.solutionConcentrationCol || 'Solution Concentration (mg/mL)')}
+                      </th>
                       <th>{isDiagnosticKit ? (lang === 'es' ? 'Método de Muestreo' : 'Sampling Method') : (lang === 'es' ? 'Vía de Administración' : 'Administration')}</th>
                       <th>{isDiagnosticKit ? (lang === 'es' ? 'Certificación y Regulación' : 'Certification & Standard') : (lang === 'es' ? 'Grado Analítico' : 'Analytical Grade')}</th>
                       <th>{isDiagnosticKit ? (lang === 'es' ? 'Laboratorio Analizador' : 'Testing Laboratory') : (lang === 'es' ? 'Verificación de Laboratorio' : 'Laboratory Verification')}</th>

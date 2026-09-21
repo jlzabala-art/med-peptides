@@ -2350,3 +2350,125 @@
   }
 }
 
+/* ── Refill & Cross-Format Device Callouts (Magenta & Multi-Format Peptides) ── */
+.pds-refill-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1rem 1.35rem;
+  border-radius: 10px;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pds-refill-to-cartridge {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+  border: 1px solid #99f6e4;
+  color: #134e4a;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.05);
+}
+
+.pds-refill-to-pen {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.05);
+}
+
+.pds-spray-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1rem 1.35rem;
+  border-radius: 10px;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.04);
+}
+
+.pds-refill-callout-icon,
+.pds-spray-callout-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pds-refill-callout-content,
+.pds-spray-callout-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pds-refill-callout-content strong,
+.pds-spray-callout-content strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.pds-refill-callout-content p,
+.pds-spray-callout-content p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.pds-refill-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  background: #003666;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pds-refill-switch-btn:hover {
+  background: #0d9488;
+  transform: translateY(-1px);
+}
+
+.pds-spray-callout-badge {
+  padding: 0.4rem 0.85rem;
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .pds-refill-callout,
+  .pds-spray-callout {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+  .pds-refill-switch-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+

@@ -112,6 +112,13 @@ export default function InteractiveReconstitutionGuide({
     return fId.includes('pen') || fId.includes('cartridge') || fName.includes('pen') || fName.includes('cartridge');
   }, [activeFormatId, activeFormat]);
 
+  const isCartridge = useMemo(() => {
+    const fId = String(activeFormatId || '').toLowerCase();
+    const fName = String(activeFormat?.name || '').toLowerCase();
+    return fId.includes('cartridge') || fName.includes('cartridge');
+  }, [activeFormatId, activeFormat]);
+
+
   const isSpray = useMemo(() => {
     const fId = String(activeFormatId || '').toLowerCase();
     const fName = String(activeFormat?.name || '').toLowerCase();
@@ -770,12 +777,16 @@ export default function InteractiveReconstitutionGuide({
     };
   }, [penDoseUnit, penDoseValue, penConcentrationMgMl, penVolumeMl]);
 
-  const PEN_DOSE_PRESETS_MG = Object.freeze([0.25, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0]);
-  const PEN_DOSE_PRESETS_MCG = Object.freeze([100, 250, 500, 750, 1000]);
-
-  // Dynamic Step 2 text replacement (for vials)
-  const dynamicSolventText = (t.solventText || '')
-    .replace('{volume}', safeBacMl.toFixed(1));
+  // ── Nasal Spray Calculations ───────────────────────────────────────────────
+  const sprayVolumeMl = selectedStrength?.volume_ml || 10.0;
+  const sprayTotalMg = initialVialMg > 0 ? initialVialMg : 30;
+  const sprayConcentrationMgMl = sprayTotalMg / sprayVolumeMl;
+  // Standard metered pump nozzle: 0.1 mL per actuation (~100 sprays per 10 mL bottle)
+  const sprayActuationVolumeMl = 0.1;
+  const sprayTotalActuations = Math.round(sprayVolumeMl / sprayActuationVolumeMl);
+  const sprayMgPerActuation = sprayConcentrationMgMl * sprayActuationVolumeMl;
+  const sprayMcgPerActuation = Math.round(sprayMgPerActuation * 1000);
+  const [sprayPuffs, setSprayPuffs] = useState(1);
 
   // ── Dedicated Pre-filled Pen & Cartridge View ──────────────────────────────
   if (isPenOrCartridge) {
@@ -786,14 +797,22 @@ export default function InteractiveReconstitutionGuide({
           <div className="irg-header-left">
             <div className="irg-badge" style={{ background: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}>
               <Sparkles size={13} />
-              <span>Multi-Dose Pen Delivery System</span>
+              <span>{isCartridge ? (lang === 'es' ? 'Cartucho de Recambio 3 mL' : '3 mL Refill Cartridge System') : (lang === 'es' ? 'Bolígrafo Inyector Multidosis' : 'Multi-Dose Pen Delivery System')}</span>
             </div>
             <h2 className="irg-title">
               <Thermometer size={20} color="#003666" />
-              {t.penCalcTitle || 'Pre-filled Pen Dial Dosing & Administration Guide'}
+              {isCartridge
+                ? (lang === 'es' ? 'Cartucho de Recambio 3 mL — Calibración de Dial y Compatibilidad' : '3 mL Refill Cartridge — Dial Dosing & Compatibility Guide')
+                : (t.penCalcTitle || (lang === 'es' ? 'Guía de Dosificación en Dial y Administración' : 'Pre-filled Pen Dial Dosing & Administration Guide'))}
             </h2>
             <p className="irg-subtitle">
-              {t.penCalcSubtitle || 'Precision multi-dose dial pen delivery system. Calibrated for subcutaneous micro-dial administration without manual reconstitution.'}
+              {isCartridge
+                ? (lang === 'es'
+                    ? 'Cartucho de vidrio borosilicato de 3 mL precargado para recarga de bolígrafos dosificadores reutilizables. Sin reconstitución manual requerida.'
+                    : 'Pre-filled 3 mL borosilicate glass cartridge engineered for reusable dial pen reloading. Zero manual reconstitution required.')
+                : (t.penCalcSubtitle || (lang === 'es'
+                    ? 'Sistema aplicador multidosis de alta precisión. Calibrado para micro-inyección subcutánea sin reconstitución manual.'
+                    : 'Precision multi-dose dial pen delivery system. Calibrated for subcutaneous micro-dial administration without manual reconstitution.'))}
             </p>
           </div>
         </div>
@@ -1038,78 +1057,188 @@ export default function InteractiveReconstitutionGuide({
 
   // ── Intranasal Spray Administration Protocol View ────────────────────────
   if (isSpray) {
+    const isEs = lang === 'es';
+    const activeDoseMg = +(sprayPuffs * sprayMgPerActuation).toFixed(3);
+    const activeDoseMcg = Math.round(sprayPuffs * sprayMcgPerActuation);
+    const doseLabel = activeDoseMcg >= 1000 
+      ? `${activeDoseMg.toFixed(2)} mg` 
+      : `${activeDoseMcg} mcg`;
+    const remainingDoses = Math.floor(sprayTotalActuations / Math.max(1, sprayPuffs));
+
     return (
       <div className="irg-wrapper">
+        {/* Header */}
         <div className="irg-header">
           <div className="irg-header-left">
-            <div className="irg-badge">
+            <div className="irg-badge" style={{ background: '#fdf4ff', color: '#86198f', borderColor: '#f0abfc' }}>
               <Sparkles size={13} />
-              <span>Intranasal Delivery System</span>
+              <span>{isEs ? 'Sistema de Administración Intranasal' : 'Intranasal Delivery System'}</span>
             </div>
             <h2 className="irg-title">
               <Thermometer size={20} color="#003666" />
-              Clinical Intranasal Administration Protocol
+              {isEs 
+                ? 'Protocolo Clínico de Administración y Dosificación Intranasal' 
+                : 'Clinical Intranasal Administration & Metered Dosing Protocol'}
             </h2>
             <p className="irg-subtitle">
-              Metered-dose mucosal delivery system formulated in sterile isotonic buffered vehicle. Direct mucosal absorption bypassing first-pass hepatic metabolism.
+              {isEs 
+                ? 'Sistema de pulverización dosificada de absorción transmucosa en vehículo isotónico estéril. Absorción directa cerebro/mucosa eludiendo el metabolismo hepático de primer paso sin inyecciones ni agujas.'
+                : 'Metered-dose mucosal delivery system formulated in sterile isotonic buffered vehicle. Direct mucosal absorption bypassing first-pass hepatic metabolism with zero needles or reconstitution.'}
             </p>
           </div>
         </div>
 
+        {/* Workspace */}
         <div className="irg-workspace">
+          {/* Controls / Specifications Panel */}
           <div className="irg-controls-panel">
-            <h3 className="irg-panel-heading">Spray Device Specifications</h3>
+            <h3 className="irg-panel-heading">{isEs ? 'Especificaciones del Dispositivo Nasal' : 'Nasal Device Specifications'}</h3>
             
             <div className="irg-summary-card" style={{ marginBottom: '16px' }}>
               <div className="irg-sum-item">
-                <span className="irg-sum-label">Delivery Mechanism</span>
-                <span className="irg-sum-val">Metered Mucosal Pump (0.1 mL / spray)</span>
+                <span className="irg-sum-label">{isEs ? 'Mecanismo' : 'Mechanism'}</span>
+                <span className="irg-sum-val">{isEs ? 'Bomba Nasal Dosificada (0.1 mL / spray)' : 'Metered Mucosal Pump (0.1 mL / spray)'}</span>
               </div>
               <div className="irg-sum-item">
-                <span className="irg-sum-label">Active Formulation</span>
-                <span className="irg-sum-val">{selectedStrength?.name || 'Metered Concentration'}</span>
+                <span className="irg-sum-label">{isEs ? 'Contenido Total' : 'Total Formulation'}</span>
+                <span className="irg-sum-val font-mono">{selectedStrength?.name || `${sprayTotalMg} mg`} ({sprayVolumeMl} mL)</span>
               </div>
               <div className="irg-sum-item">
-                <span className="irg-sum-label">Reconstitution</span>
-                <span className="irg-sum-val font-semibold text-emerald-700">None required (Ready to use)</span>
+                <span className="irg-sum-label">{isEs ? 'Dosis por Pulverización' : 'Dose per Spray'}</span>
+                <span className="irg-sum-val font-semibold text-purple-900 font-mono">
+                  {sprayMcgPerActuation >= 1000 ? `${sprayMgPerActuation.toFixed(2)} mg` : `${sprayMcgPerActuation} mcg`} (0.1 mL)
+                </span>
               </div>
               <div className="irg-sum-item">
-                <span className="irg-sum-label">Cold-Chain Storage</span>
-                <span className="irg-sum-val font-semibold text-sky-900">2°C – 8°C (Upright position)</span>
+                <span className="irg-sum-label">{isEs ? 'Pulverizaciones en Frasco' : 'Bottle Capacity'}</span>
+                <span className="irg-sum-val font-mono">~{sprayTotalActuations} {isEs ? 'sprays dosificados' : 'metered sprays'}</span>
+              </div>
+              <div className="irg-sum-item">
+                <span className="irg-sum-label">{isEs ? 'Reconstitución' : 'Reconstitution'}</span>
+                <span className="irg-sum-val font-semibold text-emerald-700">
+                  {isEs ? 'Ninguna requerida (Listo para usar)' : 'None required (Ready to use)'}
+                </span>
+              </div>
+              <div className="irg-sum-item">
+                <span className="irg-sum-label">{isEs ? 'Cadena de Frío' : 'Cold-Chain Storage'}</span>
+                <span className="irg-sum-val font-semibold text-sky-900">2°C – 8°C ({isEs ? 'Posición vertical' : 'Upright'})</span>
+              </div>
+            </div>
+
+            {/* Interactive Dose Titration */}
+            <div className="irg-control-group">
+              <div className="irg-control-label-row">
+                <label className="irg-label">
+                  <CheckCircle2 size={14} color="#a21caf" />
+                  {isEs ? 'Pulsaciones por Toma Clínica' : 'Sprays / Puffs per Dose'}
+                </label>
+              </div>
+
+              <div className="irg-pill-selector" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                {[1, 2, 3, 4].map(puffs => (
+                  <button
+                    key={puffs}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setSprayPuffs(puffs);
+                    }}
+                    className={`irg-pill-btn ${sprayPuffs === puffs ? 'active' : ''}`}
+                    style={sprayPuffs === puffs ? { background: '#86198f', borderColor: '#701a75' } : {}}
+                  >
+                    {puffs} {puffs === 1 ? (isEs ? 'spray' : 'spray') : (isEs ? 'sprays' : 'sprays')}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#64748b' }}>
+                {sprayPuffs === 1 && (isEs ? '1 pulverización en una fosa nasal.' : '1 spray into a single nostril.')}
+                {sprayPuffs === 2 && (isEs ? '1 pulverización en cada fosa nasal (bilateral).' : '1 spray into each nostril (bilateral).')}
+                {sprayPuffs === 3 && (isEs ? '3 pulverizaciones alternando fosas nasales.' : '3 sprays alternating nostrils.')}
+                {sprayPuffs === 4 && (isEs ? '2 pulverizaciones en cada fosa nasal (bilateral).' : '2 sprays into each nostril (bilateral).')}
               </div>
             </div>
           </div>
 
+          {/* Right Column: Visual Metrics & Protocol Steps */}
           <div className="irg-visual-panel">
-            <div className="irg-protocol-steps" style={{ marginTop: 0 }}>
-              <h3 className="irg-steps-heading">Step-by-Step Mucosal Protocol</h3>
+            {/* Highlight Metric Card */}
+            <div className="irg-result-highlight-card" style={{ borderLeft: '4px solid #86198f' }}>
+              <div className="irg-rh-header">
+                <span className="irg-rh-title">{isEs ? 'Dosis Activa Entregada' : 'Total Delivered Active Dose'}</span>
+                <span className="irg-rh-spec font-mono text-purple-800">
+                  {sprayPuffs} × 0.1 mL = {(sprayPuffs * sprayActuationVolumeMl).toFixed(2)} mL
+                </span>
+              </div>
+
+              <div className="irg-rh-metrics">
+                <div className="irg-metric-box">
+                  <span className="irg-mb-label">{isEs ? 'Dosis Activa Total' : 'Active Compound'}</span>
+                  <span className="irg-mb-val font-mono text-purple-950 font-bold">
+                    {doseLabel}
+                  </span>
+                </div>
+                <div className="irg-metric-box">
+                  <span className="irg-mb-label">{isEs ? 'Volumen Mucoso' : 'Mucosal Volume'}</span>
+                  <span className="irg-mb-val font-mono text-slate-800">
+                    {(sprayPuffs * sprayActuationVolumeMl).toFixed(2)} <small className="text-slate-500">mL</small>
+                  </span>
+                </div>
+                <div className="irg-metric-box">
+                  <span className="irg-mb-label">{isEs ? 'Tomas por Frasco' : 'Full Doses in Bottle'}</span>
+                  <span className="irg-mb-val font-mono text-slate-800">
+                    ~{remainingDoses} <small className="text-slate-500">{isEs ? 'tomas' : 'doses'}</small>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Protocol Steps */}
+            <div className="irg-protocol-steps" style={{ marginTop: '16px' }}>
+              <h3 className="irg-steps-heading">{isEs ? 'Protocolo Clínico de Aplicación Transmucosa' : 'Step-by-Step Mucosal Protocol'}</h3>
               <div className="irg-steps-grid">
                 <div className="irg-step-card">
-                  <div className="irg-step-number">1</div>
+                  <div className="irg-step-number" style={{ background: '#86198f' }}>1</div>
                   <div className="irg-step-content">
-                    <h4 className="irg-step-title">Priming the Nozzle</h4>
-                    <p className="irg-step-desc">On first clinical use or after 5+ days of non-use, pump 2–3 times into the air until a uniform fine aerosol mist is emitted.</p>
+                    <h4 className="irg-step-title">{isEs ? 'Cebado de la Boquilla' : 'Priming the Nozzle'}</h4>
+                    <p className="irg-step-desc">
+                      {isEs
+                        ? 'En el primer uso o tras >5 días sin utilizar, presione el pulsador 2–3 veces al aire hasta obtener una micronización fina y constante.'
+                        : 'On first clinical use or after 5+ days of non-use, pump 2–3 times into the air until a uniform fine aerosol mist is emitted.'}
+                    </p>
                   </div>
                 </div>
                 <div className="irg-step-card">
-                  <div className="irg-step-number">2</div>
+                  <div className="irg-step-number" style={{ background: '#86198f' }}>2</div>
                   <div className="irg-step-content">
-                    <h4 className="irg-step-title">Clear Nasal Passages</h4>
-                    <p className="irg-step-desc">Gently blow nose before administration. Keep head tilted slightly forward to avoid swallowing the formulation.</p>
+                    <h4 className="irg-step-title">{isEs ? 'Higiene y Despeje Nasal' : 'Clear Nasal Passages'}</h4>
+                    <p className="irg-step-desc">
+                      {isEs
+                        ? 'Suénese suavemente antes de aplicar. Mantenga la cabeza recta o ligeramente inclinada hacia adelante para evitar deglutir la solución.'
+                        : 'Gently blow nose before administration. Keep head tilted slightly forward to avoid swallowing the formulation.'}
+                    </p>
                   </div>
                 </div>
                 <div className="irg-step-card">
-                  <div className="irg-step-number">3</div>
+                  <div className="irg-step-number" style={{ background: '#86198f' }}>3</div>
                   <div className="irg-step-content">
-                    <h4 className="irg-step-title">Angle of Application</h4>
-                    <p className="irg-step-desc">Insert tip into nostril, occlude the opposite nostril. Aim slightly outward toward the top of the ear (away from septum). Press actuator firmly while inhaling gently.</p>
+                    <h4 className="irg-step-title">{isEs ? 'Ángulo de Insuflación' : 'Angle of Application'}</h4>
+                    <p className="irg-step-desc">
+                      {isEs
+                        ? 'Inserte la punta en la fosa nasal y ocluya la fosa contraria. Apunte hacia la oreja del mismo lado (lejos del tabique nasal). Presione firmemente inhalando con suavidad.'
+                        : 'Insert tip into nostril, occlude opposite nostril. Aim slightly outward toward the ear (away from septum). Press actuator firmly while inhaling gently.'}
+                    </p>
                   </div>
                 </div>
                 <div className="irg-step-card">
-                  <div className="irg-step-number">4</div>
+                  <div className="irg-step-number" style={{ background: '#86198f' }}>4</div>
                   <div className="irg-step-content">
-                    <h4 className="irg-step-title">Absorption & Hygiene</h4>
-                    <p className="irg-step-desc">Exhale through mouth. Do not sniff forcefully or blow nose for 15 minutes. Wipe nozzle with a sterile wipe and replace the cap.</p>
+                    <h4 className="irg-step-title">{isEs ? 'Absorción y Cuidados' : 'Absorption & Hygiene'}</h4>
+                    <p className="irg-step-desc">
+                      {isEs
+                        ? 'Exhale por la boca. No aspire con fuerza ni se suene la nariz durante 15 minutos. Limpie el aplicador con una gasa estéril y coloque la tapa.'
+                        : 'Exhale through mouth. Do not sniff forcefully or blow nose for 15 minutes. Wipe nozzle with a sterile wipe and replace protective cap.'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1117,9 +1246,13 @@ export default function InteractiveReconstitutionGuide({
           </div>
         </div>
 
+        {/* Clinical Disclaimer */}
         <div className="irg-disclaimer">
           <p>
-            <strong>Clinical Verification Notice:</strong> Intranasal peptides are formulated in sterile, buffered isotonic media and require zero manual solvent dilution. Dosage must be confirmed by an authorized medical practitioner.
+            <strong>{isEs ? 'Aviso de Verificación Clínica:' : 'Clinical Verification Notice:'}</strong>{' '}
+            {isEs
+              ? 'Los péptidos en spray nasal están formulados en solución estéril e isotónica y no requieren reconstitución manual con disolventes. La pauta de dosificación y frecuencia debe ser confirmada por un profesional médico habilitado.'
+              : 'Intranasal peptides are formulated in sterile, buffered isotonic media and require zero manual solvent dilution. Dosage and administration frequency must be confirmed by an authorized medical practitioner.'}
           </p>
         </div>
       </div>
