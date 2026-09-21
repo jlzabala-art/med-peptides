@@ -67,16 +67,24 @@ export default function SharedCatalogFilterBar({
 
   const formatButtonLabel = () => {
     if (dosageFilter === 'high_dose') return 'High Dose (≥10mg)';
+    if (packagingMode === 'vials') return 'Lyophilized Vials';
+    if (packagingMode === 'pens') return 'Pens & Cartridges';
+    if (packagingMode === 'sprays') return 'Nasal Sprays';
+    if (packagingMode === 'oral') return 'Oral & Sublingual';
     if (packagingMode === 'kits') return '10-Vial Kits';
-    if (packagingMode === 'units') return 'Single Vials (1–9)';
+    if (packagingMode === 'units') return 'Single Vials';
     if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
       return ROUTE_LABELS[routeFilter].label;
     }
-    return 'All Formats & Kits';
+    return 'All Peptide Formats';
   };
 
   const formatButtonIcon = () => {
     if (dosageFilter === 'high_dose') return '💪';
+    if (packagingMode === 'vials') return '🧪';
+    if (packagingMode === 'pens') return '💉';
+    if (packagingMode === 'sprays') return '💨';
+    if (packagingMode === 'oral') return '💊';
     if (packagingMode === 'kits') return '📦';
     if (packagingMode === 'units') return '🧪';
     if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
@@ -359,15 +367,18 @@ export default function SharedCatalogFilterBar({
                 }}>
                   <div style={{ padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Format & Packaging
+                      Peptide Presentation & Format
                     </span>
                   </div>
 
                   {[
-                    { id: 'all', label: 'All Formats', icon: '✨', desc: 'Single vials & 10-vial kits' },
-                    { id: 'kits', label: '10-Vial Kits', icon: '📦', desc: 'Bulk volume best savings' },
-                    { id: 'units', label: 'Single Vials (1–9)', icon: '🧪', desc: 'Individual test vials' },
-                    { id: 'high_dose', label: 'High Dose (≥10mg)', icon: '💪', desc: 'Concentrated formulations' },
+                    { id: 'all',       label: 'All Peptide Formats',         icon: '✨', desc: 'Every presentation & delivery system' },
+                    { id: 'vials',     label: 'Lyophilized Vials',            icon: '🧪', desc: 'Single lyophilized injection vials' },
+                    { id: 'pens',      label: 'Pre-filled Pens & Cartridges', icon: '💉', desc: 'Dial pens & 3 mL refill cartridges' },
+                    { id: 'sprays',    label: 'Nasal Sprays',                icon: '💨', desc: 'Metered mucosal actuation pumps' },
+                    { id: 'oral',      label: 'Oral & Sublingual',            icon: '💊', desc: 'Enteric capsules and oral tablets' },
+                    { id: 'kits',      label: '10-Vial Multi-Kits',           icon: '📦', desc: 'Volume multi-packs with savings' },
+                    { id: 'high_dose', label: 'High Dose (≥10mg)',            icon: '💪', desc: 'High-concentration peptide strength' },
                   ].map(opt => {
                     const isSelected = opt.id === 'high_dose'
                       ? dosageFilter === 'high_dose'

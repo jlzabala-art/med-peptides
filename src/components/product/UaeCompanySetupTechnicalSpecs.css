@@ -1,0 +1,761 @@
+/**
+ * src/components/product/UaeCompanySetupTechnicalSpecs.css
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Modern, responsive styling for UAE Company Formation & Discovery Questionnaire.
+ * Follows Atlas Clinical / Google Cloud Console Design Standards.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+.uae-specs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* ── Top Hero / Value Proposition ── */
+.uae-hero-card {
+  background: linear-gradient(135deg, #041f3d 0%, #003666 50%, #0a4d8c 100%);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  color: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(0, 54, 102, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.uae-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.uae-hero-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.uae-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.uae-hero-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.uae-hero-subtitle {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  max-width: 780px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.uae-hero-pills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.uae-pill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.82rem;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.uae-pill-item svg {
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
+/* ── Interactive Questionnaire Box ── */
+.uae-wizard-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.uae-wizard-header {
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.uae-wizard-heading-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.uae-wizard-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uae-wizard-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.uae-wizard-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0.15rem 0 0 0;
+}
+
+/* Step Progress Indicator */
+.uae-stepper-bar {
+  display: flex;
+  background: #ffffff;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.uae-step-tab {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.uae-step-tab.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.uae-step-tab.completed {
+  background: #f0fdf4;
+}
+
+.uae-step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.uae-step-tab.active .uae-step-number {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.uae-step-tab.completed .uae-step-number {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.uae-step-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.uae-step-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.uae-step-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* Wizard Body */
+.uae-wizard-body {
+  padding: 1.75rem 1.5rem;
+}
+
+.uae-question-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.uae-question-help {
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 1.25rem;
+  line-height: 1.45;
+}
+
+/* Grid Options Selection */
+.uae-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.uae-option-card {
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  text-align: left;
+}
+
+.uae-option-card:hover {
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.12);
+}
+
+.uae-option-card.selected {
+  border-color: #0284c7;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+}
+
+.uae-option-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.uae-option-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uae-option-card.selected .uae-option-icon {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.uae-check-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uae-option-card.selected .uae-check-circle {
+  border-color: #0284c7;
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.uae-option-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.uae-option-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Wizard Footer Controls */
+.uae-wizard-footer {
+  background: #ffffff;
+  padding: 1.15rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.uae-btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.uae-btn-nav.prev {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.uae-btn-nav.prev:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.uae-btn-nav.prev:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.uae-btn-nav.next {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.uae-btn-nav.next:hover {
+  background: #0369a1;
+}
+
+/* ── Tailored Recommendation & Quote Result (Step 5) ── */
+.uae-result-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.uae-result-banner {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.uae-result-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.uae-result-sub {
+  font-size: 0.85rem;
+  color: #ccfbf1;
+  margin: 0.25rem 0 0 0;
+}
+
+.uae-price-badge-lg {
+  text-align: right;
+}
+
+.uae-price-val {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.uae-price-usd {
+  font-size: 0.82rem;
+  color: #e0f2fe;
+}
+
+.uae-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.uae-summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.uae-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.uae-deliverables-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.uae-deliverables-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.35;
+}
+
+.uae-deliverables-list li svg {
+  color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Packages Comparison Table ── */
+.uae-packages-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.uae-section-title-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.uae-sec-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.uae-packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.uae-pkg-card {
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.uae-pkg-card:hover {
+  border-color: #0284c7;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
+  transform: translateY(-3px);
+}
+
+.uae-pkg-card.highlighted {
+  border-color: #0284c7;
+  background: #f8fafc;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3);
+}
+
+.uae-pkg-badge {
+  position: absolute;
+  top: -10px;
+  right: 1.25rem;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+}
+
+.uae-pkg-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.uae-pkg-price-wrap {
+  margin: 0.75rem 0 1.25rem 0;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.uae-pkg-price-aed {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #003666;
+}
+
+.uae-pkg-price-usd {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+.uae-pkg-deliv-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+}
+
+/* ── Turnkey 5-Phase Roadmap ── */
+.uae-roadmap-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.uae-timeline-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  position: relative;
+}
+
+.uae-timeline-step {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.uae-step-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #0284c7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.uae-step-duration {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.uae-step-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.uae-step-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* ── CTA Action Bar ── */
+.uae-cta-bar {
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.uae-cta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.uae-cta-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+.uae-cta-desc {
+  font-size: 0.85rem;
+  color: #3b82f6;
+  margin: 0;
+}
+
+.uae-cta-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.uae-btn-primary {
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.uae-btn-primary:hover {
+  background: #0369a1;
+}
+
+.uae-btn-secondary {
+  background: #ffffff;
+  color: #0284c7;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  border: 1.5px solid #0284c7;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.uae-btn-secondary:hover {
+  background: #eff6ff;
+}
+
+/* ── Mobile-First Responsive Breakpoints ── */
+@media (max-width: 768px) {
+  .uae-specs-container {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  .uae-hero-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .uae-hero-title {
+    font-size: 1.25rem;
+  }
+
+  .uae-options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .uae-packages-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .uae-stepper-bar {
+    padding: 0.5rem;
+  }
+
+  .uae-step-tab {
+    min-width: 110px;
+    padding: 0.4rem;
+  }
+
+  .uae-step-sub {
+    display: none;
+  }
+
+  .uae-cta-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .uae-cta-actions {
+    flex-direction: column;
+  }
+
+  .uae-btn-primary, .uae-btn-secondary {
+    justify-content: center;
+  }
+}

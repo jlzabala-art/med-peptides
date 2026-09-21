@@ -190,6 +190,7 @@ export const VALID_CATEGORIES = Object.freeze([
   'skincare',         // topical cosmeceuticals, hair care
   'bundle',           // multi-product kits
   'service',          // subscriptions, consultations
+  'corporate_services',// UAE company setup, business incorporation, golden visas
   'logistics_service',// temperature-controlled medical courier & freight
   'equipment',        // lab equipment, instruments
 ]);

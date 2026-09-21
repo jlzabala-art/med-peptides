@@ -149,6 +149,7 @@
   justify-content: space-between;
   gap: 0.4rem;
   margin-bottom: 0.35rem;
+  min-width: 0;
 }
 
 .ptc-kpi-label {
@@ -156,13 +157,15 @@
   font-weight: 800;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   display: flex;
   align-items: center;
   gap: 0.35rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .ptc-kpi-icon {
@@ -701,8 +704,21 @@
     border-radius: 10px;
   }
 
+  .ptc-kpi-top {
+    gap: 0.25rem;
+    margin-bottom: 0.3rem;
+  }
+
   .ptc-kpi-label {
-    font-size: 0.62rem;
+    font-size: 0.60rem;
+    letter-spacing: 0.02em;
+    gap: 0.25rem;
+  }
+
+  .ptc-kpi-pill {
+    font-size: 0.58rem;
+    padding: 0.1rem 0.35rem;
+    flex-shrink: 0;
   }
 
   .ptc-kpi-value {

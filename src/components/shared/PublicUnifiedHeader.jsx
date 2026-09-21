@@ -34,6 +34,7 @@ export default function PublicUnifiedHeader({
   onLangChange,
   // Custom canonical URL to copy, if any
   copyUrl,
+  shortUrl,
   // Institutional inquiry drawer parameters
   inquiryContextType = 'general', // 'product' | 'protocol' | 'catalog' | 'protocols_directory' | 'general'
   inquiryEntity = null,           // { name, slug, code, strength, category }
@@ -120,10 +121,10 @@ export default function PublicUnifiedHeader({
     }
   };
 
-  // Copy canonical link
+  // Copy link (prefers clean shortUrl for discreet WhatsApp & social sharing)
   const handleCopyLink = async () => {
     triggerHaptic('selection');
-    const targetUrl = copyUrl || (typeof window !== 'undefined' ? window.location.href : '');
+    const targetUrl = shortUrl || copyUrl || (typeof window !== 'undefined' ? window.location.href : '');
     if (!targetUrl) return;
 
     try {
@@ -140,7 +141,11 @@ export default function PublicUnifiedHeader({
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      toast.success(lang === 'es' ? 'Enlace copiado al portapapeles' : 'Link copied to clipboard');
+      if (shortUrl) {
+        toast.success(lang === 'es' ? 'Enlace corto copiado (sin marcas, ideal para WhatsApp) ✓' : 'Short link copied (clean preview for WhatsApp) ✓');
+      } else {
+        toast.success(lang === 'es' ? 'Enlace copiado al portapapeles' : 'Link copied to clipboard');
+      }
       setTimeout(() => setCopied(false), 2500);
     } catch {
       toast.error(lang === 'es' ? 'No se pudo copiar el enlace' : 'Failed to copy link');

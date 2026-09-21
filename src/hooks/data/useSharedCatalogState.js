@@ -523,6 +523,30 @@ export function useSharedCatalogState({
         let matchPackaging = true;
         if (packagingMode === 'kits' || dosageFilter === 'kits') {
           matchPackaging = p.variants.some(v => v.kitPrice && v.kitPrice > 0);
+        } else if (packagingMode === 'vials' || packagingMode === 'units') {
+          matchPackaging = p.variants.some(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('vial') || vName.includes('vial') || pres.includes('powder') || (!pres.includes('pen') && !pres.includes('cartridge') && !pres.includes('spray') && !pres.includes('capsule'));
+          });
+        } else if (packagingMode === 'pens') {
+          matchPackaging = p.variants.some(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('pen') || pres.includes('cartridge') || vName.includes('pen') || vName.includes('cartridge');
+          });
+        } else if (packagingMode === 'sprays') {
+          matchPackaging = p.variants.some(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('spray') || pres.includes('nasal') || vName.includes('spray') || vName.includes('nasal');
+          });
+        } else if (packagingMode === 'oral') {
+          matchPackaging = p.variants.some(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('capsule') || pres.includes('tablet') || pres.includes('oral') || pres.includes('sublingual') || vName.includes('capsule');
+          });
         }
 
         let matchDosage = true;
@@ -559,9 +583,33 @@ export function useSharedCatalogState({
           });
         }
 
-        // When kits packaging mode is selected, only show variants with kit pricing
+        // When specific peptide presentation format is selected, filter matching variants
         if (packagingMode === 'kits' || dosageFilter === 'kits') {
           activeVariants = activeVariants.filter(v => v.kitPrice && v.kitPrice > 0);
+        } else if (packagingMode === 'vials' || packagingMode === 'units') {
+          activeVariants = activeVariants.filter(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('vial') || vName.includes('vial') || pres.includes('powder') || (!pres.includes('pen') && !pres.includes('cartridge') && !pres.includes('spray') && !pres.includes('capsule'));
+          });
+        } else if (packagingMode === 'pens') {
+          activeVariants = activeVariants.filter(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('pen') || pres.includes('cartridge') || vName.includes('pen') || vName.includes('cartridge');
+          });
+        } else if (packagingMode === 'sprays') {
+          activeVariants = activeVariants.filter(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('spray') || pres.includes('nasal') || vName.includes('spray') || vName.includes('nasal');
+          });
+        } else if (packagingMode === 'oral') {
+          activeVariants = activeVariants.filter(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('capsule') || pres.includes('tablet') || pres.includes('oral') || pres.includes('sublingual') || vName.includes('capsule');
+          });
         }
 
         // When route filter is active, only show variants matching the administration route

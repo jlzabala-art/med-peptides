@@ -61,7 +61,6 @@ function CatalogExportDropdown({
         <span className={isMobile ? '' : 'btn-label'}>
           {actionLoading ? 'Exporting…' : 'Export'}
         </span>
-        <ChevronDown size={13} style={{ opacity: 0.6 }} />
       </button>
 
       {/* CatalogExportPopover now renders as a StandardDrawer (portal-based).

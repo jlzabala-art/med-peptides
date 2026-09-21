@@ -130,13 +130,8 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
     {
       key: 'displaySku',
       header: <span onClick={() => handleSort('displaySku')} style={{ cursor: 'pointer' }}>SKU{getSortIcon('displaySku')}</span>,
-      render: (val, row) => (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ position: 'relative', width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {row.image ? <Image src={row.image} alt="" fill sizes="24px" style={{ objectFit: 'cover', borderRadius: '4px' }} /> : <span style={{ fontSize: '10px', color: '#94a3b8' }}>Img</span>}
-          </div>
-          <span style={{ fontWeight: 500 }}>{val}</span>
-        </div>
+      render: (val) => (
+        <span style={{ fontWeight: 500, fontFamily: 'monospace' }}>{val}</span>
       )
     },
     {

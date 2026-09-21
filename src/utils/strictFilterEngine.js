@@ -43,44 +43,53 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
   const p = product || {};
 
   // 1. ── SOURCING & SUPPLIER FILTER (STRICT VARIANT LEVEL) ───────────────────
-  const targetSupplier = filters.supplierFilter || filters.supplierId || filters.supplier;
+  const targetSupplier = filters.supplierFilter || filters.supplierId || filters.supplier || filters.supplierIds;
   if (targetSupplier && targetSupplier !== 'all' && targetSupplier !== 'All') {
-    const normTarget = normalizeSupplierKey(targetSupplier);
-    const isLotusQuery = normTarget.includes('lotus');
+    const rawList = Array.isArray(targetSupplier)
+      ? targetSupplier
+      : String(targetSupplier).split(',');
+    const supplierList = rawList
+      .map(s => normalizeSupplierKey(s))
+      .filter(Boolean);
 
-    const vSupplierText = `${v.supplier || ''} ${v.supplierName || ''} ${v.supplierId || ''}`.toLowerCase();
-    const pSupplierText = `${p.supplier || ''} ${p.supplierName || ''} ${p.supplierId || ''} ${(Array.isArray(p.supplierIds) ? p.supplierIds : []).join(' ')}`.toLowerCase();
+    if (supplierList.length > 0) {
+      const vSupplierText = `${v.supplier || ''} ${v.supplierName || ''} ${v.supplierId || ''}`.toLowerCase();
+      const pSupplierText = `${p.supplier || ''} ${p.supplierName || ''} ${p.supplierId || ''} ${(Array.isArray(p.supplierIds) ? p.supplierIds : []).join(' ')}`.toLowerCase();
+      const pres = String(v.presentation || v.format || '').toLowerCase();
+      const vName = String(v.name || '').toLowerCase();
 
-    const isLotusVariant = vSupplierText.includes('lotus') || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
-    const isLotusProduct = pSupplierText.includes('lotus') || p.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || (Array.isArray(p.supplierIds) && p.supplierIds.some(s => String(s).toLowerCase().includes('lotus')));
+      // Check if variant matches ANY of the target suppliers under their specific constraints
+      const matchesAnySupplier = supplierList.some(normTarget => {
+        const isLotusQuery = normTarget.includes('lotus');
+        if (isLotusQuery) {
+          const isLotusVariant = vSupplierText.includes('lotus') || v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo';
+          const isLotusProduct = pSupplierText.includes('lotus') || p.supplierId === 'OLlBbQjgrj6tY7GmM2Jo' || (Array.isArray(p.supplierIds) && p.supplierIds.some(s => String(s).toLowerCase().includes('lotus')));
 
-    const pres = String(v.presentation || v.format || '').toLowerCase();
-    const vName = String(v.name || '').toLowerCase();
-    const pName = String(p.canonicalName || p.name || '').toLowerCase();
+          // Lotus Land strictly provides Vials / Lyophilized Powder / Bottles / Boxes / Kits — never Pre-filled Pens or Cartridges
+          if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge')) {
+            return false;
+          }
+          if (v.supplier || v.supplierName || v.supplierId) {
+            return isLotusVariant;
+          }
+          return isLotusProduct;
+        }
 
-    // Check specific supplier constraints
-    if (isLotusQuery) {
-      // Lotus Land strictly provides Vials / Lyophilized Powder / Bottles / Boxes / Kits — never Pre-filled Pens or Cartridges
-      if (pres.includes('pen') || vName.includes('pen') || pres.includes('cartridge')) {
-        return false;
-      }
-      if (v.supplier || v.supplierName || v.supplierId) {
-        if (!isLotusVariant) return false;
-      } else if (!isLotusProduct) {
-        return false;
-      }
-    } else {
-      // Generic supplier matching
-      const vClean = vSupplierText.replace(/[^a-z0-9]/g, '');
-      const pClean = pSupplierText.replace(/[^a-z0-9]/g, '');
-      const targetClean = String(targetSupplier).toLowerCase().replace(/[^a-z0-9]/g, '');
+        // Generic supplier matching (e.g. magenta)
+        const vClean = vSupplierText.replace(/[^a-z0-9]/g, '');
+        const pClean = pSupplierText.replace(/[^a-z0-9]/g, '');
+        const targetClean = String(normTarget).toLowerCase().replace(/[^a-z0-9]/g, '');
 
-      const vMatch = vClean.includes(targetClean) || vSupplierText.includes(String(targetSupplier).toLowerCase());
-      const pMatch = pClean.includes(targetClean) || pSupplierText.includes(String(targetSupplier).toLowerCase());
+        const vMatch = vClean.includes(targetClean) || vSupplierText.includes(normTarget);
+        const pMatch = pClean.includes(targetClean) || pSupplierText.includes(normTarget);
 
-      if (v.supplier || v.supplierName || v.supplierId) {
-        if (!vMatch) return false;
-      } else if (!pMatch) {
+        if (v.supplier || v.supplierName || v.supplierId) {
+          return vMatch;
+        }
+        return pMatch;
+      });
+
+      if (!matchesAnySupplier) {
         return false;
       }
     }

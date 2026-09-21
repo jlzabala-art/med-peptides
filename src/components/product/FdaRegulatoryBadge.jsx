@@ -34,7 +34,41 @@ export default function FdaRegulatoryBadge({
 
   return (
     <>
-      {/* ── 1. COMPACT PILL VARIANT (For catalog cards & tables) ── */}
+      {/* ── 1. HERO PILL VARIANT (For Public Datasheet Hero) ── */}
+      {variant === 'hero-pill' && (
+        <button
+          type="button"
+          onClick={handleClick}
+          className="pds-fda-hero-pill"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            backgroundColor: colorScheme.bg,
+            border: `1px solid ${colorScheme.border}`,
+            color: colorScheme.text,
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            cursor: showModalOnClick ? 'pointer' : 'default',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.15s ease',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            outline: 'none',
+            ...style
+          }}
+          title={`${info.badgeLabel} — Click for clinical regulatory monograph`}
+        >
+          <span style={{ fontSize: '0.85rem', lineHeight: 1 }}>{colorScheme.icon}</span>
+          <span>{info.shortBadge || info.badgeLabel}</span>
+          {showModalOnClick && (
+            <Info size={12} style={{ opacity: 0.65, marginLeft: '2px', flexShrink: 0 }} />
+          )}
+        </button>
+      )}
+
+      {/* ── 2. COMPACT PILL VARIANT (For catalog cards & tables) ── */}
       {variant === 'pill' && (
         <span
           onClick={handleClick}
@@ -194,6 +228,9 @@ export default function FdaRegulatoryBadge({
             style={{
               width: '100%',
               maxWidth: '560px',
+              maxHeight: '88vh',
+              display: 'flex',
+              flexDirection: 'column',
               backgroundColor: '#ffffff',
               borderRadius: '16px',
               border: '1px solid #e2e8f0',
@@ -210,7 +247,8 @@ export default function FdaRegulatoryBadge({
                 justifyContent: 'space-between',
                 padding: '16px 20px',
                 backgroundColor: colorScheme.bg,
-                borderBottom: `1px solid ${colorScheme.border}`
+                borderBottom: `1px solid ${colorScheme.border}`,
+                flexShrink: 0
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -241,7 +279,7 @@ export default function FdaRegulatoryBadge({
             </div>
 
             {/* Content Body */}
-            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
               {/* Classification Summary Card */}
               <div
                 style={{
@@ -306,7 +344,8 @@ export default function FdaRegulatoryBadge({
                 justifyContent: 'flex-end',
                 padding: '12px 20px',
                 backgroundColor: '#f8fafc',
-                borderTop: '1px solid #e2e8f0'
+                borderTop: '1px solid #e2e8f0',
+                flexShrink: 0
               }}
             >
               <button

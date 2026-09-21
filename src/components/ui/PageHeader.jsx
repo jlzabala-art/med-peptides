@@ -61,7 +61,7 @@ export default function PageHeader({
   iconColor,
   helpTopic,
   showAiAssistant = false,
-  showDashboardBack = true,
+  showDashboardBack = false,
   onBack,
 }) {
   const router = useRouter();
@@ -75,11 +75,8 @@ export default function PageHeader({
   const dashboardLabel = DASHBOARD_LABELS[effectivePanel] || 'Dashboard';
   const isDashboardRoot = pathname === dashboardRoute || pathname === `${dashboardRoute}/`;
 
-  // Auto-generate breadcrumbs if not explicitly set to false and not on root dashboard
-  const finalBreadcrumbs = (breadcrumbs === false || breadcrumbs === null) ? null : (breadcrumbs || (!isDashboardRoot ? [
-    { label: dashboardLabel, href: dashboardRoute },
-    { label: title }
-  ] : null));
+  // Only render breadcrumbs when explicitly provided and having depth > 1 (AGENTS.md Rule #17)
+  const finalBreadcrumbs = Array.isArray(breadcrumbs) && breadcrumbs.length > 1 ? breadcrumbs : null;
 
   let defaultPrimaryColor = 'var(--color-primary, #003666)';
   if (effectivePanel === 'doctor') defaultPrimaryColor = '#0d9488';
@@ -349,17 +346,6 @@ export default function PageHeader({
               </div>
             )}
             <div className="page-header-title-row">
-              {showDashboardBack && !isDashboardRoot && (
-                <button
-                  type="button"
-                  onClick={() => (onBack ? onBack() : router.push(dashboardRoute))}
-                  className="page-header-mobile-back-btn"
-                  title={`Back to ${dashboardLabel}`}
-                  aria-label="Back"
-                >
-                  <ArrowLeft size={18} />
-                </button>
-              )}
               <h1 className="page-header-title">{title}</h1>
             </div>
             {subtitle && (
@@ -379,19 +365,8 @@ export default function PageHeader({
               </div>
             )}
 
-            {(helpTopic || showAiAssistant || (showDashboardBack && !isDashboardRoot)) && (
+            {(helpTopic || showAiAssistant) && (
               <div className="page-header-quick-actions">
-                {showDashboardBack && !isDashboardRoot && (
-                  <button
-                    type="button"
-                    onClick={() => (onBack ? onBack() : router.push(dashboardRoute))}
-                    className="page-header-quick-btn"
-                    title={`Return to ${dashboardLabel}`}
-                  >
-                    <ArrowLeft size={15} style={{ color: defaultPrimaryColor }} />
-                    <span className="page-header-quick-btn-label">Dashboard</span>
-                  </button>
-                )}
                 {showAiAssistant && (
                   <button
                     type="button"

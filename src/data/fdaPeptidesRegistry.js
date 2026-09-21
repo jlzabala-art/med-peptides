@@ -283,6 +283,46 @@ export const FDA_REGISTRY = {
       icon: '🔬',
       accent: '#7c3aed'
     }
+  },
+  'selank': {
+    slug: 'selank',
+    canonicalName: 'Selank',
+    casNumber: '129954-34-3',
+    status: FDA_STATUS_TYPES.RESEARCH_ANALYTICAL_STANDARD,
+    badgeLabel: 'cGMP Analytical Reference Standard',
+    shortBadge: 'cGMP Standard',
+    rulingDate: 'ISO / cGMP Validated',
+    advisoryBody: 'Pharmacopeial Analytical Standards',
+    voteResult: 'Chemical & Biological Identity Verified',
+    summary: 'High-purity regulatory heptapeptide standard synthesized under strict cGMP guidelines for neuro-cellular and GABAergic receptor characterization.',
+    legalNotice: 'Provided with verified Certificate of Analysis (CoA) demonstrating ≥ 99.0% purity (RP-HPLC) and mass confirmation.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '🛡️',
+      accent: '#16a34a'
+    }
+  },
+  'ghk-cu': {
+    slug: 'ghk-cu',
+    canonicalName: 'GHK-Cu (Copper Tripeptide-1)',
+    casNumber: '49557-75-7',
+    status: FDA_STATUS_TYPES.RESEARCH_ANALYTICAL_STANDARD,
+    badgeLabel: 'cGMP Analytical Reference Standard',
+    shortBadge: 'cGMP Standard',
+    rulingDate: 'ISO / cGMP Validated',
+    advisoryBody: 'Pharmacopeial & Dermatological Standards',
+    voteResult: 'Copper Chelate Complex Identity Verified',
+    summary: 'Copper tripeptide complex analytical reference standard synthesized under cGMP standards for tissue remodeling, angiogenesis, and matrix synthesis.',
+    legalNotice: 'High-purity peptide-mineral chelate standard with documented Certificate of Analysis (CoA).',
+    colorScheme: {
+      bg: '#eff6ff',
+      border: '#93c5fd',
+      text: '#1d4ed8',
+      icon: '🛡️',
+      accent: '#2563eb'
+    }
   }
 };
 

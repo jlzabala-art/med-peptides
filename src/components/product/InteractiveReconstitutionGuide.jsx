@@ -1072,9 +1072,12 @@ export default function InteractiveReconstitutionGuide({
 
                 {/* Pen Barrel Body */}
                 <div className="irg-pen-body">
-                  <span className="irg-pen-brand-label">
-                    ATLAS CLINICAL
-                  </span>
+                  <div className="irg-pen-grip-lines" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </div>
                   <div className="irg-pen-dial-window" title="Dose Dial Indicator">
                     <span className="irg-pen-dial-number font-mono">{penClicks}</span>
                   </div>

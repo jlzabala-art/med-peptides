@@ -228,46 +228,44 @@ export async function generateMetadata({ params, searchParams }) {
   const formatSuffix = formatParam ? ` [${formatParam.toUpperCase()}]` : '';
   const doseSuffix = doseParam ? ` (${doseParam.replace(/_/g, ' ')})` : '';
 
-  const pharmaTitle = `${name}${doseSuffix}${formatSuffix} — Clinical Monograph & Specifications | Atlas Services`;
-  const pharmaDesc = `Pharmaceutical Monograph & Analytical Specifications for ${name}. Sourced through authorized synthesis partner ${supplierName} for Atlas Services. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
-
-  // Universal dynamic scannable barcode/QR image directing to this page for WhatsApp & social platforms
-  const barcodeImageUrl = `${BASE_URL}/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(supplierFilter || product.supplierId || 'lotusland')}`;
+  // Clean, discreet metadata for WhatsApp, Telegram & social sharing (zero company or product leaks)
+  const cleanTitle = 'Clinical Technical Monograph & Protocol Reference';
+  const cleanDesc = 'Verified analytical reference, standardized dosing specifications, and clinical administration guidelines. Confidential medical reference.';
+  const previewImageUrl = `${BASE_URL}/og-catalog.png`;
   const canonicalUrl = `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
 
   return {
-    title: pharmaTitle,
-    description: pharmaDesc,
+    title: cleanTitle,
+    description: cleanDesc,
     openGraph: {
-      title: pharmaTitle,
-      description: pharmaDesc,
+      title: cleanTitle,
+      description: cleanDesc,
       url: canonicalUrl,
-      siteName: 'Atlas Services Clinical Monographs',
+      siteName: 'Clinical Reference Library',
       images: [
         {
-          url: barcodeImageUrl,
+          url: previewImageUrl,
           width: 1200,
           height: 630,
           type: 'image/png',
-          alt: `Barcode & QR Direct Link for ${name} — Clinical Monograph`,
+          alt: 'Clinical Monograph & Protocol Specifications',
         },
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} — Clinical Monograph & Specs`,
-      description: pharmaDesc,
-      images: [barcodeImageUrl],
+      title: cleanTitle,
+      description: cleanDesc,
+      images: [previewImageUrl],
     },
     other: {
-      'og:image': barcodeImageUrl,
+      'og:image': previewImageUrl,
       'og:image:type': 'image/png',
       'og:image:width': '1200',
       'og:image:height': '630',
-      'og:image:alt': `Barcode & QR Direct Link for ${name} — Clinical Monograph`,
-      'article:section': 'Pharmaceutical & Clinical Peptides',
-      'article:tag': `${name}, ${supplierName}, RP-HPLC, Peptide Monograph, Atlas Services`,
+      'og:image:alt': 'Clinical Monograph Reference',
+      'article:section': 'Clinical Reference Documentation',
     },
     robots: { index: true, follow: true },
   };

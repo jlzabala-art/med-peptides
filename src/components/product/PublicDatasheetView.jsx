@@ -47,6 +47,9 @@ import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
+import FdaRegulatoryBadge from './FdaRegulatoryBadge';
+import PeptidePublicationsSection from './PeptidePublicationsSection';
+import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -125,6 +128,29 @@ export default function PublicDatasheetView({
     const primId = primaryProtocol?.id || primaryProtocol?.slug;
     return associatedProtocols.filter(p => (p.id || p.slug) !== primId);
   }, [associatedProtocols, primaryProtocol]);
+
+  const isCorporateService = useMemo(() => {
+    const slugLower = String(slug || product?.slug || product?.id || '').toLowerCase();
+    const nameLower = String(product?.canonicalName || product?.name || '').toLowerCase();
+    return slugLower.includes('uae-company') || slugLower.includes('company-setup') || nameLower.includes('uae company setup');
+  }, [slug, product]);
+
+  const [shortMonographUrl, setShortMonographUrl] = useState('');
+
+  useEffect(() => {
+    if (!slug) return;
+    const fullUrl = `https://med-peptides.com/p/${slug}`;
+    fetch('/api/short-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetUrl: fullUrl, entityType: 'datasheet', slug })
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.shortUrl) setShortMonographUrl(data.shortUrl);
+      })
+      .catch(() => {});
+  }, [slug]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -1071,7 +1097,7 @@ export default function PublicDatasheetView({
         track="peptides"
         lang={lang}
         onLangChange={setLang}
-        copyUrl={dynamicPublicUrl}
+        copyUrl={shortMonographUrl || dynamicPublicUrl}
         inquiryContextType="product"
         inquiryEntity={{
           name: product?.name || name,
@@ -1099,6 +1125,7 @@ export default function PublicDatasheetView({
               <span className="pds-cgmp-tag">
                 {isStrictlyLotusland ? (t.lotuslandVerified || 'Atlas Services Certified') : `${displaySupplierName} Quality Verified`}
               </span>
+              <FdaRegulatoryBadge product={product} variant="hero-pill" />
               <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
                 <span className="pds-version-dot" />
                 <span>Rev {versionInfo.version}</span>
@@ -1677,9 +1704,11 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, IV Drips, or Solvent Technical Specs ── */}
+        {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, IV Drips, Corporate Services, or Solvent Technical Specs ── */}
         <section id="reconstitution-section" className="pds-section-card">
-          {isSolventProduct ? (
+          {isCorporateService ? (
+            <UaeCompanySetupTechnicalSpecs product={product} lang={lang} />
+          ) : isSolventProduct ? (
             <SolventTechnicalSpecs product={product} lang={lang} />
           ) : isEternaDiagnostic ? (
             <EternaGeneticTechnicalSpecs product={product} lang={lang} />
@@ -1766,18 +1795,25 @@ export default function PublicDatasheetView({
         </section>
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
-        <section id="specs-section" className="pds-traceability-wrapper">
-          <ProductTraceabilityCard
-            product={product}
-            baseUrl={baseUrl}
-            lang={lang}
-            monographUrl={dynamicPublicUrl}
-            batchCode={effectiveBatchCode}
-          />
-        </section>
+        {!isCorporateService && (
+          <section id="specs-section" className="pds-traceability-wrapper">
+            <ProductTraceabilityCard
+              product={product}
+              baseUrl={baseUrl}
+              lang={lang}
+              monographUrl={dynamicPublicUrl}
+              batchCode={effectiveBatchCode}
+            />
+          </section>
+        )}
+
+        {/* ── Peer-Reviewed Scientific Literature & Clinical Trials ── */}
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+          <PeptidePublicationsSection product={product} lang={lang} />
+        )}
 
         {/* ── Block 4: Physical Labels & Dispensing Downloads (Harmonized Navy Header) ── */}
-        {!isDiagnosticKit && (
+        {!isDiagnosticKit && !isCorporateService && (
           <section id="labels-section" className="pds-section-card">
             <div className="pds-section-header">
               <div className="pds-section-header-left">

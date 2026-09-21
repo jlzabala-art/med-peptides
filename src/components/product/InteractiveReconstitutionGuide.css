@@ -1196,12 +1196,20 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
-.irg-pen-brand-label {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #94a3b8;
+.irg-pen-grip-lines {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-left: 0.5rem;
+  opacity: 0.45;
+}
+
+.irg-pen-grip-lines span {
+  display: inline-block;
+  width: 2.5px;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.08));
+  border-radius: 1px;
 }
 
 .irg-pen-dial-window {

@@ -81,10 +81,18 @@ export default function SharedCatalogHeader({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Atlas Services • Clinical Compendium & Monograph Registry
+                  {catalogMeta?.recipientType === 'wholeseller' && catalogMeta?.recipientName
+                    ? `Authorized Wholesaler Partner: ${catalogMeta.recipientName}`
+                    : catalogMeta?.recipientName
+                    ? `Authorized Clinical Partner: ${catalogMeta.recipientName}`
+                    : 'Atlas Services • Clinical Compendium & Monograph Registry'}
                 </span>
                 <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
-                  Clinical Peptide Catalog
+                  {catalogMeta?.recipientName
+                    ? (catalogMeta?.recipientType === 'wholeseller'
+                        ? `Wholesale Peptide Catalog • ${catalogMeta.recipientName}`
+                        : `Clinical Peptide Catalog • ${catalogMeta.recipientName}`)
+                    : 'Clinical Peptide Catalog'}
                 </h1>
               </div>
               <span style={{

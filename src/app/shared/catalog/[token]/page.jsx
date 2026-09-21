@@ -43,8 +43,9 @@ export async function generateMetadata({ params }) {
   const supplierTitle = 'Atlas Services Formulations';
 
   const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');
+  const isWholesaler = catalogData.recipientType === 'wholeseller';
   const title = hasRecipient
-    ? `Clinical Peptide Catalog • ${recipientName}`
+    ? (isWholesaler ? `Wholesale Peptide Catalog • ${recipientName}` : `Clinical Peptide Catalog • ${recipientName}`)
     : `Clinical Peptide Catalog • ${supplierTitle}`;
 
   const description = `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
@@ -156,10 +157,19 @@ async function fetchCatalogData(supplierId, category, catalogueFilter) {
   let productsQuery = adminDb.collection('products')
     .where('status', 'in', ['active', 'published', 'out of stock']);
 
-  if (supplierId && supplierId !== 'all') {
-    const sCore = String(supplierId).toLowerCase().replace(/^supplier-/, '');
-    // If filtering by specific supplier, use array-contains on supplierIds if available
-    productsQuery = productsQuery.where('supplierIds', 'array-contains', supplierId.startsWith('supplier-') ? supplierId : `supplier-${supplierId}`);
+  const rawList = Array.isArray(supplierId)
+    ? supplierId
+    : String(supplierId || '').split(',').map(s => s.trim()).filter(Boolean);
+
+  const cleanSuppliers = rawList.filter(s => s !== 'all' && s !== 'All');
+
+  if (cleanSuppliers.length === 1) {
+    const s = cleanSuppliers[0];
+    const sFormatted = s.startsWith('supplier-') ? s : `supplier-${s}`;
+    productsQuery = productsQuery.where('supplierIds', 'array-contains', sFormatted);
+  } else if (cleanSuppliers.length > 1) {
+    const sFormattedList = cleanSuppliers.map(s => s.startsWith('supplier-') ? s : `supplier-${s}`);
+    productsQuery = productsQuery.where('supplierIds', 'array-contains-any', sFormattedList);
   }
 
   let productsSnapshot, protosSnapshot;
@@ -368,19 +378,26 @@ export default async function SharedCatalogPage({ params }) {
     const productVariants = variantsByProduct[data.id] ||
       (Array.isArray(data.variants) ? data.variants : []);
 
-    // Supplier filter — loose match to support both 'supplier-lotusland', 'lotusland', and supplierId 'OLlBbQjgrj6tY7GmM2Jo'
-    if (supplierId) {
-      const sIdLower = String(supplierId).toLowerCase();
-      const sIdCore  = sIdLower.replace(/^supplier-/, ''); // strip prefix
-      const matchSupplier =
-        (data.supplierId && String(data.supplierId).toLowerCase().includes(sIdCore)) ||
-        (Array.isArray(data.supplierIds) && data.supplierIds.some(s =>
-          String(s).toLowerCase().includes(sIdCore))) ||
-        productVariants.some(v => {
-          const vSupplierText = `${v.supplier || ''} ${v.supplierName || ''} ${v.supplierId || ''}`.toLowerCase();
-          return vSupplierText.includes(sIdCore) || (sIdCore === 'lotusland' && v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo');
+    // Supplier filter — supports single or multiple suppliers (e.g. ['supplier-lotusland', 'supplier-magenta'] or 'supplier-lotusland,supplier-magenta')
+    if (supplierId && supplierId !== 'all') {
+      const allowedSuppliers = (Array.isArray(supplierId) ? supplierId : String(supplierId).split(','))
+        .map(s => s.trim().toLowerCase().replace(/^supplier-/, ''))
+        .filter(Boolean);
+
+      if (allowedSuppliers.length > 0) {
+        const matchSupplier = allowedSuppliers.some(sIdCore => {
+          return (
+            (data.supplierId && String(data.supplierId).toLowerCase().includes(sIdCore)) ||
+            (Array.isArray(data.supplierIds) && data.supplierIds.some(s =>
+              String(s).toLowerCase().includes(sIdCore))) ||
+            productVariants.some(v => {
+              const vSupplierText = `${v.supplier || ''} ${v.supplierName || ''} ${v.supplierId || ''}`.toLowerCase();
+              return vSupplierText.includes(sIdCore) || (sIdCore === 'lotusland' && v.supplierId === 'OLlBbQjgrj6tY7GmM2Jo');
+            })
+          );
         });
-      if (!matchSupplier) continue;
+        if (!matchSupplier) continue;
+      }
     }
 
     const variants = filterProductVariantsStrictly(

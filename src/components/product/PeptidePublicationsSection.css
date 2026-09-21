@@ -1,0 +1,249 @@
+/* ══════════════════════════════════════════════════════════════════
+   PeptidePublicationsSection.css
+   Peer-Reviewed Clinical Publications & Scientific Trials Styling
+   ══════════════════════════════════════════════════════════════════ */
+
+.pds-publications-card {
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.pds-publications-subtitle {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.pds-pub-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 3rem 1rem;
+  color: #0369a1;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pds-publications-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .pds-publications-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pds-pub-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.85rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.pds-pub-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
+}
+
+.pds-pub-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pds-pub-journal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+}
+
+.pds-pub-journal-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pds-pub-year {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.pds-pub-evidence-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.pds-pub-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.pds-pub-authors {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.pds-pub-authors-label {
+  font-weight: 700;
+  color: #475569;
+}
+
+.pds-pub-summary-box {
+  background: #f8fafc;
+  border-left: 3px solid #0284c7;
+  border-radius: 0 8px 8px 0;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.825rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.pds-pub-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #0369a1;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.pds-pub-summary-text {
+  margin: 0;
+}
+
+.pds-pub-findings-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+}
+
+.pds-pub-findings-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #15803d;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.pds-pub-findings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pds-pub-findings-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #166534;
+}
+
+.pds-pub-footer {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pds-pub-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #0284c7;
+  text-decoration: none;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: all 0.15s ease;
+  min-height: 38px;
+}
+
+.pds-pub-action-link:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+.pds-pub-action-link:hover .pds-pub-pmid-tag {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.pds-pub-pmid-tag {
+  font-size: 0.7rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.pds-pub-academic-cite {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.pds-pub-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.5;
+}
