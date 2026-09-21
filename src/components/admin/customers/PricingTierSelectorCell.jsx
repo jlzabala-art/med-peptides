@@ -64,7 +64,7 @@ export default function PricingTierSelectorCell({
           discountMargin: newTier.margin
         });
       }
-      notifier.success(`Pricing Tier updated to "${newTier.label}" (${newTier.margin}% margin)`);
+      notifier.success(`Pricing Tier updated to "${newTier.label}" (+${newTier.margin}% margin)`);
     } catch (err) {
       notifier.error(err.message || 'Failed to update pricing tier.');
     } finally {
@@ -82,7 +82,7 @@ export default function PricingTierSelectorCell({
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          padding: '3px 9px',
+          padding: '4px 10px',
           borderRadius: '14px',
           fontSize: '0.74rem',
           fontWeight: 700,
@@ -91,21 +91,24 @@ export default function PricingTierSelectorCell({
           border: `1px solid ${activeTier.border}`,
           cursor: saving ? 'wait' : 'pointer',
           transition: 'all 0.15s ease',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+          whiteSpace: 'nowrap',
+          maxWidth: '100%'
         }}
-        title={`Click to change pricing tier. Current margin: ${activeTier.margin}%`}
+        title={`Click to change pricing tier. Current margin: +${activeTier.margin}%`}
       >
-        <span>{activeTier.label}</span>
+        <span style={{ whiteSpace: 'nowrap' }}>{activeTier.label}</span>
         <span style={{
           backgroundColor: 'rgba(0,0,0,0.06)',
           padding: '1px 5px',
           borderRadius: '10px',
           fontSize: '0.68rem',
-          fontWeight: 800
+          fontWeight: 800,
+          whiteSpace: 'nowrap'
         }}>
           +{activeTier.margin}%
         </span>
-        <ChevronDown size={12} style={{ opacity: 0.6 }} />
+        <ChevronDown size={12} style={{ opacity: 0.6, flexShrink: 0 }} />
       </button>
 
       {isOpen && (

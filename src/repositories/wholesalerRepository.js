@@ -257,12 +257,24 @@ export async function updateTenantDomainConfig(tenantId, domainData) {
 }
 
 /**
- * Obtiene la lista de mayoristas/wholesalers.
+ * Obtiene la lista de mayoristas/wholesalers (Customer SSOT con fallback).
  * @param {number} limitCount
  * @returns {Promise<Array<object>>}
  */
 export async function getWholesalers(limitCount = 50) {
   try {
+    // 1. Check authoritative customers collection (SSOT)
+    const qCustomers = query(
+      collection(db, 'customers'),
+      where('customerType', '==', 'wholesaler'),
+      limit(limitCount)
+    );
+    const snapCustomers = await getDocs(qCustomers);
+    if (!snapCustomers.empty) {
+      return snapCustomers.docs.map((d) => ({ id: d.id, ...d.data() }));
+    }
+
+    // 2. Fallback to legacy wholesellers collection
     const q = query(collection(db, 'wholesellers'), limit(limitCount));
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));

@@ -6,7 +6,7 @@ import AdminClinicsTab from './AdminClinicsTab';
 import AdminAgencyDealsTab from './AdminAgencyDealsTab';
 import AdminZohoCRMWidget from './gadgets/AdminZohoCRMWidget';
 
-export default function AdminCrmTab() {
+export default function AdminCrmTab({ isSubTab = false }) {
   const tabs = [
     { id: 'crm', label: 'CRM Master', content: <AdminZohoCRMWidget isSubTab={true} /> },
     { id: 'leads', label: 'Leads', content: <AdminLeadsTab isSubTab={true} /> },
@@ -16,12 +16,15 @@ export default function AdminCrmTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--color-bg-app)' }}>
-      <PageHeader
-        title="CRM & Accounts"
-        subtitle="Manage leads, clinics, agency deals, and Zoho CRM integration."
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="CRM & Accounts"
+          subtitle="Manage leads, clinics, agency deals, and Zoho CRM integration."
+          showDashboardBack={false}
+        />
+      )}
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: isSubTab ? '0.5rem 0' : '1.5rem' }}>
         <Tabs tabs={tabs} defaultTab="leads" />
       </div>
     </div>

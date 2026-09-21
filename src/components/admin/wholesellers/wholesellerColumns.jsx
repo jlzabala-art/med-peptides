@@ -64,7 +64,7 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
     {
       key: 'companyName',
       header: 'Distributor',
-      width: '23%',
+      width: '30%',
       sortable: true,
       render: (row) => (
         <div>
@@ -73,10 +73,28 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
             placeholder="Company name"
             onSave={(val) => onUpdate?.(row.id, { companyName: val })}
           />
-          <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <CopyableId value={row.id} />
+            {row.country && (
+              <span style={{ color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '2px', whiteSpace: 'nowrap' }}>
+                • 🌐 {row.country}
+              </span>
+            )}
           </div>
         </div>
+      ),
+    },
+    {
+      key: 'pricingTier',
+      header: 'Pricing Tier',
+      width: '18%',
+      sortable: true,
+      render: (row) => (
+        <PricingTierSelectorCell
+          customer={row}
+          customerType="wholesaler"
+          onUpdate={onUpdate}
+        />
       ),
     },
     {
@@ -100,87 +118,32 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
       ),
     },
     {
-      key: 'country',
-      header: 'Country',
-      width: '12%',
-      sortable: true,
-      render: (row) => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-          <Globe size={11} /> {row.country || '—'}
-        </span>
-      ),
-    },
-    {
-      key: 'pricingTier',
-      header: 'Pricing Tier',
-      width: '15%',
-      sortable: true,
-      render: (row) => (
-        <PricingTierSelectorCell
-          customer={row}
-          customerType="wholesaler"
-          onUpdate={onUpdate}
-        />
-      ),
-    },
-    {
-      key: 'catalogAccess',
-      header: 'Catalog Access',
-      width: '12%',
-      sortable: false,
-      render: (row) => {
-        const hasRestriction = (row.authorizedVariantIds?.length || 0) > 0;
-        return (
-          <div style={{ fontSize: '12px' }}>
-            {hasRestriction ? (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                background: 'var(--color-warning-bg, #fffbeb)', color: 'var(--color-warning, #d97706)',
-                borderRadius: '12px', padding: '2px 8px', fontSize: '11px', fontWeight: 500,
-              }}>
-                <Package size={10} />
-                {row.authorizedVariantIds.length} variants
-              </span>
-            ) : (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '4px',
-                background: 'var(--color-success-bg, #f0fdf4)', color: 'var(--color-success, #16a34a)',
-                borderRadius: '12px', padding: '2px 8px', fontSize: '11px', fontWeight: 500,
-              }}>
-                <ShoppingBag size={10} />
-                Full catalog
-              </span>
-            )}
-          </div>
-        );
-      },
-    },
-    {
       key: 'status',
       header: 'Status',
-      width: '10%',
+      width: '12%',
       sortable: true,
       render: (row) => <StatusBadge status={row.status || 'active'} />,
     },
     {
       key: 'actions',
-      header: 'Actions',
-      width: '10%',
+      header: 'Quick Actions',
+      width: '22%',
       align: 'right',
       render: (row) => (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px' }} onClick={e => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => onSharePage?.(row)}
             className="gcp-btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}
-            title="Compartir Página Pública (Catálogo / Protocolo) con margen confirmado"
+            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, whiteSpace: 'nowrap' }}
+            title="Share Public Catalog with verified margin"
           >
             <Share2 size={12} />
+            <span>Share</span>
           </button>
           <QuoteQuickActionDropdown 
             size="sm" 
-            variant="icon" 
+            variant="secondary" 
             entityContext={{ 
               type: 'wholesaler', 
               recipientType: 'wholesaler', 
@@ -192,10 +155,11 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
             type="button"
             onClick={() => onOpenWorkspace?.(row)}
             className="gcp-btn-secondary"
-            style={{ padding: '4px 7px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center' }}
-            title="Ver Workspace / Drawer 360°"
+            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600, whiteSpace: 'nowrap' }}
+            title="Open Wholesaler 360° Profile Workspace"
           >
             <Eye size={13} />
+            <span>Profile</span>
           </button>
         </div>
       ),

@@ -112,7 +112,7 @@ function WholesellerKPIs({ kpiStats, isLoading, activeKpiFilter, setActiveKpiFil
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export default function AdminWholesellersTabClient({ isMobile, initialData }) {
+export default function AdminWholesellersTabClient({ isMobile, initialData, isSubTab = false }) {
   const {
     wholesellers,
     paginatedData,
@@ -197,11 +197,43 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
 
   return (
     <>
+      {isSubTab && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          padding: '0.5rem 0 1rem',
+          borderBottom: '1px solid var(--border)',
+          marginBottom: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              Wholesale Distributors & Resellers
+            </span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              ({totalItems} registered)
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              className="gcp-btn-primary"
+              onClick={() => setCreateDrawerOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 14px', fontSize: '0.80rem', fontWeight: 700, borderRadius: '6px' }}
+            >
+              <Building2 size={15} /> New Wholesaler
+            </button>
+          </div>
+        </div>
+      )}
       <DataModule
         loading={loading}
         title="Wholesellers"
         subtitle="Distributors & resellers — manage catalog access, pricing tiers, and relationships."
         icon={Building2}
+        hideHeader={isSubTab}
         kpis={
           <WholesellerKPIs
             kpiStats={serverKpis}

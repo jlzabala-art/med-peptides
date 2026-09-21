@@ -123,10 +123,33 @@ export function useWholesellerData({ initialData = null } = {}) {
   // ── CRUD Operations ─────────────────────────────────────────────────────────
   const handleUpdate = async (id, data) => {
     try {
+      const now = new Date().toISOString();
       await updateDoc(doc(db, 'wholesellers', id), {
         ...data,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now,
       });
+
+      // Dual-sync to customers SSOT
+      const customerUpdate = { updatedAt: now };
+      if (data.companyName !== undefined) {
+        customerUpdate.name = data.companyName;
+        customerUpdate.companyName = data.companyName;
+      }
+      if (data.email !== undefined) customerUpdate.email = data.email;
+      if (data.contactEmail !== undefined) customerUpdate.email = data.contactEmail;
+      if (data.phone !== undefined) customerUpdate.phone = data.phone;
+      if (data.contactPhone !== undefined) customerUpdate.phone = data.contactPhone;
+      if (data.country !== undefined) customerUpdate.country = data.country;
+      if (data.city !== undefined) customerUpdate.city = data.city;
+      if (data.pricingTier !== undefined) customerUpdate.pricingTier = data.pricingTier;
+      if (data.discountMargin !== undefined) customerUpdate.discountMargin = data.discountMargin;
+      if (data.status !== undefined) customerUpdate.status = data.status;
+      if (data.notes !== undefined) customerUpdate.notes = data.notes;
+      if (data.authorizedVariantIds !== undefined) {
+        customerUpdate['wholesalerProfile.authorizedVariantIds'] = data.authorizedVariantIds;
+      }
+      await setDoc(doc(db, 'customers', id), customerUpdate, { merge: true }).catch(() => {});
+
       // Optimistic update
       setWholesellers(prev => prev.map(w => w.id === id ? { ...w, ...data } : w));
       // Invalidate caches
@@ -141,11 +164,18 @@ export function useWholesellerData({ initialData = null } = {}) {
 
   const handleBulkUpdate = async (ids, data) => {
     try {
+      const now = new Date().toISOString();
       const batch = writeBatch(db);
-      ids.forEach(id => batch.update(doc(db, 'wholesellers', id), {
-        ...data,
-        updatedAt: new Date().toISOString(),
-      }));
+      ids.forEach(id => {
+        batch.update(doc(db, 'wholesellers', id), {
+          ...data,
+          updatedAt: now,
+        });
+        batch.set(doc(db, 'customers', id), {
+          ...data,
+          updatedAt: now,
+        }, { merge: true });
+      });
       await batch.commit();
       setWholesellers(prev => prev.map(w => ids.includes(w.id) ? { ...w, ...data } : w));
       _cache.data = null; _cache.ts = 0;
@@ -159,16 +189,45 @@ export function useWholesellerData({ initialData = null } = {}) {
   const handleCreate = async (data) => {
     try {
       const newId = 'ws-' + Date.now();
+      const now = new Date().toISOString();
       const newDoc = {
         ...data,
         status: data.status || 'active',
         // catalogAccess: all by default (empty = full access)
         authorizedVariantIds: [],
         catalogAccessId: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: now,
+        updatedAt: now,
       };
       await setDoc(doc(db, 'wholesellers', newId), newDoc);
+
+      // Dual-sync to customers SSOT
+      const customerDoc = {
+        id: newId,
+        customerType: 'wholesaler',
+        name: newDoc.companyName || newDoc.name || 'Wholesaler',
+        companyName: newDoc.companyName || newDoc.name || '',
+        email: newDoc.contactEmail || newDoc.email || '',
+        phone: newDoc.contactPhone || newDoc.phone || '',
+        country: newDoc.country || '',
+        city: newDoc.city || '',
+        pricingTier: newDoc.pricingTier || 'tier_b2b_clinic',
+        discountMargin: typeof newDoc.discountMargin === 'number' ? newDoc.discountMargin : 25,
+        currency: newDoc.currency || 'USD',
+        paymentTerms: newDoc.paymentTerms || 'Net 30',
+        creditLimit: typeof newDoc.creditLimit === 'number' ? newDoc.creditLimit : 50000,
+        status: newDoc.status || 'active',
+        notes: newDoc.notes || '',
+        createdAt: now,
+        updatedAt: now,
+        wholesalerProfile: {
+          authorizedVariantIds: newDoc.authorizedVariantIds || [],
+          exclusiveTerritories: newDoc.zones || [],
+          resellerCertificateUrl: newDoc.resellerCertificateUrl || null,
+        }
+      };
+      await setDoc(doc(db, 'customers', newId), customerDoc, { merge: true }).catch(() => {});
+
       _cache.data = null; _cache.ts = 0;
       localStorage.removeItem(CACHE_KEY);
       setWholesellers(prev => [{ id: newId, ...newDoc }, ...prev]);
@@ -183,10 +242,16 @@ export function useWholesellerData({ initialData = null } = {}) {
 
   const handleDelete = async (id) => {
     try {
+      const now = new Date().toISOString();
       await updateDoc(doc(db, 'wholesellers', id), {
         status: 'archived',
-        updatedAt: new Date().toISOString(),
+        updatedAt: now,
       });
+      await updateDoc(doc(db, 'customers', id), {
+        status: 'archived',
+        updatedAt: now,
+      }).catch(() => {});
+
       _cache.data = null; _cache.ts = 0;
       localStorage.removeItem(CACHE_KEY);
       setWholesellers(prev => prev.filter(w => w.id !== id));

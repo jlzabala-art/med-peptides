@@ -57,22 +57,22 @@ export default function CustomerSharedLinksCard({
         
         {/* Left: Marketing & Shared Pages Intelligence */}
         <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '8px', padding: '14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Share2 size={16} />
               </div>
-              <div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Marketing & Shared Pages Intelligence
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Public links sent to {customerName} and visit interaction logs
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
               <button
                 type="button"
                 onClick={loadShares}
@@ -92,26 +92,28 @@ export default function CustomerSharedLinksCard({
                   fontWeight: 700,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
                 }}
               >
-                <Share2 size={13} /> + Compartir Página
+                <Share2 size={13} /> + Share Page
               </button>
             </div>
           </div>
 
           {loading ? (
             <div style={{ padding: '20px', textAlign: 'center', fontSize: '0.78rem', color: '#64748b' }}>
-              Cargando historial de páginas compartidas...
+              Loading shared pages telemetry...
             </div>
           ) : shares.length === 0 ? (
             <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '6px', border: '1px dashed #cbd5e1' }}>
               <div style={{ fontSize: '1.2rem', marginBottom: '4px' }}>🔗</div>
               <div style={{ fontSize: '0.80rem', fontWeight: 600, color: '#475569' }}>
-                No hay páginas compartidas con este cliente todavía
+                No public pages shared with this customer yet
               </div>
               <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px', marginBottom: '10px' }}>
-                Genera un enlace con margen y proveedor Lotusland para registrar aperturas e interacciones.
+                Generate a link with custom margin and Lotusland supplier to track opens and interactions.
               </div>
               <button
                 type="button"
@@ -119,7 +121,7 @@ export default function CustomerSharedLinksCard({
                 className="gcp-btn-secondary"
                 style={{ padding: '5px 12px', fontSize: '0.76rem', fontWeight: 600, borderRadius: '6px' }}
               >
-                Generar Primera Página Compartida
+                Generate First Shared Page
               </button>
             </div>
           ) : (
@@ -128,7 +130,7 @@ export default function CustomerSharedLinksCard({
                 const visits = share.visitsCount || 0;
                 const isOpened = visits > 0 || share.interactions?.webOpened;
                 const shareUrl = share.shareableUrl || `${window.location.origin}/c/${share.catalogCode || share.catalogId}`;
-                const formattedDate = share.issuedAt ? new Date(share.issuedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Reciente';
+                const formattedDate = share.issuedAt ? new Date(share.issuedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
 
                 return (
                   <div
@@ -147,7 +149,7 @@ export default function CustomerSharedLinksCard({
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontWeight: 700, fontSize: '0.80rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {share.catalogTitle || 'Catálogo B2B de Productos'}
+                          {share.catalogTitle || 'B2B Product Catalog'}
                         </span>
                         {share.margin > 0 && (
                           <span style={{ fontSize: '0.68rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#2563eb', padding: '1px 5px', borderRadius: '4px' }}>
@@ -163,7 +165,7 @@ export default function CustomerSharedLinksCard({
                           <Clock size={11} /> {formattedDate}
                         </span>
                         <span>•</span>
-                        <span>Canal: <strong style={{ textTransform: 'capitalize' }}>{share.channel || 'web'}</strong></span>
+                        <span>Channel: <strong style={{ textTransform: 'capitalize' }}>{share.channel || 'web'}</strong></span>
                       </div>
                     </div>
 
@@ -182,7 +184,7 @@ export default function CustomerSharedLinksCard({
                           borderRadius: '12px',
                           border: '1px solid #bbf7d0'
                         }}>
-                          <Eye size={12} /> {visits > 1 ? `Abierto ${visits}x` : 'Abierto ✓'}
+                          <Eye size={12} /> {visits > 1 ? `Opened ${visits}x` : 'Opened ✓'}
                         </span>
                       ) : (
                         <span style={{
@@ -197,7 +199,7 @@ export default function CustomerSharedLinksCard({
                           borderRadius: '12px',
                           border: '1px solid #fde68a'
                         }}>
-                          Pendiente de apertura
+                          Awaiting open
                         </span>
                       )}
 
@@ -206,7 +208,7 @@ export default function CustomerSharedLinksCard({
                         onClick={() => handleCopyLink(share)}
                         className="gcp-btn-secondary"
                         style={{ padding: '4px 8px', fontSize: '0.74rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
-                        title="Copiar enlace público"
+                        title="Copy public link"
                       >
                         {copiedId === share.id ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
                       </button>
@@ -216,7 +218,7 @@ export default function CustomerSharedLinksCard({
                         target="_blank"
                         rel="noreferrer"
                         style={{ color: '#64748b', display: 'inline-flex', alignItems: 'center', padding: '4px' }}
-                        title="Abrir enlace en pestaña nueva"
+                        title="Open link in new tab"
                       >
                         <ExternalLink size={13} />
                       </a>
@@ -248,7 +250,7 @@ export default function CustomerSharedLinksCard({
               <div>
                 <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Account Manager:</span>
                 <div style={{ fontWeight: 600, color: '#1e293b' }}>
-                  {customer.manager || customer.accountManager || 'Commercial Desk Desk (Auto-assigned)'}
+                  {customer.manager || customer.accountManager || 'Commercial Desk (Auto-assigned)'}
                 </div>
               </div>
 
@@ -271,9 +273,9 @@ export default function CustomerSharedLinksCard({
               type="button"
               onClick={onOpenWorkspace}
               className="gcp-btn-primary"
-              style={{ width: '100%', padding: '7px 14px', borderRadius: '6px', fontSize: '0.80rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              style={{ width: '100%', padding: '8px 14px', borderRadius: '6px', fontSize: '0.80rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', whiteSpace: 'nowrap' }}
             >
-              <Building2 size={14} /> Abrir Workspace 360° (Drawer Completo)
+              <Building2 size={14} /> Open 360° Profile Workspace
             </button>
           </div>
         </div>

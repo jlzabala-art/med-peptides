@@ -21,6 +21,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -134,6 +135,46 @@ export const patientRepository = {
 
     this.invalidatePatientCache(ref.id);
 
+    // Sync projection to customers collection (SSOT)
+    try {
+      await setDoc(doc(db, 'customers', ref.id), {
+        id: ref.id,
+        customerType: 'patient',
+        name: cleanData.name || `${cleanData.firstName || ''} ${cleanData.lastName || ''}`.trim() || 'Patient',
+        firstName: cleanData.firstName || '',
+        lastName: cleanData.lastName || '',
+        email: cleanData.email || '',
+        phone: cleanData.phone || '',
+        country: cleanData.country || '',
+        city: cleanData.city || '',
+        pricingTier: cleanData.pricingTier || 'retail',
+        discountMargin: typeof cleanData.discountMargin === 'number' ? cleanData.discountMargin : 0,
+        currency: cleanData.currency || 'USD',
+        paymentTerms: cleanData.paymentTerms || 'Due on Receipt',
+        creditLimit: typeof cleanData.creditLimit === 'number' ? cleanData.creditLimit : 5000,
+        status: cleanData.status || 'active',
+        notes: cleanData.notes || '',
+        tags: Array.isArray(cleanData.tags) ? cleanData.tags : [],
+        assignedManagerId: cleanData.assignedManagerId || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        patientProfile: {
+          dateOfBirth: cleanData.dateOfBirth || null,
+          gender: cleanData.gender || null,
+          bloodType: cleanData.bloodType || null,
+          allergies: Array.isArray(cleanData.allergies) ? cleanData.allergies : [],
+          currentConditions: Array.isArray(cleanData.currentConditions) ? cleanData.currentConditions : [],
+          assignedDoctorId: cleanData.assignedDoctorId || (Array.isArray(cleanData.doctorIds) && cleanData.doctorIds[0]) || null,
+          assignedClinicId: cleanData.assignedClinicId || (Array.isArray(cleanData.clinicIds) && cleanData.clinicIds[0]) || null,
+          activeProtocols: Array.isArray(cleanData.activeProtocols) ? cleanData.activeProtocols : [],
+          prescriptionsCount: typeof cleanData.prescriptionsCount === 'number' ? cleanData.prescriptionsCount : 0,
+          medicalNotes: cleanData.medicalNotes || '',
+        }
+      }, { merge: true });
+    } catch (syncErr) {
+      logger.warn('[patientRepository.createPatient] Customer SSOT dual-sync warning:', syncErr);
+    }
+
     if (actorId) {
       logPHIAccess({
         actorId,
@@ -184,6 +225,35 @@ export const patientRepository = {
 
     this.invalidatePatientCache(patientId);
 
+    // Dual-sync to customers collection (SSOT)
+    try {
+      const customerUpdates = {
+        updatedAt: new Date().toISOString(),
+      };
+      if (cleanData.name !== undefined) customerUpdates.name = cleanData.name;
+      if (cleanData.firstName !== undefined) customerUpdates.firstName = cleanData.firstName;
+      if (cleanData.lastName !== undefined) customerUpdates.lastName = cleanData.lastName;
+      if (cleanData.email !== undefined) customerUpdates.email = cleanData.email;
+      if (cleanData.phone !== undefined) customerUpdates.phone = cleanData.phone;
+      if (cleanData.country !== undefined) customerUpdates.country = cleanData.country;
+      if (cleanData.city !== undefined) customerUpdates.city = cleanData.city;
+      if (cleanData.pricingTier !== undefined) customerUpdates.pricingTier = cleanData.pricingTier;
+      if (cleanData.discountMargin !== undefined) customerUpdates.discountMargin = cleanData.discountMargin;
+      if (cleanData.status !== undefined) customerUpdates.status = cleanData.status;
+      if (cleanData.notes !== undefined) customerUpdates.notes = cleanData.notes;
+
+      const profileFields = ['dateOfBirth', 'gender', 'bloodType', 'allergies', 'currentConditions', 'assignedDoctorId', 'assignedClinicId', 'activeProtocols', 'prescriptionsCount', 'medicalNotes'];
+      profileFields.forEach(f => {
+        if (cleanData[f] !== undefined) {
+          customerUpdates[`patientProfile.${f}`] = cleanData[f];
+        }
+      });
+
+      await setDoc(doc(db, 'customers', patientId), customerUpdates, { merge: true });
+    } catch (syncErr) {
+      logger.warn('[patientRepository.updatePatient] Customer SSOT dual-sync warning:', syncErr);
+    }
+
     if (actorId) {
       logPHIAccess({
         actorId,
@@ -230,6 +300,16 @@ export const patientRepository = {
     }
 
     this.invalidatePatientCache(patientId);
+
+    // Dual-sync archive status to customers collection (SSOT)
+    try {
+      await updateDoc(doc(db, 'customers', patientId), {
+        status: 'archived',
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (syncErr) {
+      logger.warn('[patientRepository.deletePatient] Customer SSOT archive sync warning:', syncErr);
+    }
   },
 
   /**

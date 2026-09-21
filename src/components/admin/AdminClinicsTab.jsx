@@ -138,9 +138,10 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     {
       key: 'name',
       header: 'Clinic / Medical Center',
-      width: '28%',
+      width: '30%',
       render: (c) => {
         const typeLabel = c.type ? c.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Clinic';
+        const loc = [c.city, c.country].filter(Boolean).join(', ');
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '34px', height: '34px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0, border: '1px solid #bfdbfe' }}>
@@ -150,25 +151,17 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
               <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.90rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {c.name || c.legalName}
               </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b' }}>
                 <CopyableId value={c.id} iconOnly={true} />
-                <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>{typeLabel}</span>
+                <span style={{ color: '#0284c7', fontWeight: 600 }}>{typeLabel}</span>
+                {loc && (
+                  <span style={{ color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    • 📍 {loc}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-        );
-      }
-    },
-    {
-      key: 'location',
-      header: 'Location & Country',
-      width: '18%',
-      render: (c) => {
-        const loc = [c.city, c.country].filter(Boolean).join(', ');
-        return (
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            📍 {loc || 'Location on file'}
-          </span>
         );
       }
     },
@@ -211,40 +204,45 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     },
     {
       key: 'status',
-      header: 'Status & Actions',
-      width: '18%',
+      header: 'Status',
+      width: '12%',
+      render: (c) => <StatusBadge status={c.status || 'active'} />
+    },
+    {
+      key: 'actions',
+      header: 'Quick Actions',
+      width: '22%',
+      align: 'right',
       render: (c) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }} onClick={e => e.stopPropagation()}>
-          <StatusBadge status={c.status || 'active'} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <button
-              type="button"
-              onClick={() => setShareModalClinic(c)}
-              className="gcp-btn-secondary"
-              style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600 }}
-              title="Compartir Página Pública (Catálogo / Protocolo) con margen confirmado"
-            >
-              <Share2 size={12} />
-            </button>
-            <QuoteQuickActionDropdown 
-              size="sm" 
-              variant="icon" 
-              entityContext={{ 
-                type: 'clinic', 
-                recipientType: 'clinic', 
-                clinicId: c.id, 
-                clinicName: c.name || c.legalName
-              }} 
-            />
-            <button
-              onClick={() => setSelectedClinic(c)}
-              className="gcp-btn-icon"
-              title="Open Clinic Profile Workspace (360°)"
-              style={{ padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer' }}
-            >
-              👁️
-            </button>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => setShareModalClinic(c)}
+            className="gcp-btn-secondary"
+            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, whiteSpace: 'nowrap' }}
+            title="Share Public Page (Datasheet / Protocol) with verified margin"
+          >
+            <Share2 size={12} />
+            <span>Share</span>
+          </button>
+          <QuoteQuickActionDropdown 
+            size="sm" 
+            variant="secondary" 
+            entityContext={{ 
+              type: 'clinic', 
+              recipientType: 'clinic', 
+              clinicId: c.id, 
+              clinicName: c.name || c.legalName
+            }} 
+          />
+          <button
+            onClick={() => setSelectedClinic(c)}
+            className="gcp-btn-secondary"
+            title="Open Clinic Profile Workspace (360°)"
+            style={{ padding: '4px 8px', fontSize: '0.72rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600, whiteSpace: 'nowrap' }}
+          >
+            👁️ <span>Profile</span>
+          </button>
         </div>
       )
     }
@@ -325,18 +323,63 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
   return (
     <AdminTabErrorBoundary tabId="clinics" tabLabel="Clinics">
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <PageHeader
-          title="Clinic Network Management"
-          subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
-          actions={
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        {!isSubTab ? (
+          <PageHeader
+            title="Clinic Network Management"
+            subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
+            showDashboardBack={false}
+            actions={
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => handleExportClinics()}
+                  title="Export clinics database to CSV"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <Download size={15} /> Export CSV
+                </button>
+                <AIQuickActionButton
+                  label="AI Forecast Demand"
+                  onClick={() => {
+                    toast.success("AI Clinic Demand & Inventory Forecast generated.");
+                  }}
+                  title="Forecast clinic stock reordering and peptide demand with AI"
+                />
+                <QuoteQuickActionDropdown size="md" variant="secondary" buttonLabel="Quote" />
+                <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)}>
+                  <Plus size={16} /> Add Clinic
+                </button>
+              </div>
+            }
+          />
+        ) : (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            padding: '0.5rem 0 1rem',
+            borderBottom: '1px solid var(--border)',
+            marginBottom: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                Clinic Network & Facilities
+              </span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                ({clinics.length} registered)
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <button
-                className="btn btn-outline"
+                className="gcp-btn-secondary"
                 onClick={() => handleExportClinics()}
                 title="Export clinics database to CSV"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '0.80rem', fontWeight: 600, borderRadius: '6px' }}
               >
-                <Download size={15} /> Export
+                <Download size={14} /> Export CSV
               </button>
               <AIQuickActionButton
                 label="AI Forecast Demand"
@@ -346,13 +389,17 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
                 title="Forecast clinic stock reordering and peptide demand with AI"
               />
               <QuoteQuickActionDropdown size="md" variant="secondary" buttonLabel="Quote" />
-              <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)}>
-                <Plus size={16} /> Add Clinic
+              <button
+                className="gcp-btn-primary"
+                onClick={() => setIsWizardOpen(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 14px', fontSize: '0.80rem', fontWeight: 700, borderRadius: '6px' }}
+              >
+                <Plus size={15} /> Add Clinic
               </button>
             </div>
-          }
-        />
-        <div className="tab-container" style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+          </div>
+        )}
+        <div className="tab-container" style={{ padding: isSubTab ? '0.5rem 0' : '1.5rem', flex: 1, overflowY: 'auto' }}>
           {!loading && (
             <ClinicKPIs
               data={kpiScope === 'global' ? clinics : filtered}
