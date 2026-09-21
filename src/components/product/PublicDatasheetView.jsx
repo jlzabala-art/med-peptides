@@ -51,7 +51,6 @@ import FdaRegulatoryBadge from './FdaRegulatoryBadge';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
 import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
 import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
-import VisualAdministrationGuide from './VisualAdministrationGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -1734,106 +1733,103 @@ export default function PublicDatasheetView({
         </section>
         )}
 
-        {/* ── Block 2: Reconstitution, Diagnostic Specs, Eterna Genetics, IV Drips, Corporate Services, or Solvent Technical Specs ── */}
-        <section id="reconstitution-section" className="pds-section-card">
-          {isSpainResidency ? (
-            <SpainCompanyResidencyTechnicalSpecs
-              product={product}
-              lang={lang}
-              onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
-            />
-          ) : isUaeCorporateService ? (
-            <UaeCompanySetupTechnicalSpecs product={product} lang={lang} />
-          ) : isSolventProduct ? (
-            <SolventTechnicalSpecs product={product} lang={lang} />
-          ) : isEternaDiagnostic ? (
-            <EternaGeneticTechnicalSpecs product={product} lang={lang} />
-          ) : isDiagnosticKit ? (
-            <DiagnosticTestTechnicalSpecs
-              product={product}
-              selectedDose={selectedStrength?.name || 'Standard'}
-              supplierName={displaySupplierName}
-              lang={lang}
-            />
-          ) : isIvDrip ? (
-            <IvDripTechnicalSpecs
-              product={product}
-              selectedDose={selectedStrength?.name || '50 mL Infusion'}
-              supplierName={displaySupplierName}
-              lang={lang}
-            />
-          ) : (
-            <>
-              <div className="pds-section-header">
-                <div className="pds-section-header-left">
-                  <div className="pds-section-header-shield">
-                    <FlaskConical size={22} />
+        {/* ── Block 2: Corporate Services (Spain Residency) or Reconstitution/Specs ── */}
+        {isSpainResidency ? (
+          <SpainCompanyResidencyTechnicalSpecs
+            product={product}
+            lang={lang}
+            onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+          />
+        ) : (
+          <section id="reconstitution-section" className="pds-section-card">
+            {isUaeCorporateService ? (
+              <UaeCompanySetupTechnicalSpecs product={product} lang={lang} />
+            ) : isSolventProduct ? (
+              <SolventTechnicalSpecs product={product} lang={lang} />
+            ) : isEternaDiagnostic ? (
+              <EternaGeneticTechnicalSpecs product={product} lang={lang} />
+            ) : isDiagnosticKit ? (
+              <DiagnosticTestTechnicalSpecs
+                product={product}
+                selectedDose={selectedStrength?.name || 'Standard'}
+                supplierName={displaySupplierName}
+                lang={lang}
+              />
+            ) : isIvDrip ? (
+              <IvDripTechnicalSpecs
+                product={product}
+                selectedDose={selectedStrength?.name || '50 mL Infusion'}
+                supplierName={displaySupplierName}
+                lang={lang}
+              />
+            ) : (
+              <>
+                <div className="pds-section-header">
+                  <div className="pds-section-header-left">
+                    <div className="pds-section-header-shield">
+                      <FlaskConical size={22} />
+                    </div>
+                    <div className="pds-section-header-titles">
+                      <div className="pds-section-header-meta-row">
+                        <span className="pds-section-header-category">
+                          {isPenOrCart
+                            ? (lang === 'es' ? 'TITULACIÓN Y CALIBRACIÓN DE DIAL' : 'DOSIMETRY & DIAL TITRATION')
+                            : isSprayFormat
+                              ? (lang === 'es' ? 'DOSIMETRÍA INTRANASAL TRANSMUCOSA' : 'INTRANASAL DOSIMETRY')
+                              : (t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY')}
+                        </span>
+                        <span className="pds-section-badge">
+                          <CheckCircle2 size={11} />{' '}
+                          {isPenOrCart
+                            ? (lang === 'es' ? 'SIMULADOR MULTIDOSIS' : 'MULTI-DOSE PEN SIMULATOR')
+                            : isSprayFormat
+                              ? (lang === 'es' ? 'BOMBA DOSIFICADA' : 'METERED MUCOSAL PUMP')
+                              : (t.interactiveCalcBadge || 'PRECISION SIMULATOR')}
+                        </span>
+                      </div>
+                      <h3 className="pds-section-header-title">
+                        {isPenOrCart
+                          ? (lang === 'es' ? 'Guía de Calibración de Dial en Bolígrafo Precargado' : 'Pre-filled Pen Dial Titration & Administration Guide')
+                          : isSprayFormat
+                            ? (lang === 'es' ? 'Guía Clínica de Administración Intranasal Dosificada' : 'Clinical Intranasal Metered Dose Guide')
+                            : (t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator')}
+                      </h3>
+                    </div>
                   </div>
-                  <div className="pds-section-header-titles">
-                    <div className="pds-section-header-meta-row">
-                      <span className="pds-section-header-category">
+
+                  <div className="pds-section-header-right">
+                    <div className="pds-section-cert-badge">
+                      <Droplets size={14} color="#38bdf8" />
+                      <span>
                         {isPenOrCart
-                          ? (lang === 'es' ? 'TITULACIÓN Y CALIBRACIÓN DE DIAL' : 'DOSIMETRY & DIAL TITRATION')
+                          ? 'ISO 11608-2 Micro-Dial (1 Click = 0.01 mL)'
                           : isSprayFormat
-                            ? (lang === 'es' ? 'DOSIMETRÍA INTRANASAL TRANSMUCOSA' : 'INTRANASAL DOSIMETRY')
-                            : (t.reconstitutionSection || 'RECONSTITUTION PROTOCOL & DOSIMETRY')}
-                      </span>
-                      <span className="pds-section-badge">
-                        <CheckCircle2 size={11} />{' '}
-                        {isPenOrCart
-                          ? (lang === 'es' ? 'SIMULADOR MULTIDOSIS' : 'MULTI-DOSE PEN SIMULATOR')
-                          : isSprayFormat
-                            ? (lang === 'es' ? 'BOMBA DOSIFICADA' : 'METERED MUCOSAL PUMP')
-                            : (t.interactiveCalcBadge || 'PRECISION SIMULATOR')}
+                            ? (lang === 'es' ? '0.1 mL por Pulverización' : '0.1 mL Metered Mucosal Actuation')
+                            : 'U-100 Standard (1.0 mL = 100 U)'}
                       </span>
                     </div>
-                    <h3 className="pds-section-header-title">
-                      {isPenOrCart
-                        ? (lang === 'es' ? 'Guía de Calibración de Dial en Bolígrafo Precargado' : 'Pre-filled Pen Dial Titration & Administration Guide')
-                        : isSprayFormat
-                          ? (lang === 'es' ? 'Guía Clínica de Administración Intranasal Dosificada' : 'Clinical Intranasal Metered Dose Guide')
-                          : (t.interactiveCalcTitle || 'Interactive Reconstitution & U-100 Syringe Simulator')}
-                    </h3>
                   </div>
                 </div>
 
-                <div className="pds-section-header-right">
-                  <div className="pds-section-cert-badge">
-                    <Droplets size={14} color="#38bdf8" />
-                    <span>
-                      {isPenOrCart
-                        ? 'ISO 11608-2 Micro-Dial (1 Click = 0.01 mL)'
-                        : isSprayFormat
-                          ? (lang === 'es' ? '0.1 mL por Pulverización' : '0.1 mL Metered Mucosal Actuation')
-                          : 'U-100 Standard (1.0 mL = 100 U)'}
-                    </span>
-                  </div>
+                <div className="pds-section-card-body" style={{ padding: 0 }}>
+                  <InteractiveReconstitutionGuide
+                    product={product}
+                    selectedStrength={selectedStrength}
+                    availableStrengths={sortedStrengths}
+                    activeFormatId={activeFormatId}
+                    activeFormat={activeFormat}
+                    availableFormats={availableFormats}
+                    onFormatChange={setActiveFormatId}
+                    supplierName={displaySupplierName}
+                    lang={lang}
+                    primaryProtocol={primaryProtocol}
+                    associatedProtocols={associatedProtocols}
+                  />
                 </div>
-              </div>
-
-              <div className="pds-section-card-body" style={{ padding: 0 }}>
-                {/* Visual Step-by-Step Delivery Guide */}
-                <div style={{ padding: '20px 24px 8px 24px' }}>
-                  <VisualAdministrationGuide activeFormatId={activeFormatId} lang={lang} />
-                </div>
-
-                <InteractiveReconstitutionGuide
-                  product={product}
-                  selectedStrength={selectedStrength}
-                  availableStrengths={sortedStrengths}
-                  activeFormatId={activeFormatId}
-                  activeFormat={activeFormat}
-                  availableFormats={availableFormats}
-                  onFormatChange={setActiveFormatId}
-                  supplierName={displaySupplierName}
-                  lang={lang}
-                  primaryProtocol={primaryProtocol}
-                  associatedProtocols={associatedProtocols}
-                />
-              </div>
-            </>
-          )}
-        </section>
+              </>
+            )}
+          </section>
+        )}
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
         {!isCorporateService && (

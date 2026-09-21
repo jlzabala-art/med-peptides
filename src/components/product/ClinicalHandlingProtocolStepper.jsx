@@ -296,6 +296,29 @@ export default function ClinicalHandlingProtocolStepper({
   const initial = resolveInitialFormat(product, activeFormatId);
   const [selectedFormat, setSelectedFormat] = useState(initial);
 
+  // Calculate which formats are actually valid for this specific product
+  const availableFormatKeys = React.useMemo(() => {
+    if (Array.isArray(product?.availableFormats) && product.availableFormats.length > 0) {
+      const keys = product.availableFormats.map(f => {
+        const id = typeof f === 'string' ? f : (f.id || f.format || '');
+        if (id.includes('pen') || id.includes('cartridge')) return 'pen';
+        if (id.includes('spray') || id.includes('nasal')) return 'spray';
+        if (id.includes('capsule') || id.includes('oral') || id.includes('tablet')) return 'capsule';
+        if (id.includes('test') || id.includes('blood')) return 'diagnostic_test';
+        return 'vial';
+      });
+      const unique = Array.from(new Set(keys)).filter(k => PROTOCOL_FORMATS[k]);
+      if (unique.length > 0) return unique;
+    }
+    // Default: strictly the single format of this product
+    return [resolveInitialFormat(product, activeFormatId)];
+  }, [product, activeFormatId]);
+
+  React.useEffect(() => {
+    const nextInitial = resolveInitialFormat(product, activeFormatId);
+    setSelectedFormat(nextInitial);
+  }, [product, activeFormatId]);
+
   const activeProtocol = PROTOCOL_FORMATS[selectedFormat] || PROTOCOL_FORMATS.vial;
 
   return (
@@ -324,25 +347,29 @@ export default function ClinicalHandlingProtocolStepper({
           </div>
         </div>
 
-        {/* Format Selector Chips */}
-        <div className="chp-format-selector" role="tablist" aria-label="Device Format Selection">
-          {Object.values(PROTOCOL_FORMATS).map((fmt) => {
-            const isSelected = fmt.id === selectedFormat;
-            return (
-              <button
-                key={fmt.id}
-                type="button"
-                role="tab"
-                aria-selected={isSelected}
-                onClick={() => setSelectedFormat(fmt.id)}
-                className={`chp-format-chip ${isSelected ? 'active' : ''}`}
-              >
-                <span className="chp-format-chip-icon">{fmt.icon}</span>
-                <span className="chp-format-chip-text">{fmt.label.split(' (')[0]}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Format Selector Chips - Only shown if product actually offers multiple delivery formats */}
+        {availableFormatKeys.length > 1 && (
+          <div className="chp-format-selector" role="tablist" aria-label="Device Format Selection">
+            {availableFormatKeys.map((key) => {
+              const fmt = PROTOCOL_FORMATS[key];
+              if (!fmt) return null;
+              const isSelected = fmt.id === selectedFormat;
+              return (
+                <button
+                  key={fmt.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setSelectedFormat(fmt.id)}
+                  className={`chp-format-chip ${isSelected ? 'active' : ''}`}
+                >
+                  <span className="chp-format-chip-icon">{fmt.icon}</span>
+                  <span className="chp-format-chip-text">{fmt.label.split(' (')[0]}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* 4-Step Visual Grid */}
