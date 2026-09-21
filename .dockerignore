@@ -1,5 +1,6 @@
-# Ignore dependency and build cache directories
-node_modules
+# Ignore dependency and build cache directories (preserve standalone minimal node_modules)
+/node_modules
+!/.next/standalone/node_modules
 .next/cache
 .next/dev
 .next/diagnostics
