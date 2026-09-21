@@ -88,8 +88,30 @@ export async function buildCatalogSummary(searchParams) {
       try {
         const algoliaRes = await searchAlgolia(qParam);
         if (algoliaRes && Array.isArray(algoliaRes.products) && algoliaRes.products.length > 0) {
+          const term = qParam.toLowerCase();
+          // Filter out false-positive typo tolerance matches (e.g. "bloodo" matching "blood" in "Metabolic & Blood Sugar")
+          const validProducts = algoliaRes.products.filter(p => {
+            const hr = p._highlightResult || {};
+            // Accept if name, supplier, or sku had an explicit match
+            if (hr.name && hr.name.matchLevel !== 'none') {
+              const pName = (p.name || '').toLowerCase();
+              if (pName.includes(term) || hr.name.fullyHighlighted) return true;
+              if (hr.name.matchLevel === 'full' && (hr.name.value || '').toLowerCase().includes(term)) return true;
+            }
+            if (hr.supplier && hr.supplier.matchLevel !== 'none') return true;
+            if (hr.sku && hr.sku.matchLevel !== 'none') return true;
+            // If match was in tags, only accept if at least one tag actually contains the search term
+            const tags = Array.isArray(p.tags) ? p.tags.map(t => typeof t === 'string' ? t.toLowerCase() : String(t.value || '').toLowerCase()) : [];
+            if (tags.some(t => t.includes(term))) return true;
+            const pSlug = (p.slug || '').toLowerCase();
+            if (pSlug.includes(term)) return true;
+            const pTokens = Array.isArray(p.searchTokens) ? p.searchTokens.map(t => String(t).toLowerCase()) : [];
+            if (pTokens.some(t => t.includes(term))) return true;
+            return false;
+          });
+
           algoliaMatchedIds = new Set(
-            algoliaRes.products.flatMap(p => [p.objectID, p.id, p.productId, p.slug].filter(Boolean).map(s => String(s).toLowerCase()))
+            validProducts.flatMap(p => [p.objectID, p.id, p.productId, p.slug].filter(Boolean).map(s => String(s).toLowerCase()))
           );
         }
       } catch (e) {
@@ -220,7 +242,7 @@ export async function buildCatalogSummary(searchParams) {
       const isInactive = (['inactive', 'archived', 'draft'].includes(rawStatus)) || data.isActive === false;
       const computedStatus = (rawStatus === 'published' ? 'active' : rawStatus) || (isInactive ? 'archived' : 'active');
 
-      // Search term filter (case-insensitive substring match with tags/aliases/programs)
+      // Search term filter (case-insensitive substring match with tags/aliases/programs/suppliers)
       if (qParam.length > 0) {
         const term = qParam.toLowerCase();
         const docId = item.id.toLowerCase();
@@ -237,6 +259,16 @@ export async function buildCatalogSummary(searchParams) {
         const pPrograms = Array.isArray(data.programs) ? data.programs : [];
         const pProgNames = pPrograms.map(p => (p.name || '').toLowerCase());
         const pProgSlugs = pPrograms.map(p => (p.slug || p.id || '').toLowerCase());
+        const pSuppliers = Array.isArray(data.suppliers) ? data.suppliers.map(s => String(s).toLowerCase()) : [];
+        const pSupplierIds = Array.isArray(data.supplierIds) ? data.supplierIds.map(s => String(s).toLowerCase()) : [];
+        const pSupplierId = (data.supplierId || '').toLowerCase();
+        const pSupplierName = (data.supplierName || '').toLowerCase();
+
+        const matchesSupplier = 
+          pSupplierId.includes(term) ||
+          pSupplierName.includes(term) ||
+          pSuppliers.some(s => s.includes(term)) ||
+          pSupplierIds.some(s => s.includes(term));
 
         const matchesSearch = 
           (algoliaMatchedIds && (algoliaMatchedIds.has(docId) || algoliaMatchedIds.has(pSlug) || algoliaMatchedIds.has(cName) || algoliaMatchedIds.has(pName))) ||
@@ -248,6 +280,7 @@ export async function buildCatalogSummary(searchParams) {
           pSku.includes(term) ||
           pCas.includes(term) ||
           pDesc.includes(term) ||
+          matchesSupplier ||
           pTokens.some(t => t.includes(term)) ||
           pTags.some(t => t.includes(term)) ||
           pAliases.some(a => a.includes(term)) ||
