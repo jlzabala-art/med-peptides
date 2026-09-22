@@ -15,6 +15,8 @@ export function generateCoaData(product, variant) {
   const rawPurity = product?.purity || product?.analyticalPurity || product?.hplcPurity || 99.4;
   const parsedPurity = typeof rawPurity === 'number' ? rawPurity : parseFloat(String(rawPurity).replace(/[^0-9.]/g, ''));
   const purity = (!isNaN(parsedPurity) && parsedPurity > 0) ? parsedPurity : 99.4;
+  const casNumber = product?.molecular?.casNumber || product?.cas || product?.casNumber || '2381089-83-2';
+  const sequence = product?.molecular?.sequence || product?.sequence || product?.aminoAcidSequence || 'Y-Aib-EGTFTSDVSSYLEGQAA-K(20-diacid)-EFIAWLVRGRG';
   
   const lotId = `RP-${(product?.id || 'TIRZ').substring(0, 4).toUpperCase()}-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
   const verificationCode = `COA-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
