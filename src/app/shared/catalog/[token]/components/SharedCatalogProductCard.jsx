@@ -4,6 +4,7 @@ import React from 'react';
 import { Package, CheckCircle2, ClipboardList, FileText, FlaskConical } from 'lucide-react';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
+import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 
 /**
  * SharedCatalogProductCard — Renders a single product card with all its variants,
@@ -27,6 +28,8 @@ export default function SharedCatalogProductCard({
   t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
+
+  const fdaStatus = React.useMemo(() => getFdaPeptideStatus(prod), [prod]);
 
   const resolvedSupplier = React.useMemo(() => {
     const rawProdSupp = prod?.supplierId || prod?.variants?.[0]?.supplierId || prod?.supplier || prod?.variants?.[0]?.supplier;
@@ -105,6 +108,28 @@ export default function SharedCatalogProductCard({
                 <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
                   {prod.canonicalName}
                 </span>
+                {fdaStatus && (
+                  <span
+                    className="catalog-card-fda-badge"
+                    title={`${fdaStatus.badgeLabel} (${fdaStatus.rulingDate || 'FDA'}): ${fdaStatus.summary || ''}`}
+                    style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      backgroundColor: fdaStatus.colorScheme?.bg || '#f8fafc',
+                      color: fdaStatus.colorScheme?.text || '#475569',
+                      padding: '2.5px 7px',
+                      borderRadius: '5px',
+                      border: `1px solid ${fdaStatus.colorScheme?.border || '#cbd5e1'}`,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      lineHeight: 1.2
+                    }}
+                  >
+                    <span style={{ fontSize: '0.78rem', lineHeight: 1 }}>{fdaStatus.colorScheme?.icon}</span>
+                    <span>{fdaStatus.shortBadge}</span>
+                  </span>
+                )}
                 <span style={{
                   fontSize: '0.72rem',
                   fontWeight: 700,

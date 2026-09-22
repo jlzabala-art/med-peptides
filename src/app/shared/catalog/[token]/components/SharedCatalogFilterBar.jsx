@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Search, Filter, ChevronDown, ClipboardList, List, LayoutGrid } from 'lucide-react';
+import { Search, Filter, ChevronDown, ClipboardList, List, LayoutGrid, ShieldCheck } from 'lucide-react';
+import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
 
 /**
  * SharedCatalogFilterBar — Search box, Goals multi-select, Format/Packaging dropdown,
- * protocol filter chips, and result count indicator.
+ * FDA Status dropdown, protocol filter chips, and result count indicator.
  */
 export default function SharedCatalogFilterBar({
   searchQuery,
@@ -27,6 +28,9 @@ export default function SharedCatalogFilterBar({
   setDosageFilter,
   routeFilter = 'all',
   setRouteFilter,
+  // FDA Status dropdown
+  fdaFilter = 'all',
+  setFdaFilter,
   // Protocol chips
   protocols,
   productsWithProtocolsCount,
@@ -47,12 +51,58 @@ export default function SharedCatalogFilterBar({
     topical:    { label: 'Topical / Hair', icon: '💧' },
   };
 
+  const [isFdaDropdownOpen, setIsFdaDropdownOpen] = React.useState(false);
+
+  const FDA_OPTIONS = [
+    { id: 'all',                          label: 'All Regulatory Profiles',      icon: '🌐', desc: 'All evaluated & standard peptides' },
+    { id: 'fda_approved',                 label: 'FDA Approved APIs',            icon: '🏛️', desc: 'Approved NDA/ANDA ingredients (GLP-1, etc.)' },
+    { id: 'fda_pcac_503a_recommended',    label: '503A PCAC Recommended',       icon: '🛡️', desc: 'July 2026 PCAC Bulks List evaluation' },
+    { id: 'clinical_investigational',     label: 'Clinical Investigational (IND)',icon: '🔬', desc: 'Active clinical IND trials (Retatrutide, etc.)' },
+    { id: 'research_analytical_standard', label: 'Analytical Reference Standards',icon: '⚗️', desc: 'High-purity characterization standards' },
+  ];
+
+  const fdaStatusCounts = React.useMemo(() => {
+    const counts = {
+      all: (products || []).length,
+      fda_approved: 0,
+      fda_pcac_503a_recommended: 0,
+      clinical_investigational: 0,
+      research_analytical_standard: 0
+    };
+    (products || []).forEach(p => {
+      const st = getFdaPeptideStatus(p)?.status;
+      if (st && counts[st] !== undefined) {
+        counts[st]++;
+      }
+    });
+    return counts;
+  }, [products]);
+
+  const fdaButtonLabel = () => {
+    const opt = FDA_OPTIONS.find(o => o.id === fdaFilter);
+    if (fdaFilter && fdaFilter !== 'all' && opt) {
+      return opt.label;
+    }
+    return 'FDA Regulatory Status';
+  };
+
+  const fdaButtonIcon = () => {
+    const opt = FDA_OPTIONS.find(o => o.id === fdaFilter);
+    if (fdaFilter && fdaFilter !== 'all' && opt) {
+      return opt.icon;
+    }
+    return '🏛️';
+  };
+
+  const isFdaActive = fdaFilter && fdaFilter !== 'all';
+
   const hasActiveFilters = Boolean(
     searchQuery ||
     (selectedGoals && selectedGoals.length > 0) ||
     packagingMode !== 'all' ||
     dosageFilter !== 'all' ||
     (routeFilter && routeFilter !== 'all') ||
+    isFdaActive ||
     onlyWithProtocols
   );
 
@@ -62,6 +112,7 @@ export default function SharedCatalogFilterBar({
     if (setPackagingMode) setPackagingMode('all');
     if (setDosageFilter) setDosageFilter('all');
     if (setRouteFilter) setRouteFilter('all');
+    if (setFdaFilter) setFdaFilter('all');
     if (setOnlyWithProtocols) setOnlyWithProtocols(false);
   };
 
@@ -481,6 +532,145 @@ export default function SharedCatalogFilterBar({
               </>
             )}
           </div>
+
+          {/* FDA Regulatory Status Dropdown */}
+          <div className="fda-dropdown-container" style={{ position: 'relative', flex: '0 1 230px', minWidth: '185px', boxSizing: 'border-box' }}>
+            <button
+              type="button"
+              onClick={() => setIsFdaDropdownOpen(prev => !prev)}
+              style={{
+                width: '100%',
+                height: '42px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px',
+                backgroundColor: isFdaActive ? '#eff6ff' : '#ffffff',
+                border: isFdaActive ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '0 12px',
+                cursor: 'pointer',
+                boxSizing: 'border-box',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                <span style={{ fontSize: '1rem', flexShrink: 0 }}>
+                  {fdaButtonIcon()}
+                </span>
+                <span style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  color: isFdaActive ? '#1d4ed8' : '#0f172a',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {fdaButtonLabel()}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                {isFdaActive && (
+                  <span style={{
+                    backgroundColor: '#2563eb',
+                    color: '#ffffff',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    padding: '1px 6px',
+                    borderRadius: '10px'
+                  }}>
+                    {fdaStatusCounts[fdaFilter] || 0}
+                  </span>
+                )}
+                <ChevronDown size={14} color="#64748b" style={{ transform: isFdaDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+              </div>
+            </button>
+
+            {isFdaDropdownOpen && (
+              <>
+                <div
+                  style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
+                  onClick={() => setIsFdaDropdownOpen(false)}
+                />
+                <div style={{
+                  position: 'absolute',
+                  top: '46px',
+                  right: 0,
+                  width: '300px',
+                  maxWidth: '92vw',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid #e2e8f0',
+                  zIndex: 1000,
+                  padding: '8px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      FDA Regulatory Status
+                    </span>
+                    {isFdaActive && (
+                      <button
+                        type="button"
+                        onClick={() => { if (setFdaFilter) setFdaFilter('all'); setIsFdaDropdownOpen(false); }}
+                        style={{ border: 'none', background: 'none', color: '#2563eb', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+
+                  {FDA_OPTIONS.map(opt => {
+                    const isSelected = fdaFilter === opt.id || (!fdaFilter && opt.id === 'all');
+                    const count = fdaStatusCounts[opt.id] ?? 0;
+                    return (
+                      <div
+                        key={opt.id}
+                        onClick={() => {
+                          if (setFdaFilter) setFdaFilter(opt.id);
+                          setIsFdaDropdownOpen(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          backgroundColor: isSelected ? '#eff6ff' : 'transparent',
+                          transition: 'background 0.12s ease',
+                          marginBottom: '2px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '1rem', flexShrink: 0 }}>{opt.icon}</span>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.82rem', fontWeight: isSelected ? 800 : 600, color: isSelected ? '#1d4ed8' : '#1e293b' }}>
+                              {opt.label}
+                            </span>
+                            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              {opt.desc}
+                            </span>
+                          </div>
+                        </div>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: isSelected ? '#2563eb' : '#64748b',
+                          backgroundColor: isSelected ? '#dbeafe' : '#f1f5f9',
+                          padding: '2px 6px',
+                          borderRadius: '6px',
+                          flexShrink: 0
+                        }}>
+                          {count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -632,6 +822,29 @@ export default function SharedCatalogFilterBar({
               <button
                 type="button"
                 onClick={() => setRouteFilter('all')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          {isFdaActive && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#eff6ff',
+              color: '#1d4ed8',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #bfdbfe',
+              fontWeight: 600
+            }}>
+              {fdaButtonIcon()} FDA: {fdaButtonLabel()}
+              <button
+                type="button"
+                onClick={() => setFdaFilter('all')}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
               >
                 ×

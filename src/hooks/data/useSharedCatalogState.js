@@ -19,6 +19,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import { GOAL_TYPES, VALID_GOALS, GOAL_LABELS } from '@/constants/goalTypes';
 import { searchAlgolia } from '@/services/algoliaSearch';
+import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
 
 /**
  * Reads a URL search param safely (client-side only, SSR returns default).
@@ -43,6 +44,7 @@ function syncFiltersToUrl(filters) {
     set('goals', filters.selectedGoals.join(','), '');
     set('fmt',   filters.packagingMode, 'all');
     set('dose',  filters.dosageFilter,  'all');
+    set('fda',   filters.fdaFilter,     'all');
     const qs = params.toString();
     const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
     window.history.replaceState(null, '', newUrl);
@@ -165,16 +167,17 @@ export function useSharedCatalogState({
   const [dosageFilter,  setDosageFilter]  = useState(() => getUrlParam('dose', 'all'));
   const [routeFilter,   setRouteFilter]   = useState('all');
   const [packagingMode, setPackagingMode] = useState(() => getUrlParam('fmt', 'all'));
+  const [fdaFilter,     setFdaFilter]     = useState(() => getUrlParam('fda', 'all'));
 
   // ── Sync filter changes back to URL (debounced, non-blocking) ─────────────
   const syncTimerRef = useRef(null);
   useEffect(() => {
     clearTimeout(syncTimerRef.current);
     syncTimerRef.current = setTimeout(() => {
-      syncFiltersToUrl({ searchQuery, selectedGoals, packagingMode, dosageFilter });
+      syncFiltersToUrl({ searchQuery, selectedGoals, packagingMode, dosageFilter, fdaFilter });
     }, 400);
     return () => clearTimeout(syncTimerRef.current);
-  }, [searchQuery, selectedGoals, packagingMode, dosageFilter]);
+  }, [searchQuery, selectedGoals, packagingMode, dosageFilter, fdaFilter]);
 
   // Algolia Instant Search integration with typo-tolerance & clinical synonyms
   const [algoliaMatchProductIds, setAlgoliaMatchProductIds] = useState(null);
@@ -569,7 +572,13 @@ export function useSharedCatalogState({
           });
         }
 
-        return matchGoal && matchQuery && matchPackaging && matchDosage && matchRoute;
+        let matchFda = true;
+        if (fdaFilter && fdaFilter !== 'all') {
+          const statusObj = getFdaPeptideStatus(p);
+          matchFda = statusObj?.status === fdaFilter;
+        }
+
+        return matchGoal && matchQuery && matchPackaging && matchDosage && matchRoute && matchFda;
       })
       .map(p => {
         let activeVariants = p.variants || [];
@@ -738,6 +747,7 @@ export function useSharedCatalogState({
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
     routeFilter, setRouteFilter,
+    fdaFilter, setFdaFilter,
 
     // Shipping & currency
     currentCurrency, setCurrentCurrency,

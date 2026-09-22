@@ -323,6 +323,258 @@ export const FDA_REGISTRY = {
       icon: '🛡️',
       accent: '#2563eb'
     }
+  },
+  'cagrilintide': {
+    slug: 'cagrilintide',
+    canonicalName: 'Cagrilintide',
+    casNumber: '1415456-99-3',
+    status: FDA_STATUS_TYPES.CLINICAL_INVESTIGATIONAL,
+    badgeLabel: 'Phase 3 Investigational (IND)',
+    shortBadge: 'Phase 3 IND',
+    shortCode: 'IND',
+    rulingDate: 'Active Phase 3 (CagriSema)',
+    advisoryBody: 'U.S. FDA IND Framework',
+    voteResult: 'Investigational Amylin Analogue',
+    summary: 'Long-acting amylin receptor agonist currently in pivotal Phase 3 co-formulation trials.',
+    legalNotice: 'Investigational drug substance for research and authorized clinical trials.',
+    colorScheme: {
+      bg: '#faf5ff',
+      border: '#d8b4fe',
+      text: '#6d28d9',
+      icon: '🔬',
+      accent: '#7c3aed'
+    }
+  },
+  'ss-31': {
+    slug: 'ss-31',
+    canonicalName: 'SS-31 (Elamipretide)',
+    casNumber: '736992-21-5',
+    status: FDA_STATUS_TYPES.CLINICAL_INVESTIGATIONAL,
+    badgeLabel: 'Phase 3 Investigational (IND)',
+    shortBadge: 'Phase 3 IND',
+    shortCode: 'IND',
+    rulingDate: 'Active Phase 3 / Fast Track',
+    advisoryBody: 'U.S. FDA CDER (Fast Track Designation)',
+    voteResult: 'Mitochondrial Cardiolipin Stabilizer',
+    summary: 'Mitochondria-targeting tetrapeptide designed to restore mitochondrial bioenergetics.',
+    legalNotice: 'Investigational New Drug under active FDA evaluation.',
+    colorScheme: {
+      bg: '#faf5ff',
+      border: '#d8b4fe',
+      text: '#6d28d9',
+      icon: '🔬',
+      accent: '#7c3aed'
+    }
+  },
+  'elamipretide': {
+    slug: 'elamipretide',
+    canonicalName: 'Elamipretide (SS-31)',
+    casNumber: '736992-21-5',
+    status: FDA_STATUS_TYPES.CLINICAL_INVESTIGATIONAL,
+    badgeLabel: 'Phase 3 Investigational (IND)',
+    shortBadge: 'Phase 3 IND',
+    shortCode: 'IND',
+    rulingDate: 'Active Phase 3 / Fast Track',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'Investigational Mitochondria Stabilizer',
+    summary: 'Elamipretide cardiolipin-binding peptide.',
+    legalNotice: 'Investigational New Drug under clinical review.',
+    colorScheme: {
+      bg: '#faf5ff',
+      border: '#d8b4fe',
+      text: '#6d28d9',
+      icon: '🔬',
+      accent: '#7c3aed'
+    }
+  },
+  'sermorelin': {
+    slug: 'sermorelin',
+    canonicalName: 'Sermorelin',
+    casNumber: '86168-78-7',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'FDA Approved GHRH Analogue',
+    shortBadge: 'FDA Approved ✓',
+    shortCode: 'FDA',
+    rulingDate: 'FDA Approved Active Ingredient',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'FDA Approved GHRH(1-29) Acetate',
+    summary: 'Synthetic peptide corresponding to the amino-terminal segment of native human GHRH.',
+    legalNotice: 'Established FDA-approved drug substance.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '🏛️',
+      accent: '#16a34a'
+    }
+  },
+  'oxytocin': {
+    slug: 'oxytocin',
+    canonicalName: 'Oxytocin',
+    casNumber: '50-56-6',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'FDA Approved Synthetic Hormone',
+    shortBadge: 'FDA Approved ✓',
+    shortCode: 'FDA',
+    rulingDate: 'FDA Approved (USP Reference)',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'FDA Approved Nonapeptide',
+    summary: 'Synthetic nonapeptide hormone identical to endogenous pituitary oxytocin.',
+    legalNotice: 'USP pharmacopeial approved active pharmaceutical ingredient.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '🏛️',
+      accent: '#16a34a'
+    }
+  },
+  'liraglutide': {
+    slug: 'liraglutide',
+    canonicalName: 'Liraglutide',
+    casNumber: '204656-20-2',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'FDA Approved GLP-1 RA',
+    shortBadge: 'FDA Approved ✓',
+    shortCode: 'FDA',
+    rulingDate: 'FDA Approved (NDA)',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'Approved GLP-1 Analogue',
+    summary: 'FDA-approved acylated human glucagon-like peptide-1 (GLP-1) receptor agonist.',
+    legalNotice: 'Approved prescription peptide.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '🏛️',
+      accent: '#16a34a'
+    }
+  },
+  'bacteriostatic-water': {
+    slug: 'bacteriostatic-water',
+    canonicalName: 'Bacteriostatic Water (BAC)',
+    casNumber: '7732-18-5 / 100-51-6',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'USP Pharmacopeial Grade (Sterile)',
+    shortBadge: 'USP Sterile',
+    shortCode: 'USP',
+    rulingDate: 'USP Grade Monograph',
+    advisoryBody: 'United States Pharmacopeia (USP)',
+    voteResult: 'Standard Sterile Diluent Monograph',
+    summary: 'Sterile, non-pyrogenic water containing 0.9% benzyl alcohol for multiple-dose vial reconstitution.',
+    legalNotice: 'Standard USP pharmacopeial diluent.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '💧',
+      accent: '#16a34a'
+    }
+  },
+  'cjc-1295': {
+    slug: 'cjc-1295',
+    canonicalName: 'CJC-1295 (DAC & No DAC)',
+    casNumber: '863288-34-0',
+    status: FDA_STATUS_TYPES.CLINICAL_INVESTIGATIONAL,
+    badgeLabel: 'Clinical Investigational Peptide',
+    shortBadge: 'Investigational',
+    shortCode: 'IND',
+    rulingDate: 'Clinical IND Trials',
+    advisoryBody: 'Investigational Analogue Framework',
+    voteResult: 'Tetrasubstituted GHRH Analogue',
+    summary: 'Long-acting synthetic analogue of growth hormone-releasing factor.',
+    legalNotice: 'Investigational material for clinical and laboratory research.',
+    colorScheme: {
+      bg: '#faf5ff',
+      border: '#d8b4fe',
+      text: '#6d28d9',
+      icon: '🔬',
+      accent: '#7c3aed'
+    }
+  },
+  'ipamorelin': {
+    slug: 'ipamorelin',
+    canonicalName: 'Ipamorelin',
+    casNumber: '170851-70-4',
+    status: FDA_STATUS_TYPES.CLINICAL_INVESTIGATIONAL,
+    badgeLabel: 'Clinical Investigational Secretagogue',
+    shortBadge: 'Investigational',
+    shortCode: 'IND',
+    rulingDate: 'Clinical IND Evaluations',
+    advisoryBody: 'Investigational Secretagogue Framework',
+    voteResult: 'Selective Ghrelin / GHS-R1a Agonist',
+    summary: 'Pentapeptide selective growth hormone secretagogue.',
+    legalNotice: 'Investigational API standard.',
+    colorScheme: {
+      bg: '#faf5ff',
+      border: '#d8b4fe',
+      text: '#6d28d9',
+      icon: '🔬',
+      accent: '#7c3aed'
+    }
+  },
+  '5-amino-1mq': {
+    slug: '5-amino-1mq',
+    canonicalName: '5-Amino-1MQ',
+    casNumber: '42464-96-0',
+    status: FDA_STATUS_TYPES.CLINICAL_INVESTIGATIONAL,
+    badgeLabel: 'Investigational NNMT Inhibitor',
+    shortBadge: 'Investigational',
+    shortCode: 'IND',
+    rulingDate: 'Translational Research Candidate',
+    advisoryBody: 'Translational Medicinal Chemistry',
+    voteResult: 'Selective NNMT Small Molecule / Peptide Mimetic',
+    summary: 'Small molecule NNMT inhibitor investigated for metabolic health and cellular energy.',
+    legalNotice: 'Reference analytical standard for clinical research.',
+    colorScheme: {
+      bg: '#faf5ff',
+      border: '#d8b4fe',
+      text: '#6d28d9',
+      icon: '🔬',
+      accent: '#7c3aed'
+    }
+  },
+  'nad': {
+    slug: 'nad',
+    canonicalName: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+    casNumber: '53-84-9',
+    status: FDA_STATUS_TYPES.RESEARCH_ANALYTICAL_STANDARD,
+    badgeLabel: 'cGMP Analytical Coenzyme Standard',
+    shortBadge: 'cGMP Standard',
+    shortCode: 'API',
+    rulingDate: 'USP / cGMP Reference',
+    advisoryBody: 'Pharmacopeial Reference Material',
+    voteResult: 'Cellular Coenzyme Standard',
+    summary: 'High-purity oxidized nicotinamide adenine dinucleotide (NAD+) standard.',
+    legalNotice: 'Pharmaceutical-grade analytical coenzyme material.',
+    colorScheme: {
+      bg: '#eff6ff',
+      border: '#93c5fd',
+      text: '#1d4ed8',
+      icon: '⚡',
+      accent: '#2563eb'
+    }
+  },
+  'epithalon': {
+    slug: 'epithalon',
+    canonicalName: 'Epithalon (Epitalon)',
+    casNumber: '307297-39-8',
+    status: FDA_STATUS_TYPES.FDA_PCAC_503A_RECOMMENDED,
+    badgeLabel: 'FDA PCAC 503A Recommended',
+    shortBadge: '503A PCAC ✓',
+    shortCode: '503A',
+    rulingDate: 'July 2026',
+    advisoryBody: 'FDA Pharmacy Compounding Advisory Committee (PCAC)',
+    voteResult: 'Recommended for 503A Bulks List Inclusion',
+    summary: 'Epitalon (Ala-Glu-Asp-Gly) telomerase activator peptide recommended by FDA PCAC in July 2026 for inclusion on the 503A Bulks List.',
+    legalNotice: 'Voted for inclusion on 503A compounding list.',
+    colorScheme: {
+      bg: '#eff6ff',
+      border: '#93c5fd',
+      text: '#1d4ed8',
+      icon: '🛡️',
+      accent: '#2563eb'
+    }
   }
 };
 
@@ -344,28 +596,56 @@ export function getFdaPeptideStatus(productOrSlug) {
   }
 
   // 2. Extract string key
-  const str = (typeof productOrSlug === 'string'
+  const rawStr = (typeof productOrSlug === 'string'
     ? productOrSlug
     : (productOrSlug.slug || productOrSlug.canonicalName || productOrSlug.name || productOrSlug.id || '')
   ).toLowerCase().trim();
 
   // 3. Exact slug match
-  if (FDA_REGISTRY[str]) {
-    return FDA_REGISTRY[str];
+  if (FDA_REGISTRY[rawStr]) {
+    return FDA_REGISTRY[rawStr];
   }
 
-  // 4. Normalized substring match (e.g., "bpc-157-10mg" -> "bpc-157")
+  // 4. Cleaned alphanumeric match (e.g., "5-amino-1mq" -> "5amino1mq", "ss-31" -> "ss31")
+  const cleanStr = rawStr.replace(/[^a-z0-9]/g, '');
+
   for (const [key, value] of Object.entries(FDA_REGISTRY)) {
-    if (str.includes(key) || key.includes(str)) {
+    const cleanKey = key.replace(/[^a-z0-9]/g, '');
+    if (cleanStr === cleanKey || cleanStr.includes(cleanKey) || cleanKey.includes(cleanStr)) {
       return value;
     }
   }
 
-  // 5. Default fallback for standard analytical peptides
+  // 5. Check aliases / common names
+  if (cleanStr.includes('bacteriostatic') || cleanStr.includes('bacwater') || cleanStr === 'bac') {
+    return FDA_REGISTRY['bacteriostatic-water'];
+  }
+  if (cleanStr.includes('semaglutide')) return FDA_REGISTRY['semaglutide'];
+  if (cleanStr.includes('tirzepatide')) return FDA_REGISTRY['tirzepatide'];
+  if (cleanStr.includes('retatrutide')) return FDA_REGISTRY['retatrutide'];
+  if (cleanStr.includes('cagrilintide')) return FDA_REGISTRY['cagrilintide'];
+  if (cleanStr.includes('tesamorelin')) return FDA_REGISTRY['tesamorelin'];
+  if (cleanStr.includes('sermorelin')) return FDA_REGISTRY['sermorelin'];
+  if (cleanStr.includes('bpc157') && cleanStr.includes('tb500')) return FDA_REGISTRY['bpc-157-tb-500'];
+  if (cleanStr.includes('bpc157') || cleanStr.includes('bpc')) return FDA_REGISTRY['bpc-157'];
+  if (cleanStr.includes('tb500') || cleanStr.includes('thymosin')) return FDA_REGISTRY['tb-500'];
+  if (cleanStr.includes('epitalon') || cleanStr.includes('epithalon')) return FDA_REGISTRY['epitalon'];
+  if (cleanStr.includes('motsc') || cleanStr.includes('mots')) return FDA_REGISTRY['mots-c'];
+  if (cleanStr.includes('semax')) return FDA_REGISTRY['semax'];
+  if (cleanStr.includes('selank')) return FDA_REGISTRY['selank'];
+  if (cleanStr.includes('ghkcu') || cleanStr.includes('copper')) return FDA_REGISTRY['ghk-cu'];
+  if (cleanStr.includes('ss31') || cleanStr.includes('elamipretide')) return FDA_REGISTRY['ss-31'];
+  if (cleanStr.includes('cjc1295') || cleanStr.includes('cjc')) return FDA_REGISTRY['cjc-1295'];
+  if (cleanStr.includes('ipamorelin')) return FDA_REGISTRY['ipamorelin'];
+  if (cleanStr.includes('5amino1mq')) return FDA_REGISTRY['5-amino-1mq'];
+  if (cleanStr.includes('nad')) return FDA_REGISTRY['nad'];
+
+  // 6. Default fallback for standard analytical peptides
   return {
     status: FDA_STATUS_TYPES.RESEARCH_ANALYTICAL_STANDARD,
     badgeLabel: 'Analytical Reference Standard',
     shortBadge: 'Analytical Grade',
+    shortCode: 'API',
     rulingDate: 'ISO / HPLC Validated',
     advisoryBody: 'Analytical Standards Framework',
     voteResult: 'Chemical Characterization Standard',

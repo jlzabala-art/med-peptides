@@ -3,6 +3,7 @@
 import React from 'react';
 import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
+import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import SharedCatalogProductCard from './SharedCatalogProductCard';
 
 export default function SharedCatalogProductListRow({
@@ -22,6 +23,8 @@ export default function SharedCatalogProductListRow({
   t,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
+
+  const fdaStatus = React.useMemo(() => getFdaPeptideStatus(prod), [prod]);
 
   const resolvedSupplier = React.useMemo(() => {
     const rawProdSupp = prod?.supplierId || prod?.variants?.[0]?.supplierId || prod?.supplier || prod?.variants?.[0]?.supplier;
@@ -55,6 +58,32 @@ export default function SharedCatalogProductListRow({
               <span className="catalog-row-title">
                 {prod.canonicalName}
               </span>
+
+              {fdaStatus && (
+                <span
+                  className="catalog-row-fda-badge"
+                  title={`${fdaStatus.badgeLabel} (${fdaStatus.rulingDate || 'FDA'}): ${fdaStatus.summary || ''}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '1.5px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: fdaStatus.colorScheme?.bg || '#f8fafc',
+                    color: fdaStatus.colorScheme?.text || '#475569',
+                    border: `1px solid ${fdaStatus.colorScheme?.border || '#cbd5e1'}`,
+                    lineHeight: 1.2,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
+                  <span style={{ fontSize: '0.74rem', lineHeight: 1 }}>{fdaStatus.colorScheme?.icon}</span>
+                  <span className="fda-badge-text">{fdaStatus.shortBadge}</span>
+                </span>
+              )}
+
               {prod.purity && (
                 <span className="catalog-row-purity">
                   {prod.purity}
@@ -95,9 +124,10 @@ export default function SharedCatalogProductListRow({
               onClick={onToggleExpand}
               className="catalog-row-expand-btn"
               aria-expanded={isExpanded}
+              aria-label={isExpanded ? 'Collapse peptide details' : 'Expand peptide details and dosages'}
+              title={isExpanded ? (t ? t('product.collapse', 'Collapse') : 'Collapse') : (t ? t('product.expand', 'Expand Formats') : 'Expand Formats')}
             >
-              <span>{isExpanded ? (t ? t('product.collapse', 'Close') : 'Close') : (t ? t('product.select', 'Select') : 'Select')}</span>
-              {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>
         </div>

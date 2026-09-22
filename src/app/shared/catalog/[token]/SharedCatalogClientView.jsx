@@ -169,6 +169,8 @@ export default function SharedCatalogClientView({
     filteredProducts,
     filteredProtocols,
     totalVariants,
+    fdaFilter,
+    setFdaFilter,
     priceTierLabel,
     handleCopyOrderSummary,
     handleConfirmWhatsApp,
@@ -801,6 +803,8 @@ export default function SharedCatalogClientView({
           setDosageFilter={setDosageFilter}
           routeFilter={routeFilter}
           setRouteFilter={setRouteFilter}
+          fdaFilter={fdaFilter}
+          setFdaFilter={setFdaFilter}
           protocols={protocols}
           productsWithProtocolsCount={productsWithProtocolsCount}
           onlyWithProtocols={onlyWithProtocols}

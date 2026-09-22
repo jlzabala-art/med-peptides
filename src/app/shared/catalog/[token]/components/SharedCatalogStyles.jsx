@@ -382,17 +382,18 @@ export default function SharedCatalogStyles() {
         .catalog-row-expand-btn {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
+          justify-content: center;
+          width: 32px;
+          min-width: 32px;
           height: 32px;
-          padding: 0 12px;
+          padding: 0;
           border-radius: 6px;
           background: #f1f5f9;
           color: #003666;
           border: 1px solid #cbd5e1;
-          font-size: 0.74rem;
-          font-weight: 700;
           cursor: pointer;
           transition: all 0.15s ease;
+          flex-shrink: 0;
         }
         .catalog-list-item.is-expanded .catalog-row-expand-btn {
           background: #003666;
@@ -401,9 +402,25 @@ export default function SharedCatalogStyles() {
         }
         .catalog-row-expand-btn:hover {
           background: #e2e8f0;
+          color: #002544;
+          border-color: #94a3b8;
         }
         .catalog-list-item.is-expanded .catalog-row-expand-btn:hover {
           background: #002544;
+          color: #ffffff;
+        }
+        .catalog-row-fda-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          font-size: 0.68rem;
+          font-weight: 700;
+          padding: 1.5px 6px;
+          border-radius: 4px;
+          line-height: 1.2;
+          white-space: nowrap;
+          flex-shrink: 0;
+          vertical-align: middle;
         }
         /* Executive Header Card */
         .header-card {
@@ -873,16 +890,17 @@ export default function SharedCatalogStyles() {
               flex: 1 1 100% !important;
             }
             .catalog-dropdowns-row {
-              display: grid !important;
-              grid-template-columns: 1fr 1fr !important;
+              display: flex !important;
+              flex-wrap: wrap !important;
               gap: 8px !important;
               width: 100% !important;
             }
             .category-dropdown-container,
-            .format-dropdown-container {
+            .format-dropdown-container,
+            .fda-dropdown-container {
               width: 100% !important;
               min-width: 0 !important;
-              flex: 1 1 auto !important;
+              flex: 1 1 calc(50% - 4px) !important;
             }
           }
           .catalog-search-box {
@@ -1148,14 +1166,16 @@ export default function SharedCatalogStyles() {
             display: none !important;
           }
           .catalog-row-expand-btn {
+            width: 32px !important;
+            min-width: 32px !important;
             height: 32px !important;
-            padding: 0 12px !important;
-            font-size: 0.74rem !important;
+            padding: 0 !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             box-sizing: border-box !important;
             border-radius: 6px !important;
+            flex-shrink: 0 !important;
           }
           .chips-scroll-container {
             flex-wrap: wrap !important;
