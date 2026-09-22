@@ -8,11 +8,28 @@ function generateWorkspaceId() {
   return `ws_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 }
 
+export function getWorkspaceInitials(ws) {
+  if (!ws) return 'WS';
+  const name = ws.targetEntity?.name || ws.targetEntity?.displayName || ws.name || '';
+  const clean = name.trim().replace(/^Dr\.\s+/i, '').replace(/[^a-zA-Z0-9\s]/g, '');
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  if (parts.length === 1 && parts[0].length >= 2) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  return (ws.name ? ws.name.substring(0, 2) : 'W1').toUpperCase();
+}
+
 const DEFAULT_WORKSPACE = {
   id: 'ws_default',
   name: 'Workspace 1',
   createdAt: Date.now(),
   updatedAt: Date.now(),
+  status: 'draft', // 'draft' | 'converted'
+  convertedAt: null,
+  convertedInfo: null, // { type, docId, summary }
   items: [],
   operationType: 'unassigned', // 'sell_quotation' | 'sell_prescription' | 'sell_order' | 'buy_po' | 'buy_rfq' | 'unassigned'
   intent: 'sell', // 'sell' | 'buy'
@@ -37,6 +54,7 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
     ws_default: { ...DEFAULT_WORKSPACE },
   },
   activeWorkspaceId: 'ws_default',
+  workspaceHistory: [], // Last 10 soft-archived/converted workspaces
   isDrawerOpen: false,
 
   setDrawerOpen: (open) => set({ isDrawerOpen: !!open }),
@@ -50,8 +68,43 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
   },
 
   createWorkspace: (name, initialIntent = 'sell') => {
+    const { workspaces, workspaceHistory = [] } = get();
+    let currentWorkspaces = { ...workspaces };
+    const keys = Object.keys(currentWorkspaces);
+
+    let newHistory = [...workspaceHistory];
+
+    // Max 3 active workspaces rule (FIFO eviction of oldest or converted)
+    if (keys.length >= 3) {
+      // Preference 1: already converted workspace
+      let evictId = keys.find(k => currentWorkspaces[k]?.status === 'converted');
+      // Preference 2: oldest workspace by updatedAt or createdAt
+      if (!evictId) {
+        evictId = keys.reduce((oldest, k) => {
+          const tOld = currentWorkspaces[oldest]?.updatedAt || currentWorkspaces[oldest]?.createdAt || 0;
+          const tCur = currentWorkspaces[k]?.updatedAt || currentWorkspaces[k]?.createdAt || 0;
+          return tCur < tOld ? k : oldest;
+        }, keys[0]);
+      }
+
+      if (evictId && currentWorkspaces[evictId]) {
+        const evicted = currentWorkspaces[evictId];
+        if ((evicted.items && evicted.items.length > 0) || evicted.targetEntity) {
+          newHistory = [
+            {
+              ...evicted,
+              archivedAt: Date.now(),
+              archiveReason: evicted.status === 'converted' ? 'converted' : 'fifo_limit',
+            },
+            ...newHistory.filter(h => h.id !== evicted.id).slice(0, 9),
+          ];
+        }
+        delete currentWorkspaces[evictId];
+      }
+    }
+
     const id = generateWorkspaceId();
-    const count = Object.keys(get().workspaces).length + 1;
+    const count = Object.keys(currentWorkspaces).length + 1;
     const wsName = name || `Workspace ${count}`;
 
     const newWs = {
@@ -59,6 +112,9 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
       name: wsName,
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      status: 'draft',
+      convertedAt: null,
+      convertedInfo: null,
       items: [],
       operationType: 'unassigned',
       intent: initialIntent,
@@ -77,10 +133,13 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
       notes: '',
     };
 
-    set((s) => ({
-      workspaces: { ...s.workspaces, [id]: newWs },
+    currentWorkspaces[id] = newWs;
+
+    set({
+      workspaces: currentWorkspaces,
       activeWorkspaceId: id,
-    }));
+      workspaceHistory: newHistory,
+    });
 
     return id;
   },
@@ -98,37 +157,79 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
   },
 
   duplicateWorkspace: (id) => {
-    const { workspaces } = get();
+    const { workspaces, workspaceHistory = [] } = get();
     const source = workspaces[id];
     if (!source) return null;
+
+    let currentWorkspaces = { ...workspaces };
+    const keys = Object.keys(currentWorkspaces);
+    let newHistory = [...workspaceHistory];
+
+    // Max 3 active workspaces rule
+    if (keys.length >= 3) {
+      let evictId = keys.find(k => currentWorkspaces[k]?.status === 'converted');
+      if (!evictId) {
+        evictId = keys.reduce((oldest, k) => {
+          const tOld = currentWorkspaces[oldest]?.updatedAt || currentWorkspaces[oldest]?.createdAt || 0;
+          const tCur = currentWorkspaces[k]?.updatedAt || currentWorkspaces[k]?.createdAt || 0;
+          return tCur < tOld ? k : oldest;
+        }, keys[0]);
+      }
+      if (evictId && currentWorkspaces[evictId]) {
+        const evicted = currentWorkspaces[evictId];
+        if ((evicted.items && evicted.items.length > 0) || evicted.targetEntity) {
+          newHistory = [
+            { ...evicted, archivedAt: Date.now(), archiveReason: 'fifo_limit' },
+            ...newHistory.filter(h => h.id !== evicted.id).slice(0, 9),
+          ];
+        }
+        delete currentWorkspaces[evictId];
+      }
+    }
 
     const newId = generateWorkspaceId();
     const dup = {
       ...source,
       id: newId,
       name: `${source.name} (Copy)`,
+      status: 'draft',
+      convertedAt: null,
+      convertedInfo: null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       items: source.items.map((it) => ({ ...it })),
     };
 
-    set((s) => ({
-      workspaces: { ...s.workspaces, [newId]: dup },
+    currentWorkspaces[newId] = dup;
+
+    set({
+      workspaces: currentWorkspaces,
       activeWorkspaceId: newId,
-    }));
+      workspaceHistory: newHistory,
+    });
 
     return newId;
   },
 
   deleteWorkspace: (id) => {
-    const { workspaces, activeWorkspaceId } = get();
+    const { workspaces, activeWorkspaceId, workspaceHistory = [] } = get();
     const keys = Object.keys(workspaces);
+
+    const wsToDelete = workspaces[id];
+    let newHistory = [...workspaceHistory];
+    if (wsToDelete && ((wsToDelete.items && wsToDelete.items.length > 0) || wsToDelete.targetEntity)) {
+      newHistory = [
+        { ...wsToDelete, archivedAt: Date.now(), archiveReason: 'manual_delete' },
+        ...newHistory.filter(h => h.id !== id).slice(0, 9),
+      ];
+    }
 
     if (keys.length <= 1) {
       const defaultWs = { ...DEFAULT_WORKSPACE, id: 'ws_default', createdAt: Date.now() };
       set({
         workspaces: { ws_default: defaultWs },
         activeWorkspaceId: 'ws_default',
+        workspaceHistory: newHistory,
       });
       return;
     }
@@ -144,7 +245,95 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
     set({
       workspaces: nextWorkspaces,
       activeWorkspaceId: nextActive,
+      workspaceHistory: newHistory,
     });
+  },
+
+  convertWorkspace: (id, docInfo = {}) => {
+    const wsId = id || get().activeWorkspaceId;
+    const { workspaces, workspaceHistory = [] } = get();
+    const ws = workspaces[wsId];
+    if (!ws) return;
+
+    const convertedWs = {
+      ...ws,
+      status: 'converted',
+      convertedAt: Date.now(),
+      convertedInfo: docInfo, // { type: 'quotation' | 'purchase_order' | 'prescription', docId, summary }
+      updatedAt: Date.now(),
+    };
+
+    const historyEntry = {
+      ...convertedWs,
+      archivedAt: Date.now(),
+      archiveReason: 'converted',
+    };
+    const updatedHistory = [historyEntry, ...workspaceHistory.filter(h => h.id !== wsId).slice(0, 9)];
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: convertedWs,
+      },
+      workspaceHistory: updatedHistory,
+    }));
+  },
+
+  restoreWorkspaceFromHistory: (historyIndex) => {
+    const { workspaces, workspaceHistory = [] } = get();
+    const itemToRestore = workspaceHistory[historyIndex];
+    if (!itemToRestore) return null;
+
+    let currentWorkspaces = { ...workspaces };
+    const keys = Object.keys(currentWorkspaces);
+    let newHistory = workspaceHistory.filter((_, idx) => idx !== historyIndex);
+
+    // Max 3 active workspaces rule: evict oldest
+    if (keys.length >= 3) {
+      let evictId = keys.find(k => currentWorkspaces[k]?.status === 'converted');
+      if (!evictId) {
+        evictId = keys.reduce((oldest, k) => {
+          const tOld = currentWorkspaces[oldest]?.updatedAt || currentWorkspaces[oldest]?.createdAt || 0;
+          const tCur = currentWorkspaces[k]?.updatedAt || currentWorkspaces[k]?.createdAt || 0;
+          return tCur < tOld ? k : oldest;
+        }, keys[0]);
+      }
+      if (evictId && currentWorkspaces[evictId]) {
+        const evicted = currentWorkspaces[evictId];
+        if ((evicted.items && evicted.items.length > 0) || evicted.targetEntity) {
+          newHistory = [
+            { ...evicted, archivedAt: Date.now(), archiveReason: 'fifo_limit' },
+            ...newHistory.filter(h => h.id !== evicted.id).slice(0, 9),
+          ];
+        }
+        delete currentWorkspaces[evictId];
+      }
+    }
+
+    const restoredId = generateWorkspaceId();
+    const restoredWs = {
+      ...itemToRestore,
+      id: restoredId,
+      name: `${itemToRestore.name} (Restored)`,
+      status: 'draft',
+      convertedAt: null,
+      convertedInfo: null,
+      updatedAt: Date.now(),
+    };
+
+    currentWorkspaces[restoredId] = restoredWs;
+
+    set({
+      workspaces: currentWorkspaces,
+      activeWorkspaceId: restoredId,
+      workspaceHistory: newHistory,
+    });
+
+    return restoredId;
+  },
+
+  clearWorkspaceHistory: () => {
+    set({ workspaceHistory: [] });
   },
 
   clearWorkspaceItems: (id) => {
@@ -159,6 +348,9 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
           ...s.workspaces[wsId],
           items: [],
           targetEntity: null,
+          status: 'draft',
+          convertedAt: null,
+          convertedInfo: null,
           operationType: 'unassigned',
           updatedAt: Date.now(),
         },

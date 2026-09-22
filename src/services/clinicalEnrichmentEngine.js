@@ -14,7 +14,7 @@
 
 import { resolveCasNumber } from '../utils/casResolver';
 import { getPeptideScientificData } from '../utils/knownPeptideData';
-import { isVehicleProduct, isApiProduct } from '../utils/calculateProductCompleteness';
+import { isVehicleProduct, isApiProduct, isIvProduct } from '../utils/calculateProductCompleteness';
 
 export const AUTHORITATIVE_PEPTIDE_KNOWLEDGE_BASE = {
   calcitonin: {
@@ -235,6 +235,19 @@ function classifyProductForEnrichment(productData) {
   const cat = (productData?.categoryId || productData?.category || '').toLowerCase().trim();
   const type = (productData?.productType || productData?.type || '').toLowerCase().trim();
   const name = (productData?.name || productData?.canonicalName || '').toLowerCase();
+
+  // ── 0. Corporate & Institutional Services ──────────────────────────────────
+  if (
+    cat === 'corporate_services' ||
+    productData.isCorporateService ||
+    productData.serviceSubtype === 'corporate_service' ||
+    name.includes('b2b peptide supply chain') ||
+    name.includes('compounding & custom formulation') ||
+    name.includes('spanish company acquisition')
+  ) return 'corporate_service';
+
+  // ── 0.5 IV Drips & Intravenous Infusion Therapies ───────────────────────────
+  if (isIvProduct(productData)) return 'iv_drip';
 
   // ── 1. Vehicles / Excipients / Compounding Bases ────────────────────────────
   if (
@@ -544,6 +557,80 @@ export async function enrichProductDocument(productData = {}) {
       requiresColdChain: productData.requiresColdChain ?? false,
       enrichedAt:      new Date().toISOString(),
       _enrichmentType: 'equipment'
+    };
+  }
+
+  // ── IV DRIP & INTRAVENOUS INFUSION THERAPY ────────────────────────────────
+  if (enrichmentType === 'iv_drip') {
+    const nameTokens = name.toLowerCase().split(/\s+/);
+    const searchTokens = Array.from(new Set([
+      ...nameTokens, 'iv drip', 'infusion', 'iv therapy', 'intravenous', 'cocktail',
+      productData.supplier?.toLowerCase() || ''
+    ].filter(Boolean)));
+
+    return {
+      ...productData,
+      canonicalName: productData.canonicalName || productData.name,
+      description: productData.description || `${name} — sterile intravenous infusion formulation engineered for cellular bio-availability and systemic longevity support.`,
+      primaryGoal: productData.primaryGoal || 'Cellular Longevity & Systemic Recovery',
+      goals: productData.goals || ['longevity', 'mitochondrial_health', 'antioxidant_defense'],
+      carrierSolution: productData.carrierSolution || '500 mL Normal Saline (0.9% NaCl USP)',
+      volume: productData.volume || '500 mL',
+      flowRate: productData.flowRate || '45 - 60 minutes controlled IV drip rate',
+      infusionTime: productData.infusionTime || '45-60 min',
+      ingredients: productData.ingredients || [
+        'NAD+ (Nicotinamide Adenine Dinucleotide) 500mg',
+        'Glutathione (Reduced) 1200mg',
+        'Ascorbic Acid (Vitamin C) 15,000mg',
+        'Magnesium Sulfate 1000mg',
+        'B-Complex (B1, B2, B3, B5, B6) 100mg',
+        'Zinc Chloride 10mg'
+      ],
+      dosage: productData.dosage || '1 Infusion Bag (500 mL)',
+      contraindications: productData.contraindications || 'Screen for G6PD deficiency before high-dose Ascorbic Acid. Check renal function (eGFR > 50 mL/min) and resting blood pressure.',
+      administrationRoute: productData.administrationRoute || 'Intravenous Infusion Only (In-Clinic / Registered Nurse / Medical Supervision)',
+      price: productData.price > 0 ? productData.price : (productData.min_unit_price > 0 ? productData.min_unit_price : 195.00),
+      storageConditions: productData.storageConditions || 'Store protected from light at 2°C to 8°C. Do not freeze. Use immediately upon compounding.',
+      requiresColdChain: true,
+      hasCOA: productData.hasCOA ?? true,
+      searchTokens,
+      enrichedAt: new Date().toISOString(),
+      _enrichmentType: 'iv_drip'
+    };
+  }
+
+  // ── CORPORATE & INSTITUTIONAL B2B SERVICE ──────────────────────────────────
+  if (enrichmentType === 'corporate_service') {
+    const nameTokens = name.toLowerCase().split(/\s+/);
+    const searchTokens = Array.from(new Set([
+      ...nameTokens, 'corporate service', 'b2b', 'wholesale', 'compounding', 'supply chain',
+      productData.supplier?.toLowerCase() || ''
+    ].filter(Boolean)));
+
+    return {
+      ...productData,
+      canonicalName: productData.canonicalName || productData.name,
+      description: productData.description || `${name} — institutional service delivering audited supply chain, regulatory compliance, and custom formulation solutions.`,
+      therapeutic_category: productData.therapeutic_category || 'Corporate & Institutional Infrastructure',
+      primaryGoal: productData.primaryGoal || 'Supply Chain Continuity & Legal Framework',
+      keyAdvantages: productData.keyAdvantages || [
+        'EU GMP certified formulation partner with batch release release testing',
+        'B2B Wholesale volume discounts and priority allocation',
+        'Dedicated account manager and cold-chain temperature monitoring',
+        'Spanish Ley 14/2013 regulatory compliance support'
+      ],
+      turnaroundTime: productData.turnaroundTime || '5-7 Business Days (Dedicated Concierge SLA)',
+      orderChannels: productData.orderChannels || ['Concierge WhatsApp', 'Enterprise EDI', 'B2B Admin Portal'],
+      dedicatedAccountManager: productData.dedicatedAccountManager || 'Enterprise Partner Desk',
+      faqs: productData.faqs || [
+        { q: 'What regulatory guarantees are provided?', a: 'All APIs are backed by full ISO/GMP Certificates of Analysis and dual-lot HPLC verification.' },
+        { q: 'What is the turnaround time for custom batches?', a: 'Standard turnaround is 5 to 7 business days with temperature-controlled expedited shipping.' }
+      ],
+      price: productData.price > 0 ? productData.price : (productData.min_unit_price > 0 ? productData.min_unit_price : 1200.00),
+      searchTokens,
+      requiresColdChain: false,
+      enrichedAt: new Date().toISOString(),
+      _enrichmentType: 'corporate_service'
     };
   }
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import StandardDrawer from '../../ui/StandardDrawer';
-import { calculateProductCompleteness } from '../../../utils/calculateProductCompleteness';
+import { calculateProductCompleteness, isIvProduct } from '../../../utils/calculateProductCompleteness';
 import { Sparkles, CheckCircle2, AlertCircle, RefreshCw, Info, Database, Beaker, FileCheck } from '@/lib/icons';
 import notifier from '../../../services/NotificationService';
 import { auth } from '@/firebase';
@@ -16,21 +16,32 @@ const ENRICHMENT_STEPS = [
 
 const CATEGORY_OPTIONS = [
   { id: 'peptide', label: '🧬 Peptides & Hormones' },
+  { id: 'iv_drip', label: '💧 IV Drips & Infusion Therapies' },
+  { id: 'corporate_services', label: '🏢 Corporate & Institutional Services' },
   { id: 'supplement', label: '🌿 Supplements & Nutraceuticals' },
   { id: 'diagnostic_test', label: '🔬 Diagnostic & Genetic Tests' },
   { id: 'raw_material', label: '⚗️ Raw Materials & APIs (Compounding)' },
   { id: 'excipient_vehicle', label: '🧴 Excipients & Vehicles' },
   { id: 'medical_device_consumable', label: '💉 Consumables & Devices' },
-  { id: 'service', label: '📅 Services & Subscriptions' },
+  { id: 'service', label: '📅 Telemedicine & Subscriptions' },
   { id: 'skincare', label: '✨ Skincare & Topicals' },
 ];
+
+function resolveInitialCategory(product) {
+  if (!product) return 'peptide';
+  if (isIvProduct(product)) return 'iv_drip';
+  const cat = (product.categoryId || product.category || '').toLowerCase();
+  const name = (product.name || product.canonicalName || '').toLowerCase();
+  if (cat === 'corporate_services' || product.isCorporateService || name.includes('b2b peptide supply chain') || name.includes('compounding & custom formulation') || name.includes('spanish company acquisition')) {
+    return 'corporate_services';
+  }
+  return product.categoryId || product.category || 'peptide';
+}
 
 export default function ProductEnrichmentModal({ isOpen, onClose, product: initialProduct, onEnriched }) {
   const [isEnriching, setIsEnriching] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(initialProduct);
-  const [selectedCategory, setSelectedCategory] = useState(
-    initialProduct?.categoryId || initialProduct?.category || 'peptide'
-  );
+  const [selectedCategory, setSelectedCategory] = useState(() => resolveInitialCategory(initialProduct));
   const [currentStep, setCurrentStep] = useState(1);
   const [animatedScore, setAnimatedScore] = useState(0);
   const autoEnrichTriggeredRef = useRef(null);
@@ -38,7 +49,7 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
   useEffect(() => {
     setCurrentProduct(initialProduct);
     if (initialProduct) {
-      const initialCat = initialProduct.categoryId || initialProduct.category || 'peptide';
+      const initialCat = resolveInitialCategory(initialProduct);
       setSelectedCategory(initialCat);
       const comp = calculateProductCompleteness({
         ...initialProduct,

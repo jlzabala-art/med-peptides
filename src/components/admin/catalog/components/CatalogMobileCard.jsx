@@ -18,6 +18,7 @@ import {
   FileText,
   Bot,
   Building2,
+  Droplets,
   Plus
 } from '@/lib/icons';
 import StatusBadge from '../../../ui/StatusBadge';
@@ -34,12 +35,15 @@ import { openProductAI } from '../../../../utils/openModuleAI';
 import notifier from '../../../../services/NotificationService';
 
 const TYPE_CONFIG = {
-  finished_product:    { label: 'FINISHED',  icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
-  raw_material:        { label: 'BULK API',   icon: <FlaskConical size={11} strokeWidth={2.2} />,  bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
-  clinical_supplies:   { label: 'CLINICAL',   icon: <Stethoscope size={11} strokeWidth={2.2} />,   bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
-  genomics_biomarkers: { label: 'GENOMICS',   icon: <Dna size={11} strokeWidth={2.2} />,          bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
-  diagnostic:          { label: 'GENOMICS',   icon: <Dna size={11} strokeWidth={2.2} />,          bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
-  service:             { label: 'SERVICE',    icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
+  finished_product:    { label: 'FINISHED',    icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+  iv_drip:             { label: 'IV DRIP',     icon: <Droplets size={11} strokeWidth={2.2} />,     bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4' },
+  compounding:         { label: 'COMPOUNDING', icon: <FlaskConical size={11} strokeWidth={2.2} />, bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8' },
+  raw_material:        { label: 'BULK API',    icon: <FlaskConical size={11} strokeWidth={2.2} />,  bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
+  corporate_services:  { label: 'B2B SERVICE', icon: <Building2 size={11} strokeWidth={2.2} />,    bg: '#f8fafc', color: '#0369a1', border: '#bae6fd' },
+  clinical_supplies:   { label: 'CLINICAL',    icon: <Stethoscope size={11} strokeWidth={2.2} />,   bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
+  genomics_biomarkers: { label: 'GENOMICS',    icon: <Dna size={11} strokeWidth={2.2} />,          bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
+  diagnostic:          { label: 'GENOMICS',    icon: <Dna size={11} strokeWidth={2.2} />,          bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
+  service:             { label: 'SERVICE',     icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
 };
 
 export default function CatalogMobileCard({

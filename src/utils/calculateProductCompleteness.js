@@ -165,6 +165,91 @@ const DIAGNOSTIC_TEST_SCHEMA = [
     check: p => !!(p.reportFormat || p.reportUrl || p.reportTemplate) },
 ];
 
+const CORPORATE_SERVICE_SCHEMA = [
+  // 1. Executive Scope & Identity (20pts)
+  { key: 'description', label: 'Service Scope & Executive Overview', weight: 10, category: 'Scope',
+    check: p => !!(p.aiDescription || p.description || p.summary || p.clinicalOverview) },
+  { key: 'therapeutic_category', label: 'Service Domain & Classification', weight: 10, category: 'Scope',
+    check: p => !!(p.therapeutic_category || p.targetSystem || p.category) },
+
+  // 2. Active Service Tiers & Packages (20pts)
+  { key: 'variants', label: 'Service Tiers & Plan Options', weight: 10, category: 'Commercial',
+    check: p => (p.variants?.length > 0) || p.variantsCount > 0 },
+  { key: 'pricing', label: 'B2B Wholesale / Tier Pricing', weight: 10, category: 'Commercial',
+    check: p => (p.variants?.some(v => v.price > 0 || v.unit_price > 0 || v.cost_price > 0 || v.dose)) || p.pricingRules || p.price > 0 || p.canonical_price_usd > 0 },
+
+  // 3. Operational Deliverables & Advantages (20pts)
+  { key: 'deliverables', label: 'Key Deliverables & Scope Checklist', weight: 10, category: 'Operations',
+    check: p => (Array.isArray(p.keyAdvantages) && p.keyAdvantages.length > 0) || (p.variants?.some(v => Array.isArray(v.deliverables) && v.deliverables.length > 0)) || !!p.features },
+  { key: 'turnaroundTime', label: 'Execution SLA & Turnaround Time', weight: 10, category: 'Operations',
+    check: p => !!(p.turnaroundTime || p.deliveryDays || p.tat || p.duration) },
+
+  // 4. Compliance & Regulatory Framework (20pts)
+  { key: 'regulatory', label: 'Regulatory Framework (EU GMP / Law 14/2013)', weight: 10, category: 'Compliance',
+    check: p => !!(p.purity || p.regulatoryLabel || p.jurisdiction || p.casNumber) },
+  { key: 'supplier', label: 'Executing Partner / Entity Sourced', weight: 10, category: 'Compliance',
+    check: p => (p.suppliers?.length > 0) || !!p.supplierId || !!p.supplierName || !!p.supplier },
+
+  // 5. Channels & Onboarding Guidance (20pts)
+  { key: 'channels', label: 'Order Channels & Concierge Lead', weight: 10, category: 'Execution',
+    check: p => (Array.isArray(p.orderChannels) && p.orderChannels.length > 0) || !!p.dedicatedAccountManager || !!p.orderChannel },
+  { key: 'faqs', label: 'Client FAQs & Onboarding Guide', weight: 10, category: 'Execution',
+    check: p => (Array.isArray(p.faqs) && p.faqs.length > 0) || (Array.isArray(p.keyAdvantages) && p.keyAdvantages.length > 0) || !!p.description },
+];
+
+const IV_INFUSION_SCHEMA = [
+  // 1. Solution Vehicle & Carrier Volume (20pts)
+  { key: 'carrierVolume', label: 'Carrier Solution & Bag Volume (250ml / 500ml 0.9% NaCl / Ringer)', weight: 10, category: 'Clinical',
+    check: p => !!(p.carrierSolution || p.carrier || p.diluent || p.volume || p.presentation?.toLowerCase().includes('bag') || p.presentation?.toLowerCase().includes('iv') || p.format?.toLowerCase().includes('iv') || p.scientificData?.carrier) },
+  { key: 'flowRate', label: 'Infusion Time & Flow Rate SLA (e.g. 45-60 min)', weight: 10, category: 'Clinical',
+    check: p => !!(p.flowRate || p.infusionTime || p.duration || p.administrationProtocol || p.scientificData?.infusionRate) },
+
+  // 2. Active Formula & Cocktails (25pts)
+  { key: 'activeIngredients', label: 'Active Compound Cocktail & Concentrations', weight: 15, category: 'Scientific',
+    check: p => (Array.isArray(p.ingredients) && p.ingredients.length > 0) || (Array.isArray(p.components) && p.components.length > 0) || !!p.scientificData?.formula || !!p.formula || !!p.aiDescription || !!p.description },
+  { key: 'dosageSpecs', label: 'Infusion Protocol & Active Dosage (mg/ml)', weight: 10, category: 'Commercial',
+    check: p => (p.variants?.some(v => v.dosage || v.strength || v.price > 0)) || !!p.dosage || p.total_active_mg > 0 },
+
+  // 3. Clinical Safety, Pre-labs & Contraindications (25pts)
+  { key: 'contraindications', label: 'Pre-infusion Vitals & Contraindications (G6PD / eGFR)', weight: 15, category: 'Regulatory',
+    check: p => !!(p.contraindications || p.allergens || p.warnings || p.preLabRequirements || p.scientificData?.contraindications) },
+  { key: 'administrationRoute', label: 'Clinical Administration Mode (In-Clinic / Nursing Only)', weight: 10, category: 'Regulatory',
+    check: p => !!(p.administrationRoute || p.route || p.forRole || p.clinicalAdministration || p.medicalSupervision) },
+
+  // 4. Commercial & Supply Chain (20pts)
+  { key: 'pricing', label: 'Infusion Pricing & Package SKUs', weight: 10, category: 'Commercial',
+    check: p => p.min_unit_price > 0 || p.max_unit_price > 0 || p.price > 0 || (p.variants?.some(v => v.price > 0 || v.unit_price > 0)) },
+  { key: 'supplier', label: 'Compounding Pharmacy / Sterile Supply Linked', weight: 10, category: 'Supply Chain',
+    check: p => (p.suppliers?.length > 0) || !!p.supplierId || !!p.supplierName || !!p.supplier },
+
+  // 5. Metadata (10pts)
+  { key: 'primaryGoal', label: 'Longevity / Therapeutic Goal Linked', weight: 5, category: 'Metadata',
+    check: p => !!(p.primaryGoal || p.goal || p.clinicalGoals?.length > 0 || p.goals?.length > 0) },
+  { key: 'storageHandling', label: 'Sterility & Storage Protocol (Cold Chain / Light Sensitive)', weight: 5, category: 'Clinical',
+    check: p => !!(p.storageConditions || p.storage || p.stability || p.specs?.storage) },
+];
+
+export function isIvProduct(product) {
+  if (!product) return false;
+  const cat = (product.categoryId || product.category || '').toLowerCase().trim();
+  const type = (product.productType || product.type || '').toLowerCase().trim();
+  const name = (product.name || product.canonicalName || '').toLowerCase();
+
+  return (
+    cat === 'iv_drip' ||
+    cat === 'iv_therapy' ||
+    cat === 'infusion' ||
+    type === 'iv_drip' ||
+    type === 'infusion' ||
+    name.includes('iv drip') ||
+    name.includes('iv infusion') ||
+    name.includes('infusion therapy') ||
+    name.includes('myers cocktail') ||
+    name.includes('iv therapy') ||
+    name.includes('drip')
+  );
+}
+
 const SERVICE_SCHEMA = [
   // Core info (25pts)
   { key: 'description', label: 'Service Description',          weight: 15, category: 'Clinical',
@@ -342,12 +427,29 @@ function resolveSchema(product) {
   const type = (product?.productType || product?.type || '').toLowerCase().trim();
   const name = (product?.name || product?.canonicalName || '').toLowerCase();
 
-  // 1. Vehicles / Excipients / Compounding Bases
+  // 0. Corporate & Institutional Services (B2B, Supply Chain, Licensing, Compounding Partner)
+  if (
+    cat === 'corporate_services' ||
+    product?.isCorporateService ||
+    product?.serviceSubtype === 'corporate_service' ||
+    name.includes('b2b peptide supply chain') ||
+    name.includes('compounding & custom formulation') ||
+    name.includes('spanish company acquisition')
+  ) {
+    return CORPORATE_SERVICE_SCHEMA;
+  }
+
+  // 1. IV Drips & Intravenous Infusion Therapies (Must precede single-molecule Peptides)
+  if (isIvProduct(product)) {
+    return IV_INFUSION_SCHEMA;
+  }
+
+  // 2. Vehicles / Excipients / Compounding Bases
   if (cat === 'excipient_vehicle' || cat === 'excipient' || isVehicleProduct(product)) {
     return EXCIPIENT_VEHICLE_SCHEMA;
   }
 
-  // 2. Diagnostic & Genetic Tests (Blood, Saliva, DNA, Epigenetics)
+  // 3. Diagnostic & Genetic Tests (Blood, Saliva, DNA, Epigenetics)
   if (
     cat === 'diagnostic_test' ||
     cat === 'genetic_test' ||
@@ -367,7 +469,7 @@ function resolveSchema(product) {
     return DIAGNOSTIC_TEST_SCHEMA;
   }
 
-  // 3. Dietary Supplements & Nutraceuticals (Explicit category takes precedence over raw_material type)
+  // 4. Dietary Supplements & Nutraceuticals (Explicit category takes precedence over raw_material type)
   if (
     cat === 'supplement' ||
     cat === 'nutricosmetics' ||
@@ -377,7 +479,7 @@ function resolveSchema(product) {
     return SUPPLEMENT_SCHEMA;
   }
 
-  // 4. Raw Active Pharmaceutical Ingredients (APIs) & Compounding Chemicals
+  // 5. Raw Active Pharmaceutical Ingredients (APIs) & Compounding Chemicals
   if (
     cat === 'raw_material' || 
     cat === 'api_raw_material' || 
@@ -387,22 +489,22 @@ function resolveSchema(product) {
     return API_RAW_MATERIAL_SCHEMA;
   }
 
-  // 5. Peptides & Hormones
+  // 6. Peptides & Hormones
   if (cat === 'hormone') return HORMONE_SCHEMA;
   if (['peptide', 'peptides', 'hormone optimization'].includes(cat)) return PEPTIDE_SCHEMA;
   if (cat.startsWith('cardiovascular') || cat.startsWith('metabolic')) return PEPTIDE_SCHEMA;
 
-  // 6. Medical Equipment / Consumables / Clinical Supplies
+  // 7. Medical Equipment / Consumables / Clinical Supplies
   if (['clinical_supplies', 'medical_device_consumable', 'equipment', 'consumables', 'capsules_and_consumables'].includes(cat)) {
     return EQUIPMENT_SCHEMA;
   }
 
-  // 7. Services & Subscriptions
+  // 8. Services & Subscriptions
   if (cat === 'service' || cat === 'subscription' || cat === 'logistics_service' || type === 'subscription') {
     return SERVICE_SCHEMA;
   }
 
-  // 8. Skincare & Cosmeceuticals
+  // 9. Skincare & Cosmeceuticals
   if (cat === 'skincare' || cat === 'skin_anti_aging') {
     return SKINCARE_SCHEMA;
   }
@@ -411,7 +513,7 @@ function resolveSchema(product) {
   if (/api|raw material|bulk|materia prima/i.test(name)) return API_RAW_MATERIAL_SCHEMA;
 
   // Infer from name as last resort
-  if (/peptide|bpc|tb-500|nad\+|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) {
+  if (/peptide|bpc|tb-500|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) {
     return PEPTIDE_SCHEMA;
   }
 
@@ -464,6 +566,17 @@ function resolveSchemaLabel(product) {
   const type = (product?.productType || product?.type || '').toLowerCase().trim();
   const name = (product?.name || product?.canonicalName || '').toLowerCase();
 
+  if (
+    cat === 'corporate_services' ||
+    product?.isCorporateService ||
+    product?.serviceSubtype === 'corporate_service' ||
+    name.includes('b2b peptide supply chain') ||
+    name.includes('compounding & custom formulation') ||
+    name.includes('spanish company acquisition')
+  ) return 'Corporate & Institutional Service';
+
+  if (isIvProduct(product)) return 'IV Infusion Therapy';
+
   if (cat === 'excipient_vehicle' || cat === 'excipient' || isVehicleProduct(product)) return 'Galenic Vehicle / Excipient';
   if (
     cat === 'diagnostic_test' ||
@@ -487,6 +600,6 @@ function resolveSchemaLabel(product) {
   if (cat === 'service' || cat === 'subscription' || type === 'subscription') return 'Service';
   if (cat === 'skincare' || cat === 'skin_anti_aging') return 'Skincare';
   if (/api|raw material|bulk|materia prima/i.test(name)) return 'Active API / Compounding';
-  if (/peptide|bpc|tb-500|nad\+|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) return 'Peptide / API';
+  if (/peptide|bpc|tb-500|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) return 'Peptide / API';
   return 'General';
 }

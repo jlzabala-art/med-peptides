@@ -119,28 +119,223 @@ export default function WorkspaceShareDatasheetModal({
     }
   }, [isOpen]);
 
-  // Copy full plain-text/markdown email
-  const handleCopyEmail = async () => {
-    const textToCopy = generatedData?.fullEmailBody;
-    if (!textToCopy) return;
+  // Build Rich Formatted HTML Email preserving styling, colors, cards, and links
+  const generateRichEmailHtml = useCallback(() => {
+    if (!generatedData) return '';
+    const cleanRecipient = recipientName?.trim() || 'Healthcare Practitioner';
+    const compounds = generatedData.compounds || [];
+    const workspaceName = activeWs?.name || 'Clinical Dossier';
 
+    const compoundCardsHtml = compounds.map((c, idx) => {
+      const rawName = c.compoundName || '';
+      const cleanName = rawName.replace(/\s*\([^)]*\)/g, '').trim() || rawName;
+      return `
+        <div style="margin-bottom: 16px; padding: 16px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 8px;">
+            <tr>
+              <td align="left" style="font-size: 15px; font-weight: 700; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                <span style="color: #0284c7; font-weight: 800; margin-right: 6px;">#${idx + 1}</span>
+                ${cleanName}
+              </td>
+              <td align="right" style="font-size: 12px; font-weight: 700; color: #0284c7; background-color: #eff6ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #bfdbfe; white-space: nowrap; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                ${c.dosageFormat || 'Standard Vial'}
+              </td>
+            </tr>
+          </table>
+          
+          <p style="margin: 0 0 10px 0; font-size: 13px; line-height: 1.5; color: #334155; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            ${c.pharmacologicalProfile || ''}
+          </p>
+          
+          <div style="margin-bottom: 12px; padding: 6px 10px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; font-weight: 600; color: #059669; letter-spacing: 0.02em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            🛡️ ${c.analyticalSpecs || 'RP-HPLC Purity ≥ 99.0% · ESI-MS Concordant'}
+          </div>
+          
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="padding-right: 10px;">
+                <a href="${c.monographUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 6px 14px; background-color: #003666; color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 700; border-radius: 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  View Live Monograph &rarr;
+                </a>
+              </td>
+              <td>
+                <a href="${c.pdfUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 6px 14px; background-color: #fef2f2; color: #b91c1c; text-decoration: none; font-size: 12px; font-weight: 700; border-radius: 6px; border: 1px solid #fecaca; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                  Analytical PDF (Spec Sheet)
+                </a>
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+    }).join('');
+
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${customSubject || generatedData.subject || 'Clinical Product Documentation'}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a;">
+  <div style="max-width: 640px; margin: 16px auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+    
+    <!-- Institutional Header -->
+    <div style="background-color: #003666; padding: 22px 26px; color: #ffffff;">
+      <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #93c5fd; margin-bottom: 4px;">
+        ATLAS HEALTH · PHARMACEUTICAL NETWORK
+      </div>
+      <h1 style="margin: 0 0 6px 0; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; color: #ffffff;">
+        Clinical Product Documentation & Analytical Specifications
+      </h1>
+      <div style="font-size: 12px; color: #bfdbfe;">
+        Ref: <strong>${workspaceName}</strong> · Dispatched by Medical Affairs Desk (business@med-peptides.com)
+      </div>
+    </div>
+
+    <!-- Main Container -->
+    <div style="padding: 22px 26px;">
+      <p style="margin: 0 0 14px 0; font-size: 14px; line-height: 1.6; color: #1e293b;">
+        Dear <strong>${cleanRecipient}</strong>,
+      </p>
+      
+      <p style="margin: 0 0 16px 0; font-size: 13.5px; line-height: 1.6; color: #334155;">
+        Following your inquiry, please find below the certified clinical monographs and analytical specifications for the pharmaceutical compounds staged in your dossier (${workspaceName}).
+      </p>
+
+      <!-- Executive Summary Box -->
+      <div style="margin-bottom: 20px; padding: 14px 16px; background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 6px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #15803d; margin-bottom: 5px;">
+          ✓ Executive Pharmaceutical Summary
+        </div>
+        <div style="font-size: 13px; line-height: 1.55; color: #14532d; font-weight: 500;">
+          ${generatedData.executiveSummary || 'All formulations are synthesized under strict aseptic conditions with dual-stage RP-HPLC purity verification (≥ 99.0%) and ESI-MS molecular identity confirmation.'}
+        </div>
+      </div>
+
+      <!-- Attached Monograph Section -->
+      <div style="margin-bottom: 12px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #475569;">
+        Attached Compound Monograph Packages (${compounds.length})
+      </div>
+      
+      ${compoundCardsHtml}
+
+      <!-- Regulatory & Logistics Assurances -->
+      <div style="margin-top: 22px; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #003666; margin-bottom: 6px;">
+          Regulatory & Cold-Chain Logistics Assurances
+        </div>
+        <ul style="margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: #475569;">
+          <li><strong>Analytical Integrity:</strong> Validated CoA and monoisotopic mass spectrometry data included with each batch release.</li>
+          <li><strong>Cold-Chain Logistics:</strong> Temperature-monitored distribution (-20°C / 2°C–8°C validated transport).</li>
+          <li><strong>Institutional Compliance:</strong> Complete traceability from GMP-grade synthesis to accredited laboratory release.</li>
+        </ul>
+      </div>
+
+      <!-- Signoff -->
+      <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; line-height: 1.5; color: #475569;">
+        <div style="font-weight: 700; color: #0f172a;">Medical Affairs & Institutional Supply Division</div>
+        <div>Atlas Health · Med-Peptides Laboratory & Research Network</div>
+        <div><a href="mailto:business@med-peptides.com" style="color: #0284c7; text-decoration: none;">business@med-peptides.com</a> | <a href="https://med-peptides.com" style="color: #0284c7; text-decoration: none;">https://med-peptides.com</a></div>
+      </div>
+
+    </div>
+
+    <!-- Footer Notice -->
+    <div style="background-color: #f1f5f9; padding: 12px 26px; font-size: 11px; line-height: 1.4; color: #64748b; border-top: 1px solid #e2e8f0;">
+      This clinical documentation transmission is confidential and intended solely for authorized medical practitioners, accredited researchers, and institutional partners.
+    </div>
+
+  </div>
+</body>
+</html>
+    `.trim();
+  }, [generatedData, recipientName, activeWs?.name, customSubject]);
+
+  // Robust multi-MIME copy to clipboard (HTML + Plain text fallback)
+  const copyFormattedHtmlToClipboard = useCallback(async (htmlContent, plainTextContent) => {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(textToCopy);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+      if (typeof window !== 'undefined' && navigator.clipboard && window.ClipboardItem) {
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const textBlob = new Blob([plainTextContent || ''], { type: 'text/plain' });
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': htmlBlob,
+            'text/plain': textBlob,
+          }),
+        ]);
+        return true;
       }
-      setCopiedEmail(true);
-      notifier.success('Complete Pharma English email copied to clipboard!');
-      setTimeout(() => setCopiedEmail(false), 3000);
     } catch (err) {
-      console.error('Failed to copy text:', err);
+      console.warn('[Clipboard] ClipboardItem write failed, trying fallback:', err);
+    }
+
+    // Fallback: document.execCommand('copy') with temporary HTML container
+    try {
+      const container = document.createElement('div');
+      container.setAttribute('contenteditable', 'true');
+      container.innerHTML = htmlContent;
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.opacity = '0';
+      document.body.appendChild(container);
+
+      const range = document.createRange();
+      range.selectNodeContents(container);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      const success = document.execCommand('copy');
+      selection.removeAllRanges();
+      document.body.removeChild(container);
+      if (success) return true;
+    } catch (err) {
+      console.warn('[Clipboard] execCommand fallback failed:', err);
+    }
+
+    // Fallback plain text
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(plainTextContent || '');
+        return true;
+      }
+    } catch {
+      // Ignore
+    }
+    return false;
+  }, []);
+
+  // Copy full rich HTML formatted email
+  const handleCopyEmail = async () => {
+    if (!generatedData) return;
+    const richHtml = generateRichEmailHtml();
+    const plainText = generatedData.fullEmailBody || '';
+
+    const copied = await copyFormattedHtmlToClipboard(richHtml, plainText);
+    if (copied) {
+      setCopiedEmail(true);
+      notifier.success('Formatted HTML email copied to clipboard! Ready to paste into Gmail, Outlook, or Apple Mail.');
+      setTimeout(() => setCopiedEmail(false), 3000);
+    } else {
       notifier.error('Could not copy to clipboard.');
+    }
+  };
+
+  // Open in email app: Copy rich HTML to clipboard first, then trigger mailto
+  const handleOpenEmailApp = async () => {
+    if (!generatedData) return;
+    const richHtml = generateRichEmailHtml();
+    const plainText = generatedData.fullEmailBody || '';
+
+    await copyFormattedHtmlToClipboard(richHtml, plainText);
+    notifier.success('Formatted HTML email copied to clipboard! Paste (⌘V / Ctrl+V) in your email app.');
+
+    // Launch email client
+    if (mailtoUrl) {
+      const tempLink = document.createElement('a');
+      tempLink.href = mailtoUrl;
+      tempLink.click();
     }
   };
 
@@ -264,22 +459,27 @@ export default function WorkspaceShareDatasheetModal({
 
         {/* Body Content */}
         <div className="ws-datasheet-body">
-          {/* Navigation Tabs */}
-          <div className="ws-datasheet-tabs">
-            <button
-              type="button"
-              className={`ws-datasheet-tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
-              onClick={() => setActiveTab('preview')}
-            >
-              <FileText size={14} /> Clinical Preview ({items.length} Compounds)
-            </button>
-            <button
-              type="button"
-              className={`ws-datasheet-tab-btn ${activeTab === 'raw' ? 'active' : ''}`}
-              onClick={() => setActiveTab('raw')}
-            >
-              <Mail size={14} /> Full Ready-to-Send Email
-            </button>
+          {/* Navigation Tabs & Format Indicator */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '1rem' }}>
+            <div className="ws-datasheet-tabs" style={{ margin: 0 }}>
+              <button
+                type="button"
+                className={`ws-datasheet-tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
+                onClick={() => setActiveTab('preview')}
+              >
+                <FileText size={14} /> Clinical Preview ({items.length} Compounds)
+              </button>
+              <button
+                type="button"
+                className={`ws-datasheet-tab-btn ${activeTab === 'raw' ? 'active' : ''}`}
+                onClick={() => setActiveTab('raw')}
+              >
+                <Mail size={14} /> Full Ready-to-Send Email
+              </button>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#f0fdfa', padding: '4px 10px', borderRadius: '6px', border: '1px solid #99f6e4' }}>
+              <Check size={12} color="#0d9488" /> Rich HTML Email (Preserves Colors & Links on Paste)
+            </div>
           </div>
 
           {loading ? (
@@ -405,14 +605,15 @@ export default function WorkspaceShareDatasheetModal({
               {copiedEmail ? <Check size={14} color="#86efac" /> : <Copy size={14} />}
               <span>{copiedEmail ? 'Email Copied!' : 'Copy Full Email'}</span>
             </button>
-            <a
-              href={mailtoUrl}
+            <button
+              type="button"
+              onClick={handleOpenEmailApp}
               className="ws-datasheet-btn ws-datasheet-btn-accent"
-              style={{ pointerEvents: !generatedData ? 'none' : 'auto', opacity: !generatedData ? 0.6 : 1 }}
-              title="Open default email application prefilled with business@med-peptides.com"
+              disabled={!generatedData || loading}
+              title="Copy formatted rich HTML email to clipboard and launch your email client"
             >
               <Send size={14} /> Open in Email App
-            </a>
+            </button>
           </div>
         </div>
 

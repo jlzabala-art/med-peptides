@@ -28,7 +28,9 @@ import {
   Archive,
   Briefcase,
   ClipboardList,
-  FileText
+  FileText,
+  Droplets,
+  Building2
 } from 'lucide-react';
 
 export function useMasterCatalogColumns({
@@ -103,20 +105,38 @@ export function useMasterCatalogColumns({
                 {(() => {
                   const types = getProductAvailableTypes(row);
                   const TYPE_CONFIG = {
-                    finished_product:    { label: 'FINISHED',  icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
-                    raw_material:        { label: 'BULK API',   icon: <FlaskConical size={11} strokeWidth={2.2} />,  bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
-                    clinical_supplies:   { label: 'CLINICAL',   icon: <Stethoscope size={11} strokeWidth={2.2} />,   bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
-                    genomics_biomarkers: { label: 'GENOMICS & BIOMARKERS', icon: <Sparkles size={11} strokeWidth={2.2} />, bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
-                    diagnostic:          { label: 'GENOMICS & BIOMARKERS', icon: <Sparkles size={11} strokeWidth={2.2} />, bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
-                    service:             { label: 'SERVICE',    icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
-                    dual:                { label: 'DUAL',       icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: 'linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)', color: '#6d28d9', border: '#ddd6fe' },
+                    finished_product:    { label: 'FINISHED',    icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+                    iv_drip:             { label: 'IV DRIP',     icon: <Droplets size={11} strokeWidth={2.2} />,     bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4' },
+                    compounding:         { label: 'COMPOUNDING', icon: <FlaskConical size={11} strokeWidth={2.2} />, bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8' },
+                    raw_material:        { label: 'BULK API',    icon: <FlaskConical size={11} strokeWidth={2.2} />, bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
+                    corporate_services:  { label: 'B2B SERVICE', icon: <Building2 size={11} strokeWidth={2.2} />,    bg: '#f8fafc', color: '#0369a1', border: '#bae6fd' },
+                    clinical_supplies:   { label: 'CLINICAL',    icon: <Stethoscope size={11} strokeWidth={2.2} />,  bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
+                    genomics_biomarkers: { label: 'GENOMICS',    icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
+                    diagnostic:          { label: 'GENOMICS',    icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
+                    service:             { label: 'SERVICE',     icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
+                    dual:                { label: 'DUAL',        icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: 'linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)', color: '#6d28d9', border: '#ddd6fe' },
                   };
+
+                  const renderedLabels = new Set();
+                  const uniqueBadges = [];
+
+                  for (const t of types) {
+                    const cfg = TYPE_CONFIG[t] || (
+                      String(t).includes('iv') || String(t).includes('drip') 
+                        ? TYPE_CONFIG.iv_drip 
+                        : (String(t).includes('corporate') ? TYPE_CONFIG.corporate_services : TYPE_CONFIG['finished_product'])
+                    );
+                    if (!renderedLabels.has(cfg.label)) {
+                      renderedLabels.add(cfg.label);
+                      uniqueBadges.push({ key: t, cfg });
+                    }
+                  }
+
                   return (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                      {types.map(t => {
-                        const cfg = TYPE_CONFIG[t] || TYPE_CONFIG['finished_product'];
+                      {uniqueBadges.map(({ key, cfg }) => {
                         return (
-                          <span key={t} style={{
+                          <span key={key} style={{
                             fontSize: '0.68rem', fontWeight: 700,
                             padding: '1.5px 7px', borderRadius: '5px',
                             background: cfg.bg, color: cfg.color,
@@ -192,28 +212,59 @@ export function useMasterCatalogColumns({
                 )}
               </div>
 
-              {/* Tier 2: Variants Count & Formats Footprint */}
+                {/* Tier 2: Variants Count & Formats Footprint */}
               <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '5px' }}>
-                <span style={{ 
-                  color: 'var(--color-primary, #003666)', 
-                  fontWeight: 700, 
-                  fontSize: '0.74rem',
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '3px' 
-                }}>
-                  <Layers size={12} strokeWidth={2.2} />
-                  {(() => { const n = row.variants?.length || row.variantsCount || 0; return `${n} Var${n === 1 ? '' : 's'}`; })()}
-                </span>
+                {(() => {
+                  const catLower = String(row.category || '').toLowerCase();
+                  const isCorpService = catLower === 'corporate_services' || catLower === 'service' || row.type === 'service' || row.product_type === 'service' || row.isCorporateService || row.isService;
+                  const n = row.variants?.length || row.variantsCount || 0;
+
+                  return (
+                    <span style={{ 
+                      color: isCorpService ? '#7e22ce' : 'var(--color-primary, #003666)', 
+                      fontWeight: 700, 
+                      fontSize: '0.74rem',
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '3px' 
+                    }}>
+                      <Layers size={12} strokeWidth={2.2} />
+                      {isCorpService ? `${n} Service Tier${n === 1 ? '' : 's'}` : `${n} Var${n === 1 ? '' : 's'}`}
+                    </span>
+                  );
+                })()}
 
                 {(() => {
                   const variants = row.variants || [];
                   if (variants.length === 0) return null;
 
+                  const catLower = String(row.category || '').toLowerCase();
+                  const isCorpService = catLower === 'corporate_services' || catLower === 'service' || row.type === 'service' || row.product_type === 'service' || row.isCorporateService || row.isService;
+                  
+                  // For corporate services, render service packages directly (never vials or sprays!)
+                  if (isCorpService) {
+                    return variants.map((v, vIdx) => {
+                      const label = v.presentationName || v.name || v.presentation || `Tier ${vIdx + 1}`;
+                      return (
+                        <span key={v.id || vIdx} style={{ 
+                          fontSize: '0.68rem', 
+                          fontWeight: 600, 
+                          padding: '1px 7px', 
+                          borderRadius: 4, 
+                          background: '#faf5ff', 
+                          color: '#7e22ce', 
+                          border: '1px solid #e9d5ff',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          💼 {label}
+                        </span>
+                      );
+                    });
+                  }
+
                   const counts = {};
                   const isRawType = getProductAvailableTypes(row).includes('raw_material');
-                  const catLower = String(row.category || '').toLowerCase();
-                  const isDiagnosticOrService = catLower === 'diagnostic' || catLower === 'service' || catLower === 'genetic_test' || catLower === 'diagnostic_test';
+                  const isDiagnosticOrService = catLower === 'diagnostic' || catLower === 'service' || catLower === 'genetic_test' || catLower === 'diagnostic_test' || isCorpService;
 
                   for (const v of variants) {
                     const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();

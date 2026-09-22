@@ -106,7 +106,7 @@ export function extractProductPresentation(product) {
 export function getProductAvailableTypes(product) {
   if (!product) return ['finished_product'];
   if (Array.isArray(product.availableTypes) && product.availableTypes.length > 0) {
-    return product.availableTypes;
+    return Array.from(new Set(product.availableTypes.filter(Boolean)));
   }
   const primary = product.primaryType || product.type || product.productType;
   if (primary) return [primary];
@@ -115,7 +115,7 @@ export function getProductAvailableTypes(product) {
 
 /**
  * Infers primary product type with 100% backward compatibility
- * @returns {'finished_product' | 'raw_material' | 'clinical_supplies' | 'diagnostic' | 'service' | 'dual'}
+ * @returns {'finished_product' | 'raw_material' | 'clinical_supplies' | 'diagnostic' | 'service' | 'dual' | 'iv_drip' | 'corporate_services'}
  */
 export function inferProductType(product) {
   if (!product) return 'finished_product';
@@ -158,7 +158,16 @@ export function inferProductType(product) {
     }
   }
 
-  const str = `${product.id || ''} ${product.name || ''} ${product.category || ''} ${product.subcategory || ''} ${product.presentation || ''} ${product.format || ''}`.toLowerCase();
+  const cat = (product.category || product.categoryId || '').toLowerCase();
+  const str = `${product.id || ''} ${product.name || ''} ${cat} ${product.subcategory || ''} ${product.presentation || ''} ${product.format || ''}`.toLowerCase();
+
+  if (cat === 'corporate_services' || product.isCorporateService || /b2b peptide supply chain|spanish company acquisition/i.test(str)) {
+    return 'corporate_services';
+  }
+
+  if (cat === 'iv_drips' || cat === 'iv_drip' || product.product_type === 'iv_drip' || /iv drip|infusion/i.test(str)) {
+    return 'iv_drip';
+  }
 
   if (/syringe|needle|bac water|bacteriostatic|filter|vial adapter|diluent/i.test(str)) {
     if (/bac water|bacteriostatic|diluent/i.test(str)) return 'clinical_supplies';

@@ -36,6 +36,7 @@ import { ProtocolPreviewModal } from '@/components/protocol/ProtocolPreviewModal
 import SharedCatalogStyles from './components/SharedCatalogStyles';
 import SharedCatalogTopNav from './components/SharedCatalogTopNav';
 import SharedCatalogHeader from './components/SharedCatalogHeader';
+import SharedCatalogKpiBar from './components/SharedCatalogKpiBar';
 import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
@@ -781,6 +782,15 @@ export default function SharedCatalogClientView({
           setShowProtocolsUnderProducts={setShowProtocolsUnderProducts}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          t={t}
+        />
+
+        {/* Google Cloud Standard 4-KPI Metric Strip */}
+        <SharedCatalogKpiBar
+          totalProductsCount={products?.length || 0}
+          displayedCount={displayedProducts?.length || 0}
+          totalVariants={totalVariants || 0}
+          isFiltered={Boolean(searchQuery?.trim() || (selectedGoals && selectedGoals.length > 0) || dosageFilter !== 'all' || fdaFilter !== 'all' || (routeFilter && routeFilter !== 'all'))}
           t={t}
         />
 

@@ -84,7 +84,22 @@ function detectProductFamily(row) {
     return 'clinical_supply';
   }
 
-  // 3. Clinical Services & Consultations
+  // 3a. Corporate & Institutional Services (B2B Supply Chain, Compounding Pharmacy, Corporate Legal/Residency)
+  if (
+    cat === 'corporate_services' ||
+    row.isCorporateService === true ||
+    row.serviceSubtype ||
+    cat.includes('corporate') ||
+    name.includes('b2b peptide supply') ||
+    name.includes('compounding & custom formulation') ||
+    name.includes('compounding service') ||
+    name.includes('spanish company') ||
+    name.includes('residence')
+  ) {
+    return 'corporate_service';
+  }
+
+  // 3b. Clinical Services & Consultations
   if (
     types.includes('service') ||
     cat.includes('service') ||
@@ -526,7 +541,119 @@ export default function CatalogVariantExpander({
       }
 
       /* ─────────────────────────────────────────────────────────────
-         4. CLINICAL SERVICES & CONSULTATIONS
+         4a. CORPORATE & INSTITUTIONAL B2B SERVICES
+         ───────────────────────────────────────────────────────────── */
+      case 'corporate_service': {
+        const pNameLower = String(row.canonicalName || row.name || '').toLowerCase();
+        const isSupplyChain = pNameLower.includes('supply chain') || pNameLower.includes('concierge');
+        const isCompounding = pNameLower.includes('compounding') || pNameLower.includes('formulation');
+        const isSpain = pNameLower.includes('spanish') || pNameLower.includes('enisa') || pNameLower.includes('residence');
+
+        let scopeTitle = row.targetSystem || 'Institutional Supply & Service Agreement';
+        let scopeSub = 'Dedicated corporate execution with SLA guarantees and volume pricing';
+        let modalityTitle = 'Dedicated Account Concierge & B2B Desk';
+        let modalitySub = 'Direct coordination via mobile app, WhatsApp and clinical liaison';
+        let complianceTitle = row.purity || 'EU GMP & Regulatory Standards';
+        let complianceSub = row.jurisdiction || 'European Union & International Commercial Distribution';
+        let slaTitle = row.turnaroundTime || '24 – 48 Hours Processing SLA';
+        let slaSub = 'Validated cold-chain logistics or legal fast-track milestone delivery';
+
+        if (isSupplyChain) {
+          scopeTitle = 'B2B Inventory Allocation & Cold-Chain Logistics';
+          scopeSub = 'Pre-certified ≥99% lyophilized stock with batch reservation & lot locking';
+          modalityTitle = 'Dedicated Account Manager & Concierge';
+          modalitySub = 'Dual billing (Clinic Wholesale vs Patient Direct) & dual destination shipping';
+          complianceTitle = 'RP-HPLC ≥ 99.0% · Validated Cold Freight';
+          complianceSub = 'Calibrated digital data loggers and temperature-monitored air freight';
+          slaTitle = '24 – 48 Hours Dispatch SLA';
+          slaSub = 'Rapid fulfillment from active EU / UAE regional inventory holdings';
+        } else if (isCompounding) {
+          scopeTitle = 'Custom Formulation & Sterile Compounding';
+          scopeSub = 'Bespoke concentrations, custom peptide blends & specialized delivery formats';
+          modalityTitle = 'European Compounding Laboratory Desk';
+          modalitySub = 'Physician prescription intake via dedicated mobile app or clinical email desk';
+          complianceTitle = 'EU GMP Certified Pharmacy & Ph. Eur.';
+          complianceSub = 'Manufactured in licensed European compounding laboratories with verified COA';
+          slaTitle = '5 – 7 Working Days Turnaround';
+          slaSub = 'Complete compounding, packaging and international cold-chain delivery';
+        } else if (isSpain) {
+          scopeTitle = '100% Spanish SL Acquisition & Residence';
+          scopeSub = 'Turnkey existing corporate entity, Spanish CIF, and registered corporate office';
+          modalityTitle = 'Notarial Deed & Legal Concierge';
+          modalitySub = 'Full legal representation, NIE procurement & Spanish corporate bank account';
+          complianceTitle = 'Law 14/2013 · ENISA Fast-Track Certified';
+          complianceSub = '3-year EU renewable entrepreneur residence permit with full work authorization';
+          slaTitle = 'Immediate Company Transfer (10-30d Permit)';
+          slaSub = 'Priority government processing under Spanish startup & entrepreneurship act';
+        }
+
+        return (
+          <>
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#faf5ff', color: '#7e22ce' }}>
+                  <Building2 size={13} />
+                </div>
+                <span className="meta-card-tag">Service Scope & Deliverables</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#7e22ce' }}>
+                {scopeTitle}
+              </div>
+              <div className="meta-card-sub">
+                {scopeSub}
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#f0f9ff', color: '#0284c7' }}>
+                  <Share2 size={13} />
+                </div>
+                <span className="meta-card-tag">Execution Modality & Channels</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0284c7' }}>
+                {modalityTitle}
+              </div>
+              <div className="meta-card-sub">
+                {modalitySub}
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+                  <ShieldCheck size={13} />
+                </div>
+                <span className="meta-card-tag">Legal & Regulatory Framework</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#059669' }}>
+                {complianceTitle}
+              </div>
+              <div className="meta-card-sub">
+                {complianceSub}
+              </div>
+            </div>
+
+            <div className="meta-card">
+              <div className="meta-card-header">
+                <div className="meta-card-icon" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+                  <Clock size={13} />
+                </div>
+                <span className="meta-card-tag">Turnaround & Delivery SLA</span>
+              </div>
+              <div className="meta-card-title" style={{ color: '#0f172a' }}>
+                {slaTitle}
+              </div>
+              <div className="meta-card-sub">
+                {slaSub}
+              </div>
+            </div>
+          </>
+        );
+      }
+
+      /* ─────────────────────────────────────────────────────────────
+         4b. CLINICAL SERVICES & CONSULTATIONS
          ───────────────────────────────────────────────────────────── */
       case 'clinical_service': {
         return (
