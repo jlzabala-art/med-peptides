@@ -19,6 +19,7 @@ export const VARIANT_PUBLIC_WHITELIST = [
   'coaUrl', 'isActive', 'status',
   'reconstitutionGuide', 'warnings',
   'supplierId', 'supplierName', 'supplier',
+  'kitDiscountPct',
 ];
 
 // ─── Whitelist of Allowed Public Product Fields ──────────────────────────────
@@ -91,7 +92,18 @@ export function sanitizePublicProduct(rawProduct, rawVariants = []) {
   // as a secondary defense layer. This ensures new fields added to variants
   // are NOT exposed unless explicitly added to VARIANT_PUBLIC_WHITELIST.
   const cleanVariants = (rawVariants || []).map(v => {
-    const whitelisted = pickWhitelistedFields(v, VARIANT_PUBLIC_WHITELIST);
+    // Safely calculate verified public kit discount percentage without leaking internal prices or margins
+    const pricing = v.pricing || {};
+    const tier = pricing.wholesale || pricing.retail || pricing.master || pricing.clinic || null;
+    const perUnit = tier?.perUnit != null ? Number(tier.perUnit) : null;
+    const kit = tier?.kit != null ? Number(tier.kit) : null;
+    const kitQty = tier?.kitQuantity ? Number(tier.kitQuantity) : 10;
+    let kitDiscountPct = null;
+    if (perUnit && kit && perUnit > 0 && kit > 0 && (perUnit * kitQty) > kit) {
+      kitDiscountPct = Math.round((((perUnit * kitQty) - kit) / (perUnit * kitQty)) * 100);
+    }
+
+    const whitelisted = pickWhitelistedFields({ ...v, kitDiscountPct }, VARIANT_PUBLIC_WHITELIST);
     return stripSensitiveFields(whitelisted);
   });
 

@@ -743,9 +743,15 @@ export default function PublicDatasheetView({
     }) || null;
   }, [activeSupplierId, activeFormatId, selectedStrengthId, selectedStrength, hierarchy.variantIndex, product?.variants]);
 
-  // Real verified discount for 10-unit kit (calculated from Firestore pricing, never invented)
+  // Real verified discount for 10-unit kit (calculated from Firestore pricing on server, never invented)
   const realKitSavings = useMemo(() => {
     if (!currentVariant) return null;
+    if (typeof currentVariant.kitDiscountPct === 'number' && currentVariant.kitDiscountPct > 0) {
+      return {
+        hasDiscount: true,
+        discountPct: currentVariant.kitDiscountPct
+      };
+    }
     const pricing = currentVariant.pricing || {};
     const tier = pricing.wholesale || pricing.retail || pricing.master || pricing.clinic || null;
     const perUnit = tier?.perUnit != null ? Number(tier.perUnit) : null;
