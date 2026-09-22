@@ -1,0 +1,550 @@
+/**
+ * src/components/product/PeptideAnalyticalSpecsCard.css
+ * Rich modern styling for EQNO Scientific-inspired peptide analytical specs card.
+ */
+
+.analytical-specs-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1.75rem 0;
+  font-family: inherit;
+  color: #1e293b;
+}
+
+/* ── HEADER ── */
+.card-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.shield-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-heading {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.2rem 0;
+}
+
+.card-subheading {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.btn-inspect-coa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-inspect-coa:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+/* ── TWO COLUMNS: HPLC vs SEQUENCE ── */
+.specs-two-columns {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 860px) {
+  .specs-two-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Analytical Panel */
+.analytical-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panel-badge-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tag-verified {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.tag-hplc {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.hplc-metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.hplc-metric-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.metric-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.metric-val {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.metric-val-sm {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.metric-val.text-emerald {
+  color: #059669;
+}
+
+.metric-sub {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.receptor-target-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #2563eb;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+}
+
+.target-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #1e40af;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.target-text {
+  font-size: 0.82rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Sequence Panel */
+.sequence-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.sequence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.seq-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.seq-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.btn-copy-seq {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-seq:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-copy-seq.copied {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #059669;
+}
+
+.sequence-code-box {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 0.85rem;
+  overflow-x: auto;
+  max-height: 110px;
+}
+
+.sequence-code-box code {
+  color: #38bdf8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.sequence-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.meta-pill {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.72rem;
+  color: #64748b;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.meta-pill strong {
+  color: #0f172a;
+}
+
+/* ── RECONSTITUTION MATRIX ── */
+.reconstitution-matrix-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.matrix-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.matrix-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.matrix-heading {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.bac-water-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bac-label {
+  font-size: 0.76rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.bac-btn {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bac-btn:hover {
+  background: #f1f5f9;
+}
+
+.bac-btn.active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+.table-responsive-wrapper {
+  overflow-x: auto;
+}
+
+.dosing-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  text-align: left;
+}
+
+.dosing-matrix-table th {
+  background: #ffffff;
+  padding: 0.65rem 0.85rem;
+  color: #475569;
+  font-weight: 800;
+  border-bottom: 1.5px solid #cbd5e1;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+}
+
+.dosing-matrix-table td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.dosing-matrix-table tr:hover {
+  background: #f1f5f9;
+}
+
+.dosing-matrix-table tr.row-featured {
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+.badge-unit {
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.badge-featured {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.dose-highlight {
+  color: #0369a1;
+  font-weight: 800;
+}
+
+.matrix-footnote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.45;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+}
+
+/* ── STABILITY TIMELINE GAUGE ── */
+.stability-timeline-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.timeline-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.timeline-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.timeline-heading {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.stability-badge-gold {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stability-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .stability-steps-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .stability-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stability-node {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  position: relative;
+}
+
+.temp-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.stability-node.frozen .temp-badge {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.stability-node.refrigerated .temp-badge {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.stability-node.transit .temp-badge {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.stability-node.reconstituted .temp-badge {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.node-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.node-time {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #0284c7;
+}
+
+.node-desc {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.35;
+}

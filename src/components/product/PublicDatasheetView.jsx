@@ -53,6 +53,8 @@ import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
 import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
 import CompoundingServicesTechnicalSpecs from './CompoundingServicesTechnicalSpecs';
 import PeptideSupplyManagementTechnicalSpecs from './PeptideSupplyManagementTechnicalSpecs';
+import PeptideAnalyticalSpecsCard from './PeptideAnalyticalSpecsCard';
+import CoaModal from './CoaModal';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -103,6 +105,7 @@ export default function PublicDatasheetView({
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inlineSvg, setInlineSvg] = useState(null);
   const [svgError, setSvgError] = useState(false);
@@ -2211,6 +2214,16 @@ export default function PublicDatasheetView({
           </section>
         )}
 
+        {/* ── Block 4.5: Analytical Quality Verification & Clinical Dosing Parameters (EQNO Inspired) ── */}
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+          <PeptideAnalyticalSpecsCard
+            product={product}
+            selectedStrength={selectedStrength}
+            lang={lang}
+            onOpenCoa={() => setIsCoaModalOpen(true)}
+          />
+        )}
+
         {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
         <BloodoRelatedPeptidesSection product={product} lang={lang} />
 
@@ -2255,6 +2268,14 @@ export default function PublicDatasheetView({
         initialBatch={effectiveBatchCode}
         version={versionInfo.version}
         updatedAtDate={versionInfo.updatedAtDate}
+      />
+
+      {/* Printable Lot Quality Certificate of Analysis (COA) Modal */}
+      <CoaModal
+        isOpen={isCoaModalOpen}
+        onClose={() => setIsCoaModalOpen(false)}
+        product={product}
+        variant={selectedStrength}
       />
 
       {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
