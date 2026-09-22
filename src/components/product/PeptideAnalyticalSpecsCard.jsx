@@ -95,11 +95,6 @@ export default function PeptideAnalyticalSpecsCard({
     setTimeout(() => setCopiedSeq(false), 2500);
   };
 
-  // Reconstitution Calculations for U-100 Syringe
-  const concentrationMgPerMl = (strengthMg / activeBacWater).toFixed(1);
-  const concentrationMcgPerMl = ((strengthMg * 1000) / activeBacWater).toFixed(0);
-  const mcgPerUnitU100 = (parseFloat(concentrationMcgPerMl) / 100).toFixed(1);
-
   return (
     <div className="analytical-specs-card">
       {/* ── HEADER ── */}
