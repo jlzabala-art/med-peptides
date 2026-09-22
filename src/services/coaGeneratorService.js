@@ -90,8 +90,8 @@ export function generateCoaData(product, variant) {
       column: 'C18 4.6 × 250 mm, 5 µm'
     },
     conclusion: 'This batch conforms to all established release specifications for research and clinical compounding.',
-    qaOfficer: 'Dr. Elena Vance, Ph.D.',
-    qaTitle: 'Head of Quality Assurance & Analytical Chemistry',
+    qaOfficer: 'Quality Assurance & Batch Release Department',
+    qaTitle: 'Responsable de Garantía de Calidad / Head of Quality Assurance',
     signedDate: new Date().toISOString().split('T')[0]
   };
 }

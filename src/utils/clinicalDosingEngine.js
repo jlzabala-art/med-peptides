@@ -449,11 +449,12 @@ export function generateDynamicReconData(protocol) {
       const endW = startW + (Number(ph.durationWeeks) || 4) - 1;
       const pLabel = `Phase ${pIdx + 1} (W${startW}–W${endW})`;
 
-      // Find matching compound in this phase
+      // Find matching compound in this phase with alphanumeric normalization (ignoring hyphens, spaces)
       const phCompounds = [...(ph.compounds || []), ...(ph.items || [])];
+      const normTarget = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const matched = phCompounds.find(c => {
-        const cName = String(c.name || c.product_name || c.title || '').toLowerCase();
-        return cName.includes(name.toLowerCase()) || name.toLowerCase().includes(cName);
+        const cClean = String(c.name || c.product_name || c.title || c.productId || c.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return cClean.includes(normTarget) || normTarget.includes(cClean);
       });
 
       const res = resolveClinicalCompoundDose(matched || raw, ph, pIdx, phases.length, name, vialMg);
@@ -511,15 +512,18 @@ export function generateDynamicSupplySummary(protocol) {
   const compounds = reconData.map(c => {
     const bm = matchClinicalBenchmark(c.name);
     const timesPerWeek = bm?.timesPerWeek || 1;
-    const totalInjections = timesPerWeek * durWeeks;
+    let totalInjections = timesPerWeek * durWeeks;
     
     // Estimate vials based on average weekly dose across phases
     const vialMgMatch = c.strength.match(/(\d+(?:\.\d+)?)/);
     const vialMg = vialMgMatch ? parseFloat(vialMgMatch[1]) : 10;
     
     let totalMgNeeded = 0;
+    const totalPhaseWeeks = phases.reduce((sum, p) => sum + (Number(p.durationWeeks) || 0), 0) || durWeeks;
     phases.forEach((ph, pIdx) => {
-      const phWeeks = Number(ph.durationWeeks) || Math.ceil(durWeeks / phases.length) || 4;
+      // If sum of phases exceeds protocol duration, scale proportionally
+      const rawPhWeeks = Number(ph.durationWeeks) || Math.ceil(durWeeks / phases.length) || 4;
+      const phWeeks = totalPhaseWeeks > durWeeks ? (rawPhWeeks / totalPhaseWeeks) * durWeeks : rawPhWeeks;
       const scale = c.dosingScale[pIdx] || c.dosingScale[0];
       const doseMgMatch = scale?.dose?.match(/(\d+(?:\.\d+)?)\s*(mg|mcg)/i);
       if (doseMgMatch) {
@@ -530,6 +534,13 @@ export function generateDynamicSupplySummary(protocol) {
         totalMgNeeded += (2.5 * timesPerWeek * phWeeks);
       }
     });
+
+    // Clinical safety check for finite-cycle peptide protocols (e.g. Epithalon 10-20 day bi-annual cycles)
+    if (/10-20 days|10–20 days|10 to 20 days|10-day|20-day/i.test(bm?.cadence || c.cadence || '')) {
+      const maxCycleDoses = 20;
+      totalInjections = Math.min(totalInjections, maxCycleDoses);
+      totalMgNeeded = Math.min(totalMgNeeded, 100); // 100mg standard clinical cycle
+    }
 
     const vials = Math.max(1, Math.ceil(totalMgNeeded / vialMg));
 

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { triggerHaptic } from '@/utils/haptics';
 
 /**
  * PublicLocalQuickNav
- * In-page quick navigation strip for hopping between clinical sections.
- * Clean segmented pills on desktop with smooth horizontal scroll and dropdown on mobile.
+ * Standardized Google Cloud Console-inspired local sub-navigation.
+ * Single unified, touch-momentum horizontal pill strip with auto-centering,
+ * active section tracking, and subtle edge fade. Eliminates redundant dropdowns.
  */
 export default function PublicLocalQuickNav({
   items = [],
@@ -16,12 +17,50 @@ export default function PublicLocalQuickNav({
   style = {}
 }) {
   const [activeId, setActiveId] = useState(controlledActiveId || items[0]?.href?.replace('#', '') || '');
+  const pillsRef = useRef(null);
 
   useEffect(() => {
     if (controlledActiveId) {
       setActiveId(controlledActiveId);
     }
   }, [controlledActiveId]);
+
+  // Active section tracker via IntersectionObserver
+  useEffect(() => {
+    if (typeof window === 'undefined' || !items.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+            const id = entry.target.id;
+            setActiveId(id);
+          }
+        });
+      },
+      {
+        rootMargin: '-80px 0px -60% 0px',
+        threshold: [0.25, 0.5]
+      }
+    );
+
+    items.forEach((it) => {
+      const id = it.href?.replace('#', '');
+      const el = id ? document.getElementById(id) : null;
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [items]);
+
+  // Auto-center the active pill in the horizontal scroll container
+  useEffect(() => {
+    if (!pillsRef.current || !activeId) return;
+    const activeEl = pillsRef.current.querySelector(`.is-active`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [activeId]);
 
   const handleNavClick = (e, targetHref) => {
     if (!targetHref) return;
@@ -40,35 +79,7 @@ export default function PublicLocalQuickNav({
 
   return (
     <nav className={`proto-quick-nav ${className}`} aria-label="Local section jumps" style={style}>
-      {/* Mobile section jump dropdown */}
-      <div className="proto-mobile-section-wrapper">
-        <select
-          className="proto-mobile-section-select"
-          aria-label={lang === 'es' ? 'Saltar a sección' : 'Jump to section'}
-          value={items.find(i => i.href?.replace('#', '') === activeId)?.href || ''}
-          onChange={(e) => {
-            if (e.target.value) {
-              const target = document.querySelector(e.target.value);
-              if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setActiveId(e.target.value.replace('#', ''));
-              }
-            }
-          }}
-        >
-          <option value="" disabled>
-            {lang === 'es' ? '📑 Saltar a sección...' : '📑 Jump to section...'}
-          </option>
-          {items.map((nav, i) => (
-            <option key={i} value={nav.href}>
-              {nav.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Desktop / tablet scrollable pills */}
-      <div className="proto-quick-nav-pills" role="tablist">
+      <div className="proto-quick-nav-pills" role="tablist" ref={pillsRef}>
         {items.map((nav, i) => {
           const targetId = nav.href?.replace('#', '');
           const isActive = activeId === targetId;
@@ -82,8 +93,20 @@ export default function PublicLocalQuickNav({
               role="tab"
               aria-selected={isActive}
             >
-              {Icon && <Icon size={13} style={{ marginRight: '5px' }} />}
+              {Icon && <Icon size={13} style={{ marginRight: '5px', flexShrink: 0 }} />}
               <span>{nav.label}</span>
+              {isActive && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#38bdf8',
+                    marginLeft: '6px'
+                  }}
+                />
+              )}
             </a>
           );
         })}

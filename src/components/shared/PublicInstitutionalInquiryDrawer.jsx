@@ -279,11 +279,14 @@ export default function PublicInstitutionalInquiryDrawer({
               <div style={{ fontWeight: 800, fontSize: '0.98rem', letterSpacing: '-0.01em' }}>
                 {lang === 'es' ? 'Consulta Médica e Institucional' : 'Institutional & Clinical Inquiry'}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span>business@med-peptides.com</span>
+              <div style={{ fontSize: '0.72rem', color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ color: '#a7f3d0', fontWeight: 700 }}>●</span>
+                <span>
+                  {lang === 'es' ? 'Mesa Oficial de Asuntos Médicos & Científicos' : 'Official Medical & Scientific Affairs Desk'}
+                </span>
                 <span>•</span>
-                <span style={{ color: '#a7f3d0' }}>
-                  {lang === 'es' ? 'Mesa Oficial' : 'Official Desk'}
+                <span style={{ color: '#bae6fd' }}>
+                  {lang === 'es' ? 'Canal Institucional' : 'Verified Channel'}
                 </span>
               </div>
             </div>
@@ -344,8 +347,8 @@ export default function PublicInstitutionalInquiryDrawer({
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
                   {lang === 'es'
-                    ? 'Su mensaje ha sido remitido al equipo científico de Med-Peptides (business@med-peptides.com). Un enlace médico se pondrá en contacto en un plazo máximo de 24 horas laborables.'
-                    : 'Your inquiry has been routed to the Med-Peptides medical & scientific affairs desk (business@med-peptides.com). A medical liaison will follow up within 24 business hours.'}
+                    ? 'Su mensaje ha sido remitido con acuse de recibo a la Mesa Científica Oficial de Med-Peptides. Un enlace médico colegiado se pondrá en contacto en un plazo máximo de 24 horas laborables.'
+                    : 'Your inquiry has been securely routed to the Med-Peptides Official Medical & Scientific Affairs Desk. A medical liaison will follow up within 24 business hours.'}
                 </p>
               </div>
 
@@ -838,13 +841,27 @@ export default function PublicInstitutionalInquiryDrawer({
                 <Clock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
                 <span>
                   {lang === 'es'
-                    ? 'Canal directo con business@med-peptides.com. Tiempo de respuesta medio < 24h laborables.'
-                    : 'Direct communication desk: business@med-peptides.com. Average response time < 24h.'}
+                    ? 'Canal Directo Institucional • Triaje y respuesta médica colegiada < 24h laborables.'
+                    : 'Direct Institutional Desk • Average clinical triage & response < 24h.'}
                 </span>
               </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.25rem' }}>
+              {/* Action Buttons Sticky Footer (Google Cloud Drawer Standard) */}
+              <div
+                style={{
+                  position: 'sticky',
+                  bottom: '-1.4rem',
+                  background: '#ffffff',
+                  borderTop: '1px solid #e2e8f0',
+                  padding: '0.9rem 1.4rem',
+                  margin: '1.25rem -1.4rem -1.4rem -1.4rem',
+                  boxShadow: '0 -4px 16px rgba(0, 0, 0, 0.06)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  zIndex: 20
+                }}
+              >
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -874,7 +891,7 @@ export default function PublicInstitutionalInquiryDrawer({
                   ) : (
                     <>
                       <Send size={16} />
-                      <span>{lang === 'es' ? 'Enviar Consulta a business@med-peptides.com' : 'Submit Inquiry to business@med-peptides.com'}</span>
+                      <span>{lang === 'es' ? 'Enviar Consulta Institucional' : 'Submit Institutional Inquiry'}</span>
                     </>
                   )}
                 </button>

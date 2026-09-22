@@ -275,14 +275,14 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontWeight: 800, fontSize: '15px', color: '#1e293b', display: 'block' }}>
-                  Elena Vance
+                <span style={{ fontWeight: 800, fontSize: '11px', color: '#003666', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {product?.supplierName || product?.supplier || 'Atlas Pharmaceutical Biotech'}
                 </span>
-                <span style={{ fontWeight: 800, fontSize: '11px', color: '#0f172a', display: 'block' }}>
-                  {coa.qaOfficer}
+                <span style={{ fontWeight: 700, fontSize: '11px', color: '#0f172a', display: 'block' }}>
+                  {coa.qaTitle}
                 </span>
                 <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>
-                  {coa.qaTitle}
+                  {coa.qaOfficer}
                 </span>
               </div>
               <div

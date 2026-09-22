@@ -2075,37 +2075,30 @@
   width: 100%;
 }
 
-.proto-mobile-section-wrapper {
-  display: none;
-}
-
-.proto-mobile-section-select {
+.proto-quick-nav {
+  position: sticky;
+  top: 56px;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0.5rem 0;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   width: 100%;
-  min-height: 44px;
-  padding: 0.65rem 2.2rem 0.65rem 0.85rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #0f172a;
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  outline: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.85rem center;
-  background-size: 16px;
 }
 
 .proto-quick-nav-pills {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
+  padding: 2px 4px;
   width: 100%;
+  mask-image: linear-gradient(to right, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 88%, transparent 100%);
 }
 
 .proto-quick-nav-pills::-webkit-scrollbar {
@@ -2113,26 +2106,35 @@
 }
 
 .proto-quick-nav-pill {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.78rem;
   font-weight: 700;
-  color: #334155;
+  color: #475569;
   text-decoration: none;
-  padding: 5px 13px;
+  padding: 6px 14px;
   border-radius: 9999px;
   background: #f8fafc;
   border: 1px solid #cbd5e1;
   white-space: nowrap;
   flex-shrink: 0;
   min-width: max-content;
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .proto-quick-nav-pill:hover {
-  background: #003666;
-  color: #ffffff;
-  border-color: #003666;
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
   transform: translateY(-1px);
+}
+
+.proto-quick-nav-pill.is-active {
+  background: #003666 !important;
+  color: #ffffff !important;
+  border-color: #003666 !important;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.25) !important;
 }
 
 .proto-compounds-grid {
@@ -2194,10 +2196,6 @@
     margin-bottom: 1rem;
   }
 
-  .proto-mobile-section-wrapper {
-    display: block;
-    margin-bottom: 0.55rem;
-  }
 
   .proto-section-card {
     padding: 1.1rem 0.85rem !important;
@@ -2241,15 +2239,15 @@
 .proto-roadmap-row {
   width: 100%;
   display: grid;
-  grid-template-columns: 105px 1fr 180px 120px;
+  grid-template-columns: 110px 1fr auto auto;
   align-items: center;
-  gap: 1.15rem;
+  gap: 1rem;
   box-sizing: border-box;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .proto-roadmap-day-col {
-  width: 105px;
+  width: 110px;
   flex-shrink: 0;
 }
 
@@ -2258,14 +2256,14 @@
 }
 
 .proto-roadmap-time-col {
-  width: 180px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .proto-roadmap-route-col {
-  width: 120px;
   text-align: right;
   flex-shrink: 0;
+  min-width: max-content;
 }
 
 .proto-roadmap-row:hover {
@@ -2273,40 +2271,46 @@
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
 }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .proto-roadmap-row {
-    grid-template-columns: 95px 1fr 150px auto;
-    gap: 0.75rem;
+    grid-template-columns: 95px 1fr auto;
+    gap: 0.75rem 1rem;
   }
   .proto-roadmap-day-col {
     width: 95px;
   }
   .proto-roadmap-time-col {
-    width: 150px;
+    grid-column: 2 / -1;
+    width: 100%;
   }
   .proto-roadmap-route-col {
-    width: auto;
+    grid-column: 3;
+    grid-row: 1;
   }
 }
 
 @media (max-width: 640px) {
   .proto-roadmap-row {
-    grid-template-columns: auto 1fr;
-    gap: 0.6rem 0.75rem !important;
-    padding: 0.75rem 0.85rem !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 0.65rem !important;
+    padding: 0.85rem !important;
   }
   .proto-roadmap-day-col {
-    width: auto;
+    width: auto !important;
   }
   .proto-roadmap-route-col {
     justify-self: end;
+    width: auto !important;
   }
   .proto-roadmap-info-col {
-    grid-column: 1 / -1;
+    grid-column: 1 / -1 !important;
+    width: 100%;
   }
   .proto-roadmap-time-col {
-    grid-column: 1 / -1;
+    grid-column: 1 / -1 !important;
     width: 100%;
+    padding-top: 5px;
+    border-top: 1px dashed #e2e8f0;
   }
 }
 

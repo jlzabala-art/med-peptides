@@ -183,6 +183,21 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
     }
   };
 
+  const handleCopyLabRequisition = () => {
+    try {
+      const text = biomarkers.map((b, i) => 
+        `[${b.phase || `Checkpoint ${i + 1}`}]\nRequired Tests: ${b.tests}\nClinical Rationale: ${b.notes || 'Routine clinical monitoring'}\n`
+      ).join('\n');
+      navigator.clipboard.writeText(
+        `CLINICAL LABORATORY REQUISITION CHECKLIST\nProtocol: ${displayName}\nReference Code: ${protocol?.code || 'PR-001'}\n\n${text}`
+      );
+      triggerHaptic('success');
+      toast.success(lang === 'es' ? 'Orden de analítica copiada al portapapeles ✓' : 'Lab checklist copied to clipboard ✓');
+    } catch {
+      toast.error('Could not copy lab checklist');
+    }
+  };
+
   // Biomarkers extraction or clinical fallbacks
   const biomarkers = useMemo(() => {
     if (Array.isArray(protocol?.biomarkers) && protocol.biomarkers.length > 0) {
@@ -871,13 +886,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                     </div>
 
                     {/* Col 3: Timing / Schedule Note */}
-                    <div className="proto-roadmap-time-col" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#475569', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    <div className="proto-roadmap-time-col" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#475569', fontWeight: 600, lineHeight: 1.35, minWidth: 0 }}>
                       <Clock size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
-                      <span>{displayTime}</span>
+                      <span style={{ wordBreak: 'break-word' }}>{displayTime}</span>
                     </div>
 
                     {/* Col 4: Route & Protocol Mode Tag */}
-                    <div className="proto-roadmap-route-col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
+                    <div className="proto-roadmap-route-col" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0, minWidth: 'max-content' }}>
                       <span style={{
                         fontSize: '0.72rem',
                         fontWeight: 700,
@@ -886,7 +901,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         background: isActiveAdmin ? '#eff6ff' : '#f1f5f9',
                         color: isActiveAdmin ? '#1d4ed8' : '#64748b',
                         border: `1px solid ${isActiveAdmin ? '#bfdbfe' : '#e2e8f0'}`,
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        display: 'inline-block'
                       }}>
                         {displayRoute}
                       </span>
@@ -906,35 +922,129 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             badge={lang === 'es' ? 'Supervisión de Laboratorio' : 'Laboratory Surveillance'}
             badgeVariant="green"
             rightAction={
-              <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600 }}>
-                {t.sec3Subtitle}
-              </span>
+              <button
+                type="button"
+                onClick={handleCopyLabRequisition}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  color: '#ffffff',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s ease'
+                }}
+                title={lang === 'es' ? 'Copiar orden de analíticas para el laboratorio' : 'Copy clinical lab requisition checklist'}
+              >
+                <Copy size={13} />
+                <span>{lang === 'es' ? 'Copiar Orden Lab' : 'Copy Lab Order'}</span>
+              </button>
             }
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
-              {biomarkers.map((b, idx) => (
-                <div key={idx} style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  padding: '0.95rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.35rem'
-                }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                    {b.phase || `Checkpoint ${idx + 1}`}
-                  </div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                    {b.tests}
-                  </div>
-                  {b.notes && (
-                    <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.4, marginTop: '2px' }}>
-                      {b.notes}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+              {biomarkers.map((b, idx) => {
+                const stepColors = [
+                  { bg: '#f0fdf4', border: '#bbf7d0', badgeBg: '#dcfce7', badgeText: '#166534', dot: '#22c55e' },
+                  { bg: '#fffbeb', border: '#fef3c7', badgeBg: '#fef3c7', badgeText: '#92400e', dot: '#f59e0b' },
+                  { bg: '#eff6ff', border: '#bfdbfe', badgeBg: '#dbeafe', badgeText: '#1e40af', dot: '#3b82f6' }
+                ];
+                const theme = stepColors[idx % stepColors.length];
+                const testItems = String(b.tests || '').split(',').map(s => s.trim()).filter(Boolean);
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '1.15rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.65rem',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                    }}
+                  >
+                    {/* Step Milestone Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: theme.dot, flexShrink: 0 }} />
+                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {idx === 0 ? 'Step 1' : idx === 1 ? 'Step 2' : 'Step 3'} · {b.phase || `Checkpoint ${idx + 1}`}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        backgroundColor: theme.badgeBg,
+                        color: theme.badgeText,
+                        letterSpacing: '0.02em'
+                      }}>
+                        {idx === 0 ? (lang === 'es' ? 'Pre-Inicio' : 'Pre-Flight') : idx === 1 ? (lang === 'es' ? 'Seguridad' : 'Surveillance') : (lang === 'es' ? 'Consolidación' : 'Validation')}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {/* Structured Test Chips Matrix */}
+                    <div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '0.35rem' }}>
+                        {lang === 'es' ? 'Analíticas Requeridas:' : 'Required Diagnostic Tests:'}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                        {testItems.map((testItem, tIdx) => (
+                          <span
+                            key={tIdx}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              color: '#0f172a',
+                              backgroundColor: '#f8fafc',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              padding: '3px 8px',
+                              lineHeight: 1.3
+                            }}
+                          >
+                            <Activity size={11} style={{ color: '#0284c7', flexShrink: 0 }} />
+                            <span>{testItem}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Clinical Rationale Context */}
+                    {b.notes && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '6px',
+                        fontSize: '0.73rem',
+                        color: '#475569',
+                        lineHeight: 1.45,
+                        marginTop: 'auto',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '0.55rem 0.75rem'
+                      }}>
+                        <Info size={13} style={{ color: '#0284c7', flexShrink: 0, marginTop: '2px' }} />
+                        <span>{b.notes}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </PublicSectionCard>
 
