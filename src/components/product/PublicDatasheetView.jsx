@@ -1,6 +1,8 @@
 "use client";
 
 import './PublicDatasheetView.css';
+import './InteractiveReconstitutionGuide.css';
+import './PeptideAnalyticalSpecsCard.css';
 import React, { useState, useEffect, useTransition, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { 
@@ -720,6 +722,52 @@ export default function PublicDatasheetView({
       || sortedStrengths[0] 
       || null;
   }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
+
+  // Resolve current active variant from hierarchy or product.variants
+  const currentVariant = useMemo(() => {
+    const vIndex = hierarchy.variantIndex || {};
+    const directKey = `${activeSupplierId}::${activeFormatId}::${selectedStrengthId}`;
+    if (vIndex[directKey]) return vIndex[directKey];
+
+    for (const key of Object.keys(vIndex)) {
+      if (key.includes(String(selectedStrengthId)) && key.includes(String(activeFormatId))) {
+        return vIndex[key];
+      }
+    }
+
+    const variants = Array.isArray(product?.variants) ? product.variants : [];
+    const cleanStr = String(selectedStrength?.name || selectedStrengthId || '').toLowerCase().replace(/[-_\s]+/g, '');
+    return variants.find(v => {
+      const vStr = String(v.dosage || v.dose || v.name || v.id || '').toLowerCase().replace(/[-_\s]+/g, '');
+      return vStr === cleanStr || vStr.includes(cleanStr) || cleanStr.includes(vStr);
+    }) || null;
+  }, [activeSupplierId, activeFormatId, selectedStrengthId, selectedStrength, hierarchy.variantIndex, product?.variants]);
+
+  // Real verified discount for 10-unit kit (calculated from Firestore pricing, never invented)
+  const realKitSavings = useMemo(() => {
+    if (!currentVariant) return null;
+    const pricing = currentVariant.pricing || {};
+    const tier = pricing.wholesale || pricing.retail || pricing.master || pricing.clinic || null;
+    const perUnit = tier?.perUnit != null ? Number(tier.perUnit) : null;
+    const kit = tier?.kit != null ? Number(tier.kit) : null;
+    const kitQty = tier?.kitQuantity ? Number(tier.kitQuantity) : 10;
+
+    if (perUnit && kit && perUnit > 0 && kit > 0) {
+      const total10Singles = perUnit * kitQty;
+      if (total10Singles > kit) {
+        const discountPct = Math.round(((total10Singles - kit) / total10Singles) * 100);
+        return {
+          hasDiscount: discountPct > 0,
+          discountPct,
+          perUnit,
+          kit,
+          kitQty,
+          currency: tier.currency || 'USD'
+        };
+      }
+    }
+    return null;
+  }, [currentVariant]);
 
   const isPenFormat = useMemo(() => {
     const f = (activeFormatId || '').toLowerCase();
@@ -1509,7 +1557,7 @@ export default function PublicDatasheetView({
             </div>
           </div>
 
-          {/* Packaging / Volume Tier Selector (EQNO Scientific-Inspired Wholesale Options) */}
+          {/* Packaging / Volume Tier Selector (Verified Lotusland 10-Unit Kit Specification) */}
           {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
             <div className="pds-pack-tier-section" style={{
               marginTop: '1.15rem',
@@ -1520,20 +1568,35 @@ export default function PublicDatasheetView({
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {lang === 'es' ? '📦 Formato de Lote y Ahorro por Volumen:' : '📦 Packaging Tier & Volume Savings:'}
+                  {lang === 'es' ? '📦 Formato de Presentación y Suministro:' : '📦 Packaging Tier & Batch Sizing:'}
                 </span>
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', background: '#dcfce7', padding: '2px 8px', borderRadius: '6px' }}>
-                  {packUnits === 10 ? (lang === 'es' ? 'Tarifa Mayorista B2B (-35%)' : 'Wholesale B2B Tier (-35%)') :
-                   packUnits === 5 ? (lang === 'es' ? 'Ahorro Tratamiento (-15%)' : 'Multi-Cycle Regimen (-15%)') :
-                   (lang === 'es' ? 'Unidad Individual' : 'Single Unit')}
+                  {packUnits === 10 ? (
+                    realKitSavings?.hasDiscount 
+                      ? (lang === 'es' ? `Caja 10 Viales (Ahorro Real -${realKitSavings.discountPct}%)` : `10-Vial Kit (Verified Save -${realKitSavings.discountPct}%)`)
+                      : (lang === 'es' ? 'Caja 10 Viales (Kit Mayorista B2B)' : '10-Vial Box (Wholesale Kit)')
+                  ) : (
+                    lang === 'es' ? 'Unidad Individual' : 'Single Unit'
+                  )}
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                 {[
-                  { count: 1, label: lang === 'es' ? '1 Unidad' : '1 Unit', badge: null, sub: lang === 'es' ? 'Protocolo Individual' : 'Standard' },
-                  { count: 5, label: lang === 'es' ? 'Pack 5 Unidades' : '5 Units Pack', badge: '-15%', sub: lang === 'es' ? 'Ahorro Tratamiento' : 'Save 15%' },
-                  { count: 10, label: lang === 'es' ? 'Caja 10 Unidades' : '10 Units Box', badge: '-35%', sub: lang === 'es' ? 'Escala Mayorista B2B' : 'Wholesale Tier' }
+                  { 
+                    count: 1, 
+                    label: lang === 'es' ? '1 Unidad' : '1 Unit', 
+                    badge: null, 
+                    sub: lang === 'es' ? 'Vial Individual' : 'Standard Single Vial' 
+                  },
+                  { 
+                    count: 10, 
+                    label: lang === 'es' ? 'Caja 10 Unidades' : '10 Units Box', 
+                    badge: realKitSavings?.hasDiscount ? `-${realKitSavings.discountPct}%` : (lang === 'es' ? 'Kit B2B' : 'B2B Kit'), 
+                    sub: realKitSavings?.hasDiscount 
+                      ? (lang === 'es' ? `Ahorro real de escala (-${realKitSavings.discountPct}%)` : `Verified bulk savings (-${realKitSavings.discountPct}%)`)
+                      : (lang === 'es' ? 'Kit Completo de 10 Viales' : 'Full 10-Vial Kit Box') 
+                  }
                 ].map(tier => {
                   const isSelected = packUnits === tier.count;
                   return (
@@ -1545,7 +1608,7 @@ export default function PublicDatasheetView({
                         triggerHaptic('selection');
                       }}
                       style={{
-                        padding: '0.65rem 0.5rem',
+                        padding: '0.75rem 0.65rem',
                         borderRadius: '10px',
                         border: isSelected ? '2px solid #003666' : '1px solid #cbd5e1',
                         background: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
@@ -1560,22 +1623,22 @@ export default function PublicDatasheetView({
                         <span style={{
                           position: 'absolute',
                           top: '-8px',
-                          right: '6px',
-                          background: tier.count === 10 ? '#2563eb' : '#16a34a',
+                          right: '8px',
+                          background: '#2563eb',
                           color: '#ffffff',
-                          fontSize: '0.65rem',
+                          fontSize: '0.68rem',
                           fontWeight: 800,
-                          padding: '1px 6px',
+                          padding: '1px 7px',
                           borderRadius: '10px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.12)'
                         }}>
                           {tier.badge}
                         </span>
                       )}
-                      <div style={{ fontWeight: 800, fontSize: '0.84rem', color: isSelected ? '#003666' : '#1e293b' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.88rem', color: isSelected ? '#003666' : '#1e293b' }}>
                         {tier.label}
                       </div>
-                      <div style={{ fontSize: '0.70rem', color: isSelected ? '#2563eb' : '#64748b', marginTop: '2px', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.72rem', color: isSelected ? '#2563eb' : '#64748b', marginTop: '3px', fontWeight: 600 }}>
                         {tier.sub}
                       </div>
                     </button>
@@ -1583,7 +1646,7 @@ export default function PublicDatasheetView({
                 })}
               </div>
 
-              {/* Wholesale pricing benchmark note */}
+              {/* Verified Batch Quality & Format note (no invented pricing benchmarks) */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1595,7 +1658,10 @@ export default function PublicDatasheetView({
                 borderTop: '1px dashed #cbd5e1'
               }}>
                 <span>
-                  <strong>Wholesale Benchmark:</strong> {packUnits === 10 ? '$7.30 / mg (B2B Bulk Rate)' : '$12.90 / mg (Standard Rate)'}
+                  <strong>{lang === 'es' ? 'Especificación de Lote:' : 'Batch Specification:'}</strong>{' '}
+                  {packUnits === 10 
+                    ? (lang === 'es' ? 'Caja institucional de 10 viales liofilizados al vacío' : 'Institutional kit of 10 vacuum-sealed lyophilized vials')
+                    : (lang === 'es' ? 'Vial clínico individual liofilizado' : 'Individual clinical lyophilized vial')}
                 </span>
                 <span style={{ color: '#0f172a', fontWeight: 700 }}>
                   Dual RP-HPLC ≥ 99.0% Verified
