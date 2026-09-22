@@ -31,6 +31,7 @@ import WorkspaceMiniSummaryStrip from './drawer/WorkspaceMiniSummaryStrip';
 import WorkspaceProductsAccordion from './drawer/WorkspaceProductsAccordion';
 import WorkspaceRecipientAccordion from './drawer/WorkspaceRecipientAccordion';
 import WorkspaceShippingAccordion from './drawer/WorkspaceShippingAccordion';
+import WorkspaceFinancialAccordion from './drawer/WorkspaceFinancialAccordion';
 import WorkspacePdfPreviewSheet from './drawer/WorkspacePdfPreviewSheet';
 import WorkspaceShareDatasheetModal from './drawer/WorkspaceShareDatasheetModal';
 import { useWorkspaceActions } from './hooks/useWorkspaceActions';
