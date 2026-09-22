@@ -55,6 +55,7 @@ import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMo
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import CorporateResidencyInquiryDrawer from '@/components/portal/CorporateResidencyInquiryDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
@@ -1141,6 +1142,53 @@ export default function PublicDatasheetView({
                     : `${displaySupplierName} Quality Verified`}
               </span>
               {!isCorporateService && <FdaRegulatoryBadge product={product} variant="hero-pill" />}
+              {!isCorporateService && !isSolventProduct && !isDiagnosticKit && (
+                <>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#f1f5f9',
+                    color: '#0f172a',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <span>🇺🇸 / 🇪🇺 Synthesis Origin</span>
+                  </span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    border: '1px solid #6ee7b7',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <ShieldCheck size={13} color="#059669" />
+                    <span>≥ 99.0% Purity (Dual RP-HPLC)</span>
+                  </span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#eff6ff',
+                    color: '#1e40af',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <span>Clinical Protocol Grade</span>
+                  </span>
+                </>
+              )}
               <span className="pds-version-tag" title={`Clinical Monograph Revision ${versionInfo.version}`}>
                 <span className="pds-version-dot" />
                 <span>Rev {versionInfo.version}</span>
@@ -2088,14 +2136,27 @@ export default function PublicDatasheetView({
 
       {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
-        contextType="monograph"
+        hideFloatingTrigger={true}
+        contextType={isSpainResidency ? "corporate_residency" : "monograph"}
         contextAnchor={{
-          name: product?.canonicalName || product?.name || 'Peptide Monograph',
+          name: isSpainResidency 
+            ? 'Spanish Corporate Acquisition & Law 14/2013 Residence Program'
+            : (product?.canonicalName || product?.name || 'Peptide Monograph'),
+          slug: slug,
           cas: product?.cas || 'N/A',
-          purity: product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)',
-          molecular: product?.molecularWeight || product?.molecularFormula || 'N/A',
-          sequence: product?.sequence || null,
-          details: {
+          purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
+          molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
+          category: isSpainResidency ? 'Corporate Services' : (product?.category || 'Peptides'),
+          details: isSpainResidency ? {
+            program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
+            statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
+            resolutionWindow: '20 business days statutory decision window (UGE-CE)',
+            initialPermit: '3 full years initial residence card (renewable +2 years)',
+            schengenMobility: '29 Schengen countries free visa-free border mobility',
+            ownership: '100% legal ownership of an existing debt-free Spanish S.L. (Sociedad Limitada)',
+            physicalPresence: 'No strict 183-day stay required to maintain/renew permit',
+            remoteExecution: 'Full remote execution through consular Power of Attorney (PoA)',
+          } : {
             category: isSolventProduct ? 'Sterile Reconstitution Solvent' : isDiagnosticKit ? 'CE-IVDR Clinical Diagnostic Test' : (product?.category || 'Peptides'),
             storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : isDiagnosticKit ? 'Ambient 15-25°C dry storage. Dried blood spot stable up to 14 days at room temp.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
             reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : isDiagnosticKit ? 'No reconstitution required. Direct capillary dried blood spot (DBS) collection.' : '1.0mL - 2.0mL sterile bacteriostatic water',
@@ -2108,19 +2169,32 @@ export default function PublicDatasheetView({
         }}
       />
 
-      {/* Non-Intrusive Institutional Inquiry Drawer */}
-      <PublicInstitutionalInquiryDrawer
-        isOpen={isInquiryDrawerOpen}
-        onClose={() => setIsInquiryDrawerOpen(false)}
-        contextType="product"
-        initialEntity={{
-          name: product?.canonicalName || product?.name || slug,
-          slug: slug,
-          strength: selectedStrength?.name || selectedStrengthId || '',
-          category: product?.category || 'Peptides'
-        }}
-        lang={lang}
-      />
+      {/* Context-Aware Inquiry Drawer: Dedicated Visa Questionnaire for Corporate, Clinical Drawer for Peptides */}
+      {isSpainResidency ? (
+        <CorporateResidencyInquiryDrawer
+          isOpen={isInquiryDrawerOpen}
+          onClose={() => setIsInquiryDrawerOpen(false)}
+          initialEntity={{
+            name: product?.canonicalName || product?.name || 'Spanish Corporate Acquisition & Law 14/2013 Residence Program',
+            slug: slug,
+            category: 'Corporate Services'
+          }}
+          lang={lang}
+        />
+      ) : (
+        <PublicInstitutionalInquiryDrawer
+          isOpen={isInquiryDrawerOpen}
+          onClose={() => setIsInquiryDrawerOpen(false)}
+          contextType="product"
+          initialEntity={{
+            name: product?.canonicalName || product?.name || slug,
+            slug: slug,
+            strength: selectedStrength?.name || selectedStrengthId || '',
+            category: product?.category || 'Peptides'
+          }}
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

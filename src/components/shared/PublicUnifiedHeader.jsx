@@ -249,6 +249,7 @@ export default function PublicUnifiedHeader({
                 ))}
               </select>
 
+
               {/* Institutional Inquiry Drawer Trigger */}
               <button
                 type="button"

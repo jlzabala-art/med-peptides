@@ -290,8 +290,21 @@ export function resolveScreenAIContext(path = '/', activeEntity = null, currentU
 
   // Fallback or adaptive screen config if on shared routes like /catalog or /calculator
   if (!matchedScreen) {
-    if (cleanPath.startsWith('/catalog') || cleanPath.startsWith('/product/')) {
-      if (role === 'doctor') {
+    if (cleanPath.startsWith('/catalog') || cleanPath.startsWith('/product/') || cleanPath.startsWith('/p/')) {
+      if (cleanPath.includes('spain-company') || cleanPath.includes('spain-residency')) {
+        matchedScreen = {
+          screenScope: 'corporate_residency',
+          screenTitle: 'Executive Corporate & Immigration Advisor',
+          roleLabel: 'Spanish Law 14/2013 Corporate Residency',
+          accentColor: '#003666',
+          suggestedPrompts: [
+            'Explain the 20-day UGE-CE fast-track statutory resolution window',
+            'What is the structure of the 100% Spanish S.L. acquisition?',
+            'How does the 3-year initial residence card work for my family?',
+            'What are the consular Power of Attorney (PoA) requirements for remote closing?',
+          ],
+        };
+      } else if (role === 'doctor') {
         matchedScreen = {
           screenScope: 'doctor_formulary',
           screenTitle: 'Formulary & Clinical Dosing Advisor',
@@ -328,6 +341,19 @@ export function resolveScreenAIContext(path = '/', activeEntity = null, currentU
             'Verify available stock levels and lot expiration dates',
             'Request batch COA and purity report for this compound',
             'Add 50 units to commercial quotation workspace',
+          ],
+        };
+      } else {
+        matchedScreen = {
+          screenScope: 'public_datasheet',
+          screenTitle: 'Research Monograph Copilot',
+          roleLabel: 'Analytical Monograph & Formulations',
+          accentColor: roleTheme.accentColor,
+          suggestedPrompts: [
+            'Explain target receptor mechanisms and biological pathways',
+            'What are the standard reconstitution guidelines with BAC water?',
+            'Which evidence-based protocols feature this compound?',
+            'How does Lotusland Limited certify RP-HPLC analytical purity?',
           ],
         };
       }

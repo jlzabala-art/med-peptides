@@ -62,7 +62,7 @@ const MARKET_FALLBACK_BENCHMARKS = {
   'tesamorelin': { avgPrice: 95.0, avgPpm: 19.0, minPrice: 79.0, maxPrice: 120.0, competitors: ['Peptide Sciences', 'Limitless Life', 'Direct Peptides', 'Amino Asylum'] },
   'tirzepatide': { avgPrice: 115.0, avgPpm: 11.5, minPrice: 89.0, maxPrice: 145.0, competitors: ['Qingdao Sigma', 'Limitless Life', 'Direct Peptides', 'Biotech Peptides'] },
   'semaglutide': { avgPrice: 75.0, avgPpm: 15.0, minPrice: 59.0, maxPrice: 95.0, competitors: ['Peptide Sciences', 'Biotech Peptides', 'Limitless Life', 'Direct Peptides'] },
-  'retatrutide': { avgPrice: 135.0, avgPpm: 13.5, minPrice: 110.0, maxPrice: 165.0, competitors: ['Limitless Life', 'Direct Peptides', 'Biotech Peptides'] },
+  'retatrutide': { avgPrice: 135.0, avgPpm: 13.5, minPrice: 110.0, maxPrice: 165.0, competitors: ['EQNO Scientific (Wholesale)', 'Limitless Life', 'Direct Peptides', 'Biotech Peptides'] },
   'ipamorelin':  { avgPrice: 45.0, avgPpm: 9.0, minPrice: 38.0, maxPrice: 55.0, competitors: ['Peptide Sciences', 'Amino Asylum', 'Core Peptides', 'Limitless Life'] },
   'cjc-1295':    { avgPrice: 48.0, avgPpm: 24.0, minPrice: 39.0, maxPrice: 59.0, competitors: ['Peptide Sciences', 'Core Peptides', 'Limitless Life', 'Amino Asylum'] },
   'epithalon':   { avgPrice: 55.0, avgPpm: 5.5, minPrice: 45.0, maxPrice: 70.0, competitors: ['Biotech Peptides', 'Peptide Sciences', 'Direct Peptides'] },
@@ -71,6 +71,49 @@ const MARKET_FALLBACK_BENCHMARKS = {
   'aod-9604':    { avgPrice: 54.0, avgPpm: 10.8, minPrice: 44.0, maxPrice: 68.0, competitors: ['Peptide Sciences', 'Core Peptides', 'Limitless Life'] },
   'mots-c':      { avgPrice: 68.0, avgPpm: 13.6, minPrice: 55.0, maxPrice: 85.0, competitors: ['Peptide Sciences', 'Direct Peptides', 'Limitless Life'] },
   'ss-31':       { avgPrice: 85.0, avgPpm: 17.0, minPrice: 69.0, maxPrice: 105.0, competitors: ['Limitless Life', 'Direct Peptides', 'Peptide Sciences'] },
+};
+
+// ── Wholesale & Manufacturer Direct Benchmarks (B2B / Wholesale benchmarks) ──
+export const WHOLESALE_SUPPLIER_BENCHMARKS = {
+  'retatrutide': {
+    name: 'Retatrutide 10-30mg',
+    supplier: 'EQNO Scientific',
+    supplierUrl: 'https://eqno.com',
+    origin: 'U.S. Manufactured Peptides',
+    purity: '≥99.0% (Research & Clinical Grade)',
+    wholesalePricingModel: 'Wholesale B2B / Volume Tiered',
+    tiers: [
+      { sizeMg: 10, regularMSRP: 189.0, wholesalePrice: 129.0, ppm: 12.90, currency: 'USD' },
+      { sizeMg: 30, regularMSRP: 349.0, wholesalePrice: 219.0, ppm: 7.30, currency: 'USD' },
+    ],
+    verifiedDate: '2026-09-21',
+  },
+  'bpc-157': {
+    name: 'BPC-157 5-10mg',
+    supplier: 'EQNO Scientific',
+    supplierUrl: 'https://eqno.com',
+    origin: 'U.S. Manufactured Peptides',
+    purity: '≥99.0%',
+    wholesalePricingModel: 'Wholesale B2B / Volume Tiered',
+    tiers: [
+      { sizeMg: 5, regularMSRP: 59.0, wholesalePrice: 39.0, ppm: 7.80, currency: 'USD' },
+      { sizeMg: 10, regularMSRP: 99.0, wholesalePrice: 65.0, ppm: 6.50, currency: 'USD' },
+    ],
+    verifiedDate: '2026-09-21',
+  },
+  'tirzepatide': {
+    name: 'Tirzepatide 10-30mg',
+    supplier: 'EQNO Scientific',
+    supplierUrl: 'https://eqno.com',
+    origin: 'U.S. Manufactured Peptides',
+    purity: '≥99.0%',
+    wholesalePricingModel: 'Wholesale B2B / Volume Tiered',
+    tiers: [
+      { sizeMg: 10, regularMSRP: 149.0, wholesalePrice: 99.0, ppm: 9.90, currency: 'USD' },
+      { sizeMg: 30, regularMSRP: 299.0, wholesalePrice: 189.0, ppm: 6.30, currency: 'USD' },
+    ],
+    verifiedDate: '2026-09-21',
+  }
 };
 
 // ── Diagnostic Manufacturer Retail Benchmarks (MSRP directly from manufacturer websites) ──
@@ -267,6 +310,15 @@ export async function getCompetitorBenchmark({
     isCompetitive = priceDeltaPercent >= 0; // cheaper or equal to market average
   }
 
+  // 4. Look up wholesale supplier benchmark (e.g. EQNO Scientific)
+  let wholesaleBenchmark = null;
+  for (const [wKey, wData] of Object.entries(WHOLESALE_SUPPLIER_BENCHMARKS)) {
+    if (normKey.includes(cleanCompound(wKey)) || cleanCompound(wKey).includes(normKey)) {
+      wholesaleBenchmark = wData;
+      break;
+    }
+  }
+
   const result = {
     productName,
     ourPrice: numericOurPrice,
@@ -279,6 +331,7 @@ export async function getCompetitorBenchmark({
     isCompetitive,
     competitorsCount: competitors.length,
     competitors,
+    wholesaleBenchmark,
   };
 
   setCached(cacheKey, result);

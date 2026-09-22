@@ -150,6 +150,28 @@ export default function AlgoliaCompetitorBadge({
                 </div>
               ))}
             </div>
+
+            {benchmark.wholesaleBenchmark && (
+              <div style={{ marginTop: '0.75rem', padding: '8px 10px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>🏭 Wholesale Benchmark:</span>
+                  <span>{benchmark.wholesaleBenchmark.supplier}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.70rem', color: '#1e3a8a', marginTop: '2px' }}>
+                  <span>{benchmark.wholesaleBenchmark.origin}</span>
+                  <span>{benchmark.wholesaleBenchmark.purity}</span>
+                </div>
+                {Array.isArray(benchmark.wholesaleBenchmark.tiers) && (
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                    {benchmark.wholesaleBenchmark.tiers.map((t, idx) => (
+                      <span key={idx} style={{ background: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0f172a', border: '1px solid #cbd5e1' }}>
+                        {t.sizeMg}mg: ${t.wholesalePrice} (${t.ppm}/mg)
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
