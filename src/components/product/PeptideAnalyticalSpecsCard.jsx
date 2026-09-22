@@ -149,7 +149,7 @@ export default function PeptideAnalyticalSpecsCard({
             <div className="hplc-metric-item">
               <span className="metric-lbl">{lang === 'es' ? 'Masa Medida (LC-MS)' : 'Observed Mass (LC-MS)'}</span>
               <span className="metric-val">{observedMass} Da</span>
-              <span className="metric-sub">Teórica: {theoreticalMass} Da (Δ &lt; 0.01%)</span>
+              <span className="metric-sub">{lang === 'es' ? `Teórica: ${theoreticalMass} Da (Δ < 0.01%)` : `Theoretical: ${theoreticalMass} Da (Δ < 0.01%)`}</span>
             </div>
 
             <div className="hplc-metric-item">
@@ -185,7 +185,7 @@ export default function PeptideAnalyticalSpecsCard({
               type="button"
               className={`btn-copy-seq ${copiedSeq ? 'copied' : ''}`}
               onClick={copySequence}
-              title="Copiar secuencia"
+              title={lang === 'es' ? 'Copiar secuencia' : 'Copy sequence'}
             >
               {copiedSeq ? (
                 <>
@@ -209,12 +209,12 @@ export default function PeptideAnalyticalSpecsCard({
               <strong>{product?.cas || product?.casNumber || 'N/A'}</strong>
             </div>
             <div className="meta-pill">
-              <span>Fórmula:</span>
-              <strong>{product?.molecularFormula || 'Bioactive Polypeptide'}</strong>
+              <span>{lang === 'es' ? 'Fórmula:' : 'Formula:'}</span>
+              <strong>{product?.molecularFormula || (lang === 'es' ? 'Polipéptido Bioactivo' : 'Bioactive Polypeptide')}</strong>
             </div>
             <div className="meta-pill">
-              <span>Solubilidad:</span>
-              <strong>Agua BAC (10-30 mg/mL)</strong>
+              <span>{lang === 'es' ? 'Solubilidad:' : 'Solubility:'}</span>
+              <strong>{lang === 'es' ? 'Agua BAC (10-30 mg/mL)' : 'BAC Water (10-30 mg/mL)'}</strong>
             </div>
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function PeptideAnalyticalSpecsCard({
           <div className="stability-node transit">
             <div className="temp-badge">20°C – 25°C</div>
             <div className="node-title">{lang === 'es' ? 'En Tránsito Aéreo (Ambiente)' : 'In-Transit Ambient'}</div>
-            <div className="node-time">Hasta 30 {lang === 'es' ? 'Días' : 'Days'}</div>
+            <div className="node-time">{lang === 'es' ? 'Hasta 30 Días' : 'Up to 30 Days'}</div>
             <p className="node-desc">{lang === 'es' ? 'Liofilizado estable durante envío internacional sin degradación.' : 'Lyophilized powder remains stable during transit with cold packs.'}</p>
           </div>
 

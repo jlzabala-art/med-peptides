@@ -142,8 +142,8 @@
 }
 
 .irg-pills-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
   gap: 0.4rem;
 }
 
@@ -1533,7 +1533,16 @@
   font-weight: 700;
   text-decoration: none;
   transition: all 0.18s ease;
+  /* GCP: never overflow — clip text gracefully */
+  min-width: 0;
+  overflow: hidden;
+}
+
+.irg-proto-btn-secondary > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .irg-proto-btn-secondary:hover {

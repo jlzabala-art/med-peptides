@@ -32,19 +32,19 @@ export const KNOWN_CANONICAL_PEPTIDES = {
   },
   'bpc-157-tb-500': {
     canonicalKey: 'bpc-157-tb-500',
-    canonicalName: 'BPC-157 + TB-500 Blend',
+    canonicalName: 'BPC-157 + TB-500',
     aliases: ['bpc-157 + tb-500', 'bpc-157 + tb-500 blend', 'bpc-157 + tb-500 stack', 'bpc-10mg-tb-10mg', 'bpc-5-mgtb-5-mg'],
     category: 'Peptide Blend'
   },
   'bpc-157-tb-500-ghk-cu': {
     canonicalKey: 'bpc-157-tb-500-ghk-cu',
-    canonicalName: 'BPC-157 + TB-500 + GHK-Cu Stack',
+    canonicalName: 'BPC-157 + TB-500 + GHK-Cu',
     aliases: ['bpc-157 + tb-500 + ghk-cu', 'bpc-157/tb-500/ghk-cu'],
     category: 'Peptide Blend'
   },
   'cagrilintide-semaglutide': {
     canonicalKey: 'cagrilintide-semaglutide',
-    canonicalName: 'Cagrilintide + Semaglutide (CagriSema)',
+    canonicalName: 'Cagrilintide + Semaglutide',
     aliases: ['cagrisema', 'cagrilintide + semaglutide', 'cagrilintide + semaglutide (cagrisema)'],
     category: 'Peptide Blend'
   },
@@ -52,13 +52,13 @@ export const KNOWN_CANONICAL_PEPTIDES = {
   // Single Peptides
   'bpc-157': {
     canonicalKey: 'bpc-157',
-    canonicalName: 'BPC-157 (Body Protection Compound)',
+    canonicalName: 'BPC-157',
     aliases: ['bpc-157', 'bpc157', 'bpc 157'],
     category: 'Recovery & Healing'
   },
   'tb-500': {
     canonicalKey: 'tb-500',
-    canonicalName: 'TB-500 (Thymosin Beta-4)',
+    canonicalName: 'TB-500',
     aliases: ['tb-500', 'tb500', 'tb 500', 'thymosin beta-4', 'thymosin beta 4', 'thymosin β4', 'thymosin β4 (tb-500)', 'thymosin beta (tb-500)'],
     category: 'Recovery & Healing'
   },
@@ -82,7 +82,7 @@ export const KNOWN_CANONICAL_PEPTIDES = {
   },
   'nad-plus': {
     canonicalKey: 'nad-plus',
-    canonicalName: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
+    canonicalName: 'NAD+',
     aliases: ['nad+', 'nad', 'nad +', 'nicotinamide adenine dinucleotide'],
     category: 'Longevity & Cellular'
   },

@@ -653,6 +653,9 @@ export const CATEGORY_TRANSLATIONS = {
   'Growth Hormone Secretagogues': { es: 'Secretagogos de Hormona de Crecimiento', fr: 'Sécrétagogues de l\'Hormone de Croissance', de: 'Wachstumshormon-Sekretagoga' },
   'Metabolic Health': { es: 'Salud Metabólica', fr: 'Santé Métabolique', de: 'Stoffwechselgesundheit' },
   'Regenerative Therapy': { es: 'Terapia Regenerativa', fr: 'Thérapie Régénérative', de: 'Regenerative Therapie' },
+  'corporate_services': { es: 'Servicios Corporativos & Logística', fr: 'Services d\'Entreprise & Logistique', de: 'Unternehmensdienstleistungen & Logistik' },
+  'Corporate Services': { es: 'Servicios Corporativos & Logística', fr: 'Services d\'Entreprise & Logistique', de: 'Unternehmensdienstleistungen & Logistik' },
+  'Biopharmaceutical Supply Chain & Peptide Distribution': { es: 'Cadena de Suministro Biofarmacéutica & Distribución', fr: 'Chaîne d\'Approvisionnement Biopharmaceutique', de: 'Biopharmazeutische Lieferkette & Distribution' },
 };
 
 export const TARGET_SYSTEM_TRANSLATIONS = {

@@ -375,6 +375,18 @@ export default async function SharedCatalogPage({ params }) {
   const products = [];
 
   for (const data of productDocs) {
+    // Clinical Vials Catalog Guard: Exclude bulk chemical raw materials (API powders by the gram)
+    // from clinical finished vial catalogs unless explicitly configured as a raw material catalog.
+    const isRawMaterial = data.productType === 'raw_material' ||
+      data.category === 'raw_material' ||
+      data.type === 'raw_material' ||
+      (data.name || '').toLowerCase().includes('(bulk api)') ||
+      (data.canonicalName || '').toLowerCase().includes('(bulk api)');
+
+    if (isRawMaterial && catalogueFilter !== 'raw_material' && catalogueFilter !== 'api' && category !== 'raw_material') {
+      continue;
+    }
+
     const productVariants = variantsByProduct[data.id] ||
       (Array.isArray(data.variants) ? data.variants : []);
 

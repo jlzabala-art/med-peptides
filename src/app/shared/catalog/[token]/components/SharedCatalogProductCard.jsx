@@ -106,7 +106,10 @@ export default function SharedCatalogProductCard({
             {!hideMasterImage ? (
               <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
                 <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
-                  {prod.canonicalName}
+                  {String(prod.canonicalName || prod.name || '')
+                    .replace(/\s*\([^)]*(?:body protection compound|thymosin beta|nicotinamide)[^)]*\)/gi, '')
+                    .replace(/\s+(?:Blend|Stack)$/i, '')
+                    .trim()}
                 </span>
                 {fdaStatus && (
                   <span

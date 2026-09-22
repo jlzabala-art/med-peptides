@@ -139,17 +139,23 @@ async function getPublicProduct(slug, supplierFilter = null) {
   }
 
   // Filter variants strictly for target supplier to prevent cross-supplier contamination.
-  // Clinical standard: Default strictly to Lotusland Limited (Atlas Services) so that public datasheets
-  // show exclusively Lotusland certified formulations without mentioning other suppliers.
+  // Clinical standard: Default to product's own supplier, or Lotusland Limited if multi-supplier,
+  // or the supplier of the available variants.
+  const inherentSupplier = raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (rawVariants && rawVariants[0]?.supplier);
   const targetSupplier = (supplierFilter && supplierFilter.toLowerCase() !== 'all')
     ? supplierFilter
-    : 'supplier-lotusland';
+    : (inherentSupplier && !String(inherentSupplier).toLowerCase().includes('unknown') ? inherentSupplier : 'supplier-lotusland');
 
-  const filtered = (rawVariants || []).filter(v => matchSupplier(v, targetSupplier));
+  let filtered = (rawVariants || []).filter(v => matchSupplier(v, targetSupplier));
+  // If target supplier was 'unknown_supplier', match variants that have unknown/undefined supplier or fall back to inherent
+  if (filtered.length === 0 && (targetSupplier === 'unknown_supplier' || targetSupplier.includes('unknown'))) {
+    filtered = rawVariants || [];
+  }
+
   if (filtered.length > 0) {
     rawVariants = filtered;
-    const matchedSupp = filtered[0].supplierName || filtered[0].supplier || targetSupplier;
-    const matchedSuppId = filtered[0].supplierId || (targetSupplier.startsWith('supplier-') ? targetSupplier : `supplier-${targetSupplier}`);
+    const matchedSupp = filtered[0].supplierName || filtered[0].supplier || raw.supplierName || raw.supplier || targetSupplier;
+    const matchedSuppId = filtered[0].supplierId || raw.supplierId || (targetSupplier.startsWith('supplier-') ? targetSupplier : `supplier-${targetSupplier}`);
     raw.supplierName = matchedSupp;
     raw.supplier = matchedSupp;
     raw.supplierId = matchedSuppId;
@@ -159,9 +165,20 @@ async function getPublicProduct(slug, supplierFilter = null) {
   } else {
     // 🛡️ Graceful Fallback: If requested/default supplier has no active variants,
     // fallback to available variants rather than returning 404 (Golden UX Rule)
-    raw.isSingleSupplierLocked = false;
-    raw.supplierName = 'Certified Clinical Laboratories';
-    raw.supplier = 'Multi-Source';
+    const fallbackSupp = raw.supplierName || raw.supplier || (rawVariants && rawVariants[0]?.supplierName) || (rawVariants && rawVariants[0]?.supplier);
+    const fallbackSuppId = raw.supplierId || (rawVariants && rawVariants[0]?.supplierId);
+    if (fallbackSupp && fallbackSuppId) {
+      raw.supplierName = fallbackSupp;
+      raw.supplier = fallbackSupp;
+      raw.supplierId = fallbackSuppId;
+      raw.suppliers = [fallbackSuppId];
+      raw.supplierIds = [fallbackSuppId];
+      raw.isSingleSupplierLocked = true;
+    } else {
+      raw.isSingleSupplierLocked = false;
+      raw.supplierName = 'Certified Clinical Laboratories';
+      raw.supplier = 'Multi-Source';
+    }
   }
 
   // 🛡️ Zero-Trust Sanitization

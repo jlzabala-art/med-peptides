@@ -56,7 +56,10 @@ export default function SharedCatalogProductListRow({
           <div className="catalog-row-info">
             <div className="catalog-row-title-line">
               <span className="catalog-row-title">
-                {prod.canonicalName}
+                {String(prod.canonicalName || prod.name || '')
+                  .replace(/\s*\([^)]*(?:body protection compound|thymosin beta|nicotinamide)[^)]*\)/gi, '')
+                  .replace(/\s+(?:Blend|Stack)$/i, '')
+                  .trim()}
               </span>
 
               {fdaStatus && (

@@ -76,6 +76,18 @@ const ROUTE_MAP = {
  */
 export function resolveProductCanonicalGoals(product) {
   if (!product) return [GOAL_TYPES.GENERAL_HEALTH];
+
+  // Clinical Guard: Solvents, diluents, and bacteriostatic water must NEVER be classified as peptides or under longevity/metabolic goals
+  const pName = String(product.canonicalName || product.name || product.title || '').toLowerCase();
+  const pCat = String(product.category || '').toLowerCase();
+  const pType = String(product.productType || product.type || '').toLowerCase();
+  const pSlug = String(product.slug || product.id || '').toLowerCase();
+  const isSolventOrSupply = pCat.includes('solvent') || pType.includes('solvent') || pSlug.includes('bac-water') || pName.includes('bacteriostatic water') || pName.includes('bac water');
+
+  if (isSolventOrSupply) {
+    return ['supplies'];
+  }
+
   const goals = new Set();
   
   if (Array.isArray(product.canonicalGoals) && product.canonicalGoals.length > 0) {

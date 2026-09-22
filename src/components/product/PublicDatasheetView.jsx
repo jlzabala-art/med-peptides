@@ -51,6 +51,7 @@ import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
+import PeptideContraindicationsSection from './PeptideContraindicationsSection';
 import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
 import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
 import CompoundingServicesTechnicalSpecs from './CompoundingServicesTechnicalSpecs';
@@ -1209,7 +1210,9 @@ export default function PublicDatasheetView({
               <span className="pds-cat-tag">{category}</span>
               <span className="pds-cgmp-tag">
                 {isCorporateService
-                  ? (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory')
+                  ? (displaySupplierName && !displaySupplierName.includes('Certified Clinical Laboratories') && !displaySupplierName.includes('Multi-Source')
+                      ? `${displaySupplierName} Quality Verified`
+                      : (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory'))
                   : isStrictlyLotusland 
                     ? (t.lotuslandVerified || 'Atlas Services Certified') 
                     : `${displaySupplierName} Quality Verified`}
@@ -2081,7 +2084,11 @@ export default function PublicDatasheetView({
           <PeptidePublicationsSection product={product} lang={lang} />
         )}
 
-        {/* ── Block 4: Physical Labels & Dispensing Downloads (Harmonized Navy Header) ── */}
+        {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+          <PeptideContraindicationsSection product={product} lang={lang} />
+        )}
+
         {!isDiagnosticKit && !isCorporateService && (
           <section id="labels-section" className="pds-section-card">
             <div className="pds-section-header">
@@ -2346,7 +2353,7 @@ export default function PublicDatasheetView({
           cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : 'N/A'),
           purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : isCompoundingService ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy' : isPeptideSupplyService ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
           molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : isCompoundingService ? 'Custom Prescription Matrix (Compounded Formulation)' : isPeptideSupplyService ? 'In-Stock Lyophilized Peptide Portfolio' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
-          category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? 'Compounding Farmacéutico' : isPeptideSupplyService ? 'Suministro de Péptidos' : (product?.category || 'Peptides'),
+          category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : (product?.category || 'Peptides'),
           details: isSpainResidency ? {
             program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
             statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
@@ -2408,7 +2415,7 @@ export default function PublicDatasheetView({
             name: product?.canonicalName || product?.name || slug,
             slug: slug,
             strength: selectedStrength?.name || selectedStrengthId || '',
-            category: isCompoundingService ? 'Compounding Farmacéutico' : isPeptideSupplyService ? 'Suministro de Péptidos' : (product?.category || 'Peptides')
+            category: isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : (product?.category || 'Peptides')
           }}
           lang={lang}
         />

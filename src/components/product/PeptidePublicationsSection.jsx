@@ -148,7 +148,7 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
                       )}
                     </div>
 
-                    {/* Card Action Row: Read full article & Ask Clinical AI */}
+                    {/* Card Action Row: PubMed link (AI context injected into floating agent) */}
                     <div className="pds-pub-footer">
                       {pubmedUrl ? (
                         <a

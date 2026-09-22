@@ -50,7 +50,7 @@ export const AUTHORITATIVE_PEPTIDE_KNOWLEDGE_BASE = {
     }
   },
   'bpc-157': {
-    canonicalName: 'BPC-157 (Body Protection Compound)',
+    canonicalName: 'BPC-157',
     aliases: ['bpc-157', 'bpc157', 'body protection compound', 'bepecin', 'pl-14736', 'pl-10'],
     casNumber: '137525-51-0',
     molecularFormula: 'C62H98N16O22',

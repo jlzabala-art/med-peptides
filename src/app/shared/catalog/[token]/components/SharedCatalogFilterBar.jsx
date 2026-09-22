@@ -4,6 +4,21 @@ import React from 'react';
 import { Search, Filter, ChevronDown, ClipboardList, List, LayoutGrid, ShieldCheck } from 'lucide-react';
 import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
 
+/** Compact inline FDA emblem — 18×16 SVG that mirrors the FDA wordmark style */
+const FdaEmblem = ({ size = 18, color = '#1d4ed8' }) => (
+  <svg width={size} height={Math.round(size * 0.88)} viewBox="0 0 36 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="FDA" role="img" style={{ flexShrink: 0 }}>
+    <rect width="36" height="32" rx="4" fill={color} />
+    <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle"
+      fontFamily="'Arial Black', Arial, sans-serif"
+      fontWeight="900"
+      fontSize="14"
+      letterSpacing="0.5"
+      fill="#ffffff"
+    >FDA</text>
+  </svg>
+);
+
+
 /**
  * SharedCatalogFilterBar — Search box, Goals multi-select, Format/Packaging dropdown,
  * FDA Status dropdown, protocol filter chips, and result count indicator.
@@ -89,9 +104,11 @@ export default function SharedCatalogFilterBar({
   const fdaButtonIcon = () => {
     const opt = FDA_OPTIONS.find(o => o.id === fdaFilter);
     if (fdaFilter && fdaFilter !== 'all' && opt) {
-      return opt.icon;
+      // Show the category emoji when a specific filter is active
+      return <span style={{ fontSize: '0.95rem', lineHeight: 1 }}>{opt.icon}</span>;
     }
-    return '🏛️';
+    // Default: show the FDA badge emblem
+    return <FdaEmblem size={18} color={isFdaActive ? '#1d4ed8' : '#475569'} />;
   };
 
   const isFdaActive = fdaFilter && fdaFilter !== 'all';
@@ -592,20 +609,23 @@ export default function SharedCatalogFilterBar({
                   style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
                   onClick={() => setIsFdaDropdownOpen(false)}
                 />
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  right: 0,
-                  width: '300px',
-                  maxWidth: '92vw',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
-                  border: '1px solid #e2e8f0',
-                  zIndex: 1000,
-                  padding: '8px',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
+                <div
+                  className="fda-dropdown-menu-popover"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    left: 0,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid #e2e8f0',
+                    zIndex: 1000,
+                    padding: '8px',
+                  }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
+                    <FdaEmblem size={16} color="#475569" />
                     <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       FDA Regulatory Status
                     </span>
@@ -613,7 +633,7 @@ export default function SharedCatalogFilterBar({
                       <button
                         type="button"
                         onClick={() => { if (setFdaFilter) setFdaFilter('all'); setIsFdaDropdownOpen(false); }}
-                        style={{ border: 'none', background: 'none', color: '#2563eb', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                        style={{ border: 'none', background: 'none', color: '#2563eb', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: 0, marginLeft: 'auto' }}
                       >
                         Reset
                       </button>

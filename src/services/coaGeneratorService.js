@@ -91,7 +91,7 @@ export function generateCoaData(product, variant) {
     },
     conclusion: 'This batch conforms to all established release specifications for research and clinical compounding.',
     qaOfficer: 'Quality Assurance & Batch Release Department',
-    qaTitle: 'Responsable de Garantía de Calidad / Head of Quality Assurance',
+    qaTitle: 'Head of Quality Assurance',
     signedDate: new Date().toISOString().split('T')[0]
   };
 }

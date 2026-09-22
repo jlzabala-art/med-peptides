@@ -87,33 +87,32 @@ export default function SharedCatalogFloatingDock({
           </div>
         )}
 
-        <div className="dock-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-
+        <div className="dock-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
           <button
             onClick={handleOpenWhatsAppCheckout}
             disabled={cartTotalUnits === 0}
             title={cartTotalUnits === 0 ? 'Add formulations to order before submitting' : 'Submit formal order'}
             style={{
-              backgroundColor: cartTotalUnits === 0 ? '#94a3b8' : '#16a34a',
+              backgroundColor: cartTotalUnits === 0 ? '#94a3b8' : '#003666',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
-              padding: '10px 18px',
+              padding: '10px 20px',
               fontWeight: 700,
               fontSize: '0.875rem',
               cursor: cartTotalUnits === 0 ? 'not-allowed' : 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              boxShadow: cartTotalUnits === 0 ? 'none' : '0 4px 12px rgba(22, 163, 74, 0.25)',
-              opacity: cartTotalUnits === 0 ? 0.65 : 1,
-              transition: 'all 0.2s ease'
+              boxShadow: cartTotalUnits === 0 ? 'none' : '0 2px 8px rgba(0, 54, 102, 0.25)',
+              opacity: cartTotalUnits === 0 ? 0.6 : 1,
+              transition: 'all 0.18s ease'
             }}
-            onMouseEnter={(e) => { if (cartTotalUnits > 0) e.currentTarget.style.backgroundColor = '#15803d'; }}
-            onMouseLeave={(e) => { if (cartTotalUnits > 0) e.currentTarget.style.backgroundColor = '#16a34a'; }}
+            onMouseEnter={(e) => { if (cartTotalUnits > 0) e.currentTarget.style.backgroundColor = '#002244'; }}
+            onMouseLeave={(e) => { if (cartTotalUnits > 0) e.currentTarget.style.backgroundColor = '#003666'; }}
           >
-            <Send size={16} />
-            <span>{cartTotalUnits > 0 ? `Submit Order (${cartTotalUnits}) 🚀` : 'Submit Order'}</span>
+            <Send size={15} color="#ffffff" />
+            <span>{cartTotalUnits > 0 ? `Submit Order (${cartTotalUnits})` : 'Submit Order'}</span>
           </button>
         </div>
       </div>

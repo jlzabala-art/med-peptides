@@ -902,6 +902,18 @@ export default function SharedCatalogStyles() {
               min-width: 0 !important;
               flex: 1 1 calc(50% - 4px) !important;
             }
+            .fda-dropdown-menu-popover {
+              width: 100% !important;
+              left: 0 !important;
+              right: 0 !important;
+            }
+          }
+          @media (min-width: 769px) {
+            .fda-dropdown-menu-popover {
+              width: 310px !important;
+              left: auto !important;
+              right: 0 !important;
+            }
           }
           .catalog-search-box {
             width: 100%;
@@ -1232,17 +1244,18 @@ export default function SharedCatalogStyles() {
           }
           .dock-actions {
             width: 100% !important;
-            display: grid !important;
-            grid-template-columns: 1fr 2fr !important;
-            gap: 6px !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+            gap: 8px !important;
           }
           .dock-actions button {
-            justify-content: center !important;
+            margin-left: auto !important;
             min-height: 44px !important;
           }
-          /* Atlas AI Technical Inquiry Floating Button — Mobile Non-Obstructive Guard */
+          /* Atlas AI Technical Inquiry Floating Button — Mobile Elevated Z-Index Guard */
           .atlas-ai-public-fab {
-            bottom: 84px !important;
+            bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
             right: 16px !important;
             width: 48px !important;
             height: 48px !important;
@@ -1252,8 +1265,8 @@ export default function SharedCatalogStyles() {
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            box-shadow: 0 6px 20px rgba(0, 54, 102, 0.45) !important;
-            z-index: 45 !important;
+            box-shadow: 0 8px 24px rgba(0, 54, 102, 0.5) !important;
+            z-index: 70 !important;
           }
           .atlas-ai-fab-label {
             display: none !important;
@@ -1356,9 +1369,9 @@ export default function SharedCatalogStyles() {
             padding: 16px 20px calc(110px + env(safe-area-inset-bottom, 16px)) 20px !important;
           }
           .atlas-ai-public-fab {
-            bottom: 84px !important;
+            bottom: 96px !important;
             right: 20px !important;
-            z-index: 45 !important;
+            z-index: 70 !important;
           }
         }
 
