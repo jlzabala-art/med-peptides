@@ -687,6 +687,8 @@ export default function PublicDatasheetView({
     return filteredStrengths[0]?.id || sortedStrengths[0]?.id || '10_mg';
   });
 
+  const [packUnits, setPackUnits] = useState(1); // 1 (Single) | 5 (Pack) | 10 (Wholesale Box)
+
   useEffect(() => {
     if (!filteredStrengths.some(s => s.id === selectedStrengthId)) {
       setSelectedStrengthId(filteredStrengths[0]?.id || sortedStrengths[0]?.id || '10_mg');
@@ -1489,6 +1491,101 @@ export default function PublicDatasheetView({
               })}
             </div>
           </div>
+
+          {/* Packaging / Volume Tier Selector (EQNO Scientific-Inspired Wholesale Options) */}
+          {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+            <div className="pds-pack-tier-section" style={{
+              marginTop: '1.15rem',
+              padding: '0.95rem 1rem',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.8) 100%)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {lang === 'es' ? '📦 Formato de Lote y Ahorro por Volumen:' : '📦 Packaging Tier & Volume Savings:'}
+                </span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', background: '#dcfce7', padding: '2px 8px', borderRadius: '6px' }}>
+                  {packUnits === 10 ? (lang === 'es' ? 'Tarifa Mayorista B2B (-35%)' : 'Wholesale B2B Tier (-35%)') :
+                   packUnits === 5 ? (lang === 'es' ? 'Ahorro Tratamiento (-15%)' : 'Multi-Cycle Regimen (-15%)') :
+                   (lang === 'es' ? 'Unidad Individual' : 'Single Unit')}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                {[
+                  { count: 1, label: lang === 'es' ? '1 Unidad' : '1 Unit', badge: null, sub: lang === 'es' ? 'Protocolo Individual' : 'Standard' },
+                  { count: 5, label: lang === 'es' ? 'Pack 5 Unidades' : '5 Units Pack', badge: '-15%', sub: lang === 'es' ? 'Ahorro Tratamiento' : 'Save 15%' },
+                  { count: 10, label: lang === 'es' ? 'Caja 10 Unidades' : '10 Units Box', badge: '-35%', sub: lang === 'es' ? 'Escala Mayorista B2B' : 'Wholesale Tier' }
+                ].map(tier => {
+                  const isSelected = packUnits === tier.count;
+                  return (
+                    <button
+                      key={tier.count}
+                      type="button"
+                      onClick={() => {
+                        setPackUnits(tier.count);
+                        triggerHaptic('selection');
+                      }}
+                      style={{
+                        padding: '0.65rem 0.5rem',
+                        borderRadius: '10px',
+                        border: isSelected ? '2px solid #003666' : '1px solid #cbd5e1',
+                        background: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
+                        boxShadow: isSelected ? '0 4px 12px rgba(0, 54, 102, 0.12)' : 'none',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        position: 'relative',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {tier.badge && (
+                        <span style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '6px',
+                          background: tier.count === 10 ? '#2563eb' : '#16a34a',
+                          color: '#ffffff',
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
+                          padding: '1px 6px',
+                          borderRadius: '10px',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}>
+                          {tier.badge}
+                        </span>
+                      )}
+                      <div style={{ fontWeight: 800, fontSize: '0.84rem', color: isSelected ? '#003666' : '#1e293b' }}>
+                        {tier.label}
+                      </div>
+                      <div style={{ fontSize: '0.70rem', color: isSelected ? '#2563eb' : '#64748b', marginTop: '2px', fontWeight: 600 }}>
+                        {tier.sub}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Wholesale pricing benchmark note */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.72rem',
+                color: '#64748b',
+                marginTop: '0.65rem',
+                paddingTop: '0.5rem',
+                borderTop: '1px dashed #cbd5e1'
+              }}>
+                <span>
+                  <strong>Wholesale Benchmark:</strong> {packUnits === 10 ? '$7.30 / mg (B2B Bulk Rate)' : '$12.90 / mg (Standard Rate)'}
+                </span>
+                <span style={{ color: '#0f172a', fontWeight: 700 }}>
+                  Dual RP-HPLC ≥ 99.0% Verified
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Refill Cross-Format Callouts (Pen vs 3 mL Refill Cartridge) */}
           {isPenAndCartridgeEcosystem && isPenFormat && (

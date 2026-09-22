@@ -55,6 +55,10 @@ export default function SpainCompanyResidencyTechnicalSpecs({
   const [physicalStay, setPhysicalStay] = useState('flexible'); // 'flexible' | 'full'
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
+  // 60-Second Qualifier State
+  const [qualifierOrigin, setQualifierOrigin] = useState('ibero'); // 'ibero' | 'noneu'
+  const [qualifierCapital, setQualifierCapital] = useState('tier2'); // 'tier1' (€25-50k) | 'tier2' (€50-100k) | 'tier3' (€100k+)
+
   const toggleFaq = (idx) => {
     setOpenFaqIndex(openFaqIndex === idx ? null : idx);
   };
@@ -287,6 +291,176 @@ export default function SpainCompanyResidencyTechnicalSpecs({
             <span className="spain-metric-lbl">Legal Ownership</span>
             <span className="spain-metric-sub">Clean notarial deed</span>
           </div>
+        </div>
+      </div>
+
+      {/* ── 2.5 60-Second Fast-Track Visa Qualifier ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #002244 0%, #003666 100%)',
+        color: '#ffffff',
+        borderRadius: '16px',
+        padding: '1.5rem',
+        marginBottom: '2rem',
+        border: '1px solid rgba(56, 189, 248, 0.3)',
+        boxShadow: '0 10px 28px -6px rgba(0, 54, 102, 0.4)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: 'rgba(56, 189, 248, 0.15)',
+              border: '1px solid rgba(56, 189, 248, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#38bdf8'
+            }}>
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                {lang === 'es' ? 'Test de Elegibilidad Inmediata en 60 Segundos' : '60-Second Fast-Track Visa Eligibility Qualifier'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#93c5fd' }}>
+                {lang === 'es' ? 'Verificación preliminar estatutaria según los Criterios Oficiales UGE-CE / Ley 14/2013' : 'Statutory pre-check against official UGE-CE / Law 14/2013 criteria'}
+              </div>
+            </div>
+          </div>
+          <span style={{
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            background: 'rgba(34, 197, 94, 0.2)',
+            color: '#86efac',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            padding: '4px 10px',
+            borderRadius: '20px'
+          }}>
+            ✓ 20-Day Fast Track
+          </span>
+        </div>
+
+        {/* Qualifier Controls */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginBottom: '1.25rem' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase', marginBottom: '6px' }}>
+              {lang === 'es' ? '1. Nacionalidad del Solicitante' : '1. Applicant Citizenship'}
+            </label>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[
+                { id: 'ibero', label: lang === 'es' ? '🌎 Iberoamericana' : '🌎 Ibero-American', sub: lang === 'es' ? 'Nacionalidad en 2 Años' : 'Citizenship in 2 Yrs' },
+                { id: 'noneu', label: lang === 'es' ? '🌐 No-UE / Global' : '🌐 Non-EU / Global', sub: lang === 'es' ? 'Residencia UE 5 Años' : 'Permanent EU Year 5' }
+              ].map(opt => {
+                const isSelected = qualifierOrigin === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setQualifierOrigin(opt.id)}
+                    style={{
+                      flex: 1,
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      border: isSelected ? '1.5px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.15)',
+                      background: isSelected ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div style={{ fontSize: '0.80rem', fontWeight: 800 }}>{opt.label}</div>
+                    <div style={{ fontSize: '0.68rem', color: isSelected ? '#38bdf8' : '#94a3b8' }}>{opt.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase', marginBottom: '6px' }}>
+              {lang === 'es' ? '2. Capital de Inversión Disponible' : '2. Investment Horizon'}
+            </label>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[
+                { id: 'tier1', label: '€25k – €50k', sub: lang === 'es' ? 'S.L. Estándar' : 'Turnkey S.L.' },
+                { id: 'tier2', label: '€50k – €100k', sub: lang === 'es' ? 'Óptimo UGE-CE' : 'Optimal Path' },
+                { id: 'tier3', label: '€100k+', sub: lang === 'es' ? 'Expansión B2B' : 'Holding / Multi' }
+              ].map(opt => {
+                const isSelected = qualifierCapital === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setQualifierCapital(opt.id)}
+                    style={{
+                      flex: 1,
+                      padding: '8px 8px',
+                      borderRadius: '8px',
+                      border: isSelected ? '1.5px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.15)',
+                      background: isSelected ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800 }}>{opt.label}</div>
+                    <div style={{ fontSize: '0.66rem', color: isSelected ? '#38bdf8' : '#94a3b8' }}>{opt.sub}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Live Statutory Assessment Box */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(56, 189, 248, 0.25)',
+          borderRadius: '12px',
+          padding: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+              <CheckCircle2 size={16} color="#4ade80" />
+              <strong style={{ fontSize: '0.88rem', color: '#f8fafc' }}>
+                {lang === 'es' ? '100% Elegible para Resolución Rápida UGE-CE en 20 Días' : '100% Eligible for 20-Day Fast-Track UGE-CE Resolution'}
+              </strong>
+            </div>
+            <div style={{ fontSize: '0.76rem', color: '#cbd5e1' }}>
+              {qualifierOrigin === 'ibero'
+                ? (lang === 'es' ? '⭐ Vía Acelerada: Califica para pasaporte español y ciudadanía en 2 años de residencia legal continuada.' : '⭐ Accelerated Track: Qualifies for Spanish citizenship & EU passport in only 2 years.')
+                : (lang === 'es' ? '🇪🇺 Vía Europea Estándar: Permiso inicial de 3 años, renovable +2 y residencia permanente en el año 5.' : '🇪🇺 Standard EU Track: 3-year initial permit, renewable +2, with permanent EU residency at Year 5.')}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onOpenInquiry && onOpenInquiry()}
+            style={{
+              padding: '0.65rem 1.15rem',
+              background: 'linear-gradient(135deg, #38bdf8 0%, #2563eb 100%)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 800,
+              fontSize: '0.84rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>{lang === 'es' ? 'Iniciar Evaluación Diagnóstica' : 'Start Diagnostic Review'}</span>
+            <ArrowRight size={15} />
+          </button>
         </div>
       </div>
 

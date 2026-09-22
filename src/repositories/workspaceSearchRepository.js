@@ -137,6 +137,63 @@ async function fetchFromFirestore(type, cacheKey) {
         biginContactId: '7006116000001550028',
       });
 
+      // Seed/Default for Dr. Raluca Hera (Hera Medical Institute)
+      wsMap.set('hera-medical-institute', {
+        id: 'hera-medical-institute',
+        name: 'Dr. Raluca Hera',
+        companyName: 'Hera Medical Institute',
+        fullName: 'Dr. med. Raluca Hera, MD PhD',
+        displayName: 'Hera Medical Institute · Dr. Raluca Hera',
+        email: 'office@dr-hera.com',
+        secondaryEmail: 'raluca.hera@dr-hera.com',
+        phone: '+40 726 714 810',
+        mobile: '+41 77 416 49 29',
+        landline: '+41 43 343 97 30',
+        type: 'wholeseller',
+        role: 'wholeseller',
+        priceMarkupPercent: 20,
+        markupPercent: 20,
+        marginOnCost: 20,
+        pricingTier: 'wholesale',
+        address: 'Docenților 12A',
+        shippingAddress: 'Docenților 12A, RO-011403 Bucharest, Romania',
+        city: 'Bucharest',
+        country: 'Romania',
+        currency: 'EUR',
+        secondaryAddress: 'Lochmannstrasse 2, CH-8001 Zurich, Switzerland',
+        secondaryCountry: 'Switzerland',
+        secondaryCity: 'Zurich',
+        website: 'https://dr-hera.com',
+        speciality: 'Obstetrics and Gynecology; Menopause and Longevity Medicine',
+        biginContactId: '7006116000001741002',
+        zohoBiginContactId: '7006116000001741002',
+        zohoBiginAccountId: '7006116000001742002',
+      });
+
+      // Seed/Default for Dr. Ana Baroni
+      wsMap.set('dr-ana-baroni', {
+        id: 'dr-ana-baroni',
+        name: 'Dr. Ana Baroni',
+        companyName: 'Asia Pacific Longevity Medicine Society / Dr. Ana Baroni',
+        fullName: 'Dr. Ana Baroni, MD PhD MSc',
+        displayName: 'Dr. Ana Baroni · Longevity Medicine',
+        email: 'dranabaroni@gmail.com',
+        phone: '+34 693 76 57 65',
+        mobile: '+34 693 76 57 65',
+        type: 'wholeseller',
+        role: 'wholeseller',
+        priceMarkupPercent: 20,
+        markupPercent: 20,
+        marginOnCost: 20,
+        pricingTier: 'wholesale',
+        country: 'Spain',
+        currency: 'EUR',
+        website: 'https://www.linkedin.com/in/dranabaronimdphd/',
+        speciality: 'Longevity Medicine, Precision Health, Regenerative Medicine, Genomics',
+        biginContactId: '7006116000001708010',
+        zohoBiginContactId: '7006116000001708010',
+      });
+
       snapWs.docs.forEach(d => {
         const data = d.data();
         wsMap.set(d.id, {

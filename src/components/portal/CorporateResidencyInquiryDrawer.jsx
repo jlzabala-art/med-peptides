@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Check, ArrowRight, ShieldCheck, Briefcase, Globe, Users, Building2, Calendar, Phone, Mail, FileText } from 'lucide-react';
+import { X, Check, ArrowRight, ShieldCheck, Briefcase, Globe, Users, Building2, Calendar, Phone, Mail, FileText, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+function WaIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.158.57 4.184 1.564 5.938l-1.564 5.717 5.864-1.538c1.696.924 3.633 1.455 5.698 1.455 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z" />
+    </svg>
+  );
+}
 
 export default function CorporateResidencyInquiryDrawer({
   isOpen = false,
@@ -43,6 +51,48 @@ export default function CorporateResidencyInquiryDrawer({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
+
+  const handleWhatsAppDirect = () => {
+    const structLabel = applicantStructure === 'single' ? (isEs ? 'Empresario Individual' : 'Single Entrepreneur') :
+      applicantStructure === 'team' ? (isEs ? 'Equipo Co-Fundadores (2-4)' : 'Co-Founders Team (2-4)') :
+      (isEs ? 'Unidad Familiar' : 'Family Unit');
+
+    const capitalLabel = capitalHorizon === '25k-50k' ? '€25.000 – €50.000' :
+      capitalHorizon === '50k-100k' ? '€50.000 – €100.000' : '€100.000+';
+
+    const sectorLabel = targetSector === 'tech' ? 'Tech & AI Software' :
+      targetSector === 'trade' ? 'B2B Trade & Logistics' :
+      targetSector === 'holding' ? 'Asset Holding & Management' : 'Consulting & Services';
+
+    const timelineLabel = timeline === 'immediate' ? (isEs ? '< 30 días' : '< 30 days') :
+      timeline === '1-3m' ? (isEs ? '1 a 3 meses' : '1 to 3 months') :
+      (isEs ? 'Explorando' : 'Exploring');
+
+    const msg = isEs
+      ? `Hola, me interesa la Adquisición de S.L. y Residencia en España (Ley 14/2013).\n\n` +
+        `• Estructura: ${structLabel}\n` +
+        `• Capital Previsto: ${capitalLabel}\n` +
+        `• Sector S.L.: ${sectorLabel}\n` +
+        `• Plazo: ${timelineLabel}\n` +
+        (citizenship ? `• Nacionalidad: ${citizenship}\n` : '') +
+        (fullName ? `• Solicitante: ${fullName}\n` : '') +
+        (email ? `• Email: ${email}\n` : '') +
+        (phone ? `• Teléfono: ${phone}\n` : '') +
+        `\n¿Podemos coordinar una revisión diagnóstica preliminar?`
+      : `Hello, I am inquiring about the Spanish S.L. Acquisition & Law 14/2013 Residency Program.\n\n` +
+        `• Structure: ${structLabel}\n` +
+        `• Capital Horizon: ${capitalLabel}\n` +
+        `• Target Sector: ${sectorLabel}\n` +
+        `• Timeline: ${timelineLabel}\n` +
+        (citizenship ? `• Citizenship: ${citizenship}\n` : '') +
+        (fullName ? `• Applicant: ${fullName}\n` : '') +
+        (email ? `• Email: ${email}\n` : '') +
+        (phone ? `• Phone: ${phone}\n` : '') +
+        `\nCould we coordinate a preliminary diagnostic review?`;
+
+    const cleanPhone = '34649814227'; // Brand Business Health S.L. WhatsApp Desk
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+  };
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
@@ -259,23 +309,49 @@ export default function CorporateResidencyInquiryDrawer({
                 <div><strong>{isEs ? 'Plazo:' : 'Timeline:'}</strong> {timeline.toUpperCase()}</div>
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                style={{
-                  width: '100%',
-                  padding: '0.85rem',
-                  background: '#003666',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  cursor: 'pointer'
-                }}
-              >
-                {isEs ? 'Entendido / Cerrar' : 'Done / Close Window'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleWhatsAppDirect}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem',
+                    background: '#25D366',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(37, 211, 102, 0.25)'
+                  }}
+                >
+                  <WaIcon />
+                  <span>{isEs ? 'Iniciar Chat Inmediato por WhatsApp' : 'Start Immediate WhatsApp Chat'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem',
+                    background: '#003666',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Entendido / Cerrar' : 'Done / Close Window'}
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.35rem' }}>
@@ -558,32 +634,58 @@ export default function CorporateResidencyInquiryDrawer({
                 </div>
               </div>
 
-              {/* Submit CTA */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={{
-                  marginTop: '0.5rem',
-                  width: '100%',
-                  padding: '0.9rem 1.25rem',
-                  background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '10px',
-                  fontWeight: 800,
-                  fontSize: '0.92rem',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 14px rgba(0, 54, 102, 0.3)',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <span>{isSubmitting ? (isEs ? 'Enviando Expediente...' : 'Submitting Dossier...') : (isEs ? 'Solicitar Revisión Diagnóstica Confidencial' : 'Request Confidential Diagnostic Review')}</span>
-                <ArrowRight size={16} />
-              </button>
+              {/* Dual Action: Submit Dossier OR Direct WhatsApp Contact */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', marginTop: '0.5rem' }}>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  style={{
+                    width: '100%',
+                    padding: '0.88rem 1.25rem',
+                    background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontWeight: 800,
+                    fontSize: '0.92rem',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(0, 54, 102, 0.3)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span>{isSubmitting ? (isEs ? 'Enviando Expediente...' : 'Submitting Dossier...') : (isEs ? 'Enviar Solicitud Formal por Email' : 'Submit Formal Dossier via Email')}</span>
+                  <ArrowRight size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleWhatsAppDirect}
+                  style={{
+                    width: '100%',
+                    padding: '0.82rem 1.25rem',
+                    background: '#25D366',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontWeight: 800,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(37, 211, 102, 0.25)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <WaIcon />
+                  <span>{isEs ? 'Chat Inmediato con Asesor Legal por WhatsApp' : 'Direct Legal Chat via WhatsApp'}</span>
+                </button>
+              </div>
 
               <div style={{ fontSize: '0.72rem', color: '#94a3b8', textAlign: 'center', lineHeight: 1.4 }}>
                 🔒 {isEs ? 'Protegido bajo estricto secreto profesional. Los datos se transmiten directamente al equipo jurídico asignado.' : 'Protected under strict professional secrecy. Transmitted directly to assigned legal counsel.'}
