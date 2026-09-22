@@ -309,7 +309,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     {
       key: 'customerType',
       header: 'Channel Type',
-      width: '14%',
+      width: '16%',
       render: (row) => {
         const meta = getCustomerTypeMeta(row.customerType || row.type);
         return (
@@ -317,14 +317,15 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
               padding: '3px 8px',
               borderRadius: '6px',
               backgroundColor: meta.bg,
               color: meta.color,
               border: `1px solid ${meta.border}`,
               fontSize: '0.74rem',
-              fontWeight: 700
+              fontWeight: 700,
+              whiteSpace: 'nowrap'
             }}
           >
             {meta.icon} {meta.label}
@@ -335,7 +336,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     {
       key: 'commercialTerms',
       header: 'Pricing & Currency',
-      width: '18%',
+      width: '16%',
       render: (row) => {
         const currency = row.currency || (row.country?.toLowerCase().includes('emirates') ? 'AED' : (row.country?.toLowerCase().includes('spain') ? 'EUR' : 'USD'));
         const markup = row.commercialMarkup ?? row.markup ?? row.discountMargin ?? 20;
@@ -350,7 +351,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
                 borderRadius: '12px',
                 backgroundColor: '#eff6ff',
                 color: '#1d4ed8',
-                border: '1px solid #bfdbfe'
+                border: '1px solid #bfdbfe',
+                whiteSpace: 'nowrap'
               }}
             >
               +{markup}%
@@ -363,7 +365,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
                 borderRadius: '4px',
                 backgroundColor: '#f8fafc',
                 color: '#475569',
-                border: '1px solid #cbd5e1'
+                border: '1px solid #cbd5e1',
+                whiteSpace: 'nowrap'
               }}
             >
               {currency}
@@ -373,88 +376,36 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       }
     },
     {
-      key: 'contact',
-      header: 'Contact & Channels',
-      width: '18%',
-      render: (row) => {
-        const rawPhone = row.phone || row.contactPhone || row.mobile || '';
-        const cleanDigits = rawPhone.replace(/[^\d+]/g, '');
-        const waNumber = cleanDigits.replace('+', '');
-        const email = row.email || row.contactEmail || '';
-
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }} onClick={e => e.stopPropagation()}>
-            {rawPhone ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <a
-                  href={`tel:${cleanDigits}`}
-                  title={`Call ${rawPhone}`}
-                  style={{ fontSize: '0.76rem', fontWeight: 600, color: 'var(--text-main)', textDecoration: 'none' }}
-                >
-                  📞 {rawPhone}
-                </a>
-                {waNumber.length >= 7 && (
-                  <a
-                    href={`https://wa.me/${waNumber}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={`Open WhatsApp chat with ${row.name || 'Customer'}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '18px',
-                      height: '18px',
-                      borderRadius: '4px',
-                      backgroundColor: '#dcfce7',
-                      color: '#16a34a',
-                      border: '1px solid #bbf7d0',
-                      fontSize: '0.68rem',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    💬
-                  </a>
-                )}
-              </div>
-            ) : (
-              <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>— No phone —</span>
-            )}
-            {email ? (
-              <a
-                href={`mailto:${email}`}
-                style={{ fontSize: '0.72rem', color: '#0284c7', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                title={`Send email to ${email}`}
-              >
-                ✉️ {email}
-              </a>
-            ) : (
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>—</span>
-            )}
-          </div>
-        );
-      }
-    },
-    {
       key: 'status',
       header: 'Status',
-      width: '8%',
+      width: '12%',
       render: (row) => <StatusBadge status={row.status || 'active'} />
     },
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '12%',
+      width: '24%',
       align: 'right',
       render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }} onClick={e => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => setShareModalCustomer(row)}
-            className="gcp-action-thumb-btn thumb-share"
+            className="gcp-btn-secondary"
+            style={{
+              padding: '4px 8px',
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              borderRadius: '6px',
+              whiteSpace: 'nowrap'
+            }}
             title="Compartir Catálogo B2B / Datasheet"
           >
-            <Share2 size={15} />
+            <Share2 size={13} />
+            <span>Share</span>
           </button>
           <QuoteQuickActionDropdown
             size="sm"
@@ -469,10 +420,24 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           <button
             type="button"
             onClick={() => setSelectedCustomer(row)}
-            className="gcp-action-thumb-btn thumb-profile"
+            className="gcp-btn-secondary"
+            style={{
+              padding: '4px 8px',
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              borderRadius: '6px',
+              backgroundColor: '#f8fafc',
+              borderColor: '#cbd5e1',
+              color: '#334155',
+              whiteSpace: 'nowrap'
+            }}
             title="Abrir Perfil del Cliente (360°)"
           >
-            <Eye size={15} />
+            <Eye size={13} />
+            <span>360°</span>
           </button>
         </div>
       )

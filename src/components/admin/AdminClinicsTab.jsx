@@ -271,104 +271,15 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
       }
     },
     {
-      key: 'contact',
-      header: 'Contact & Channels',
-      width: '20%',
-      render: (c) => {
-        const rawPhone = c.phone || '';
-        const cleanDigits = rawPhone.replace(/[^\d+]/g, '');
-        const waNumber = cleanDigits.replace('+', '');
-        const email = c.email || '';
-
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }} onClick={e => e.stopPropagation()}>
-            {rawPhone ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <a
-                  href={`tel:${cleanDigits}`}
-                  title={`Call ${rawPhone}`}
-                  style={{
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: 'var(--text-main)',
-                    textDecoration: 'none'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
-                >
-                  📞 {rawPhone}
-                </a>
-                {waNumber.length >= 7 && (
-                  <a
-                    href={`https://wa.me/${waNumber}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={`Open WhatsApp chat with ${c.name || 'Clinic'}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '4px',
-                      backgroundColor: '#dcfce7',
-                      color: '#16a34a',
-                      border: '1px solid #bbf7d0',
-                      fontSize: '0.70rem',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    💬
-                  </a>
-                )}
-              </div>
-            ) : (
-              <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>— No phone —</span>
-            )}
-
-            {email ? (
-              <a
-                href={`mailto:${email}`}
-                title={`Send email to ${email}`}
-                style={{
-                  fontSize: '0.72rem',
-                  color: '#0284c7',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
-                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
-              >
-                ✉️ {email}
-              </a>
-            ) : c.website ? (
-              <a
-                href={c.website.startsWith('http') ? c.website : `https://${c.website}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontSize: '0.72rem', color: '#64748b', textDecoration: 'none' }}
-              >
-                🌐 {new URL(c.website.startsWith('http') ? c.website : `https://${c.website}`).hostname.replace('www.', '')}
-              </a>
-            ) : (
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>—</span>
-            )}
-          </div>
-        );
-      }
-    },
-    {
       key: 'status',
       header: 'Status',
-      width: '10%',
+      width: '14%',
       render: (c) => <StatusBadge status={c.status || 'active'} />
     },
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '18%',
+      width: '34%',
       align: 'right',
       render: (c) => {
         const rawPhone = c.phone || c.contactPhone || '';

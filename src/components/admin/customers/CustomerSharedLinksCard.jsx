@@ -210,6 +210,117 @@ export default function CustomerSharedLinksCard({
         </div>
       </div>
 
+      {/* ── CONTACT & DIRECT COMMS STRIP (Moved from table row to expandable panel) ── */}
+      {(customer?.phone || customer?.contactPhone || customer?.mobile || customer?.email || customer?.contactEmail || customer?.website || customer?.city || customer?.country) && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            padding: '8px 16px',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e2e8f0',
+            fontSize: '0.78rem'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            {/* Phone & WhatsApp */}
+            {(customer?.phone || customer?.contactPhone || customer?.mobile) ? (() => {
+              const rawP = customer.phone || customer.contactPhone || customer.mobile;
+              const cleanDigits = rawP.replace(/[^\d+]/g, '');
+              const waNumber = cleanDigits.replace('+', '');
+              return (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Phone:</span>
+                  <a
+                    href={`tel:${cleanDigits}`}
+                    style={{ color: '#0f172a', fontWeight: 700, textDecoration: 'none' }}
+                    title={`Call ${rawP}`}
+                  >
+                    📞 {rawP}
+                  </a>
+                  {waNumber.length >= 7 && (
+                    <a
+                      href={`https://wa.me/${waNumber}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        backgroundColor: '#dcfce7',
+                        color: '#16a34a',
+                        border: '1px solid #bbf7d0',
+                        fontSize: '0.70rem',
+                        fontWeight: 700,
+                        textDecoration: 'none'
+                      }}
+                      title={`Open WhatsApp chat with ${customerName}`}
+                    >
+                      💬 WhatsApp
+                    </a>
+                  )}
+                </div>
+              );
+            })() : null}
+
+            {/* Email */}
+            {(customer?.email || customer?.contactEmail) ? (() => {
+              const em = customer.email || customer.contactEmail;
+              return (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Email:</span>
+                  <a
+                    href={`mailto:${em}`}
+                    style={{ color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}
+                    title={`Send email to ${em}`}
+                  >
+                    ✉️ {em}
+                  </a>
+                </div>
+              );
+            })() : null}
+
+            {/* Website */}
+            {customer?.website ? (() => {
+              const web = customer.website;
+              const webUrl = web.startsWith('http') ? web : `https://${web}`;
+              return (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Web:</span>
+                  <a
+                    href={webUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#475569', fontWeight: 600, textDecoration: 'none' }}
+                    title={`Visit ${web}`}
+                  >
+                    🌐 {web.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                  </a>
+                </div>
+              );
+            })() : null}
+
+            {/* Location */}
+            {(customer?.city || customer?.country) ? (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#64748b' }}>
+                <span>📍 {[customer.city, customer.country].filter(Boolean).join(', ')}</span>
+              </div>
+            ) : null}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem', color: '#64748b' }}>
+            <span style={{ padding: '2px 8px', borderRadius: '12px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontWeight: 700 }}>
+              Direct Channels Active
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── FULL-WIDTH TABLE (Google Cloud Style) ── */}
       {loading ? (
         <div style={{ padding: '28px', textAlign: 'center', fontSize: '0.82rem', color: '#64748b' }}>
