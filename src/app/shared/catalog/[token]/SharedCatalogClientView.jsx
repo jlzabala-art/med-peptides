@@ -134,7 +134,8 @@ export default function SharedCatalogClientView({
   protocols = [],
   currency = 'USD',
   priceSource = 'wholesaler',
-  includePrices = true
+  includePrices = true,
+  serverKpis = null
 }) {
   const {
     activeTab, setActiveTab,
@@ -785,8 +786,9 @@ export default function SharedCatalogClientView({
           t={t}
         />
 
-        {/* Google Cloud Standard 4-KPI Metric Strip */}
+        {/* Google Cloud Standard 4-KPI Metric Strip (Golden Rule #22 Server-side KPIs & Scope Switcher) */}
         <SharedCatalogKpiBar
+          serverKpis={serverKpis}
           totalProductsCount={products?.length || 0}
           displayedCount={displayedProducts?.length || 0}
           totalVariants={totalVariants || 0}
