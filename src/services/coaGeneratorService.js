@@ -8,11 +8,13 @@
 export function generateCoaData(product, variant) {
   const activeVariant = variant || product?.variants?.[0] || {};
   const productName = product?.canonicalName || product?.name || 'Peptide Compound';
-  const molecularWeight = Number(product?.molecular?.molecularWeight || product?.molecularWeight || 4113.6);
+  const rawWeight = product?.molecular?.molecularWeight || product?.molecularWeight || 4113.6;
+  const parsedWeight = typeof rawWeight === 'number' ? rawWeight : parseFloat(String(rawWeight).replace(/[^0-9.]/g, ''));
+  const molecularWeight = (!isNaN(parsedWeight) && parsedWeight > 0) ? parsedWeight : 4113.6;
   const formula = product?.molecular?.formula || product?.formula || 'C225H348N48O68';
-  const casNumber = product?.molecular?.casNumber || product?.cas || '2023788-19-2';
-  const purity = Number(product?.purity || 99.4);
-  const sequence = product?.molecular?.sequence || product?.sequence || 'Tyr-Aib-Glu-Gly-Thr-Phe-Thr-Ser-Asp-Tyr-Ser-Ile-Aib-Leu-Asp-Lys-Ile-Ala-Gln-Lys-Ala-Phe-Val-Gln-Trp-Leu-Ile-Ala-Gly-Gly-Pro-Ser-Ser-Gly-Ala-Pro-Pro-Pro-Ser-NH2';
+  const rawPurity = product?.purity || product?.analyticalPurity || product?.hplcPurity || 99.4;
+  const parsedPurity = typeof rawPurity === 'number' ? rawPurity : parseFloat(String(rawPurity).replace(/[^0-9.]/g, ''));
+  const purity = (!isNaN(parsedPurity) && parsedPurity > 0) ? parsedPurity : 99.4;
   
   const lotId = `RP-${(product?.id || 'TIRZ').substring(0, 4).toUpperCase()}-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
   const verificationCode = `COA-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
