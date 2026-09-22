@@ -1,17 +1,19 @@
 /**
  * src/app/d/[code]/page.jsx
  * ─────────────────────────────────────────────────────────────────────────────
- * Short Link Redirection & Discreet WhatsApp Unfurling Endpoint
+ * Short Link Redirection & Read Tracking Engine (Read Receipts).
  * 
- * STRICT COMPLIANCE:
- * - Clean metadata for WhatsApp and social previews.
- * - Zero mention of company name (no RegenPept, Magenta, Lotusland, etc.).
- * - Zero mention of specific product name.
- * - Instant redirection to the full, comprehensive datasheet URL.
+ * FEATURES:
+ * - Detects every opening and marks readStatus: 'read'.
+ * - Records timestamps, viewCount, IP, and UserAgent.
+ * - Synchronizes with central CRM shared_records collection.
+ * - Handles link revocation securely.
+ * - Preserves discreet social preview metadata for WhatsApp/Telegram.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +63,7 @@ export default async function ShortDatasheetPage({ params }) {
   const code = resolvedParams?.code;
 
   let targetUrl = `${BASE_URL}/catalog`;
+  let isRevoked = false;
 
   if (adminDb && code) {
     try {
@@ -68,18 +71,112 @@ export default async function ShortDatasheetPage({ params }) {
       const snap = await docRef.get();
       if (snap.exists) {
         const data = snap.data();
-        if (data?.targetUrl) {
+
+        if (data.status === 'revoked') {
+          isRevoked = true;
+        } else if (data?.targetUrl) {
           targetUrl = data.targetUrl;
-          // Increment hits asynchronously
-          docRef.update({
-            hits: (data.hits || 0) + 1,
-            lastAccessedAt: new Date().toISOString()
+
+          // Extract client request headers for audit logging
+          const headersList = await headers();
+          const userAgent = headersList.get('user-agent') || 'unknown';
+          const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+          const referer = headersList.get('referer') || null;
+
+          const now = new Date().toISOString();
+          const viewCount = (data.viewCount || data.hits || 0) + 1;
+          const viewEntry = {
+            timestamp: now,
+            userAgent,
+            ip,
+            referer
+          };
+
+          const updatePayload = {
+            hits: viewCount,
+            viewCount,
+            readStatus: 'read',
+            firstViewedAt: data.firstViewedAt || now,
+            lastViewedAt: now,
+            lastAccessedAt: now,
+            views: [...(data.views || []).slice(-49), viewEntry]
+          };
+
+          // 1. Update datasheet_short_links record
+          docRef.update(updatePayload).catch((err) => {
+            console.warn('[ShortDatasheetPage] Failed to update short link tracking:', err.message);
+          });
+
+          // 2. Mirror read event to central shared_records collection for CRM visibility
+          adminDb.collection('shared_records').doc(code).update({
+            status: 'read',
+            readStatus: 'read',
+            viewCount,
+            firstViewedAt: data.firstViewedAt || now,
+            lastViewedAt: now,
+            views: [...(data.views || []).slice(-49), viewEntry]
+          }).catch(() => {});
+
+          // 3. Mirror read event to shared_catalog_links for User360Drawer
+          adminDb.collection('shared_catalog_links').doc(code).update({
+            status: 'read',
+            readStatus: 'read',
+            visitsCount: viewCount,
+            viewCount,
+            lastViewedAt: now,
+            lastVisitedAt: now
           }).catch(() => {});
         }
       }
     } catch (err) {
       console.error('[ShortDatasheetPage] Error fetching short link:', err);
     }
+  }
+
+  if (isRevoked) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc',
+        padding: '24px',
+        fontFamily: 'Inter, system-ui, sans-serif'
+      }}>
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #fee2e2',
+          padding: '40px',
+          maxWidth: '500px',
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: '#fef2f2',
+            color: '#dc2626',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '16px',
+            fontSize: '24px'
+          }}>
+            ⚠️
+          </div>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+            Datasheet Link Revoked
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.5', margin: 0 }}>
+            This technical documentation access link has been revoked or updated by the medical affairs desk. Please contact your account representative to request an updated specification link.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Redirect instantly to the complete target URL

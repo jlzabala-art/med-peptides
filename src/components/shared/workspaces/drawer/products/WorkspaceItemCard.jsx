@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Copy, X, Package, Zap, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, X, Package, Zap, Sparkles, Share2 } from 'lucide-react';
 import WorkspaceTransferPopover from './WorkspaceTransferPopover';
 import CopyableId from '@/components/ui/CopyableId';
 import { resolveItemSku } from '@/utils/skuResolver';
@@ -29,6 +29,7 @@ export default function WorkspaceItemCard({
   availableWorkspaces = [],
   currentWorkspaceId,
   onTransferItem,
+  onShareDatasheet,
 }) {
   const tierInfo = getItemTierInfo
     ? getItemTierInfo(item)
@@ -364,6 +365,27 @@ export default function WorkspaceItemCard({
                 onClose={() => setTransferItemId && setTransferItemId(null)}
               />
             )}
+
+            <button
+              type="button"
+              onClick={() => onShareDatasheet && onShareDatasheet(item)}
+              style={{
+                width: '36px',
+                height: '36px',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                color: '#0284c7',
+                cursor: 'pointer',
+                borderRadius: '7px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                touchAction: 'manipulation',
+              }}
+              title="Compartir Ficha Técnica Única con Mayorista"
+            >
+              <Share2 size={15} />
+            </button>
 
             <button
               type="button"

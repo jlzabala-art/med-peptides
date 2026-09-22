@@ -13,11 +13,13 @@ import {
   Sparkles,
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
+import toast from 'react-hot-toast';
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
 import ClinicalSyringeHelper from './ClinicalSyringeHelper';
 import WorkspaceCompactRow from './products/WorkspaceCompactRow';
 import WorkspaceItemCard from './products/WorkspaceItemCard';
 import WorkspaceCatalogPickers from './products/WorkspaceCatalogPickers';
+import QuickShareDatasheetModal from './QuickShareDatasheetModal';
 
 export default function WorkspaceProductsAccordion({
   isExpanded,
@@ -53,6 +55,7 @@ export default function WorkspaceProductsAccordion({
   const [activePicker, setActivePicker] = useState(null); // 'products' | 'protocols' | 'kits' | null
   const [pickerSearch, setPickerSearch] = useState('');
   const [showSyringeHelper, setShowSyringeHelper] = useState(false);
+  const [shareDatasheetItem, setShareDatasheetItem] = useState(null);
 
   // High-capacity visualization state
   const [viewMode, setViewMode] = useState(items.length >= 6 ? 'compact' : 'cards');
@@ -64,6 +67,60 @@ export default function WorkspaceProductsAccordion({
   const workspacesMap = useWorkspaceStore((s) => s.workspaces);
   const moveItemBetweenWorkspaces = useWorkspaceStore((s) => s.moveItemBetweenWorkspaces);
   const copyItemBetweenWorkspaces = useWorkspaceStore((s) => s.copyItemBetweenWorkspaces);
+
+  const handleShareItemDatasheet = async (item) => {
+    const target = activeWs?.targetEntity;
+    const recipientName = target?.name || target?.displayName || target?.companyName;
+
+    // 1-Click Fast Path: if recipient is already bound to workspace, generate & copy instantly!
+    if (recipientName) {
+      const recipientType = target.role || target.type || (activeWs?.type === 'wholesaler' ? 'wholesaler' : 'doctor');
+      const itemSlug = item.slug || String(item.canonicalName || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const itemName = item.canonicalName || item.name || 'Compound';
+
+      try {
+        notifier.info(`Generando enlace único para ${recipientName}...`);
+        const res = await fetch('/api/short-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug: itemSlug,
+            dose: item.dosage || item.dose || '',
+            format: item.format || item.presentation || '',
+            supplier: item.supplier || item.supplierId || null,
+            productName: itemName,
+            recipient: {
+              id: target.id || null,
+              name: recipientName,
+              email: target.email || '',
+              phone: target.phone || '',
+              type: recipientType,
+            },
+            variant: {
+              productId: item.productId || item.id,
+              productName: itemName,
+              dose: item.dosage || item.dose || '',
+              format: item.format || item.presentation || '',
+            },
+          }),
+        });
+
+        if (!res.ok) throw new Error('Error al generar enlace rastreable');
+        const data = await res.json();
+
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(data.shortUrl);
+          toast.success(`¡Enlace único copiado para ${recipientName}!`);
+        }
+      } catch (err) {
+        console.error('[handleShareItemDatasheet]', err);
+        setShareDatasheetItem(item);
+      }
+    } else {
+      // No recipient in context: open quick picker modal
+      setShareDatasheetItem(item);
+    }
+  };
 
   const availableWorkspaces = Object.values(workspacesMap || {}).filter((w) => w.id !== activeWs?.id);
 
@@ -566,6 +623,7 @@ export default function WorkspaceProductsAccordion({
                                 availableWorkspaces={availableWorkspaces}
                                 currentWorkspaceId={activeWs?.id}
                                 onTransferItem={handleTransferItem}
+                                onShareDatasheet={handleShareItemDatasheet}
                               />
                             ))}
                         </div>
@@ -593,6 +651,7 @@ export default function WorkspaceProductsAccordion({
                         availableWorkspaces={availableWorkspaces}
                         currentWorkspaceId={activeWs?.id}
                         onTransferItem={handleTransferItem}
+                        onShareDatasheet={handleShareItemDatasheet}
                       />
                     ))
                   )}
@@ -621,6 +680,7 @@ export default function WorkspaceProductsAccordion({
                       availableWorkspaces={availableWorkspaces}
                       currentWorkspaceId={activeWs?.id}
                       onTransferItem={handleTransferItem}
+                      onShareDatasheet={handleShareItemDatasheet}
                     />
                   ))}
                 </div>
@@ -647,6 +707,14 @@ export default function WorkspaceProductsAccordion({
             savedKits={savedKits}
             onLoadKit={onLoadKit}
             onDeleteKit={onDeleteKit}
+          />
+
+          {/* Quick Tracked Datasheet Sharing Modal */}
+          <QuickShareDatasheetModal
+            isOpen={Boolean(shareDatasheetItem)}
+            onClose={() => setShareDatasheetItem(null)}
+            item={shareDatasheetItem}
+            activeWs={activeWs}
           />
         </div>
       )}

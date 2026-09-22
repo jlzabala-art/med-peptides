@@ -45,6 +45,7 @@ export default function ShareProductMonographDrawer({
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [selectedLang, setSelectedLang] = useState('en');
+  const [trackedShortUrl, setTrackedShortUrl] = useState(null);
 
   // Process hierarchy from variants
   const hierarchy = useMemo(() => {
@@ -63,6 +64,11 @@ export default function ShareProductMonographDrawer({
   const [selectedSupplierId, setSelectedSupplierId] = useState('all');
   const [selectedFormatId, setSelectedFormatId] = useState('all');
   const [selectedStrengthId, setSelectedStrengthId] = useState('all');
+
+  // Reset tracked link when selection changes
+  useEffect(() => {
+    setTrackedShortUrl(null);
+  }, [selectedSupplierId, selectedFormatId, selectedStrengthId, selectedLang]);
 
   // Initialize or reset when drawer opens
   useEffect(() => {
@@ -236,12 +242,41 @@ export default function ShareProductMonographDrawer({
 
   const handleCopy = async () => {
     try {
+      let urlToCopy = trackedShortUrl;
+
+      if (!urlToCopy) {
+        try {
+          const res = await fetch('/api/short-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              slug,
+              dose: selectedStrengthId !== 'all' ? selectedStrengthId : null,
+              format: selectedFormatId !== 'all' ? selectedFormatId : null,
+              supplier: selectedSupplierId !== 'all' ? selectedSupplierId : null,
+              lang: selectedLang,
+              productName,
+              recipient: { type: 'wholesaler', name: 'Partner / Client' },
+              targetUrl: shareUrl,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            urlToCopy = data.shortUrl;
+            setTrackedShortUrl(data.shortUrl);
+          }
+        } catch {
+          urlToCopy = shareUrl;
+        }
+      }
+
+      const finalUrl = urlToCopy || shareUrl;
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(finalUrl);
       }
       triggerHaptic();
       setCopied(true);
-      toast.success('Link copied to clipboard!');
+      toast.success('Tracked unique link copied to clipboard!');
       setTimeout(() => setCopied(false), 3000);
     } catch {
       toast.error('Could not copy link');

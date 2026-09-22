@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Copy, X } from '@/lib/icons';
+import { Copy, X, FileText } from '@/lib/icons';
 import WorkspaceTransferPopover from './WorkspaceTransferPopover';
 
 /**
@@ -26,6 +26,7 @@ export default function WorkspaceCompactRow({
   onUpdateItemPrice,
   onRemoveItem,
   getItemTierInfo,
+  onShareDatasheet,
 }) {
   const lineTotal = (it.quantity || 1) * unitRate;
   const tierInfo = getItemTierInfo ? getItemTierInfo(it) : null;
@@ -322,6 +323,39 @@ export default function WorkspaceCompactRow({
           onMoveItem={onMoveItem}
           onCopyItem={onCopyItem}
         />
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onShareDatasheet && onShareDatasheet(it);
+          }}
+          style={{
+            width: '24px',
+            height: '24px',
+            background: 'none',
+            border: '1px solid transparent',
+            color: '#0284c7',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '4px',
+            padding: 0,
+            transition: 'all 0.15s ease',
+          }}
+          title="Compartir Ficha Técnica Única con Mayorista"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#eff6ff';
+            e.currentTarget.style.borderColor = '#bfdbfe';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.borderColor = 'transparent';
+          }}
+        >
+          <FileText size={13} />
+        </button>
 
         <button
           type="button"
