@@ -19,6 +19,7 @@ const KNOWN_PROTOCOL_ALIASES = {
   'growth-hormone-optimization': 'gh_001',
   'immune-modulation-cellular': 'imm_001',
   'mitochondrial-metabolic-support': 'mit_001',
+  'lxv-neuro-restoration-12w': '3GocJWVon5tKgOASM3it',
 };
 
 async function getPublicProtocol(slug) {

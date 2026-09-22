@@ -33,6 +33,7 @@ import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav';
+import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 
 const DAY_LABELS_ES = {

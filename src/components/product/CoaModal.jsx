@@ -25,8 +25,21 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
 
   const coa = generateCoaData(product, variant);
 
+  // Dynamic file title for browser "Save as PDF" / Print dialog
+  const sanitize = (s) => String(s || '').trim().replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_');
+  const prodClean = sanitize(coa?.productName || product?.canonicalName || product?.name || 'Peptide');
+  const doseClean = sanitize(coa?.dosage || variant?.dosage || variant?.name || '');
+  const lotClean = sanitize(coa?.lotNumber || 'LOT');
+  const docClean = sanitize(coa?.documentId || '');
+  const downloadFileName = `COA_${prodClean}${doseClean ? `_${doseClean}` : ''}_${lotClean}${docClean ? `_${docClean}` : ''}`;
+
   const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = downloadFileName;
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
   };
 
   return (
