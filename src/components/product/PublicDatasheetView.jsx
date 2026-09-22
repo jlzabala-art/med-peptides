@@ -1221,20 +1221,6 @@ export default function PublicDatasheetView({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '4px',
-                    backgroundColor: '#f1f5f9',
-                    color: '#0f172a',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    padding: '2px 8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700
-                  }}>
-                    <span>🇺🇸 / 🇪🇺 Synthesis Origin</span>
-                  </span>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
                     backgroundColor: '#ecfdf5',
                     color: '#065f46',
                     border: '1px solid #6ee7b7',
@@ -2268,19 +2254,13 @@ export default function PublicDatasheetView({
 
               {/* Live Scannable Label Preview */}
               <div className="pds-vial-label-preview-wrap">
-                {inlineSvg ? (
-                  <div
-                    className="pds-vial-label-img"
-                    aria-label={`Barcode & QR Label for ${name}`}
-                    dangerouslySetInnerHTML={{ __html: inlineSvg }}
-                  />
-                ) : svgError ? (
-                  <div className="pds-vial-label-error">
-                    <span>⚠ Could not load barcode label. Check your connection.</span>
-                  </div>
-                ) : (
-                  <div className="pds-vial-label-skeleton" aria-label="Loading barcode..." />
-                )}
+                <img
+                  src={`/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(getConcreteSupplierId(activeSupplierId, supplierName))}&batch=${encodeURIComponent(effectiveBatchCode)}`}
+                  alt={`Vial Dispensing Label for ${product?.canonicalName || product?.name || slug}`}
+                  className="pds-vial-label-img"
+                  loading="lazy"
+                  style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                />
               </div>
             </div>
           </section>

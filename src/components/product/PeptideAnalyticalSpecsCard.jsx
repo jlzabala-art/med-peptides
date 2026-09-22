@@ -19,11 +19,9 @@ import {
   ThermometerSnowflake,
   ShieldCheck,
   FileCheck2,
-  Syringe,
   FlaskConical,
   Clock,
   Sparkles,
-  AlertCircle,
   HelpCircle
 } from 'lucide-react';
 import './PeptideAnalyticalSpecsCard.css';
@@ -35,7 +33,6 @@ export default function PeptideAnalyticalSpecsCard({
   onOpenCoa
 }) {
   const [copiedSeq, setCopiedSeq] = useState(false);
-  const [activeBacWater, setActiveBacWater] = useState(2.0); // 1.0mL, 2.0mL, 3.0mL
 
   // Numerical strength in mg (default 10mg)
   const strengthMg = useMemo(() => {
@@ -113,12 +110,12 @@ export default function PeptideAnalyticalSpecsCard({
           </div>
           <div>
             <h3 className="card-heading">
-              {lang === 'es' ? 'Parámetros Analíticos & Matriz de Reconstitución' : 'Analytical Specifications & Reconstitution Matrix'}
+              {lang === 'es' ? 'Especificaciones Analíticas & Calidad del Lote' : 'Analytical Specifications & Batch Quality'}
             </h3>
             <p className="card-subheading">
               {lang === 'es' 
-                ? 'Certificación de lote por RP-HPLC, espectrometría de masas y tabla de conversión para jeringa U-100.'
-                : 'RP-HPLC lot purity certification, mass spectrometry, and calibrated U-100 syringe dosing matrix.'}
+                ? 'Certificación de pureza por RP-HPLC, espectrometría de masas LC-MS y perfiles de estabilidad térmica.'
+                : 'Dual-column RP-HPLC purity, LC-MS mass confirmation and cold-chain stability profiles.'}
             </p>
           </div>
         </div>
@@ -128,6 +125,7 @@ export default function PeptideAnalyticalSpecsCard({
             type="button" 
             className="btn-inspect-coa"
             onClick={onOpenCoa}
+            title={lang === 'es' ? 'Ver Certificado de Análisis Oficial' : 'View Official Certificate of Analysis'}
           >
             <FileCheck2 size={16} />
             <span>{lang === 'es' ? 'Ver CoA del Lote' : 'Inspect Lot CoA'}</span>
@@ -224,89 +222,6 @@ export default function PeptideAnalyticalSpecsCard({
               <strong>Agua BAC (10-30 mg/mL)</strong>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* ── QUICK-REFERENCE RECONSTITUTION & DOSING MATRIX ── */}
-      <div className="reconstitution-matrix-section">
-        <div className="matrix-top-bar">
-          <div className="matrix-title-group">
-            <Syringe size={18} className="text-sky-600" />
-            <h4 className="matrix-heading">
-              {lang === 'es' 
-                ? `Matriz de Dosificación para Vial de ${strengthMg} mg (Jeringa U-100)` 
-                : `Quick-Reference Dosing Matrix for ${strengthMg} mg Vial (U-100 Syringe)`}
-            </h4>
-          </div>
-
-          {/* Bac water selector pills */}
-          <div className="bac-water-selector">
-            <span className="bac-label">{lang === 'es' ? 'Agua BAC añadida:' : 'Added BAC Water:'}</span>
-            {[1.0, 2.0, 3.0].map(vol => (
-              <button
-                key={vol}
-                type="button"
-                className={`bac-btn ${activeBacWater === vol ? 'active' : ''}`}
-                onClick={() => setActiveBacWater(vol)}
-              >
-                {vol.toFixed(1)} mL
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Dynamic Matrix Table */}
-        <div className="table-responsive-wrapper">
-          <table className="dosing-matrix-table">
-            <thead>
-              <tr>
-                <th>{lang === 'es' ? 'Volumen Inyectado' : 'Injection Volume'}</th>
-                <th>{lang === 'es' ? 'Unidades en Jeringa U-100' : 'U-100 Syringe Units'}</th>
-                <th>{lang === 'es' ? 'Dosis Activa Entregada' : 'Active Dose Delivered'}</th>
-                <th>{lang === 'es' ? 'Inyecciones por Vial' : 'Doses per Vial'}</th>
-                <th>{lang === 'es' ? 'Estabilidad en Refrigerador' : 'Refrigerated Shelf-Life'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>0.05 mL</strong></td>
-                <td><span className="badge-unit">5 Unidades</span></td>
-                <td><strong className="dose-highlight">{(parseFloat(mcgPerUnitU100) * 5).toFixed(0)} mcg</strong> ({((parseFloat(mcgPerUnitU100) * 5) / 1000).toFixed(2)} mg)</td>
-                <td>{(activeBacWater / 0.05).toFixed(0)} dosis</td>
-                <td>28 días (2°C – 8°C)</td>
-              </tr>
-              <tr className="row-featured">
-                <td><strong>0.10 mL</strong></td>
-                <td><span className="badge-unit badge-featured">10 Unidades</span></td>
-                <td><strong className="dose-highlight">{(parseFloat(mcgPerUnitU100) * 10).toFixed(0)} mcg</strong> ({((parseFloat(mcgPerUnitU100) * 10) / 1000).toFixed(2)} mg)</td>
-                <td>{(activeBacWater / 0.10).toFixed(0)} dosis</td>
-                <td>28 días (2°C – 8°C)</td>
-              </tr>
-              <tr>
-                <td><strong>0.20 mL</strong></td>
-                <td><span className="badge-unit">20 Unidades</span></td>
-                <td><strong className="dose-highlight">{(parseFloat(mcgPerUnitU100) * 20).toFixed(0)} mcg</strong> ({((parseFloat(mcgPerUnitU100) * 20) / 1000).toFixed(2)} mg)</td>
-                <td>{(activeBacWater / 0.20).toFixed(0)} dosis</td>
-                <td>28 días (2°C – 8°C)</td>
-              </tr>
-              <tr>
-                <td><strong>0.25 mL</strong></td>
-                <td><span className="badge-unit">25 Unidades</span></td>
-                <td><strong className="dose-highlight">{(parseFloat(mcgPerUnitU100) * 25).toFixed(0)} mcg</strong> ({((parseFloat(mcgPerUnitU100) * 25) / 1000).toFixed(2)} mg)</td>
-                <td>{(activeBacWater / 0.25).toFixed(0)} dosis</td>
-                <td>28 días (2°C – 8°C)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div className="matrix-footnote">
-          <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />
-          <span>
-            {lang === 'es'
-              ? 'Consejo galénico: Inyectar el agua bacteriostática despacio por la pared interior del vial. No agitar vigorosamente; rotar suavemente entre las palmas hasta disolución total.'
-              : 'Clinical advice: Inject bacteriostatic water slowly along the vial wall. Do not vortex or shake vigorously; roll gently between palms until completely dissolved.'}
-          </span>
         </div>
       </div>
 
