@@ -134,6 +134,8 @@ MED-PEPTIDES COMPLETE PUBLIC PLATFORM KNOWLEDGE BASE:
 - [Interactive Reconstitution & Syringe Calculator](/calculator) — Accurate BAC water dilution and U-100 syringe units calculator.
 - [Peptide Science Primer](/what-are-peptides) — Foundational science, mechanisms of action, and biological pathways.
 - [Spanish Corporate Acquisition & Law 14/2013 Residence Program](/p/spain-company-acquisition-residency) — Fast-track European residency and turnkey Spanish S.L. corporate acquisition under statutory Law 14/2013 (UGE-CE 20-day resolution, 3-year initial permit, Schengen 29 mobility, 100% debt-free company ownership).
+- [European Pharmaceutical Compounding & Custom Formulation Service](/p/pharmaceutical-compounding-service) — Licensed EU compounding pharmacy manufacturing (5-7 days turnaround, mobile app & email desk at kasia@mediluxeme.com, clinic B2B vs direct patient RRP invoicing, cold-chain shipping to clinic or patient, free shipping on 10+ units).
+- [B2B Peptide Supply Chain & Dedicated Inventory Management Service](/p/peptide-supply-management) — In-stock HPLC ≥99% certified peptide inventory ready for 24-48h dispatch (zero manufacturing delay), assigned personal Account Manager, dual invoicing (clinic vs patient), dual destination delivery (clinic bulk vs patient home dropship), lot-locking, and free shipping on 10+ vials.
 
 2. VERIFIED PUBLIC CLINICAL PROTOCOLS (${protocols.length} Available):
 ${protocolEntries}
@@ -141,7 +143,7 @@ ${protocolEntries}
 3. VERIFIED PUBLIC PEPTIDE MONOGRAPHS (${products.length} Key Formulations):
 ${productEntries}
 
-4. INSTITUTIONAL CORPORATE ACQUISITIONS & RESIDENCY PROGRAMS:
+4. INSTITUTIONAL CORPORATE, COMPOUNDING & SUPPLY SERVICES:
 - [Spanish Corporate Acquisition & Law 14/2013 Residence Program](/p/spain-company-acquisition-residency)
   * Statutory Basis: Spanish Law 14/2013 of September 27 (Articles 68 to 72), centrally adjudicated by the Large Business and Strategic Groups Unit (UGE-CE) under the Ministry of Inclusion, Social Security & Migration.
   * Fast-Track Resolution: Statutory 20 business days administrative silence window (positive administrative silence / favorable decision).
@@ -152,6 +154,22 @@ ${productEntries}
   * Physical Presence: No strict 183-day stay required to maintain/renew residency.
   * Remote Execution: 100% remote execution via consular Power of Attorney (PoA); visit to Spain required only for fingerprint biometrics.
   * Eligible Structures: Single entrepreneur/executive, co-founders team (2-4 partners), family unit (spouse, children under 18 or dependent adult children, dependent ascendants).
+
+- [European Pharmaceutical Compounding & Custom Formulation Service](/p/pharmaceutical-compounding-service)
+  * Manufacturing: European Compounding Pharmacy operating under EU GMP & Ph. Eur. standards.
+  * Turnaround: 5 to 7 working days total from prescription validation to international delivery.
+  * Dual Order Channels: Via dedicated Mobile Application or by emailing prescriptions directly to kasia@mediluxeme.com or business@med-peptides.com.
+  * Flexible Invoicing: If clinic pays, clinical wholesale discount is applied. If patient pays directly, recommended patient price (RRP) is applied via secure email payment link.
+  * Flexible Delivery: Shipped directly to Clinic or dropshipped door-to-door to Patient residence in validated cold-chain.
+  * Shipping Costs: 200–400 AED (approx 50–100 EUR); 100% Free Complimentary Shipping on orders of 10 or more products.
+  * Currency & Settlements: EUR base currency, converted to AED on invoice issuance date; European SEPA bank wire or secure card payment link.
+
+- [B2B Peptide Supply Chain & Dedicated Inventory Management Service](/p/peptide-supply-management)
+  * Nature: In-stock analytical HPLC ≥99% certified inventory ready for immediate allocation with ZERO manufacturing delay (24-48h dispatch).
+  * Dedicated Account Manager: Every clinic is paired with a personal Account Manager for batch allocation, lot locking, custom volume tier discounts, and cold-chain oversight.
+  * Dual Invoicing Options: Clinic B2B Wholesale Billing (clinic captures margin) OR Direct Patient RRP Billing (freeing the clinic from collection overhead).
+  * Dual Delivery Destinations: Bulk refrigerated shipment to Clinic reception OR discreet temperature-controlled dropship directly to Patient home.
+  * Shipping Costs: 100% Free Express Cold-Chain Shipping on orders of 10 or more units (200–400 AED standard on smaller orders).
 `;
 }
 

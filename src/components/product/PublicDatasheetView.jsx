@@ -51,6 +51,8 @@ import FdaRegulatoryBadge from './FdaRegulatoryBadge';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
 import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
 import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnicalSpecs';
+import CompoundingServicesTechnicalSpecs from './CompoundingServicesTechnicalSpecs';
+import PeptideSupplyManagementTechnicalSpecs from './PeptideSupplyManagementTechnicalSpecs';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -143,9 +145,21 @@ export default function PublicDatasheetView({
     return slugLower.includes('uae-company') || slugLower.includes('company-setup') || nameLower.includes('uae company setup');
   }, [slug, product]);
 
+  const isCompoundingService = useMemo(() => {
+    const slugLower = String(slug || product?.slug || product?.id || '').toLowerCase();
+    const nameLower = String(product?.canonicalName || product?.name || '').toLowerCase();
+    return slugLower.includes('compounding') || slugLower.includes('farmaceutico') || nameLower.includes('compounding');
+  }, [slug, product]);
+
+  const isPeptideSupplyService = useMemo(() => {
+    const slugLower = String(slug || product?.slug || product?.id || '').toLowerCase();
+    const nameLower = String(product?.canonicalName || product?.name || '').toLowerCase();
+    return slugLower.includes('peptide-supply') || slugLower.includes('suministro-peptidos') || nameLower.includes('peptide supply') || nameLower.includes('suministro');
+  }, [slug, product]);
+
   const isCorporateService = useMemo(() => {
-    return isSpainResidency || isUaeCorporateService || product?.isCorporateService === true || product?.category === 'corporate_services' || product?.type === 'service';
-  }, [isSpainResidency, isUaeCorporateService, product]);
+    return isSpainResidency || isUaeCorporateService || isCompoundingService || isPeptideSupplyService || product?.isCorporateService === true || product?.category === 'corporate_services' || product?.type === 'service';
+  }, [isSpainResidency, isUaeCorporateService, isCompoundingService, isPeptideSupplyService, product]);
 
   const [shortMonographUrl, setShortMonographUrl] = useState('');
 
@@ -1878,9 +1892,21 @@ export default function PublicDatasheetView({
         </section>
         )}
 
-        {/* ── Block 2: Corporate Services (Spain Residency) or Reconstitution/Specs ── */}
+        {/* ── Block 2: Corporate & Clinical Services or Reconstitution/Specs ── */}
         {isSpainResidency ? (
           <SpainCompanyResidencyTechnicalSpecs
+            product={product}
+            lang={lang}
+            onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+          />
+        ) : isCompoundingService ? (
+          <CompoundingServicesTechnicalSpecs
+            product={product}
+            lang={lang}
+            onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+          />
+        ) : isPeptideSupplyService ? (
+          <PeptideSupplyManagementTechnicalSpecs
             product={product}
             lang={lang}
             onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
@@ -2234,16 +2260,20 @@ export default function PublicDatasheetView({
       {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
         hideFloatingTrigger={true}
-        contextType={isSpainResidency ? "corporate_residency" : "monograph"}
+        contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : "monograph"}
         contextAnchor={{
           name: isSpainResidency 
             ? 'Spanish Corporate Acquisition & Law 14/2013 Residence Program'
+            : isCompoundingService
+            ? 'European Pharmaceutical Compounding & Custom Formulation Service'
+            : isPeptideSupplyService
+            ? 'B2B Peptide Supply Chain & Dedicated Inventory Management Service'
             : (product?.canonicalName || product?.name || 'Peptide Monograph'),
           slug: slug,
-          cas: product?.cas || 'N/A',
-          purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
-          molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
-          category: isSpainResidency ? 'Corporate Services' : (product?.category || 'Peptides'),
+          cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : 'N/A'),
+          purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : isCompoundingService ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy' : isPeptideSupplyService ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
+          molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : isCompoundingService ? 'Custom Prescription Matrix (Compounded Formulation)' : isPeptideSupplyService ? 'In-Stock Lyophilized Peptide Portfolio' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
+          category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? 'Compounding Farmacéutico' : isPeptideSupplyService ? 'Suministro de Péptidos' : (product?.category || 'Peptides'),
           details: isSpainResidency ? {
             program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
             statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
@@ -2253,6 +2283,24 @@ export default function PublicDatasheetView({
             ownership: '100% legal ownership of an existing debt-free Spanish S.L. (Sociedad Limitada)',
             physicalPresence: 'No strict 183-day stay required to maintain/renew permit',
             remoteExecution: 'Full remote execution through consular Power of Attorney (PoA)',
+          } : isCompoundingService ? {
+            service: 'European Pharmaceutical Compounding & Custom Formulation',
+            pharmacyStandards: 'EU Ph. Eur. & GMP Certified European Compounding Laboratory',
+            orderChannels: 'Dedicated Mobile Application or Direct Email to kasia@mediluxeme.com / business@med-peptides.com',
+            turnaroundTime: '5 to 7 working days from European compounding facility to destination',
+            invoicingFlexibility: 'Clinic Wholesale Price (if clinic pays) vs Recommended Patient Price RRP (if patient pays directly)',
+            destinationFlexibility: 'Shipped directly to Clinic or dropshipped to Patient home address with validated cold-chain',
+            shippingFeeRules: '200 to 400 AED standard shipping; 100% Free Shipping on orders of 10 or more products',
+            paymentOptions: 'European Bank SEPA / Wire or Secure Payment Link via email, EUR currency (converted to AED on invoice date)'
+          } : isPeptideSupplyService ? {
+            service: 'B2B Peptide Supply Chain & Dedicated Inventory Management',
+            stockStatus: 'Pre-certified in-stock HPLC ≥99% inventory ready for immediate allocation with ZERO manufacturing delay (24-48h dispatch)',
+            accountManager: 'Dedicated personal Account Manager assigned to every clinic as clinical and logistical concierge',
+            lotLocking: 'Lot-locking guarantee ensuring consistent lot number for patient multi-month cycles',
+            invoicingFlexibility: 'Clinic B2B Wholesale Billing vs Direct Patient RRP Invoicing',
+            deliveryFlexibility: 'Bulk refrigerated delivery to Clinic OR individual cold dropship to Patient residence',
+            shippingFeeRules: '100% Free Complimentary Air Freight on orders of 10 or more vials (200-400 AED on smaller orders)',
+            directHotline: 'VIP WhatsApp and telephone concierge'
           } : {
             category: isSolventProduct ? 'Sterile Reconstitution Solvent' : isDiagnosticKit ? 'CE-IVDR Clinical Diagnostic Test' : (product?.category || 'Peptides'),
             storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : isDiagnosticKit ? 'Ambient 15-25°C dry storage. Dried blood spot stable up to 14 days at room temp.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
@@ -2282,12 +2330,12 @@ export default function PublicDatasheetView({
         <PublicInstitutionalInquiryDrawer
           isOpen={isInquiryDrawerOpen}
           onClose={() => setIsInquiryDrawerOpen(false)}
-          contextType="product"
+          contextType={isCompoundingService ? 'compounding' : isPeptideSupplyService ? 'supply' : 'product'}
           initialEntity={{
             name: product?.canonicalName || product?.name || slug,
             slug: slug,
             strength: selectedStrength?.name || selectedStrengthId || '',
-            category: product?.category || 'Peptides'
+            category: isCompoundingService ? 'Compounding Farmacéutico' : isPeptideSupplyService ? 'Suministro de Péptidos' : (product?.category || 'Peptides')
           }}
           lang={lang}
         />
