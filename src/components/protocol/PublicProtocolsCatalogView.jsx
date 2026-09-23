@@ -46,6 +46,7 @@ import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from 
 // ── Goal Taxonomy Buckets ───────────────────────────────────────────────────
 const GOAL_BUCKETS = [
   { id: 'all', label: 'All Protocols', icon: FlaskConical, color: '#003666', bg: '#eff6ff' },
+  { id: 'reference_standards', label: '★ Reference Standards', icon: Award, color: '#b45309', bg: '#fffbeb', isReferenceChip: true },
   { id: 'fat_loss', label: 'Metabolism & GLP-1 / GIP', icon: Zap, color: '#ea580c', bg: '#fff7ed' },
   { id: 'longevity', label: 'Longevity & Anti-Aging', icon: Heart, color: '#0d9488', bg: '#f0fdfa' },
   { id: 'recovery', label: 'Tissue & Joint Regeneration', icon: Activity, color: '#0284c7', bg: '#f0f9ff' },
@@ -56,6 +57,14 @@ const GOAL_BUCKETS = [
   { id: 'sleep', label: 'Sleep & Circadian Rhythm', icon: Moon, color: '#4338ca', bg: '#eef2ff' },
   { id: 'skin_hair', label: 'Skin, Hair & Aesthetics', icon: Sparkles, color: '#d97706', bg: '#fffbeb' },
 ];
+
+const REFERENCE_TELEMETRY_PILLS = {
+  'bpc-157-tb-500-protocol': { en: 'Anatomical Geometry', es: 'Geometría Anatómica' },
+  'metabolic-retatrutide-motsc-12w': { en: 'Incretin / DEXA Safety', es: 'Seguridad Incretina / DEXA' },
+  'nad-cellular-restoration-protocol': { en: 'Bloodo™ Companion Test', es: 'Test Acompañante Bloodo™' },
+  'cjc-1295-ipamorelin-synergistic-hgh-optimization': { en: 'Somatotropic Axis', es: 'Eje Somatotrópico' },
+  'thymosin-alpha-1-immune-resilience': { en: 'Immune Lineage', es: 'Linaje Inmunitario' },
+};
 
 /**
  * Maps arbitrary Firestore goal tags to standard bucket IDs
@@ -256,6 +265,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
       const referenceLabelEn = p.reference_label_en || 'Primary Clinical Reference Standard';
       const referenceTier = p.reference_standard_tier || 'gold';
 
+      const finalGoals = isRef 
+        ? [...mappedGoals.filter(g => g !== 'reference_standards'), 'reference_standards']
+        : mappedGoals;
+
       return {
         ...p,
         cleanName,
@@ -264,7 +277,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         durationWeeks,
         phasesCount,
         compounds,
-        mappedGoals,
+        mappedGoals: finalGoals,
         summary,
         is_reference_standard: isRef,
         reference_order: refOrder,
@@ -371,7 +384,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
     }
 
     const targetBuckets = selectedGoal === 'all'
-      ? GOAL_BUCKETS.filter(b => b.id !== 'all')
+      ? GOAL_BUCKETS.filter(b => b.id !== 'all' && b.id !== 'reference_standards')
       : GOAL_BUCKETS.filter(b => b.id === selectedGoal);
 
     targetBuckets.forEach(bucket => {
@@ -847,13 +860,23 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                               </Link>
 
                               {proto.is_reference_standard && (
-                                <span
-                                  className="proto-list-badge-reference"
-                                  title={lang === 'es' ? 'Protocolo de Referencia Clínica con datos ampliados de farmacocinética y seguridad' : 'Primary Clinical Reference Standard with extended pharmacological and safety data'}
-                                >
-                                  <Award size={11} />
-                                  <span>{lang === 'es' ? 'Referencia Clínica' : 'Reference Standard'}</span>
-                                </span>
+                                <>
+                                  <span
+                                    className="proto-list-badge-reference"
+                                    title={lang === 'es' ? 'Protocolo de Referencia Clínica con datos ampliados de farmacocinética y seguridad' : 'Primary Clinical Reference Standard with extended pharmacological and safety data'}
+                                  >
+                                    <Award size={11} />
+                                    <span>{lang === 'es' ? 'Referencia Clínica' : 'Reference Standard'}</span>
+                                  </span>
+                                  {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug] && (
+                                    <span
+                                      className="proto-telemetry-badge"
+                                      title={lang === 'es' ? 'Módulo de telemetría clínica avanzada' : 'Advanced clinical telemetry module'}
+                                    >
+                                      {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug][lang] || REFERENCE_TELEMETRY_PILLS[proto.cleanSlug].en}
+                                    </span>
+                                  )}
+                                </>
                               )}
 
                               <span
@@ -1004,9 +1027,16 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                                     : (proto.reference_label_en || 'Primary Clinical Reference Standard')}
                                 </span>
                               </div>
-                              <span className="proto-ref-tier-pill">
-                                {lang === 'es' ? 'Ficha Extensa' : 'Extended Monograph'}
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug] && (
+                                  <span className="proto-telemetry-badge">
+                                    {REFERENCE_TELEMETRY_PILLS[proto.cleanSlug][lang] || REFERENCE_TELEMETRY_PILLS[proto.cleanSlug].en}
+                                  </span>
+                                )}
+                                <span className="proto-ref-tier-pill">
+                                  {lang === 'es' ? 'Ficha Extensa' : 'Extended Monograph'}
+                                </span>
+                              </div>
                             </div>
                           )}
 

@@ -18,7 +18,10 @@ import {
   Calendar,
   Layers,
   FlaskConical,
-  ExternalLink
+  ExternalLink,
+  Sun,
+  Moon,
+  AlertTriangle
 } from '@/lib/icons';
 import './DiagnosticTestTechnicalSpecs.css';
 
@@ -520,46 +523,333 @@ export default function DiagnosticTestTechnicalSpecs({
           </div>
         </div>
 
-        {/* ── 3. AT-HOME 3-STEP DBS COLLECTION PROTOCOL ── */}
+        {/* ── 3. STANDARDIZED DBS CAPILLARY COLLECTION PROTOCOL (BLOODO.COM METHODOLOGY) ── */}
         <div className="dts-protocol-card">
-          <h4 className="dts-protocol-title">
-            <Droplets size={18} color="#0d9488" />
-            {isEs ? 'Protocolo de Toma de Muestra en 3 Pasos (DBS)' : 'At-Home 3-Step Capillary Blood Spot Collection'}
-          </h4>
-
-          <div className="dts-steps-grid">
-            <div className="dts-step">
-              <div className="dts-step-num">1</div>
-              <strong className="dts-step-title">{isEs ? 'Preparación' : 'Preparation'}</strong>
-              <p className="dts-step-desc">
+          <div className="dts-protocol-header-row">
+            <div>
+              <div className="dts-protocol-tag">
+                <CheckCircle2 size={12} /> {isEs ? 'PROCEDIMIENTO ANALÍTICO ESTANDARIZADO' : 'STANDARDIZED ANALYTICAL PROCEDURE'}
+              </div>
+              <h4 className="dts-protocol-title">
+                <Droplets size={20} color="#0d9488" />
                 {isEs 
-                  ? ((isCortisol || isTestosterone)
-                      ? 'Toma en ayunas a primera hora de la mañana (dentro de los 30–60 min tras despertar) para evaluar el ritmo circadiano. Lava tus manos con agua tibia y desinfecta con la toallita con alcohol 70%.'
-                      : 'Lava tus manos con agua tibia para activar la circulación sanguínea. Desinfecta la yema del dedo con la toallita con alcohol 70% suministrada y deja secar.')
-                  : ((isCortisol || isTestosterone)
-                      ? 'Morning fasting sample within 30–60 minutes of waking recommended for circadian rhythm accuracy. Wash hands with warm water and disinfect with the 70% IPA alcohol wipe.'
-                      : 'Wash hands with warm water to promote capillary blood flow. Clean the chosen fingertip with the provided 70% IPA alcohol wipe and allow to air dry.')}
+                  ? 'Guía de Extracción Capilar y Recogida de Muestra (Bloodo DBS™)' 
+                  : 'Standardized Capillary Blood Spot Collection Protocol (Bloodo DBS™)'}
+              </h4>
+              <p className="dts-protocol-subtitle">
+                {isEs
+                  ? 'Procedimiento analítico neutral para la obtención y preservación de gotas de sangre seca en tarjeta de filtro Whatman 903 certificada bajo normativa CE-IVDR.'
+                  : 'Neutral analytical procedure for the collection and preservation of dried blood spots on CE-IVDR certified Whatman 903 grade filter cards.'}
               </p>
             </div>
+            <div className="dts-protocol-dry-badge">
+              <Clock size={15} color="#003666" />
+              <div>
+                <span className="dts-dry-time-val">{isEs ? '3 Horas de Secado' : '3-Hour Air Drying'}</span>
+                <span className="dts-dry-time-sub">{isEs ? 'Temp. ambiente (15–25°C)' : 'Ambient room temp (15–25°C)'}</span>
+              </div>
+            </div>
+          </div>
 
-            <div className="dts-step">
-              <div className="dts-step-num">2</div>
-              <strong className="dts-step-title">{isEs ? 'Punción y Recolección' : 'Prick & Collect'}</strong>
-              <p className="dts-step-desc">
+          {/* Quick Analytical Parameters Bar */}
+          <div className="dts-specs-bar">
+            <div className="dts-spec-item">
+              <span className="dts-spec-label">{isEs ? 'Matriz Biológica' : 'Biological Matrix'}</span>
+              <strong className="dts-spec-val">{isEs ? 'Sangre capilar total' : 'Whole capillary blood'}</strong>
+            </div>
+            <div className="dts-spec-item">
+              <span className="dts-spec-label">{isEs ? 'Volumen por Círculo' : 'Volume per Spot'}</span>
+              <strong className="dts-spec-val">{isEs ? '2–3 gotas (~50 µL)' : '2–3 drops (~50 µL)'}</strong>
+            </div>
+            <div className="dts-spec-item">
+              <span className="dts-spec-label">{isEs ? 'Soporte Analítico' : 'Collection Substrate'}</span>
+              <strong className="dts-spec-val">Whatman 903 (CE-IVDR)</strong>
+            </div>
+            <div className="dts-spec-item">
+              <span className="dts-spec-label">{isEs ? 'Estabilidad en Tránsito' : 'Transit Stability'}</span>
+              <strong className="dts-spec-val">{isEs ? '14 días con desecante' : '14 days with desiccant'}</strong>
+            </div>
+          </div>
+
+          {/* Cortisol Dual-Sample Diurnal Cadence (When isCortisol is true) */}
+          {isCortisol && (
+            <div className="dts-cortisol-cadence-card">
+              <div className="dts-cadence-badge-row">
+                <span className="dts-cadence-badge">
+                  <Clock size={12} /> {isEs ? 'CRONOBIOLOGÍA DEL EJE HPA' : 'HPA AXIS CHRONOBIOLOGY'}
+                </span>
+                <span className="dts-cadence-pill">
+                  {isEs ? 'Doble Muestra Obligatoria (AM + PM)' : 'Mandatory Dual Sampling (AM + PM)'}
+                </span>
+              </div>
+              <h5 className="dts-cadence-title">
+                {isEs 
+                  ? 'Protocolo de Muestreo Diurno: Respuesta al Despertar (CAR) y Pendiente Vespertina' 
+                  : 'Diurnal Sampling Cadence: Cortisol Awakening Response (CAR) & Evening Slope'}
+              </h5>
+              <p className="dts-cadence-desc">
                 {isEs
-                  ? 'Presiona la lanceta de seguridad estéril en el lateral de la yema. Deja caer 2 a 3 gotas de sangre de forma natural hasta cubrir los círculos marcados en la tarjeta de filtro.'
-                  : 'Place the retractable safety lancet against the side of the fingertip. Allow 2–3 large hanging blood drops to fill the printed circles on the certified filter card.'}
+                  ? 'El cortisol experimenta una pronunciada fluctuación circadiana. Una toma aislada resulta analíticamente insuficiente para evaluar el eje hipotálamo-hipofisario-adrenal (HPA). La recogida en dos puntos temporales permite calcular la Pendiente Diurna del Cortisol (DCS), diferenciando ritmos fisiológicos sanos de estados de hipercortisolemia alostática o de agotamiento suprarrenal (curva aplanada).'
+                  : 'Cortisol secretion follows a steep circadian curve. A single snapshot is clinically insufficient to characterize hypothalamic-pituitary-adrenal (HPA) axis regulation. Two-point diurnal sampling allows accurate determination of the Diurnal Cortisol Slope (DCS), differentiating healthy circadian decline from allostatic evening hypercortisolemia or HPA axis burnout (flattened slope).'}
               </p>
+
+              <div className="dts-cadence-grid">
+                <div className="dts-cadence-box dts-cadence-am">
+                  <div className="dts-cadence-box-top">
+                    <div className="dts-cadence-icon dts-icon-am">
+                      <Sun size={20} color="#b45309" />
+                    </div>
+                    <div>
+                      <span className="dts-cadence-step-tag">{isEs ? 'Muestra 1 (Mañana)' : 'Sample 1 (Morning)'}</span>
+                      <strong className="dts-cadence-time">07:00 – 09:00 AM</strong>
+                    </div>
+                  </div>
+                  <div className="dts-cadence-specs">
+                    <div className="dts-cadence-spec-row">
+                      <span>{isEs ? 'Momento de recogida:' : 'Collection window:'}</span>
+                      <strong>{isEs ? '30–60 min tras despertar (ayunas)' : '30–60 min post-waking (fasting)'}</strong>
+                    </div>
+                    <div className="dts-cadence-spec-row">
+                      <span>{isEs ? 'Círculos en tarjeta:' : 'Target card spots:'}</span>
+                      <strong className="dts-spot-tag-am">{isEs ? 'Círculos marcados AM' : 'Spots marked AM'}</strong>
+                    </div>
+                    <div className="dts-cadence-spec-row">
+                      <span>{isEs ? 'Objetivo analítico:' : 'Analytical target:'}</span>
+                      <small>{isEs ? 'Cuantifica el pico circadiano y la respuesta de despertar suprarrenal (CAR).' : 'Quantifies peak circadian activation & adrenal functional reserve (CAR).'}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="dts-cadence-box dts-cadence-pm">
+                  <div className="dts-cadence-box-top">
+                    <div className="dts-cadence-icon dts-icon-pm">
+                      <Moon size={20} color="#4338ca" />
+                    </div>
+                    <div>
+                      <span className="dts-cadence-step-tag">{isEs ? 'Muestra 2 (Tarde/Noche)' : 'Sample 2 (Evening)'}</span>
+                      <strong className="dts-cadence-time">17:00 – 19:00 PM</strong>
+                    </div>
+                  </div>
+                  <div className="dts-cadence-specs">
+                    <div className="dts-cadence-spec-row">
+                      <span>{isEs ? 'Momento de recogida:' : 'Collection window:'}</span>
+                      <strong>{isEs ? 'Antes de la cena (mínimo 2h sin comer)' : 'Pre-dinner (min. 2h without food)'}</strong>
+                    </div>
+                    <div className="dts-cadence-spec-row">
+                      <span>{isEs ? 'Círculos en tarjeta:' : 'Target card spots:'}</span>
+                      <strong className="dts-spot-tag-pm">{isEs ? 'Círculos marcados PM' : 'Spots marked PM'}</strong>
+                    </div>
+                    <div className="dts-cadence-spec-row">
+                      <span>{isEs ? 'Objetivo analítico:' : 'Analytical target:'}</span>
+                      <small>{isEs ? 'Evalúa el nadir circadiano y la capacidad de desconexión parasimpática.' : 'Evaluates evening nadir and parasympathetic down-regulation capacity.'}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Standard Single Morning Cadence Banner (For non-cortisol tests) */}
+          {!isCortisol && (
+            <div className="dts-standard-timing-banner">
+              <div className="dts-timing-icon">
+                <Clock size={18} color="#0d9488" />
+              </div>
+              <div className="dts-timing-text">
+                <strong>{isEs ? 'Momento Óptimo de Recogida de Muestra' : 'Optimal Specimen Collection Window'}</strong>
+                <p>
+                  {isEs
+                    ? (isHba1c
+                        ? 'Se recomienda realizar la extracción a primera hora de la mañana tras 8–10 horas de ayuno nocturno para máxima consistencia analítica.'
+                        : 'Se recomienda realizar la extracción a primera hora de la mañana, preferiblemente antes del desayuno o de la ingesta calórica principal, garantizando uniformidad en determinaciones evolutivas.')
+                    : (isHba1c
+                        ? 'Recommended morning specimen following 8–10 hours of overnight fasting for peak analytical consistency.'
+                        : 'Recommended morning collection, ideally prior to breakfast or heavy caloric intake, ensuring reproducibility across longitudinal measurements.')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* 4 Graphic Procedural Steps */}
+          <div className="dts-procedural-steps-grid">
+            {/* Step 1 */}
+            <div className="dts-proc-card">
+              <div className="dts-proc-header">
+                <span className="dts-proc-num">1</span>
+                <span className="dts-proc-phase">{isEs ? 'PRE-ANALÍTICA' : 'PRE-ANALYTICAL'}</span>
+              </div>
+              <h5 className="dts-proc-title">
+                {isEs ? 'Perfusión y Preparación Aséptica' : 'Perfusion & Aseptic Preparation'}
+              </h5>
+              <ul className="dts-proc-list">
+                <li>
+                  {isEs 
+                    ? 'Ingerir 1–2 vasos de agua 20 minutos antes para asegurar hidratación microvascular y volemia adecuada.' 
+                    : 'Drink 1–2 glasses of water 20 minutes prior to ensure adequate microvascular hydration and volume.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Lavar minuciosamente las manos con agua tibia durante 2 minutos. El calor favorece la vasodilatación de las arteriolas digitales.' 
+                    : 'Wash hands thoroughly with warm water for 2 minutes. Heat stimulates digital arteriole vasodilation.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Efectuar movimientos pendulares suaves con el brazo hacia abajo durante 15–20 segundos para concentrar el volumen capilar en las yemas.' 
+                    : 'Gently swing the arm downward for 15–20 seconds to pool capillary blood into the fingertips.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Desinfectar la cara lateral del dedo anular o medio con la toallita de alcohol IPA 70%. Dejar secar al aire 30 segundos.' 
+                    : 'Disinfect the lateral side of the ring or middle finger with the 70% IPA alcohol wipe. Allow to air dry for 30s.'}
+                </li>
+              </ul>
+              <div className="dts-proc-tip">
+                <Info size={13} color="#0284c7" />
+                <span>{isEs ? 'No usar agua fría para evitar vasoconstricción periférica.' : 'Avoid cold water to prevent reflexive vasoconstriction.'}</span>
+              </div>
             </div>
 
-            <div className="dts-step">
-              <div className="dts-step-num">3</div>
-              <strong className="dts-step-title">{isEs ? 'Secado y Envío' : 'Dry & Dispatch'}</strong>
-              <p className="dts-step-desc">
-                {isEs
-                  ? 'Deja secar la tarjeta 15 minutos al aire a temperatura ambiente. Introduce en la bolsa sellable con desecante y deposita en el sobre con franqueo pagado hacia LifeLab1.'
-                  : 'Allow card to air-dry for 15 minutes at room temperature. Insert into the foil pouch with desiccant pack and mail in the prepaid envelope to LifeLab1.'}
-              </p>
+            {/* Step 2 */}
+            <div className="dts-proc-card">
+              <div className="dts-proc-header">
+                <span className="dts-proc-num">2</span>
+                <span className="dts-proc-phase">{isEs ? 'PUNCIÓN' : 'PUNCTURE'}</span>
+              </div>
+              <h5 className="dts-proc-title">
+                {isEs ? 'Punción Lateral y Descarte Inicial' : 'Lateral Puncture & First Drop'}
+              </h5>
+              <ul className="dts-proc-list">
+                <li>
+                  {isEs 
+                    ? 'Retirar la pestaña de bloqueo de la lanceta de seguridad estéril retráctil.' 
+                    : 'Twist and remove the safety tab from the sterile retractable lancet.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Apoyar el cabezal firmemente contra la cara lateral del pulpejo (zona con menor inervación nociceptiva y mayor red capilar).' 
+                    : 'Press the lancet firmly against the lateral edge of the fingertip (fewer nerve endings, denser capillary bed).'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Presionar hasta escuchar el clic de disparo automático de la micropunta.' 
+                    : 'Press down firmly until hearing the mechanical click triggering the microneedle.'}
+                </li>
+                <li className="dts-critical-step-item">
+                  <AlertTriangle size={13} color="#b45309" />
+                  <strong>
+                    {isEs 
+                      ? 'Punto Crítico: Limpiar y descartar la primera gota con la gasa estéril (contiene líquido intersticial que altera la precisión analítica).' 
+                      : 'Critical Step: Wipe away the first blood drop with the sterile gauze (contains interstitial fluid that dilutes analytes).'}
+                  </strong>
+                </li>
+              </ul>
+              <div className="dts-proc-tip">
+                <Info size={13} color="#0284c7" />
+                <span>{isEs ? 'El descarte de la primera gota es estándar obligatorio CE-IVDR.' : 'Wiping the first drop is a mandatory CE-IVDR analytical standard.'}</span>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="dts-proc-card">
+              <div className="dts-proc-header">
+                <span className="dts-proc-num">3</span>
+                <span className="dts-proc-phase">{isEs ? 'SATURACIÓN' : 'SATURATION'}</span>
+              </div>
+              <h5 className="dts-proc-title">
+                {isEs ? 'Carga y Saturación de la Tarjeta' : 'Spot Loading & Matrix Saturation'}
+              </h5>
+              <ul className="dts-proc-list">
+                <li>
+                  {isEs 
+                    ? 'Mantener la mano hacia abajo para permitir la formación espontánea de una gota de sangre grande y colgante.' 
+                    : 'Keep the hand positioned downward to allow a large hanging drop of blood to form naturally.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Aproximar suavemente la gota colgante al centro del círculo de la tarjeta hasta que toque el papel de filtro Whatman.' 
+                    : 'Gently bring the hanging drop into contact with the center of the Whatman filter card circle.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Permitir que la capilaridad absorba la sangre de forma homogénea sin que la piel toque ni frote el papel.' 
+                    : 'Allow capillary action to absorb the blood cleanly without pressing or rubbing skin against the paper.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Saturar 2 a 3 círculos por muestra (en Cortisol: círculos AM por la mañana y círculos PM por la tarde).' 
+                    : 'Saturate 2–3 circles per specimen (for Cortisol: AM spots in the morning, PM spots in the evening).'}
+                </li>
+              </ul>
+              <div className="dts-proc-tip">
+                <Info size={13} color="#0284c7" />
+                <span>{isEs ? 'Comprobar que la sangre impregne el reverso de la tarjeta.' : 'Verify blood has penetrated uniformly through the card back.'}</span>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="dts-proc-card">
+              <div className="dts-proc-header">
+                <span className="dts-proc-num">4</span>
+                <span className="dts-proc-phase">{isEs ? 'DESECACIÓN' : 'DESICCATION'}</span>
+              </div>
+              <h5 className="dts-proc-title">
+                {isEs ? 'Secado Horizontal (3h) y Envío' : 'Horizontal Air-Dry (3h) & Dispatch'}
+              </h5>
+              <ul className="dts-proc-list">
+                <li>
+                  {isEs 
+                    ? 'Dejar secar la tarjeta abierta en posición horizontal sobre superficie limpia durante 3 horas completas a temperatura ambiente (15–25°C).' 
+                    : 'Allow the card to air-dry horizontally on a clean surface for 3 full hours at room temperature (15–25°C).'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'No aplicar calor artificial (secadores o radiadores) ni exponer a luz solar directa para no alterar las biomoléculas.' 
+                    : 'Do not apply heat (hairdryers/radiators) or direct sunlight to prevent molecular degradation.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Una vez seca (color pardo homogéneo), cerrar la solapa protectora de la tarjeta.' 
+                    : 'Once completely dry (uniform dark color), fold the protective cover flap over the card.'}
+                </li>
+                <li>
+                  {isEs 
+                    ? 'Introducir en la bolsa bio-barrier aluminizada con el sobre desecante de sílice, sellar herméticamente y depositar en el sobre prepagado.' 
+                    : 'Place inside the foil bio-barrier pouch with the silica desiccant, seal hermetically, and insert into the prepaid mailer.'}
+                </li>
+              </ul>
+              <div className="dts-proc-tip">
+                <Info size={13} color="#0284c7" />
+                <span>{isEs ? 'El desecante garantiza estabilidad analítica durante 14 días.' : 'The silica desiccant preserves analyte stability for up to 14 days.'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quality Acceptance Criteria vs Rejection Causes */}
+          <div className="dts-qa-criteria-grid">
+            <div className="dts-qa-box dts-qa-valid">
+              <div className="dts-qa-box-header">
+                <CheckCircle2 size={16} color="#0d9488" />
+                <strong className="dts-qa-title">{isEs ? 'Criterios de Muestra Válida' : 'Analytical Acceptance Criteria'}</strong>
+              </div>
+              <ul className="dts-qa-list">
+                <li>{isEs ? 'Círculos de papel de filtro completamente saturados y homogéneos.' : 'Circles completely saturated with even, uniform absorption.'}</li>
+                <li>{isEs ? 'Penetración visible y simétrica en la cara posterior de la tarjeta.' : 'Visible, symmetric penetration on the back of the filter card.'}</li>
+                <li>{isEs ? 'Descarte inicial riguroso de la 1ª gota de punción.' : 'Strict discard of the first puncture droplet prior to collection.'}</li>
+                <li>{isEs ? 'Secado horizontal de 3 horas antes del cierre y envasado aluminizado.' : 'Full 3-hour horizontal air drying prior to foil pouch hermetic sealing.'}</li>
+              </ul>
+            </div>
+
+            <div className="dts-qa-box dts-qa-invalid">
+              <div className="dts-qa-box-header">
+                <AlertTriangle size={16} color="#dc2626" />
+                <strong className="dts-qa-title">{isEs ? 'Causas de Rechazo Analítico' : 'Causes for Analytical Rejection'}</strong>
+              </div>
+              <ul className="dts-qa-list">
+                <li>{isEs ? 'Ordeñado o compresión digital violenta (produce hemólisis y dilución).' : 'Aggressive digital squeezing/milking (causes hemolysis & tissue dilution).'}</li>
+                <li>{isEs ? 'Frotar o raspar el dedo contra la superficie del papel de filtro.' : 'Rubbing or scraping fingertip directly against the filter paper matrix.'}</li>
+                <li>{isEs ? 'Superposición de múltiples gotas pequeñas en un mismo círculo.' : 'Layering multiple small droplets on top of an already dried spot.'}</li>
+                <li>{isEs ? 'Envasado prematuro con humedad residual (< 3 horas de secado).' : 'Premature packaging with residual moisture (< 3 hours air drying).'}</li>
+              </ul>
             </div>
           </div>
         </div>

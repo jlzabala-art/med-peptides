@@ -245,18 +245,26 @@ export async function generateMetadata({ params, searchParams }) {
   const formatSuffix = formatParam ? ` [${formatParam.toUpperCase()}]` : '';
   const doseSuffix = doseParam ? ` (${doseParam.replace(/_/g, ' ')})` : '';
 
-  // Clean, discreet metadata for WhatsApp, Telegram & social sharing (zero company or product leaks)
-  const cleanTitle = 'Clinical Technical Monograph & Protocol Reference';
-  const cleanDesc = 'Verified analytical reference, standardized dosing specifications, and clinical administration guidelines. Confidential medical reference.';
-  const previewImageUrl = `${BASE_URL}/og-catalog.png`;
+  const { resolveSocialImage, resolveSocialContent } = await import('../../../utils/socialImageResolver');
+  const resolvedSocial = resolveSocialContent({
+    product,
+    variant: { dose: doseParam, format: formatParam },
+    recipient: null
+  });
+
+  const pageTitle = resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — Clinical Monograph`;
+  const pageDesc = resolvedSocial.description;
+  const previewImageUrl = resolveSocialImage(product, formatParam);
+  const isPng = previewImageUrl.toLowerCase().endsWith('.png');
+  const imageType = isPng ? 'image/png' : 'image/jpeg';
   const canonicalUrl = `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
 
   return {
-    title: cleanTitle,
-    description: cleanDesc,
+    title: pageTitle,
+    description: pageDesc,
     openGraph: {
-      title: cleanTitle,
-      description: cleanDesc,
+      title: pageTitle,
+      description: pageDesc,
       url: canonicalUrl,
       siteName: 'Clinical Reference Library',
       images: [
@@ -264,24 +272,25 @@ export async function generateMetadata({ params, searchParams }) {
           url: previewImageUrl,
           width: 1200,
           height: 630,
-          type: 'image/png',
-          alt: 'Clinical Monograph & Protocol Specifications',
+          type: imageType,
+          alt: pageTitle,
         },
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: cleanTitle,
-      description: cleanDesc,
+      title: pageTitle,
+      description: pageDesc,
       images: [previewImageUrl],
     },
     other: {
       'og:image': previewImageUrl,
-      'og:image:type': 'image/png',
+      'og:image:secure_url': previewImageUrl,
+      'og:image:type': imageType,
       'og:image:width': '1200',
       'og:image:height': '630',
-      'og:image:alt': 'Clinical Monograph Reference',
+      'og:image:alt': pageTitle,
       'article:section': 'Clinical Reference Documentation',
     },
     robots: { index: true, follow: true },

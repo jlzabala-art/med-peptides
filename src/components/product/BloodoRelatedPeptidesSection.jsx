@@ -172,44 +172,86 @@ const DEFAULT_RELATED_PEPTIDES = {
   ],
   'cortisol-test': [
     {
+      slug: 'epithalon',
+      name: 'Epithalon (Epitalon)',
+      category: 'peptide',
+      target: 'Pineal Bioregulation & Circadian Rhythm Synchronization',
+      rationaleEn: 'Synchronizes the suprachiasmatic nucleus (SCN), restores pineal melatonin-cortisol diurnal rhythm, and normalizes evening cortisol surges.',
+      rationaleEs: 'Sincroniza el núcleo supraquiasmático, normaliza el ritmo diurno melatonina-cortisol y amortigua los picos elevados de cortisol vespertino.'
+    },
+    {
       slug: 'selank',
       name: 'Selank',
       category: 'peptide',
       target: 'Neuro-Endocrine HPA Axis & Anxiolytic Modulation',
-      rationaleEn: 'Modulates central GABAergic neurotransmission and stabilizes dysregulated adrenocortical cortisol rhythms without sedation.',
-      rationaleEs: 'Modula la neurotransmisión GABAérgica y estabiliza los picos de cortisol del eje HPA sin generar sedación.'
+      rationaleEn: 'Modulates central GABAergic neurotransmission and downregulates hyperactive CRH/ACTH signaling under chronic stress without sedation.',
+      rationaleEs: 'Modula la neurotransmisión GABAérgica y atenúa la hiperreactividad del eje HPA (CRH/ACTH) ante el estrés crónico sin sedación.'
     },
     {
       slug: 'semax',
       name: 'Semax',
       category: 'peptide',
-      target: 'ACTH(4-10) Derived BDNF Enhancer',
-      rationaleEn: 'Counteracts stress-induced hippocampal neurodegeneration, elevating central BDNF and neuroplasticity under chronic burnout.',
-      rationaleEs: 'Protege el hipocampo contra el estrés crónico, elevando el BDNF y la resiliencia cognitiva ante el agotamiento adrenal.'
+      target: 'ACTH(4-10) Derived BDNF & Hippocampal Neuroprotection',
+      rationaleEn: 'Counteracts glucocorticoid-induced hippocampal neurotoxicity, sustaining central BDNF expression and neuroplasticity during burnout.',
+      rationaleEs: 'Protege las neuronas hipocampales contra la neurotoxicidad por exceso glucocorticoide, elevando el BDNF y la resiliencia cognitiva.'
     },
     {
       slug: 'dsip',
       name: 'DSIP (Delta Sleep-Inducing Peptide)',
       category: 'peptide',
-      target: 'Circadian Slow-Wave Sleep & Nocturnal Cortisol',
-      rationaleEn: 'Promotes restorative slow-wave sleep stages (delta sleep), facilitating physiological nocturnal cortisol suppression.',
-      rationaleEs: 'Promueve el sueño profundo de ondas lentas delta, favoreciendo el descenso fisiológico del cortisol nocturno.'
+      target: 'Circadian Slow-Wave Sleep & Nocturnal Cortisol Nadir',
+      rationaleEn: 'Promotes restorative stage-3/4 delta sleep and facilitates physiological nocturnal cortisol suppression, enabling adrenal recovery.',
+      rationaleEs: 'Promueve el sueño profundo delta de ondas lentas y favorece el descenso fisiológico del cortisol nocturno, facilitando la recuperación adrenal.'
     },
     {
-      slug: 'pinealon',
-      name: 'Pinealon',
+      slug: 'cjc-1295-ipamorelin',
+      name: 'CJC-1295 + Ipamorelin',
       category: 'peptide',
-      target: 'Pineal Bioregulation & Chronobiology',
-      rationaleEn: 'Short peptide normalizing pineal melatonin synthesis and chronobiological circadian synchronization.',
-      rationaleEs: 'Biorregulador de la glándula pineal que normaliza la producción de melatonina y la cronobiología circadiana.'
+      target: 'Nocturnal GH Secretagogue & Cellular Repair Synergist',
+      rationaleEn: 'Stimulates physiological pulsatile GH/IGF-1 release during slow-wave sleep without activating cortisol, ACTH, or prolactin.',
+      rationaleEs: 'Estimula la secreción pulsátil fisiológica de hormona de crecimiento durante el sueño profundo sin inducir picos de cortisol ni prolactina.'
+    }
+  ],
+  'bloodo-cortisol-test': [
+    {
+      slug: 'epithalon',
+      name: 'Epithalon (Epitalon)',
+      category: 'peptide',
+      target: 'Pineal Bioregulation & Circadian Rhythm Synchronization',
+      rationaleEn: 'Synchronizes the suprachiasmatic nucleus (SCN), restores pineal melatonin-cortisol diurnal rhythm, and normalizes evening cortisol surges.',
+      rationaleEs: 'Sincroniza el núcleo supraquiasmático, normaliza el ritmo diurno melatonina-cortisol y amortigua los picos elevados de cortisol vespertino.'
     },
     {
-      slug: 'oxytocin-acetate',
-      name: 'Oxytocin Acetate',
+      slug: 'selank',
+      name: 'Selank',
       category: 'peptide',
-      target: 'Hypothalamic Stress Buffer & Autonomic Tone',
-      rationaleEn: 'Downregulates amygdala hyperactivity and dampens autonomic sympathetic stress reactivity and cortisol surges.',
-      rationaleEs: 'Atenúa la hiperreactividad de la amígdala reduciendo la descarga simpática y los picos agudos de cortisol.'
+      target: 'Neuro-Endocrine HPA Axis & Anxiolytic Modulation',
+      rationaleEn: 'Modulates central GABAergic neurotransmission and downregulates hyperactive CRH/ACTH signaling under chronic stress without sedation.',
+      rationaleEs: 'Modula la neurotransmisión GABAérgica y atenúa la hiperreactividad del eje HPA (CRH/ACTH) ante el estrés crónico sin sedación.'
+    },
+    {
+      slug: 'semax',
+      name: 'Semax',
+      category: 'peptide',
+      target: 'ACTH(4-10) Derived BDNF & Hippocampal Neuroprotection',
+      rationaleEn: 'Counteracts glucocorticoid-induced hippocampal neurotoxicity, sustaining central BDNF expression and neuroplasticity during burnout.',
+      rationaleEs: 'Protege las neuronas hipocampales contra la neurotoxicidad por exceso glucocorticoide, elevando el BDNF y la resiliencia cognitiva.'
+    },
+    {
+      slug: 'dsip',
+      name: 'DSIP (Delta Sleep-Inducing Peptide)',
+      category: 'peptide',
+      target: 'Circadian Slow-Wave Sleep & Nocturnal Cortisol Nadir',
+      rationaleEn: 'Promotes restorative stage-3/4 delta sleep and facilitates physiological nocturnal cortisol suppression, enabling adrenal recovery.',
+      rationaleEs: 'Promueve el sueño profundo delta de ondas lentas y favorece el descenso fisiológico del cortisol nocturno, facilitando la recuperación adrenal.'
+    },
+    {
+      slug: 'cjc-1295-ipamorelin',
+      name: 'CJC-1295 + Ipamorelin',
+      category: 'peptide',
+      target: 'Nocturnal GH Secretagogue & Cellular Repair Synergist',
+      rationaleEn: 'Stimulates physiological pulsatile GH/IGF-1 release during slow-wave sleep without activating cortisol, ACTH, or prolactin.',
+      rationaleEs: 'Estimula la secreción pulsátil fisiológica de hormona de crecimiento durante el sueño profundo sin inducir picos de cortisol ni prolactina.'
     }
   ],
   'testosterone-test': [

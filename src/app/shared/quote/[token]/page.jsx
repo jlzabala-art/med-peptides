@@ -15,9 +15,59 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
+  const token = resolvedParams?.token;
+  const verification = verifySignedQuoteToken(token);
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+
+  let title = 'Official Medical Quotation • Institutional Reference';
+  let description = 'Official verified quotation with locked channel pricing, cold-chain logistics, and certificate of analysis verification.';
+
+  if (verification?.valid && verification.payload) {
+    const payload = verification.payload;
+    const clientName = payload.recipientName || payload.clientName || payload.companyName;
+    if (clientName) {
+      title = `Official Medical Quotation • ${clientName}`;
+    }
+    const count = payload.items?.length || 0;
+    const currency = payload.currency || 'USD';
+    description = `Verified institutional quotation${count > 0 ? ` (${count} items)` : ''} in ${currency}. Direct cold-chain delivery terms, batch traceability, and analytical assays.`;
+  }
+
+  const previewImage = `${BASE_URL}/og-catalog.png`;
+
   return {
-    title: 'Interactive Medical Quote - Atlas Health',
-    description: 'Official verified quotation with locked channel pricing.'
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      siteName: 'Clinical Reference Library',
+      url: `${BASE_URL}/shared/quote/${token}`,
+      images: [
+        {
+          url: previewImage,
+          width: 1200,
+          height: 630,
+          type: 'image/png',
+          alt: title
+        }
+      ]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [previewImage]
+    },
+    other: {
+      'og:image': previewImage,
+      'og:image:secure_url': previewImage,
+      'og:image:type': 'image/png',
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      'og:image:alt': title
+    }
   };
 }
 

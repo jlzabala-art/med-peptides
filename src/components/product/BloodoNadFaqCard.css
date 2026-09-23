@@ -93,7 +93,7 @@
   max-width: 720px;
 }
 
-/* Header WhatsApp Actions */
+/* Header Clinical Actions */
 .bnf-header-actions {
   display: flex;
   align-items: center;
@@ -101,47 +101,26 @@
   flex-shrink: 0;
 }
 
-.bnf-wa-btn {
+.bnf-btn-copy-guideline {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 0.78rem;
+  font-size: 0.80rem;
   font-weight: 700;
-  padding: 0.55rem 0.95rem;
+  padding: 0.55rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  border: 1px solid transparent;
+  background: #f8fafc;
+  color: #003666;
+  border: 1px solid #cbd5e1;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
-.bnf-wa-btn-primary {
-  background: #25D366;
-  color: #ffffff;
-  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
-  border-color: #20ba5a;
-}
-
-.bnf-wa-btn-primary:hover {
-  background: #20ba5a;
-  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
-  transform: translateY(-1px);
-}
-
-.bnf-wa-icon-circle {
-  font-size: 0.90rem;
-}
-
-.bnf-wa-btn-secondary {
-  background: #f8fafc;
-  color: #1e293b;
-  border-color: #cbd5e1;
-}
-
-.bnf-wa-btn-secondary:hover {
+.bnf-btn-copy-guideline:hover {
   background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
+  border-color: #003666;
+  color: #003666;
 }
 
 /* ── Key Clinical Strategic Notice ── */
@@ -386,14 +365,14 @@
 
 /* Answer Drawer */
 .bnf-faq-answer-block {
-  padding: 0 1.15rem 1.15rem 3rem;
+  padding: 0.85rem 1.25rem 1.15rem 3rem;
   border-top: 1px solid #f1f5f9;
   background: #f8fafc;
 }
 
 .bnf-answer-text {
-  padding-top: 0.85rem;
-  margin-bottom: 0.85rem;
+  padding-top: 0;
+  margin-bottom: 0;
 }
 
 .bnf-text-line {
@@ -401,6 +380,11 @@
   font-size: 0.88rem;
   color: #334155;
   line-height: 1.55;
+}
+
+.bnf-text-line:last-child,
+.bnf-bullet-line:last-child {
+  margin-bottom: 0;
 }
 
 .bnf-bullet-line {

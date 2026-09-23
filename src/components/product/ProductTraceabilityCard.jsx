@@ -293,13 +293,13 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
             <span className="ptc-kpi-pill cas-pill">{isDiagnosticKit ? 'CE-IVD' : 'CAS'}</span>
           </div>
           <div className="ptc-kpi-value-wrap">
-            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? 'DBS (Dried Blood Spot)' : casNumber}>
-              {isDiagnosticKit ? 'Sangre Capilar (DBS)' : casNumber}
+            <span className="ptc-kpi-value font-mono" title={isDiagnosticKit ? (lang === 'es' ? 'DBS (Gotas de Sangre Seca)' : 'DBS (Dried Blood Spot)') : casNumber}>
+              {isDiagnosticKit ? (lang === 'es' ? 'Sangre Capilar (DBS)' : 'Capillary Blood (DBS)') : casNumber}
             </span>
           </div>
           <div className="ptc-kpi-sub">
-            <span title={isDiagnosticKit ? 'EU 2017/746 In Vitro Diagnostic Directive' : (formula || 'Synthetic Polypeptide Structure')}>
-              {isDiagnosticKit ? 'UE 2017/746 Directiva IVD' : (formula || 'Synthetic Polypeptide')}
+            <span title={isDiagnosticKit ? (lang === 'es' ? 'Directiva de Diagnóstico In Vitro UE 2017/746' : 'EU 2017/746 In Vitro Diagnostic Directive') : (formula || 'Synthetic Polypeptide Structure')}>
+              {isDiagnosticKit ? (lang === 'es' ? 'Directiva IVD (UE 2017/746)' : 'EU 2017/746 IVD Directive') : (formula || 'Synthetic Polypeptide')}
             </span>
           </div>
         </div>

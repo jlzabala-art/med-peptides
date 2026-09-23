@@ -290,6 +290,7 @@ export function getProtocolTranslations(lang = 'en') {
  */
 export const GOAL_TRANSLATIONS = {
   all: { en: 'All Protocols', es: 'Todos los Protocolos' },
+  reference_standards: { en: '★ Primary Reference Standards (5)', es: '★ Estándares Clínicos de Referencia (5)' },
   fat_loss: { en: 'Metabolism & GLP-1 / GIP', es: 'Metabolismo & GLP-1 / GIP' },
   longevity: { en: 'Longevity & Anti-Aging', es: 'Longevidad & Anti-Aging' },
   recovery: { en: 'Tissue & Joint Regeneration', es: 'Regeneración Tisular & Articular' },

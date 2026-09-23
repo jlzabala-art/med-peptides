@@ -94,6 +94,13 @@ export default function PublicAtlasAIDrawer({
         if (typeof data.remaining === 'number') {
           setRemaining(data.remaining);
           setLimit(data.limit || 5);
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(
+              new CustomEvent('atlas-quota-updated', {
+                detail: { remaining: data.remaining, limit: data.limit || 5 },
+              })
+            );
+          }
           if (data.remaining <= 0) {
             setIsBlocked(true);
           }
@@ -203,6 +210,13 @@ export default function PublicAtlasAIDrawer({
       if (res.status === 429 || data.error === 'QUOTA_EXCEEDED') {
         setIsBlocked(true);
         setRemaining(0);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('atlas-quota-updated', {
+              detail: { remaining: 0, limit: 5 },
+            })
+          );
+        }
         saveMessages([
           ...newMsgList,
           {
@@ -217,6 +231,13 @@ export default function PublicAtlasAIDrawer({
 
       if (typeof data.remaining === 'number') {
         setRemaining(data.remaining);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('atlas-quota-updated', {
+              detail: { remaining: data.remaining, limit: 5 },
+            })
+          );
+        }
         if (data.remaining <= 0) {
           setIsBlocked(true);
         }

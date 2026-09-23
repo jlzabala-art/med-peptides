@@ -30,7 +30,22 @@ export default function FdaRegulatoryBadge({
     setCurrentInfo(getFdaPeptideStatus(product));
   }, [product]);
 
-  if (!currentInfo) return null;
+  const isDiagnosticKit = Boolean(
+    product?.category === 'genomics_biomarkers' || 
+    product?.category === 'diagnostic_tests' ||
+    product?.category === 'diagnostic_test' ||
+    product?.category === 'tests' ||
+    product?.presentation === 'blood_test' || 
+    product?.presentation === 'home_test_kit' ||
+    product?.format === 'blood_test' || 
+    product?.supplierId === 'supplier-bloodo' ||
+    (product?.slug && String(product.slug).includes('bloodo')) ||
+    (product?.slug && String(product.slug).endsWith('-test')) ||
+    (product?.id && String(product.id).includes('bloodo')) ||
+    (product?.id && String(product.id).endsWith('-test'))
+  );
+
+  if (isDiagnosticKit || !currentInfo) return null;
 
   const info = currentInfo;
   const { colorScheme } = info;

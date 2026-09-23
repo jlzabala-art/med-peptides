@@ -137,6 +137,9 @@
   padding: 0 1.25rem;
   gap: 0.5rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap;
+  scrollbar-width: thin;
 }
 
 .pimc-tab-btn {
@@ -152,6 +155,8 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
   transition: all 0.12s ease;
 }
 

@@ -250,7 +250,7 @@ export default function InteractiveReconstitutionGuide({
     isOverSyringe,
     isUnderMeasured
   } = useMemo(() => {
-    const vMg = Math.max(0.1, Math.min(500, parseFloat(vialMg) || 10));
+    const vMg = Math.max(0.1, Math.min(2000, parseFloat(vialMg) || 10));
     const bMl = Math.max(0.2, Math.min(20, parseFloat(bacWaterMl) || 2.0));
     
     // Concentration

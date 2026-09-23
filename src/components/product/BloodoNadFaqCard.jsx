@@ -22,119 +22,119 @@ const DEFAULT_NAD_FAQS = [
   {
     id: 'faq-nad-01',
     category: 'clinical',
-    tag: 'Overview & Target',
-    questionEn: 'What does the NAD test measure?',
-    questionEs: '¿Qué mide exactamente la prueba de NAD?',
-    answerEn: 'The test measures total cellular NAD (NAD⁺ and NADH) status in blood via capillary dried blood spot (DBS), providing an objective indication of the patient’s current intracellular NAD availability and mitochondrial redox capacity.',
-    answerEs: 'La prueba cuantifica el estado celular total de NAD (NAD⁺ y NADH) en sangre mediante mancha de sangre seca capilar (DBS), proporcionando un indicador objetivo de la disponibilidad intracelular de NAD y la capacidad redox mitocondrial.'
+    tag: 'Assay Scope & Redox Target',
+    questionEn: 'What physiological biomarker parameters does the capillary DBS NAD assay evaluate?',
+    questionEs: '¿Qué parámetros cuantitativos de biomarcadores evalúa el ensayo DBS de NAD capilar?',
+    answerEn: 'The assay quantifies total intracellular NAD (oxidized NAD⁺ and reduced NADH) in whole blood via validated capillary dried blood spot (DBS) micro-sampling, establishing an objective cellular bioenergetics baseline and mitochondrial redox capacity indicator.',
+    answerEs: 'El ensayo cuantifica el NAD celular total (NAD⁺ oxidado y NADH reducido) en sangre completa mediante micromuestra capilar DBS validada, estableciendo una línea de base bioenergética objetiva y un indicador de la capacidad redox mitocondrial.'
   },
   {
     id: 'faq-nad-02',
     category: 'protocol_monitoring',
-    tag: 'Clinical Intent & Strategy',
-    questionEn: 'Testing Intent: Baseline Level vs. Active Protocol Therapeutic Monitoring',
-    questionEs: 'Objetivo de la prueba: Nivel basal vs. Monitorización terapéutica de protocolo activo',
-    answerEn: 'Before scheduling the test, clarify the primary clinical objective with the physician:\n• Baseline Assessment: Evaluates unsupplemented native NAD status prior to therapy (requires temporary washout of precursors).\n• Protocol Therapeutic Monitoring: Evaluates cellular response and precursor bioavailability while on an active regimen to assess efficacy and adjust dosage (does NOT require stopping treatment or a long washout).',
-    answerEs: 'Antes de realizar la prueba, defina con el médico el objetivo clínico prioritario:\n• Evaluación Basal: Determina el nivel endógeno sin suplementación previo al inicio de una terapia (requiere suspensión previa de precursores).\n• Monitorización de Protocolo Activo: Evalúa la respuesta biológica y biodisponibilidad durante el tratamiento para calibrar dosis y pautas (NO requiere suspender el tratamiento ni períodos de lavado prolongados).'
+    tag: 'Clinical Intent Stratification',
+    questionEn: 'Clinical Intent Stratification: Baseline Native Level vs. Active Protocol Therapeutic Monitoring',
+    questionEs: 'Estratificación de Objetivo Clínico: Nivel Basal Endógeno vs. Monitorización Terapéutica en Tratamiento Activo',
+    answerEn: 'Clinicians must establish the diagnostic objective prior to specimen collection:\n• Baseline Assessment: Quantifies unsupplemented endogenous NAD status prior to therapy initiation (requires a planned precursor washout period).\n• In-Treatment Therapeutic Monitoring: Assesses bioavailability and biological cellular response during an active regimen to titrate dosing and administration cadence (does NOT require therapy cessation or precursor washout).',
+    answerEs: 'El facultativo debe definir el objetivo clínico previo a la extracción:\n• Evaluación Basal: Cuantifica el estado endógeno sin suplementar previo al inicio terapéutico (requiere período de lavado programado).\n• Monitorización Terapéutica en Curso: Evalúa la biodisponibilidad y respuesta celular durante una pauta activa para calibrar dosis y cadencia (NO requiere suspensión del tratamiento ni períodos de lavado).'
   },
   {
     id: 'faq-nad-03',
     category: 'protocol_monitoring',
-    tag: 'Active Protocol (Recommended)',
-    questionEn: 'I am already on an active NAD protocol (oral or IV). Should I stop my treatment?',
-    questionEs: 'Ya estoy en un protocolo activo de NAD (oral o intravenoso). ¿Debo suspender el tratamiento?',
-    answerEn: 'No. If the objective is to assess therapeutic response to your current protocol and obtain an in-treatment snapshot to guide dosage adjustment, you should NOT stop oral NAD/precursors or introduce a 2–3 week washout period. Stopping would eliminate the active metabolic state the clinician intends to evaluate.',
-    answerEs: 'No. Si el objetivo es valorar la respuesta terapéutica al protocolo actual y obtener una medición en tratamiento para ajustar la pauta, NO debe suspender el NAD oral ni introducir un lavado de 2–3 semanas. Suspender el tratamiento eliminaría el estado metabólico activo que el médico busca evaluar.'
+    tag: 'Active Protocol Management',
+    questionEn: 'Management of Active Regimens: Oral Precursors & IV Infusion During Monitoring',
+    questionEs: 'Manejo de Pautas Activas: Precursores Orales e Infusiones IV Durante la Monitorización',
+    answerEn: 'When the clinical objective is evaluating patient responsiveness to an active NAD protocol, clinicians should NOT discontinue oral precursors or introduce a 2–3 week washout. Discontinuing treatment eliminates the steady-state pharmacodynamic equilibrium that the physician seeks to assess.',
+    answerEs: 'Cuando el objetivo clínico es evaluar la respuesta terapéutica a un protocolo activo, el médico NO debe indicar la suspensión de precursores orales ni introducir un lavado de 2–3 semanas. La interrupción suprime el equilibrio farmacodinámico que se pretende evaluar.'
   },
   {
     id: 'faq-nad-04',
     category: 'protocol_monitoring',
-    tag: 'Clinical Documentation',
-    questionEn: 'What clinical information must be documented if testing during an active protocol?',
-    questionEs: '¿Qué información clínica debe registrarse si la prueba se realiza durante un tratamiento activo?',
-    answerEn: 'Precise clinical documentation is essential for consistent interpretation:\n• Acute therapy details: e.g., "Received 250 mg IV NAD⁺ infusion yesterday at 14:00".\n• Active oral regimen: exact compound (NMN, NR, NAD⁺), daily dosage, and timing of the last dose prior to capillary blood sampling.',
-    answerEs: 'Es fundamental documentar de forma precisa:\n• Terapia parenteral reciente: ej. "Recibió infusión IV de 250 mg de NAD⁺ ayer a las 14:00".\n• Pauta oral actual: compuesto exacto (NMN, NR, NAD⁺), dosis diaria y momento de la última toma respecto a la extracción capilar.'
+    tag: 'Requisition Documentation',
+    questionEn: 'Essential Requisition Metadata for Active Protocol Monitoring',
+    questionEs: 'Metadatos Clínicos Requeridos para la Interpretación de Resultados en Tratamiento Activo',
+    answerEn: 'Standardized interpretation requires accurate charting of:\n• Acute parenteral history: e.g. "250 mg IV NAD⁺ infusion administered 24 hours prior to sampling".\n• Active oral regimen: specific molecule (NMN, NR, NAD⁺), daily dose in mg, and exact timestamp of the last dose relative to capillary collection.',
+    answerEs: 'La interpretación estandarizada requiere consignar con precisión:\n• Antecedente parenteral reciente: ej. "Infusión IV de 250 mg de NAD⁺ administrada 24 horas previas a la toma".\n• Pauta oral activa: molécula específica (NMN, NR, NAD⁺), dosificación diaria en mg y hora exacta de la última toma respecto a la punción capilar.'
   },
   {
     id: 'faq-nad-05',
     category: 'protocol_monitoring',
-    tag: 'Serial Tracking & Comparability',
-    questionEn: 'How should sample timing be standardised for serial follow-up tests?',
-    questionEs: '¿Cómo debe estandarizarse el momento de toma de muestra para pruebas de seguimiento comparables?',
-    answerEn: 'For serial follow-up tests, standardise the timing of blood collection in relation to your IV infusion and oral dose (e.g., consistently 24 hours post-IV infusion, or in the morning before daily oral dosing). This consistency ensures future results are directly comparable and clinically useful for fine-tuning the protocol.',
-    answerEs: 'Para monitorizaciones periódicas, estandarice la ventana horaria de toma de muestra respecto a la infusión IV y la toma oral (ej. siempre 24 horas después de la infusión, o por la mañana antes de la dosis oral diaria). Esta uniformidad permite comparar resultados de forma rigurosa para ajustar la pauta médica.'
+    tag: 'Longitudinal Standardization',
+    questionEn: 'Chronobiological Sampling Standardization for Serial Follow-Up',
+    questionEs: 'Estandarización Cronobiológica para la Comparabilidad en Pruebas de Seguimiento',
+    answerEn: 'To maintain longitudinal analytical validity, clinicians should standardize sample collection timing relative to therapeutic administration (e.g. consistently 24 hours post-infusion, or fasting morning trough prior to daily oral dosing). Consistent timing enables direct intra-individual comparability to guide therapeutic adjustments.',
+    answerEs: 'Para preservar la validez analítica longitudinal, el clínico debe estandarizar la ventana temporal de recogida respecto a la administración terapéutica (ej. sistemáticamente 24 horas post-infusión, o muestra matutina valle previa a la dosis oral). Esta consistencia garantiza la comparabilidad intraindividual para el ajuste posológico.'
   },
   {
     id: 'faq-nad-06',
     category: 'baseline',
     tag: 'Baseline Washout Guidelines',
-    questionEn: 'What if the objective IS to measure unsupplemented baseline NAD status? (Washout Guidelines)',
-    questionEs: '¿Y si el objetivo clínico SÍ es conocer el nivel basal de NAD sin tratamiento? (Pautas de lavado)',
-    answerEn: 'If the clinical goal is to assess native baseline NAD status before starting therapy:\n• Oral Precursors (NMN, NR, Niacin, Nicotinamide): Ideally stop NAD-boosting supplements for approximately 2–3 weeks before testing, if clinically appropriate.\n• IV NAD⁺ Therapy: Avoid testing immediately after an infusion. While universal washout consensus is limited, allowing at least several days to a few weeks is a reasonable, prudent practical approach.',
-    answerEs: 'Si el objetivo médico es determinar el nivel basal puro antes de iniciar un tratamiento:\n• Suplementos orales (NMN, NR, Niacin, Nicotinamida): Suspender idealmente durante 2–3 semanas previas a la prueba, bajo criterio clínico.\n• Terapia IV de NAD⁺: Evitar la toma de muestra inmediatamente tras una infusión. Aunque no hay un consenso universal de washout, dejar transcurrir varios días o semanas es un criterio clínico prudente y razonable.'
+    questionEn: 'Recommended Washout Parameters for True Baseline Native Assessment',
+    questionEs: 'Parámetros de Lavado (Washout) para la Determinación del Nivel Basal Puro',
+    answerEn: 'If the clinical intent is establishing native unsupplemented baseline NAD levels prior to initiating therapy:\n• Oral Precursors (NMN, NR, Niacin, Nicotinamide): Discontinue oral NAD-modulating supplements for 2–3 weeks prior to specimen collection, where clinically appropriate.\n• IV NAD⁺ Therapy: Allow adequate clearance following infusion. In clinical practice, an interval of 2 to 3 weeks provides a prudent window for returning to native cellular baseline.',
+    answerEs: 'Si el objetivo médico es determinar el nivel basal puro antes de iniciar un tratamiento:\n• Precursores Orales (NMN, NR, Niacina, Nicotinamida): Suspender la suplementación durante 2–3 semanas previas a la prueba bajo criterio médico.\n• Terapia IV con NAD⁺: Respetar un intervalo prudente de eliminación. En la práctica clínica, un plazo de 2 a 3 semanas constituye un estándar adecuado para restablecer el nivel basal celular nativo.'
   },
   {
     id: 'faq-nad-07',
     category: 'preparation',
-    tag: 'Pre-Test Fasting',
-    questionEn: 'Do I need to fast before the test?',
-    questionEs: '¿Es necesario acudir en ayunas para la prueba?',
-    answerEn: 'Unless otherwise instructed by your physician, fasting is generally not required for the capillary dried blood spot NAD test. However, for follow-up testing and longitudinal monitoring, it is advisable to collect samples under similar dietary and time-of-day conditions each time.',
-    answerEs: 'Salvo indicación expresa de su médico, el ayuno estricto generalmente no es obligatorio para el test capilar DBS de NAD. Sin embargo, para monitorización evolutiva, es muy aconsejable tomar la muestra en condiciones similares de hidratación y horario.'
+    tag: 'Pre-Sampling Fasting',
+    questionEn: 'Is Pre-Sampling Fasting Required for Capillary DBS NAD Assessment?',
+    questionEs: '¿Es Necesario el Ayuno Previo para la Punción Capilar DBS de NAD?',
+    answerEn: 'Unless specified by a specific research protocol, strict caloric fasting is generally not mandatory for capillary dried blood spot NAD determination. However, to ensure intra-individual consistency in longitudinal tracking, clinicians should collect follow-up specimens under comparable dietary and time-of-day conditions.',
+    answerEs: 'Salvo indicación expresa en un protocolo de investigación, el ayuno calórico estricto generalmente no es obligatorio para la determinación de NAD capilar por DBS. No obstante, para garantizar consistencia longitudinal, se recomienda tomar las muestras de seguimiento bajo condiciones similares de horario e ingesta.'
   },
   {
     id: 'faq-nad-08',
     category: 'preparation',
-    tag: 'Prescription Medication',
-    questionEn: 'Can I take my normal medications?',
-    questionEs: '¿Puedo tomar mis medicamentos habituales?',
-    answerEn: 'Do not discontinue prescribed chronic medication solely for an NAD test unless explicitly instructed by your physician. Please report all current medications and therapies on the clinical intake form.',
-    answerEs: 'No suspenda medicación prescrita únicamente con motivo del test de NAD, salvo indicación expresa de su médico. Por favor reporte todos sus fármacos activos en la ficha clínica previa.'
+    tag: 'Prescription Pharmacotherapy',
+    questionEn: 'Management of Chronic Prescription Pharmacotherapy',
+    questionEs: 'Manejo de Farmacoterapia Crónica Prescrita',
+    answerEn: 'Prescribed chronic medical treatments should not be discontinued solely for NAD biomarker assessment unless clinically directed. Clinicians must record all active pharmaceuticals on the lab requisition form to evaluate potential metabolic interactions.',
+    answerEs: 'No debe suspenderse la medicación crónica prescrita con motivo exclusivo del test de NAD. El facultativo debe registrar todos los fármacos activos en la solicitud analítica para valorar posibles interacciones metabólicas.'
   },
   {
     id: 'faq-nad-09',
     category: 'preparation',
-    tag: 'Vitamins & Cofactors',
-    questionEn: 'What about other vitamins and supplements?',
-    questionEs: '¿Qué ocurre con otras vitaminas y suplementos?',
-    answerEn: 'Please report any supplements that may influence NAD metabolism or salvage pathways, particularly NMN, NR, niacin (vitamin B3), nicotinamide, TMG (trimethylglycine), and CD38 inhibitors (apigenin, quercetin).',
-    answerEs: 'Debe comunicar cualquier suplemento que influya en las rutas de salvamento del NAD, especialmente NMN, NR, niacina (vitamina B3), nicotinamida, TMG (trimetilglicina) e inhibidores de CD38 (apigenina, quercetina).'
+    tag: 'Pathway Modulators (TMG/CD38)',
+    questionEn: 'Cofactor and Pathway Modulator Interference (TMG, CD38 Inhibitors)',
+    questionEs: 'Interferencias de Cofactores y Moduladores de Vía (TMG, Inhibidores de CD38)',
+    answerEn: 'Physicians should document all adjunct agents influencing the salvage pathway, including methyl donors (TMG / Trimethylglycine, SAMe), precursor intermediates, and pharmacological/nutraceutical CD38 inhibitors (apigenin, quercetin).',
+    answerEs: 'El médico debe registrar todos los agentes adyuvantes que modulan la vía de salvamento, incluidos donantes de metilos (TMG / Trimetilglicina, SAMe), intermediarios y moduladores de CD38 (apigenina, quercetina).'
   },
   {
     id: 'faq-nad-10',
     category: 'preparation',
-    tag: 'Circadian Timing',
-    questionEn: 'What is the best time of day to take the test?',
-    questionEs: '¿Cuál es el mejor momento del día para realizar la prueba?',
-    answerEn: 'NAD levels fluctuate following circadian biological rhythms. For serial monitoring over time, consistency is key. Ideally, repeat samples should be collected at approximately the same time of day (preferably morning) under rested conditions.',
-    answerEs: 'Los niveles de NAD presentan oscilaciones circadianas. Para monitorización longitudinal, la consistencia horaria es clave: recoja las muestras de seguimiento aproximadamente a la misma hora del día (preferiblemente por la mañana) y en reposo.'
+    tag: 'Circadian Sampling Window',
+    questionEn: 'Circadian Rhythm & Chronobiological Sampling Window',
+    questionEs: 'Ritmo Circadiano y Ventana Cronobiológica de Muestreo',
+    answerEn: 'Intracellular NAD concentrations fluctuate under circadian regulation governed by core clock proteins and rhythmic NAMPT expression. For longitudinal clinical tracking, follow-up capillary blood collections should occur consistently in the morning (within 1–2 hours post-waking) under rested conditions.',
+    answerEs: 'Las concentraciones intracelulares de NAD presentan oscilaciones circadianas reguladas por el reloj biológico central y la expresión rítmica de NAMPT. Para monitorizaciones seriadas, la toma capilar debe programarse sistemáticamente por la mañana (1–2 horas tras despertar) y en reposo.'
   },
   {
     id: 'faq-nad-11',
     category: 'preparation',
-    tag: 'Physical Exercise',
-    questionEn: 'Can exercise affect the test result?',
-    questionEs: '¿Puede el ejercicio físico alterar el resultado?',
-    answerEn: 'Yes. Strenuous exercise influences cellular energy metabolism, mitochondrial ATP demand, and NAD⁺/NADH turnover. For the most comparable measurements, avoid unusually strenuous exercise immediately before testing and keep pre-test physical activity habitual.',
-    answerEs: 'Sí. El ejercicio físico intenso altera la demanda bioenergética mitocondrial y el recambio de NAD⁺/NADH. Para obtener mediciones comparables, evite entrenamientos extenuantes no habituales las 24 horas previas a la extracción.'
+    tag: 'Physical Exertion Flux',
+    questionEn: 'Impact of Strenuous Physical Exertion on Intracellular NAD Flux',
+    questionEs: 'Impacto del Ejercicio Físico Extenuante en el Flujo Intracelular de NAD',
+    answerEn: 'Exhaustive exercise alters mitochondrial ATP turnover and NAD⁺/NADH redox equilibrium. For baseline or monitoring comparability, patients should maintain habitual physical activity and avoid unusually strenuous exertion during the 24 hours preceding sample collection.',
+    answerEs: 'El ejercicio físico extenuante altera la demanda de ATP mitocondrial y el balance redox NAD⁺/NADH. Para preservar la comparabilidad, se recomienda mantener actividad física habitual y evitar esfuerzos extenuantes las 24 horas previas al muestreo.'
   },
   {
     id: 'faq-nad-12',
     category: 'clinical',
-    tag: 'Pre-Test Clinical Checklist',
-    questionEn: 'What clinical information should I provide before testing?',
-    questionEs: '¿Qué información clínica debo facilitar antes de realizar la prueba?',
-    answerEn: 'Ideally provide: patient age, active prescription medications, dietary supplements, specific NAD/NMN/NR precursor usage, IV NAD⁺ therapy history (including dose, e.g. 250 mg, and timestamp of the last infusion).',
-    answerEs: 'Idealmente reporte: edad del paciente, medicación prescrita activa, suplementos nutricionales, uso de precursores NAD/NMN/NR, e historial de infusiones IV de NAD⁺ (incluyendo dosis, ej. 250 mg, y fecha/hora exacta de la última infusión).'
+    tag: 'Pre-Analytical Checklist',
+    questionEn: 'Requisite Clinical Metadata on Lab Requisition Form',
+    questionEs: 'Metadatos Clínicos Esenciales en la Petición Analítica',
+    answerEn: 'Essential clinical requisition fields include: patient age, active therapeutic regimen, exact NAD precursor dosing, timestamp of last parenteral IV infusion (dose in mg), and blood collection timestamp.',
+    answerEs: 'Los campos esenciales en la solicitud clínica incluyen: edad del paciente, pauta farmacológica activa, dosificación de precursores de NAD, fecha/hora de la última infusión parenteral IV (dosis en mg) y momento de la extracción capilar.'
   },
   {
     id: 'faq-nad-13',
     category: 'clinical',
-    tag: 'Diagnostic Scope & Regulatory',
-    questionEn: 'Is the Bloodo™ NAD test a diagnostic test?',
-    questionEs: '¿Es la prueba de NAD de Bloodo™ un test diagnóstico de enfermedades?',
-    answerEn: 'The Bloodo™ NAD test is a quantitative cellular biomarker assessment. Results must be interpreted in conjunction with the patient’s full clinical context by a licensed healthcare provider, and should not be used in isolation to diagnose a medical pathology or make unilateral therapeutic changes.',
-    answerEs: 'La prueba de NAD de Bloodo™ es una evaluación cuantitativa de biomarcadores celulares. Los resultados deben ser interpretados por un médico cualificado dentro del contexto clínico integral del paciente, y no deben utilizarse de forma aislada para diagnosticar patologías ni modificar tratamientos unilateralmente.'
+    tag: 'Regulatory Status (CE-IVDR)',
+    questionEn: 'Diagnostic Scope & Regulatory Status (CE-IVDR)',
+    questionEs: 'Alcance Diagnóstico y Marco Regulatorio (CE-IVDR)',
+    answerEn: 'The Bloodo™ NAD test is a quantitative cellular biomarker assay performed in a certified central laboratory (LifeLab1, Vilnius, EU) under CE-IVDR compliance. Results provide objective biochemical data to support licensed medical practitioners in clinical protocol calibration and therapeutic monitoring.',
+    answerEs: 'El test de NAD de Bloodo™ es un ensayo cuantitativo de biomarcadores celulares procesado en laboratorio central certificado (LifeLab1, Vilna, UE) bajo directiva CE-IVDR. Los resultados aportan datos bioquímicos objetivos para orientar al facultativo en la calibración posológica y monitorización clínica.'
   }
 ];
 
@@ -147,8 +147,7 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
   }, [product]);
 
   const [activeCategory, setActiveCategory] = useState('all');
-  const [openIds, setOpenIds] = useState(() => new Set(['faq-nad-02', 'faq-nad-03']));
-  const [copiedId, setCopiedId] = useState(null);
+  const [openIds, setOpenIds] = useState(() => new Set());
   const [isCopiedAll, setIsCopiedAll] = useState(false);
 
   const filteredFaqs = useMemo(() => {
@@ -168,103 +167,40 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
     });
   };
 
-  const handleShareWhatsAppSingle = (faq) => {
-    const q = isEs ? faq.questionEs : faq.questionEn;
-    const a = isEs ? faq.answerEs : faq.answerEn;
-    const tag = faq.tag || 'Clinical Guidance';
-    const text = `*Bloodo™ NAD Test FAQ — ${tag}*\n\n*Q: ${q}*\n\n${a}\n\n_Med-Peptides Clinical Intelligence • Bloodo UAB (Vilnius, EU)_`;
-
-    const encoded = encodeURIComponent(text);
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encoded}`;
-    
-    // Open WhatsApp in new tab/app
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleCopySingle = async (faq) => {
-    const q = isEs ? faq.questionEs : faq.questionEn;
-    const a = isEs ? faq.answerEs : faq.answerEn;
-    const tag = faq.tag || 'Clinical Guidance';
-    const text = `*Bloodo™ NAD Test FAQ — ${tag}*\n\n*Q: ${q}*\n\n${a}\n\n_Med-Peptides Clinical Intelligence • Bloodo UAB_`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(faq.id);
-      toast.success(isEs ? 'Respuesta copiada para WhatsApp' : 'Answer copied for WhatsApp sharing');
-      setTimeout(() => setCopiedId(null), 2500);
-    } catch {
-      toast.error('Could not copy to clipboard');
-    }
-  };
-
-  const handleShareWhatsAppAll = () => {
-    const headerTitle = isEs
-      ? '*Guía Rápida para Pacientes — Test Capilar de NAD (Bloodo™)*'
-      : '*Patient Clinical FAQ & Guidance — Bloodo™ NAD Test*';
-
-    const intentSection = isEs
-      ? `*1. OBJETIVO CLÍNICO Y MONITORIZACIÓN:*
-• *Si está en protocolo activo (ej. NMN/NR o IV NAD+):* NO suspenda el tratamiento ni haga lavado. El médico busca evaluar la respuesta terapéutica en curso.
-• *Registro clave:* Anotar dosis y momento exacto de la última toma o infusión (ej. "250 mg IV ayer a las 14:00").
-• *Si busca nivel basal sin tratamiento:* Suspenda precursores orales 2-3 semanas antes (bajo criterio médico).`
-      : `*1. CLINICAL OBJECTIVE & PROTOCOL MONITORING:*
-• *On Active Protocol (evaluating response):* DO NOT stop oral NAD/precursors or introduce a 2-3 week washout. The physician wants an in-treatment snapshot to calibrate dosing.
-• *Critical Record:* Document exact dose & timestamp of last dose or IV infusion (e.g. "Received 250 mg IV NAD+ yesterday at 14:00").
-• *Baseline Native Assessment:* Stop oral precursors 2-3 weeks prior (if clinically appropriate).`;
-
-    const prepSection = isEs
-      ? `*2. PREPARACIÓN Y TOMA DE MUESTRA:*
-• *Ayuno:* No es estrictamente obligatorio; se recomienda consistencia horaria (mañanas en reposo).
-• *Medicamentos:* No suspenda fármacos prescritos.
-• *Ejercicio:* Evite ejercicio extenuante 24h antes.
-• *Seguimiento comparativo:* Mantenga el mismo intervalo horario entre su dosis e infusión y la toma de sangre en futuros tests.`
-      : `*2. PRE-TEST PREPARATION & TIMING:*
-• *Fasting:* Generally not required; time-of-day consistency (morning rested) is recommended.
-• *Medications:* Do NOT discontinue prescribed chronic medications.
-• *Exercise:* Avoid strenuous workouts for 24h prior.
-• *Serial Tracking:* Maintain consistent intervals between treatment administration and blood collection.`;
-
-    const footer = `_Consultas médicas: business@med-peptides.com • LifeLab1 (Vilna, Lituania) / CE-IVDR_`;
-    const fullText = `${headerTitle}\n\n${intentSection}\n\n${prepSection}\n\n${footer}`;
-
-    const encoded = encodeURIComponent(fullText);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
-  };
-
   const handleCopyAll = async () => {
     const headerTitle = isEs
-      ? '*Guía Rápida para Pacientes — Test Capilar de NAD (Bloodo™)*'
-      : '*Patient Clinical FAQ & Guidance — Bloodo™ NAD Test*';
+      ? 'Especificaciones Clínicas y Protocolo de Monitorización — Test Capilar de NAD (Bloodo™)'
+      : 'Clinical Specifications & Therapeutic Monitoring Guidelines — Bloodo™ NAD Test';
 
     const intentSection = isEs
-      ? `*1. OBJETIVO CLÍNICO Y MONITORIZACIÓN:*
-• *Si está en protocolo activo (ej. NMN/NR o IV NAD+):* NO suspenda el tratamiento ni haga lavado. El médico busca evaluar la respuesta terapéutica en curso.
-• *Registro clave:* Anotar dosis y momento exacto de la última toma o infusión (ej. "250 mg IV ayer a las 14:00").
-• *Si busca nivel basal sin tratamiento:* Suspenda precursores orales 2-3 semanas antes (bajo criterio médico).`
-      : `*1. CLINICAL OBJECTIVE & PROTOCOL MONITORING:*
-• *On Active Protocol (evaluating response):* DO NOT stop oral NAD/precursors or introduce a 2-3 week washout. The physician wants an in-treatment snapshot to calibrate dosing.
-• *Critical Record:* Document exact dose & timestamp of last dose or IV infusion (e.g. "Received 250 mg IV NAD+ yesterday at 14:00").
-• *Baseline Native Assessment:* Stop oral precursors 2-3 weeks prior (if clinically appropriate).`;
+      ? `1. OBJETIVO CLÍNICO Y MONITORIZACIÓN TERAPÉUTICA:
+• Monitorización en Protocolo Activo (respuesta biológica): NO suspender tratamiento oral ni indicar lavado de 2-3 semanas. El médico evalúa el estado metabólico activo para calibrar dosis.
+• Registro Clínico Obligatorio: Consignar dosis exacta y hora de la última infusión IV o toma oral (ej. "250 mg IV ayer a las 14:00").
+• Nivel Basal Puro Sin Tratamiento: Suspender precursores orales 2-3 semanas antes bajo supervisión médica.`
+      : `1. CLINICAL OBJECTIVE & THERAPEUTIC MONITORING:
+• In-Treatment Protocol Monitoring (biological response): DO NOT discontinue oral precursors or introduce a 2-3 week washout. The clinician evaluates active metabolic equilibrium to calibrate dosage.
+• Essential Requisition Documentation: Record exact dose and timestamp of last parenteral infusion or oral dose (e.g. "Received 250 mg IV NAD+ yesterday at 14:00").
+• True Baseline Native Assessment: Discontinue oral precursors 2-3 weeks prior under medical direction.`;
 
     const prepSection = isEs
-      ? `*2. PREPARACIÓN Y TOMA DE MUESTRA:*
-• *Ayuno:* No es estrictamente obligatorio; se recomienda consistencia horaria (mañanas en reposo).
-• *Medicamentos:* No suspenda fármacos prescritos.
-• *Ejercicio:* Evite ejercicio extenuante 24h antes.
-• *Seguimiento comparativo:* Mantenga el mismo intervalo horario entre su dosis e infusión y la toma de sangre en futuros tests.`
-      : `*2. PRE-TEST PREPARATION & TIMING:*
-• *Fasting:* Generally not required; time-of-day consistency (morning rested) is recommended.
-• *Medications:* Do NOT discontinue prescribed chronic medications.
-• *Exercise:* Avoid strenuous workouts for 24h prior.
-• *Serial Tracking:* Maintain consistent intervals between treatment administration and blood collection.`;
+      ? `2. ESTANDARIZACIÓN PREANALÍTICA:
+• Ayuno: No obligatorio; se requiere consistencia horaria (mañanas en reposo).
+• Farmacoterapia Crónica: Mantener tratamientos prescritos; documentar en la petición analítica.
+• Actividad Física: Evitar ejercicio extenuante no habitual las 24h previas.
+• Estandarización Seriada: Mantener intervalo temporal idéntico respecto a la administración terapéutica.`
+      : `2. PRE-ANALYTICAL STANDARDIZATION:
+• Fasting Status: Generally not mandatory; time-of-day consistency (morning rested) is required.
+• Chronic Medications: Maintain prescribed therapies; report all active agents on requisition.
+• Physical Activity: Avoid exhaustive exercise for 24 hours preceding collection.
+• Serial Comparability: Maintain identical timing intervals relative to therapeutic administration.`;
 
-    const footer = `_Consultas médicas: business@med-peptides.com • LifeLab1 (Vilna, Lituania) / CE-IVDR_`;
+    const footer = `Med-Peptides Clinical Intelligence • LifeLab1 (Vilnius, Lithuania) / CE-IVDR Certified`;
     const fullText = `${headerTitle}\n\n${intentSection}\n\n${prepSection}\n\n${footer}`;
 
     try {
       await navigator.clipboard.writeText(fullText);
       setIsCopiedAll(true);
-      toast.success(isEs ? 'Guía completa copiada para WhatsApp' : 'Complete patient guide copied for WhatsApp');
+      toast.success(isEs ? 'Pautas clínicas copiadas al portapapeles ✓' : 'Clinical guidelines copied to clipboard ✓');
       setTimeout(() => setIsCopiedAll(false), 2500);
     } catch {
       toast.error('Could not copy to clipboard');
@@ -283,7 +219,7 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
             <div className="bnf-header-badge-row">
               <span className="bnf-chip bnf-chip-pharma">CE-IVDR Certified • Dried Blood Spot (DBS)</span>
               <span className="bnf-chip bnf-chip-protocol">
-                {isEs ? 'Pauta de Pacientes' : 'Patient Clinical FAQ'}
+                {isEs ? 'Guía para Profesionales' : 'Physician Clinical FAQ'}
               </span>
             </div>
             <h3 className="bnf-title">
@@ -291,32 +227,22 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
             </h3>
             <p className="bnf-subtitle">
               {isEs
-                ? 'Información rigurosa en lenguaje médico claro, diseñada para resolver dudas y compartir pautas directamente con pacientes.'
-                : 'Pharma-grade clinical guidance designed for rapid practitioner reference and 1-click sharing with patients via WhatsApp.'}
+                ? 'Información farmacológica rigurosa y parámetros de monitorización estandarizados para médicos, investigadores clínicos y consultas especializadas.'
+                : 'Pharma-grade clinical guidance and standardized testing parameters for medical practitioners, clinical investigators, and prescribing clinics.'}
             </p>
           </div>
         </div>
 
-        {/* Global WhatsApp Share CTA */}
+        {/* Global Clinical Copy Action */}
         <div className="bnf-header-actions">
           <button
             type="button"
-            className="bnf-wa-btn bnf-wa-btn-primary"
-            onClick={handleShareWhatsAppAll}
-            title={isEs ? 'Compartir resumen de pautas por WhatsApp' : 'Share comprehensive patient summary via WhatsApp'}
-          >
-            <span className="bnf-wa-icon-circle">💬</span>
-            <span>{isEs ? 'Enviar Guía por WhatsApp' : 'Share Guide on WhatsApp'}</span>
-          </button>
-
-          <button
-            type="button"
-            className="bnf-wa-btn bnf-wa-btn-secondary"
+            className="bnf-btn-copy-guideline"
             onClick={handleCopyAll}
-            title={isEs ? 'Copiar texto formateado para WhatsApp' : 'Copy formatted WhatsApp text to clipboard'}
+            title={isEs ? 'Copiar especificaciones clínicas al portapapeles' : 'Copy clinical specifications to clipboard'}
           >
             {isCopiedAll ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
-            <span>{isCopiedAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar para WhatsApp' : 'Copy WhatsApp Text')}</span>
+            <span>{isCopiedAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Pautas Clínicas' : 'Copy Clinical Guidelines')}</span>
           </button>
         </div>
       </div>
@@ -388,7 +314,6 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
       <div className="bnf-accordion-list">
         {filteredFaqs.map((faq, index) => {
           const isOpen = openIds.has(faq.id);
-          const isCopied = copiedId === faq.id;
           const qText = isEs ? faq.questionEs : faq.questionEn;
           const aText = isEs ? faq.answerEs : faq.answerEn;
           const isProtocolCategory = faq.category === 'protocol_monitoring';
@@ -437,29 +362,6 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
                         {line}
                       </p>
                     ))}
-                  </div>
-
-                  {/* Per-Question WhatsApp Share & Copy Strip */}
-                  <div className="bnf-answer-actions">
-                    <button
-                      type="button"
-                      className="bnf-action-btn bnf-action-wa"
-                      onClick={() => handleShareWhatsAppSingle(faq)}
-                      title={isEs ? 'Compartir esta respuesta por WhatsApp' : 'Share this specific answer via WhatsApp'}
-                    >
-                      <span style={{ fontSize: '0.85rem' }}>💬</span>
-                      <span>{isEs ? 'Compartir por WhatsApp' : 'Share on WhatsApp'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="bnf-action-btn bnf-action-copy"
-                      onClick={() => handleCopySingle(faq)}
-                      title={isEs ? 'Copiar texto formateado de esta respuesta' : 'Copy formatted text for WhatsApp messaging'}
-                    >
-                      {isCopied ? <Check size={13} style={{ color: '#10b981' }} /> : <Copy size={13} />}
-                      <span>{isCopied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Texto' : 'Copy Text')}</span>
-                    </button>
                   </div>
                 </div>
               )}

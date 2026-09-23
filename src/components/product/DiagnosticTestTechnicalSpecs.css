@@ -186,17 +186,45 @@
   color: #334155;
 }
 
-/* ── 3. 3-Step Protocol ── */
+/* ── 3. Bloodo Standardized Capillary Collection Protocol ── */
 .dts-protocol-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 1.5rem;
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dts-protocol-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1.25rem;
+}
+
+.dts-protocol-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.70rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0d9488;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
 }
 
 .dts-protocol-title {
-  margin: 0 0 1.25rem 0;
-  font-size: 1.05rem;
+  margin: 0 0 0.35rem 0;
+  font-size: 1.15rem;
   font-weight: 800;
   color: #003666;
   display: flex;
@@ -204,48 +232,427 @@
   gap: 0.5rem;
 }
 
-.dts-steps-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+.dts-protocol-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.45;
+  max-width: 780px;
 }
 
-.dts-step {
+.dts-protocol-dry-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.dts-dry-time-val {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #003666;
+}
+
+.dts-dry-time-sub {
+  display: block;
+  font-size: 0.70rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Quick Analytical Specs Bar */
+.dts-specs-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.85rem 1.15rem;
+}
+
+.dts-spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dts-spec-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.03em;
+}
+
+.dts-spec-val {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Cortisol Dual Cadence Card */
+.dts-cortisol-cadence-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dts-cadence-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dts-cadence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.dts-cadence-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.dts-cadence-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dts-cadence-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.55;
+}
+
+.dts-cadence-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.dts-cadence-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dts-cadence-am {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+  border-color: #fde68a;
+}
+
+.dts-cadence-pm {
+  background: linear-gradient(180deg, #eef2ff 0%, #ffffff 100%);
+  border-color: #c7d2fe;
+}
+
+.dts-cadence-box-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dts-cadence-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dts-icon-am {
+  background: #fef3c7;
+}
+
+.dts-icon-pm {
+  background: #e0e7ff;
+}
+
+.dts-cadence-step-tag {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.03em;
+}
+
+.dts-cadence-time {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dts-cadence-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 0.65rem;
+}
+
+.dts-cadence-spec-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.78rem;
+}
+
+.dts-cadence-spec-row span {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.dts-cadence-spec-row strong {
+  color: #0f172a;
+}
+
+.dts-spot-tag-am {
+  color: #b45309 !important;
+  background: #fef3c7;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.dts-spot-tag-pm {
+  color: #4338ca !important;
+  background: #e0e7ff;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.dts-cadence-spec-row small {
+  color: #475569;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+/* Standard Single Morning Cadence Banner */
+.dts-standard-timing-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid #ccfbf1;
+  border-left: 4px solid #0d9488;
+  border-radius: 10px;
+  padding: 0.85rem 1.15rem;
+}
+
+.dts-timing-icon {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.dts-timing-text strong {
+  display: block;
+  font-size: 0.86rem;
+  color: #003666;
+  margin-bottom: 0.2rem;
+}
+
+.dts-timing-text p {
+  margin: 0;
+  font-size: 0.80rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+/* 4 Graphic Procedural Steps */
+.dts-procedural-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.dts-proc-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 1.25rem;
-  position: relative;
+  padding: 1.15rem;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.dts-step-num {
-  width: 28px;
-  height: 28px;
+.dts-proc-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dts-proc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.dts-proc-num {
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #003666;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.80rem;
   font-weight: 800;
-  margin-bottom: 0.75rem;
 }
 
-.dts-step-title {
-  font-size: 0.95rem;
+.dts-proc-phase {
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0d9488;
+  background: #f0fdfa;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.dts-proc-title {
+  margin: 0 0 0.65rem 0;
+  font-size: 0.90rem;
   font-weight: 800;
   color: #0f172a;
-  margin-bottom: 0.4rem;
+  line-height: 1.35;
 }
 
-.dts-step-desc {
+.dts-proc-list {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #475569;
+  line-height: 1.45;
+  flex-grow: 1;
+}
+
+.dts-critical-step-item {
+  list-style: none;
+  margin-left: -1.1rem;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  color: #92400e;
+}
+
+.dts-critical-step-item strong {
+  color: #78350f;
+  line-height: 1.35;
+}
+
+.dts-proc-tip {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f0f9ff;
+  border: 1px solid #e0f2fe;
+  padding: 0.4rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.70rem;
+  color: #0369a1;
+  line-height: 1.35;
+}
+
+/* Quality Acceptance Criteria vs Rejection */
+.dts-qa-criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.dts-qa-box {
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dts-qa-valid {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.dts-qa-invalid {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.dts-qa-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.dts-qa-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dts-qa-list {
   margin: 0;
-  font-size: 0.82rem;
-  color: #64748b;
-  line-height: 1.5;
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #334155;
 }
 
 /* ── 4. Included Contents Checklist ── */
@@ -334,15 +741,27 @@
 }
 
 /* ── Responsive Mobile Breakpoints ── */
+@media (max-width: 1024px) {
+  .dts-procedural-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .dts-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .dts-steps-grid {
-    grid-template-columns: 1fr;
-  }
   .dts-contents-grid {
     grid-template-columns: 1fr;
+  }
+  .dts-cadence-grid {
+    grid-template-columns: 1fr;
+  }
+  .dts-qa-criteria-grid {
+    grid-template-columns: 1fr;
+  }
+  .dts-specs-bar {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -355,6 +774,25 @@
     grid-template-columns: 1fr;
   }
   .dts-range-selector {
+    grid-template-columns: 1fr;
+  }
+  .dts-protocol-card {
+    padding: 1.25rem;
+  }
+  .dts-protocol-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .dts-protocol-dry-badge {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .dts-specs-bar {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+  .dts-procedural-steps-grid {
     grid-template-columns: 1fr;
   }
   .dts-footer-banner {

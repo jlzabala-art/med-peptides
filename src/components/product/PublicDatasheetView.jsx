@@ -62,6 +62,7 @@ import CoaModal from './CoaModal';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import CorporateResidencyInquiryDrawer from '@/components/portal/CorporateResidencyInquiryDrawer';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -1224,7 +1225,7 @@ export default function PublicDatasheetView({
                     ? (t.lotuslandVerified || (lang === 'es' ? 'Certificado Atlas Services' : 'Atlas Services Certified')) 
                     : `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`}
               </span>
-              {!isCorporateService && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
+              {!isCorporateService && !isDiagnosticKit && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
               {!isCorporateService && !isSolventProduct && !isDiagnosticKit && (
                 <>
                   <span style={{
@@ -2358,7 +2359,7 @@ export default function PublicDatasheetView({
       {/* Sandboxed Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
         lang={lang}
-        hideFloatingTrigger={false}
+        hideFloatingTrigger={true}
         contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : "monograph"}
         contextAnchor={{
           name: isSpainResidency 
@@ -2457,6 +2458,56 @@ export default function PublicDatasheetView({
           lang={lang}
         />
       )}
+
+      {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
+      <PublicStickyActionBar
+        title={
+          isSpainResidency
+            ? (lang === 'es' ? 'Programa de Residencia y Adquisición Corporativa (Ley 14/2013)' : 'Spanish Corporate Acquisition & Law 14/2013 Residence Program')
+            : isCompoundingService
+            ? (lang === 'es' ? 'Servicio de Compounding Farmacéutico Europeo' : 'European Pharmaceutical Compounding Service')
+            : isPeptideSupplyService
+            ? (lang === 'es' ? 'Suministro de Péptidos B2B y Gestión de Inventario' : 'B2B Dedicated Peptide Supply Chain')
+            : (product?.canonicalName || product?.name || slug)
+        }
+        subtitle={
+          isDiagnosticKit
+            ? (lang === 'es' ? 'Sangre Capilar (DBS) • Certificado CE-IVDR • LifeLab1' : 'Capillary Blood (DBS) • CE-IVDR Certified • LifeLab1')
+            : isSpainResidency
+            ? (lang === 'es' ? 'Programa Legal Ley 14/2013 • Resolución en 20 Días' : 'Law 14/2013 Statutory Program • 20-Day Fast Track')
+            : isCompoundingService
+            ? (lang === 'es' ? 'Formulaciones Personalizadas EU GMP & Ph. Eur.' : 'EU GMP & Ph. Eur. Certified Compounding Formulation')
+            : isPeptideSupplyService
+            ? (lang === 'es' ? 'Stock HPLC ≥99% Certificado • Envío 24-48h' : 'HPLC ≥99% Certified Inventory • 24-48h Dispatch')
+            : `${selectedStrength?.name || ''}${product?.format ? ` · ${getHumanFormatName(product.format, lang)}` : ''} • ${lang === 'es' ? 'Pureza' : 'Purity'} ${product?.purity || '≥99%'}`.trim()
+        }
+        badge={
+          isDiagnosticKit
+            ? (lang === 'es' ? 'Test Diagnóstico' : 'Diagnostic Kit')
+            : isSpainResidency
+            ? (lang === 'es' ? 'Programa Legal' : 'Residency Program')
+            : isCompoundingService
+            ? 'Compounding'
+            : isPeptideSupplyService
+            ? (lang === 'es' ? 'Suministro B2B' : 'B2B Supply')
+            : (lang === 'es' ? 'Monografía' : 'Peptide Monograph')
+        }
+        badgeType={isDiagnosticKit ? 'diagnostic' : 'default'}
+        inquireLabel={
+          isDiagnosticKit
+            ? (lang === 'es' ? 'Consultar Test' : 'Inquire Test')
+            : isSpainResidency
+            ? (lang === 'es' ? 'Consultar Programa' : 'Inquire Program')
+            : isCompoundingService
+            ? (lang === 'es' ? 'Consultar Formulación' : 'Inquire Formulation')
+            : isPeptideSupplyService
+            ? (lang === 'es' ? 'Consultar Suministro' : 'Inquire Supply')
+            : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product')
+        }
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        showClinicalAI={true}
+        lang={lang}
+      />
     </div>
   );
 }

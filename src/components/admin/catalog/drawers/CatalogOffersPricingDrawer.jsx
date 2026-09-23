@@ -674,7 +674,7 @@ export default function CatalogOffersPricingDrawer({
       width={isExpanded ? "min(1360px, 96vw)" : "clamp(480px, 62vw, 880px)"}
       expandable={false}
       actions={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           {activeDrawer === 'offers' && (
             <>
               <button
@@ -685,11 +685,13 @@ export default function CatalogOffersPricingDrawer({
                     onOpenImportPriceList({ productId: selectedProduct?.id, supplierId: suppId, category: cat });
                   }
                 }}
+                title="Import Price List"
+                aria-label="Import Price List"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.35rem',
-                  padding: '0.35rem 0.75rem',
+                  padding: '0.35rem 0.5rem',
                   fontSize: '0.78rem',
                   fontWeight: 700,
                   color: '#0284c7',
@@ -698,11 +700,12 @@ export default function CatalogOffersPricingDrawer({
                   borderRadius: '7px',
                   cursor: 'pointer',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
                 }}
               >
                 <UploadCloud size={14} style={{ color: '#0284c7' }} />
-                <span>Import Price List</span>
+                <span className="hidden sm:inline">Import Price List</span>
               </button>
 
               <button
@@ -712,11 +715,13 @@ export default function CatalogOffersPricingDrawer({
                   commercialChannel, 
                   groupBy: 'supplier' 
                 })}
+                title="Export Product PDF"
+                aria-label="Export Product PDF"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.35rem',
-                  padding: '0.35rem 0.75rem',
+                  padding: '0.35rem 0.5rem',
                   fontSize: '0.78rem',
                   fontWeight: 700,
                   color: '#003666',
@@ -725,22 +730,23 @@ export default function CatalogOffersPricingDrawer({
                   borderRadius: '7px',
                   cursor: 'pointer',
                   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
                 }}
               >
                 <FileText size={14} style={{ color: '#0284c7' }} />
-                <span>Export PDF</span>
-                <Share2 size={12} style={{ opacity: 0.6 }} />
+                <span className="hidden sm:inline">Export PDF</span>
+                <Share2 size={12} className="hidden sm:inline" style={{ opacity: 0.6 }} />
               </button>
             </>
           )}
 
           <button
             onClick={() => setIsExpanded(prev => !prev)}
+            className="hidden sm:inline-flex"
             title={isExpanded ? "Collapse to standard width" : "Expand to wide comparison view"}
             aria-label={isExpanded ? "Collapse drawer width" : "Expand drawer width"}
             style={{
-              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0.35rem',
@@ -752,7 +758,8 @@ export default function CatalogOffersPricingDrawer({
               color: '#475569',
               cursor: 'pointer',
               boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.15s ease',
+              flexShrink: 0
             }}
           >
             {isExpanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}

@@ -449,17 +449,20 @@ export default function VariantAccordion({
               </span>
             </div>
           ) : isGenomicsOrTest ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
               <span style={{
-                fontSize: '0.74rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
                 color: '#4338ca',
                 background: '#eef2ff',
                 border: '1px solid #c7d2fe',
-                padding: '3px 10px',
-                borderRadius: '6px'
+                padding: '2px 8px',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
               }}>
-                🧬 Non-Diagnostic Screening & Genomic Lab Panels
+                🧬 Non-Diagnostic Screening & Lab Panels
               </span>
             </div>
           ) : (!hasMixedTypes || variantTypeFilter !== 'all') ? (
@@ -558,29 +561,67 @@ export default function VariantAccordion({
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  {/* Supplier Header */}
+                  {/* Supplier Header — GCP Responsive 2-Tier Master-Detail Accordion */}
                   <div
                     onClick={() => toggleSupplierCollapse(group.key)}
                     style={{
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.625rem 1rem',
+                      flexDirection: 'column',
+                      gap: '0.4rem',
+                      padding: '0.625rem 0.875rem',
                       backgroundColor: '#f8fafc',
                       borderBottom: isCollapsed ? 'none' : '1px solid #e2e8f0',
                       cursor: 'pointer',
                       userSelect: 'none'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                      <span style={{ color: isCollapsed ? '#94a3b8' : '#003666', display: 'flex', alignItems: 'center' }}>
-                        {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-                      </span>
-                      <Building2 size={16} style={{ color: 'var(--color-primary, #003666)' }} />
-                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
-                        {group.name}
-                      </span>
+                    {/* Tier 1: Supplier Identity + Variant Count Badge */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '0.5rem',
+                      width: '100%'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
+                        <span style={{ color: isCollapsed ? '#94a3b8' : '#003666', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                          {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                        </span>
+                        <Building2 size={16} style={{ color: 'var(--color-primary, #003666)', flexShrink: 0 }} />
+                        <span style={{
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
+                          color: '#0f172a',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {group.name}
+                        </span>
+                      </div>
 
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#475569',
+                        backgroundColor: '#e2e8f0',
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                        flexShrink: 0,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {group.variants.length} {group.variants.length === 1 ? 'variant' : 'variants'}
+                      </span>
+                    </div>
+
+                    {/* Tier 2: Metadata Chips & Quick Actions (Wraps cleanly on mobile, zero overlap) */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      flexWrap: 'wrap',
+                      paddingLeft: '1.5rem'
+                    }}>
                       {/* 🌐 1-Click Public Datasheet Export & Share */}
                       <button
                         type="button"
@@ -595,7 +636,7 @@ export default function VariantAccordion({
                           alignItems: 'center',
                           gap: '4px',
                           padding: '2px 8px',
-                          fontSize: '0.72rem',
+                          fontSize: '0.7rem',
                           fontWeight: 600,
                           color: '#0284c7',
                           backgroundColor: '#ffffff',
@@ -618,11 +659,13 @@ export default function VariantAccordion({
                         <Share2 size={12} style={{ color: '#0284c7' }} />
                         <span>Public Datasheet</span>
                       </button>
+
                       {group.hasCOA && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: 600, color: '#059669', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
                           <ShieldCheck size={11} /> COA Verified
                         </span>
                       )}
+
                       {isGroupRaw && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: 700, color: '#047857', backgroundColor: '#ecfdf5', padding: '1px 6px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
                           🧪 Bulk Raw Material (g)
@@ -662,31 +705,18 @@ export default function VariantAccordion({
                               fontSize: '0.68rem',
                               fontWeight: 700,
                               color: '#334155',
-                              backgroundColor: '#f8fafc',
+                              backgroundColor: '#ffffff',
                               border: '1px solid #cbd5e1',
                               padding: '1px 6px',
                               borderRadius: '4px'
                             }}
                           >
-                            <span style={{ fontSize: '0.75rem' }}>{origCurr.flag}</span>
+                            <span style={{ fontSize: '0.72rem' }}>{origCurr.flag}</span>
                             <span style={{ color: '#64748b' }}>Currency:</span>
                             <span style={{ color: '#0f172a', fontWeight: 800 }}>{origCurr.label}</span>
                           </span>
                         );
                       })()}
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: '#64748b',
-                        backgroundColor: '#e2e8f0',
-                        padding: '2px 8px',
-                        borderRadius: '9999px'
-                      }}>
-                        {group.variants.length} {group.variants.length === 1 ? 'variant' : 'variants'}
-                      </span>
                     </div>
                   </div>
 

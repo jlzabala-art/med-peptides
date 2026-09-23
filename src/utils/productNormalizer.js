@@ -60,27 +60,36 @@ export function extractProductDosage(product) {
 
 /**
  * Extracts and formats the presentation format (Vial, Pre-filled Pen, Lyophilized Vial, etc.)
+ * IMPORTANT: Fagron Iberia only supplies bulk raw materials — NEVER finished vials.
  */
 export function extractProductPresentation(product) {
   if (!product) return 'Vial';
+
+  // Fagron guard: Fagron Iberia only supplies bulk APIs, raw materials and compounding substrates.
+  // They never supply finished injectable vials. Always return Bulk API Powder for Fagron products.
+  const rootSupplier = String(product.supplierId || product.supplierName || product.supplier || '').toLowerCase();
+  const isFagron = rootSupplier.includes('fagron');
+
   const isRaw = product.type === 'raw_material' || 
                 product.productType === 'raw_material' || 
                 product.productType === 'api_raw_material' ||
-                product.format === 'bulk_api';
+                product.format === 'bulk_api' ||
+                isFagron; // Fagron always means raw/compounding
 
   const pres = product.presentationName || product.presentation || product.format || product.form || product.presentationType;
   if (pres && typeof pres === 'string' && pres.trim()) {
     const p = pres.trim().toLowerCase();
-    if (isRaw || /bulk|granel|api/i.test(p)) return 'Bulk API Powder';
+    if (isRaw || /bulk|granel|api|powder/i.test(p)) return 'Bulk API Powder';
     if (/pen/i.test(p)) return 'Pre-filled Pen';
     if (/lyophilized|liofilizado/i.test(p)) return 'Lyophilized Vial';
-    if (/powder/i.test(p)) return isRaw ? 'Bulk API Powder' : 'Lyophilized Vial';
     if (/nasal/i.test(p)) return 'Nasal Spray';
     if (/capsule/i.test(p)) return 'Oral Capsule';
     if (/sublingual/i.test(p)) return 'Sublingual';
     if (/cartridge/i.test(p)) return 'Refill Cartridge';
     if (/cream|topical/i.test(p)) return 'Topical Cream';
     if (/oil/i.test(p)) return 'Topical Oil';
+    if (/tablet/i.test(p)) return 'Oral Tablet';
+    if (/bottle/i.test(p)) return 'Bottle';
     return isRaw ? 'Bulk API Powder' : 'Vial';
   }
 
@@ -88,13 +97,15 @@ export function extractProductPresentation(product) {
   if (isRaw || /bulk|granel|api/i.test(str)) return 'Bulk API Powder';
   if (/pre-?filled-?pen|pen/i.test(str)) return 'Pre-filled Pen';
   if (/lyophilized|liofilizado/i.test(str)) return 'Lyophilized Vial';
-  if (/vial/i.test(str)) return 'Vial';
+  if (/vial/i.test(str)) return isRaw ? 'Bulk API Powder' : 'Vial'; // Guard: Fagron+vial in name → still Bulk API
   if (/nasal/i.test(str)) return 'Nasal Spray';
   if (/capsule|oral/i.test(str)) return 'Oral Capsule';
   if (/sublingual/i.test(str)) return 'Sublingual';
   if (/cartridge/i.test(str)) return 'Refill Cartridge';
   if (/cream|topical/i.test(str)) return 'Topical Cream';
   if (/oil/i.test(str)) return 'Topical Oil';
+  if (/tablet/i.test(str)) return 'Oral Tablet';
+  if (/bottle/i.test(str)) return 'Bottle';
   return isRaw ? 'Bulk API Powder' : 'Vial';
 }
 

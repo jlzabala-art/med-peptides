@@ -15,7 +15,12 @@ export const RECONSTITUTION_LOOKUP = Object.freeze({
   20: { bacMl: 3.0, concMgMl: 6.67, concStr: '6.7 mg/mL',  diluentStr: '3.0 mL BAC Water' },
   30: { bacMl: 4.0, concMgMl: 7.5,  concStr: '7.5 mg/mL',  diluentStr: '4.0 mL BAC Water' },
   40: { bacMl: 5.0, concMgMl: 8.0,  concStr: '8.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
-  50: { bacMl: 5.0, concMgMl: 10.0, concStr: '10.0 mg/mL', diluentStr: '5.0 mL BAC Water' }
+  50:   { bacMl: 5.0,  concMgMl: 10.0,  concStr: '10.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
+  100:  { bacMl: 5.0,  concMgMl: 20.0,  concStr: '20.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
+  200:  { bacMl: 5.0,  concMgMl: 40.0,  concStr: '40.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
+  500:  { bacMl: 5.0,  concMgMl: 100.0, concStr: '100.0 mg/mL', diluentStr: '5.0 mL BAC Water' },
+  750:  { bacMl: 7.5,  concMgMl: 100.0, concStr: '100.0 mg/mL', diluentStr: '7.5 mL BAC Water' },
+  1000: { bacMl: 10.0, concMgMl: 100.0, concStr: '100.0 mg/mL', diluentStr: '10.0 mL BAC Water' }
 });
 
 const DYNAMIC_CACHE = new Map();
@@ -48,7 +53,7 @@ export function getReconstitutionBaseline(mgVal, isBlend = false) {
   let baseBac = 2.0;
   if (isBlend) {
     const rawVol = numMg / 10.0;
-    baseBac = Math.max(2.0, Math.round(rawVol * 2) / 2);
+    baseBac = Math.min(10.0, Math.max(2.0, Math.round(rawVol * 2) / 2));
   } else if (numMg <= 2) {
     baseBac = 1.0;
   } else if (numMg <= 10) {
@@ -59,8 +64,14 @@ export function getReconstitutionBaseline(mgVal, isBlend = false) {
     baseBac = 4.0;
   } else if (numMg <= 50) {
     baseBac = 5.0;
+  } else if (numMg <= 250) {
+    baseBac = 5.0;
+  } else if (numMg <= 500) {
+    baseBac = 5.0;
+  } else if (numMg <= 750) {
+    baseBac = 7.5;
   } else {
-    baseBac = Math.max(5.0, Math.round((numMg / 10.0) * 2) / 2);
+    baseBac = 10.0;
   }
 
   const concVal = baseBac > 0 ? numMg / baseBac : numMg;

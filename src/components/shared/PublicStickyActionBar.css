@@ -1,0 +1,246 @@
+.public-sticky-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08);
+  padding: 10px 20px max(10px, env(safe-area-inset-bottom, 10px)) 20px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.public-sticky-action-bar__container {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Left: Identity */
+.public-sticky-action-bar__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.public-sticky-action-bar__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.public-sticky-action-bar__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.public-sticky-action-bar__badge--diagnostic {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.public-sticky-action-bar__badge--protocol {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.public-sticky-action-bar__title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.public-sticky-action-bar__subtitle {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* Right: Actions */
+.public-sticky-action-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Clinical AI Button */
+.public-sticky-action-bar__ai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #0f172a 0%, #002244 100%);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+}
+
+.public-sticky-action-bar__ai-btn:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #003666 100%);
+  border-color: #38bdf8;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
+}
+
+.public-sticky-action-bar__ai-btn:active {
+  transform: translateY(0);
+}
+
+.public-sticky-action-bar__sparkle-icon {
+  color: #38bdf8;
+  flex-shrink: 0;
+  animation: pulse-sparkle 3s ease-in-out infinite;
+}
+
+@keyframes pulse-sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+  }
+}
+
+.public-sticky-action-bar__quota-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+/* Inquire CTA Button */
+.public-sticky-action-bar__inquire-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #003666;
+  color: #ffffff;
+  border: 1px solid #003666;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.2);
+}
+
+.public-sticky-action-bar__inquire-btn:hover {
+  background: #002244;
+  border-color: #002244;
+  box-shadow: 0 4px 14px rgba(0, 54, 102, 0.35);
+  transform: translateY(-1px);
+}
+
+.public-sticky-action-bar__inquire-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .public-sticky-action-bar {
+    padding: 8px 12px max(8px, env(safe-area-inset-bottom, 8px)) 12px;
+  }
+
+  .public-sticky-action-bar__container {
+    gap: 10px;
+  }
+
+  .public-sticky-action-bar__title {
+    font-size: 0.82rem;
+  }
+
+  .public-sticky-action-bar__subtitle {
+    font-size: 0.68rem;
+  }
+
+  .public-sticky-action-bar__ai-btn {
+    padding: 7px 10px;
+    font-size: 0.76rem;
+    gap: 6px;
+  }
+
+  .public-sticky-action-bar__inquire-btn {
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 520px) {
+  .public-sticky-action-bar__badge {
+    display: none;
+  }
+
+  .public-sticky-action-bar__subtitle {
+    display: none;
+  }
+
+  .public-sticky-action-bar__ai-label-full {
+    display: none;
+  }
+
+  .public-sticky-action-bar__ai-label-short {
+    display: inline;
+  }
+
+  .public-sticky-action-bar__ai-btn {
+    padding: 7px 8px;
+  }
+
+  .public-sticky-action-bar__inquire-btn {
+    padding: 7px 12px;
+  }
+}
+
+@media (min-width: 521px) {
+  .public-sticky-action-bar__ai-label-short {
+    display: none;
+  }
+}

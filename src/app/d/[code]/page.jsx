@@ -21,38 +21,86 @@ export const revalidate = 0;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
+import { resolveSocialImage, resolveSocialContent } from '@/utils/socialImageResolver';
+
 /**
- * Clean OpenGraph & Twitter Metadata for WhatsApp / Telegram / Social Previews.
- * Guaranteed to be 100% clean without company or product leaks.
+ * Dynamic OpenGraph & Twitter Metadata for WhatsApp / Telegram / Social Previews.
+ * Resolves exact compound/diagnostic test, recipient personalization, and related image.
  */
 export async function generateMetadata({ params }) {
-  const cleanTitle = 'Clinical Technical Monograph & Protocol Reference';
-  const cleanDesc = 'Verified analytical reference, standardized dosing specifications, and clinical administration guidelines. Confidential medical reference.';
-  const previewImage = `${BASE_URL}/og-catalog.png`;
+  const resolvedParams = await params;
+  const code = resolvedParams?.code;
+
+  let title = 'Clinical Technical Monograph & Protocol Reference';
+  let description = 'Verified analytical reference, standardized dosing specifications, and clinical administration guidelines. Confidential medical reference.';
+  let previewImage = `${BASE_URL}/og-catalog.png`;
+
+  if (adminDb && code) {
+    try {
+      const snap = await adminDb.collection('datasheet_short_links').doc(code).get();
+      if (snap.exists) {
+        const linkData = snap.data();
+        const slug = linkData.slug || linkData.variant?.productId || '';
+        let productData = null;
+
+        if (slug) {
+          const prodSnap = await adminDb.collection('products').doc(slug).get().catch(() => null);
+          if (prodSnap?.exists) {
+            productData = { id: prodSnap.id, ...prodSnap.data() };
+          }
+        }
+
+        const resolved = resolveSocialContent({
+          product: productData,
+          variant: linkData.variant,
+          code,
+          recipient: linkData.recipient
+        });
+
+        title = resolved.title || title;
+        description = resolved.description || description;
+        previewImage = resolveSocialImage(productData || slug, linkData.format || linkData.variant?.format);
+      }
+    } catch (err) {
+      console.warn('[d/[code]/generateMetadata] Error resolving short link metadata:', err.message);
+    }
+  }
+
+  const isPng = previewImage.toLowerCase().endsWith('.png');
+  const imageType = isPng ? 'image/png' : 'image/jpeg';
 
   return {
-    title: cleanTitle,
-    description: cleanDesc,
+    title,
+    description,
     openGraph: {
-      title: cleanTitle,
-      description: cleanDesc,
+      title,
+      description,
       type: 'article',
-      siteName: 'Clinical Technical Reference Library',
+      siteName: 'Clinical Reference Library',
+      url: `${BASE_URL}/d/${code}`,
       images: [
         {
           url: previewImage,
           width: 1200,
           height: 630,
-          type: 'image/png',
-          alt: 'Clinical Monograph Reference Documentation'
+          type: imageType,
+          alt: title
         }
       ]
     },
     twitter: {
       card: 'summary_large_image',
-      title: cleanTitle,
-      description: cleanDesc,
+      title,
+      description,
       images: [previewImage]
+    },
+    other: {
+      'og:image': previewImage,
+      'og:image:secure_url': previewImage,
+      'og:image:type': imageType,
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      'og:image:alt': title
     },
     robots: { index: false, follow: true }
   };
@@ -179,6 +227,25 @@ export default async function ShortDatasheetPage({ params }) {
     );
   }
 
-  // Redirect instantly to the complete target URL
+  // Check if request is from a social preview crawler (WhatsApp, Telegram, etc.)
+  const headersList = await headers();
+  const userAgent = headersList.get('user-agent') || '';
+  const isSocialCrawler = /whatsapp|facebookexternalhit|telegrambot|twitterbot|linkedinbot|slackbot|applebot/i.test(userAgent);
+
+  if (isSocialCrawler) {
+    return (
+      <html lang="en">
+        <head>
+          <meta httpEquiv="refresh" content={`0;url=${targetUrl}`} />
+        </head>
+        <body style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem', textAlign: 'center', backgroundColor: '#f8fafc' }}>
+          <p style={{ color: '#64748b' }}>Redirecting to clinical technical documentation...</p>
+          <a href={targetUrl} style={{ color: '#0d9488', fontWeight: 600 }}>Click here if not redirected automatically</a>
+        </body>
+      </html>
+    );
+  }
+
+  // Redirect instantly to the complete target URL for regular browser visitors
   redirect(targetUrl);
 }

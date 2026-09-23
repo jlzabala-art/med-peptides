@@ -414,8 +414,9 @@ export async function buildCatalogSummary(searchParams) {
       // Presentation filter
       if (hasPresentationFilter) {
         productVariants = productVariants.filter(v => {
-          const pres = v.presentation || v.format || 'vial';
-          return presentationParams.includes(pres);
+          const pres = v.presentation || v.format || '';
+          if (!pres) return false; // Skip variants with no presentation (better to exclude than misclassify)
+          return presentationParams.includes(pres.toLowerCase()) || presentationParams.includes(pres);
         });
       }
 

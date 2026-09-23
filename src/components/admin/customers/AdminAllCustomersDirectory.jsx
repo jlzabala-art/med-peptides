@@ -427,36 +427,42 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-      {/* ── METRICS SUMMARY ── */}
+      {/* ── METRICS SUMMARY (tappable quick filters — GCP pattern) ── */}
       <div className="kpi-grid-4">
-        <MetricCard
-          title="All Customer Accounts"
-          value={typeCounts.all}
-          icon={Users2}
-          color="#1d4ed8"
-          subtitle="Consolidated database"
-        />
-        <MetricCard
-          title="Clinics & Centers"
-          value={typeCounts.clinics}
-          icon={Stethoscope}
-          color="#0d9488"
-          subtitle="Physical medical facilities"
-        />
-        <MetricCard
-          title="Wholesalers & Resellers"
-          value={typeCounts.wholesalers}
-          icon={Building2}
-          color="#c2410c"
-          subtitle="Bulk commercial channels"
-        />
-        <MetricCard
-          title="Direct Patients & Doctors"
-          value={typeCounts.patients + typeCounts.doctors}
-          icon={User}
-          color="#7c3aed"
-          subtitle="Direct prescriptions"
-        />
+        {[
+          { title: 'All Customer Accounts', value: typeCounts.all, icon: Users2, color: '#1d4ed8', subtitle: 'Consolidated database', typeId: 'All' },
+          { title: 'Clinics & Centers', value: typeCounts.clinics, icon: Stethoscope, color: '#0d9488', subtitle: 'Physical medical facilities', typeId: 'clinic' },
+          { title: 'Wholesalers & Resellers', value: typeCounts.wholesalers, icon: Building2, color: '#c2410c', subtitle: 'Bulk commercial channels', typeId: 'wholesaler' },
+          { title: 'Direct Patients & Doctors', value: typeCounts.patients + typeCounts.doctors, icon: User, color: '#7c3aed', subtitle: 'Direct prescriptions', typeId: 'patient' },
+        ].map(card => {
+          const isActiveCard = selectedType === card.typeId || (card.typeId === 'All' && (!selectedType || selectedType === 'All'));
+          return (
+            <div
+              key={card.typeId}
+              onClick={() => setSelectedType(card.typeId)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setSelectedType(card.typeId)}
+              style={{
+                cursor: 'pointer',
+                borderRadius: '12px',
+                outline: isActiveCard ? `2.5px solid ${card.color}` : '2.5px solid transparent',
+                outlineOffset: '2px',
+                transition: 'outline 0.15s ease, box-shadow 0.15s ease',
+                boxShadow: isActiveCard ? `0 0 0 3px ${card.color}22` : 'none',
+              }}
+              title={`Filter by ${card.title}`}
+            >
+              <MetricCard
+                title={card.title}
+                value={card.value}
+                icon={card.icon}
+                color={card.color}
+                subtitle={card.subtitle}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* ── UNIFIED SEARCH BAR ── */}
@@ -509,73 +515,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
         ]}
       />
 
-      {/* ── FAST-ACCESS TYPE SEGMENTED PILLS BAR ── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.45rem 0.75rem',
-          backgroundColor: '#ffffff',
-          borderRadius: '10px',
-          border: '1px solid var(--border, #e2e8f0)',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
-          scrollbarWidth: 'none'
-        }}
-      >
-        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', marginRight: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <Globe size={13} color="#2563eb" /> Channel:
-        </span>
 
-        {[
-          { id: 'All', label: 'All Accounts', count: typeCounts.all, icon: '🌐' },
-          { id: 'clinic', label: 'Clinics', count: typeCounts.clinics, icon: '🏥' },
-          { id: 'wholesaler', label: 'Wholesalers', count: typeCounts.wholesalers, icon: '🏢' },
-          { id: 'doctor', label: 'Doctors', count: typeCounts.doctors, icon: '🩺' },
-          { id: 'patient', label: 'Patients', count: typeCounts.patients, icon: '👤' }
-        ].map(pill => {
-          const isActive = selectedType === pill.id || (pill.id === 'All' && (!selectedType || selectedType === 'All'));
-
-          return (
-            <button
-              key={pill.id}
-              type="button"
-              onClick={() => setSelectedType(pill.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '18px',
-                border: isActive ? '1.5px solid #2563eb' : '1px solid #e2e8f0',
-                backgroundColor: isActive ? '#eff6ff' : '#ffffff',
-                color: isActive ? '#1d4ed8' : '#475569',
-                fontSize: '0.78rem',
-                fontWeight: isActive ? 700 : 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>{pill.icon}</span>
-              <span>{pill.label}</span>
-              <span
-                style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  padding: '1px 5px',
-                  borderRadius: '10px',
-                  backgroundColor: isActive ? '#2563eb' : '#f1f5f9',
-                  color: isActive ? '#ffffff' : '#64748b'
-                }}
-              >
-                {pill.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* ── MAIN UNIFIED DATATABLE ── */}
       <div style={{ backgroundColor: 'var(--surface, #ffffff)', borderRadius: '12px', border: '1px solid var(--border, #e2e8f0)', overflow: 'hidden' }}>

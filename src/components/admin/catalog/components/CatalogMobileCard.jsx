@@ -72,24 +72,30 @@ export default function CatalogMobileCard({
   const primaryType = types[0] || (row.category === 'raw_material' ? 'raw_material' : 'finished_product');
   const typeCfg = TYPE_CONFIG[primaryType] || TYPE_CONFIG.finished_product;
 
-  const variants = Array.isArray(row.variants) && row.variants.length > 0 
-    ? row.variants 
-    : [{ 
-        id: row.id, 
-        dosage: row.dosage || 'Standard', 
-        format: row.format || 'Vial', 
-        price: row.price || row.pricing?.retail || 0,
-        supplierName: row.supplierName || 'Fagron Iberia'
-      }];
+  // Filter out bogus $0 Fagron default stubs when real variants exist
+  const allVariants = Array.isArray(row.variants) && row.variants.length > 0 ? row.variants : [];
+  const realVariants = allVariants.filter(v => {
+    const s = String(v.supplier || v.supplierName || v.supplierId || '').toLowerCase();
+    return !s.includes('fagron') || (v.price > 0 || v.unit_price > 0);
+  });
+  const variants = (realVariants.length > 0 ? realVariants : allVariants.length > 0 ? allVariants : [{ 
+    id: row.id, 
+    dosage: row.dosage || 'Standard', 
+    format: row.format || (primaryType === 'raw_material' ? 'powder' : 'vial'), 
+    price: row.price || row.pricing?.retail || 0,
+    supplierName: row.supplierName || null
+  }]);
   const variantCount = variants.length;
-  const primaryFormat = variants[0]?.format || row.format || (primaryType === 'raw_material' ? 'API Powder' : 'Vial');
+  // Determine display format: raw_material → never 'Vial'
+  const rawFmt = variants[0]?.format || row.format || '';
+  const primaryFormat = rawFmt || (primaryType === 'raw_material' ? 'Bulk API Powder' : 'Vial');
 
   const suppliers = Array.isArray(row.suppliers) ? row.suppliers : [];
   const firstSupplierId = row.supplierId || (typeof suppliers[0] === 'object' ? suppliers[0]?.id : suppliers[0]);
   const supplierName = supplierIdToName?.[firstSupplierId] || 
                        row.supplierName || 
                        (typeof suppliers[0] === 'object' ? suppliers[0]?.name : suppliers[0]) || 
-                       'Fagron Iberia';
+                       null; // Never default to Fagron Iberia — show nothing instead
 
   const programs = Array.isArray(row.programs) ? row.programs : [];
   const status = row.status || (row.isActive === false ? 'inactive' : 'active');
@@ -106,7 +112,7 @@ export default function CatalogMobileCard({
       canonicalName: `${name} · ${v.dosage || v.strength || v.presentation || 'Standard'}`,
       sku: v.sku || '',
       dosage: v.dosage || v.strength || '',
-      format: v.presentation || v.format || 'Vial',
+      format: v.presentation || v.format || (primaryType === 'raw_material' ? 'Bulk API Powder' : 'Vial'),
       quantity: 1,
       unitPrice: v.resolvedPrice?.perUnit || v.price || v.unit_price || 0,
       supplierCost: v.supplierCost || v.cost || 0,
@@ -381,13 +387,14 @@ export default function CatalogMobileCard({
             Suppliers ({suppliers.length || 1})
           </span>
           <span style={{
-            color: '#0f172a',
+            color: supplierName ? '#0f172a' : '#94a3b8',
             fontWeight: 600,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }} title={supplierName}>
-            {supplierName}
+            textOverflow: 'ellipsis',
+            fontStyle: supplierName ? 'normal' : 'italic'
+          }} title={supplierName || 'Supplier not assigned'}>
+            {supplierName || '—'}
           </span>
         </div>
 

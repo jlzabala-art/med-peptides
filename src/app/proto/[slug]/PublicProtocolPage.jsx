@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import ClinicalGanttTimeline from '../../../components/protocol/ClinicalGanttTimeline';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import { 
   generateDynamicReconData, 
   generateDynamicSupplySummary, 
@@ -345,7 +346,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
       />
 
       {/* ── Standardized Clinical Page Shell ── */}
-      <PublicPageShell>
+      <PublicPageShell style={{ paddingBottom: '5rem' }}>
         {/* Universal Clinical Page Hero */}
         <PublicPageHero
           badges={
@@ -1257,52 +1258,21 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         )}
       </PublicPageShell>
 
-      {/* Mobile Sticky Bottom Action Bar (GCP Standard) */}
-      <div className="mobile-proto-sticky-bar" style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: '#ffffff',
-        borderTop: '1px solid #e2e8f0',
-        padding: '10px 16px max(10px, env(safe-area-inset-bottom, 10px)) 16px',
-        display: 'none',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-        zIndex: 90,
-        boxShadow: '0 -4px 16px rgba(0, 0, 0, 0.06)'
-      }}>
-        <div style={{ minWidth: 0, flex: '1 1 auto' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {displayName}
-          </div>
-          <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
-            {displayDuration} • {phases.length || 3} {lang === 'es' ? 'Fases' : 'Phases'}
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsInquiryDrawerOpen(true)}
-          style={{
-            background: '#003666',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '9px 16px',
-            fontSize: '0.78rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            flexShrink: 0
-          }}
-        >
-          {lang === 'es' ? 'Consultar Protocolo' : 'Inquire Protocol'}
-        </button>
-      </div>
+      {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
+      <PublicStickyActionBar
+        title={displayName}
+        subtitle={`${displayDuration} • ${phases.length || 3} ${lang === 'es' ? 'Fases' : 'Phases'}`}
+        badge={lang === 'es' ? 'Protocolo Clínico' : 'Clinical Protocol'}
+        badgeType="protocol"
+        inquireLabel={lang === 'es' ? 'Consultar Protocolo' : 'Inquire Protocol'}
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        showClinicalAI={true}
+        lang={lang}
+      />
 
-      {/* ── Single Public Atlas AI Research Copilot Floating Trigger ── */}
+      {/* ── Single Public Atlas AI Research Copilot ── */}
       <PublicAtlasAIDrawer
+        hideFloatingTrigger={true}
         contextType="protocol"
         contextAnchor={{
           name: displayName,
