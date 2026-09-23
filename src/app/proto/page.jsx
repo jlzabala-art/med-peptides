@@ -70,6 +70,11 @@ async function getAllProtocols() {
         bom: sanitized.bom || data.bom || [],
         goals: sanitized.goals || data.goals || [data.goal || data.category || 'Healthy Aging'],
         overview_summary: sanitized.overview_summary || data.overview_summary || data.description || '',
+        is_reference_standard: Boolean(sanitized.is_reference_standard ?? data.is_reference_standard),
+        reference_order: sanitized.reference_order ?? data.reference_order ?? 99,
+        reference_label_es: sanitized.reference_label_es || data.reference_label_es || 'Protocolo de Referencia Clínica',
+        reference_label_en: sanitized.reference_label_en || data.reference_label_en || 'Primary Clinical Reference Standard',
+        reference_standard_tier: sanitized.reference_standard_tier || data.reference_standard_tier || 'gold',
       };
     });
 

@@ -31,7 +31,8 @@ import {
   ChevronUp,
   List,
   LayoutGrid,
-  ClipboardList
+  ClipboardList,
+  Award
 } from '@/lib/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import '../../styles/publicProtocolsCatalog.css';
@@ -229,6 +230,32 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
       const summary = p.overview_summary || p.description || p.executiveSummary || p.clinical_rationale || 
         'Prescription protocol calibrated for cellular receptor adaptation and targeted biomarker outcomes.';
 
+      const isRef = Boolean(
+        p.is_reference_standard ||
+        cleanSlug === 'bpc-157-tb-500-protocol' ||
+        cleanSlug === 'metabolic-retatrutide-motsc-12w' ||
+        cleanSlug === 'nad-cellular-restoration-protocol' ||
+        cleanSlug === 'cjc-1295-ipamorelin-synergistic-hgh-optimization' ||
+        cleanSlug === 'thymosin-alpha-1-immune-resilience' ||
+        cleanCode === 'PR-REC-002' ||
+        cleanCode === 'PR-MET-011' ||
+        cleanCode === 'PR-LON-003' ||
+        p.id === 'HCFtYVhkbeEnHX4FJ7FR' ||
+        p.id === '1k0p4FgSekpmUyAJhbsT'
+      );
+
+      const refOrder = p.reference_order !== undefined ? p.reference_order : (
+        (cleanSlug === 'bpc-157-tb-500-protocol' || cleanCode === 'PR-REC-002') ? 1 :
+        (cleanSlug === 'metabolic-retatrutide-motsc-12w' || cleanCode === 'PR-MET-011') ? 2 :
+        (cleanSlug === 'nad-cellular-restoration-protocol' || cleanCode === 'PR-LON-003') ? 3 :
+        (cleanSlug === 'cjc-1295-ipamorelin-synergistic-hgh-optimization' || p.id === 'HCFtYVhkbeEnHX4FJ7FR') ? 4 :
+        (cleanSlug === 'thymosin-alpha-1-immune-resilience' || p.id === '1k0p4FgSekpmUyAJhbsT') ? 5 : 99
+      );
+
+      const referenceLabelEs = p.reference_label_es || 'Protocolo de Referencia Clínica';
+      const referenceLabelEn = p.reference_label_en || 'Primary Clinical Reference Standard';
+      const referenceTier = p.reference_standard_tier || 'gold';
+
       return {
         ...p,
         cleanName,
@@ -239,6 +266,11 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         compounds,
         mappedGoals,
         summary,
+        is_reference_standard: isRef,
+        reference_order: refOrder,
+        reference_label_es: referenceLabelEs,
+        reference_label_en: referenceLabelEn,
+        reference_standard_tier: referenceTier,
       };
     });
   }, [initialProtocols]);
@@ -297,7 +329,13 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
       if (sortBy === 'duration-asc') return a.durationWeeks - b.durationWeeks;
       if (sortBy === 'name-asc') return a.cleanName.localeCompare(b.cleanName);
       if (sortBy === 'phases-desc') return b.phasesCount - a.phasesCount;
-      // Default: relevance (multi-compound and multi-phase first)
+      // Default: relevance
+      // First, prioritize Clinical Reference Standards strictly by reference_order (1=BPC/TB-500, 2=Retatrutide/MOTS-c, 3=NAD+)
+      const aRefScore = a.is_reference_standard ? (1000 - (a.reference_order || 10) * 10) : 0;
+      const bRefScore = b.is_reference_standard ? (1000 - (b.reference_order || 10) * 10) : 0;
+      if (aRefScore !== bRefScore) {
+        return bRefScore - aRefScore;
+      }
       return (b.compounds.length * 2 + b.phasesCount) - (a.compounds.length * 2 + a.phasesCount);
     });
 
@@ -307,6 +345,31 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   // Group filtered protocols by therapeutic goal buckets
   const groupedProtocols = useMemo(() => {
     const groups = [];
+
+    // Pinned top section: Primary Clinical Reference Standards when viewing all and no drilldown active
+    if (selectedGoal === 'all' && !searchQuery.trim() && durationFilter === 'all' && phasesFilter === 'all') {
+      const referenceProtocols = filteredProtocols
+        .filter(p => p.is_reference_standard)
+        .sort((a, b) => (a.reference_order || 99) - (b.reference_order || 99));
+
+      if (referenceProtocols.length > 0) {
+        groups.push({
+          bucket: {
+            id: 'reference_standards',
+            label: lang === 'es' ? 'Protocolos de Referencia Clínica' : 'Primary Clinical Reference Standards',
+            sublabel: lang === 'es'
+              ? 'Monografías de máxima profundidad clínica: farmacocinética celular, técnica anatómica perilesional y algoritmos de titulación'
+              : 'Highest clinical depth monographs: cellular pharmacokinetics, peri-lesional geometry & titration algorithms',
+            icon: Award,
+            color: '#003666',
+            bg: '#eff6ff',
+            isReferenceGroup: true
+          },
+          protocols: referenceProtocols
+        });
+      }
+    }
+
     const targetBuckets = selectedGoal === 'all'
       ? GOAL_BUCKETS.filter(b => b.id !== 'all')
       : GOAL_BUCKETS.filter(b => b.id === selectedGoal);
@@ -317,6 +380,15 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         return primary === bucket.id || (selectedGoal !== 'all' && p.mappedGoals.includes(bucket.id));
       });
       if (matching.length > 0) {
+        // Keep reference standards at top of category if relevance sort
+        if (sortBy === 'relevance') {
+          matching.sort((a, b) => {
+            const aRefScore = a.is_reference_standard ? (1000 - (a.reference_order || 10) * 10) : 0;
+            const bRefScore = b.is_reference_standard ? (1000 - (b.reference_order || 10) * 10) : 0;
+            if (aRefScore !== bRefScore) return bRefScore - aRefScore;
+            return (b.compounds.length * 2 + b.phasesCount) - (a.compounds.length * 2 + a.phasesCount);
+          });
+        }
         groups.push({
           bucket,
           protocols: matching
@@ -342,7 +414,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
     }
 
     return groups;
-  }, [filteredProtocols, selectedGoal]);
+  }, [filteredProtocols, selectedGoal, searchQuery, durationFilter, phasesFilter, sortBy, lang]);
 
   const handleCopyCode = (code, e) => {
     e.preventDefault();
@@ -712,17 +784,24 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
             return (
               <section key={bucket.id} className="proto-goal-section">
                 {/* Section Goal Header */}
-                <div className="proto-goal-section-header">
+                <div className={`proto-goal-section-header ${bucket.isReferenceGroup ? 'is-reference-header' : ''}`}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div className="proto-goal-section-icon" style={{ background: bucket.bg, color: bucket.color }}>
                       <BucketIcon size={18} />
                     </div>
                     <div>
-                      <h2 className="proto-goal-section-title">
-                        {groupTitle}
-                      </h2>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h2 className="proto-goal-section-title">
+                          {groupTitle}
+                        </h2>
+                        {bucket.isReferenceGroup && (
+                          <span className="proto-ref-section-badge">
+                            {lang === 'es' ? 'Telemetría Completa' : 'Full Clinical Telemetry'}
+                          </span>
+                        )}
+                      </div>
                       <div className="proto-goal-section-sub">
-                        {group.protocols.length} {lang === 'es' ? 'protocolos clínicos disponibles' : 'clinical protocols available'}
+                        {bucket.sublabel || `${group.protocols.length} ${lang === 'es' ? 'protocolos clínicos disponibles' : 'clinical protocols available'}`}
                       </div>
                     </div>
                   </div>
@@ -741,10 +820,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                       const localizedGoal = (GOAL_TRANSLATIONS[primaryGoalId]?.[lang] || goalInfo.label).split('&')[0].trim();
 
                       return (
-                        <article key={proto.cleanSlug} className={`proto-list-item ${isExpanded ? 'is-expanded' : ''}`}>
+                        <article key={proto.cleanSlug} className={`proto-list-item ${proto.is_reference_standard ? 'is-reference-standard' : ''} ${isExpanded ? 'is-expanded' : ''}`}>
                           {/* Main Compact Row */}
                           <div className="proto-list-row" onClick={() => toggleExpanded(proto.cleanSlug)}>
-                            {/* Left: Expand chevron + Code + Title */}
+                            {/* Left: Expand chevron + Code + Title + Reference Badge + Goal Pill */}
                             <div className="proto-list-left">
                               <button
                                 type="button"
@@ -766,6 +845,16 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                               >
                                 {proto.cleanName}
                               </Link>
+
+                              {proto.is_reference_standard && (
+                                <span
+                                  className="proto-list-badge-reference"
+                                  title={lang === 'es' ? 'Protocolo de Referencia Clínica con datos ampliados de farmacocinética y seguridad' : 'Primary Clinical Reference Standard with extended pharmacological and safety data'}
+                                >
+                                  <Award size={11} />
+                                  <span>{lang === 'es' ? 'Referencia Clínica' : 'Reference Standard'}</span>
+                                </span>
+                              )}
 
                               <span
                                 className="proto-card-goal-pill"
@@ -903,7 +992,24 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                       const localizedGoal = (GOAL_TRANSLATIONS[primaryGoalId]?.[lang] || goalInfo.label).split('&')[0].trim();
 
                       return (
-                        <article key={proto.id || proto.cleanSlug} className="proto-card">
+                        <article key={proto.id || proto.cleanSlug} className={`proto-card ${proto.is_reference_standard ? 'is-reference-standard' : ''}`}>
+                          {/* Reference Standard Top Badge */}
+                          {proto.is_reference_standard && (
+                            <div className="proto-card-badge-reference">
+                              <div className="proto-ref-badge-main">
+                                <Award size={13} className="proto-ref-icon" />
+                                <span className="proto-ref-label">
+                                  {lang === 'es'
+                                    ? (proto.reference_label_es || 'Protocolo de Referencia Clínica')
+                                    : (proto.reference_label_en || 'Primary Clinical Reference Standard')}
+                                </span>
+                              </div>
+                              <span className="proto-ref-tier-pill">
+                                {lang === 'es' ? 'Ficha Extensa' : 'Extended Monograph'}
+                              </span>
+                            </div>
+                          )}
+
                           <div className="proto-card-top">
                             {/* Header: Category Goal Pill */}
                             <div className="proto-card-header">

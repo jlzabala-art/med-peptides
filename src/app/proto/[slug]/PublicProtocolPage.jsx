@@ -21,7 +21,8 @@ import {
   Activity, CheckCircle2, AlertTriangle, Droplets, 
   Thermometer, Copy, Check, Clock,
   ExternalLink, Layers, ArrowRight, Package, Syringe,
-  Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode, BarChart3
+  Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode, BarChart3,
+  Moon, ShieldAlert
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -36,6 +37,10 @@ import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav'
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import ProtocolClinicalOutcomesCard from '@/components/protocol/ProtocolClinicalOutcomesCard';
 import ProtocolClinicalCompanionCard from '@/components/protocol/ProtocolClinicalCompanionCard';
+import ProtocolAnatomicalTargetingCard from '@/components/protocol/ProtocolAnatomicalTargetingCard';
+import ProtocolIncretinSafetyCard from '@/components/protocol/ProtocolIncretinSafetyCard';
+import ProtocolSomatotropicAxisCard from '@/components/protocol/ProtocolSomatotropicAxisCard';
+import ProtocolImmuneModulationCard from '@/components/protocol/ProtocolImmuneModulationCard';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 
 const DAY_LABELS_ES = {
@@ -526,6 +531,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ...((protocol?.companion_diagnostic || protocol?.methylation_support || (protocol?.administration_modalities && protocol.administration_modalities.length > 0)) ? [
               { label: lang === 'es' ? 'Farmacocinética' : 'Pharmacokinetics', href: '#protocol-clinical-companion', icon: Activity }
             ] : []),
+            ...((protocol?.anatomical_targeting || (protocol?.mechanotherapy_phases && protocol.mechanotherapy_phases.length > 0)) ? [
+              { label: lang === 'es' ? 'Técnica Anatómica' : 'Anatomical Targeting', href: '#anatomical-targeting', icon: Activity }
+            ] : []),
+            ...((protocol?.gi_tolerance_algorithm || protocol?.lean_mass_preservation_target) ? [
+              { label: lang === 'es' ? 'Seguridad Incretinas' : 'Incretin Safety & DEXA', href: '#incretin-safety', icon: ShieldCheck }
+            ] : []),
+            ...(protocol?.somatotropic_axis_parameters ? [
+              { label: lang === 'es' ? 'Eje GH / Somatotropo' : 'Somatotropic Axis', href: '#somatotropic-axis', icon: Moon }
+            ] : []),
+            ...(protocol?.immune_modulation_matrix ? [
+              { label: lang === 'es' ? 'Modulación Inmune' : 'Immune Modulation', href: '#immune-modulation', icon: ShieldAlert }
+            ] : []),
             { label: lang === 'es' ? 'Compuestos' : 'Compounds', href: '#included-compounds', icon: FlaskConical },
             { label: lang === 'es' ? 'Timeline' : 'Timeline', href: '#pathway-timeline', icon: CalendarDays },
             { label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution-console', icon: Droplets },
@@ -544,6 +561,18 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
           {/* Section 0.5: Companion Diagnostics, Pharmacokinetics & Methylation Safeguards */}
           <ProtocolClinicalCompanionCard protocol={protocol} lang={lang} />
+
+          {/* Section 0.6: Anatomical Targeting Geometry & Mechanotherapy Pathway */}
+          <ProtocolAnatomicalTargetingCard protocol={protocol} lang={lang} />
+
+          {/* Section 0.7: Incretin GI Tolerance Algorithm, DEXA Lean Mass & Diagnostics */}
+          <ProtocolIncretinSafetyCard protocol={protocol} lang={lang} />
+
+          {/* Section 0.8: Somatotropic Axis Fasting Kinetics & 5-On/2-Off Cadence */}
+          <ProtocolSomatotropicAxisCard protocol={protocol} lang={lang} />
+
+          {/* Section 0.9: Immune Modulation Matrix & Zadaxin Lineage */}
+          <ProtocolImmuneModulationCard protocol={protocol} lang={lang} />
           
           {/* Section 1: Included Compounds */}
           <PublicSectionCard

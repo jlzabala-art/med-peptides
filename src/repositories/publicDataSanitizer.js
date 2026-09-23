@@ -66,6 +66,10 @@ export const PROTOCOL_PUBLIC_WHITELIST = [
   'biomarkers', 'recommendedTests', 'status', 'isActive',
   'translations', 'aiContent', 'clinical_outcomes', 'clinical_evidence', 'objective_benefits',
   'companion_diagnostic', 'companion_diagnostics', 'methylation_support', 'administration_modalities', 'chronobiology',
+  'anatomical_targeting', 'mechanotherapy_phases', 'tissue_specific_dosages', 'angiogenesis_safety_screen',
+  'gi_tolerance_algorithm', 'lean_mass_preservation_target', 'biliary_pancreatic_surveillance',
+  'somatotropic_axis_parameters', 'immune_modulation_matrix',
+  'is_reference_standard', 'reference_standard_tier', 'reference_label_en', 'reference_label_es', 'reference_order',
 ];
 
 function pickWhitelistedFields(obj, whitelist) {

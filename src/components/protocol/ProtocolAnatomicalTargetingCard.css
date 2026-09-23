@@ -1,0 +1,718 @@
+/* ── Protocol Anatomical Targeting & Mechanotherapy Card ─────────────────── */
+
+.patc-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+/* ── Header ── */
+.patc-header {
+  padding: 1.5rem 1.75rem 1.25rem 1.75rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.patc-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+  min-width: 280px;
+}
+
+.patc-header-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #ecfeff;
+  border: 1px solid #a5f3fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0891b2;
+  flex-shrink: 0;
+}
+
+.patc-header-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.50rem;
+  margin-bottom: 0.40rem;
+  flex-wrap: wrap;
+}
+
+.patc-chip {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.patc-chip-cyan {
+  background: #ecfeff;
+  color: #0e7490;
+  border: 1px solid #a5f3fc;
+}
+
+.patc-chip-purple {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+
+.patc-chip-amber {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.patc-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.patc-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.45;
+  max-width: 720px;
+}
+
+.patc-header-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.patc-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #25D366;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.50rem 0.90rem;
+  border-radius: 8px;
+  border: 1px solid #20ba5a;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.patc-wa-btn:hover {
+  background: #20ba5a;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ── Google Cloud Console Subnav Tabs ── */
+.patc-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.50rem;
+  padding: 0.75rem 1.75rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.patc-nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.80rem;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.patc-nav-tab:hover {
+  background: #edf2f7;
+  color: #0f172a;
+}
+
+.patc-nav-tab.is-active {
+  background: #ffffff;
+  color: #003666;
+  font-weight: 800;
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.patc-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.patc-dot-cyan { background: #06b6d4; }
+.patc-dot-purple { background: #8b5cf6; }
+.patc-dot-green { background: #10b981; }
+.patc-dot-red { background: #ef4444; }
+
+/* ── Tab Panels ── */
+.patc-tab-panel {
+  padding: 1.5rem 1.75rem;
+}
+
+/* ── Tab 1: Modes ── */
+.patc-mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.patc-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.patc-mode-pill:hover {
+  background: #edf2f7;
+  color: #0f172a;
+}
+
+.patc-mode-pill.is-selected {
+  background: #003666;
+  color: #ffffff;
+  border-color: #003666;
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.25);
+}
+
+.patc-mode-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  background: #ffffff;
+}
+
+.patc-mode-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.patc-mode-badge-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.patc-badge-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0e7490;
+  text-transform: uppercase;
+}
+
+.patc-mode-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.patc-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.patc-copy-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.patc-mode-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 1.25rem;
+}
+
+.patc-detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.patc-detail-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.patc-detail-text {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.pcc-bold-text {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Warnings and Alerts */
+.patc-alert-strip {
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.patc-alert-strip.is-danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+}
+
+.patc-alert-strip.is-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #2563eb;
+}
+
+.patc-alert-icon {
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.patc-alert-strip.is-info .patc-alert-icon {
+  color: #2563eb;
+}
+
+.patc-alert-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #7f1d1d;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.patc-alert-strip.is-info .patc-alert-text {
+  color: #1e3a8a;
+}
+
+/* ── Tab 2: Mechanotherapy ── */
+.patc-mech-intro {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.patc-mech-intro-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #003666;
+}
+
+.patc-mech-intro-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.patc-mech-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.patc-phase-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.15rem;
+  background: #ffffff;
+}
+
+.patc-phase-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.patc-phase-number {
+  background: #003666;
+  color: #ffffff;
+  font-size: 0.70rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.patc-phase-weeks {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.patc-phase-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.patc-phase-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.patc-phase-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.patc-phase-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.patc-label-rehab {
+  color: #047857;
+}
+
+.patc-phase-text {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.patc-phase-guideline-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 0.75rem 0.90rem;
+}
+
+.patc-rehab-text {
+  color: #14532d;
+  font-weight: 600;
+}
+
+/* ── Tab 3: Tissues ── */
+.patc-tissue-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.15rem;
+}
+
+.patc-tissue-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.15rem;
+  background: #ffffff;
+}
+
+.patc-tissue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.patc-tissue-name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.patc-tissue-dur {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.patc-tissue-doses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.40rem;
+  margin-bottom: 0.75rem;
+}
+
+.patc-dose-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.patc-dose-label {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #334155;
+}
+
+.patc-dose-val {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.patc-tissue-notes {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.patc-tissue-notes strong {
+  color: #1e293b;
+}
+
+/* ── Tab 4: Safety ── */
+.patc-safety-card {
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 1.25rem;
+  background: #fff5f5;
+}
+
+.patc-safety-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b91c1c;
+  margin-bottom: 0.50rem;
+}
+
+.patc-safety-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.patc-safety-rationale {
+  margin: 0 0 1rem 0;
+  font-size: 0.85rem;
+  color: #7f1d1d;
+  line-height: 1.5;
+}
+
+.patc-safety-contraindications {
+  background: #ffffff;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+}
+
+.patc-contra-heading {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #991b1b;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.50rem;
+}
+
+.patc-contra-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.40rem;
+}
+
+.patc-contra-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #374151;
+}
+
+.patc-contra-cross {
+  color: #ef4444;
+  font-weight: 800;
+}
+
+/* ── Footer ── */
+.patc-footer {
+  padding: 0.75rem 1.75rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.patc-footer-shield {
+  color: #059669;
+  flex-shrink: 0;
+}
+
+/* ── Tablet (iPad) Responsive ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  .patc-header {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .patc-nav-tabs {
+    padding: 0.65rem 1.25rem;
+  }
+
+  .patc-tab-panel {
+    padding: 1.25rem;
+  }
+
+  .patc-tissue-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Mobile Responsive (Golden Rule #23) ──────────────────────────── */
+@media (max-width: 640px) {
+  .patc-header {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patc-header-main {
+    min-width: 100%;
+  }
+
+  .patc-header-cta-group {
+    width: 100%;
+  }
+
+  .patc-wa-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.65rem;
+  }
+
+  .patc-title {
+    font-size: 1.10rem;
+  }
+
+  .patc-nav-tabs {
+    padding: 0.50rem 1rem;
+    gap: 0.35rem;
+  }
+
+  .patc-nav-tab {
+    font-size: 0.74rem;
+    padding: 5px 10px;
+  }
+
+  .patc-tab-panel {
+    padding: 1rem;
+  }
+
+  .patc-mode-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .patc-copy-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .patc-mode-details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .patc-mode-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .patc-footer {
+    padding: 0.75rem 1rem;
+    font-size: 0.70rem;
+  }
+}
