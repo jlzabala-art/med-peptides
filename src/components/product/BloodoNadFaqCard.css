@@ -1,0 +1,600 @@
+/* ── Bloodo NAD Clinical FAQ Card (Google Cloud UX Standards) ───────────── */
+
+.bnf-card-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+/* ── Card Header ── */
+.bnf-card-header {
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.bnf-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+  min-width: 280px;
+}
+
+.bnf-header-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #0284c7;
+}
+
+.bnf-header-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.bnf-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.bnf-chip-pharma {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.bnf-chip-protocol {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.bnf-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.bnf-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.45;
+  max-width: 720px;
+}
+
+/* Header WhatsApp Actions */
+.bnf-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.bnf-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.bnf-wa-btn-primary {
+  background: #25D366;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
+  border-color: #20ba5a;
+}
+
+.bnf-wa-btn-primary:hover {
+  background: #20ba5a;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+  transform: translateY(-1px);
+}
+
+.bnf-wa-icon-circle {
+  font-size: 0.90rem;
+}
+
+.bnf-wa-btn-secondary {
+  background: #f8fafc;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.bnf-wa-btn-secondary:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* ── Key Clinical Strategic Notice ── */
+.bnf-strategic-banner {
+  margin: 1.25rem 1.75rem 0.5rem 1.75rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #86efac;
+  border-left: 4px solid #16a34a;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.bnf-banner-icon-col {
+  color: #15803d;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.bnf-banner-content {
+  flex: 1;
+}
+
+.bnf-banner-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #14532d;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bnf-banner-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.bnf-banner-desc strong {
+  color: #14532d;
+}
+
+/* ── Category Filter Bar ── */
+.bnf-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.50rem;
+  padding: 1rem 1.75rem 0.75rem 1.75rem;
+  overflow-x: auto;
+  border-bottom: 1px solid #f1f5f9;
+  scrollbar-width: thin;
+}
+
+.bnf-filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.bnf-filter-tab:hover {
+  background: #f8fafc;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.bnf-filter-tab.is-active {
+  background: #003666;
+  color: #ffffff;
+  border-color: #003666;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 54, 102, 0.2);
+}
+
+.bnf-filter-tab-active.is-active {
+  background: #047857;
+  border-color: #047857;
+  box-shadow: 0 1px 3px rgba(4, 120, 87, 0.25);
+}
+
+.bnf-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bnf-dot-green { background: #10b981; }
+.bnf-dot-amber { background: #f59e0b; }
+.bnf-dot-blue { background: #0284c7; }
+
+/* ── FAQ Accordion List ── */
+.bnf-accordion-list {
+  padding: 0.75rem 1.75rem 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.bnf-faq-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  transition: all 0.15s ease;
+  overflow: hidden;
+}
+
+.bnf-faq-item:hover {
+  border-color: #cbd5e1;
+  background: #fafafa;
+}
+
+.bnf-faq-item.is-open {
+  border-color: #93c5fd;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.06);
+  background: #ffffff;
+}
+
+.bnf-faq-item.is-protocol-card {
+  border-left: 3px solid #10b981;
+}
+
+.bnf-faq-item.is-protocol-card.is-open {
+  border-left: 3px solid #059669;
+  border-color: #86efac;
+}
+
+.bnf-faq-question-row {
+  padding: 0.90rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bnf-q-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  flex: 1;
+}
+
+.bnf-q-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.bnf-faq-item.is-open .bnf-q-number {
+  background: #003666;
+  color: #ffffff;
+}
+
+.bnf-faq-item.is-protocol-card.is-open .bnf-q-number {
+  background: #059669;
+  color: #ffffff;
+}
+
+.bnf-q-content {
+  flex: 1;
+}
+
+.bnf-q-meta {
+  margin-bottom: 0.25rem;
+}
+
+.bnf-tag-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bnf-tag-protocol_monitoring {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.bnf-tag-baseline {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bnf-tag-preparation {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.bnf-tag-clinical,
+.bnf-tag-default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.bnf-q-text {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.bnf-q-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.bnf-chevron-box {
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+/* Answer Drawer */
+.bnf-faq-answer-block {
+  padding: 0 1.15rem 1.15rem 3rem;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.bnf-answer-text {
+  padding-top: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.bnf-text-line {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.bnf-bullet-line {
+  margin: 0 0 0.4rem 0;
+  padding-left: 0.75rem;
+  font-size: 0.86rem;
+  color: #1e293b;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Per-Question WhatsApp Actions */
+.bnf-answer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.50rem;
+  padding-top: 0.50rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.bnf-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.bnf-action-wa {
+  background: #25D366;
+  color: #ffffff;
+}
+
+.bnf-action-wa:hover {
+  background: #20ba5a;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.35);
+}
+
+.bnf-action-copy {
+  background: #ffffff;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.bnf-action-copy:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ── Card Footer ── */
+.bnf-card-footer {
+  padding: 0.85rem 1.75rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.bnf-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.bnf-footer-shield {
+  color: #059669;
+  flex-shrink: 0;
+}
+
+/* ── Tablet (iPad) Responsive Layout ──────────────────────────────── */
+@media (max-width: 900px) {
+  .bnf-card-header {
+    padding: 1.25rem 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .bnf-strategic-banner {
+    margin: 1rem 1.25rem 0.5rem 1.25rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .bnf-filter-bar {
+    padding: 0.85rem 1.25rem 0.65rem 1.25rem;
+  }
+
+  .bnf-accordion-list {
+    padding: 0.65rem 1.25rem 1.25rem 1.25rem;
+  }
+
+  .bnf-faq-answer-block {
+    padding: 0 1rem 1rem 1.5rem;
+  }
+}
+
+/* ── Mobile Responsive Layout (Golden Rule #23) ───────────────────── */
+@media (max-width: 640px) {
+  .bnf-card-header {
+    padding: 1rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bnf-header-left {
+    min-width: 100%;
+  }
+
+  .bnf-header-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.50rem;
+  }
+
+  .bnf-wa-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .bnf-title {
+    font-size: 1.10rem;
+  }
+
+  .bnf-strategic-banner {
+    margin: 0.75rem 1rem 0.5rem 1rem;
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.50rem;
+  }
+
+  .bnf-banner-icon-col {
+    margin-top: 0;
+  }
+
+  .bnf-filter-bar {
+    padding: 0.75rem 1rem 0.50rem 1rem;
+    gap: 0.35rem;
+  }
+
+  .bnf-filter-tab {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+  }
+
+  .bnf-accordion-list {
+    padding: 0.50rem 1rem 1rem 1rem;
+    gap: 0.50rem;
+  }
+
+  .bnf-faq-question-row {
+    padding: 0.75rem 0.85rem;
+    gap: 0.50rem;
+  }
+
+  .bnf-q-left {
+    gap: 0.65rem;
+  }
+
+  .bnf-q-number {
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+  }
+
+  .bnf-q-text {
+    font-size: 0.88rem;
+  }
+
+  .bnf-faq-answer-block {
+    padding: 0 0.85rem 0.85rem 0.85rem;
+  }
+
+  .bnf-answer-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bnf-action-btn {
+    justify-content: center;
+    padding: 6px 12px;
+  }
+
+  .bnf-card-footer {
+    padding: 0.75rem 1rem;
+  }
+
+  .bnf-footer-meta {
+    font-size: 0.70rem;
+  }
+}

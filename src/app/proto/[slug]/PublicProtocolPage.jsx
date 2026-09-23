@@ -35,6 +35,7 @@ import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import ProtocolClinicalOutcomesCard from '@/components/protocol/ProtocolClinicalOutcomesCard';
+import ProtocolClinicalCompanionCard from '@/components/protocol/ProtocolClinicalCompanionCard';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 
 const DAY_LABELS_ES = {
@@ -522,6 +523,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             ...(protocol?.clinical_outcomes?.has_objective_data ? [
               { label: lang === 'es' ? 'Evidencia' : 'Clinical Evidence', href: '#clinical-outcomes', icon: BarChart3 }
             ] : []),
+            ...((protocol?.companion_diagnostic || protocol?.methylation_support || (protocol?.administration_modalities && protocol.administration_modalities.length > 0)) ? [
+              { label: lang === 'es' ? 'Farmacocinética' : 'Pharmacokinetics', href: '#protocol-clinical-companion', icon: Activity }
+            ] : []),
             { label: lang === 'es' ? 'Compuestos' : 'Compounds', href: '#included-compounds', icon: FlaskConical },
             { label: lang === 'es' ? 'Timeline' : 'Timeline', href: '#pathway-timeline', icon: CalendarDays },
             { label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution-console', icon: Droplets },
@@ -537,6 +541,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           
           {/* Section 0: Verified Clinical Outcomes & Endpoints (Strictly renders if objective data exists) */}
           <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
+
+          {/* Section 0.5: Companion Diagnostics, Pharmacokinetics & Methylation Safeguards */}
+          <ProtocolClinicalCompanionCard protocol={protocol} lang={lang} />
           
           {/* Section 1: Included Compounds */}
           <PublicSectionCard

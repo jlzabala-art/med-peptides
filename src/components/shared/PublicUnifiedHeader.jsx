@@ -13,7 +13,7 @@ import {
   Activity,
   FileText
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, UserPlus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -198,39 +198,11 @@ export default function PublicUnifiedHeader({
         {/* ── Line 1: Universal Executive Bar ── */}
         <div className="puh-tier1">
           <div className="puh-tier1-inner">
-            {/* Left: Brand + Directory Track Switcher + Status Badge */}
+            {/* Left: Brand Logo / Title */}
             <div className="puh-brand-group">
               <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Med-Peptides Clinical Intelligence">
                 <span className="puh-brand-title">Med-Peptides</span>
               </Link>
-              
-              <span className="puh-brand-divider" aria-hidden="true" />
-
-              {/* Segmented Directory Switcher */}
-              <nav className="puh-directory-switcher" aria-label="Directory Mode">
-                <Link
-                  href="/c/CAT-MU9L9GBN"
-                  className={`puh-switcher-item ${track === 'peptides' || track === 'compounds' ? 'is-active' : ''}`}
-                  title={isSpanish ? 'Explorar Catálogo de Péptidos' : 'Browse Research Peptides Catalog'}
-                >
-                  <FlaskConical size={13} />
-                  <span>{isSpanish ? 'Péptidos' : 'Peptides'}</span>
-                </Link>
-                <Link
-                  href="/proto"
-                  className={`puh-switcher-item ${track === 'protocols' ? 'is-active' : ''}`}
-                  title={isSpanish ? 'Explorar Directorio de Protocolos Clínicos' : 'Browse Clinical Protocols Directory'}
-                >
-                  <Layers size={13} />
-                  <span>{isSpanish ? 'Protocolos' : 'Protocols'}</span>
-                </Link>
-              </nav>
-
-              <span className="puh-reference-badge">
-                {track === 'protocols'
-                  ? (isSpanish ? 'Registro Clínico' : 'Clinical Registry')
-                  : (isSpanish ? 'Compendio Clínico' : 'Clinical Reference')}
-              </span>
             </div>
 
             {/* Right: Global Actions (Lang, Contact, Copy, Sign In) */}
@@ -301,7 +273,7 @@ export default function PublicUnifiedHeader({
                   <span className="puh-user-avatar">
                     {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                   </span>
-                  <span className="puh-signup-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
+                  <span className="puh-auth-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
                 </Link>
               ) : (
                 <>
@@ -310,14 +282,16 @@ export default function PublicUnifiedHeader({
                     className="puh-btn puh-btn-signin"
                     title={isSpanish ? 'Iniciar sesión' : 'Sign In'}
                   >
-                    <span className="puh-btn-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
+                    <LogIn size={13} className="puh-btn-icon" />
+                    <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
                   </Link>
                   <Link
                     href={`/login?tab=register${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
                     className="puh-btn puh-btn-signup"
                     title={isSpanish ? 'Registrarse en la plataforma médica' : 'Register for clinical practitioner portal'}
                   >
-                    <span className="puh-signup-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
+                    <UserPlus size={13} className="puh-btn-icon" />
+                    <span className="puh-auth-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
                   </Link>
                 </>
               )}

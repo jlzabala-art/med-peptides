@@ -47,6 +47,7 @@ import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
+import BloodoNadFaqCard from './BloodoNadFaqCard';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
@@ -2293,6 +2294,11 @@ export default function PublicDatasheetView({
             lang={lang}
             onOpenCoa={() => setIsCoaModalOpen(true)}
           />
+        )}
+
+        {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share ── */}
+        {(isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
+          <BloodoNadFaqCard product={product} lang={lang} />
         )}
 
         {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}

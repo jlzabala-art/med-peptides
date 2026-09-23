@@ -38,7 +38,8 @@ export const PRODUCT_PUBLIC_WHITELIST = [
   'analyticalSpecs', 'testingStandards', 'storageConditions', 'mfgDate',
   'reconstitutionGuide', 'warnings', 'contraindications',
   'supplier', 'supplierName', 'laboratory', 'provenance', 'processedHierarchy',
-  'clinicalOverview', 'clinical_overview', 'clinical_overview_en', 'clinical_overview_es', 'scientificData'
+  'clinicalOverview', 'clinical_overview', 'clinical_overview_en', 'clinical_overview_es', 'scientificData',
+  'faq', 'faqs', 'clinical_faq', 'clinicalFaq', 'testingFaq'
 ];
 
 // ─── Blacklist of Sensitive Fields to NEVER Expose ────────────────────────────
@@ -64,6 +65,7 @@ export const PROTOCOL_PUBLIC_WHITELIST = [
   'contraindications', 'warnings', 'safetyGuidelines', 'storageInstructions',
   'biomarkers', 'recommendedTests', 'status', 'isActive',
   'translations', 'aiContent', 'clinical_outcomes', 'clinical_evidence', 'objective_benefits',
+  'companion_diagnostic', 'companion_diagnostics', 'methylation_support', 'administration_modalities', 'chronobiology',
 ];
 
 function pickWhitelistedFields(obj, whitelist) {
