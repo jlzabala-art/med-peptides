@@ -25,7 +25,8 @@ import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTable from '../ui/DataTable';
 import StandardDrawer from '../ui/StandardDrawer';
 import { useToast } from '../../hooks/useToast';
-import { Share2, Sparkles, MessageCircle, Eye } from '@/lib/icons';
+import { Share2, Sparkles, MessageCircle, Eye, Layers } from '@/lib/icons';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 import useDataModuleState from '../../hooks/useDataModuleState';
 import MobileClinicCard from '../shared/mobile/MobileClinicCard';
@@ -336,7 +337,19 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
               <Sparkles size={14} />
             </button>
 
-            {/* 5. 360° Profile Workspace */}
+            {/* 5. Load Clinic into dedicated Workspace */}
+            <button
+              type="button"
+              onClick={() => {
+                useWorkspaceStore.getState().loadUserIntoWorkspace(c, { role: 'clinic' });
+              }}
+              className="gcp-action-thumb-btn thumb-workspace"
+              title={`Cargar clínica ${c.name || ''} en Workspace`}
+            >
+              <Layers size={14} />
+            </button>
+
+            {/* 6. 360° Profile Workspace */}
             <button
               type="button"
               onClick={() => setSelectedClinic(c)}

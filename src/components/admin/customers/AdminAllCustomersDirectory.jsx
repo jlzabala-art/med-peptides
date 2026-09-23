@@ -15,8 +15,10 @@ import {
   CheckCircle,
   Archive,
   RefreshCw,
-  Globe
+  Globe,
+  Layers
 } from '@/lib/icons';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
 import useDataModuleState from '../../../hooks/useDataModuleState';
 import { DataTable, StatusBadge, CopyableId, MetricCard, KpiScopeBar, QuoteQuickActionDropdown } from '../../ui';
@@ -226,10 +228,9 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     {
       key: 'name',
       header: 'Customer / Organization',
-      width: '32%',
+      width: '38%',
       render: (row) => {
         const meta = getCustomerTypeMeta(row.customerType || row.type);
-        const loc = [row.city, row.country].filter(Boolean).join(', ');
         const hasBooks = Boolean(row.zohoContactId || row.zohoContactNumber);
         const hasBigin = Boolean(row.zohoBiginContactId);
 
@@ -237,8 +238,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div
               style={{
-                width: '34px',
-                height: '34px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '8px',
                 backgroundColor: meta.bg,
                 color: meta.color,
@@ -246,7 +247,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1rem',
+                fontSize: '0.95rem',
                 flexShrink: 0
               }}
             >
@@ -292,14 +293,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
                   </span>
                 )}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b' }}>
-                <CopyableId value={row.id} iconOnly={true} />
-                <span style={{ color: meta.color, fontWeight: 600 }}>{meta.label}</span>
-                {loc && (
-                  <span style={{ color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    • 📍 {loc}
-                  </span>
-                )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
+                <CopyableId value={row.id} />
               </div>
             </div>
           </div>
@@ -309,7 +304,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     {
       key: 'customerType',
       header: 'Channel Type',
-      width: '16%',
+      width: '15%',
       render: (row) => {
         const meta = getCustomerTypeMeta(row.customerType || row.type);
         return (
@@ -318,7 +313,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
               display: 'inline-flex',
               alignItems: 'center',
               gap: '5px',
-              padding: '3px 8px',
+              padding: '2px 8px',
               borderRadius: '6px',
               backgroundColor: meta.bg,
               color: meta.color,
@@ -378,34 +373,59 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     {
       key: 'status',
       header: 'Status',
-      width: '12%',
+      width: '13%',
       render: (row) => <StatusBadge status={row.status || 'active'} />
     },
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '24%',
+      width: '18%',
       align: 'right',
       render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => useWorkspaceStore.getState().loadUserIntoWorkspace(row, { role: row.customerType || 'customer' })}
+            style={{
+              width: '30px',
+              height: '30px',
+              padding: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '6px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              color: '#003666',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
+            }}
+            title="Cargar en Workspace comercial"
+          >
+            <Layers size={14} />
+          </button>
           <button
             type="button"
             onClick={() => setShareModalCustomer(row)}
-            className="gcp-btn-secondary"
             style={{
-              padding: '4px 8px',
-              fontSize: '0.74rem',
-              fontWeight: 600,
+              width: '30px',
+              height: '30px',
+              padding: 0,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
               borderRadius: '6px',
-              whiteSpace: 'nowrap'
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              color: '#0284c7',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
             }}
-            title="Compartir Catálogo B2B / Datasheet"
+            title="Compartir Catálogo B2B / Ficha"
           >
-            <Share2 size={13} />
-            <span>Share</span>
+            <Share2 size={14} />
           </button>
           <QuoteQuickActionDropdown
             size="sm"
@@ -420,24 +440,24 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           <button
             type="button"
             onClick={() => setSelectedCustomer(row)}
-            className="gcp-btn-secondary"
             style={{
-              padding: '4px 8px',
-              fontSize: '0.74rem',
-              fontWeight: 600,
+              width: '30px',
+              height: '30px',
+              padding: 0,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
               borderRadius: '6px',
               backgroundColor: '#f8fafc',
-              borderColor: '#cbd5e1',
+              border: '1px solid #cbd5e1',
               color: '#334155',
-              whiteSpace: 'nowrap'
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
             }}
             title="Abrir Perfil del Cliente (360°)"
           >
-            <Eye size={13} />
-            <span>360°</span>
+            <Eye size={14} />
           </button>
         </div>
       )

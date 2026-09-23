@@ -25,7 +25,8 @@ import EmptyState from '../../ui/EmptyState';
 import AppActionGroup from '../../ui/AppActionGroup';
 import MobileDoctorCard from './mobile/MobileDoctorCard';
 import MobileActionSheet from '../../ui/MobileActionSheet';
-import { Eye, Edit3, XCircle } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Layers } from '@/lib/icons';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 
 export default function AdminPhysiciansTab() {
   // UI State
@@ -664,14 +665,45 @@ export default function AdminPhysiciansTab() {
             onClick: () => { setActionDoctor(d); setActiveAction('assign_am'); }
           },
           {
+            type: 'workspace',
+            label: 'Abrir en Workspace',
+            icon: Layers,
+            onClick: () => {
+              useWorkspaceStore.getState().loadUserIntoWorkspace(d, { role: 'doctor' });
+            }
+          },
+          {
             type: 'archive',
             label: 'Archive Physician',
             onClick: () => { setSelectedIds([d.id]); handleBulkAction('archive'); }
           }
         ];
         return (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', whiteSpace: 'nowrap' }}>
-            <AppActionGroup actions={actions} maxVisible={2} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }} onClick={e => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => {
+                useWorkspaceStore.getState().loadUserIntoWorkspace(d, { role: 'doctor' });
+              }}
+              title={`Cargar Dr. ${getDoctorName(d)} en Workspace`}
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '6px',
+                border: '1px solid #bfdbfe',
+                backgroundColor: '#eff6ff',
+                color: '#1d4ed8',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                flexShrink: 0
+              }}
+            >
+              <Layers size={14} />
+            </button>
+            <AppActionGroup actions={actions} maxVisible={1} />
           </div>
         );
       }

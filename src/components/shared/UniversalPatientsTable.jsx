@@ -33,8 +33,8 @@ import notifier from '../../services/NotificationService';
 import BulkActionsBar from '../ui/BulkActionsBar';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { usePatientActions } from '../../hooks/usePatientActions';
-import { usePatientExport } from '../../hooks/usePatientExport';
-import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope } from '@/lib/icons';
+import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope, Layers } from '@/lib/icons';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import EntityLink from '../ui/EntityLink';
 import ReassignPhysicianModal from '../admin/patients/ReassignPhysicianModal';
 
@@ -677,6 +677,15 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                       });
                     }
                   },
+                  {
+                    type: 'workspace',
+                    label: 'Workspace',
+                    icon: Layers,
+                    tooltip: 'Cargar Paciente en Workspace',
+                    onClick: () => {
+                      useWorkspaceStore.getState().loadUserIntoWorkspace(row, { role: 'patient' });
+                    }
+                  },
                   ...(canReassignDoctor ? [{
                     label: 'Reassign Doctor',
                     icon: Stethoscope,
@@ -713,6 +722,13 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
               params.set('drawer', 'patient');
               params.set('drawerId', mobileActionPatient.id);
               router.push(`${pathname}?${params.toString()}`);
+            },
+          },
+          {
+            label: 'Cargar en Workspace',
+            icon: Layers,
+            onClick: () => {
+              useWorkspaceStore.getState().loadUserIntoWorkspace(mobileActionPatient, { role: 'patient' });
             },
           },
           {

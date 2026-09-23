@@ -900,6 +900,87 @@ const createWorkspaceIntentSlice = (set, get) => ({
     }));
   },
 
+  loadUserIntoWorkspace: (user, options = {}) => {
+    if (!user) return null;
+    const {
+      workspaces,
+      activeWorkspaceId,
+      createWorkspace,
+      setActiveWorkspace,
+      setTargetEntity,
+      setDrawerOpen,
+      renameWorkspace,
+    } = get();
+
+    const role = options.role || user.type || user.role || (user.customerType === 'wholesaler' ? 'wholesaler' : user.customerType || 'wholesaler');
+    const openDrawer = options.openDrawer !== false;
+    const userName = user.companyName || user.name || user.displayName || user.fullName || 'Client';
+    const userId = user.id;
+
+    // 1. Check if an active workspace already has this specific user assigned (distinct workspace per user)
+    const existingWsEntry = Object.entries(workspaces).find(([id, ws]) => {
+      const t = ws.targetEntity;
+      return t && (t.id === userId || (user.email && t.email === user.email));
+    });
+
+    let targetWsId = null;
+
+    if (existingWsEntry) {
+      targetWsId = existingWsEntry[0];
+      setActiveWorkspace(targetWsId);
+      if (typeof window !== 'undefined') {
+        import('react-hot-toast').then(({ default: toast }) => {
+          toast.success(`Workspace activo para ${userName} seleccionado ✓`);
+        });
+      }
+    } else {
+      // 2. Check if currently active workspace is an empty draft with no items and no targetEntity
+      const currentWs = workspaces[activeWorkspaceId];
+      const isCurrentEmpty = currentWs && (!currentWs.items || currentWs.items.length === 0) && !currentWs.targetEntity;
+
+      const targetEntity = {
+        type: role === 'wholeseller' ? 'wholesaler' : role,
+        id: userId,
+        name: userName,
+        companyName: user.companyName || user.company || userName,
+        email: user.email || user.contactEmail || '',
+        phone: user.phone || user.whatsapp || user.phoneNumber || user.contactPhone || '',
+        pricingTier: user.pricingTier || user.tier || (role === 'wholesaler' || role === 'wholeseller' ? 'wholesale' : role === 'patient' ? 'retail' : 'clinic'),
+        priceMarkupPercent: user.priceMarkupPercent ?? user.markupPercent ?? user.discountMargin ?? null,
+        shippingAddress: user.shippingAddress || user.address || user.registeredAddress || '',
+        shippingNotes: user.shippingNotes || user.deliveryNotes || '',
+        country: user.country || '',
+        currency: user.currency || (user.country?.toLowerCase().includes('emirates') ? 'AED' : (user.country?.toLowerCase().includes('spain') ? 'EUR' : 'USD')),
+      };
+
+      if (isCurrentEmpty) {
+        targetWsId = activeWorkspaceId;
+        renameWorkspace(activeWorkspaceId, `WS: ${userName}`);
+        setTargetEntity(targetEntity, activeWorkspaceId);
+        if (typeof window !== 'undefined') {
+          import('react-hot-toast').then(({ default: toast }) => {
+            toast.success(`Workspace asignado a ${userName} ✓`);
+          });
+        }
+      } else {
+        // Create new workspace (createWorkspace automatically enforces the max 3 workspaces via FIFO eviction into history)
+        targetWsId = createWorkspace(`WS: ${userName}`, role === 'supplier' ? 'buy' : 'sell');
+        setTargetEntity(targetEntity, targetWsId);
+        if (typeof window !== 'undefined') {
+          import('react-hot-toast').then(({ default: toast }) => {
+            toast.success(`Nuevo Workspace creado para ${userName} (máx 3 activos) ✓`);
+          });
+        }
+      }
+    }
+
+    if (openDrawer) {
+      setDrawerOpen(true);
+    }
+
+    return targetWsId;
+  },
+
   recalculateWorkspacePrices: (targetWorkspaceId = null, options = {}) => {
     const { workspaces, activeWorkspaceId } = get();
     const wsId = targetWorkspaceId || activeWorkspaceId;

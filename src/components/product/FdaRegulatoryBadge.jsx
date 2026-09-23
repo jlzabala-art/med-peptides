@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldCheck, AlertCircle, Info, ExternalLink, X, CheckCircle2, FlaskConical } from '@/lib/icons';
+import { ShieldCheck, AlertCircle, Info, ExternalLink, X, CheckCircle2, FlaskConical, RefreshCw, Calendar, Sparkles } from '@/lib/icons';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
+import notifier from '@/services/NotificationService';
 
 /**
  * FdaRegulatoryBadge
  * 
  * Displays the verified FDA regulatory status badge across datasheets, catalog cards, and B2B views.
  * Clicking opens a detailed clinical and regulatory compliance breakdown.
+ * Includes interactive on-demand Gemini AI refresh to verify the latest FDA regulatory standing.
  */
 export default function FdaRegulatoryBadge({
   product,
@@ -18,11 +20,68 @@ export default function FdaRegulatoryBadge({
   style = {}
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const info = getFdaPeptideStatus(product);
+  const initialInfo = useMemo(() => getFdaPeptideStatus(product), [product]);
+  const [currentInfo, setCurrentInfo] = useState(initialInfo);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  if (!info) return null;
+  useEffect(() => {
+    setCurrentInfo(getFdaPeptideStatus(product));
+  }, [product]);
 
+  if (!currentInfo) return null;
+
+  const info = currentInfo;
   const { colorScheme } = info;
+
+  const handleRefreshFdaStatus = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch('/api/admin/enrich-fda-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product?.id || product?.slug || info.slug,
+          slug: product?.slug || info.slug,
+          productName: info.canonicalName || product?.canonicalName || product?.name,
+          casNumber: info.casNumber || product?.casNumber,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to query FDA regulatory status');
+      }
+
+      const data = await res.json();
+      const regData = data.data || data.regulatory;
+      if (regData) {
+        const updated = {
+          ...info,
+          ...regData,
+          updatedAt: regData.updatedAt || new Date().toISOString(),
+          colorScheme: regData.colorScheme || info.colorScheme,
+        };
+        setCurrentInfo(updated);
+        notifier.success(`FDA status updated to latest standing (${updated.shortBadge || updated.badgeLabel}) ✓`);
+      } else {
+        notifier.info('FDA status is already at the latest standing.');
+      }
+    } catch (err) {
+      console.error('[FdaRegulatoryBadge] Refresh error:', err);
+      notifier.error(`Error checking FDA: ${err.message}`);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const formatDisplayDate = (dateVal) => {
+    if (!dateVal) return 'Current';
+    const parsed = new Date(dateVal);
+    if (!isNaN(parsed.getTime()) && String(dateVal).includes('T')) {
+      return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    return String(dateVal);
+  };
 
   const handleClick = (e) => {
     if (showModalOnClick) {
@@ -306,10 +365,37 @@ export default function FdaRegulatoryBadge({
                 </div>
 
                 <div style={{ padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Review Date</div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', marginTop: '2px' }}>
-                    {info.rulingDate}
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                    {info.phase ? 'Clinical Phase' : 'Review Date'}
                   </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', marginTop: '2px' }}>
+                    {info.phase || info.rulingDate}
+                  </div>
+                </div>
+              </div>
+
+              {/* Last Verified Timestamp & Status Banner */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  backgroundColor: '#f1f5f9',
+                  borderRadius: '8px',
+                  fontSize: '0.74rem',
+                  color: '#334155'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={13} color="#64748b" />
+                  <span>
+                    Last Updated: <strong>{formatDisplayDate(info.updatedAt || info.rulingDate)}</strong>
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', color: '#059669', fontWeight: 600 }}>
+                  <CheckCircle2 size={12} color="#059669" />
+                  <span>FDA Monograph</span>
                 </div>
               </div>
 
@@ -337,13 +423,45 @@ export default function FdaRegulatoryBadge({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: 'space-between',
                 padding: '12px 20px',
                 backgroundColor: '#f8fafc',
                 borderTop: '1px solid #e2e8f0',
-                flexShrink: 0
+                flexShrink: 0,
+                gap: '12px'
               }}
             >
+              <button
+                type="button"
+                onClick={handleRefreshFdaStatus}
+                disabled={isRefreshing}
+                className="gcp-btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                  color: '#003666',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  cursor: isRefreshing ? 'wait' : 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                title="Query Gemini AI to check latest FDA rulings, clinical trials and PCAC lists"
+              >
+                <RefreshCw
+                  size={13}
+                  style={{
+                    animation: isRefreshing ? 'spin 1s linear infinite' : 'none'
+                  }}
+                />
+                <Sparkles size={12} color="#7c3aed" />
+                <span>{isRefreshing ? 'Checking FDA with Gemini...' : 'Verify Latest FDA Status'}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}

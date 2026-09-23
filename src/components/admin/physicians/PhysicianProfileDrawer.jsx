@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldCheck, MapPin, Mail, FilePlus, UserPlus, ClipboardList, Loader2, Eye, FileUp } from '@/lib/icons';
+import { ShieldCheck, MapPin, Mail, FilePlus, UserPlus, ClipboardList, Loader2, Eye, FileUp, Layers } from '@/lib/icons';
 import { useDrawer } from '../../../context/DrawerContext';
 import { UniversalForm } from '../../shared/UniversalFormDrawer';
 import notifier from '../../../services/NotificationService';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { doc, updateDoc, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
@@ -508,6 +509,30 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
             >
               🩺 Simulate Doctor Portal
             </a>
+            {/* Abrir en Workspace */}
+            <button
+              type="button"
+              onClick={() => {
+                useWorkspaceStore.getState().loadUserIntoWorkspace(currentDoctor, { role: 'doctor' });
+              }}
+              className="gcp-btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.8rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: '1.5px solid #bfdbfe',
+                backgroundColor: '#eff6ff',
+                color: '#1d4ed8',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+              title="Abrir o Crear Workspace para este Médico"
+            >
+              <Layers size={14} /> Workspace
+            </button>
             {/* New Rx quick action */}
             <button
               onClick={() => openDrawer('rx-builder', 'new', {

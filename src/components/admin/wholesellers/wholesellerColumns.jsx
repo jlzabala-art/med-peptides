@@ -59,7 +59,7 @@ function InlineEditableCell({ value, onSave, placeholder = '—' }) {
 }
 
 // ── Column definitions ────────────────────────────────────────────────────────
-export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace } = {}) {
+export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace, onLoadToWorkspace, onShareDatasheet } = {}) {
   return [
     {
       key: 'companyName',
@@ -129,24 +129,42 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
     {
       key: 'status',
       header: 'Status',
-      width: '14%',
+      width: '12%',
       sortable: true,
       render: (row) => <StatusBadge status={row.status || 'active'} />,
     },
     {
       key: 'actions',
       header: 'Quick Actions',
-      width: '26%',
+      width: '28%',
       align: 'right',
       render: (row) => (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '6px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '5px' }} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => onLoadToWorkspace?.(row)}
+            className="gcp-action-thumb-btn thumb-workspace"
+            title="Cargar Distribuidor en Workspace Comercial (Pre-seleccionado)"
+            style={{ color: '#003666', borderColor: '#cbd5e1' }}
+          >
+            <span style={{ fontSize: '13px', fontWeight: 800 }}>🗂️</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onShareDatasheet?.(row)}
+            className="gcp-action-thumb-btn thumb-datasheet"
+            title="Compartir Ficha Técnica Individual (Enlace Único con Rastreabilidad)"
+            style={{ color: '#0284c7', borderColor: '#bae6fd' }}
+          >
+            <span style={{ fontSize: '13px', fontWeight: 800 }}>📄</span>
+          </button>
           <button
             type="button"
             onClick={() => onSharePage?.(row)}
             className="gcp-action-thumb-btn thumb-share"
-            title="Compartir Catálogo B2B / Datasheet con margen verificado"
+            title="Compartir Catálogo B2B Completo con margen verificado"
           >
-            <Share2 size={15} />
+            <Share2 size={14} />
           </button>
           <QuoteQuickActionDropdown 
             size="sm" 
@@ -162,9 +180,9 @@ export function getWholesellerColumns({ onUpdate, onSharePage, onOpenWorkspace }
             type="button"
             onClick={() => onOpenWorkspace?.(row)}
             className="gcp-action-thumb-btn thumb-profile"
-            title="Abrir Perfil 360° Workspace del Distribuidor"
+            title="Abrir Perfil 360° del Distribuidor"
           >
-            <Eye size={15} />
+            <Eye size={14} />
           </button>
         </div>
       ),

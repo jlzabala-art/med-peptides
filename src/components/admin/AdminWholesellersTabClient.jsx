@@ -31,6 +31,8 @@ import { CheckCircle, XCircle, Users, Mail, Download, Archive, Package, Globe } 
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
 import ZohoBiginSyncModal from './wholesellers/ZohoBiginSyncModal';
+import QuickShareDatasheetModal from '../shared/workspaces/drawer/QuickShareDatasheetModal';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 // ── KPI Cards ─────────────────────────────────────────────────────────────────
 function WholesellerKPIs({ kpiStats, isLoading, activeKpiFilter, setActiveKpiFilter }) {
@@ -149,6 +151,7 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [selectedManager, setSelectedManager] = useState('');
   const [shareModalWholesaler, setShareModalWholesaler] = useState(null);
+  const [shareDatasheetWholesaler, setShareDatasheetWholesaler] = useState(null);
   const [biginModalOpen, setBiginModalOpen] = useState(false);
 
   if (loading && !wholesellers.length) {
@@ -195,6 +198,8 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
   const columns = getWholesellerColumns({
     onUpdate: (id, data) => handleUpdate(id, data),
     onSharePage: (w) => setShareModalWholesaler(w),
+    onShareDatasheet: (w) => setShareDatasheetWholesaler(w),
+    onLoadToWorkspace: (w) => useWorkspaceStore.getState().loadUserIntoWorkspace(w, { role: 'wholesaler' }),
     onOpenWorkspace: (w) => setSelectedWholeseller(w)
   });
 
@@ -427,6 +432,13 @@ export default function AdminWholesellersTabClient({ isMobile, initialData, isSu
         isOpen={biginModalOpen}
         onClose={() => setBiginModalOpen(false)}
         onWholesalerImported={() => refresh()}
+      />
+
+      {/* Quick Share Datasheet Modal */}
+      <QuickShareDatasheetModal
+        isOpen={Boolean(shareDatasheetWholesaler)}
+        onClose={() => setShareDatasheetWholesaler(null)}
+        initialRecipient={shareDatasheetWholesaler}
       />
     </>
   );

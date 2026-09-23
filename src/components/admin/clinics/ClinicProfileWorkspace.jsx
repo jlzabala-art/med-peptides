@@ -531,21 +531,13 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
           </button>
           <button
             onClick={() => {
-              const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
-              setWorkspaceIntent('sell', activeWorkspaceId);
-              setTargetEntity(activeWorkspaceId, {
-                id: effectiveClinic.id,
-                name: effectiveClinic.name,
-                type: 'clinic'
-              });
-              setDrawerOpen(true);
-              notifier.success(`Configured Workspace for Clinic "${effectiveClinic.name}"!`);
+              useWorkspaceStore.getState().loadUserIntoWorkspace(effectiveClinic, { role: 'clinic' });
             }}
             className="gcp-btn-secondary"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe', fontSize: '0.78rem', padding: '7px 12px' }}
-            title="Create B2B Quote in Workspace (⌥W)"
+            title="Abrir o Crear Workspace para esta Clínica"
           >
-            <Briefcase size={14} /> Quote in Workspace
+            <Layers size={14} /> Abrir en Workspace
           </button>
           <button
             onClick={() => setIsImportOpen(true)}
@@ -1401,15 +1393,7 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
           <button
             type="button"
             onClick={() => {
-              const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
-              setWorkspaceIntent('sell', activeWorkspaceId);
-              setTargetEntity(activeWorkspaceId, {
-                id: effectiveClinic.id,
-                name: effectiveClinic.name,
-                type: 'clinic'
-              });
-              setDrawerOpen(true);
-              notifier.success(`Configured Workspace for Clinic "${effectiveClinic.name}"!`);
+              useWorkspaceStore.getState().loadUserIntoWorkspace(effectiveClinic, { role: 'clinic' });
             }}
             className="gcp-btn-primary"
             style={{
@@ -1422,8 +1406,9 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
               gap: '6px',
               cursor: 'pointer'
             }}
+            title="Abrir o Crear Workspace para esta Clínica"
           >
-            <Briefcase size={15} /> Quote in Workspace
+            <Layers size={15} /> Abrir en Workspace
           </button>
         </div>
       </div>

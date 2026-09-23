@@ -17,11 +17,25 @@ import { getRecentEntitiesFast } from '@/repositories/workspaceSearchRepository'
 import notifier from '@/services/NotificationService';
 import toast from 'react-hot-toast';
 
+const CURATED_COMPOUNDS = [
+  { slug: 'retatrutide', name: 'Retatrutide (Triple Agonist)', doses: ['5mg', '10mg', '15mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'bpc-157', name: 'BPC-157 (Body Protection Compound)', doses: ['5mg', '10mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'tb-500', name: 'TB-500 (Thymosin β4)', doses: ['2mg', '5mg', '10mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'tirzepatide', name: 'Tirzepatide (GIP/GLP-1)', doses: ['5mg', '10mg', '15mg', '30mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'semaglutide', name: 'Semaglutide (GLP-1)', doses: ['2mg', '5mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'cagrilintide', name: 'Cagrilintide (Amylin Analog)', doses: ['5mg', '10mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'semax', name: 'Semax (Heptapeptide ACTH 4-10)', doses: ['30mg', '60mg'], formats: ['Nasal Spray', 'Vial'] },
+  { slug: 'epitalon', name: 'Epitalon (Epithalamin Synthetic)', doses: ['10mg', '50mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'mots-c', name: 'MOTS-c (Mitochondrial Peptide)', doses: ['10mg'], formats: ['Vial', 'Lyophilized 10-Pack'] },
+  { slug: 'kpv', name: 'KPV (α-MSH 11-13)', doses: ['5mg'], formats: ['Vial', 'Capsules'] },
+];
+
 export default function QuickShareDatasheetModal({
   isOpen,
   onClose,
   item = null,
   activeWs = null,
+  initialRecipient = null,
 }) {
   const [recipientType, setRecipientType] = useState('wholesaler');
   const [wholesalers, setWholesalers] = useState([]);
@@ -34,45 +48,61 @@ export default function QuickShareDatasheetModal({
   const [generatedLink, setGeneratedLink] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  // Initialize recipient from active workspace target if available
+  // Standalone compound selection when item is not preselected
+  const [selectedCompoundIdx, setSelectedCompoundIdx] = useState(0);
+  const [selectedDose, setSelectedDose] = useState('');
+  const [selectedFormat, setSelectedFormat] = useState('');
+
+  // Initialize recipient from active workspace target or initialRecipient if available
   useEffect(() => {
     if (isOpen) {
       setGeneratedLink(null);
       setCopied(false);
 
-      const target = activeWs?.targetEntity;
-      if (target) {
-        setSelectedRecipientId(target.id || 'custom');
-        setCustomName(target.name || target.displayName || target.companyName || '');
-        setCustomEmail(target.email || '');
-        setCustomPhone(target.phone || '');
-        if (target.role === 'wholesaler' || target.type === 'wholeseller' || activeWs?.type === 'wholesaler') {
-          setRecipientType('wholesaler');
-        } else {
-          setRecipientType('doctor');
-        }
+      if (initialRecipient) {
+        setSelectedRecipientId(initialRecipient.id || 'custom');
+        setCustomName(initialRecipient.name || initialRecipient.companyName || initialRecipient.fullName || '');
+        setCustomEmail(initialRecipient.email || initialRecipient.contactEmail || '');
+        setCustomPhone(initialRecipient.phone || initialRecipient.whatsapp || initialRecipient.contactPhone || '');
+        setRecipientType(initialRecipient.type || initialRecipient.role || 'wholesaler');
       } else {
-        setSelectedRecipientId('');
-        setCustomName('');
-        setCustomEmail('');
-        setCustomPhone('');
+        const target = activeWs?.targetEntity;
+        if (target) {
+          setSelectedRecipientId(target.id || 'custom');
+          setCustomName(target.name || target.displayName || target.companyName || '');
+          setCustomEmail(target.email || '');
+          setCustomPhone(target.phone || '');
+          if (target.role === 'wholesaler' || target.type === 'wholeseller' || activeWs?.type === 'wholesaler') {
+            setRecipientType('wholesaler');
+          } else {
+            setRecipientType('doctor');
+          }
+        } else {
+          setSelectedRecipientId('');
+          setCustomName('');
+          setCustomEmail('');
+          setCustomPhone('');
+        }
       }
 
-      // Load wholesaler directory for quick select
-      setLoadingWholesalers(true);
-      getRecentEntitiesFast('wholeseller')
-        .then((res) => setWholesalers(res || []))
-        .catch(() => setWholesalers([]))
-        .finally(() => setLoadingWholesalers(false));
+      // Load wholesaler directory for quick select if no recipient locked
+      if (!initialRecipient) {
+        setLoadingWholesalers(true);
+        getRecentEntitiesFast('wholeseller')
+          .then((res) => setWholesalers(res || []))
+          .catch(() => setWholesalers([]))
+          .finally(() => setLoadingWholesalers(false));
+      }
     }
-  }, [isOpen, activeWs]);
+  }, [isOpen, activeWs, initialRecipient]);
 
-  if (!isOpen || !item) return null;
+  if (!isOpen) return null;
 
-  const itemName = item.canonicalName || item.name || item.displayName || 'Compound';
-  const itemDose = item.dosage || item.dose || 'Standard';
-  const itemFormat = item.format || item.presentation || 'Vial';
-  const itemSlug = item.slug || String(itemName).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const currentCompound = CURATED_COMPOUNDS[selectedCompoundIdx] || CURATED_COMPOUNDS[0];
+  const itemName = item?.canonicalName || item?.name || item?.displayName || currentCompound.name;
+  const itemDose = item?.dosage || item?.dose || selectedDose || currentCompound.doses[0];
+  const itemFormat = item?.format || item?.presentation || selectedFormat || currentCompound.formats[0];
+  const itemSlug = item?.slug || currentCompound.slug;
 
   const handleSelectWholesaler = (e) => {
     const id = e.target.value;
@@ -239,114 +269,182 @@ export default function QuickShareDatasheetModal({
 
         {/* Content */}
         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* Item Highlight Pill */}
-          <div
-            style={{
-              padding: '10px 14px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div>
-              <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
-                {itemName}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                Dosificación: <strong style={{ color: '#0369a1' }}>{itemDose}</strong> | Formato: <strong>{itemFormat}</strong>
-              </div>
-            </div>
-            <span
+          {/* Item Highlight Pill or Compound Picker */}
+          {item ? (
+            <div
               style={{
-                fontSize: '0.68rem',
-                fontWeight: 800,
-                color: '#15803d',
-                backgroundColor: '#dcfce7',
-                padding: '2px 8px',
-                borderRadius: '99px',
-                border: '1px solid #bbf7d0',
+                padding: '10px 14px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
-              Dual HPLC ≥99.2%
-            </span>
-          </div>
+              <div>
+                <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
+                  {itemName}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  Dosificación: <strong style={{ color: '#0369a1' }}>{itemDose}</strong> | Formato: <strong>{itemFormat}</strong>
+                </div>
+              </div>
+              <span
+                style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  color: '#15803d',
+                  backgroundColor: '#dcfce7',
+                  padding: '2px 8px',
+                  borderRadius: '99px',
+                  border: '1px solid #bbf7d0',
+                }}
+              >
+                Dual HPLC ≥99.2%
+              </span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
+                Seleccionar Péptido / Compuesto:
+              </label>
+              <select
+                value={selectedCompoundIdx}
+                onChange={(e) => {
+                  const idx = Number(e.target.value);
+                  setSelectedCompoundIdx(idx);
+                  setSelectedDose(CURATED_COMPOUNDS[idx]?.doses[0] || '');
+                  setSelectedFormat(CURATED_COMPOUNDS[idx]?.formats[0] || '');
+                }}
+                style={{
+                  width: '100%',
+                  padding: '7px 10px',
+                  fontSize: '0.82rem',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  fontWeight: 700,
+                  color: '#0f172a'
+                }}
+              >
+                {CURATED_COMPOUNDS.map((c, i) => (
+                  <option key={c.slug} value={i}>
+                    🔬 {c.name}
+                  </option>
+                ))}
+              </select>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>Dosis:</span>
+                {currentCompound.doses.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setSelectedDose(d)}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      border: (selectedDose || currentCompound.doses[0]) === d ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
+                      backgroundColor: (selectedDose || currentCompound.doses[0]) === d ? '#eff6ff' : '#ffffff',
+                      color: (selectedDose || currentCompound.doses[0]) === d ? '#0284c7' : '#475569',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {!generatedLink ? (
             <>
               {/* Recipient Selector */}
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#334155',
-                    marginBottom: '6px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.03em',
-                  }}
-                >
-                  Destinatario Mayorista / Partner
-                </label>
-
-                {wholesalers.length > 0 && (
-                  <select
-                    value={selectedRecipientId}
-                    onChange={handleSelectWholesaler}
+              {initialRecipient ? (
+                <div style={{ padding: '8px 12px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontSize: '0.78rem', color: '#166534' }}>
+                    Destinatario Asignado: <strong>{customName}</strong>
+                    {customEmail && <span style={{ opacity: 0.8 }}> ({customEmail})</span>}
+                  </div>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#15803d', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
+                    Confirmado ✓
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <label
                     style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      fontSize: '0.82rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      marginBottom: '8px',
-                      color: '#0f172a',
-                      fontWeight: 600,
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      marginBottom: '6px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.03em',
                     }}
                   >
-                    <option value="">-- Seleccionar de Mayoristas Registrados --</option>
-                    {wholesalers.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        🏢 {w.name || w.companyName || w.fullName} {w.city ? `(${w.city})` : ''}
-                      </option>
-                    ))}
-                    <option value="custom">✏️ Otro / Destinatario Nuevo...</option>
-                  </select>
-                )}
+                    Destinatario Mayorista / Partner
+                  </label>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  <input
-                    type="text"
-                    placeholder="Nombre o Razón Social"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                    style={{
-                      padding: '8px 12px',
-                      fontSize: '0.8rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                    }}
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email (opcional)"
-                    value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
-                    style={{
-                      padding: '8px 12px',
-                      fontSize: '0.8rem',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                    }}
-                  />
+                  {wholesalers.length > 0 && (
+                    <select
+                      value={selectedRecipientId}
+                      onChange={handleSelectWholesaler}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        fontSize: '0.82rem',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                        marginBottom: '8px',
+                        color: '#0f172a',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <option value="">-- Seleccionar de Mayoristas Registrados --</option>
+                      {wholesalers.map((w) => (
+                        <option key={w.id} value={w.id}>
+                          🏢 {w.name || w.companyName || w.fullName} {w.city ? `(${w.city})` : ''}
+                        </option>
+                      ))}
+                      <option value="custom">✏️ Otro / Destinatario Nuevo...</option>
+                    </select>
+                  )}
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input
+                      type="text"
+                      placeholder="Nombre o Razón Social"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      style={{
+                        padding: '8px 12px',
+                        fontSize: '0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                      }}
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email (opcional)"
+                      value={customEmail}
+                      onChange={(e) => setCustomEmail(e.target.value)}
+                      style={{
+                        padding: '8px 12px',
+                        fontSize: '0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#ffffff',
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Informative Note */}
               <div

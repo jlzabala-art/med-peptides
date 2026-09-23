@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, Users, Plus, Archive, CheckCircle2, XCircle, Trash2, FilePlus, UserPlus, ClipboardList, Activity, Mail } from 'lucide-react';
+import { Search, Users, Plus, Archive, CheckCircle2, XCircle, Trash2, FilePlus, UserPlus, ClipboardList, Activity, Mail, Eye, Layers } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
 import BulkActionsBar from '../../ui/BulkActionsBar';
 import { useDataTable } from '../../../hooks/ui/useDataTable';
@@ -10,6 +10,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import notifier from '../../../services/NotificationService';
 import { useToast } from '../../../hooks/useToast';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import InlineEditableCell from '../../ui/InlineEditableCell';
 import StatusBadge from '../../ui/StatusBadge';
 
@@ -146,24 +147,89 @@ export default function PhysiciansDirectory({ doctors = [], isLoading = false, o
     }
   ];
 
-  // Quick actions to show on hover
+  // Quick actions to show on hover (Icon-only GCP standard)
   const renderActions = (d) => (
-    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
       <button 
-        onClick={(e) => { e.stopPropagation(); onSelectDoctor(d); }}
-        style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', borderRadius: '6px', border: 'none', background: 'var(--primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-        View Profile
+        type="button"
+        title="Ver Perfil 360°"
+        onClick={() => onSelectDoctor(d)}
+        style={{
+          width: '30px',
+          height: '30px',
+          borderRadius: '6px',
+          border: 'none',
+          background: 'var(--primary)',
+          color: 'white',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 0
+        }}
+      >
+        <Eye size={14} />
       </button>
       <button 
+        type="button"
+        title="Cargar Médico en Workspace"
+        onClick={() => {
+          useWorkspaceStore.getState().loadUserIntoWorkspace(d, { role: 'doctor' });
+        }}
+        style={{
+          width: '30px',
+          height: '30px',
+          borderRadius: '6px',
+          border: '1px solid #bfdbfe',
+          backgroundColor: '#eff6ff',
+          color: '#1d4ed8',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 0
+        }}
+      >
+        <Layers size={14} />
+      </button>
+      <button 
+        type="button"
         title="Assign Patient"
-        onClick={(e) => { e.stopPropagation(); toast.info('Assign Patient modal coming soon'); }}
-        style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--background)', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-main)' }}>
+        onClick={() => toast.info('Assign Patient modal coming soon')}
+        style={{
+          width: '30px',
+          height: '30px',
+          borderRadius: '6px',
+          border: '1px solid var(--border)',
+          background: 'var(--background)',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--text-main)',
+          padding: 0
+        }}
+      >
         <UserPlus size={14} />
       </button>
       <button 
+        type="button"
         title="New Prescription"
-        onClick={(e) => { e.stopPropagation(); toast.info('Prescription creator coming soon'); }}
-        style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--background)', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-main)' }}>
+        onClick={() => toast.info('Prescription creator coming soon')}
+        style={{
+          width: '30px',
+          height: '30px',
+          borderRadius: '6px',
+          border: '1px solid var(--border)',
+          background: 'var(--background)',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--text-main)',
+          padding: 0
+        }}
+      >
         <FilePlus size={14} />
       </button>
     </div>

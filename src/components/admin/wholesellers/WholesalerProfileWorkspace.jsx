@@ -23,8 +23,10 @@ import {
   ExternalLink,
   FileCheck,
   Copy,
-  Download
+  Download,
+  Layers
 } from '@/lib/icons';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { StatusBadge, CopyableId, StatusChip } from '../../ui';
 import notifier from '../../../services/NotificationService';
 
@@ -227,7 +229,32 @@ export default function WholesalerProfileWorkspace({
           <button
             type="button"
             onClick={() => {
-              notifier.info(`Initiating B2B Purchase Order for ${displayName}`);
+              useWorkspaceStore.getState().loadUserIntoWorkspace(wholeseller, { role: 'wholesaler' });
+              if (onClose) onClose();
+            }}
+            className="gcp-btn-secondary"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.80rem',
+              padding: '6px 12px',
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              color: '#1d4ed8',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title="Cargar Distribuidor en Workspace Comercial (Pre-seleccionado)"
+          >
+            <Layers size={14} /> Abrir en Workspace
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              useWorkspaceStore.getState().loadUserIntoWorkspace(wholeseller, { role: 'wholesaler' });
+              if (onClose) onClose();
             }}
             className="gcp-btn-primary"
             style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.80rem', padding: '6px 14px' }}

@@ -14,7 +14,7 @@ import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
 import { useDrawer } from '../../../context/DrawerContext';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
-import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2, Tag, MoreVertical, MessageCircle, Sparkles } from '@/lib/icons';
+import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2, Tag, MoreVertical, MessageCircle, Sparkles, Layers } from '@/lib/icons';
 import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
 import PatientLabelSheetModal from '../prescriptions/PatientLabelSheetModal';
 
@@ -409,22 +409,13 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
 
           <button
             onClick={() => {
-              const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
-              setWorkspaceIntent('sell', activeWorkspaceId);
-              setTargetEntity(activeWorkspaceId, {
-                id: patient.id,
-                name: displayName,
-                email: patient.email || '',
-                type: 'patient'
-              });
-              setDrawerOpen(true);
-              notifier.success(`Configured Workspace for Patient "${displayName}"!`);
+              useWorkspaceStore.getState().loadUserIntoWorkspace(patient, { role: 'patient' });
             }}
             className="gcp-btn-secondary"
             style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe', fontSize: '0.8125rem', padding: '0.4rem 0.8rem' }}
-            title="Stage and prescribe compounds in Workspace (⌥W)"
+            title="Abrir o Crear Workspace para este Paciente"
           >
-            <Briefcase size={14} /> Stage
+            <Layers size={14} /> Workspace
           </button>
 
           {isCommercial && (
@@ -568,14 +559,11 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                 <button
                   onClick={() => {
                     setShowMobileActions(false);
-                    const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
-                    setWorkspaceIntent('sell', activeWorkspaceId);
-                    setTargetEntity(activeWorkspaceId, { id: patient.id, name: displayName, email: patient.email || '', type: 'patient' });
-                    setDrawerOpen(true);
+                    useWorkspaceStore.getState().loadUserIntoWorkspace(patient, { role: 'patient' });
                   }}
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '6px', fontSize: '0.80rem', color: '#1d4ed8', fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}
                 >
-                  <Briefcase size={14} /> Stage in Workspace
+                  <Layers size={14} /> Abrir en Workspace
                 </button>
                 {isCommercial && (
                   <button

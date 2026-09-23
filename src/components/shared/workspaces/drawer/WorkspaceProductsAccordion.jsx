@@ -11,6 +11,9 @@ import {
   Search,
   X,
   Sparkles,
+  Share2,
+  Check,
+  MessageCircle,
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import toast from 'react-hot-toast';
@@ -119,6 +122,197 @@ export default function WorkspaceProductsAccordion({
     } else {
       // No recipient in context: open quick picker modal
       setShareDatasheetItem(item);
+    }
+  };
+
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+
+  const handleShareAllDatasheets = async () => {
+    if (!items || items.length === 0) return;
+    const target = activeWs?.targetEntity;
+    const recipientName = target?.name || target?.displayName || target?.companyName || 'Cliente / Distribuidor';
+    const recipientType = target?.role || target?.type || (activeWs?.type === 'wholesaler' ? 'wholesaler' : 'doctor');
+
+    setIsGeneratingAll(true);
+    notifier.info(`Generando enlaces únicos para ${items.length} variantes...`);
+
+    try {
+      const results = await Promise.all(
+        items.map(async (item) => {
+          const itemSlug = item.slug || String(item.canonicalName || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          const itemName = item.canonicalName || item.name || 'Compound';
+          const itemDose = item.dosage || item.dose || '';
+          const itemFormat = item.format || item.presentation || '';
+
+          const res = await fetch('/api/short-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              slug: itemSlug,
+              dose: itemDose,
+              format: itemFormat,
+              supplier: item.supplier || item.supplierId || null,
+              productName: itemName,
+              recipient: {
+                id: target?.id || null,
+                name: recipientName,
+                email: target?.email || '',
+                phone: target?.phone || '',
+                type: recipientType,
+              },
+              variant: {
+                productId: item.productId || item.id,
+                productName: itemName,
+                dose: itemDose,
+                format: itemFormat,
+              },
+            }),
+          });
+
+          if (!res.ok) throw new Error(`Error generando enlace para ${itemName}`);
+          const data = await res.json();
+          return {
+            name: itemName,
+            dose: itemDose,
+            format: itemFormat,
+            shortUrl: data.shortUrl,
+            targetUrl: data.targetUrl,
+          };
+        })
+      );
+
+      // Format text for WhatsApp / Clipboard
+      const textLines = [
+        `*Fichas Técnicas Oficiales — ATLAS HEALTH*`,
+        `Destinatario: ${recipientName}`,
+        '',
+        ...results.map((r, idx) => `${idx + 1}. *${r.name}* (${r.dose ? `${r.dose} ` : ''}${r.format || 'Vial'})\n👉 ${r.shortUrl}`),
+        '',
+        `Acceso directo con trazabilidad analítica y monografía clínica.`
+      ];
+
+      const fullText = textLines.join('\n');
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(fullText);
+        toast.success(`¡Enlaces para ${results.length} variantes copiados al portapapeles!`);
+      }
+    } catch (err) {
+      console.error('[handleShareAllDatasheets]', err);
+      notifier.error(`Error generando enlaces: ${err.message}`);
+    } finally {
+      setIsGeneratingAll(false);
+    }
+  };
+
+  const handleShareWhatsAppBundle = async () => {
+    if (!items || items.length === 0) {
+      notifier.error('No hay productos en el workspace para cotizar.');
+      return;
+    }
+
+    setIsGeneratingAll(true);
+    try {
+      const target = activeWs?.targetEntity;
+      const recipientName = target?.name || target?.companyName || 'Estimado Cliente';
+      const recipientType = target?.type || 'Cliente';
+      const currency = target?.currency || 'USD';
+
+      // 1. Generate short URLs for each item in parallel
+      const results = await Promise.all(
+        items.map(async (item) => {
+          const itemSlug = item.slug || String(item.canonicalName || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          const itemName = item.canonicalName || item.name || 'Compound';
+          const itemDose = item.dosage || item.dose || '';
+          const itemFormat = item.format || item.presentation || '';
+          const qty = item.quantity || 1;
+          const price = item.price || item.unitPrice || 0;
+          const lineTotal = Number((qty * price).toFixed(2));
+
+          let shortUrl = '';
+          try {
+            const res = await fetch('/api/short-url', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                slug: itemSlug,
+                dose: itemDose,
+                format: itemFormat,
+                supplier: item.supplier || item.supplierId || null,
+                productName: itemName,
+                recipient: {
+                  id: target?.id || null,
+                  name: recipientName,
+                  email: target?.email || '',
+                  phone: target?.phone || '',
+                  type: recipientType,
+                },
+                variant: {
+                  productId: item.productId || item.id,
+                  productName: itemName,
+                  dose: itemDose,
+                  format: itemFormat,
+                },
+              }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              shortUrl = data.shortUrl;
+            }
+          } catch (e) {
+            console.warn('Error generating short url for item', e);
+          }
+
+          return {
+            name: itemName,
+            dose: itemDose,
+            format: itemFormat,
+            qty,
+            price,
+            lineTotal,
+            shortUrl,
+          };
+        })
+      );
+
+      const grandTotal = results.reduce((sum, r) => sum + r.lineTotal, 0);
+
+      // Build complete WhatsApp Commercial Deal text
+      const textLines = [
+        `📋 *PROPUESTA COMERCIAL — ATLAS HEALTH / MED-PEPTIDES*`,
+        `👤 *Cliente:* ${recipientName} (${String(recipientType).toUpperCase()})`,
+        `📅 *Fecha:* ${new Date().toLocaleDateString()}`,
+        `─────────────────────`,
+        `*ÍTEMS Y FORMULACIONES:*`,
+        ...results.map((r, idx) => {
+          const doseStr = r.dose ? ` ${r.dose}` : '';
+          const formatStr = r.format ? ` (${r.format})` : '';
+          const linkStr = r.shortUrl ? `\n   🔗 Ficha técnica: ${r.shortUrl}` : '';
+          return `${idx + 1}. *${r.name}*${doseStr}${formatStr}\n   Cant: ${r.qty} ud. × $${r.price.toFixed(2)} = *$${r.lineTotal.toFixed(2)} ${currency}*${linkStr}`;
+        }),
+        `─────────────────────`,
+        `💰 *TOTAL PROPUESTA: $${grandTotal.toFixed(2)} ${currency}*`,
+        `📦 *Incluye:* Monografía analítica certificada HPLC/MS + Trazabilidad de lote.`,
+        `⚡ Disponibilidad inmediata y despacho refrigerado prioritario.`
+      ];
+
+      const fullText = textLines.join('\n');
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(fullText);
+        toast.success(`Propuesta comercial copiada para WhatsApp ✓`);
+      }
+
+      // If recipient has phone, open WhatsApp directly
+      const rawPhone = target?.phone || '';
+      const cleanDigits = rawPhone.replace(/[^\d+]/g, '').replace('+', '');
+      if (cleanDigits.length >= 7) {
+        const waUrl = `https://wa.me/${cleanDigits}?text=${encodeURIComponent(fullText)}`;
+        window.open(waUrl, '_blank');
+      }
+    } catch (err) {
+      console.error('[handleShareWhatsAppBundle]', err);
+      notifier.error(`Error generando propuesta: ${err.message}`);
+    } finally {
+      setIsGeneratingAll(false);
     }
   };
 
@@ -368,6 +562,56 @@ export default function WorkspaceProductsAccordion({
                       title="Share clinical datasheets of staged compounds via AI-generated Pharma English email"
                     >
                       <Sparkles size={13} color="#0284c7" /> Share Datasheets (AI)
+                    </button>
+                  )}
+                  {items.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleShareAllDatasheets}
+                      disabled={isGeneratingAll}
+                      style={{
+                        padding: '6px 10px',
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        borderRadius: '7px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        color: '#15803d',
+                        cursor: isGeneratingAll ? 'wait' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        touchAction: 'manipulation',
+                      }}
+                      title="Generar y copiar un enlace único rastreable por cada variante en este Workspace"
+                    >
+                      <Share2 size={13} color="#16a34a" />
+                      <span>{isGeneratingAll ? 'Generando...' : 'Links Fichas (Todas)'}</span>
+                    </button>
+                  )}
+                  {items.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleShareWhatsAppBundle}
+                      disabled={isGeneratingAll}
+                      style={{
+                        padding: '6px 10px',
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #86efac',
+                        borderRadius: '7px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        color: '#166534',
+                        cursor: isGeneratingAll ? 'wait' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        touchAction: 'manipulation',
+                      }}
+                      title="Copiar propuesta comercial detallada y enlaces para WhatsApp"
+                    >
+                      <MessageCircle size={13} color="#15803d" />
+                      <span>Propuesta WhatsApp</span>
                     </button>
                   )}
                 </div>
