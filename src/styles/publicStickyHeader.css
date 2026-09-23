@@ -258,6 +258,80 @@
   box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45);
 }
 
+/* ── Google Cloud Standard Auth Architecture ── */
+.puh-btn-signin {
+  color: #e2e8f0;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.puh-btn-signin:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.puh-btn-signup {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.40);
+}
+
+.puh-btn-signup:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.55);
+  transform: translateY(-1px);
+}
+
+.puh-signup-label {
+  display: inline;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.puh-btn-console {
+  background: rgba(2, 132, 199, 0.18);
+  color: #ffffff !important;
+  font-weight: 700;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.puh-btn-console:hover {
+  background: rgba(2, 132, 199, 0.30);
+  border-color: rgba(56, 189, 248, 0.70);
+}
+
+.puh-user-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.puh-user-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 /* ── Line 2: Contextual Navigation & Value Strip ─────────────────── */
 .puh-tier2,
 .pds-context-bar {

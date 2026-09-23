@@ -290,25 +290,36 @@ export default function PublicUnifiedHeader({
                 </span>
               </button>
 
-              {/* Professional Portal Sign In / Dashboard CTA */}
+              {/* Google Cloud Standard Auth CTAs (Sign In, Sign Up, or Practitioner Console) */}
               {user ? (
                 <Link
                   href={getDashboardPath()}
-                  className="puh-btn puh-btn-login"
+                  className="puh-btn puh-btn-console"
                   title={isSpanish ? 'Acceso a mi Panel Profesional' : 'Access Practitioner Dashboard'}
                 >
-                  <Lock size={13} />
-                  <span className="puh-btn-label">{isSpanish ? 'Mi Portal' : 'My Portal'}</span>
+                  <span className="puh-user-status-dot" aria-hidden="true" />
+                  <span className="puh-user-avatar">
+                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                  </span>
+                  <span className="puh-signup-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
                 </Link>
               ) : (
-                <Link
-                  href={`/login${loginRedirect ? `?redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
-                  className="puh-btn puh-btn-login"
-                  title={isSpanish ? 'Acceso Profesionales · Ver lotes analíticos, precios mayoristas y pedidos' : 'Practitioner Portal · Access certified CoAs & wholesale pricing'}
-                >
-                  <Lock size={13} />
-                  <span className="puh-btn-label">{isSpanish ? 'Acceso Portal' : 'Sign In'}</span>
-                </Link>
+                <>
+                  <Link
+                    href={`/login?tab=login${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
+                    className="puh-btn puh-btn-signin"
+                    title={isSpanish ? 'Iniciar sesión' : 'Sign In'}
+                  >
+                    <span className="puh-btn-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
+                  </Link>
+                  <Link
+                    href={`/login?tab=register${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
+                    className="puh-btn puh-btn-signup"
+                    title={isSpanish ? 'Registrarse en la plataforma médica' : 'Register for clinical practitioner portal'}
+                  >
+                    <span className="puh-signup-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
+                  </Link>
+                </>
               )}
             </div>
           </div>
