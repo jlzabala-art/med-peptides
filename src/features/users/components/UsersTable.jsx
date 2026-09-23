@@ -41,6 +41,7 @@ import User360Drawer from '../../../components/admin/users/User360Drawer';
 import InviteUserModal from '../../../components/admin/users/InviteUserModal';
 import AIUserIntelligenceModal from '../../../components/admin/users/AIUserIntelligenceModal';
 import UserSharedCatalogsPopover from './UserSharedCatalogsPopover';
+import UserMobileCard from './UserMobileCard';
 import UniversalShareDrawer from '../../../components/ui/UniversalShareDrawer';
 import { EMAILJS_CONFIG } from '@/config/emailjs';
 import { approveUserRoleAction } from '../../../actions/adminActions';
@@ -323,8 +324,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     const priceMarkup = Number(targetUser.customDiscountPct || targetUser.priceMarkupPercent || 30);
     const currency = targetUser.currency || 'USD';
 
-    const typeLabel = catalogType === 'protocols' ? 'Directorio de Protocolos' : 'Catálogo Clínico';
-    const toastId = toast.loading(`Generando enlace de ${typeLabel} para ${fullName}...`);
+    const typeLabel = catalogType === 'protocols' ? 'Clinical Protocols' : 'Product Catalog';
+    const toastId = toast.loading(`Generating ${typeLabel} link for ${fullName}...`);
 
     try {
       const res = await fetch('/api/catalog/share', {
@@ -353,15 +354,15 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       const shortUrl = data.shortUrl || data.shareableUrl;
       const cleanPhone = phone.replace(/[^\d]/g, '');
       const msg = catalogType === 'protocols'
-        ? `Hola ${fullName}, te comparto el Directorio Clínico Oficial de Protocolos y Dosificación:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier consulta clínica.`
-        : `Hola ${fullName}, te comparto el Catálogo Clínico Oficial de formulaciones y especificaciones:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier consulta o pedido.`;
+        ? `Hello ${fullName}, here is the Official Clinical Protocols and Dosing Directory:\n\n🔗 ${shortUrl}\n\nPlease let me know if you have any questions.`
+        : `Hello ${fullName}, here is the Official Clinical Formulations and Products Catalog:\n\n🔗 ${shortUrl}\n\nPlease let me know if you need any assistance with orders.`;
 
       if (cleanPhone) {
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-        toast.success(`WhatsApp abierto para ${fullName} con enlace corto: ${shortUrl}`);
+        toast.success(`WhatsApp opened for ${fullName} with link: ${shortUrl}`);
       } else {
         await navigator.clipboard.writeText(msg);
-        toast.success(`Enlace corto copiado al portapapeles (${shortUrl})`);
+        toast.success(`Catalog link copied to clipboard (${shortUrl})`);
       }
     } catch (err) {
       toast.dismiss(toastId);
@@ -538,16 +539,18 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', wordBreak: 'break-word' }}>{email}</span>
                 <CopyableId value={u.id} iconOnly={true} />
-                <UserSharedCatalogsPopover 
-                  user={u} 
-                  onOpenShareDrawer={(targetUser) => {
-                    setShareDrawerConfig({
-                      user: targetUser,
-                      shareUrl: 'https://med-peptides.com/catalog',
-                      docType: 'catalog'
-                    });
-                  }} 
-                />
+                <span className="hide-on-mobile">
+                  <UserSharedCatalogsPopover 
+                    user={u} 
+                    onOpenShareDrawer={(targetUser) => {
+                      setShareDrawerConfig({
+                        user: targetUser,
+                        shareUrl: 'https://med-peptides.com/catalog',
+                        docType: 'catalog'
+                      });
+                    }} 
+                  />
+                </span>
               </div>
             </div>
           </div>
@@ -683,7 +686,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
         // Share Clinical Product Catalog
         actions.push({
-          label: 'Compartir Catálogo',
+          label: 'Share Catalog',
           icon: Share2,
           onClick: (e) => { 
             e.stopPropagation(); 
@@ -693,7 +696,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
 
         // Share Clinical Protocols Directory
         actions.push({
-          label: 'Compartir Protocolos',
+          label: 'Share Protocols',
           icon: BookOpen,
           onClick: (e) => { 
             e.stopPropagation(); 
@@ -835,28 +838,32 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   if (roleFilter !== 'all') {
     activeFilters.push({
       id: 'role',
-      label: `Role: ${roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}`,
+      label: 'Role',
+      value: roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1),
       onRemove: () => setRoleFilter('all')
     });
   }
   if (showArchived) {
     activeFilters.push({
       id: 'archived',
-      label: 'Showing Archived',
+      label: 'Archive',
+      value: 'Archived',
       onRemove: () => setShowArchived(false)
     });
   }
   if (statusFilter !== 'all') {
     activeFilters.push({
       id: 'status',
-      label: `Status: ${statusFilter === 'active' ? 'Active' : 'Pending'}`,
+      label: 'Status',
+      value: statusFilter === 'active' ? 'Active' : 'Pending',
       onRemove: () => setStatusFilter('all')
     });
   }
   if (originFilter !== 'all') {
     activeFilters.push({
       id: 'origin',
-      label: `Source: ${originFilter === 'local' ? 'Local' : 'Zoho Sync'}`,
+      label: 'Source',
+      value: originFilter === 'local' ? 'Local' : 'Zoho Sync',
       onRemove: () => setOriginFilter('all')
     });
   }
@@ -1156,6 +1163,20 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           data={filteredUsers}
           columns={columns}
           keyField="id"
+          mobileCardComponent={UserMobileCard}
+          mobileCardProps={{
+            canApprove,
+            readOnly,
+            handleToggleApproval,
+            handleInlineRoleChange,
+            handleInlinePricingChange,
+            setShareDrawerConfig,
+            setDetailsUser,
+            setAiTargetUser,
+            impersonateUser,
+            setReassignModal,
+            getUserFullName
+          }}
           expandableRender={renderUserExpandableContent}
           onRowClick={(user) => setDetailsUser(user)}
           selectedIds={Array.from(selectedIds)}

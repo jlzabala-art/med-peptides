@@ -580,17 +580,28 @@ export default function GlobalSearchBar({
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginRight: '0.25rem', flexShrink: 0 }}>
               ACTIVE FILTERS:
             </span>
-            {filters.map((filter, idx) => filter && (
-              <span key={filter.key || filter.id || `filter-${idx}`} className="atlas-search__chip">
-                {filter.label && <span className="atlas-search__chip-label">{filter.label}:</span>}
-                {filter.value}
-                {filter.onRemove && (
-                  <button className="atlas-search__chip-remove" onClick={filter.onRemove} title={`Remove ${filter.label} filter`}>
-                    <X size={10} />
-                  </button>
-                )}
-              </span>
-            ))}
+            {filters.map((filter, idx) => {
+              if (!filter) return null;
+              const rawLabel = (filter.label || '').trim();
+              const hasValue = filter.value !== undefined && filter.value !== null && filter.value !== '';
+              const cleanLabel = rawLabel.endsWith(':') ? rawLabel.slice(0, -1) : rawLabel;
+
+              return (
+                <span key={filter.key || filter.id || `filter-${idx}`} className="atlas-search__chip">
+                  {cleanLabel && (
+                    <span className="atlas-search__chip-label">
+                      {cleanLabel}{hasValue ? ':' : ''}
+                    </span>
+                  )}
+                  {hasValue && <span>{filter.value}</span>}
+                  {filter.onRemove && (
+                    <button className="atlas-search__chip-remove" onClick={filter.onRemove} title={`Remove ${cleanLabel || filter.value} filter`}>
+                      <X size={10} />
+                    </button>
+                  )}
+                </span>
+              );
+            })}
           </div>
         )}
 

@@ -57,7 +57,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const userName = user?.fullName || user?.name || user?.email || 'Usuario';
+  const userName = user?.fullName || user?.name || user?.email || 'User';
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }} ref={popoverRef}>
@@ -69,7 +69,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
           triggerHaptic('light');
           setIsOpen(!isOpen);
         }}
-        title="Ver catálogos enviados a este usuario"
+        title="View shared catalogs for this user"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -87,7 +87,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
         }}
       >
         <Share2 size={12} style={{ color: isOpen ? '#0284c7' : '#64748b' }} />
-        <span>Catálogos</span>
+        <span>Catalogs</span>
       </button>
 
       {/* Popover Menu */}
@@ -119,7 +119,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
           }}>
             <div>
               <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a' }}>
-                Catálogos Enviados
+                Shared Catalogs
               </div>
               <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '240px' }}>
                 {userName}
@@ -148,16 +148,16 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
             {isLoading ? (
               <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b', fontSize: '0.78rem' }}>
                 <RefreshCw size={16} className="animate-spin" style={{ margin: '0 auto 0.5rem' }} />
-                Cargando historial de envíos...
+                Loading share history...
               </div>
             ) : shares.length === 0 ? (
               <div style={{ padding: '1.5rem 1rem', textAlign: 'center' }}>
                 <BookOpen size={24} style={{ color: '#cbd5e1', margin: '0 auto 0.5rem' }} />
                 <div style={{ fontSize: '0.80rem', fontWeight: 600, color: '#334155' }}>
-                  Sin catálogos registrados
+                  No catalogs recorded
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.2rem' }}>
-                  Aún no se ha enviado ningún catálogo a este destinatario.
+                  No catalog links have been shared with this user yet.
                 </div>
               </div>
             ) : (
@@ -165,8 +165,8 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                 {shares.map((item) => {
                   const isProto = item.catalogType === 'protocols';
                   const dateStr = item.issuedAt
-                    ? new Date(item.issuedAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                    : 'Fecha no registrada';
+                    ? new Date(item.issuedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : 'Unknown date';
                   const shortUrl = item.shortUrl || `https://med-peptides.com/c/${item.catalogId}`;
                   const isCopied = copiedId === item.id;
 
@@ -196,7 +196,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                           border: isProto ? '1px solid #e9d5ff' : '1px solid #bfdbfe'
                         }}>
                           {isProto ? <BookOpen size={10} /> : <Package size={10} />}
-                          <span>{isProto ? 'Protocolos' : 'Productos'}</span>
+                          <span>{isProto ? 'Protocols' : 'Products'}</span>
                         </span>
 
                         <span style={{
@@ -210,12 +210,12 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                           {item.webOpened || item.visitsCount > 0 ? (
                             <>
                               <Eye size={10} />
-                              <span>Visto ({item.visitsCount || 1})</span>
+                              <span>Viewed ({item.visitsCount || 1})</span>
                             </>
                           ) : (
                             <>
                               <Clock size={10} />
-                              <span>Enviado</span>
+                              <span>Sent</span>
                             </>
                           )}
                         </span>
@@ -260,7 +260,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                           <button
                             type="button"
                             onClick={(e) => handleCopyLink(shortUrl, item.id, e)}
-                            title="Copiar URL corta"
+                            title="Copy short link"
                             style={{
                               background: isCopied ? '#f0fdf4' : '#ffffff',
                               border: '1px solid #cbd5e1',
@@ -276,14 +276,14 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
                             }}
                           >
                             {isCopied ? <Check size={11} /> : <Copy size={11} />}
-                            <span>{isCopied ? 'Copiado' : 'Copiar'}</span>
+                            <span>{isCopied ? 'Copied' : 'Copy'}</span>
                           </button>
 
                           <a
                             href={shortUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="Abrir enlace"
+                            title="Open link"
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
@@ -336,7 +336,7 @@ export default function UserSharedCatalogsPopover({ user, onOpenShareDrawer }) {
               }}
             >
               <Plus size={13} />
-              <span>Enviar Nuevo Catálogo a este Usuario</span>
+              <span>Share New Catalog with this User</span>
             </button>
           </div>
         </div>
