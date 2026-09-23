@@ -78,8 +78,8 @@ export default function PublicLocalQuickNav({
   };
 
   return (
-    <nav className={`proto-quick-nav ${className}`} aria-label="Local section jumps" style={style}>
-      <div className="proto-quick-nav-pills" role="tablist" ref={pillsRef}>
+    <nav className={`proto-quick-nav proto-gcp-nav-container ${className}`} aria-label="Local section jumps" style={style}>
+      <div className="proto-gcp-tabs-scroll proto-quick-nav-pills" role="tablist" ref={pillsRef}>
         {items.map((nav, i) => {
           const targetId = nav.href?.replace('#', '');
           const isActive = activeId === targetId;
@@ -88,25 +88,13 @@ export default function PublicLocalQuickNav({
             <a
               key={i}
               href={nav.href}
-              className={`proto-quick-nav-pill ${isActive ? 'is-active' : ''}`}
+              className={`proto-gcp-tab-link proto-quick-nav-pill ${isActive ? 'is-active' : ''}`}
               onClick={(e) => handleNavClick(e, nav.href)}
               role="tab"
               aria-selected={isActive}
             >
-              {Icon && <Icon size={13} style={{ marginRight: '5px', flexShrink: 0 }} />}
+              {Icon && <Icon size={14} className="proto-gcp-tab-icon" style={{ marginRight: '6px', flexShrink: 0 }} />}
               <span>{nav.label}</span>
-              {isActive && (
-                <span
-                  style={{
-                    display: 'inline-block',
-                    width: '5px',
-                    height: '5px',
-                    borderRadius: '50%',
-                    backgroundColor: '#38bdf8',
-                    marginLeft: '6px'
-                  }}
-                />
-              )}
             </a>
           );
         })}

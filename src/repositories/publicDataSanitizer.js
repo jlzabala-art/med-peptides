@@ -63,7 +63,7 @@ export const PROTOCOL_PUBLIC_WHITELIST = [
   'schedule', 'instructions', 'administrationInstructions',
   'contraindications', 'warnings', 'safetyGuidelines', 'storageInstructions',
   'biomarkers', 'recommendedTests', 'status', 'isActive',
-  'translations', 'aiContent',
+  'translations', 'aiContent', 'clinical_outcomes', 'clinical_evidence', 'objective_benefits',
 ];
 
 function pickWhitelistedFields(obj, whitelist) {

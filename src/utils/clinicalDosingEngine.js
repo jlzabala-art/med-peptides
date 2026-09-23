@@ -412,15 +412,25 @@ export function generateDynamicReconData(protocol) {
   ];
 
   allItems.forEach(it => {
-    const name = it.product_name || it.name || it.title || it.productId || '';
-    if (!name) return;
-    const cleanKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const rawName = it.product_name || it.name || it.title || it.productId || '';
+    if (!rawName) return;
+    // Canonical clean base name: strip parenthesized text (e.g. "(LY-3437943)", "(Mitochondrial-Derived Peptide)")
+    const baseName = rawName.replace(/\(.*?\)/g, '').replace(/sterile vial|lyophilized|cartridge|pen/gi, '').trim();
+    const cleanKey = baseName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!cleanKey) return;
+
     if (!compoundMap.has(cleanKey)) {
       compoundMap.set(cleanKey, {
         raw: it,
-        name: it.product_name || it.name || name,
+        name: baseName,
         id: it.productId || it.id || cleanKey
       });
+    } else {
+      // If an existing entry has a longer name with parentheses, prefer the cleaner baseName
+      const existing = compoundMap.get(cleanKey);
+      if (baseName.length < existing.name.length && baseName.length >= 3) {
+        existing.name = baseName;
+      }
     }
   });
 
@@ -576,7 +586,7 @@ export function generateDynamicSupplySummary(protocol) {
 /**
  * Dynamically computes 7-day administration schedule from protocol compounds
  */
-export function generateDynamicWeeklySchedule(protocol) {
+export function generateDynamicWeeklySchedule(protocol, activePhaseIdx = 0) {
   const reconData = generateDynamicReconData(protocol);
   if (!reconData || reconData.length === 0) {
     return [
@@ -608,12 +618,17 @@ export function generateDynamicWeeklySchedule(protocol) {
   reconData.forEach((comp, idx) => {
     const bm = matchClinicalBenchmark(comp.name);
     const color = BADGE_COLORS[idx % BADGE_COLORS.length];
-    const initialDose = comp.dosingScale && comp.dosingScale[0] ? comp.dosingScale[0].dose : (comp.dosage || 'Standard Dose');
+    
+    // Resolve dose for the requested activePhaseIdx
+    const scaleEntry = (comp.dosingScale && comp.dosingScale[activePhaseIdx])
+      ? comp.dosingScale[activePhaseIdx]
+      : (comp.dosingScale && comp.dosingScale[0] ? comp.dosingScale[0] : null);
+    const targetDose = scaleEntry ? scaleEntry.dose : (comp.dosage || 'Standard Dose');
     const timing = bm?.timing || 'Morning • Fasted';
     const route = bm?.route?.split(' ')[0] || comp.route || 'SubQ';
 
     // Parse clean cadence & timesPerWeek
-    const cleanDoseStr = String(initialDose || '').toLowerCase();
+    const cleanDoseStr = String(targetDose || '').toLowerCase();
     const rawFreqStr = String(comp.frequency || comp.raw?.frequency || '').toLowerCase();
     let times = comp.timesPerWeek || bm?.timesPerWeek;
 
@@ -642,7 +657,7 @@ export function generateDynamicWeeklySchedule(protocol) {
     targetDays.forEach(d => {
       scheduleMap[d].push({
         compound: comp.name,
-        dose: initialDose,
+        dose: targetDose,
         time: timing,
         route,
         badgeColor: color

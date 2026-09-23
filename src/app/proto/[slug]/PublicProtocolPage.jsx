@@ -21,7 +21,7 @@ import {
   Activity, CheckCircle2, AlertTriangle, Droplets, 
   Thermometer, Copy, Check, Clock,
   ExternalLink, Layers, ArrowRight, Package, Syringe,
-  Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode
+  Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode, BarChart3
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -34,6 +34,7 @@ import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
+import ProtocolClinicalOutcomesCard from '@/components/protocol/ProtocolClinicalOutcomesCard';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 
 const DAY_LABELS_ES = {
@@ -71,6 +72,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const [copied, setCopied] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [activeReconTab, setActiveReconTab] = useState(0);
+  const [activeRoadmapPhase, setActiveRoadmapPhase] = useState(0);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [dynamicTranslations, setDynamicTranslations] = useState({});
   const requestedLangs = useRef(new Set());
@@ -254,8 +256,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
   // 7-Day Administration Schedule Map — Single Source of Truth
   const weeklySchedule = useMemo(() => {
-    return generateDynamicWeeklySchedule(protocol);
-  }, [protocol]);
+    return generateDynamicWeeklySchedule(protocol, activeRoadmapPhase);
+  }, [protocol, activeRoadmapPhase]);
 
   // Auto-clamp active tab if compounds count changes
   useEffect(() => {
@@ -517,6 +519,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         <PublicLocalQuickNav
           lang={lang}
           items={[
+            ...(protocol?.clinical_outcomes?.has_objective_data ? [
+              { label: lang === 'es' ? 'Evidencia' : 'Clinical Evidence', href: '#clinical-outcomes', icon: BarChart3 }
+            ] : []),
             { label: lang === 'es' ? 'Compuestos' : 'Compounds', href: '#included-compounds', icon: FlaskConical },
             { label: lang === 'es' ? 'Timeline' : 'Timeline', href: '#pathway-timeline', icon: CalendarDays },
             { label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution-console', icon: Droplets },
@@ -529,6 +534,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
 
         {/* ── Core Pathway & Sections ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+          
+          {/* Section 0: Verified Clinical Outcomes & Endpoints (Strictly renders if objective data exists) */}
+          <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
           
           {/* Section 1: Included Compounds */}
           <PublicSectionCard
@@ -788,12 +796,24 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             icon={CalendarDays}
             category={lang === 'es' ? 'CRONOGRAMA DE ADMINISTRACIÓN' : 'ADMINISTRATION SCHEDULE'}
             title={lang === 'es' ? 'Calendario Semanal de Administración' : 'Weekly Administration Roadmap'}
-            badge={lang === 'es' ? 'Ciclo 7 Días' : '7-Day Regimen'}
+            badge={phases[activeRoadmapPhase] ? (phases[activeRoadmapPhase].name || (lang === 'es' ? `Fase ${activeRoadmapPhase + 1}` : `Phase ${activeRoadmapPhase + 1}`)) : (lang === 'es' ? 'Ciclo 7 Días' : '7-Day Regimen')}
             badgeVariant="cyan"
             rightAction={
-              <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600 }}>
-                {lang === 'es' ? 'Pauta Estandarizada' : 'Standardized Cadence'}
-              </span>
+              phases.length > 1 ? (
+                <PublicSegmentedControl
+                  size="sm"
+                  items={phases.map((ph, idx) => ({
+                    id: idx,
+                    label: lang === 'es' ? `Fase ${idx + 1}` : `Phase ${idx + 1}`
+                  }))}
+                  activeId={activeRoadmapPhase}
+                  onChange={setActiveRoadmapPhase}
+                />
+              ) : (
+                <span style={{ fontSize: '0.74rem', color: '#93c5fd', fontWeight: 600 }}>
+                  {lang === 'es' ? 'Pauta Estandarizada' : 'Standardized Cadence'}
+                </span>
+              )
             }
           >
             <div className="proto-roadmap-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
