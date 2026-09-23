@@ -1919,11 +1919,17 @@ export default function PublicDatasheetView({
                         >
                           <td data-label="Strength / Dose" className="pds-strength-cell">
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                              {row.isCurrentlyActive && (
-                                <span className="pds-active-dot" aria-label="Active Presentation" title="Active Presentation" />
-                              )}
+                              <span
+                                className={row.isCurrentlyActive ? "pds-active-dot" : "pds-inactive-dot"}
+                                aria-label={row.isCurrentlyActive ? "Active Presentation" : "Select Presentation"}
+                              />
                               <span className="pds-strength-name">{row.strengthName}</span>
                             </div>
+                            {row.isCurrentlyActive && (
+                              <span className="pds-mobile-active-tag">
+                                {lang === 'es' ? 'Seleccionada' : 'Selected'}
+                              </span>
+                            )}
                           </td>
                           <td data-label="Presentation Format">
                             <span className={`pds-format-pill pds-format-${row.formatId}`}>
@@ -2339,7 +2345,7 @@ export default function PublicDatasheetView({
 
       {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
-        hideFloatingTrigger={true}
+        hideFloatingTrigger={false}
         contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : "monograph"}
         contextAnchor={{
           name: isSpainResidency 
@@ -2383,9 +2389,27 @@ export default function PublicDatasheetView({
             directHotline: 'VIP WhatsApp and telephone concierge'
           } : {
             category: isSolventProduct ? 'Sterile Reconstitution Solvent' : isDiagnosticKit ? 'CE-IVDR Clinical Diagnostic Test' : (product?.category || 'Peptides'),
-            storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : isDiagnosticKit ? 'Ambient 15-25°C dry storage. Dried blood spot stable up to 14 days at room temp.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C',
-            reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : isDiagnosticKit ? 'No reconstitution required. Direct capillary dried blood spot (DBS) collection.' : '1.0mL - 2.0mL sterile bacteriostatic water',
-            activeSupplier: displaySupplierName || (isDiagnosticKit ? 'LifeLab1 / Bloodo' : 'Atlas Services'),
+            targetReceptorAxis: targetSystem || 'Pharmacological target receptors',
+            overview: description || '',
+            storage: isSolventProduct ? '2-25°C unopened, 2-8°C refrigerated after puncture. Discard after 28 days.' : isDiagnosticKit ? 'Ambient 15-25°C dry storage. Dried blood spot stable up to 14 days at room temp.' : '2-8°C (Lyophilized), -20°C (Long term), Reconstituted refrigerated 2-8°C, discard after 28 days',
+            reconstitution: isSolventProduct ? 'Pure diluent solvent for lyophilized peptide reconstitution' : isDiagnosticKit ? 'No reconstitution required. Direct capillary dried blood spot (DBS) collection.' : '1.0mL - 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol)',
+            activeSupplier: displaySupplierName || (isDiagnosticKit ? 'LifeLab1 / Bloodo' : 'Lotusland Limited / Atlas Services'),
+            availableFormulations: (matrixRows || []).slice(0, 8).map(r => ({
+              strength: r.strengthName,
+              format: r.formatName,
+              diluent: r.diluentText,
+              concentration: r.concText,
+              route: r.adminText,
+              purity: r.purity,
+              laboratory: r.supplierName
+            })),
+            indexedClinicalPublications: (product?.articles || product?.publications || []).map(a => ({
+              title: a.title,
+              journal: a.journal,
+              year: a.year,
+              pmid: a.pmid,
+              keyFindings: a.keyFindings || a.clinicalSummary || a.abstract || ''
+            }))
           }
         }}
         storageKey={`monograph_${slug}`}

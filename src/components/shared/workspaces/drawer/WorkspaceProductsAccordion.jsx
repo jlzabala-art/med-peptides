@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Package,
   ChevronDown,
@@ -171,6 +171,16 @@ export default function WorkspaceProductsAccordion({
 
           if (!res.ok) throw new Error(`Error generando enlace para ${itemName}`);
           const data = await res.json();
+          try {
+            useWorkspaceStore.getState().updateItemData(item.id, {
+              shortUrl: data.shortUrl,
+              code: data.code,
+              readStatus: 'unread',
+              viewCount: 0,
+              generatedAt: new Date().toISOString()
+            }, activeWs?.id);
+          } catch (_) {}
+
           return {
             name: itemName,
             dose: itemDose,
@@ -203,6 +213,28 @@ export default function WorkspaceProductsAccordion({
       setIsGeneratingAll(false);
     }
   };
+
+  // Real-time link status & read tracking check (Buying Intent)
+  useEffect(() => {
+    const itemsWithCode = (items || []).filter(it => it.code);
+    if (itemsWithCode.length === 0) return;
+
+    itemsWithCode.forEach(async (it) => {
+      try {
+        const res = await fetch(`/api/short-url?code=${encodeURIComponent(it.code)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.viewCount !== it.viewCount || data.readStatus !== it.readStatus) {
+            useWorkspaceStore.getState().updateItemData(it.id, {
+              viewCount: data.viewCount || 0,
+              readStatus: data.readStatus || 'unread',
+              lastViewedAt: data.lastViewedAt || null,
+            }, activeWs?.id);
+          }
+        }
+      } catch (_) {}
+    });
+  }, [items?.length, activeWs?.id]);
 
   const handleShareWhatsAppBundle = async () => {
     if (!items || items.length === 0) {
@@ -257,6 +289,15 @@ export default function WorkspaceProductsAccordion({
             if (res.ok) {
               const data = await res.json();
               shortUrl = data.shortUrl;
+              try {
+                useWorkspaceStore.getState().updateItemData(item.id, {
+                  shortUrl: data.shortUrl,
+                  code: data.code,
+                  readStatus: 'unread',
+                  viewCount: 0,
+                  generatedAt: new Date().toISOString()
+                }, activeWs?.id);
+              } catch (_) {}
             }
           } catch (e) {
             console.warn('Error generating short url for item', e);

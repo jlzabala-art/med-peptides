@@ -682,6 +682,24 @@ const createWorkspaceItemsSlice = (set, get) => ({
     }));
   },
 
+  updateItemData: (itemId, data, targetWorkspaceId = null) => {
+    const { workspaces, activeWorkspaceId } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces[wsId];
+    if (!ws) return;
+
+    const nextItems = ws.items.map((it) =>
+      it.id === itemId ? { ...it, ...data } : it
+    );
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: { ...ws, items: nextItems, updatedAt: Date.now() },
+      },
+    }));
+  },
+
   applyDiscountPercentage: (percent, targetWorkspaceId = null) => {
     const { workspaces, activeWorkspaceId } = get();
     const wsId = targetWorkspaceId || activeWorkspaceId;

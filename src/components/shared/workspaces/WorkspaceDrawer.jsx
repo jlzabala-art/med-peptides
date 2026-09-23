@@ -552,6 +552,15 @@ export default function WorkspaceDrawer() {
           isPatient={isPatient}
           activeStep={safeActiveStep}
           onGoToStep={setActiveStep}
+          onQuickConvert={() => {
+            if (isDoctor || activeWs.targetEntity?.type === 'patient') {
+              handleExecutePrescription();
+            } else if (activeWs.intent === 'buy') {
+              handleExecutePO();
+            } else {
+              handleExecuteQuotation();
+            }
+          }}
         />
 
         {/* Sticky Footer Action Bar with iOS Safe-Area Padding */}

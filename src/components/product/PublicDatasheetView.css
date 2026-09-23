@@ -1490,27 +1490,64 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 0.85rem 1rem;
+    padding: 0.95rem 1.1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
+    gap: 0.45rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    cursor: pointer;
   }
 
   .pds-strengths-table tr:hover {
     border-color: #cbd5e1;
     background: #fbfcfe;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
   }
 
   .pds-strengths-table tr.pds-row-selected {
     background: #f0fdf4 !important;
     border: 1.5px solid #16a34a !important;
-    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12) !important;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.14) !important;
   }
 
   .pds-format-mini-badge {
     display: inline-block;
+  }
+
+  .pds-inactive-dot {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 1.5px solid #94a3b8;
+    background: #ffffff;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .pds-active-dot {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    flex-shrink: 0;
+  }
+
+  .pds-mobile-active-tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #15803d;
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.02em;
   }
 
   .pds-strengths-table td {
@@ -1519,23 +1556,26 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.80rem;
+    font-size: 0.81rem;
     color: #334155;
     line-height: 1.4;
   }
 
   /* Card Header: Strength/Dose */
   .pds-strengths-table td:nth-child(1) {
-    border-bottom: 1px solid #f1f5f9 !important;
-    padding-bottom: 0.45rem !important;
-    margin-bottom: 0.2rem;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 0.55rem !important;
+    margin-bottom: 0.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
-  .pds-strengths-table td:nth-child(1) .pds-mobile-card-title {
-    font-size: 1.05rem;
+  .pds-strengths-table td:nth-child(1) .pds-strength-name {
+    font-size: 1.10rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
   }
 
   /* Hide redundant full format row on mobile since it is displayed in the header pill */
@@ -1549,7 +1589,7 @@
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     flex-shrink: 0;
   }
 
@@ -1559,8 +1599,18 @@
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     flex-shrink: 0;
+  }
+
+  .pds-strengths-table td:nth-child(4) .pds-conc-badge {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.78rem;
   }
 
   .pds-strengths-table td:nth-child(5)::before {
@@ -1569,7 +1619,7 @@
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     flex-shrink: 0;
   }
 
@@ -1579,8 +1629,13 @@
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     flex-shrink: 0;
+  }
+
+  .pds-strengths-table td:nth-child(6) {
+    font-weight: 700;
+    color: #15803d;
   }
 
   .pds-strengths-table td:nth-child(7)::before {
@@ -1589,8 +1644,23 @@
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     flex-shrink: 0;
+  }
+}
+
+/* ── GCP Standard Contraindications Layout ── */
+.pds-contraindications-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+@media (max-width: 640px) {
+  .pds-contraindications-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
   }
 }
 

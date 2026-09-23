@@ -37,6 +37,7 @@ import HelpDrawer from './HelpDrawer';
 import PullToRefreshContainer from '../mobile/PullToRefreshContainer';
 import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List, Briefcase } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import WorkspaceTopBarControl from '../shared/workspaces/WorkspaceTopBarControl';
 import { useCart } from '../../context/CartProvider';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import MobileBottomNav from '../mobile/MobileBottomNav';
@@ -934,44 +935,7 @@ export default function PortalLayout({
             )}
           </div>
 
-          <button
-            onClick={toggleWorkspaceDrawer}
-            style={{
-              ...iconBtnStyle,
-              position: 'relative',
-              backgroundColor: 'rgba(255,255,255,0.5)',
-              borderColor: 'rgba(0,0,0,0.05)',
-              marginLeft: '0.25rem'
-            }}
-            title={`Workspaces (${activeWs?.name || 'Workspace'} - ${workspaceItemCount} items)`}
-          >
-            <Briefcase
-              size={20}
-              color="var(--color-text-secondary)"
-            />
-            {workspaceItemCount > 0 && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '-2px',
-                  right: '-2px',
-                  backgroundColor: 'var(--color-primary, #003666)',
-                  color: 'white',
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px solid white',
-                }}
-              >
-                {workspaceItemCount}
-              </span>
-            )}
-          </button>
+          <WorkspaceTopBarControl iconBtnStyle={iconBtnStyle} />
 
           <style>{`
             @keyframes gcpGeminiGlow {

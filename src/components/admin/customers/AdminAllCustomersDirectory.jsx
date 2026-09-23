@@ -385,44 +385,18 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }} onClick={e => e.stopPropagation()}>
           <button
             type="button"
+            className="gcp-action-thumb-btn thumb-workspace"
             onClick={() => useWorkspaceStore.getState().loadUserIntoWorkspace(row, { role: row.customerType || 'customer' })}
-            style={{
-              width: '30px',
-              height: '30px',
-              padding: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '6px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#003666',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              flexShrink: 0
-            }}
+            style={{ width: '30px', height: '30px' }}
             title="Cargar en Workspace comercial"
           >
             <Layers size={14} />
           </button>
           <button
             type="button"
+            className="gcp-action-thumb-btn thumb-share"
             onClick={() => setShareModalCustomer(row)}
-            style={{
-              width: '30px',
-              height: '30px',
-              padding: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '6px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#0284c7',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              flexShrink: 0
-            }}
+            style={{ width: '30px', height: '30px' }}
             title="Compartir Catálogo B2B / Ficha"
           >
             <Share2 size={14} />
@@ -439,22 +413,9 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           />
           <button
             type="button"
+            className="gcp-action-thumb-btn thumb-profile"
             onClick={() => setSelectedCustomer(row)}
-            style={{
-              width: '30px',
-              height: '30px',
-              padding: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '6px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              flexShrink: 0
-            }}
+            style={{ width: '30px', height: '30px' }}
             title="Abrir Perfil del Cliente (360°)"
           >
             <Eye size={14} />

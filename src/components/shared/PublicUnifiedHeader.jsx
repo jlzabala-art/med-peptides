@@ -13,7 +13,7 @@ import {
   Activity,
   FileText
 } from '@/lib/icons';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Sparkles } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -249,6 +249,20 @@ export default function PublicUnifiedHeader({
                 ))}
               </select>
 
+
+              {/* Clinical AI Copilot Global Trigger */}
+              <button
+                type="button"
+                className="puh-btn puh-btn-ai"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                }}
+                title={isSpanish ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas Clinical AI Research Copilot'}
+              >
+                <Sparkles size={14} />
+                <span className="puh-btn-label">{isSpanish ? 'Clinical AI' : 'Clinical AI'}</span>
+              </button>
 
               {/* Institutional Inquiry Drawer Trigger */}
               <button

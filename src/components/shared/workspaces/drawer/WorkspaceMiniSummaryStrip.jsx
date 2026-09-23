@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Package, User, Building2, DollarSign, Truck } from '@/lib/icons';
+import { Package, User, Building2, DollarSign, Truck, Zap } from '@/lib/icons';
 
 /**
  * WorkspaceMiniSummaryStrip
@@ -19,6 +19,7 @@ export default function WorkspaceMiniSummaryStrip({
   isPatient = false,
   activeStep = 0,
   onGoToStep = () => {},
+  onQuickConvert = null,
 }) {
   const recipient = activeWs?.targetEntity;
   const recipientName = recipient?.name || recipient?.businessName || recipient?.patientName;
@@ -130,6 +131,34 @@ export default function WorkspaceMiniSummaryStrip({
         <DollarSign size={13} style={{ color: '#2563eb' }} />
         <span>${grandTotal.toFixed(2)}</span>
       </button>
+
+      {/* 1-Click Fast Conversion Action */}
+      {itemsCount > 0 && onQuickConvert && (
+        <button
+          type="button"
+          onClick={onQuickConvert}
+          style={{
+            marginLeft: '6px',
+            padding: '3px 9px',
+            borderRadius: '6px',
+            backgroundColor: isDoctor || recipient?.type === 'patient' ? '#0d9488' : '#2563eb',
+            color: '#ffffff',
+            border: 'none',
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}
+          title={isDoctor || recipient?.type === 'patient' ? 'Prescribir directamente en Rx Builder (1-clic)' : 'Generar Pedido / Cotización B2B (1-clic)'}
+        >
+          <Zap size={11} />
+          <span>{isDoctor || recipient?.type === 'patient' ? 'Prescribir (Rx)' : 'Cotizar / Pedido'}</span>
+        </button>
+      )}
     </div>
   );
 }

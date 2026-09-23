@@ -11,8 +11,7 @@ import {
   Activity, 
   Loader2,
   ChevronDown,
-  ChevronUp,
-  Sparkles
+  ChevronUp
 } from '@/lib/icons';
 import { getCuratedPeptideLiterature } from '@/data/peptideLiteratureRegistry';
 import PublicationsSkeleton from './skeletons/PublicationsSkeleton';
@@ -167,22 +166,6 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
                           Indexed Peer-Reviewed Medical Monograph
                         </span>
                       )}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          window.dispatchEvent(new CustomEvent('open-public-atlas-ai', {
-                            detail: {
-                              initialQuery: `What does the clinical study "${article.title}" (${article.journal}${article.year ? `, ${article.year}` : ''}) establish regarding ${productName}?`,
-                            }
-                          }));
-                        }}
-                        className="pds-pub-ai-btn"
-                        title={`Consult Atlas Clinical AI regarding ${article.title}`}
-                      >
-                        <Sparkles size={13} color="#0284c7" />
-                        <span>Ask Clinical AI</span>
-                      </button>
                     </div>
                   </div>
 

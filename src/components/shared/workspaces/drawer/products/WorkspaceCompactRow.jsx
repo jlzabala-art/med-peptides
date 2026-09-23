@@ -96,6 +96,45 @@ export default function WorkspaceCompactRow({
         >
           {it.format || 'Vial'}
         </span>
+        {it.viewCount > 0 ? (
+          <span
+            title={`Ficha abierta ${it.viewCount} ${it.viewCount === 1 ? 'vez' : 'veces'}${it.lastViewedAt ? ` • Última: ${new Date(it.lastViewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}`}
+            style={{
+              fontSize: '0.62rem',
+              fontWeight: 800,
+              color: '#15803d',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
+            Visto ({it.viewCount})
+          </span>
+        ) : it.shortUrl ? (
+          <span
+            title="Enlace generado y enviado, esperando apertura del cliente"
+            style={{
+              fontSize: '0.62rem',
+              fontWeight: 600,
+              color: '#64748b',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            Enviado
+          </span>
+        ) : null}
       </div>
 
       {/* Col 2: Quantity Controls */}

@@ -201,3 +201,52 @@ export async function POST(req) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const code = searchParams.get('code');
+    const recipientId = searchParams.get('recipientId');
+
+    if (!code && !recipientId) {
+      return NextResponse.json({ error: 'code or recipientId query param is required' }, { status: 400 });
+    }
+
+    if (code) {
+      if (!adminDb) {
+        return NextResponse.json({ error: 'Firestore Admin not initialized' }, { status: 500 });
+      }
+      const snap = await adminDb.collection('datasheet_short_links').doc(code).get();
+      if (!snap.exists) {
+        return NextResponse.json({ error: 'Short link not found' }, { status: 404 });
+      }
+      const data = snap.data();
+      return NextResponse.json({
+        code,
+        readStatus: data.readStatus || (data.viewCount > 0 ? 'read' : 'unread'),
+        viewCount: data.viewCount || 0,
+        lastViewedAt: data.lastViewedAt || null,
+        targetUrl: data.targetUrl,
+        shortUrl: data.shortUrl,
+        variant: data.variant || null,
+        recipient: data.recipient || null,
+      });
+    }
+
+    if (recipientId && adminDb) {
+      const snap = await adminDb
+        .collection('datasheet_short_links')
+        .where('recipient.id', '==', recipientId)
+        .limit(30)
+        .get();
+
+      const links = snap.docs.map(d => ({ code: d.id, ...d.data() }));
+      return NextResponse.json({ links });
+    }
+
+    return NextResponse.json({ links: [] });
+  } catch (err) {
+    console.error('[GET /api/short-url] Error querying short link status:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
