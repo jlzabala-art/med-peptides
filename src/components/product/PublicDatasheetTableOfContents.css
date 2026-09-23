@@ -1,0 +1,525 @@
+/* ══════════════════════════════════════════════════════════════════
+   PublicDatasheetTableOfContents.css
+   Google Cloud Console-Inspired Navigation (Desktop Sticky TOC + Mobile Drawer)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. LAPTOP / DESKTOP SIDEBAR TOC (>= 1024px) ── */
+.pds-sidebar-toc {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .pds-sidebar-toc {
+    display: block;
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 88px;
+    align-self: flex-start;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    z-index: 20;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .pds-sidebar-toc::-webkit-scrollbar {
+    width: 4px;
+  }
+  .pds-sidebar-toc::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .pds-sidebar-toc::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
+.pds-toc-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem 1rem 0.85rem 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.pds-toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pds-toc-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pds-toc-header-icon {
+  color: #003666;
+}
+
+.pds-toc-header-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+.pds-toc-progress-pill {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #003666;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pds-toc-nav {
+  margin: 0;
+  padding: 0;
+}
+
+.pds-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pds-toc-item {
+  margin: 0;
+  padding: 0;
+}
+
+.pds-toc-link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.50rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #475569;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border-left: 2px solid transparent;
+  line-height: 1.35;
+}
+
+.pds-toc-link:hover {
+  color: #003666;
+  background: #f8fafc;
+  border-left-color: #cbd5e1;
+}
+
+.pds-toc-link.is-active {
+  color: #003666;
+  font-weight: 700;
+  background: #f0f7ff;
+  border-left: 3px solid #003666;
+  box-shadow: inset 0 0 0 1px rgba(0, 54, 102, 0.04);
+}
+
+.pds-toc-step-number {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #94a3b8;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pds-toc-link.is-active .pds-toc-step-number {
+  color: #003666;
+  background: #dbeafe;
+  border-radius: 50%;
+}
+
+.pds-toc-item-icon {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: color 0.15s ease;
+}
+
+.pds-toc-link.is-active .pds-toc-item-icon {
+  color: #003666;
+}
+
+.pds-toc-item-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pds-toc-active-arrow {
+  flex-shrink: 0;
+  color: #003666;
+  margin-left: auto;
+}
+
+.pds-toc-footer {
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pds-toc-top-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px dashed #cbd5e1;
+  background: #fafafa;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pds-toc-top-btn:hover {
+  background: #eff6ff;
+  border-color: #003666;
+  color: #003666;
+}
+
+/* ── 2. MOBILE FLOATING TRIGGER BUTTON (< 1024px) ── */
+.pds-mobile-toc-fab-container {
+  display: block;
+  position: fixed;
+  bottom: 84px; /* Sits just above PublicStickyActionBar */
+  left: 1rem;
+  z-index: 990;
+}
+
+@media (min-width: 1024px) {
+  .pds-mobile-toc-fab-container {
+    display: none;
+  }
+}
+
+.pds-mobile-toc-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  background: #003666;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 54, 102, 0.35), 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pds-mobile-toc-fab:active {
+  transform: scale(0.96);
+  background: #002244;
+}
+
+.pds-fab-icon {
+  flex-shrink: 0;
+}
+
+.pds-fab-label {
+  letter-spacing: -0.01em;
+}
+
+.pds-fab-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 3. MOBILE SLIDE-IN DRAWER & BACKDROP (< 1024px) ── */
+.pds-mobile-toc-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+  animation: pdsFadeIn 0.2s ease-out;
+}
+
+@keyframes pdsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pds-mobile-toc-drawer {
+  width: 88vw;
+  max-width: 360px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  animation: pdsSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes pdsSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.pds-drawer-header {
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+}
+
+.pds-drawer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.pds-drawer-icon {
+  color: #003666;
+  flex-shrink: 0;
+}
+
+.pds-drawer-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.pds-drawer-subtitle {
+  font-size: 0.74rem;
+  color: #64748b;
+  display: block;
+}
+
+.pds-drawer-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pds-drawer-close-btn:active {
+  background: #f1f5f9;
+}
+
+.pds-drawer-current-banner {
+  padding: 0.65rem 1.25rem;
+  background: #eff6ff;
+  border-bottom: 1px solid #bfdbfe;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pds-current-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pds-current-title {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #003666;
+}
+
+.pds-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.85rem 1rem;
+}
+
+.pds-drawer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.pds-drawer-item {
+  margin: 0;
+  padding: 0;
+}
+
+.pds-drawer-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 48px; /* Mobile touch friendly (Golden Rule #23) */
+}
+
+.pds-drawer-btn:active {
+  background: #f8fafc;
+}
+
+.pds-drawer-btn.is-active {
+  background: #f0f7ff;
+  border-color: #003666;
+  color: #003666;
+  box-shadow: 0 1px 4px rgba(0, 54, 102, 0.08);
+}
+
+.pds-drawer-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.pds-drawer-step {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pds-drawer-step.is-active {
+  background: #003666;
+  color: #ffffff;
+}
+
+.pds-drawer-item-icon {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.pds-drawer-btn.is-active .pds-drawer-item-icon {
+  color: #003666;
+}
+
+.pds-drawer-item-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pds-drawer-btn.is-active .pds-drawer-item-text {
+  font-weight: 800;
+  color: #003666;
+}
+
+.pds-drawer-active-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #003666;
+  background: #dbeafe;
+  padding: 2px 7px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.pds-drawer-arrow {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.pds-drawer-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.pds-drawer-top-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.70rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #003666;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pds-drawer-top-action:active {
+  background: #eff6ff;
+}
+
+/* ── 4. SMOOTH SCROLL MARGIN OFFSETS FOR ALL SECTIONS ── */
+#overview,
+#presentations-matrix,
+#reconstitution-section,
+#diagnostic-specs,
+#biomarker-simulator,
+#collection-protocol,
+#pre-analytical-prep,
+#kit-contents,
+#lab-certification,
+#specs-section,
+#publications-section,
+#contraindications-section,
+#labels-section,
+#analytical-specs,
+#nad-clinical-faq,
+#related-peptides-section {
+  scroll-margin-top: 86px;
+}

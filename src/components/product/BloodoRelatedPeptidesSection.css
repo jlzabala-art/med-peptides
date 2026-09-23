@@ -229,6 +229,205 @@
   transform: translate(2px, -2px);
 }
 
+/* ── Featured Master Clinical Protocol Banner ── */
+.brp-protocol-banner {
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+  border: 1.5px solid #99f6e4;
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.brp-proto-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #e6fffa;
+}
+
+.brp-proto-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.brp-proto-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.brp-proto-grade {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #ffffff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.brp-proto-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.brp-proto-code-pill {
+  font-size: 0.70rem;
+  font-weight: 800;
+  color: #0f766e;
+  background: rgba(13, 148, 136, 0.12);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.brp-proto-banner-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.brp-proto-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.brp-proto-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #003666;
+  line-height: 1.35;
+}
+
+.brp-proto-summary {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.brp-proto-compounds {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.brp-compounds-label {
+  font-size: 0.68rem;
+  font-weight: 750;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.brp-compounds-list {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.brp-compound-chip {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.brp-proto-cta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: flex-end;
+  min-width: 210px;
+}
+
+.brp-retest-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: #0d9488;
+  font-weight: 600;
+}
+
+.brp-proto-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #003666;
+  color: #ffffff !important;
+  font-size: 0.82rem;
+  font-weight: 750;
+  padding: 0.65rem 1.15rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.18);
+  white-space: nowrap;
+}
+
+.brp-proto-btn:hover {
+  background: #002244;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.25);
+}
+
+.brp-peptides-lead-row {
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.brp-peptides-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.35rem 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 @media (max-width: 900px) {
   .brp-row {
     flex-direction: column;
@@ -246,6 +445,17 @@
     justify-content: space-between;
     padding-top: 0.65rem;
     border-top: 1px solid #f1f5f9;
+  }
+
+  .brp-proto-banner-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .brp-proto-cta-box {
+    align-items: stretch;
+    width: 100%;
+    min-width: unset;
   }
 }
 
@@ -270,6 +480,11 @@
 
   .brp-spec-pill {
     text-align: center;
+  }
+
+  .brp-proto-banner-top {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

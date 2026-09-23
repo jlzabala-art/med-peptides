@@ -31,7 +31,8 @@ import {
   Eye,
   Loader2,
   Droplets,
-  Printer
+  Printer,
+  HelpCircle
 } from '@/lib/icons';
 import { 
   SUPPORTED_LANGUAGES, 
@@ -69,6 +70,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
+import PublicDatasheetTableOfContents from './PublicDatasheetTableOfContents';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -809,6 +811,46 @@ export default function PublicDatasheetView({
 
   const isPenAndCartridgeEcosystem = hasPenFormat && hasCartridgeFormat;
 
+  const tocSections = useMemo(() => {
+    if (isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
+      return [
+        { id: 'overview', label: lang === 'es' ? 'Descripción y Utilidad' : 'Overview & Utility', icon: FileText },
+        { id: 'presentations-matrix', label: lang === 'es' ? 'Presentaciones del Kit' : 'Kit Presentations', icon: Layers },
+        { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones Analíticas' : 'Analytical Specs', icon: Activity },
+        { id: 'biomarker-simulator', label: lang === 'es' ? 'Simulador Clínico NAD+' : 'Biomarker Simulator', icon: Sparkles },
+        { id: 'collection-protocol', label: lang === 'es' ? 'Protocolo de Muestreo DBS' : 'DBS Collection Protocol', icon: Droplets },
+        { id: 'pre-analytical-prep', label: lang === 'es' ? 'Estandarización Preanalítica' : 'Pre-Analytical Prep', icon: CheckCircle2 },
+        { id: 'kit-contents', label: lang === 'es' ? 'Contenido del Kit' : 'Kit Included Items', icon: Layers },
+        { id: 'specs-section', label: lang === 'es' ? 'Trazabilidad y Calidad' : 'Lab Quality & Traceability', icon: ShieldCheck },
+        { id: 'nad-clinical-faq', label: lang === 'es' ? 'Guías y Preguntas Clínicas' : 'Clinical FAQs & Guidance', icon: HelpCircle },
+        { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Acompañantes' : 'Companion Protocols', icon: FlaskConical }
+      ];
+    }
+
+    if (isCorporateService) {
+      return [
+        { id: 'overview', label: lang === 'es' ? 'Resumen Ejecutivo' : 'Executive Overview', icon: FileText },
+        { id: 'reconstitution-section', label: lang === 'es' ? 'Especificaciones del Servicio' : 'Service Specifications', icon: Building2 },
+        { id: 'specs-section', label: lang === 'es' ? 'Marco Legal y Acreditación' : 'Legal & Accreditation', icon: ShieldCheck }
+      ];
+    }
+
+    // Default therapeutic peptide monograph
+    return [
+      { id: 'overview', label: lang === 'es' ? 'Perfil Farmacológico' : 'Pharmacological Profile', icon: FileText },
+      { id: 'presentations-matrix', label: lang === 'es' ? 'Lotes y Presentaciones' : 'Batch & Presentations', icon: Layers },
+      { id: 'reconstitution-section', label: isPenOrCart ? (lang === 'es' ? 'Calibración de Dial' : 'Pen Dial Titration') : isSprayFormat ? (lang === 'es' ? 'Dosimetría Intranasal' : 'Intranasal Dosimetry') : (lang === 'es' ? 'Guía de Reconstitución' : 'Reconstitution Guide'), icon: Droplets },
+      { id: 'specs-section', label: lang === 'es' ? 'Certificado de Análisis (CoA)' : 'Certificate of Analysis', icon: ShieldCheck },
+      ...(!isSolventProduct ? [
+        { id: 'publications-section', label: lang === 'es' ? 'Ensayos y Literatura' : 'Scientific Literature', icon: FileText },
+        { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Precauciones' : 'Safety & Contraindications', icon: ShieldCheck },
+        { id: 'labels-section', label: lang === 'es' ? 'Etiquetas de Dispensación' : 'Dispensing Vial Labels', icon: Tag },
+        { id: 'analytical-specs', label: lang === 'es' ? 'Cromatografía y Pureza' : 'HPLC Purity & Mass', icon: Activity }
+      ] : []),
+      { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Clínicos' : 'Clinical Protocols', icon: FlaskConical }
+    ];
+  }, [isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, product, lang]);
+
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
     if (initialBatch && String(initialBatch).trim().length > 0 && !String(initialBatch).toLowerCase().includes('dummy')) {
@@ -1210,8 +1252,9 @@ export default function PublicDatasheetView({
       {/* ── Standardized Clinical Page Shell ── */}
       <PublicPageShell>
         {/* Universal Clinical / Institutional Page Hero */}
-        <PublicPageHero
-          badges={
+        <div id="overview">
+          <PublicPageHero
+            badges={
             <>
               <span className="pds-cat-tag">
                 {lang === 'es' && (category === 'PEPTIDE' || category === 'Peptide' || !category) ? 'PÉPTIDO' : category}
@@ -1327,8 +1370,12 @@ export default function PublicDatasheetView({
             </div>
           )}
         />
+        </div>
 
-        {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
+        {/* ── Google Cloud Console Dynamic Dual Navigation Layout ── */}
+        <div className="pds-content-with-sidebar">
+          <div className="pds-main-column">
+            {/* ── Multi-Formulation / Laboratory Switcher (Golden Rule #28 & #4) ── */}
         {!isCorporateService && !product?.isSingleSupplierLocked && Array.isArray(product?.availableSuppliers) && product.availableSuppliers.length > 1 && (
           <div style={{
             margin: '0 0 1.25rem 0',
@@ -2318,6 +2365,11 @@ export default function PublicDatasheetView({
             </p>
           </div>
         </footer>
+          </div>
+
+          {/* Persistent Google Cloud Console Table of Contents (Desktop Sidebar + Mobile Drawer) */}
+          <PublicDatasheetTableOfContents sections={tocSections} lang={lang} />
+        </div>
       </PublicPageShell>
 
       {/* Dynamic Flexible Share Monograph Drawer */}
@@ -2360,7 +2412,7 @@ export default function PublicDatasheetView({
       <PublicAtlasAIDrawer
         lang={lang}
         hideFloatingTrigger={true}
-        contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : "monograph"}
+        contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : isDiagnosticKit ? "diagnostic_test" : "monograph"}
         contextAnchor={{
           name: isSpainResidency 
             ? 'Spanish Corporate Acquisition & Law 14/2013 Residence Program'
@@ -2368,12 +2420,14 @@ export default function PublicDatasheetView({
             ? 'European Pharmaceutical Compounding & Custom Formulation Service'
             : isPeptideSupplyService
             ? 'B2B Peptide Supply Chain & Dedicated Inventory Management Service'
+            : isDiagnosticKit
+            ? (product?.canonicalName || product?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit')
             : (product?.canonicalName || product?.name || 'Peptide Monograph'),
           slug: slug,
-          cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : 'N/A'),
-          purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : isCompoundingService ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy' : isPeptideSupplyService ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
-          molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : isCompoundingService ? 'Custom Prescription Matrix (Compounded Formulation)' : isPeptideSupplyService ? 'In-Stock Lyophilized Peptide Portfolio' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
-          category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : (product?.category || 'Peptides'),
+          cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : isDiagnosticKit ? 'CE-IVDR / Whatman 903' : 'N/A'),
+          purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : isCompoundingService ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy' : isPeptideSupplyService ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)' : isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
+          molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : isCompoundingService ? 'Custom Prescription Matrix (Compounded Formulation)' : isPeptideSupplyService ? 'In-Stock Lyophilized Peptide Portfolio' : isDiagnosticKit ? 'Capillary DBS Enzymatic Cyclic Assay' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
+          category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : isDiagnosticKit ? 'Diagnostic Kits' : (product?.category || 'Peptides'),
           details: isSpainResidency ? {
             program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
             statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
@@ -2426,7 +2480,7 @@ export default function PublicDatasheetView({
             }))
           }
         }}
-        storageKey={`monograph_${slug}`}
+        storageKey={isDiagnosticKit ? `diagnostic_${slug}` : `monograph_${slug}`}
         onOpenRegisterModal={() => {
           window.open('/auth/login?register=true', '_blank');
         }}

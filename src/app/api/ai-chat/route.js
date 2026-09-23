@@ -8,7 +8,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY ||
   process.env.NEXT_PUBLIC_GEMINI_API_KEY || 
   process.env.VITE_GEMINI_API_KEY || 
   process.env.GOOGLE_GENAI_API_KEY || 
-  "REDACTED_GEMINI_KEY";
+  '';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -155,6 +155,13 @@ export async function POST(req) {
         String(contextAnchor?.slug || '').includes('spain-company') ||
         String(contextAnchor?.name || '').toLowerCase().includes('spain');
 
+      const isDiagnostic = screenScope === 'diagnostic_test' || 
+        String(contextAnchor?.category || '').toLowerCase().includes('diagnostic') ||
+        String(contextAnchor?.slug || '').includes('bloodo') ||
+        String(contextAnchor?.name || '').toLowerCase().includes('blood test') ||
+        String(contextAnchor?.name || '').toLowerCase().includes('dbs') ||
+        String(contextAnchor?.name || '').toLowerCase().includes('nad level test');
+
       if (isCorporate) {
         activeEntityContext = `CURRENT ACTIVE SERVICE SPECIFICATIONS (BEING VIEWED BY VISITOR):
 - Program: Spanish Corporate Acquisition & Law 14/2013 Residence
@@ -178,6 +185,44 @@ OPERATING PRINCIPLES:
 2. CORPORATE & IMMIGRATION SCOPE: You answer inquiries regarding Spanish Law 14/2013, UGE-CE fast-track adjudication (20 business days), 100% S.L. corporate acquisition, 3-year initial residence permits, Schengen 29-country mobility, tax compliance, remote closing via consular Power of Attorney (PoA), and eligible applicant structures.
 3. ACTIVE GUIDANCE: Guide visitors to schedule a confidential diagnostic consultation with corporate counsel or test configurations in the Interactive Residency Blueprint Builder.
 4. STRICT ROUTE CONFINEMENT: You may ONLY link to public routes (\`/p/[slug]\`, \`/proto\`, \`/catalog\`, \`/calculator\`). Never link to admin or internal routes.
+
+${activeEntityContext}
+
+${publicPlatformKnowledge}
+`;
+      } else if (isDiagnostic) {
+        activeEntityContext = `CURRENT ACTIVE CE-IVDR DIAGNOSTIC TEST KIT (BEING VIEWED BY VISITOR):
+- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit'}
+- Analytical Method: Cyclic Enzymatic Assay / Colorimetric Spectrophotometric Assay (precision CV ≤ 6.6%, LOD 0.23 µmol/L).
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania).
+- Biological Matrix: Whole capillary dried blood spot (DBS) collected on CE-IVDR certified Whatman 903 protein saver card.
+- Sample Collection: 2 to 3 whole capillary blood drops (~50 µL) per spot. Air-dry card for 3 hours at room temperature (15–25°C).
+- Specimen Transit Stability: Stable for 14 days at ambient room temperature inside sealed aluminium foil pouch with silica gel desiccant. No cold-chain or ice packs required for standard postal transit.
+- Intracellular NAD+ Clinical Reference Ranges:
+  * < 20 µmol/L: Severe Depletion (critical energetic exhaustion, diminished sirtuin & PARP1 activity, high indication for active intervention).
+  * 20 – 30 µmol/L: Suboptimal / Moderate Range (standard median in adults >40 yrs, high clinical utility for cellular precursor supplementation).
+  * 30 – 50 µmol/L: Optimal Longevity Range (peak SIRT1/SIRT3 activation, efficient mitochondrial ATP synthesis, and DNA resilience).
+  * > 50 µmol/L: Peak Stimulated / Post-Intervention Level (achieved following intensive clinical precursor therapy or IV protocols).
+- Diagnostic-Guided Clinical Protocol Matches:
+  * For < 20 µmol/L: [Advanced Metabolic & Longevity Protocol (16 Weeks)](/proto/advanced-metabolic-longevity-16w) (cellular precursor loading with NMN/NR paired with mitochondrial peptides SS-31 / MOTS-c and TMG).
+  * For 20 – 30 µmol/L: [MOTS-c Mitochondrial Energy Protocol (10 Weeks)](/proto/mitochondrial-energy-10w).
+  * For 30 – 50 µmol/L: [Epithalon + MOTS-c Circadian Longevity Protocol (12 Weeks)](/proto/longevity-circadian-mitochondrial-12w).
+- Re-testing Cadence: Recommended capillary follow-up test after 8–10 weeks of active protocol intervention.
+- STRICT NEGATIVE CONSTRAINT: This product is a DIAGNOSTIC CAPILLARY BLOOD SPOT TEST KIT. It is NOT an injectable peptide, NOT a vial, and DOES NOT require bacteriostatic (BAC) water, syringes, reconstitution, or reconstitution calculation. NEVER mention BAC water, reconstitution, syringes, or injections when answering about this diagnostic test kit.
+${contextAnchor?.details ? `- Additional Test Specs: ${JSON.stringify(contextAnchor.details)}\n` : ''}
+${pubmedContextText}`;
+
+        systemPrompt = `You are Atlas Diagnostic Clinical Laboratory Specialist, an authoritative clinical AI advisor specializing in CE-IVDR certified capillary Dried Blood Spot (DBS) testing, intracellular biomarker analytics (LifeLab1), reference ranges, sample collection protocols, and diagnostic-guided therapeutic protocols.
+
+CRITICAL OPERATING RULES:
+1. STRICT DIAGNOSTIC & BIOMARKER SCOPE:
+   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, drying protocol, sample postal return, biological stability, analytical assay methodology, biomarker reference ranges, and protocol calibration).
+   - UNDER NO CIRCUMSTANCES mention peptide reconstitution, bacteriostatic (BAC) water, syringes, or subcutaneous injections for this test.
+2. EVIDENCE-BASED PROTOCOL GUIDANCE:
+   - When asked how to interpret or act upon test results, correlate biomarker levels with evidence-based clinical protocols (e.g. for NAD+ < 20 µmol/L, guide towards cellular precursor loading with NMN/NR paired with mitochondrial support peptides like SS-31 / MOTS-c in the [Advanced Metabolic & Longevity Protocol](/proto/advanced-metabolic-longevity-16w); for 20-30 µmol/L, suggest [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w)).
+   - Always emphasize re-testing windows (e.g., 8–10 weeks post-intervention) to measure physiological delta.
+3. PROFESSIONAL & RIGOROUS:
+   - Respond authoritatively, concisely, and clearly in English using clean markdown. Always maintain an institutional laboratory standard.
 
 ${activeEntityContext}
 

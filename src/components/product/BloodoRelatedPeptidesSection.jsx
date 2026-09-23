@@ -2,8 +2,64 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { FlaskConical, ArrowUpRight, ShieldCheck, Sparkles, CheckCircle2 } from '@/lib/icons';
+import { 
+  FlaskConical, 
+  ArrowUpRight, 
+  ShieldCheck, 
+  Sparkles, 
+  CheckCircle2,
+  Activity,
+  Award,
+  ArrowRight,
+  Clock,
+  FileText
+} from '@/lib/icons';
 import './BloodoRelatedPeptidesSection.css';
+
+/**
+ * Institutional Clinical Protocol recommendations calibrated to each Bloodo diagnostic test.
+ */
+const DEFAULT_RELATED_PROTOCOLS = {
+  'bloodo-nad-level-test': {
+    slug: 'nad-cellular-restoration-protocol',
+    shortCode: 'REF-NAD-MSTR',
+    nameEn: 'Master NAD+ Protocol: Cellular Bioenergetics & Multi-Route Optimization',
+    nameEs: 'Protocolo NAD+ Maestro: Bioenergética Celular y Optimización Multivía',
+    category: 'Mitochondrial Bioenergetics & Sirtuin Activation',
+    duration: '12 – 16 Weeks · Parenteral & SubQ Pathways',
+    evidenceGrade: 'Grade A · Evidence-Based',
+    summaryEn: 'Comprehensive master clinical protocol calibrated to baseline intracellular NAD+ levels, integrating intravenous loading, subcutaneous micro-dosing, and essential methylation safeguards.',
+    summaryEs: 'Protocolo clínico maestro calibrado según los niveles basales de NAD+ intracelular, integrando infusión intravenosa, microdosificación subcutánea y protección obligatoria de metilación.',
+    keyCompounds: ['NAD+ (IV / SubQ)', 'NMN', 'SS-31 (Elamipretide)', 'MOTS-c', 'TMG (Betaine)'],
+    retestGuideline: 'Capillary DBS follow-up at Week 4 (IV) or Week 8 (SubQ)'
+  },
+  'hemoglobin-a1c-hba1c-test': {
+    slug: 'personalized-metabolic-weight-loss-12w',
+    shortCode: 'LXV-PMW-12W',
+    nameEn: 'Personalized Incretin & Metabolic Regulation Protocol (12 Weeks)',
+    nameEs: 'Protocolo Personalizado Incretínico y Regulación Metabólica (12 Semanas)',
+    category: 'Metabolic & Glycemic Tone',
+    duration: '12 Weeks · Progressive Titration',
+    evidenceGrade: 'Grade A · Evidence-Based',
+    summaryEn: 'Multi-target incretin receptor signaling engineered for visceral adiposity reduction, insulin resensitization, and HbA1c normalization.',
+    summaryEs: 'Señalización incretínica de diana múltiple para reducción de grasa visceral, resensibilización a la insulina y normalización de HbA1c.',
+    keyCompounds: ['Tirzepatide', 'MOTS-c', 'AOD-9604', 'BPC-157'],
+    retestGuideline: 'Capillary DBS HbA1c test at Week 12'
+  },
+  'omega-ratio-test': {
+    slug: 'recovery-foundation-bpc-tb',
+    shortCode: 'LXV-RCF-8W',
+    nameEn: 'Endothelial & Microvascular Restoration Protocol (8 Weeks)',
+    nameEs: 'Protocolo de Restauración Endotelial y Microvascular (8 Semanas)',
+    category: 'Microvascular & Inflammation Control',
+    duration: '8 Weeks · Dual-Peptide Matrix',
+    evidenceGrade: 'Grade A · Evidence-Based',
+    summaryEn: 'Systemic endothelial and vascular anti-inflammatory protocol resolving chronic microvascular injury and optimizing cell membrane lipid resilience.',
+    summaryEs: 'Protocolo sistémico antiinflamatorio vascular y endotelial para resolver el daño microvascular crónico y optimizar la resiliencia lipídica.',
+    keyCompounds: ['BPC-157', 'TB-500', 'KPV'],
+    retestGuideline: 'DBS Omega-3/6 index follow-up at Week 10'
+  }
+};
 
 /**
  * Static fallback map of certified Lotusland Limited therapeutic peptides
@@ -316,11 +372,16 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
     return DEFAULT_RELATED_PEPTIDES[matchedTestKey] || [];
   }, [matchedTestKey]);
 
+  const matchedProtocol = useMemo(() => {
+    if (!matchedTestKey) return DEFAULT_RELATED_PROTOCOLS['bloodo-nad-level-test'];
+    return DEFAULT_RELATED_PROTOCOLS[matchedTestKey] || DEFAULT_RELATED_PROTOCOLS['bloodo-nad-level-test'];
+  }, [matchedTestKey]);
+
+  const isEs = lang === 'es';
+
   if (!peptidesList || peptidesList.length === 0) {
     return null;
   }
-
-  const isEs = lang === 'es';
 
   return (
     <section id="related-peptides-section" className="brp-section-card">
@@ -340,8 +401,8 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
             </div>
             <h3 className="brp-header-title">
               {isEs 
-                ? 'Péptidos Terapéuticos Relacionados' 
-                : 'Targeted Therapeutic Peptides'}
+                ? 'Péptidos Terapéuticos & Protocolo Relacionado' 
+                : 'Targeted Therapeutic Peptides & Calibrated Protocol'}
             </h3>
           </div>
         </div>
@@ -355,11 +416,78 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
       </div>
 
       <div className="brp-section-body">
-        <p className="brp-intro-text">
-          {isEs 
-            ? 'Compuestos peptídicos con sólida evidencia preclínica y clínica indicados para optimización fisiológica, intervención metabólica o modulación según los biomarcadores evaluados en este panel diagnóstico.' 
-            : 'Evidence-based peptide compounds indicated for physiological modulation, clinical optimization, or therapeutic intervention based on this biomarker profile.'}
-        </p>
+        {/* Featured Master Clinical Protocol Card */}
+        {matchedProtocol && (
+          <div className="brp-protocol-banner">
+            <div className="brp-proto-banner-top">
+              <div className="brp-proto-badges">
+                <span className="brp-proto-tag">
+                  <Activity size={12} /> {isEs ? 'PROTOCOLO CLÍNICO CALIBRADO' : 'CALIBRATED CLINICAL PROTOCOL'}
+                </span>
+                <span className="brp-proto-grade">
+                  <Award size={12} /> {matchedProtocol.evidenceGrade}
+                </span>
+                <span className="brp-proto-duration">
+                  <Clock size={12} /> {matchedProtocol.duration}
+                </span>
+              </div>
+              <div className="brp-proto-code-pill">
+                {matchedProtocol.shortCode}
+              </div>
+            </div>
+
+            <div className="brp-proto-banner-content">
+              <div className="brp-proto-main">
+                <h4 className="brp-proto-title">
+                  {isEs ? matchedProtocol.nameEs : matchedProtocol.nameEn}
+                </h4>
+                <p className="brp-proto-summary">
+                  {isEs ? matchedProtocol.summaryEs : matchedProtocol.summaryEn}
+                </p>
+
+                <div className="brp-proto-compounds">
+                  <span className="brp-compounds-label">
+                    {isEs ? 'Compuestos Activos en Sinergia:' : 'Included Synergistic Compounds:'}
+                  </span>
+                  <div className="brp-compounds-list">
+                    {matchedProtocol.keyCompounds.map((comp, cIdx) => (
+                      <span key={cIdx} className="brp-compound-chip">
+                        {comp}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="brp-proto-cta-box">
+                <div className="brp-retest-note">
+                  <FileText size={13} color="#0d9488" />
+                  <span>{matchedProtocol.retestGuideline}</span>
+                </div>
+                <Link 
+                  href={`/proto/${matchedProtocol.slug}`}
+                  className="brp-proto-btn"
+                  title={isEs ? 'Ver protocolo clínico completo' : 'View full clinical protocol blueprint'}
+                >
+                  <span>{isEs ? 'Explorar Protocolo Completo' : 'Explore Clinical Protocol'}</span>
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="brp-peptides-lead-row">
+          <h4 className="brp-peptides-subtitle">
+            <Sparkles size={14} color="#0284c7" />
+            {isEs ? 'Monografías de Compuestos Peptídicos Asociados' : 'Associated Therapeutic Compound Monographs'}
+          </h4>
+          <p className="brp-intro-text">
+            {isEs 
+              ? 'Compuestos peptídicos con sólida evidencia preclínica y clínica indicados para optimización fisiológica, intervención metabólica o modulación según los biomarcadores evaluados en este panel diagnóstico.' 
+              : 'Evidence-based peptide compounds indicated for physiological modulation, clinical optimization, or therapeutic intervention based on this biomarker profile.'}
+          </p>
+        </div>
 
         <div className="brp-rows-list">
           {peptidesList.map((pep) => {

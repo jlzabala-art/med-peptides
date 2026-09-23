@@ -479,6 +479,17 @@ export default function PublicAtlasAIDrawer({
   };
 
   // Dynamic topic pools for non-repeating inquiry rotation
+  const DIAGNOSTIC_TOPICS = [
+    { label: 'Capillary DBS Collection', query: 'What are the step-by-step instructions for capillary blood collection on the Whatman 903 card?', keys: ['collection', 'fingerstick', 'step', 'lancet', 'spot', 'card', 'whatman'] },
+    { label: 'Sample Transit Stability', query: 'What is the sample stability duration at ambient temperature during postal transit?', keys: ['stability', 'transit', 'postal', 'ambient', 'temperature', 'days', 'desiccant'] },
+    { label: 'Biomarker Reference Ranges', query: 'How are the intracellular NAD+ clinical reference ranges stratified and interpreted?', keys: ['range', 'reference', 'stratified', 'depletion', 'optimal', 'level', 'umol'] },
+    { label: 'Re-Testing Cadence', query: 'What is the recommended re-testing interval during active precursor supplementation or peptide therapy?', keys: ['re-test', 'cadence', 'interval', 'follow-up', 'monitoring', 'weeks'] },
+    { label: 'LifeLab1 Analytical Method', query: 'What analytical assay methodology does LifeLab1 use for intracellular NAD+ measurement?', keys: ['method', 'assay', 'lifelab', 'enzymatic', 'cyclic', 'spectrophotometric', 'lod'] },
+    { label: 'Pre-Test Fasting Protocol', query: 'Should the blood sample be collected in a fasted state or at a specific time of day?', keys: ['fasting', 'morning', 'circadian', 'timing', 'food', 'breakfast'] },
+    { label: 'CD38 & PARP1 Sinks', query: 'What cellular mechanisms and enzymes drive intracellular NAD+ depletion in aging?', keys: ['cd38', 'parp', 'sirtuin', 'consumption', 'decline', 'aging', 'salvage'] },
+    { label: 'Protocol Pairing & Precursors', query: 'Which clinical longevity protocols and cofactors are recommended for suboptimal NAD+ levels?', keys: ['protocol', 'precursor', 'nmn', 'ss-31', 'mots-c', 'tmg', 'synergy'] },
+  ];
+
   const MONOGRAPH_TOPICS = [
     { label: 'BAC Dilution Ratio', query: 'Please detail the exact BAC water dilution ratio and reconstitution steps.', keys: ['bac', 'dilut', 'reconstitut', 'water'] },
     { label: 'Refrigeration Limits', query: 'What are the thermal stability limits and refrigeration storage protocols?', keys: ['refrigerat', 'storage', 'temp', 'thermal', 'freeze'] },
@@ -519,6 +530,8 @@ export default function PublicAtlasAIDrawer({
 
     const pool = contextType === 'protocol'
       ? PROTOCOL_TOPICS
+      : contextType === 'diagnostic_test'
+      ? DIAGNOSTIC_TOPICS
       : contextType === 'monograph'
       ? MONOGRAPH_TOPICS
       : CATALOG_TOPICS;
@@ -537,7 +550,11 @@ export default function PublicAtlasAIDrawer({
     }
 
     // If pool is near exhausted, supplement with unasked items from the alternative pool
-    const secondaryPool = contextType === 'monograph' ? PROTOCOL_TOPICS : MONOGRAPH_TOPICS;
+    const secondaryPool = contextType === 'diagnostic_test'
+      ? PROTOCOL_TOPICS
+      : contextType === 'monograph'
+      ? PROTOCOL_TOPICS
+      : MONOGRAPH_TOPICS;
     const secondaryUnasked = secondaryPool.filter((t) => {
       const labelLower = t.label.toLowerCase();
       return !userQueries.some((uText) => uText.includes(labelLower) || t.keys.some((k) => uText.includes(k)));
@@ -760,6 +777,13 @@ export default function PublicAtlasAIDrawer({
         `What are the baseline laboratory monitoring biomarkers?`,
         `Are there companion peptide monographs or calculators?`,
       ]
+    : contextType === 'diagnostic_test'
+    ? [
+        `How is the capillary blood sample collected on the Whatman 903 card?`,
+        `What are the clinical reference ranges for intracellular NAD+?`,
+        `How long is the blood sample stable at room temperature during transit?`,
+        `Which clinical longevity protocols correlate with deficient NAD+ levels?`,
+      ]
     : contextType === 'monograph'
     ? [
         `How to reconstitute with 2mL BAC water?`,
@@ -950,6 +974,8 @@ export default function PublicAtlasAIDrawer({
                 <strong style={{ color: '#003666' }}>Active Focus:</strong>{' '}
                 {contextType === 'protocol'
                   ? `Active Clinical Protocol Guide (${contextAnchor?.duration || 'Multi-week cycle'})`
+                  : contextType === 'diagnostic_test'
+                  ? `CE-IVDR Diagnostic Test Kit • Capillary DBS (${contextAnchor?.method || 'LifeLab1 Central Lab'})`
                   : contextType === 'monograph'
                   ? `Active Formulation Monograph (${contextAnchor?.purity || '≥ 99.0% Dual RP-HPLC'})`
                   : `Active Research Portfolio (${catalogInventory.length} Available Formulations)`}
@@ -1038,10 +1064,18 @@ export default function PublicAtlasAIDrawer({
                       <Sparkles size={22} />
                     </div>
                     <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                      Dedicated Technical Research Assistant
+                      {contextType === 'diagnostic_test'
+                        ? 'Diagnostic Laboratory & Biomarker AI Copilot'
+                        : contextType === 'protocol'
+                        ? 'Clinical Protocol Research Copilot'
+                        : 'Dedicated Technical Research Assistant'}
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '320px', margin: '6px auto 0', lineHeight: 1.45 }}>
-                      Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
+                      {contextType === 'diagnostic_test'
+                        ? 'Ask questions regarding capillary blood spot collection, sample transit stability, reference ranges, laboratory analytical methods, or clinical protocol matching.'
+                        : contextType === 'protocol'
+                        ? 'Ask questions regarding multi-phase titration schedules, companion compounds, safety precautions, or required laboratory monitoring.'
+                        : 'Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.'}
                     </div>
 
                     {/* Suggested Prompts */}

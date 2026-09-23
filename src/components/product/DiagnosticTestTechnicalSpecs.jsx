@@ -21,7 +21,9 @@ import {
   ExternalLink,
   Sun,
   Moon,
-  AlertTriangle
+  AlertTriangle,
+  Bot,
+  Syringe
 } from '@/lib/icons';
 import './DiagnosticTestTechnicalSpecs.css';
 
@@ -75,7 +77,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fef2f2',
             description: isEs 
               ? 'Niveles críticamente bajos asociados a fatiga mitocondrial crónica, senescencia celular acelerada y capacidad de reparación de ADN disminuida (baja actividad de PARP1 y sirtuinas).'
-              : 'Critically depressed levels correlated with chronic mitochondrial exhaustion, accelerated cellular senescence, and impaired DNA repair (reduced sirtuin & PARP1 activity).'
+              : 'Critically depressed levels correlated with chronic mitochondrial exhaustion, accelerated cellular senescence, and impaired DNA repair (reduced sirtuin & PARP1 activity).',
+            clinicalProtocol: {
+              slug: 'nad-cellular-restoration-protocol',
+              queryParams: '?baseline=severe&nad_level=18&tier=critical&modality=intravenous&retest=4w',
+              shortCode: 'REF-NAD-MSTR',
+              name: isEs 
+                ? 'Protocolo NAD+ Maestro: Estrategia de Rescate Parenteral IV' 
+                : 'Master NAD+ Protocol: Parenteral IV Rescue Pathway',
+              tierTitle: isEs ? 'TIER 1 · RESCATE MITOCONDRIAL PARENTERAL' : 'TIER 1 · PARENTERAL MITOCHONDRIAL RESCUE',
+              targetGoal: isEs ? 'Elevar NAD⁺ intracelular a ≥ 35 µmol/L' : 'Escalate intracellular NAD+ to ≥ 35 µmol/L',
+              recommendedModality: isEs ? 'Infusión Intravenosa (IV) Clínica Parenteral' : 'Clinical IV Infusion (Parenteral Loading)',
+              dosageGuide: isEs ? '250 mg IV lento (goteo ≥ 120 min) semanal x 4 semanas, escalando a 500 mg' : '250 mg slow IV (≥ 120 min) weekly x 4 weeks, titrating to 500 mg',
+              methylationRx: isEs ? 'TMG 1.000 mg diario + Complejo B metilado (Obligatorio frente a consumo NNMT)' : 'TMG 1,000 mg daily + Methyl-B Complex (Mandatory vs NNMT consumption)',
+              retestWindow: isEs ? 'Semana 4 (Evaluación en tratamiento activo)' : 'Week 4 (On-treatment evaluation)',
+              cellularTarget: isEs ? 'Mitocondria, sirtuinas SIRT1/3, homeostasis de ATP' : 'Mitochondria, SIRT1/SIRT3, ATP homeostasis',
+              clinicalRationale: isEs
+                ? 'Déficit mitocondrial severo con saturación de PARP1 y desregulación de sirtuinas. Requiere rescate parenteral intravenoso con titulación lenta para evitar vasoconstricción/sofoco purinérgico, complementado con altas dosis de donantes de metilo (TMG) para salvaguardar la reserva de SAMe frente a la excreción por NNMT.'
+                : 'Severe mitochondrial deficit and PARP1 saturation. Requires intravenous parenteral rescue with slow titration to avoid purinergic flushing, coupled with high-dose methyl donor support (TMG) to protect hepatic SAMe pools from NNMT-mediated clearance.',
+              synergies: [
+                { name: 'NAD+ IV 250-500mg', role: isEs ? 'Vía Parenteral' : 'Parenteral Route' },
+                { name: 'TMG (Betaína) 1000mg', role: isEs ? 'Protector de Metilación' : 'Methyl Safeguard' },
+                { name: 'SS-31 (Elamipretide)', role: isEs ? 'Protección Cardiolipina' : 'Cardiolipin Shield' },
+                { name: 'B-Complex Metilado', role: isEs ? 'Reciclaje Homocisteína' : 'Homocysteine Clearance' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el algoritmo clínico de infusión IV de NAD+ y cofactores de metilación cuando el nivel es inferior a 20 µmol/L?'
+                : 'What is the recommended clinical NAD+ IV infusion and methylation cofactor protocol when levels are below 20 µmol/L?'
+            }
           },
           {
             label: isEs ? 'Rango Moderado / Subóptimo' : 'Suboptimal / Moderate',
@@ -86,7 +115,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fffbeb',
             description: isEs
               ? 'Nivel medio poblacional en adultos mayores de 40 años. Pérdida típica del 40-50% respecto a la juventud. Recomendada optimización con precursores (NMN/NR/NAD+ IV) y ejercicio.'
-              : 'Standard adult population median (>40 yrs). Typical 40-50% decline from peak youthful levels. High clinical utility for supplementation (NMN/NR/NAD+ therapy) and exercise.'
+              : 'Standard adult population median (>40 yrs). Typical 40-50% decline from peak youthful levels. High clinical utility for supplementation (NMN/NR/NAD+ therapy) and exercise.',
+            clinicalProtocol: {
+              slug: 'nad-cellular-restoration-protocol',
+              queryParams: '?baseline=suboptimal&nad_level=25&tier=warning&modality=subcutaneous&retest=8w',
+              shortCode: 'REF-NAD-MSTR',
+              name: isEs 
+                ? 'Protocolo NAD+ Maestro: Titulación Subcutánea y Precursores' 
+                : 'Master NAD+ Protocol: Subcutaneous & Precursor Titration',
+              tierTitle: isEs ? 'TIER 2 · OPTIMIZACIÓN SUBCUTÁNEA & BIOENERGÉTICA' : 'TIER 2 · SUBCUTANEOUS & BIOENERGETIC OPTIMIZATION',
+              targetGoal: isEs ? 'Optimizar al rango diana de 35 – 50 µmol/L' : 'Optimize to clinical target range 35 – 50 µmol/L',
+              recommendedModality: isEs ? 'Microdosificación Subcutánea (SC) o NMN Oral' : 'Subcutaneous Micro-Dosing (SC) or Oral NMN',
+              dosageGuide: isEs ? '50 – 100 mg SC 2–3 veces por semana o NMN 500–1.000 mg oral matutino' : '50 – 100 mg SC 2–3x/wk or oral NMN 500–1,000 mg morning',
+              methylationRx: isEs ? 'TMG 500 mg diario con la primera comida matutina' : 'TMG 500 mg daily with first morning meal',
+              retestWindow: isEs ? 'Semana 8 (Evaluación de respuesta biológica)' : 'Week 8 (Biological response evaluation)',
+              cellularTarget: isEs ? 'Fosforilación oxidativa, biogénesis mitocondrial, AMPK' : 'Oxidative phosphorylation, mitochondrial biogenesis, AMPK',
+              clinicalRationale: isEs
+                ? 'Declive fisiológico asociado a la edad con mayor consumo basal por CD38. Indicación prioritaria para titulación domiciliaria subcutánea o precursores orales de alta pureza, con apoyo circadiano matutino y protección moderada de donantes de metilo.'
+                : 'Age-associated physiological decline with heightened CD38 enzymatic consumption. High clinical indication for at-home subcutaneous titration or high-purity oral precursors, with morning circadian timing and moderate methyl donor co-administration.',
+              synergies: [
+                { name: 'NAD+ SubQ 50-100mg', role: isEs ? 'Microdosis Domicilio' : 'At-Home Micro-dose' },
+                { name: 'NMN Oral 500mg', role: isEs ? 'Precursor Fisiológico' : 'Oral Precursor' },
+                { name: 'TMG 500mg', role: isEs ? 'Soporte SAMe' : 'SAMe Buffer' },
+                { name: 'Apigenina / Quercetina', role: isEs ? 'Inhibidor CD38' : 'CD38 Sinks Inhibitor' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué pauta de dosificación subcutánea de NAD+ y TMG se aconseja para niveles en rango subóptimo de 20 a 30 µmol/L?'
+                : 'What is the recommended SubQ NAD+ and TMG dosing schedule for suboptimal NAD+ levels between 20 and 30 µmol/L?'
+            }
           },
           {
             label: isEs ? 'Rango Óptimo de Longevidad' : 'Optimal Longevity Range',
@@ -97,7 +153,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#f0fdfa',
             description: isEs
               ? 'Nivel celular óptimo asociado a máxima activación de SIRT1 y SIRT3, biogénesis mitocondrial eficiente, alta capacidad física y recuperación celular sostenida.'
-              : 'Ideal therapeutic baseline reflecting youthful cellular bioenergetics, peak SIRT1/SIRT3 sirtuin activation, efficient ATP synthesis, and resilient DNA integrity.'
+              : 'Ideal therapeutic baseline reflecting youthful cellular bioenergetics, peak SIRT1/SIRT3 sirtuin activation, efficient ATP synthesis, and resilient DNA integrity.',
+            clinicalProtocol: {
+              slug: 'nad-cellular-restoration-protocol',
+              queryParams: '?baseline=optimal&nad_level=40&tier=optimal&modality=subcutaneous&retest=6m',
+              shortCode: 'REF-NAD-MSTR',
+              name: isEs 
+                ? 'Protocolo NAD+ Maestro: Mantenimiento Celular y Longevidad' 
+                : 'Master NAD+ Protocol: Circadian Longevity Maintenance',
+              tierTitle: isEs ? 'TIER 3 · VIGILANCIA Y MANTENIMIENTO HOMEOSTÁTICO' : 'TIER 3 · SURVEILLANCE & HOMEOSTATIC MAINTENANCE',
+              targetGoal: isEs ? 'Sostener homeostasis fisiológica en 30 – 50 µmol/L' : 'Sustain steady-state homeostasis at 30 – 50 µmol/L',
+              recommendedModality: isEs ? 'Mantenimiento Domiciliario SubQ / Oral Circadiano' : 'At-Home SubQ / Oral Circadian Maintenance',
+              dosageGuide: isEs ? '50 mg SC semanal o ciclos de NMN 250–500 mg en días alternos' : '50 mg SC weekly or alternating-day oral NMN 250–500 mg',
+              methylationRx: isEs ? 'TMG 500 mg en días de administración o aporte dietético de colina' : 'TMG 500 mg on administration days or dietary choline',
+              retestWindow: isEs ? '6 Meses (Vigilancia semestral DBS)' : '6 Months (Biannual DBS Surveillance)',
+              cellularTarget: isEs ? 'Ritmos circadianos de NAMPT, SIRT1 nuclear, integridad de cromatina' : 'Circadian NAMPT oscillations, nuclear SIRT1, chromatin integrity',
+              clinicalRationale: isEs
+                ? 'Valores en el rango óptimo juvenil de longevidad celular. Se recomienda estrategia de micro-pulsos de mantenimiento sincronizados con el ritmo circadiano matutino (07:00–12:00) para preservar resiliencia biológica sin sobrecargar la maquinaria celular.'
+                : 'Optimal youthful longevity baseline. Maintenance micro-pulsing synchronized with circadian morning oscillations (07:00–12:00) is indicated to preserve cellular resilience against age stressors without saturating enzymatic pathways.',
+              synergies: [
+                { name: 'NAD+ SubQ 50mg', role: isEs ? 'Pulso Semanal' : 'Weekly Pulse' },
+                { name: 'NMN 250mg', role: isEs ? 'Ciclado Intermitente' : 'Intermittent Cycling' },
+                { name: 'Epithalon', role: isEs ? 'Biorregulación Circadiana' : 'Circadian Bioregulation' },
+                { name: 'Espermidina', role: isEs ? 'Autofagia Mitocondrial' : 'Mitophagy Inducer' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo estructurar un protocolo de mantenimiento circadiano cuando los niveles de NAD+ ya están en rango óptimo de 30 a 50 µmol/L?'
+                : 'How to structure a circadian maintenance protocol when intracellular NAD+ is already in the optimal 30-50 µmol/L range?'
+            }
           },
           {
             label: isEs ? 'Nivel Máximo Estimulado' : 'Peak Stimulated / Supra-optimal',
@@ -108,7 +191,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#eff6ff',
             description: isEs
               ? 'Valores alcanzados habitualmente tras protocolos activos de infusión intravenosa de NAD+, suplementación de alta dosis con activadores de sirtuinas o protocolos regenerativos.'
-              : 'Levels achieved following intensive clinical NAD+ IV therapy, high-dose precursor administration, and caloric restriction/longevity protocols.'
+              : 'Levels achieved following intensive clinical NAD+ IV therapy, high-dose precursor administration, and caloric restriction/longevity protocols.',
+            clinicalProtocol: {
+              slug: 'nad-cellular-restoration-protocol',
+              queryParams: '?baseline=peak&nad_level=55&tier=super&modality=cycling&retest=12w',
+              shortCode: 'REF-NAD-MSTR',
+              name: isEs 
+                ? 'Protocolo NAD+ Maestro: Fase de Consolidación y Descanso' 
+                : 'Master NAD+ Protocol: Plateau Consolidation & Washout',
+              tierTitle: isEs ? 'TIER 4 · TITULACIÓN CLÍNICA Y CONTROL DE METILACIÓN' : 'TIER 4 · CLINICAL TITRATION & METHYL RESILIENCY',
+              targetGoal: isEs ? 'Consolidar y monitorizar balance de excreción de metilos' : 'Consolidate and monitor methyl excretion equilibrium',
+              recommendedModality: isEs ? 'Ciclado de Precursores (Cycling / Washout de 2–4 Semanas)' : 'Precursor Cycling & Washout Window (2–4 Weeks)',
+              dosageGuide: isEs ? 'Pausa temporal de aportes exógenos; evaluar meseta y respuesta celular basal' : 'Temporary pause of exogenous precursors; evaluate plateau retention',
+              methylationRx: isEs ? 'Monitorización de homocisteína sérica (objetivo < 8.0 µmol/L) y soporte hepático' : 'Serum homocysteine monitoring (target < 8.0 µmol/L) & hepatic support',
+              retestWindow: isEs ? '12 Semanas (Monitoreo post-lavado para evaluar meseta)' : '12 Weeks (Post-washout evaluation)',
+              cellularTarget: isEs ? 'Balance de donantes de metilo (SAMe), excreción de MeNAM' : 'Methyl donor pool (SAMe), MeNAM urinary excretion',
+              clinicalRationale: isEs
+                ? 'Nivel elevado característico de infusiones recientes o megadosis de precursores. Requiere verificar que la excreción de metabolitos metilados (MeNAM) no agote la reserva de donantes de metilo (SAMe / colina) y aplicar una ventana de ciclado/descanso para preservar la síntesis endógena de NAMPT.'
+                : 'Supra-physiological level typical of active high-dose therapy or recent IV infusions. Clinical oversight warrants checking that clearance of methylated metabolites (MeNAM) preserves the hepatic methyl donor pool and applying cycling windows to maintain endogenous NAMPT expression.',
+              synergies: [
+                { name: 'TMG (Betaína)', role: isEs ? 'Soporte de Metilación' : 'Methylation Safeguard' },
+                { name: 'Vitamina B12 / Folato', role: isEs ? 'Ciclo de Metionina' : 'Methionine Resynthesis' },
+                { name: 'Monitoreo DBS', role: isEs ? 'Control de Meseta' : 'Plateau Verification' },
+                { name: 'Cycling / Washout', role: isEs ? 'Pausa Terapéutica' : 'Washout Window' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué precauciones sobre metilación y donantes de metilo (TMG) deben tomarse con niveles de NAD+ superiores a 50 µmol/L?'
+                : 'What methyl donor safeguards (TMG) should be observed when intracellular NAD+ exceeds 50 µmol/L?'
+            }
           }
         ]
       };
@@ -430,7 +540,7 @@ export default function DiagnosticTestTechnicalSpecs({
 
       <div className="dts-body">
         {/* ── 1. ANALYTICAL METRICS GRID ── */}
-        <div className="dts-metrics-grid">
+        <div id="diagnostic-specs" className="dts-metrics-grid">
           <div className="dts-metric-card">
             <span className="dts-metric-label">{isEs ? 'Método Analítico' : 'Analytical Method'}</span>
             <strong className="dts-metric-value">{biomarkerData.method}</strong>
@@ -469,7 +579,7 @@ export default function DiagnosticTestTechnicalSpecs({
         </div>
 
         {/* ── 2. INTERACTIVE BIOMARKER CLINICAL RANGE SIMULATOR ── */}
-        <div className="dts-simulator-card">
+        <div id="biomarker-simulator" className="dts-simulator-card">
           <div className="dts-simulator-header">
             <div>
               <span className="dts-simulator-kicker">
@@ -521,10 +631,154 @@ export default function DiagnosticTestTechnicalSpecs({
               {activeRange.description}
             </p>
           </div>
+
+          {/* Dynamic Clinical Decision Algorithm & Protocol Integration */}
+          {activeRange.clinicalProtocol && (
+            <div className="dts-clinical-action-card">
+              <div className="dts-action-header">
+                <div className="dts-action-tag-row">
+                  <span 
+                    className="dts-action-badge" 
+                    style={{ 
+                      backgroundColor: activeRange.color + '15', 
+                      color: activeRange.color, 
+                      borderColor: activeRange.color + '40' 
+                    }}
+                  >
+                    <Activity size={12} /> {activeRange.clinicalProtocol.tierTitle}
+                  </span>
+                  <span className="dts-evidence-badge">
+                    <Award size={12} /> {isEs ? 'Algoritmo de Decisión Clínica' : 'Evidence-Based Clinical Decision Pathway'}
+                  </span>
+                </div>
+                <div className="dts-proto-title-row">
+                  <div>
+                    <span className="dts-proto-code">{activeRange.clinicalProtocol.shortCode}</span>
+                    <h5 className="dts-proto-name">{activeRange.clinicalProtocol.name}</h5>
+                  </div>
+                  <div className="dts-proto-target-pill">
+                    <span className="dts-target-label">{isEs ? 'Diana Terapéutica' : 'Biomarker Target'}</span>
+                    <strong className="dts-target-val">{activeRange.clinicalProtocol.targetGoal}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pathophysiological Rationale */}
+              <div className="dts-action-rationale">
+                <div className="dts-rationale-label">
+                  <FileText size={13} color="#0284c7" />
+                  <span>{isEs ? 'Juicio Diagnóstico & Mecanismo Celular' : 'Diagnostic Rationale & Cellular Mechanism'}</span>
+                </div>
+                <p className="dts-rationale-text">
+                  {activeRange.clinicalProtocol.clinicalRationale}
+                </p>
+              </div>
+
+              {/* Precision Pharmacokinetic Prescription Breakdown (Biomarker Calibration) */}
+              {(activeRange.clinicalProtocol.recommendedModality || activeRange.clinicalProtocol.dosageGuide) && (
+                <div className="dts-rx-breakdown-card">
+                  <div className="dts-rx-header">
+                    <span className="dts-rx-title">
+                      <Syringe size={14} color="#0d9488" />
+                      {isEs ? 'Prescripción y Calibración Farmacocinética Específica' : 'Precision Pharmacokinetic Prescription'}
+                    </span>
+                    <span className="dts-rx-tag">
+                      {isEs ? 'Estratificación Biomarcador DBS' : 'Biomarker-Stratified Route'}
+                    </span>
+                  </div>
+                  <div className="dts-rx-grid">
+                    <div className="dts-rx-item">
+                      <span className="dts-rx-item-label">{isEs ? 'Vía Recomendada:' : 'Prescribed Route:'}</span>
+                      <strong className="dts-rx-item-val">{activeRange.clinicalProtocol.recommendedModality}</strong>
+                    </div>
+                    <div className="dts-rx-item">
+                      <span className="dts-rx-item-label">{isEs ? 'Pauta de Inducción:' : 'Induction Schedule:'}</span>
+                      <strong className="dts-rx-item-val">{activeRange.clinicalProtocol.dosageGuide}</strong>
+                    </div>
+                    <div className="dts-rx-item">
+                      <span className="dts-rx-item-label">{isEs ? 'Protección de Metilación:' : 'Methylation Safeguard:'}</span>
+                      <strong className="dts-rx-item-val">{activeRange.clinicalProtocol.methylationRx}</strong>
+                    </div>
+                    <div className="dts-rx-item">
+                      <span className="dts-rx-item-label">{isEs ? 'Ventana Re-Test DBS:' : 'DBS Re-Test Window:'}</span>
+                      <strong className="dts-rx-item-val">{activeRange.clinicalProtocol.retestWindow}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Synergistic Compounds & Biomarker Surveillance Grid */}
+              <div className="dts-action-grid">
+                <div className="dts-synergies-col">
+                  <span className="dts-grid-heading">
+                    <Sparkles size={12} color="#0d9488" />
+                    {isEs ? 'Péptidos & Precursores en Sinergia' : 'Synergistic Companion Compounds'}
+                  </span>
+                  <div className="dts-synergies-pills">
+                    {activeRange.clinicalProtocol.synergies.map((syn, synIdx) => (
+                      <div key={synIdx} className="dts-syn-pill">
+                        <span className="dts-syn-name">{syn.name}</span>
+                        <span className="dts-syn-role">{syn.role}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="dts-cadence-col">
+                  <span className="dts-grid-heading">
+                    <Clock size={12} color="#475569" />
+                    {isEs ? 'Monitorización y Re-evaluación' : 'Clinical Monitoring Interval'}
+                  </span>
+                  <div className="dts-cadence-meta">
+                    <div className="dts-meta-line">
+                      <span>{isEs ? 'Ventana Re-Test DBS:' : 'DBS Re-Test Window:'}</span>
+                      <strong>{activeRange.clinicalProtocol.retestWindow}</strong>
+                    </div>
+                    <div className="dts-meta-line">
+                      <span>{isEs ? 'Objetivo Biológico:' : 'Cellular Target:'}</span>
+                      <small>{activeRange.clinicalProtocol.cellularTarget}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="dts-action-footer">
+                <a 
+                  href={`/proto/${activeRange.clinicalProtocol.slug}${activeRange.clinicalProtocol.queryParams || ''}`}
+                  className="dts-btn-explore-proto"
+                  title={isEs ? `Ver protocolo clínico calibrado ${activeRange.clinicalProtocol.shortCode}` : `Explore calibrated clinical protocol ${activeRange.clinicalProtocol.shortCode}`}
+                >
+                  <span>{isEs ? 'Ver Protocolo Clínico Calibrado para este Resultado' : 'Review Calibrated Clinical Protocol for this Result'}</span>
+                  <ArrowRight size={14} />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(
+                        new CustomEvent('open-public-atlas-ai', {
+                          detail: {
+                            initialQuery: activeRange.clinicalProtocol.aiQuery
+                          }
+                        })
+                      );
+                    }
+                  }}
+                  className="dts-btn-ai-query"
+                  title={isEs ? 'Consultar este nivel y protocolo con el Asistente Clínico de IA' : 'Inquire about this biomarker tier with Clinical AI'}
+                >
+                  <Bot size={14} />
+                  <span>{isEs ? 'Consultar con Clinical AI este Nivel' : 'Ask Clinical AI About This Level'}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── 3. STANDARDIZED DBS CAPILLARY COLLECTION PROTOCOL (BLOODO.COM METHODOLOGY) ── */}
-        <div className="dts-protocol-card">
+        <div id="collection-protocol" className="dts-protocol-card">
           <div className="dts-protocol-header-row">
             <div>
               <div className="dts-protocol-tag">
@@ -671,7 +925,7 @@ export default function DiagnosticTestTechnicalSpecs({
           )}
 
           {/* 4 Graphic Procedural Steps */}
-          <div className="dts-procedural-steps-grid">
+          <div id="pre-analytical-prep" className="dts-procedural-steps-grid">
             {/* Step 1 */}
             <div className="dts-proc-card">
               <div className="dts-proc-header">
@@ -855,7 +1109,7 @@ export default function DiagnosticTestTechnicalSpecs({
         </div>
 
         {/* ── 4. WHAT'S IN THE BOX CHECKLIST ── */}
-        <div className="dts-contents-card">
+        <div id="kit-contents" className="dts-contents-card">
           <h5 className="dts-contents-title">
             <Layers size={16} color="#003666" />
             {isEs ? 'Contenido del Kit de Diagnóstico' : 'Diagnostic Kit Included Accessories'}
@@ -889,7 +1143,7 @@ export default function DiagnosticTestTechnicalSpecs({
         </div>
 
         {/* ── 5. ACCREDITATION & COMMERCIAL INQUIRY FOOTER ── */}
-        <div className="dts-footer-banner">
+        <div id="lab-certification" className="dts-footer-banner">
           <div className="dts-footer-text">
             <strong className="dts-footer-headline">
               <Building2 size={16} color="#0d9488" />

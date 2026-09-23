@@ -19,21 +19,28 @@ import {
 import { toast } from 'react-hot-toast';
 import './ProtocolClinicalCompanionCard.css';
 
-export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en' }) {
+export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', biomarkerCalibration = null }) {
   const isEs = lang === 'es';
   const companion = protocol?.companion_diagnostic;
   const methylation = protocol?.methylation_support;
   const modalities = protocol?.administration_modalities || [];
   const chronobiology = protocol?.chronobiology;
 
+  const calibratedModality = biomarkerCalibration?.modality === 'intravenous' ? 'intravenous' : 'subcutaneous';
+  const [userSelectedModalityId, setUserSelectedModalityId] = useState(null);
+  const selectedModalityId = userSelectedModalityId || (biomarkerCalibration?.modality ? calibratedModality : (modalities[0]?.id || 'subcutaneous'));
+  const setSelectedModalityId = setUserSelectedModalityId;
+
+  const [userActiveTab, setUserActiveTab] = useState(null);
+  const activeTab = userActiveTab || (biomarkerCalibration?.modality ? 'modalities' : 'companion');
+  const setActiveTab = setUserActiveTab;
+
+  const [copiedCadenceId, setCopiedCadenceId] = useState(null);
+
   // If this protocol has none of these clinical companion metadata fields, don't render
   if (!companion && !methylation && modalities.length === 0 && !chronobiology) {
     return null;
   }
-
-  const [activeTab, setActiveTab] = useState('companion');
-  const [selectedModalityId, setSelectedModalityId] = useState(() => modalities[0]?.id || 'subcutaneous');
-  const [copiedCadenceId, setCopiedCadenceId] = useState(null);
 
   const selectedModality = modalities.find(m => m.id === selectedModalityId) || modalities[0];
 
@@ -218,17 +225,40 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en' })
               const mGuide = isEs ? cad.guideline_es : cad.guideline;
               const isCopied = copiedCadenceId === cad.id;
               const isMidProtocol = idx === 1;
+              const isCalibratedMilestone = biomarkerCalibration && (
+                (biomarkerCalibration.retest === '4w' && idx === 1) ||
+                (biomarkerCalibration.retest === '8w' && idx === 2) ||
+                (biomarkerCalibration.retest === '6m' && idx === 2) ||
+                (biomarkerCalibration.retest === '12w' && idx === 2)
+              );
 
               return (
-                <div key={cad.id || idx} className={`pcc-cadence-card ${isMidProtocol ? 'is-recommended' : ''}`}>
+                <div 
+                  key={cad.id || idx} 
+                  className={`pcc-cadence-card ${isCalibratedMilestone ? 'is-calibrated-target' : (isMidProtocol ? 'is-recommended' : '')}`}
+                  style={isCalibratedMilestone ? { borderColor: '#0d9488', backgroundColor: '#f0fdfa' } : {}}
+                >
                   <div className="pcc-cadence-badge-row">
                     <span className="pcc-cadence-step">0{idx + 1}</span>
                     <span className="pcc-cadence-timing">{mTiming}</span>
-                    {isMidProtocol && (
+                    {isCalibratedMilestone ? (
+                      <span style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        backgroundColor: '#0d9488',
+                        color: '#ffffff',
+                        padding: '0.15rem 0.5rem',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em'
+                      }}>
+                        {isEs ? '★ Control DBS Calibrado' : '★ Calibrated Target Re-Test'}
+                      </span>
+                    ) : isMidProtocol ? (
                       <span className="pcc-cadence-pill-green">
                         {isEs ? 'Monitorización Activa' : 'Therapeutic Response'}
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <h5 className="pcc-cadence-title">{mTitle}</h5>
                   <p className="pcc-cadence-objective">
@@ -260,17 +290,38 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en' })
         <div className="pcc-tab-panel">
           {/* Segmented Modality Selector */}
           <div className="pcc-modality-selector">
-            {modalities.map(m => (
-              <button
-                key={m.id}
-                type="button"
-                className={`pcc-modality-pill ${selectedModalityId === m.id ? 'is-selected' : ''}`}
-                onClick={() => setSelectedModalityId(m.id)}
-              >
-                <span>{m.id === 'intravenous' ? '💉' : '🩹'}</span>
-                <span>{isEs ? m.label_es : m.label}</span>
-              </button>
-            ))}
+            {modalities.map(m => {
+              const isPrescribedModality = biomarkerCalibration && (
+                (biomarkerCalibration.modality === 'intravenous' && m.id === 'intravenous') ||
+                (biomarkerCalibration.modality !== 'intravenous' && m.id === 'subcutaneous')
+              );
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  className={`pcc-modality-pill ${selectedModalityId === m.id ? 'is-selected' : ''}`}
+                  onClick={() => setSelectedModalityId(m.id)}
+                >
+                  <span>{m.id === 'intravenous' ? '💉' : '🩹'}</span>
+                  <span>{isEs ? m.label_es : m.label}</span>
+                  {isPrescribedModality && (
+                    <span style={{
+                      fontSize: '0.62rem',
+                      fontWeight: 800,
+                      backgroundColor: '#0d9488',
+                      color: '#ffffff',
+                      padding: '0.15rem 0.45rem',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      marginLeft: '0.35rem'
+                    }}>
+                      {isEs ? '★ Prescrita para tu Nivel' : '★ Prescribed Route'}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {selectedModality && (

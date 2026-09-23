@@ -146,14 +146,9 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
       : (Array.isArray(product?.faq) && product.faq.length > 0 ? product.faq : DEFAULT_NAD_FAQS);
   }, [product]);
 
-  const [activeCategory, setActiveCategory] = useState('all');
   const [openIds, setOpenIds] = useState(() => new Set());
   const [isCopiedAll, setIsCopiedAll] = useState(false);
-
-  const filteredFaqs = useMemo(() => {
-    if (activeCategory === 'all') return faqs;
-    return faqs.filter(f => f.category === activeCategory);
-  }, [faqs, activeCategory]);
+  const filteredFaqs = faqs;
 
   const toggleAccordion = (id) => {
     setOpenIds(prev => {
@@ -270,44 +265,6 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
             )}
           </p>
         </div>
-      </div>
-
-      {/* ── Category Filter Pills ── */}
-      <div className="bnf-filter-bar">
-        <button
-          type="button"
-          className={`bnf-filter-tab ${activeCategory === 'all' ? 'is-active' : ''}`}
-          onClick={() => setActiveCategory('all')}
-        >
-          {isEs ? `Todas las Preguntas (${faqs.length})` : `All Clinical Questions (${faqs.length})`}
-        </button>
-
-        <button
-          type="button"
-          className={`bnf-filter-tab bnf-filter-tab-active ${activeCategory === 'protocol_monitoring' ? 'is-active' : ''}`}
-          onClick={() => setActiveCategory('protocol_monitoring')}
-        >
-          <span className="bnf-tab-dot bnf-dot-green" />
-          {isEs ? 'Monitorización de Protocolo Activo' : 'Active Protocol Monitoring (On-Treatment)'}
-        </button>
-
-        <button
-          type="button"
-          className={`bnf-filter-tab ${activeCategory === 'baseline' ? 'is-active' : ''}`}
-          onClick={() => setActiveCategory('baseline')}
-        >
-          <span className="bnf-tab-dot bnf-dot-amber" />
-          {isEs ? 'Lavado / Estado Basal' : 'Baseline Assessment & Washout'}
-        </button>
-
-        <button
-          type="button"
-          className={`bnf-filter-tab ${activeCategory === 'preparation' ? 'is-active' : ''}`}
-          onClick={() => setActiveCategory('preparation')}
-        >
-          <span className="bnf-tab-dot bnf-dot-blue" />
-          {isEs ? 'Preparación (Ayuno, Ejercicio, Medicación)' : 'Patient Prep (Fasting, Exercise, Meds)'}
-        </button>
       </div>
 
       {/* ── FAQ Accordion List ── */}

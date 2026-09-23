@@ -740,6 +740,362 @@
   white-space: nowrap;
 }
 
+/* ── Dynamic Clinical Decision Algorithm & Protocol Integration ── */
+.dts-clinical-action-card {
+  margin-top: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  animation: dtsFadeIn 0.25s ease-out;
+}
+
+@keyframes dtsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dts-action-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dts-action-tag-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dts-action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid;
+}
+
+.dts-evidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+}
+
+.dts-proto-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dts-proto-code {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.15rem;
+}
+
+.dts-proto-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #003666;
+  line-height: 1.35;
+}
+
+.dts-proto-target-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  text-align: right;
+}
+
+.dts-target-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dts-target-val {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0d9488;
+}
+
+/* Rationale callout */
+.dts-action-rationale {
+  background: #f8fafc;
+  border-left: 3px solid #0284c7;
+  border-radius: 0 8px 8px 0;
+  padding: 0.85rem 1rem;
+}
+
+.dts-rationale-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0369a1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.dts-rationale-text {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+/* Precision Pharmacokinetic Prescription Card */
+.dts-rx-breakdown-card {
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  border-radius: 10px;
+  padding: 0.95rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dts-rx-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(13, 148, 136, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.dts-rx-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dts-rx-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #0d9488;
+  background: #ffffff;
+  border: 1px solid #99f6e4;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.dts-rx-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem 1rem;
+}
+
+@media (max-width: 640px) {
+  .dts-rx-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+}
+
+.dts-rx-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dts-rx-item-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dts-rx-item-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+/* Action grid: Synergies + Cadence */
+.dts-action-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.25rem;
+}
+
+.dts-grid-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.70rem;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.55rem;
+}
+
+.dts-synergies-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.dts-syn-pill {
+  display: inline-flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.3rem 0.55rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.dts-syn-name {
+  font-size: 0.74rem;
+  font-weight: 750;
+  color: #0f172a;
+}
+
+.dts-syn-role {
+  font-size: 0.64rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.dts-cadence-meta {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dts-meta-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.dts-meta-line span {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.dts-meta-line strong {
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dts-meta-line small {
+  font-size: 0.74rem;
+  color: #475569;
+  line-height: 1.35;
+}
+
+/* Action footer buttons */
+.dts-action-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.dts-btn-explore-proto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #003666;
+  color: #ffffff !important;
+  font-size: 0.80rem;
+  font-weight: 750;
+  padding: 0.65rem 1.15rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.15);
+}
+
+.dts-btn-explore-proto:hover {
+  background: #002244;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.25);
+}
+
+.dts-btn-ai-query {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #f0fdfa;
+  color: #0d9488;
+  border: 1px solid #99f6e4;
+  font-size: 0.80rem;
+  font-weight: 750;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dts-btn-ai-query:hover {
+  background: #ccfbf1;
+  border-color: #5eead4;
+  color: #0f766e;
+}
+
 /* ── Responsive Mobile Breakpoints ── */
 @media (max-width: 1024px) {
   .dts-procedural-steps-grid {
@@ -762,6 +1118,9 @@
   }
   .dts-specs-bar {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .dts-action-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -798,5 +1157,23 @@
   .dts-footer-banner {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .dts-proto-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dts-proto-target-pill {
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+  .dts-action-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dts-btn-explore-proto,
+  .dts-btn-ai-query {
+    width: 100%;
+    justify-content: center;
   }
 }

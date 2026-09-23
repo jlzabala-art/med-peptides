@@ -96,7 +96,7 @@ export default function PeptideAnalyticalSpecsCard({
   };
 
   return (
-    <div className="analytical-specs-card">
+    <div id="analytical-specs" className="analytical-specs-card">
       {/* ── HEADER ── */}
       <div className="card-top-header">
         <div className="header-left">

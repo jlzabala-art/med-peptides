@@ -48,6 +48,7 @@ const COMPOUND_IMAGE_MAP = {
   'ghkcu': '/assets/vials/generic-vial.png',
 
   // Diagnostic Kits & Bloodo tests
+  'bloodo-nad-test': '/images/nad_test_results.png',
   'bloodo-nad-level-test': '/images/nad_test_results.png',
   'nad-level-test': '/images/nad_test_results.png',
   'bloodo-testosterone-test': '/images/clinical/vial_single.jpg',
@@ -157,23 +158,33 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   // Remove markdown or technical artifacts if any
   pName = pName.replace(/^[#*\s]+/, '').trim();
 
+  const isDiagnostic = 
+    product?.category === 'diagnostic_test' || 
+    product?.category === 'diagnostic_tests' || 
+    product?.category === 'genomics_biomarkers' ||
+    product?.category === 'tests' ||
+    String(product?.id || '').includes('bloodo') || 
+    String(product?.slug || '').includes('bloodo') || 
+    String(product?.id || '').endsWith('-test') ||
+    String(product?.slug || '').endsWith('-test') ||
+    String(pName).toLowerCase().includes('test');
+
+  const rawFormat = variant?.format || product?.format || product?.presentation || '';
   const dose = variant?.dose || product?.dose || product?.dosage || '';
-  const format = variant?.format || product?.format || product?.presentation || '';
-  const isDiagnostic = (product?.category === 'diagnostic_test') || 
-                       String(product?.id || '').includes('bloodo') || 
-                       String(pName).toLowerCase().includes('test');
+  // Never label a blood test kit as a "Vial" even if URL has presentation=Vial
+  const format = isDiagnostic ? 'CE-IVDR Capillary DBS Kit' : rawFormat;
 
   // ── 1. ATTRACTIVE TITLE ──
   let title = '';
   if (isDiagnostic) {
-    if (String(pName).toLowerCase().includes('cortisol')) {
-      title = `${pName} — Circadian Rhythm & Diurnal Slope Quantification`;
-    } else if (String(pName).toLowerCase().includes('nad')) {
-      title = `${pName} — Total Cellular Quantification`;
+    if (String(pName).toLowerCase().includes('cortisol') || String(product?.slug || '').includes('cortisol')) {
+      title = `Bloodo™ Cortisol Awakening Response (CAR) Test | CE-IVDR Kit`;
+    } else if (String(pName).toLowerCase().includes('nad') || String(product?.slug || '').includes('nad')) {
+      title = `Bloodo™ Intracellular NAD+ Blood Test | CE-IVDR Kit`;
     } else if (String(pName).toLowerCase().includes('hba1c') || String(pName).toLowerCase().includes('hemoglobin')) {
-      title = `${pName} — 90-Day Glycemic & Metabolic Quantification`;
+      title = `Bloodo™ HbA1c 90-Day Glycemic Test | CE-IVDR Kit`;
     } else {
-      title = `${pName} — Certified Capillary DBS Diagnostic`;
+      title = `${pName} | CE-IVDR Certified Diagnostic Kit`;
     }
   } else {
     const specDetails = [dose, format].filter(Boolean).join(' · ');
@@ -190,12 +201,12 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   // ── 2. ATTRACTIVE SUMMARY DESCRIPTION ──
   let description = '';
   if (isDiagnostic) {
-    if (product?.description && product.description.length > 30) {
+    if (String(pName).toLowerCase().includes('cortisol') || String(product?.slug || '').includes('cortisol')) {
+      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test measuring circadian Cortisol Awakening Response (CAR) and diurnal slope. LifeLab1 central laboratory.';
+    } else if (String(pName).toLowerCase().includes('nad') || String(product?.slug || '').includes('nad')) {
+      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test measuring total intracellular NAD+ & NADH. LifeLab1 central laboratory analysis with clinical report.';
+    } else if (product?.description && product.description.length > 30) {
       description = product.description.slice(0, 160);
-    } else if (String(pName).toLowerCase().includes('cortisol')) {
-      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test measuring circadian Cortisol Awakening Response (CAR) and diurnal slope. Dual-sample protocol.';
-    } else if (String(pName).toLowerCase().includes('nad')) {
-      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test measuring total cellular NAD+ & NADH. Standardized clinical protocol and laboratory guidance.';
     } else {
       description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test. LifeLab1 central laboratory analysis with digital clinical report delivery.';
     }

@@ -85,6 +85,99 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const requestedLangs = useRef(new Set());
   const [, startTransition] = useTransition();
 
+  // ── Biomarker Calibration State (Precision Diagnostic Integration) ──
+  const [biomarkerCalibration, setBiomarkerCalibration] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const nadLevel = params.get('nad_level');
+      const baseline = params.get('baseline');
+      const tier = params.get('tier');
+      const modality = params.get('modality');
+      const retest = params.get('retest');
+
+      if (nadLevel || baseline) {
+        return {
+          nadLevel: nadLevel ? parseFloat(nadLevel) : 18.0,
+          baseline: baseline || 'severe',
+          tier: tier || 'critical',
+          modality: modality || 'intravenous',
+          retest: retest || '4w'
+        };
+      }
+    }
+    return null;
+  });
+
+  const handleClearCalibration = () => {
+    setBiomarkerCalibration(null);
+    if (typeof window !== 'undefined' && window.history) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+    toast.success(lang === 'es' ? 'Vista restablecida al protocolo general' : 'Reset to general protocol view');
+  };
+
+  const calibrationDisplay = useMemo(() => {
+    if (!biomarkerCalibration) return null;
+    const isEs = lang === 'es';
+    const lvl = biomarkerCalibration.nadLevel;
+    const baseline = biomarkerCalibration.baseline;
+
+    let tierColor = '#dc2626';
+    let tierBg = '#fef2f2';
+    let tierBadgeText = isEs ? 'Depleción Severa · Alto Riesgo' : 'Severe Depletion · High Risk';
+    let tierSubText = isEs ? 'Fatiga mitocondrial y déficit de ATP' : 'Mitochondrial exhaustion & ATP deficit';
+    let prescribedRouteText = isEs ? 'Infusión Intravenosa (IV)' : 'Clinical IV Infusion';
+    let prescribedRouteSub = isEs ? 'Carga parenteral rápida con titulación lenta' : 'Rapid parenteral loading with slow titration';
+    let deltaTargetText = isEs ? `Déficit de -${Math.max(0, (35 - lvl)).toFixed(1)} µmol/L hacia diana` : `Deficit of -${Math.max(0, (35 - lvl)).toFixed(1)} µmol/L to target`;
+    let retestScheduleText = isEs ? 'Semana 4 (En Tratamiento)' : 'Week 4 (On-Treatment)';
+    let retestScheduleSub = isEs ? 'Control capilar DBS sin suspender pauta' : 'DBS capillary test without pause';
+
+    if (baseline === 'suboptimal' || (lvl >= 20 && lvl < 30)) {
+      tierColor = '#d97706';
+      tierBg = '#fffbeb';
+      tierBadgeText = isEs ? 'Subóptimo · Margen de Optimización' : 'Suboptimal · Room for Optimization';
+      tierSubText = isEs ? 'Pérdida típica del 40-50% con la edad' : 'Typical 40-50% age-associated decline';
+      prescribedRouteText = isEs ? 'Microdosificación Subcutánea (SC)' : 'Subcutaneous (SC) Micro-dosing';
+      prescribedRouteSub = isEs ? '50–100 mg SC 2–3x/semana + NMN Oral' : '50–100 mg SC 2–3x/wk + Oral NMN';
+      deltaTargetText = isEs ? `Déficit de -${Math.max(0, (35 - lvl)).toFixed(1)} µmol/L hacia diana` : `Deficit of -${Math.max(0, (35 - lvl)).toFixed(1)} µmol/L to target`;
+      retestScheduleText = isEs ? 'Semana 8 (Consolidación)' : 'Week 8 (Consolidation)';
+      retestScheduleSub = isEs ? 'Evaluación de respuesta celular' : 'Cellular response assessment';
+    } else if (baseline === 'optimal' || (lvl >= 30 && lvl <= 50)) {
+      tierColor = '#0d9488';
+      tierBg = '#f0fdfa';
+      tierBadgeText = isEs ? 'Rango Óptimo · Longevidad' : 'Optimal Target · Longevity';
+      tierSubText = isEs ? 'Máxima activación SIRT1 y resiliencia' : 'Peak SIRT1 activation & resilience';
+      prescribedRouteText = isEs ? 'Mantenimiento Domiciliario Circadiano' : 'Circadian At-Home Maintenance';
+      prescribedRouteSub = isEs ? 'Micro-pulsos matutinos 50 mg SC semanal' : 'Morning micro-pulses 50 mg SC weekly';
+      deltaTargetText = isEs ? 'Nivel en zona diana terapéutica (≥ 30)' : 'Level in target therapeutic zone (≥ 30)';
+      retestScheduleText = isEs ? '6 Meses (Vigilancia Semestral)' : '6 Months (Biannual Check)';
+      retestScheduleSub = isEs ? 'Mantenimiento de estabilidad biológica' : 'Biological stability maintenance';
+    } else if (baseline === 'peak' || lvl > 50) {
+      tierColor = '#2563eb';
+      tierBg = '#eff6ff';
+      tierBadgeText = isEs ? 'Pico Pos-Tratamiento · Meseta' : 'Post-Treatment Peak · Plateau';
+      tierSubText = isEs ? 'Saturación mitocondrial alcanzada' : 'Mitochondrial saturation achieved';
+      prescribedRouteText = isEs ? 'Ciclado / Washout (2–4 Semanas)' : 'Cycling / Washout (2–4 Weeks)';
+      prescribedRouteSub = isEs ? 'Pausa exógena y balance de metilos' : 'Exogenous pause & methyl balance';
+      deltaTargetText = isEs ? 'Nivel supramáximo post-intervención' : 'Supra-maximal post-intervention level';
+      retestScheduleText = isEs ? '12 Semanas (Monitoreo de Meseta)' : '12 Weeks (Plateau Monitoring)';
+      retestScheduleSub = isEs ? 'Evaluación post-ventana de descanso' : 'Post-washout window check';
+    }
+
+    return {
+      tierColor,
+      tierBg,
+      tierBadgeText,
+      tierSubText,
+      prescribedRouteText,
+      prescribedRouteSub,
+      deltaTargetText,
+      retestScheduleText,
+      retestScheduleSub
+    };
+  }, [biomarkerCalibration, lang]);
+
   const publicUrl = `${baseUrl}/proto/${slug}`;
   const t = getProtocolTranslations(lang);
 
@@ -557,11 +650,128 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         {/* ── Core Pathway & Sections ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           
+          {/* Biomarker-Driven Calibration Banner (Precision Diagnostic Integration) */}
+          {biomarkerCalibration && calibrationDisplay && (
+            <div className="proto-biomarker-calibration-banner" style={{ borderLeftColor: calibrationDisplay.tierColor }}>
+              <div className="pbc-header">
+                <div className="pbc-header-left">
+                  <div className="pbc-badge-icon" style={{ backgroundColor: calibrationDisplay.tierBg, color: calibrationDisplay.tierColor }}>
+                    <Activity size={18} />
+                  </div>
+                  <div>
+                    <div className="pbc-meta-row">
+                      <span className="pbc-kicker">
+                        {lang === 'es' ? 'CALIBRACIÓN CLÍNICA PERSONALIZADA POR BIOMARCADOR' : 'PRECISION BIOMARKER-DRIVEN PROTOCOL CALIBRATION'}
+                      </span>
+                      <span className="pbc-source-tag">Bloodo DBS™ · LifeLab1 (Vilnius, EU)</span>
+                    </div>
+                    <h4 className="pbc-title">
+                      {lang === 'es' 
+                        ? `Estratificación Terapéutica para NAD⁺ Intracelular: ${biomarkerCalibration.nadLevel} µmol/L`
+                        : `Therapeutic Stratification for Intracellular NAD+: ${biomarkerCalibration.nadLevel} µmol/L`}
+                    </h4>
+                  </div>
+                </div>
+                <div className="pbc-header-right">
+                  <span className="pbc-tier-pill" style={{ backgroundColor: calibrationDisplay.tierBg, color: calibrationDisplay.tierColor, borderColor: calibrationDisplay.tierColor + '40' }}>
+                    {calibrationDisplay.tierBadgeText}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearCalibration}
+                    className="pbc-btn-reset"
+                    title={lang === 'es' ? 'Ver protocolo estándar no calibrado' : 'View uncalibrated standard protocol'}
+                  >
+                    <RotateCcw size={13} />
+                    <span>{lang === 'es' ? 'Restablecer Vista General' : 'Reset to General View'}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pbc-body-grid">
+                <div className="pbc-stat-box">
+                  <span className="pbc-stat-label">{lang === 'es' ? 'Nivel Basal Determinado:' : 'Simulated Baseline:'}</span>
+                  <strong className="pbc-stat-val" style={{ color: calibrationDisplay.tierColor }}>
+                    {biomarkerCalibration.nadLevel} µmol/L
+                  </strong>
+                  <small className="pbc-stat-sub">{calibrationDisplay.tierSubText}</small>
+                </div>
+
+                <div className="pbc-stat-box">
+                  <span className="pbc-stat-label">{lang === 'es' ? 'Rango Diana de Longevidad:' : 'Target Longevity Range:'}</span>
+                  <strong className="pbc-stat-val" style={{ color: '#0d9488' }}>
+                    30.0 – 50.0 µmol/L
+                  </strong>
+                  <small className="pbc-stat-sub">
+                    {calibrationDisplay.deltaTargetText}
+                  </small>
+                </div>
+
+                <div className="pbc-stat-box">
+                  <span className="pbc-stat-label">{lang === 'es' ? 'Estrategia de Administración:' : 'Calibrated Route Strategy:'}</span>
+                  <strong className="pbc-stat-val" style={{ color: '#003666' }}>
+                    {calibrationDisplay.prescribedRouteText}
+                  </strong>
+                  <small className="pbc-stat-sub">{calibrationDisplay.prescribedRouteSub}</small>
+                </div>
+
+                <div className="pbc-stat-box">
+                  <span className="pbc-stat-label">{lang === 'es' ? 'Control Analítico Programado:' : 'Target DBS Re-Test:'}</span>
+                  <strong className="pbc-stat-val" style={{ color: '#0284c7' }}>
+                    {calibrationDisplay.retestScheduleText}
+                  </strong>
+                  <small className="pbc-stat-sub">{calibrationDisplay.retestScheduleSub}</small>
+                </div>
+              </div>
+
+              <div className="pbc-footer">
+                <div className="pbc-footer-tip">
+                  <Info size={14} color="#0d9488" />
+                  <span>
+                    {lang === 'es'
+                      ? 'El módulo de Diagnóstico Acompañante y Farmacocinética inferior se ha pre-configurado automáticamente con la vía y salvaguardas recomendadas.'
+                      : 'The Companion Diagnostics & Pharmacokinetics module below has been auto-calibrated to this patient tier.'}
+                  </span>
+                </div>
+                <div className="pbc-footer-actions">
+                  <a href="#protocol-clinical-companion" className="pbc-btn-anchor">
+                    <span>{lang === 'es' ? 'Inspeccionar Farmacocinética Prescrita' : 'Review Prescribed Pharmacokinetics'}</span>
+                    <ArrowRight size={13} />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(
+                          new CustomEvent('open-public-atlas-ai', {
+                            detail: {
+                              initialQuery: lang === 'es'
+                                ? `Tengo un nivel de NAD+ de ${biomarkerCalibration.nadLevel} µmol/L (${calibrationDisplay.tierBadgeText}). ¿Cómo debo administrar la vía ${biomarkerCalibration.modality} y los protectores de metilación con este protocolo?`
+                                : `My intracellular NAD+ level is ${biomarkerCalibration.nadLevel} µmol/L (${calibrationDisplay.tierBadgeText}). What is the clinical protocol for ${biomarkerCalibration.modality} dosing and methylation support?`
+                            }
+                          })
+                        );
+                      }
+                    }}
+                    className="pbc-btn-ai"
+                  >
+                    <Sparkles size={13} />
+                    <span>{lang === 'es' ? 'Consultar con Clinical AI' : 'Inquire with Clinical AI'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Section 0: Verified Clinical Outcomes & Endpoints (Strictly renders if objective data exists) */}
           <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
 
           {/* Section 0.5: Companion Diagnostics, Pharmacokinetics & Methylation Safeguards */}
-          <ProtocolClinicalCompanionCard protocol={protocol} lang={lang} />
+          <ProtocolClinicalCompanionCard 
+            protocol={protocol} 
+            lang={lang} 
+            biomarkerCalibration={biomarkerCalibration}
+          />
 
           {/* Section 0.6: Anatomical Targeting Geometry & Mechanotherapy Pathway */}
           <ProtocolAnatomicalTargetingCard protocol={protocol} lang={lang} />
