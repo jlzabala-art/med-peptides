@@ -87,15 +87,50 @@ export default function AdminOverviewTab({
     async function fetchClinicalInquiries() {
       try {
         const { collection, query, where, getDocs, limit: firestoreLimit } = await import('firebase/firestore');
-        const q = query(
-          collection(db, 'catalog_generation_logs'),
-          where('docType', '==', 'info_request'),
-          firestoreLimit(15)
-        );
-        const snap = await getDocs(q);
-        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        items.sort((a, b) => new Date(b.generatedAt || 0) - new Date(a.generatedAt || 0));
-        setClinicalInquiries(items);
+        let combined = [];
+
+        // 1. Fetch live inquiries submitted via the Public Institutional Drawer
+        try {
+          const snapInq = await getDocs(query(collection(db, 'institutional_inquiries'), firestoreLimit(25)));
+          const drawerInquiries = snapInq.docs.map(d => {
+            const data = d.data();
+            return {
+              id: d.id,
+              recipient: {
+                name: data.name || (data.organization ? `${data.organization}` : 'Clinical Practitioner'),
+                email: data.email || ''
+              },
+              organization: data.organization || '',
+              productName: data.attachedEntity?.name || (data.topic ? data.topic.replace(/_/g, ' ') : 'Institutional Inquiry'),
+              phone: data.phone || '',
+              topic: data.topic,
+              message: data.message,
+              createdAt: data.createdAt,
+              generatedAt: data.createdAt,
+              source: 'drawer'
+            };
+          });
+          combined = [...drawerInquiries];
+        } catch (inqErr) {
+          console.warn('Notice: Could not fetch institutional_inquiries:', inqErr);
+        }
+
+        // 2. Fetch legacy catalog generation logs
+        try {
+          const q = query(
+            collection(db, 'catalog_generation_logs'),
+            where('docType', '==', 'info_request'),
+            firestoreLimit(15)
+          );
+          const snap = await getDocs(q);
+          const legacyItems = snap.docs.map(d => ({ id: d.id, ...d.data(), source: 'catalog' }));
+          combined = [...combined, ...legacyItems];
+        } catch (logErr) {
+          console.warn('Notice: Could not fetch catalog_generation_logs:', logErr);
+        }
+
+        combined.sort((a, b) => new Date(b.createdAt || b.generatedAt || 0) - new Date(a.createdAt || a.generatedAt || 0));
+        setClinicalInquiries(combined);
       } catch (err) {
         console.warn('Error fetching clinical inquiries for overview:', err);
       }

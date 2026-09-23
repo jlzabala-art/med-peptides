@@ -17,12 +17,14 @@ export default function FdaRegulatoryBadge({
   product,
   variant = 'badge', // 'badge', 'banner', 'pill', 'compact'
   showModalOnClick = true,
-  style = {}
+  style = {},
+  lang = 'en'
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const initialInfo = useMemo(() => getFdaPeptideStatus(product), [product]);
   const [currentInfo, setCurrentInfo] = useState(initialInfo);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isEs = lang === 'es';
 
   useEffect(() => {
     setCurrentInfo(getFdaPeptideStatus(product));
@@ -32,6 +34,83 @@ export default function FdaRegulatoryBadge({
 
   const info = currentInfo;
   const { colorScheme } = info;
+
+  // Localized getters to support 100% Spanish mode without Gemini references
+  const localizedShortBadge = useMemo(() => {
+    if (!isEs || !info.shortBadge) return info.shortBadge;
+    if (info.shortBadge === 'Phase 3 IND') return 'Fase 3 IND';
+    if (info.shortBadge === '503A PCAC ✓') return '503A PCAC ✓';
+    if (info.shortBadge === 'cGMP Standard') return 'Estándar cGMP';
+    if (info.shortBadge === 'FDA Approved') return 'Aprobado FDA';
+    if (info.shortBadge === 'Category 2') return 'Categoría 2';
+    return info.shortBadge;
+  }, [info.shortBadge, isEs]);
+
+  const localizedBadgeLabel = useMemo(() => {
+    if (!isEs || !info.badgeLabel) return info.badgeLabel;
+    if (info.badgeLabel.includes('Phase 3 Investigational')) return 'Fase 3 en Investigación (IND)';
+    if (info.badgeLabel.includes('503A Recommended')) return 'Recomendado 503A PCAC';
+    if (info.badgeLabel.includes('cGMP Analytical')) return 'Estándar Analítico cGMP';
+    if (info.badgeLabel.includes('FDA Approved')) return 'Aprobado por FDA';
+    if (info.badgeLabel.includes('Category 2')) return 'Categoría 2 (Restringido)';
+    return info.badgeLabel;
+  }, [info.badgeLabel, isEs]);
+
+  const localizedVoteResult = useMemo(() => {
+    if (!isEs || !info.voteResult) return info.voteResult;
+    if (info.voteResult.includes('Phase 3 Clinical Trials')) {
+      return 'Ensayos Clínicos Activos Fase 3 para Obesidad y Condiciones Metabólicas';
+    }
+    if (info.voteResult.includes('Under Active Investigational New Drug')) {
+      return 'En Evaluación Activa como Medicamento en Investigación (IND)';
+    }
+    if (info.voteResult.includes('503A Bulks List')) {
+      return 'Recomendado para Inclusión en la Lista 503A Bulks de Fórmulas Magistrales';
+    }
+    if (info.voteResult.includes('Chemical & Biological Identity Verified')) {
+      return 'Identidad Química y Biológica Verificada (Estándar Analítico)';
+    }
+    return info.voteResult;
+  }, [info.voteResult, isEs]);
+
+  const localizedAdvisoryBody = useMemo(() => {
+    if (!isEs || !info.advisoryBody) return info.advisoryBody;
+    if (info.advisoryBody.includes('PCAC')) {
+      return 'Comité Asesor de Fórmulas Magistrales de la FDA (PCAC)';
+    }
+    if (info.advisoryBody.includes('CDER')) {
+      return 'Investigación en Ensayos Clínicos / FDA CDER';
+    }
+    if (info.advisoryBody.includes('Clinical Trial Investigation')) {
+      return 'Investigación en Ensayos Clínicos';
+    }
+    if (info.advisoryBody.includes('Pharmacopeial')) {
+      return 'Estándares Analíticos Farmacopeicos';
+    }
+    return info.advisoryBody;
+  }, [info.advisoryBody, isEs]);
+
+  const localizedSummary = useMemo(() => {
+    if (!isEs || !info.summary) return info.summary;
+    if (info.canonicalName?.toLowerCase().includes('retatrutide') || info.summary?.toLowerCase().includes('retatrutide')) {
+      return 'Retatrutida se encuentra actualmente en desarrollo clínico activo bajo Solicitud de Medicamento en Investigación (IND), específicamente en ensayos clínicos de Fase 3 para el tratamiento de obesidad y condiciones metabólicas asociadas. Aún no cuenta con aprobación comercial de prescripción por la FDA. Su desarrollo está bajo la supervisión del Centro de Evaluación e Investigación de Medicamentos de la FDA (CDER).';
+    }
+    if (info.summary.includes('503A Bulks List')) {
+      return 'El Comité Asesor de Fórmulas Magistrales de la FDA (PCAC) dictaminó recomendación favorable para la inclusión de este compuesto en la Lista 503A Bulks para formulación de precisión.';
+    }
+    return info.summary;
+  }, [info.summary, info.canonicalName, isEs]);
+
+  const localizedLegalNotice = useMemo(() => {
+    if (!isEs || !info.legalNotice) return info.legalNotice;
+    if (info.legalNotice.includes('investigational new drug') || info.legalNotice.includes('Investigational new drug')) {
+      return 'Como medicamento en fase de investigación (IND), Retatrutida no está autorizada para comercialización comercial ni formulación magistral general según las Secciones 503A o 503B de la Ley FD&C. Su uso está restringido a ensayos clínicos autorizados bajo una solicitud activa de Nuevo Fármaco en Investigación (IND).';
+    }
+    if (info.legalNotice.includes('503A')) {
+      return 'Recomendación favorable por el comité PCAC para prescripción médica magistral bajo directrices 503A.';
+    }
+    return info.legalNotice;
+  }, [info.legalNotice, isEs]);
 
   const handleRefreshFdaStatus = async () => {
     setIsRefreshing(true);
@@ -62,9 +141,9 @@ export default function FdaRegulatoryBadge({
           colorScheme: regData.colorScheme || info.colorScheme,
         };
         setCurrentInfo(updated);
-        notifier.success(`FDA status updated to latest standing (${updated.shortBadge || updated.badgeLabel}) ✓`);
+        notifier.success(isEs ? `Estado FDA actualizado (${updated.shortBadge || updated.badgeLabel}) ✓` : `FDA status updated to latest standing (${updated.shortBadge || updated.badgeLabel}) ✓`);
       } else {
-        notifier.info('FDA status is already at the latest standing.');
+        notifier.info(isEs ? 'El estado FDA ya está en su versión más reciente.' : 'FDA status is already at the latest standing.');
       }
     } catch (err) {
       console.error('[FdaRegulatoryBadge] Refresh error:', err);
@@ -75,10 +154,10 @@ export default function FdaRegulatoryBadge({
   };
 
   const formatDisplayDate = (dateVal) => {
-    if (!dateVal) return 'Current';
+    if (!dateVal) return isEs ? 'Actual' : 'Current';
     const parsed = new Date(dateVal);
     if (!isNaN(parsed.getTime()) && String(dateVal).includes('T')) {
-      return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      return parsed.toLocaleDateString(isEs ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
     return String(dateVal);
   };
@@ -108,14 +187,14 @@ export default function FdaRegulatoryBadge({
             outline: 'none',
             ...style
           }}
-          title={`${info.badgeLabel} — Click for clinical regulatory monograph`}
+          title={`${localizedBadgeLabel} — ${isEs ? 'Clic para ver monografía regulatoria' : 'Click for clinical regulatory monograph'}`}
         >
           {info.status === 'fda_approved' ? (
             <CheckCircle2 size={12} color="#15803d" style={{ flexShrink: 0 }} />
           ) : (
             <ShieldCheck size={12} color={colorScheme.accent || colorScheme.text} style={{ flexShrink: 0 }} />
           )}
-          <span>{info.shortBadge || info.badgeLabel}</span>
+          <span>{localizedShortBadge || localizedBadgeLabel}</span>
           {showModalOnClick && (
             <Info size={11} style={{ opacity: 0.65, marginLeft: '1px', flexShrink: 0 }} />
           )}
@@ -143,10 +222,10 @@ export default function FdaRegulatoryBadge({
             transition: 'all 0.15s ease',
             ...style
           }}
-          title={`${info.badgeLabel} — Click for regulatory details`}
+          title={`${localizedBadgeLabel} — ${isEs ? 'Clic para ver detalles regulatorios' : 'Click for regulatory details'}`}
         >
           <span>{colorScheme.icon}</span>
-          <span>{info.shortBadge}</span>
+          <span>{localizedShortBadge}</span>
         </span>
       )}
 
@@ -172,12 +251,12 @@ export default function FdaRegulatoryBadge({
             boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
             ...style
           }}
-          title="Click to view FDA PCAC 503A regulatory details"
+          title={isEs ? 'Clic para ver detalles regulatorios FDA' : 'Click to view FDA PCAC 503A regulatory details'}
         >
           <span style={{ fontSize: '0.88rem' }}>{colorScheme.icon}</span>
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-            <span style={{ fontWeight: 800 }}>{info.badgeLabel}</span>
-            <span style={{ fontSize: '0.64rem', opacity: 0.85 }}>{info.advisoryBody} ({info.rulingDate})</span>
+            <span style={{ fontWeight: 800 }}>{localizedBadgeLabel}</span>
+            <span style={{ fontSize: '0.64rem', opacity: 0.85 }}>{localizedAdvisoryBody} ({info.rulingDate})</span>
           </div>
           {showModalOnClick && <Info size={12} style={{ opacity: 0.7, marginLeft: 'auto' }} />}
         </button>
@@ -219,7 +298,7 @@ export default function FdaRegulatoryBadge({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.84rem', fontWeight: 800, color: colorScheme.text }}>
-                {info.badgeLabel}
+                {localizedBadgeLabel}
               </span>
               <span
                 style={{
@@ -236,7 +315,7 @@ export default function FdaRegulatoryBadge({
               </span>
             </div>
             <p style={{ margin: '4px 0 0', fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
-              {info.summary}
+              {localizedSummary}
             </p>
           </div>
           {showModalOnClick && (
@@ -256,7 +335,7 @@ export default function FdaRegulatoryBadge({
                 flexShrink: 0
               }}
             >
-              Details <Info size={13} />
+              {isEs ? 'Detalles' : 'Details'} <Info size={13} />
             </button>
           )}
         </div>
@@ -310,7 +389,7 @@ export default function FdaRegulatoryBadge({
                 <span style={{ fontSize: '1.4rem' }}>{colorScheme.icon}</span>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: colorScheme.text }}>
-                    FDA & Regulatory Classification
+                    {isEs ? 'Clasificación Regulatoria y FDA' : 'FDA & Regulatory Classification'}
                   </h3>
                   <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                     {info.canonicalName} {info.casNumber ? `(CAS: ${info.casNumber})` : ''}
@@ -345,28 +424,30 @@ export default function FdaRegulatoryBadge({
                 }}
               >
                 <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Official Advisory Finding
+                  {isEs ? 'DICTAMEN OFICIAL DE ASESORAMIENTO' : 'OFFICIAL ADVISORY FINDING'}
                 </div>
                 <div style={{ fontSize: '0.90rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                  {info.voteResult}
+                  {localizedVoteResult}
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', lineHeight: 1.45 }}>
-                  {info.summary}
+                  {localizedSummary}
                 </div>
               </div>
 
               {/* Committee Details Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div style={{ padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Advisory Body</div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                    {isEs ? 'Organismo Asesor' : 'Advisory Body'}
+                  </div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', marginTop: '2px' }}>
-                    {info.advisoryBody}
+                    {localizedAdvisoryBody}
                   </div>
                 </div>
 
                 <div style={{ padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
-                    {info.phase ? 'Clinical Phase' : 'Review Date'}
+                    {info.phase ? (isEs ? 'Fase Clínica' : 'Clinical Phase') : (isEs ? 'Fecha de Revisión' : 'Review Date')}
                   </div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', marginTop: '2px' }}>
                     {info.phase || info.rulingDate}
@@ -390,12 +471,12 @@ export default function FdaRegulatoryBadge({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Calendar size={13} color="#64748b" />
                   <span>
-                    Last Updated: <strong>{formatDisplayDate(info.updatedAt || info.rulingDate)}</strong>
+                    {isEs ? 'Actualizado:' : 'Last Updated:'} <strong>{formatDisplayDate(info.updatedAt || info.rulingDate)}</strong>
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.70rem', color: '#059669', fontWeight: 600 }}>
                   <CheckCircle2 size={12} color="#059669" />
-                  <span>FDA Monograph</span>
+                  <span>{isEs ? 'Monografía FDA' : 'FDA Monograph'}</span>
                 </div>
               </div>
 
@@ -411,9 +492,11 @@ export default function FdaRegulatoryBadge({
                   lineHeight: 1.5
                 }}
               >
-                <strong>Compliance Disclosure:</strong> {info.legalNotice}
+                <strong>{isEs ? 'Aviso de Cumplimiento Normativo:' : 'Compliance Disclosure:'}</strong> {localizedLegalNotice}
                 <div style={{ marginTop: '6px', fontSize: '0.70rem', color: '#b45309' }}>
-                  Compounded preparations must comply with federal section 503A / 503B quality guidelines and state pharmacy board regulations.
+                  {isEs
+                    ? 'Las preparaciones magistrales deben cumplir con las directrices de calidad federales de la sección 503A / 503B y las regulaciones del colegio farmacéutico estatal.'
+                    : 'Compounded preparations must comply with federal section 503A / 503B quality guidelines and state pharmacy board regulations.'}
                 </div>
               </div>
             </div>
@@ -450,7 +533,7 @@ export default function FdaRegulatoryBadge({
                   cursor: isRefreshing ? 'wait' : 'pointer',
                   transition: 'all 0.15s ease'
                 }}
-                title="Query Gemini AI to check latest FDA rulings, clinical trials and PCAC lists"
+                title={isEs ? 'Consultar base de datos FDA y ensayos clínicos activos' : 'Query latest FDA rulings, clinical trials and PCAC lists'}
               >
                 <RefreshCw
                   size={13}
@@ -459,7 +542,11 @@ export default function FdaRegulatoryBadge({
                   }}
                 />
                 <Sparkles size={12} color="#7c3aed" />
-                <span>{isRefreshing ? 'Checking FDA with Gemini...' : 'Verify Latest FDA Status'}</span>
+                <span>
+                  {isRefreshing 
+                    ? (isEs ? 'Verificando con la FDA...' : 'Verifying FDA Status...') 
+                    : (isEs ? 'Verificar Estado FDA' : 'Verify Latest FDA Status')}
+                </span>
               </button>
 
               <button
@@ -468,7 +555,7 @@ export default function FdaRegulatoryBadge({
                 className="gcp-btn-primary"
                 style={{ padding: '6px 16px', fontSize: '0.80rem', fontWeight: 600, borderRadius: '6px' }}
               >
-                Close
+                {isEs ? 'Cerrar' : 'Close'}
               </button>
             </div>
           </div>

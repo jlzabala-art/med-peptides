@@ -520,7 +520,11 @@ export default function PublicDatasheetView({
   }, [product, activeSupplierObj]);
 
   const displaySupplierName = useMemo(() => {
-    return supplierName || 'Certified Clinical Synthesis Laboratory';
+    const raw = supplierName || '';
+    if (!raw || raw.toLowerCase().includes('lotusland') || raw.toLowerCase().includes('lotus')) {
+      return 'Certified Clinical Synthesis Laboratory';
+    }
+    return raw;
   }, [supplierName]);
 
   const rawFormats = Array.isArray(hierarchy.formats) ? hierarchy.formats : [];
@@ -1207,17 +1211,19 @@ export default function PublicDatasheetView({
         <PublicPageHero
           badges={
             <>
-              <span className="pds-cat-tag">{category}</span>
+              <span className="pds-cat-tag">
+                {lang === 'es' && (category === 'PEPTIDE' || category === 'Peptide' || !category) ? 'PÉPTIDO' : category}
+              </span>
               <span className="pds-cgmp-tag">
                 {isCorporateService
                   ? (displaySupplierName && !displaySupplierName.includes('Certified Clinical Laboratories') && !displaySupplierName.includes('Multi-Source')
-                      ? `${displaySupplierName} Quality Verified`
+                      ? `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`
                       : (lang === 'es' ? 'Asesoramiento Institucional' : 'Institutional Advisory'))
                   : isStrictlyLotusland 
-                    ? (t.lotuslandVerified || 'Atlas Services Certified') 
-                    : `${displaySupplierName} Quality Verified`}
+                    ? (t.lotuslandVerified || (lang === 'es' ? 'Certificado Atlas Services' : 'Atlas Services Certified')) 
+                    : `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`}
               </span>
-              {!isCorporateService && <FdaRegulatoryBadge product={product} variant="hero-pill" />}
+              {!isCorporateService && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
               {!isCorporateService && !isSolventProduct && !isDiagnosticKit && (
                 <>
                   <span style={{
@@ -1233,7 +1239,7 @@ export default function PublicDatasheetView({
                     fontWeight: 700
                   }}>
                     <ShieldCheck size={13} color="#059669" />
-                    <span>≥ 99.0% Purity (Dual RP-HPLC)</span>
+                    <span>{lang === 'es' ? '≥ 99.0% Pureza (Dual RP-HPLC)' : '≥ 99.0% Purity (Dual RP-HPLC)'}</span>
                   </span>
                   <span style={{
                     display: 'inline-flex',
@@ -1247,7 +1253,7 @@ export default function PublicDatasheetView({
                     fontSize: '0.72rem',
                     fontWeight: 700
                   }}>
-                    <span>Clinical Protocol Grade</span>
+                    <span>{lang === 'es' ? 'Grado Protocolo Clínico' : 'Clinical Protocol Grade'}</span>
                   </span>
                 </>
               )}
@@ -1272,7 +1278,7 @@ export default function PublicDatasheetView({
                   fontWeight: 700
                 }}>
                   <ShieldCheck size={13} color="#059669" />
-                  <span>Batch Verified:</span>
+                  <span>{lang === 'es' ? 'Lote Verificado:' : 'Batch Verified:'}</span>
                   <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857' }}>{initialBatch}</code>
                 </span>
               )}
@@ -1307,11 +1313,11 @@ export default function PublicDatasheetView({
                 </h2>
                 {isTranslating ? (
                   <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                    <Sparkles size={13} className="spin" /> {t.translating || 'Translating with Gemini…'}
+                    <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
                   </span>
                 ) : lang !== 'en' && (
                   <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                    <Sparkles size={11} color="#0284c7" /> Gemini 2.5 Flash Translated
+                    <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
                   </span>
                 )}
               </div>
@@ -1347,7 +1353,7 @@ export default function PublicDatasheetView({
                   ? (lang === 'es' ? '🖊️ Bolígrafo Precargado SubQ (Magenta)' : '🖊️ Pre-filled SubQ Pen (Magenta)')
                   : supp.isSpray
                     ? (lang === 'es' ? '👃 Spray Nasal Dosificado' : '👃 Metered Nasal Spray')
-                    : (lang === 'es' ? '💉 Vial Liofilizado SubQ (Lotusland)' : '💉 Lyophilized SubQ Vial (Lotusland)');
+                    : (lang === 'es' ? '💉 Vial Liofilizado SubQ' : '💉 Lyophilized SubQ Vial');
                 return (
                   <a
                     key={supp.id}
@@ -1394,7 +1400,7 @@ export default function PublicDatasheetView({
                   </span>
                 </div>
                 <h3 className="pds-section-header-title">
-                  {t.presentationsMatrix || 'Batch Availability & Presentations Matrix'} ({displaySupplierName})
+                  {t.presentationsMatrix || 'Batch Availability & Presentations Matrix'}
                 </h3>
               </div>
             </div>
@@ -1589,7 +1595,7 @@ export default function PublicDatasheetView({
                     label: lang === 'es' ? 'Caja 10 Unidades' : '10 Units Box', 
                     badge: realKitSavings?.hasDiscount ? `-${realKitSavings.discountPct}%` : (lang === 'es' ? 'Kit B2B' : 'B2B Kit'), 
                     sub: realKitSavings?.hasDiscount 
-                      ? (lang === 'es' ? `Ahorro real de escala (-${realKitSavings.discountPct}%)` : `Verified bulk savings (-${realKitSavings.discountPct}%)`)
+                      ? (lang === 'es' ? 'Ahorro real de escala' : 'Verified bulk savings')
                       : (lang === 'es' ? 'Kit Completo de 10 Viales' : 'Full 10-Vial Kit Box') 
                   }
                 ].map(tier => {
@@ -2343,8 +2349,9 @@ export default function PublicDatasheetView({
         variant={selectedStrength}
       />
 
-      {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
+      {/* Sandboxed Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
+        lang={lang}
         hideFloatingTrigger={false}
         contextType={isSpainResidency ? "corporate_residency" : isCompoundingService ? "compounding_service" : isPeptideSupplyService ? "peptide_supply_service" : "monograph"}
         contextAnchor={{

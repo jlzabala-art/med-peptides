@@ -354,7 +354,7 @@ export default function ClinicalGanttTimeline({
               >
                 {normalizedPhases.map((ph, idx) => (
                   <option key={idx} value={idx}>
-                    Phase {ph.phaseNumber}: {ph.phaseName} (Weeks {ph.startWeek}–{ph.endWeek})
+                    Phase {ph.phaseNumber}: {ph.phaseName}
                   </option>
                 ))}
               </select>

@@ -63,6 +63,26 @@ const INQUIRY_TOPICS = [
   }
 ];
 
+const COUNTRY_CODES = [
+  { code: '+34', country: 'ES', flag: '🇪🇸', name: 'Spain (+34)' },
+  { code: '+1', country: 'US', flag: '🇺🇸', name: 'USA/Canada (+1)' },
+  { code: '+44', country: 'GB', flag: '🇬🇧', name: 'UK (+44)' },
+  { code: '+971', country: 'AE', flag: '🇦🇪', name: 'UAE (+971)' },
+  { code: '+49', country: 'DE', flag: '🇩🇪', name: 'Germany (+49)' },
+  { code: '+33', country: 'FR', flag: '🇫🇷', name: 'France (+33)' },
+  { code: '+39', country: 'IT', flag: '🇮🇹', name: 'Italy (+39)' },
+  { code: '+41', country: 'CH', flag: '🇨🇭', name: 'Switzerland (+41)' },
+  { code: '+351', country: 'PT', flag: '🇵🇹', name: 'Portugal (+351)' },
+  { code: '+52', country: 'MX', flag: '🇲🇽', name: 'Mexico (+52)' },
+  { code: '+57', country: 'CO', flag: '🇨🇴', name: 'Colombia (+57)' },
+  { code: '+54', country: 'AR', flag: '🇦🇷', name: 'Argentina (+54)' },
+  { code: '+56', country: 'CL', flag: '🇨🇱', name: 'Chile (+56)' },
+  { code: '+55', country: 'BR', flag: '🇧🇷', name: 'Brazil (+55)' },
+  { code: '+61', country: 'AU', flag: '🇦🇺', name: 'Australia (+61)' },
+  { code: '+966', country: 'SA', flag: '🇸🇦', name: 'Saudi Arabia (+966)' },
+  { code: '+974', country: 'QA', flag: '🇶🇦', name: 'Qatar (+974)' },
+];
+
 export default function PublicInstitutionalInquiryDrawer({
   isOpen = false,
   onClose,
@@ -80,11 +100,19 @@ export default function PublicInstitutionalInquiryDrawer({
   const [attachedEntity, setAttachedEntity] = useState(initialEntity);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
   const [organization, setOrganization] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phonePrefix, setPhonePrefix] = useState(() => (lang === 'es' ? '+34' : '+1'));
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const isEmailValid = useMemo(() => {
+    if (!email.trim()) return false;
+    return EMAIL_REGEX.test(email.trim());
+  }, [email]);
 
   // Algolia Search states for attaching compounds / protocols dynamically
   const [searchTab, setSearchTab] = useState(contextType === 'protocols_directory' ? 'protocols' : 'products');
@@ -137,11 +165,12 @@ export default function PublicInstitutionalInquiryDrawer({
   const mailtoUrl = useMemo(() => {
     const entityLabel = attachedEntity ? ` [Ref: ${attachedEntity.code || attachedEntity.name}]` : '';
     const subject = encodeURIComponent(`Institutional Inquiry: ${activeTopicObj.labelEn}${entityLabel}`);
+    const formattedPhone = phoneNumber.trim() ? `${phonePrefix} ${phoneNumber.trim()}` : '';
     const bodyLines = [
       `From: ${name || 'Prospective Healthcare Practitioner'}`,
       `Organization: ${organization || 'Clinical Practice'}`,
       `Email: ${email || 'N/A'}`,
-      `Phone/WhatsApp: ${phone || 'N/A'}`,
+      `Phone/WhatsApp: ${formattedPhone || 'N/A'}`,
       `Topic: ${activeTopicObj.labelEn}`,
       attachedEntity ? `Referenced Resource: ${attachedEntity.name} (${attachedEntity.code || attachedEntity.slug || ''})` : null,
       '',
@@ -153,7 +182,7 @@ export default function PublicInstitutionalInquiryDrawer({
     ].filter(Boolean).join('\n');
 
     return `mailto:business@med-peptides.com?subject=${subject}&body=${encodeURIComponent(bodyLines)}`;
-  }, [name, organization, email, phone, activeTopicObj, attachedEntity, message]);
+  }, [name, organization, email, phonePrefix, phoneNumber, activeTopicObj, attachedEntity, message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -161,6 +190,14 @@ export default function PublicInstitutionalInquiryDrawer({
       toast.error(lang === 'es' ? 'Por favor complete su nombre, email y mensaje.' : 'Please provide your name, professional email, and inquiry.');
       return;
     }
+
+    if (!isEmailValid) {
+      setEmailTouched(true);
+      toast.error(lang === 'es' ? 'Por favor introduzca un email profesional válido.' : 'Please enter a valid professional email address.');
+      return;
+    }
+
+    const formattedPhone = phoneNumber.trim() ? `${phonePrefix} ${phoneNumber.trim()}` : '';
 
     setIsSubmitting(true);
     try {
@@ -171,7 +208,7 @@ export default function PublicInstitutionalInquiryDrawer({
           name: name.trim(),
           email: email.trim(),
           organization: organization.trim(),
-          phone: phone.trim(),
+          phone: formattedPhone,
           topic,
           message: message.trim(),
           contextType,
@@ -469,23 +506,28 @@ export default function PublicInstitutionalInquiryDrawer({
                   <div
                     style={{
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
+                      alignItems: 'flex-start',
+                      gap: '10px',
                       background: '#eff6ff',
                       border: '1px solid #bfdbfe',
-                      padding: '0.45rem 0.75rem',
+                      padding: '0.6rem 0.85rem',
                       borderRadius: '8px',
-                      color: '#1e40af',
-                      fontSize: '0.82rem',
-                      fontWeight: 700
+                      color: '#1e40af'
                     }}
                   >
-                    <FlaskConical size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
-                    <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {attachedEntity.name} {attachedEntity.strength ? `(${attachedEntity.strength})` : ''}
-                    </span>
+                    <FlaskConical size={18} style={{ color: '#2563eb', flexShrink: 0, marginTop: '2px' }} />
+                    <div style={{ flex: 1, minWidth: 0, lineHeight: 1.4 }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.86rem', color: '#1e3a8a', wordBreak: 'break-word', whiteSpace: 'normal' }}>
+                        {attachedEntity.name}
+                      </div>
+                      {attachedEntity.strength && (
+                        <div style={{ fontSize: '0.74rem', color: '#3b82f6', fontWeight: 600, marginTop: '2px' }}>
+                          {lang === 'es' ? 'Dosis/Concentración:' : 'Strength/Dose:'} {attachedEntity.strength}
+                        </div>
+                      )}
+                    </div>
                     {attachedEntity.code && (
-                      <span style={{ fontSize: '0.7rem', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', color: '#1d4ed8' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 750, background: '#dbeafe', padding: '2px 8px', borderRadius: '4px', color: '#1d4ed8', whiteSpace: 'nowrap', flexShrink: 0 }}>
                         {attachedEntity.code}
                       </span>
                     )}
@@ -732,25 +774,52 @@ export default function PublicInstitutionalInquiryDrawer({
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' }}>
-                    {lang === 'es' ? 'Email Profesional *' : 'Professional Email *'}
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="practitioner@clinic.com"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.65rem',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.82rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                      {lang === 'es' ? 'Email Profesional *' : 'Professional Email *'}
+                    </label>
+                    {emailTouched && email.trim() && (
+                      <span style={{ fontSize: '0.68rem', fontWeight: 750, color: isEmailValid ? '#16a34a' : '#dc2626' }}>
+                        {isEmailValid 
+                          ? (lang === 'es' ? '✓ Válido' : '✓ Valid format') 
+                          : (lang === 'es' ? '⚠ Formato incorrecto' : '⚠ Invalid format')}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onBlur={() => setEmailTouched(true)}
+                      placeholder="practitioner@clinic.com"
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 2rem 0.5rem 0.65rem',
+                        borderRadius: '6px',
+                        border: `1.5px solid ${emailTouched && email.trim() ? (isEmailValid ? '#16a34a' : '#dc2626') : '#cbd5e1'}`,
+                        fontSize: '0.82rem',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        backgroundColor: '#ffffff'
+                      }}
+                    />
+                    {emailTouched && email.trim() && (
+                      <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                        {isEmailValid ? (
+                          <Check size={14} color="#16a34a" />
+                        ) : (
+                          <span style={{ color: '#dc2626', fontWeight: 800, fontSize: '0.80rem' }}>!</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                  {emailTouched && email.trim() && !isEmailValid && (
+                    <div style={{ fontSize: '0.68rem', color: '#dc2626', marginTop: '3px' }}>
+                      {lang === 'es' ? 'Introduce una dirección de email válida.' : 'Please enter a valid professional email address.'}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -780,46 +849,101 @@ export default function PublicInstitutionalInquiryDrawer({
                   <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}>
                     {lang === 'es' ? 'Teléfono / WhatsApp' : 'Phone / WhatsApp'}
                   </label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 555-0199"
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem 0.65rem',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.82rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
+                  <div style={{ display: 'flex', width: '100%' }}>
+                    <select
+                      value={phonePrefix}
+                      onChange={(e) => setPhonePrefix(e.target.value)}
+                      style={{
+                        flexShrink: 0,
+                        width: '88px',
+                        padding: '0.5rem 0.3rem',
+                        borderRadius: '6px 0 0 6px',
+                        border: '1px solid #cbd5e1',
+                        borderRight: 'none',
+                        background: '#f8fafc',
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        color: '#1e293b',
+                        outline: 'none',
+                        cursor: 'pointer'
+                      }}
+                      aria-label="Country Dial Code"
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.flag} {c.code}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^\d\s-]/g, '');
+                        setPhoneNumber(val);
+                      }}
+                      placeholder={phonePrefix === '+34' ? '612 34 56 78' : '555-0199'}
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        padding: '0.5rem 0.65rem',
+                        borderRadius: '0 6px 6px 0',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.82rem',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Message Details */}
+              {/* Message Details (GCP Form Guidelines: permanent helper text + clean placeholder) */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' }}>
-                  {lang === 'es' ? 'Detalle de la Consulta *' : 'Inquiry Specifications *'}
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.25rem' }}>
+                  <label style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a' }}>
+                    {lang === 'es' ? 'Detalle de la Consulta *' : 'Inquiry Specifications *'}
+                  </label>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                    {message.length > 0 ? `${message.length} chars` : (lang === 'es' ? 'Mín. 10 caracteres' : 'Min. 10 chars')}
+                  </span>
+                </div>
+                
+                {/* Visible descriptive helper text above textarea according to GCP standards */}
+                <div style={{ fontSize: '0.73rem', color: '#475569', marginBottom: '0.45rem', lineHeight: 1.4, backgroundColor: '#f8fafc', padding: '6px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  ℹ {lang === 'es' ? activeTopicObj.placeholderEs : activeTopicObj.placeholderEn}
+                </div>
+
                 <textarea
                   required
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder={lang === 'es' ? activeTopicObj.placeholderEs : activeTopicObj.placeholderEn}
+                  placeholder={
+                    lang === 'es'
+                      ? 'Escriba aquí los detalles de su consulta clínica o requerimientos...'
+                      : 'Enter your clinical inquiry, dosing query, or specific requirements...'
+                  }
                   style={{
                     width: '100%',
-                    padding: '0.55rem 0.75rem',
+                    padding: '0.6rem 0.75rem',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1.5px solid #cbd5e1',
                     fontSize: '0.82rem',
-                    lineHeight: 1.45,
+                    lineHeight: 1.5,
                     fontFamily: 'inherit',
                     outline: 'none',
                     resize: 'vertical',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    backgroundColor: '#ffffff'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#0284c7';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(2, 132, 199, 0.15)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#cbd5e1';
+                    e.target.style.boxShadow = 'none';
                   }}
                 />
               </div>
@@ -895,32 +1019,6 @@ export default function PublicInstitutionalInquiryDrawer({
                     </>
                   )}
                 </button>
-
-                {/* Secondary Fallback: Direct Mailto */}
-                <a
-                  href={mailtoUrl}
-                  style={{
-                    width: '100%',
-                    padding: '0.55rem 1rem',
-                    background: '#f8fafc',
-                    color: '#475569',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    boxSizing: 'border-box'
-                  }}
-                  title="Open draft directly in Apple Mail, Outlook or Gmail"
-                >
-                  <ExternalLink size={13} />
-                  <span>{lang === 'es' ? 'Abrir borrador en su gestor de correo' : 'Open draft directly in your Email Client'}</span>
-                </a>
               </div>
             </form>
           )}
