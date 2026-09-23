@@ -382,7 +382,7 @@ export default function WorkspaceItemCard({
                 justifyContent: 'center',
                 touchAction: 'manipulation',
               }}
-              title="Compartir Ficha Técnica Única con Mayorista"
+              title="Share Unique Datasheet with Client/Wholesaler"
             >
               <Share2 size={15} />
             </button>

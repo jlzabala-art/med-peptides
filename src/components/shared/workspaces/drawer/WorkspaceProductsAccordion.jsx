@@ -82,7 +82,7 @@ export default function WorkspaceProductsAccordion({
       const itemName = item.canonicalName || item.name || 'Compound';
 
       try {
-        notifier.info(`Generando enlace único para ${recipientName}...`);
+        notifier.info(`Generating unique tracked link for ${recipientName}...`);
         const res = await fetch('/api/short-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -108,12 +108,12 @@ export default function WorkspaceProductsAccordion({
           }),
         });
 
-        if (!res.ok) throw new Error('Error al generar enlace rastreable');
+        if (!res.ok) throw new Error('Failed to generate tracked link');
         const data = await res.json();
 
         if (navigator.clipboard) {
           await navigator.clipboard.writeText(data.shortUrl);
-          toast.success(`¡Enlace único copiado para ${recipientName}!`);
+          toast.success(`Unique tracked link copied for ${recipientName}!`);
         }
       } catch (err) {
         console.error('[handleShareItemDatasheet]', err);
@@ -130,11 +130,11 @@ export default function WorkspaceProductsAccordion({
   const handleShareAllDatasheets = async () => {
     if (!items || items.length === 0) return;
     const target = activeWs?.targetEntity;
-    const recipientName = target?.name || target?.displayName || target?.companyName || 'Cliente / Distribuidor';
+    const recipientName = target?.name || target?.displayName || target?.companyName || 'Client / Wholesaler';
     const recipientType = target?.role || target?.type || (activeWs?.type === 'wholesaler' ? 'wholesaler' : 'doctor');
 
     setIsGeneratingAll(true);
-    notifier.info(`Generando enlaces únicos para ${items.length} variantes...`);
+    notifier.info(`Generating unique tracked links for ${items.length} variants...`);
 
     try {
       const results = await Promise.all(
@@ -169,7 +169,7 @@ export default function WorkspaceProductsAccordion({
             }),
           });
 
-          if (!res.ok) throw new Error(`Error generando enlace para ${itemName}`);
+          if (!res.ok) throw new Error(`Failed to generate link for ${itemName}`);
           const data = await res.json();
           try {
             useWorkspaceStore.getState().updateItemData(item.id, {
@@ -193,22 +193,22 @@ export default function WorkspaceProductsAccordion({
 
       // Format text for WhatsApp / Clipboard
       const textLines = [
-        `*Fichas Técnicas Oficiales — ATLAS HEALTH*`,
-        `Destinatario: ${recipientName}`,
+        `*Official Technical Datasheets — ATLAS HEALTH*`,
+        `Recipient: ${recipientName}`,
         '',
         ...results.map((r, idx) => `${idx + 1}. *${r.name}* (${r.dose ? `${r.dose} ` : ''}${r.format || 'Vial'})\n👉 ${r.shortUrl}`),
         '',
-        `Acceso directo con trazabilidad analítica y monografía clínica.`
+        `Direct access with analytical traceability and clinical monograph.`
       ];
 
       const fullText = textLines.join('\n');
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(fullText);
-        toast.success(`¡Enlaces para ${results.length} variantes copiados al portapapeles!`);
+        toast.success(`Tracked links for ${results.length} variants copied to clipboard!`);
       }
     } catch (err) {
       console.error('[handleShareAllDatasheets]', err);
-      notifier.error(`Error generando enlaces: ${err.message}`);
+      notifier.error(`Error generating links: ${err.message}`);
     } finally {
       setIsGeneratingAll(false);
     }
@@ -238,15 +238,15 @@ export default function WorkspaceProductsAccordion({
 
   const handleShareWhatsAppBundle = async () => {
     if (!items || items.length === 0) {
-      notifier.error('No hay productos en el workspace para cotizar.');
+      notifier.error('No products in workspace to quote.');
       return;
     }
 
     setIsGeneratingAll(true);
     try {
       const target = activeWs?.targetEntity;
-      const recipientName = target?.name || target?.companyName || 'Estimado Cliente';
-      const recipientType = target?.type || 'Cliente';
+      const recipientName = target?.name || target?.companyName || 'Valued Client';
+      const recipientType = target?.type || 'Client';
       const currency = target?.currency || 'USD';
 
       // 1. Generate short URLs for each item in parallel
@@ -317,29 +317,29 @@ export default function WorkspaceProductsAccordion({
 
       const grandTotal = results.reduce((sum, r) => sum + r.lineTotal, 0);
 
-      // Build complete WhatsApp Commercial Deal text
+      // Build complete WhatsApp Commercial Deal text in English
       const textLines = [
-        `📋 *PROPUESTA COMERCIAL — ATLAS HEALTH / MED-PEPTIDES*`,
-        `👤 *Cliente:* ${recipientName} (${String(recipientType).toUpperCase()})`,
-        `📅 *Fecha:* ${new Date().toLocaleDateString()}`,
+        `📋 *COMMERCIAL PROPOSAL — ATLAS HEALTH*`,
+        `👤 *Client:* ${recipientName} (${String(recipientType).toUpperCase()})`,
+        `📅 *Date:* ${new Date().toLocaleDateString()}`,
         `─────────────────────`,
-        `*ÍTEMS Y FORMULACIONES:*`,
+        `*ITEMS & FORMULATIONS:*`,
         ...results.map((r, idx) => {
           const doseStr = r.dose ? ` ${r.dose}` : '';
           const formatStr = r.format ? ` (${r.format})` : '';
-          const linkStr = r.shortUrl ? `\n   🔗 Ficha técnica: ${r.shortUrl}` : '';
-          return `${idx + 1}. *${r.name}*${doseStr}${formatStr}\n   Cant: ${r.qty} ud. × $${r.price.toFixed(2)} = *$${r.lineTotal.toFixed(2)} ${currency}*${linkStr}`;
+          const linkStr = r.shortUrl ? `\n   🔗 Technical Datasheet: ${r.shortUrl}` : '';
+          return `${idx + 1}. *${r.name}*${doseStr}${formatStr}\n   Qty: ${r.qty} units × $${r.price.toFixed(2)} = *$${r.lineTotal.toFixed(2)} ${currency}*${linkStr}`;
         }),
         `─────────────────────`,
-        `💰 *TOTAL PROPUESTA: $${grandTotal.toFixed(2)} ${currency}*`,
-        `📦 *Incluye:* Monografía analítica certificada HPLC/MS + Trazabilidad de lote.`,
-        `⚡ Disponibilidad inmediata y despacho refrigerado prioritario.`
+        `💰 *TOTAL PROPOSAL: $${grandTotal.toFixed(2)} ${currency}*`,
+        `📦 *Includes:* Certified HPLC/MS analytical monograph + Batch release traceability.`,
+        `⚡ Immediate stock availability & temperature-controlled priority dispatch.`
       ];
 
       const fullText = textLines.join('\n');
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(fullText);
-        toast.success(`Propuesta comercial copiada para WhatsApp ✓`);
+        toast.success(`Commercial proposal copied to clipboard ✓`);
       }
 
       // If recipient has phone, open WhatsApp directly
@@ -351,7 +351,7 @@ export default function WorkspaceProductsAccordion({
       }
     } catch (err) {
       console.error('[handleShareWhatsAppBundle]', err);
-      notifier.error(`Error generando propuesta: ${err.message}`);
+      notifier.error(`Error generating proposal: ${err.message}`);
     } finally {
       setIsGeneratingAll(false);
     }
@@ -539,227 +539,269 @@ export default function WorkspaceProductsAccordion({
             />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              {/* Toolbar & Action Ribbon */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => setActivePicker(activePicker === 'products' ? null : 'products')}
-                    style={{
-                      padding: '6px 10px',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '7px',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      color: '#0f172a',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      touchAction: 'manipulation',
-                    }}
-                  >
-                    <Plus size={13} /> Add Product
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePicker(activePicker === 'protocols' ? null : 'protocols')}
-                    style={{
-                      padding: '6px 10px',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: '7px',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      color: '#0284c7',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      touchAction: 'manipulation',
-                    }}
-                  >
-                    <FileText size={13} /> Load Protocol
-                  </button>
-                  {onOpenShareDatasheets && (
+              {/* Unified GCP Action Ribbon */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '8px 10px',
+                }}
+              >
+                {/* Row 1: Primary Staging Actions & View Switcher */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <button
                       type="button"
-                      onClick={onOpenShareDatasheets}
+                      onClick={() => setActivePicker(activePicker === 'products' ? null : 'products')}
                       style={{
-                        padding: '6px 10px',
-                        backgroundColor: '#eff6ff',
-                        border: '1px solid #bfdbfe',
-                        borderRadius: '7px',
+                        padding: '6px 12px',
+                        backgroundColor: '#0b57d0',
+                        border: '1px solid #0b57d0',
+                        borderRadius: '6px',
                         fontSize: '0.74rem',
                         fontWeight: 700,
-                        color: '#003666',
+                        color: '#ffffff',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
+                        boxShadow: '0 1px 2px rgba(11, 87, 208, 0.2)',
                         touchAction: 'manipulation',
                       }}
-                      title="Share clinical datasheets of staged compounds via AI-generated Pharma English email"
+                      title="Add pharmaceutical research compounds to workspace"
                     >
-                      <Sparkles size={13} color="#0284c7" /> Share Datasheets (AI)
+                      <Plus size={13} strokeWidth={2.5} /> Add Compound
                     </button>
-                  )}
-                  {items.length > 0 && (
                     <button
                       type="button"
-                      onClick={handleShareAllDatasheets}
-                      disabled={isGeneratingAll}
+                      onClick={() => setActivePicker(activePicker === 'protocols' ? null : 'protocols')}
                       style={{
-                        padding: '6px 10px',
-                        backgroundColor: '#f0fdf4',
-                        border: '1px solid #bbf7d0',
-                        borderRadius: '7px',
+                        padding: '6px 11px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
                         fontSize: '0.74rem',
                         fontWeight: 700,
-                        color: '#15803d',
-                        cursor: isGeneratingAll ? 'wait' : 'pointer',
+                        color: '#3c4043',
+                        cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
                         touchAction: 'manipulation',
                       }}
-                      title="Generar y copiar un enlace único rastreable por cada variante en este Workspace"
+                      title="Load standardized multi-phase clinical protocol"
                     >
-                      <Share2 size={13} color="#16a34a" />
-                      <span>{isGeneratingAll ? 'Generando...' : 'Links Fichas (Todas)'}</span>
+                      <FileText size={13} color="#0b57d0" /> Load Protocol
                     </button>
-                  )}
-                  {items.length > 0 && (
                     <button
                       type="button"
-                      onClick={handleShareWhatsAppBundle}
-                      disabled={isGeneratingAll}
+                      onClick={onAddBacteriostaticWater}
                       style={{
-                        padding: '6px 10px',
-                        backgroundColor: '#f0fdf4',
-                        border: '1px solid #86efac',
-                        borderRadius: '7px',
+                        padding: '6px 11px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
                         fontSize: '0.74rem',
                         fontWeight: 700,
-                        color: '#166534',
-                        cursor: isGeneratingAll ? 'wait' : 'pointer',
+                        color: '#0b57d0',
+                        cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
-                        touchAction: 'manipulation',
+                        gap: '5px',
                       }}
-                      title="Copiar propuesta comercial detallada y enlaces para WhatsApp"
+                      title="Add 30mL Bacteriostatic Water diluent vial"
                     >
-                      <MessageCircle size={13} color="#15803d" />
-                      <span>Propuesta WhatsApp</span>
+                      <Droplet size={13} color="#0284c7" /> + BAC Water
                     </button>
-                  )}
-                </div>
+                  </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {/* View Mode Toggle (Compact Table vs Cards) */}
-                  <div style={{ display: 'inline-flex', backgroundColor: '#e2e8f0', borderRadius: '7px', padding: '2px' }}>
+                  {/* GCP Segmented View Switcher */}
+                  <div style={{ display: 'inline-flex', backgroundColor: '#e8eaed', borderRadius: '6px', padding: '2px' }}>
                     <button
                       type="button"
                       onClick={() => setViewMode('compact')}
                       style={{
-                        padding: '4px 8px',
-                        borderRadius: '5px',
+                        padding: '4px 9px',
+                        borderRadius: '4px',
                         border: 'none',
                         backgroundColor: viewMode === 'compact' ? '#ffffff' : 'transparent',
-                        color: viewMode === 'compact' ? '#003666' : '#64748b',
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
+                        color: viewMode === 'compact' ? '#0b57d0' : '#5f6368',
+                        fontSize: '0.70rem',
+                        fontWeight: 700,
                         cursor: 'pointer',
-                        boxShadow: viewMode === 'compact' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                        boxShadow: viewMode === 'compact' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
                       }}
-                      title="Compact Table View (~34px rows)"
+                      title="Compact Table View"
                     >
-                      ☰ Compact
+                      ☰ Table
                     </button>
                     <button
                       type="button"
                       onClick={() => setViewMode('cards')}
                       style={{
-                        padding: '4px 8px',
-                        borderRadius: '5px',
+                        padding: '4px 9px',
+                        borderRadius: '4px',
                         border: 'none',
                         backgroundColor: viewMode === 'cards' ? '#ffffff' : 'transparent',
-                        color: viewMode === 'cards' ? '#003666' : '#64748b',
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
+                        color: viewMode === 'cards' ? '#0b57d0' : '#5f6368',
+                        fontSize: '0.70rem',
+                        fontWeight: 700,
                         cursor: 'pointer',
-                        boxShadow: viewMode === 'cards' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                        boxShadow: viewMode === 'cards' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
                       }}
                       title="Cards View"
                     >
-                      🔲 Cards
+                      ▦ Cards
                     </button>
-                  </div>
-
-                  {/* Grouping switch */}
-                  <button
-                    type="button"
-                    onClick={() => setGroupByCategory((prev) => !prev)}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: groupByCategory ? '#eff6ff' : '#ffffff',
-                      border: `1px solid ${groupByCategory ? '#bfdbfe' : '#cbd5e1'}`,
-                      borderRadius: '7px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: groupByCategory ? '#0284c7' : '#64748b',
-                      cursor: 'pointer',
-                    }}
-                    title="Group items by clinical route / category"
-                  >
-                    {groupByCategory ? '✓ Grouped' : 'Group'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onAddBacteriostaticWater}
-                    style={{
-                      padding: '5px 9px',
-                      backgroundColor: '#eff6ff',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: '7px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#1d4ed8',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
-                    title="Add Bacteriostatic Water 30ml companion diluent"
-                  >
-                    <Droplet size={12} /> + Bac Water
-                  </button>
-                  {isDoctor && (
                     <button
                       type="button"
-                      onClick={() => setShowSyringeHelper(!showSyringeHelper)}
+                      onClick={() => setGroupByCategory((prev) => !prev)}
                       style={{
-                        padding: '4px 8px',
-                        backgroundColor: showSyringeHelper ? '#e0f2fe' : '#ffffff',
-                        border: `1px solid ${showSyringeHelper ? '#0284c7' : '#cbd5e1'}`,
-                        borderRadius: '7px',
-                        fontSize: '0.72rem',
+                        padding: '4px 9px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        backgroundColor: groupByCategory ? '#ffffff' : 'transparent',
+                        color: groupByCategory ? '#0b57d0' : '#5f6368',
+                        fontSize: '0.70rem',
                         fontWeight: 700,
-                        color: showSyringeHelper ? '#0284c7' : '#0f172a',
                         cursor: 'pointer',
+                        boxShadow: groupByCategory ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+                      }}
+                      title="Group items by clinical route / category"
+                    >
+                      {groupByCategory ? '✓ Grouped' : 'Group'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Row 2: Export & Sharing Actions */}
+                {items.length > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      flexWrap: 'wrap',
+                      paddingTop: '6px',
+                      borderTop: '1px solid #e2e8f0',
+                    }}
+                  >
+                    {onOpenShareDatasheets && (
+                      <button
+                        type="button"
+                        onClick={onOpenShareDatasheets}
+                        style={{
+                          padding: '5px 10px',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #dadce0',
+                          borderRadius: '6px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          color: '#0b57d0',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                        }}
+                        title="Share clinical datasheets of staged compounds via AI email generator"
+                      >
+                        <Sparkles size={12} color="#0b57d0" /> Share Datasheets (AI)
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleShareAllDatasheets}
+                      disabled={isGeneratingAll}
+                      style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: '#3c4043',
+                        cursor: isGeneratingAll ? 'wait' : 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
                       }}
-                      title="U-100 Syringe Units & Reconstitution Helper"
+                      title="Generate and copy unique tracked links for all compounds in this workspace"
                     >
-                      <Droplet size={12} color="#0284c7" /> Syringe Guide
+                      <Share2 size={12} color="#5f6368" />
+                      <span>{isGeneratingAll ? 'Generating...' : 'Copy All Links'}</span>
                     </button>
-                  )}
-                </div>
+                    <button
+                      type="button"
+                      onClick={handleShareWhatsAppBundle}
+                      disabled={isGeneratingAll}
+                      style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        color: '#137333',
+                        cursor: isGeneratingAll ? 'wait' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                      }}
+                      title="Copy detailed commercial proposal and tracked links for WhatsApp"
+                    >
+                      <MessageCircle size={12} color="#188038" />
+                      <span>WhatsApp Summary</span>
+                    </button>
+                    {isDoctor && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={onPrintPatientLabels}
+                          style={{
+                            padding: '5px 10px',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #dadce0',
+                            borderRadius: '6px',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            color: '#0d9488',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                          }}
+                          title="Print Avery-compliant clinical patient dosage labels"
+                        >
+                          <Tag size={12} /> Label Sheet
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowSyringeHelper(!showSyringeHelper)}
+                          style={{
+                            padding: '5px 10px',
+                            backgroundColor: showSyringeHelper ? '#e8f0fe' : '#ffffff',
+                            border: `1px solid ${showSyringeHelper ? '#0b57d0' : '#dadce0'}`,
+                            borderRadius: '6px',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            color: showSyringeHelper ? '#0b57d0' : '#3c4043',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                          }}
+                          title="U-100 Syringe Units & Reconstitution Helper"
+                        >
+                          <Droplet size={12} color="#0284c7" /> Syringe Guide
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Inline Syringe Calculator */}

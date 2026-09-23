@@ -457,13 +457,73 @@ export default function PublicAtlasAIDrawer({
     };
   };
 
+  // Dynamic topic pools for non-repeating inquiry rotation
+  const MONOGRAPH_TOPICS = [
+    { label: 'BAC Dilution Ratio', query: 'Please detail the exact BAC water dilution ratio and reconstitution steps.', keys: ['bac', 'dilut', 'reconstitut', 'water'] },
+    { label: 'Refrigeration Limits', query: 'What are the thermal stability limits and refrigeration storage protocols?', keys: ['refrigerat', 'storage', 'temp', 'thermal', 'freeze'] },
+    { label: 'Clinical Pathways', query: 'What are the primary clinical pathways and investigational outcomes?', keys: ['clinical', 'pathway', 'trial', 'investigat', 'human'] },
+    { label: 'Receptor Target Affinities', query: 'What are the receptor binding affinities and molecular selectivity values?', keys: ['receptor', 'affinity', 'selectivity', 'agonist', 'target'] },
+    { label: 'Dual-Stage HPLC Purity', query: 'What are the certified dual-stage RP-HPLC and MS purity release specifications?', keys: ['purity', 'hplc', 'spectrometry', 'ms', 'release', 'standard'] },
+    { label: 'In-Solution Shelf Life', query: 'What is the active degradation curve and shelf life once reconstituted?', keys: ['shelf', 'solution', 'days active', 'degradation', 'stability'] },
+    { label: 'Peer-Reviewed Evidence', query: 'What do published PubMed clinical trials and pharmacokinetic data indicate?', keys: ['pubmed', 'pmid', 'evidence', 'study', 'literature'] },
+    { label: 'Gentle Handling Protocols', query: 'What are the critical vial handling guidelines to prevent peptide shearing?', keys: ['handling', 'swirl', 'shear', 'agitat', 'gentle'] },
+    { label: 'Micro-Dosing Syringe Units', query: 'How do syringe unit calibrations correlate to microgram (mcg) measurements?', keys: ['syringe', 'unit', 'mcg', 'conversion', 'micro-dosing'] },
+    { label: 'Molecular Identity & Mass', query: 'What is the theoretical molecular formula and verified net peptide mass?', keys: ['molecular', 'formula', 'weight', 'mass', 'sequence'] },
+    { label: 'Secondary Signaling Cascades', query: 'What downstream metabolic cascades or enzymatic pathways are modulated?', keys: ['cascade', 'metabolic', 'enzymatic', 'downstream', 'camp'] },
+  ];
+
+  const PROTOCOL_TOPICS = [
+    { label: 'Phase Titration Schedule', query: 'Explain the progressive phase titration schedule and step-up timeline.', keys: ['titrat', 'schedule', 'phase', 'step-up', 'timeline'] },
+    { label: 'Required Biomarkers', query: 'Which baseline and follow-up laboratory biomarkers should be monitored?', keys: ['biomarker', 'lab', 'blood', 'monitor', 'baseline'] },
+    { label: 'Compound Synergies', query: 'How do the companion compounds synergize within this protocol architecture?', keys: ['synerg', 'companion', 'combin', 'stack'] },
+    { label: 'Safety & Contraindications', query: 'What are the strict contraindications, warning flags, and interaction precautions?', keys: ['contraindicat', 'caution', 'warning', 'safety', 'precaution'] },
+    { label: 'Washout & Cycle Limits', query: 'What is the recommended cycle duration and required washout or pause interval?', keys: ['cycle', 'washout', 'pause', 'duration', 'interval'] },
+    { label: 'Micro-Unit Syringe Math', query: 'How to calculate individual syringe units for each titration phase?', keys: ['unit', 'calculat', 'syringe', 'dose'] },
+  ];
+
+  const CATALOG_TOPICS = [
+    { label: 'Metabolic Formulations', query: 'Which high-purity formulations are designed for metabolic and glycemic research?', keys: ['metabolic', 'glycemic', 'weight'] },
+    { label: 'In-Stock Immediate Dispatch', query: 'Which research compounds are currently verified in stock for immediate dispatch?', keys: ['stock', 'dispatch', 'ship', 'available'] },
+    { label: 'Verified Synthesis Standard', query: 'What is the dual-stage RP-HPLC synthesis standard and release testing criteria?', keys: ['standard', 'synthesis', 'purity', 'release', 'quality'] },
+    { label: 'Research Volume Tiers', query: 'What multi-vial research volume tiers and bulk study discounts are supported?', keys: ['volume', 'tier', 'bulk', 'multi-vial'] },
+    { label: 'Cellular Repair Peptides', query: 'What cellular repair and wound healing peptides are cataloged?', keys: ['repair', 'tissue', 'healing', 'bpc', 'tb-500'] },
+    { label: 'Neuro & Longevity Monograph', query: 'What nootropic and cellular longevity peptides are available in the repository?', keys: ['neuro', 'longevity', 'semax', 'selank', 'epithalon'] },
+  ];
+
   const getDynamicSuggestions = () => {
-    if (contextType === 'protocol') {
-      return ['Titration Schedule', 'Required Biomarkers', 'Compound Synergies', 'Contraindications'];
+    // Gather all historical queries sent by user to eliminate repetition
+    const userQueries = messages
+      .filter((m) => m.sender === 'user')
+      .map((m) => (m.text || '').toLowerCase());
+
+    const pool = contextType === 'protocol'
+      ? PROTOCOL_TOPICS
+      : contextType === 'monograph'
+      ? MONOGRAPH_TOPICS
+      : CATALOG_TOPICS;
+
+    // Filter out topics the user has already asked about
+    const unasked = pool.filter((topic) => {
+      const labelLower = topic.label.toLowerCase();
+      return !userQueries.some((uText) => {
+        if (uText.includes(labelLower)) return true;
+        return topic.keys.some((k) => uText.includes(k));
+      });
+    });
+
+    if (unasked.length >= 4) {
+      return unasked.slice(0, 4);
     }
-    return contextType === 'monograph'
-      ? ['BAC Dilution Ratio', 'Refrigeration Limits', 'Clinical Pathways', 'Receptor Target Affinities']
-      : ['Metabolic Peptides', 'Immediate Dispatch', 'Lotusland Standards', 'Verified Volume Tiers'];
+
+    // If pool is near exhausted, supplement with unasked items from the alternative pool
+    const secondaryPool = contextType === 'monograph' ? PROTOCOL_TOPICS : MONOGRAPH_TOPICS;
+    const secondaryUnasked = secondaryPool.filter((t) => {
+      const labelLower = t.label.toLowerCase();
+      return !userQueries.some((uText) => uText.includes(labelLower) || t.keys.some((k) => uText.includes(k)));
+    });
+
+    const combined = [...unasked, ...secondaryUnasked];
+    return combined.slice(0, 4);
   };
 
   // Safe markdown cleaner and high-fidelity clinical parser
@@ -491,7 +551,7 @@ export default function PublicAtlasAIDrawer({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.70rem', fontWeight: 800, color: '#003666', letterSpacing: '0.02em' }}>
             <Sparkles size={11} color="#0284c7" />
-            <span>LOTUSLAND ANALYTICAL VERIFICATION</span>
+            <span>VERIFIED ANALYTICAL SPECIFICATIONS</span>
           </div>
           <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>Standard Monograph</span>
         </div>
@@ -563,21 +623,21 @@ export default function PublicAtlasAIDrawer({
                     <button
                       key={cIdx}
                       type="button"
-                      onClick={() => handleSendMessage(`Please detail: ${chip}`)}
+                      onClick={() => handleSendMessage(chip.query || `Please detail: ${chip.label || chip}`)}
                       disabled={isBlocked || isLoading}
                       style={{
                         backgroundColor: '#ffffff',
                         border: '1px solid #cbd5e1',
                         borderRadius: '12px',
-                        padding: '2px 8px',
-                        fontSize: '0.70rem',
+                        padding: '3px 9px',
+                        fontSize: '0.71rem',
                         fontWeight: 600,
                         color: '#003666',
                         cursor: isBlocked || isLoading ? 'default' : 'pointer',
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      + {chip}
+                      + {chip.label || chip}
                     </button>
                   ))}
                 </div>
@@ -666,7 +726,7 @@ export default function PublicAtlasAIDrawer({
             <ShieldCheck size={11} color="#16a34a" />
             <span>Dual-Stage RP-HPLC & LC-MS Verified</span>
           </div>
-          <span>Lotusland Limited</span>
+          <span>Analytical Grade Standard</span>
         </div>
       </div>
     );
@@ -689,7 +749,7 @@ export default function PublicAtlasAIDrawer({
     : [
         `What formulations are ready for immediate dispatch?`,
         `Which peptides are intended for metabolic research?`,
-        `What is the Lotusland synthesis purity standard?`,
+        `What is the certified synthesis purity standard?`,
       ];
 
   return (
@@ -791,24 +851,46 @@ export default function PublicAtlasAIDrawer({
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#7dd3fc', marginTop: '2px', fontWeight: 600 }}>
-                  Lotusland Limited • Verified Analytical Support
+                  Verified Analytical Support • Monograph Specifications
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                <div
                   style={{
-                    fontSize: '0.70rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    height: '26px',
+                    padding: '0 10px',
+                    borderRadius: '13px',
+                    backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.12)',
+                    border: `1px solid ${isBlocked ? 'rgba(248, 113, 113, 0.4)' : 'rgba(56, 189, 248, 0.28)'}`,
+                    color: isBlocked ? '#fca5a5' : '#e0f2fe',
+                    fontSize: '0.72rem',
                     fontWeight: 700,
-                    backgroundColor: isBlocked ? 'rgba(239, 68, 68, 0.25)' : 'rgba(56, 189, 248, 0.15)',
-                    color: isBlocked ? '#fca5a5' : '#bae6fd',
-                    padding: '2px 8px',
-                    borderRadius: '8px',
-                    border: `1px solid ${isBlocked ? 'rgba(248, 113, 113, 0.4)' : 'rgba(56, 189, 248, 0.3)'}`,
+                    letterSpacing: '0.02em',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                   }}
                 >
-                  {isBlocked ? '0/5 Available' : `${remaining}/${limit} Inquiries`}
-                </span>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: isBlocked ? '#ef4444' : '#38bdf8',
+                      boxShadow: isBlocked ? '0 0 6px #ef4444' : '0 0 6px #38bdf8',
+                    }}
+                  />
+                  <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>
+                    {isBlocked ? '0/5' : `${remaining}/${limit}`}
+                  </span>
+                  <span style={{ opacity: 0.85, fontSize: '0.66rem', textTransform: 'uppercase' }}>
+                    QUERIES
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
@@ -846,10 +928,10 @@ export default function PublicAtlasAIDrawer({
               <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 <strong style={{ color: '#003666' }}>Active Focus:</strong>{' '}
                 {contextType === 'protocol'
-                  ? `Clinical Protocol: ${contextAnchor?.name || 'Protocol'} (${contextAnchor?.duration || 'Multi-week'})`
+                  ? `Active Clinical Protocol Guide (${contextAnchor?.duration || 'Multi-week cycle'})`
                   : contextType === 'monograph'
-                  ? `${contextAnchor?.name || 'Peptide Monograph'} (${contextAnchor?.purity || '≥99% HPLC'})`
-                  : `Portfolio Catalog (${catalogInventory.length} Available Formulations)`}
+                  ? `Active Formulation Monograph (${contextAnchor?.purity || '≥ 99.0% Dual RP-HPLC'})`
+                  : `Active Research Portfolio (${catalogInventory.length} Available Formulations)`}
               </div>
             </div>
 
@@ -1048,13 +1130,13 @@ export default function PublicAtlasAIDrawer({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                     <FlaskConical size={16} color="#003666" />
                     <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#00284d' }}>
-                      {contextAnchor?.name || 'Peptide Active Substance'}
+                      Active Formulation Monograph Specifications
                     </span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <div><strong>CAS Registry:</strong> {contextAnchor?.cas || 'Verified Compendial ID'}</div>
                     <div><strong>Synthesis Standard:</strong> {contextAnchor?.purity || '≥ 99.0% Dual-Stage RP-HPLC Verified'}</div>
-                    <div><strong>Formulation Quality:</strong> Lyophilized Analytical Grade (Lotusland Limited Release)</div>
+                    <div><strong>Formulation Quality:</strong> Lyophilized Analytical Grade (Dual-Stage RP-HPLC Certified)</div>
                   </div>
                 </div>
 
@@ -1265,7 +1347,7 @@ export default function PublicAtlasAIDrawer({
                   textAlign: 'center',
                 }}
               >
-                Strictly English • Lotusland Analytical Verification • Confidential Session
+                Strictly English • Verified Analytical Specifications • Confidential Research Session
               </div>
             </div>
           </div>

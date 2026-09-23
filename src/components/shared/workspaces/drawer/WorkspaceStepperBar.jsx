@@ -49,18 +49,19 @@ export default function WorkspaceStepperBar({ steps, activeStep, onGoToStep }) {
           border-radius: 4px;
         }
         .ws-step-label {
-          font-size: 0.67rem;
+          font-size: 0.70rem;
           font-weight: 700;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          max-width: 80px;
+          max-width: 100px;
           padding-bottom: 6px;
           transition: color 0.18s ease;
+          letter-spacing: 0.01em;
         }
         @media (max-width: 380px) {
-          .ws-step-label { display: none; }
-          .ws-step-btn { padding: 8px 2px 8px; min-height: 40px; }
+          .ws-step-label { max-width: 75px; font-size: 0.65rem; }
+          .ws-step-btn { padding: 6px 2px 6px; min-height: 44px; }
         }
         .ws-step-active-bar {
           position: absolute;
@@ -68,7 +69,7 @@ export default function WorkspaceStepperBar({ steps, activeStep, onGoToStep }) {
           left: 0;
           right: 0;
           height: 2.5px;
-          background-color: #003666;
+          background-color: #0b57d0;
           border-radius: 2px 2px 0 0;
           animation: wsBarSlideIn 0.2s ease;
         }
@@ -81,7 +82,7 @@ export default function WorkspaceStepperBar({ steps, activeStep, onGoToStep }) {
           align-items: center;
           padding-top: 4px;
           flex-shrink: 0;
-          color: #cbd5e1;
+          color: #dadce0;
           padding-bottom: 12px;
         }
       `}</style>
@@ -91,12 +92,12 @@ export default function WorkspaceStepperBar({ steps, activeStep, onGoToStep }) {
         const isComplete = step.isComplete;
 
         const circleColor = isComplete
-          ? { bg: '#dcfce7', border: '#16a34a', text: '#15803d' }
+          ? { bg: '#e6f4ea', border: '#137333', text: '#137333' }
           : isActive
-          ? { bg: '#eff6ff', border: '#003666', text: '#003666' }
-          : { bg: '#f1f5f9', border: '#cbd5e1', text: '#94a3b8' };
+          ? { bg: '#e8f0fe', border: '#0b57d0', text: '#0b57d0' }
+          : { bg: '#f1f3f4', border: '#dadce0', text: '#5f6368' };
 
-        const labelColor = isComplete ? '#16a34a' : isActive ? '#003666' : '#94a3b8';
+        const labelColor = isComplete ? '#137333' : isActive ? '#0b57d0' : '#5f6368';
 
         return (
           <React.Fragment key={step.key}>

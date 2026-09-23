@@ -165,14 +165,14 @@ export default function WorkspaceDrawer() {
       return [
         { key: 'products', label: 'Products', isComplete: items.length > 0 },
         { key: 'recipient', label: 'Patient', isComplete: !!activeWs?.targetEntity },
-        { key: 'review', label: 'Review & Prescribe', isComplete: items.length > 0 && !!activeWs?.targetEntity },
+        { key: 'review', label: 'Review', isComplete: items.length > 0 && !!activeWs?.targetEntity },
       ];
     }
     return [
       { key: 'products', label: 'Products', isComplete: items.length > 0 },
       { key: 'recipient', label: isWholesaler ? 'Client' : 'Recipient', isComplete: !!activeWs?.targetEntity },
       { key: 'shipping', label: 'Logistics', isComplete: true },
-      { key: 'review', label: isAdmin ? 'Review & Margins' : 'Review & Order', isComplete: items.length > 0 && !!activeWs?.targetEntity },
+      { key: 'review', label: 'Review', isComplete: items.length > 0 && !!activeWs?.targetEntity },
     ];
   }, [isAdmin, isDoctor, isWholesaler, items.length, activeWs?.targetEntity]);
 

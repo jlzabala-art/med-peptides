@@ -139,24 +139,25 @@ export default function WorkspaceMiniSummaryStrip({
           onClick={onQuickConvert}
           style={{
             marginLeft: '6px',
-            padding: '3px 9px',
+            padding: '4px 10px',
             borderRadius: '6px',
-            backgroundColor: isDoctor || recipient?.type === 'patient' ? '#0d9488' : '#2563eb',
+            backgroundColor: isDoctor || recipient?.type === 'patient' ? '#0d9488' : '#0b57d0',
             color: '#ffffff',
             border: 'none',
             fontSize: '0.72rem',
-            fontWeight: 800,
+            fontWeight: 700,
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
             whiteSpace: 'nowrap',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            boxShadow: '0 1px 2px rgba(11, 87, 208, 0.2)',
+            transition: 'background-color 0.15s ease',
           }}
-          title={isDoctor || recipient?.type === 'patient' ? 'Prescribir directamente en Rx Builder (1-clic)' : 'Generar Pedido / Cotización B2B (1-clic)'}
+          title={isDoctor || recipient?.type === 'patient' ? 'Create Prescription directly in Rx Builder (1-click)' : 'Generate B2B Order / Quote (1-click)'}
         >
-          <Zap size={11} />
-          <span>{isDoctor || recipient?.type === 'patient' ? 'Prescribir (Rx)' : 'Cotizar / Pedido'}</span>
+          <Zap size={12} />
+          <span>{isDoctor || recipient?.type === 'patient' ? 'Prescribe (Rx)' : 'Create Order / Quote'}</span>
         </button>
       )}
     </div>

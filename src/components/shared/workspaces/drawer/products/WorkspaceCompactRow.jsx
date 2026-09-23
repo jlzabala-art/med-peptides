@@ -98,7 +98,7 @@ export default function WorkspaceCompactRow({
         </span>
         {it.viewCount > 0 ? (
           <span
-            title={`Ficha abierta ${it.viewCount} ${it.viewCount === 1 ? 'vez' : 'veces'}${it.lastViewedAt ? ` • Última: ${new Date(it.lastViewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}`}
+            title={`Datasheet opened ${it.viewCount} ${it.viewCount === 1 ? 'time' : 'times'}${it.lastViewedAt ? ` • Last: ${new Date(it.lastViewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}`}
             style={{
               fontSize: '0.62rem',
               fontWeight: 800,
@@ -383,7 +383,7 @@ export default function WorkspaceCompactRow({
             padding: 0,
             transition: 'all 0.15s ease',
           }}
-          title="Compartir Ficha Técnica Única con Mayorista"
+          title="Share Unique Datasheet with Client/Wholesaler"
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#eff6ff';
             e.currentTarget.style.borderColor = '#bfdbfe';

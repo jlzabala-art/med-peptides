@@ -4,7 +4,11 @@ import { sanitizeText } from '@/utils/apiValidator';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { getPublicPlatformKnowledgeContext } from '@/services/publicKnowledgeService';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 
+  process.env.NEXT_PUBLIC_GEMINI_API_KEY || 
+  process.env.VITE_GEMINI_API_KEY || 
+  process.env.GOOGLE_GENAI_API_KEY || 
+  "REDACTED_GEMINI_KEY";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -167,7 +171,7 @@ export async function POST(req) {
 - Post-Acquisition Obligations: Maintain genuine economic activity, recurring invoicing, quarterly IVA/corporate tax returns, and administrator registration.
 ${contextAnchor?.details ? `- Additional Program Data: ${JSON.stringify(contextAnchor.details)}\n` : ''}`;
 
-        systemPrompt = `You are Atlas Executive Corporate & Immigration Advisor, a specialized AI counsel for Lotusland Limited institutional corporate structuring, turnkey Spanish company acquisitions, and Law 14/2013 residency programs.
+        systemPrompt = `You are Atlas Executive Corporate & Immigration Advisor, a specialized AI counsel for institutional corporate structuring, turnkey Spanish company acquisitions, and Law 14/2013 residency programs.
 
 OPERATING PRINCIPLES:
 1. MULTILINGUAL & EXECUTIVE TONE: Communicate authoritatively in the language used by the visitor (English or Spanish). Maintain an executive, precise legal-corporate tone based strictly on the Spanish statutory framework.
@@ -201,23 +205,31 @@ ${publicPlatformKnowledge}
           `- Sequence: ${contextAnchor.sequence || 'Protected proprietary synthesis sequence'}\n` +
           `- Standard Reconstitution Protocol: Reconstitute with 1.0mL – 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol). Introduce diluent slowly down the vial inner wall and swirl gently without shaking.\n` +
           `- Storage & Stability: Lyophilized powder is stable at -20°C (24 months) or 2-8°C (90 days). Reconstituted solution must be refrigerated at 2-8°C, shielded from direct light, and used within 28 days.\n` +
-          `- Release Certification: Verified Authentic Lotusland Limited Dual-Stage RP-HPLC & LC-MS Release.\n` +
+          `- Release Certification: Verified Authentic Dual-Stage RP-HPLC & LC-MS Release.\n` +
           (contextAnchor.details ? `- Additional Monograph Data: ${JSON.stringify(contextAnchor.details)}\n` : '') +
           pubmedContextText;
       } else {
         activeEntityContext = `CATALOG RESEARCH PORTFOLIO SPECIFICATIONS:\n` +
           `- Total Available Formulations: ${catalogInventory?.length || 'Multiple'}\n` +
           `- Formulations in this Catalog: ${(catalogInventory || []).slice(0, 50).map(p => `${p.name} (${p.category || 'Peptide'}, Purity: ${p.purity || '≥99%'})`).join('; ')}\n` +
-          `- Grade: Lyophilized analytical grade vials certified by Lotusland Limited.\n`;
+          `- Grade: Lyophilized analytical grade vials certified under Dual-Stage RP-HPLC standards.\n`;
       }
 
       if (!isCorporate) {
-        systemPrompt = `You are Atlas Knowledge Copilot, the comprehensive AI advisor for Lotusland Limited and Med-Peptides public portfolio, encompassing analytical monographs, clinical protocols, reconstitution sciences, diagnostic kits, and institutional corporate residency programs.
+        systemPrompt = `You are Atlas Knowledge Copilot, the comprehensive AI research advisor for Med-Peptides and Atlas Health public portfolio, encompassing analytical monographs, clinical protocols, reconstitution sciences, diagnostic kits, and institutional services.
 
-OPERATING PRINCIPLES:
-1. PROFESSIONAL COMMUNICATION: Communicate authoritatively in the language used by the visitor (English or Spanish, defaulting to English). Maintain a rigorous, structured scientific and executive tone.
-2. COMPREHENSIVE PLATFORM SCOPE:
-- Analytical Peptide Monographs: Provide precise pharmacology, target receptor affinities, amino acid sequences, analytical purity (≥ 99.0% dual RP-HPLC), cold-chain storage (2-8°C / -20°C), reconstitution protocols (bacteriostatic water), and safety standards.
+CRITICAL OPERATING RULES:
+1. STRICTLY ANSWER THE USER'S SPECIFIC QUESTION:
+   - If the user asks about peer-reviewed clinical research or clinical studies: provide a direct, insightful summary of the published clinical trials, efficacy endpoints, receptor agonist findings, and PubMed evidence. Do NOT provide reconstitution or dilution instructions when asked about clinical research!
+   - If the user asks about reconstitution or dilution ratio: provide the exact dilution ratio (1.0mL - 2.0mL BAC water), calculated concentration, and gentle swirling technique.
+   - If the user asks about thermal stability or storage: explain the temperature guidelines (-20°C long term, 2-8°C refrigerated).
+2. ONLY ANSWER ABOUT THE ACTIVE MONOGRAPH:
+   The user may only ask questions regarding the currently active compound / formulation monograph being viewed. Do not answer questions about unrelated outside topics.
+3. DISCRETION & PRIVACY:
+   Never mention "Lotusland" or "Lotusland Limited".
+   Do not needlessly repeat the explicit brand name; refer to the substance as "the active formulation", "this compound monograph", or "the active polypeptide".
+4. PROFESSIONAL & STRUCTURED:
+   Respond authoritatively, clearly, and concisely in English using clean markdown.
 - Clinical Protocols: Guide visitors through structured multi-phase regimens, titration curves, synergistic peptide stacks, and recovery timelines across 77 verified protocols.
 - Institutional Corporate & Residency Services: When asked about corporate structuring or European residency, provide full details on the [Spanish Corporate Acquisition & Law 14/2013 Residence Program](/p/spain-company-acquisition-residency), including statutory Law 14/2013 (Articles 68-72), the 20-business-day fast-track resolution (UGE-CE), 3-year initial residence card, 100% legal ownership of an existing debt-free Spanish S.L. (Sociedad Limitada), Schengen 29 border mobility, and remote execution via consular Power of Attorney (PoA).
 - European Pharmaceutical Compounding Service: When asked about custom prescription compounding or magistral formulations, explain the [European Pharmaceutical Compounding & Custom Formulation Service](/p/pharmaceutical-compounding-service) (formulated in EU GMP & Ph. Eur. certified compounding labs, 5–7 working days turnaround, order via dedicated Mobile App or email to kasia@mediluxeme.com, flexible invoicing with clinical wholesale price for clinics or direct patient RRP via secure link, cold-chain delivery to clinic or patient dropship, free shipping on 10+ units).
@@ -286,23 +298,37 @@ GUIDELINES:
     }
 
     if (GEMINI_API_KEY) {
+      // Build valid alternating conversation turns
+      const validHistoryTurns = [];
+      let lastRole = null;
+      for (const h of history.slice(-4)) {
+        const turnRole = h.sender === 'user' ? 'user' : 'model';
+        if (turnRole !== lastRole && h.text) {
+          validHistoryTurns.push({
+            role: turnRole,
+            parts: [{ text: h.text }]
+          });
+          lastRole = turnRole;
+        }
+      }
+      // If the last history turn is 'user', pop it to ensure alternation before appending current message
+      if (validHistoryTurns.length > 0 && validHistoryTurns[validHistoryTurns.length - 1].role === 'user') {
+        validHistoryTurns.pop();
+      }
+      validHistoryTurns.push({
+        role: 'user',
+        parts: [{ text: message }]
+      });
+
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-        
-        const contents = [
-          { role: 'user', parts: [{ text: systemPrompt }] },
-          ...history.slice(-4).map(h => ({
-            role: h.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: h.text }]
-          })),
-          { role: 'user', parts: [{ text: message }] }
-        ];
 
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents,
+          contents: validHistoryTurns,
           config: {
+            systemInstruction: systemPrompt,
             temperature: 0.3,
             maxOutputTokens: 900,
           }
@@ -328,14 +354,10 @@ GUIDELINES:
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [
-                { role: 'user', parts: [{ text: systemPrompt }] },
-                ...history.slice(-4).map(h => ({
-                  role: h.sender === 'user' ? 'user' : 'model',
-                  parts: [{ text: h.text }]
-                })),
-                { role: 'user', parts: [{ text: message }] }
-              ],
+              systemInstruction: {
+                parts: [{ text: systemPrompt }]
+              },
+              contents: validHistoryTurns,
               generationConfig: {
                 temperature: 0.3,
                 maxOutputTokens: 900,
@@ -365,18 +387,51 @@ GUIDELINES:
       }
     }
 
-    // Intelligent context-aware fallback response
-    let fallbackReply = isPublicSandbox
-      ? `**Analytical Specifications Overview**:\n\n` +
-        `• **Synthesis Standard**: Certified ≥99.0% analytical purity via Dual-Stage RP-HPLC & LC-MS release testing (Lotusland Limited).\n` +
-        `• **Dilution Guidance**: Reconstitute lyophilized cake with 1.0mL – 2.0mL sterile bacteriostatic water (0.9% benzyl alcohol). Inject gently along vial glass wall and swirl; do not agitate.\n` +
-        `• **Thermal Stability**: Store lyophilized cakes at 2–8°C for short term (up to 90 days) or -20°C for extended research. Store reconstituted solution at 2–8°C shielded from light.\n\n` +
-        `Which specific compounding or analytical parameter do you need clarified?`
-      : `Here is what you should know about **${goal || 'peptide research'}**:\n\n` +
+    // Dynamic, query-specific fallback responses (100% strictly on-topic, zero Lotusland mentions)
+    const lowerMsg = (message || '').toLowerCase();
+    let fallbackReply = '';
+
+    if (isPublicSandbox) {
+      if (lowerMsg.includes('bac') || lowerMsg.includes('dilut') || lowerMsg.includes('reconstitut') || lowerMsg.includes('ratio') || lowerMsg.includes('water')) {
+        fallbackReply = `**Reconstitution & Dilution Specification**:\n\n` +
+          `• **Recommended Solvent**: Sterile bacteriostatic water containing 0.9% benzyl alcohol (USP-NF analytical grade).\n` +
+          `• **Dilution Volume**: Reconstitute lyophilized cake with **1.0 mL to 2.0 mL** sterile solvent based on desired micro-concentration.\n` +
+          `• **Aseptic Injection Technique**: Direct the solvent needle against the inner glass sidewall of the vial. Do not spray solvent directly onto the lyophilized cake.\n` +
+          `• **Dissolution**: Swirl gently with smooth circular motions. Avoid mechanical shaking or vortexing to prevent peptide peptide peptide shearing.\n\n` +
+          `Which specific concentration or syringe volume calculation would you like detailed?`;
+      } else if (lowerMsg.includes('refrigerat') || lowerMsg.includes('storage') || lowerMsg.includes('temp') || lowerMsg.includes('limit') || lowerMsg.includes('stabilit')) {
+        fallbackReply = `**Thermal Stability & Storage Protocol**:\n\n` +
+          `• **Lyophilized Powder**: Store sealed vials at **2°C to 8°C** for short-term handling (up to 90 days). For extended research preservation (12–24 months), store at **-20°C** in a frost-free, moisture-controlled environment.\n` +
+          `• **Reconstituted Solution**: Maintain reconstituted aqueous aliquots at **2°C to 8°C** shielded from UV light. Optimal analytical stability is observed within 28–35 days post-reconstitution.\n` +
+          `• **Thermal Excursion Safeguard**: Avoid repetitive freeze-thaw cycles. Protect from ambient heat sources and direct sunlight.\n\n` +
+          `Do you need storage criteria for alternate research solvent environments?`;
+      } else if (lowerMsg.includes('clinical') || lowerMsg.includes('pathway') || lowerMsg.includes('trial') || lowerMsg.includes('study') || lowerMsg.includes('pubmed') || lowerMsg.includes('evidence')) {
+        fallbackReply = `**Clinical Evidence & Investigational Overview**:\n\n` +
+          `• **Investigational Class**: Multi-receptor targeting peptide evaluated in peer-reviewed clinical research programs.\n` +
+          `• **Primary Biological Pathways**: Studies document potent agonist activity along regulated metabolic and cellular signaling cascades.\n` +
+          `• **Published Literature**: Peer-reviewed trials listed in the Clinical Evidence panel detail pharmacokinetics, dose-response curves, and safety endpoints.\n` +
+          `• **Research Scope**: Formulations are produced strictly for laboratory research, molecular investigation, and non-in-vivo analytical evaluation.\n\n` +
+          `Would you like to examine specific PubMed clinical trial citations or outcome endpoints?`;
+      } else if (lowerMsg.includes('receptor') || lowerMsg.includes('affinity') || lowerMsg.includes('target') || lowerMsg.includes('agonist')) {
+        fallbackReply = `**Receptor Target Affinities & Molecular Profile**:\n\n` +
+          `• **Signaling Dynamics**: Engineered for high-affinity receptor binding with nanomolar potency across designated target receptors.\n` +
+          `• **Downstream Cascades**: Stimulates selective intracellular cAMP accumulation and downstream enzymatic activation cascades without non-specific cross-reactivity.\n` +
+          `• **Molecular Integrity**: Sequence fidelity confirmed via high-resolution mass spectrometry (LC-MS).\n\n` +
+          `Would you like to review theoretical vs. observed molecular weight spectra?`;
+      } else {
+        fallbackReply = `**Analytical Specifications Overview**:\n\n` +
+          `• **Synthesis Standard**: Certified ≥99.0% analytical purity verified via Dual-Stage RP-HPLC and high-resolution LC-MS release assay.\n` +
+          `• **Appearance**: Pure white to off-white lyophilized plug, sterilized and hermetically sealed under nitrogen.\n` +
+          `• **Quality Verification**: Each production lot is cataloged with an independent Certificate of Analysis (COA) confirming peptide content and trifluoroacetate (TFA) clearance.\n\n` +
+          `Which specific compounding or analytical parameter do you need clarified?`;
+      }
+    } else {
+      fallbackReply = `Here is what you should know about **${goal || 'peptide research'}**:\n\n` +
         `• **Target Mechanism**: Research indicates targeted peptide signaling supports receptor binding with high specificity.\n` +
         `• **Key Compounds**: For your profile, explore [BPC-157](/product/bpc-157), [GHK-Cu](/product/ghk-cu), or [Epithalon](/product/epithalon).\n` +
         `• **Reconstitution Guide**: Vials typically reconstitute with 1.0mL – 2.0mL of bacteriostatic water. You can check the [Dose Calculator](/calculator) for exact units.\n\n` +
         `How else can I assist your protocol today?`;
+    }
 
     const fallbackRes = NextResponse.json({
       reply: fallbackReply,

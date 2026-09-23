@@ -178,7 +178,7 @@ export default function QuickShareDatasheetModal({
   };
 
   const cleanRecipientName = customName.trim() || 'Wholesale Partner';
-  const waText = `*Ficha Técnica Oficial — ATLAS HEALTH*\n📋 *Compuesto:* ${itemName} (${itemDose} ${itemFormat})\nDestinatario: ${cleanRecipientName}\n\nAcceso a especificaciones analíticas y protocolo:\n${generatedLink?.shortUrl || ''}`;
+  const waText = `*Official Technical Datasheet — ATLAS HEALTH*\n📋 *Compound:* ${itemName} (${itemDose} ${itemFormat})\nRecipient: ${cleanRecipientName}\n\nAccess verified analytical specifications and monograph:\n${generatedLink?.shortUrl || ''}`;
   const waUrl = `https://wa.me/${customPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waText)}`;
 
   return (
@@ -240,7 +240,7 @@ export default function QuickShareDatasheetModal({
             </div>
             <div>
               <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#ffffff' }}>
-                Compartir Ficha Técnica Única
+                Share Unique Datasheet
               </div>
               <div style={{ fontSize: '0.72rem', color: '#bfdbfe' }}>
                 {itemName} • {itemDose} ({itemFormat})
@@ -287,7 +287,7 @@ export default function QuickShareDatasheetModal({
                   {itemName}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  Dosificación: <strong style={{ color: '#0369a1' }}>{itemDose}</strong> | Formato: <strong>{itemFormat}</strong>
+                  Dosage: <strong style={{ color: '#0369a1' }}>{itemDose}</strong> | Format: <strong>{itemFormat}</strong>
                 </div>
               </div>
               <span
@@ -307,7 +307,7 @@ export default function QuickShareDatasheetModal({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
               <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
-                Seleccionar Péptido / Compuesto:
+                Select Peptide / Compound:
               </label>
               <select
                 value={selectedCompoundIdx}
@@ -366,11 +366,11 @@ export default function QuickShareDatasheetModal({
               {initialRecipient ? (
                 <div style={{ padding: '8px 12px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ fontSize: '0.78rem', color: '#166534' }}>
-                    Destinatario Asignado: <strong>{customName}</strong>
+                    Assigned Recipient: <strong>{customName}</strong>
                     {customEmail && <span style={{ opacity: 0.8 }}> ({customEmail})</span>}
                   </div>
                   <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#15803d', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
-                    Confirmado ✓
+                    Confirmed ✓
                   </span>
                 </div>
               ) : (
@@ -386,7 +386,7 @@ export default function QuickShareDatasheetModal({
                       letterSpacing: '0.03em',
                     }}
                   >
-                    Destinatario Mayorista / Partner
+                    Wholesale Partner / Recipient
                   </label>
 
                   {wholesalers.length > 0 && (
@@ -411,14 +411,14 @@ export default function QuickShareDatasheetModal({
                           🏢 {w.name || w.companyName || w.fullName} {w.city ? `(${w.city})` : ''}
                         </option>
                       ))}
-                      <option value="custom">✏️ Otro / Destinatario Nuevo...</option>
+                      <option value="custom">✏️ Other / New Recipient...</option>
                     </select>
                   )}
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <input
                       type="text"
-                      placeholder="Nombre o Razón Social"
+                      placeholder="Client or Company Name"
                       value={customName}
                       onChange={(e) => setCustomName(e.target.value)}
                       style={{
@@ -431,7 +431,7 @@ export default function QuickShareDatasheetModal({
                     />
                     <input
                       type="email"
-                      placeholder="Email (opcional)"
+                      placeholder="Email (optional)"
                       value={customEmail}
                       onChange={(e) => setCustomEmail(e.target.value)}
                       style={{
@@ -463,7 +463,7 @@ export default function QuickShareDatasheetModal({
               >
                 <ShieldCheck size={16} style={{ color: '#0284c7', flexShrink: 0, marginTop: '1px' }} />
                 <span>
-                  <strong>URL Única & Rastreable:</strong> Cada vez que compartes, se genera un enlace irrepetible. Podrás saber con exactitud cuándo y cuántas veces este mayorista abrió el documento.
+                  <strong>Unique & Tracked Link:</strong> Every time you share, a dedicated non-repeatable link is created. You can track exactly when and how many times the recipient viewed this monograph.
                 </span>
               </div>
 
@@ -475,7 +475,7 @@ export default function QuickShareDatasheetModal({
                 style={{
                   width: '100%',
                   padding: '11px',
-                  backgroundColor: '#003666',
+                  backgroundColor: '#0b57d0',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '8px',
@@ -486,16 +486,16 @@ export default function QuickShareDatasheetModal({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 2px 4px rgba(0, 54, 102, 0.25)',
+                  boxShadow: '0 2px 4px rgba(11, 87, 208, 0.25)',
                   marginTop: '4px',
                 }}
               >
                 {isGenerating ? (
-                  <span>Generando enlace seguro...</span>
+                  <span>Generating secure link...</span>
                 ) : (
                   <>
                     <Share2 size={16} />
-                    <span>Generar y Copiar Enlace Único</span>
+                    <span>Generate & Copy Unique Link</span>
                   </>
                 )}
               </button>
@@ -514,10 +514,10 @@ export default function QuickShareDatasheetModal({
               >
                 <CheckCircle2 size={28} style={{ color: '#16a34a', margin: '0 auto 6px' }} />
                 <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#14532d' }}>
-                  ¡Enlace Único Generado con Éxito!
+                  Unique Tracked Link Generated!
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#15803d', marginTop: '2px' }}>
-                  Asignado exclusivamente a <strong>{cleanRecipientName}</strong>
+                  Dedicated to <strong>{cleanRecipientName}</strong>
                 </div>
               </div>
 
@@ -556,7 +556,7 @@ export default function QuickShareDatasheetModal({
                       alignItems: 'center',
                       gap: '4px',
                       padding: '5px 10px',
-                      backgroundColor: copied ? '#16a34a' : '#0284c7',
+                      backgroundColor: copied ? '#137333' : '#0b57d0',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '6px',
@@ -566,7 +566,7 @@ export default function QuickShareDatasheetModal({
                     }}
                   >
                     {copied ? <Check size={13} /> : <Copy size={13} />}
-                    <span>{copied ? 'Copiado' : 'Copiar'}</span>
+                    <span>{copied ? 'Copied ✓' : 'Copy Link'}</span>
                   </button>
                 </div>
               </div>
@@ -593,7 +593,7 @@ export default function QuickShareDatasheetModal({
                   }}
                 >
                   <ExternalLink size={14} />
-                  <span>Ver Ficha Técnica</span>
+                  <span>View Datasheet</span>
                 </a>
 
                 <a
