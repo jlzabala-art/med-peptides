@@ -41,8 +41,9 @@ const TYPE_CONFIG = {
   raw_material:        { label: 'BULK API',    icon: <FlaskConical size={11} strokeWidth={2.2} />,  bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
   corporate_services:  { label: 'B2B SERVICE', icon: <Building2 size={11} strokeWidth={2.2} />,    bg: '#f8fafc', color: '#0369a1', border: '#bae6fd' },
   clinical_supplies:   { label: 'CLINICAL',    icon: <Stethoscope size={11} strokeWidth={2.2} />,   bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
+  diagnostic_test:     { label: 'DIAGNOSTIC',  icon: <Activity size={11} strokeWidth={2.2} />,     bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
+  diagnostic:          { label: 'DIAGNOSTIC',  icon: <Activity size={11} strokeWidth={2.2} />,     bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
   genomics_biomarkers: { label: 'GENOMICS',    icon: <Dna size={11} strokeWidth={2.2} />,          bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
-  diagnostic:          { label: 'GENOMICS',    icon: <Dna size={11} strokeWidth={2.2} />,          bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
   service:             { label: 'SERVICE',     icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
 };
 

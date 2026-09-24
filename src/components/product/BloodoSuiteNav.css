@@ -3,32 +3,41 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ---------------------------------------------------------------------------
-   1. CHIPS VARIANT (Top Header Carousel)
+   1. CHIPS VARIANT (Top Header Responsive Grid - No Horizontal Scroll)
    --------------------------------------------------------------------------- */
 .bloodo-suite-chips {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
   margin: 12px 0 16px 0;
-  padding: 8px 12px;
-  background: rgba(2, 132, 199, 0.04);
-  border: 1px solid rgba(2, 132, 199, 0.15);
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  max-width: 100%;
-  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bloodo-suite-chips__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.bloodo-suite-chips__title-group {
+  display: flex;
+  align-items: center;
   gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
+}
+
+.bloodo-suite-chips__label {
+  font-size: 0.74rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #0369a1;
-  white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: 0.04em;
+  color: #0f172a;
 }
 
 .bloodo-suite-chips__icon {
@@ -36,43 +45,89 @@
   flex-shrink: 0;
 }
 
-.bloodo-suite-chips__track {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 2px 0;
-  width: 100%;
+.bloodo-suite-chips__subtag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0d9488;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
-.bloodo-suite-chips__track::-webkit-scrollbar {
-  display: none;
+.bloodo-suite-chips__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bloodo-suite-chip {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  font-size: 0.72rem;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.76rem;
   font-weight: 600;
-  color: #475569;
+  color: #334155;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 9999px;
+  border-radius: 8px;
   text-decoration: none;
-  white-space: nowrap;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.bloodo-suite-chip__icon {
   flex-shrink: 0;
+}
+
+.bloodo-suite-chip__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+}
+
+.bloodo-suite-chip__text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.bloodo-suite-chip__sub {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 1px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .bloodo-suite-chip:hover {
   color: var(--chip-accent, #0284c7);
   border-color: var(--chip-accent, #0284c7);
-  background: rgba(2, 132, 199, 0.05);
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
   transform: translateY(-1px);
+}
+
+.bloodo-suite-chip:hover .bloodo-suite-chip__sub {
+  color: var(--chip-accent, #0284c7);
+  opacity: 0.9;
 }
 
 .bloodo-suite-chip--active {
@@ -80,25 +135,37 @@
   background: var(--chip-accent, #0284c7);
   border-color: var(--chip-accent, #0284c7);
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   cursor: default;
 }
 
-.bloodo-suite-chip__icon {
+.bloodo-suite-chip--active .bloodo-suite-chip__sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bloodo-suite-chip__badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  letter-spacing: 0.03em;
+  margin-left: auto;
   flex-shrink: 0;
 }
 
-.bloodo-suite-chip__dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #ffffff;
-  animation: bloodo-pulse 2s infinite ease-in-out;
+@media (max-width: 640px) {
+  .bloodo-suite-chips__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-@keyframes bloodo-pulse {
-  0%, 100% { opacity: 0.6; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.2); }
+@media (max-width: 420px) {
+  .bloodo-suite-chips__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -220,17 +287,17 @@
   font-size: 0.74rem;
   font-weight: 700;
   color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .bloodo-suite-drawer-item__biomarker {
   font-size: 0.65rem;
   color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 .bloodo-suite-drawer-item__current-badge {
@@ -238,9 +305,11 @@
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
-  background: #22c55e;
+  background: #16a34a;
   color: #ffffff;
   flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
 }
 
 .bloodo-suite-drawer-item__arrow {

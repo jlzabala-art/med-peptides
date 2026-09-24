@@ -47,15 +47,20 @@ const COMPOUND_IMAGE_MAP = {
   'ghk-cu': '/assets/vials/generic-vial.png',
   'ghkcu': '/assets/vials/generic-vial.png',
 
-  // Diagnostic Kits & Bloodo tests
+  // Diagnostic Kits & Bloodo tests (High-Res Visual Assets)
   'bloodo-nad-test': '/images/nad_test_results.png',
   'bloodo-nad-level-test': '/images/nad_test_results.png',
   'nad-level-test': '/images/nad_test_results.png',
-  'bloodo-testosterone-test': '/images/clinical/vial_single.jpg',
-  'bloodo-vitamin-d-test': '/images/clinical/vial_single.jpg',
-  'bloodo-hba1c-test': '/images/clinical/vial_single.jpg',
-  'bloodo-omega-ratio-test': '/images/clinical/vial_single.jpg',
-  'bloodo-cortisol-test': '/images/clinical/vial_single.jpg',
+  'bloodo-testosterone-test': '/images/hormone_balance.png',
+  'testosterone-test': '/images/hormone_balance.png',
+  'bloodo-cortisol-test': '/images/stress_resilience.png',
+  'cortisol-test': '/images/stress_resilience.png',
+  'bloodo-hba1c-test': '/images/metabolic_flex.png',
+  'hemoglobin-a1c-hba1c-test': '/images/metabolic_flex.png',
+  'bloodo-omega-ratio-test': '/images/biomarkers_aging_telomere.png',
+  'omega-ratio-test': '/images/biomarkers_aging_telomere.png',
+  'bloodo-vitamin-d-test': '/images/vitamin_d.png',
+  'vitamin-d-test': '/images/vitamin_d.png',
 };
 
 // Delivery format visual fallbacks
@@ -177,14 +182,22 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   // ── 1. ATTRACTIVE TITLE ──
   let title = '';
   if (isDiagnostic) {
-    if (String(pName).toLowerCase().includes('cortisol') || String(product?.slug || '').includes('cortisol')) {
-      title = `Bloodo™ Cortisol Awakening Response (CAR) Test | CE-IVDR Kit`;
-    } else if (String(pName).toLowerCase().includes('nad') || String(product?.slug || '').includes('nad')) {
-      title = `Bloodo™ Intracellular NAD+ Blood Test | CE-IVDR Kit`;
-    } else if (String(pName).toLowerCase().includes('hba1c') || String(pName).toLowerCase().includes('hemoglobin')) {
-      title = `Bloodo™ HbA1c 90-Day Glycemic Test | CE-IVDR Kit`;
+    const slugLower = String(product?.slug || product?.id || '').toLowerCase();
+    const nameLower = String(pName).toLowerCase();
+    if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
+      title = `⚡ Bloodo™ Testosterona+ Test (Total & Libre) | CE-IVDR Kit`;
+    } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
+      title = `⏱️ Bloodo™ Cortisol Ritmo Circadiano (CAR) | CE-IVDR Kit`;
+    } else if (slugLower.includes('nad') || nameLower.includes('nad')) {
+      title = `🔬 Bloodo™ Test de Nivel NAD+ Celular | CE-IVDR Kit`;
+    } else if (slugLower.includes('hba1c') || slugLower.includes('hemoglobin') || nameLower.includes('hba1c') || nameLower.includes('hemoglobina')) {
+      title = `🩸 Bloodo™ HbA1c Glicación 90 Días | CE-IVDR Kit`;
+    } else if (slugLower.includes('omega') || nameLower.includes('omega')) {
+      title = `🛡️ Bloodo™ Ratio Omega-3/6 & Índice Omega | CE-IVDR Kit`;
+    } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
+      title = `☀️ Bloodo™ Vitamina D3 [25-OH] Test | CE-IVDR Kit`;
     } else {
-      title = `${pName} | CE-IVDR Certified Diagnostic Kit`;
+      title = `🔬 ${pName} | CE-IVDR Certified Diagnostic Kit`;
     }
   } else {
     const specDetails = [dose, format].filter(Boolean).join(' · ');
@@ -201,14 +214,24 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   // ── 2. ATTRACTIVE SUMMARY DESCRIPTION ──
   let description = '';
   if (isDiagnostic) {
-    if (String(pName).toLowerCase().includes('cortisol') || String(product?.slug || '').includes('cortisol')) {
-      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test measuring circadian Cortisol Awakening Response (CAR) and diurnal slope. LifeLab1 central laboratory.';
-    } else if (String(pName).toLowerCase().includes('nad') || String(product?.slug || '').includes('nad')) {
-      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test measuring total intracellular NAD+ & NADH. LifeLab1 central laboratory analysis with clinical report.';
+    const slugLower = String(product?.slug || product?.id || '').toLowerCase();
+    const nameLower = String(pName).toLowerCase();
+    if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
+      description = 'LC-MS/MS Gold Standard para cuantificar Testosterona Total, Libre, SHBG e Índice FAI por punción capilar DBS. Evalúa tu vitalidad hormonal y eje HPTA con LifeLab1.';
+    } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
+      description = 'Curva de Cortisol Diurno y Respuesta al Despertar (CAR) por punción capilar DBS. Mide estrés neuroendocrino, fatiga suprarrenal y calidad de descanso con LifeLab1.';
+    } else if (slugLower.includes('nad') || nameLower.includes('nad')) {
+      description = 'Test cuantitativo CE-IVDR de NAD⁺ intracelular total y NADH por punción capilar DBS. Analítica centralizada en LifeLab1 (Vilnius) con informe clínico de longevidad.';
+    } else if (slugLower.includes('hba1c') || slugLower.includes('hemoglobin') || nameLower.includes('hba1c') || nameLower.includes('hemoglobina')) {
+      description = 'Microcromatografía de afinidad para medir Hemoglobina Glicada y Glucosa Media de 90 días por punción capilar DBS. Optimiza tu sensibilidad a la insulina y control metabólico.';
+    } else if (slugLower.includes('omega') || nameLower.includes('omega')) {
+      description = 'Perfil de ácidos grasos en membrana eritrocitaria por GC-MS. Cuantifica tu Índice Omega-3, ratio inflamatorio AA/EPA y ácidos trans con LifeLab1.';
+    } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
+      description = 'Dilución isotópica LC-MS/MS para cuantificar 25-Hidroxivitamina D3 y D2 total por punción capilar DBS. Clave para inmunidad innata, expresión génica y eje VDR.';
     } else if (product?.description && product.description.length > 30) {
       description = product.description.slice(0, 160);
     } else {
-      description = 'CE-IVDR certified quantitative capillary dried blood spot (DBS) test. LifeLab1 central laboratory analysis with digital clinical report delivery.';
+      description = 'Test cuantitativo CE-IVDR por punción capilar Dried Blood Spot (DBS). Análisis centralizado en laboratorio de referencia LifeLab1 con informe clínico digital.';
     }
   } else {
     const purity = product?.purity || '≥ 99.0% (RP-HPLC & ESI-MS)';

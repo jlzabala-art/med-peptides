@@ -90,14 +90,82 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const nadLevel = params.get('nad_level');
+      const testoLevel = params.get('testosterone_level') || params.get('testo_level');
+      const cortisolLevel = params.get('cortisol_level');
+      const hba1cLevel = params.get('hba1c_level');
+      const omegaRatio = params.get('omega_ratio') || params.get('omega_index');
+      const vitdLevel = params.get('vitd_level') || params.get('vit_d_level');
       const baseline = params.get('baseline');
       const tier = params.get('tier');
       const modality = params.get('modality');
       const retest = params.get('retest');
 
+      if (testoLevel || (baseline && (slug?.includes('hormon') || protocol?.category === 'Hormonal Support'))) {
+        return {
+          type: 'testosterone',
+          level: testoLevel ? parseFloat(testoLevel) : 8.5,
+          unit: 'nmol/L',
+          baseline: baseline || 'deficient',
+          tier: tier || 'critical',
+          modality: modality || 'secretagogues',
+          retest: retest || '8w'
+        };
+      }
+
+      if (cortisolLevel || (baseline && (slug?.includes('sleep') || slug?.includes('cortisol') || slug?.includes('stress')))) {
+        return {
+          type: 'cortisol',
+          level: cortisolLevel ? parseFloat(cortisolLevel) : 110,
+          unit: 'nmol/L',
+          baseline: baseline || 'exhaustion',
+          tier: tier || 'critical',
+          modality: modality || 'neurorestoration',
+          retest: retest || '8w'
+        };
+      }
+
+      if (hba1cLevel) {
+        return {
+          type: 'hba1c',
+          level: parseFloat(hba1cLevel),
+          unit: '%',
+          baseline: baseline || 'elevated',
+          tier: tier || 'warning',
+          modality: modality || 'incretin',
+          retest: retest || '12w'
+        };
+      }
+
+      if (omegaRatio) {
+        return {
+          type: 'omega',
+          level: parseFloat(omegaRatio),
+          unit: '%',
+          baseline: baseline || 'suboptimal',
+          tier: tier || 'warning',
+          modality: modality || 'repletion',
+          retest: retest || '12w'
+        };
+      }
+
+      if (vitdLevel) {
+        return {
+          type: 'vitd',
+          level: parseFloat(vitdLevel),
+          unit: 'ng/mL',
+          baseline: baseline || 'deficient',
+          tier: tier || 'critical',
+          modality: modality || 'repletion',
+          retest: retest || '10w'
+        };
+      }
+
       if (nadLevel || baseline) {
         return {
+          type: 'nad',
+          level: nadLevel ? parseFloat(nadLevel) : 18.0,
           nadLevel: nadLevel ? parseFloat(nadLevel) : 18.0,
+          unit: 'µmol/L',
           baseline: baseline || 'severe',
           tier: tier || 'critical',
           modality: modality || 'intravenous',
@@ -120,9 +188,103 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
   const calibrationDisplay = useMemo(() => {
     if (!biomarkerCalibration) return null;
     const isEs = lang === 'es';
-    const lvl = biomarkerCalibration.nadLevel;
+    const bType = biomarkerCalibration.type || 'nad';
+    const lvl = biomarkerCalibration.level;
     const baseline = biomarkerCalibration.baseline;
 
+    // ── 1. TESTOSTERONE CALIBRATION PROFILE ──
+    if (bType === 'testosterone') {
+      let tierColor = '#dc2626';
+      let tierBg = '#fef2f2';
+      let tierBadgeText = isEs ? 'Déficit Androgénico · Alto Impacto' : 'Androgen Deficiency · Critical Priority';
+      let tierSubText = isEs ? 'Hipogonadismo funcional / fallo de pulsatilidad GnRH' : 'Functional hypogonadism / impaired GnRH pulsatility';
+      let prescribedRouteText = isEs ? 'Secretagogos HPTA (Kisspeptina-10 + Testagen)' : 'HPTA Secretagogues (Kisspeptin-10 + Testagen)';
+      let prescribedRouteSub = isEs ? 'Reactivación endógena sin atrofia testicular' : 'Endogenous stimulation preserving testicular volume';
+      let deltaTargetText = isEs ? `Déficit de -${Math.max(0, (20 - lvl)).toFixed(1)} nmol/L hacia diana (≥ 20 nmol/L)` : `Deficit of -${Math.max(0, (20 - lvl)).toFixed(1)} nmol/L to target (≥ 20 nmol/L)`;
+      let retestScheduleText = isEs ? 'Semana 8 (En Tratamiento)' : 'Week 8 (On-Treatment)';
+      let retestScheduleSub = isEs ? 'Control capilar DBS sin suspender pauta' : 'DBS capillary test without cessation';
+      let targetRangeText = '18.0 – 28.0 nmol/L (520 – 800 ng/dL)';
+      let titleText = isEs
+        ? `Estratificación Terapéutica para Testosterona Total: ${lvl} nmol/L`
+        : `Therapeutic Stratification for Total Testosterone: ${lvl} nmol/L`;
+      let aiQueryText = isEs
+        ? `Tengo un nivel de Testosterona de ${lvl} nmol/L (${tierBadgeText}). ¿Cómo reactiva la Kisspeptina-10 la pulsatilidad del eje HPTA sin inducir atrofia testicular en este protocolo?`
+        : `My total testosterone level is ${lvl} nmol/L (${tierBadgeText}). How does Kisspeptin-10 stimulate HPTA pulsatility without testicular atrophy in this protocol?`;
+
+      if (baseline === 'suboptimal' || (lvl >= 10 && lvl < 15)) {
+        tierColor = '#d97706';
+        tierBg = '#fffbeb';
+        tierBadgeText = isEs ? 'Subóptimo · Margen de Optimización' : 'Borderline Suboptimal · Room for Optimization';
+        tierSubText = isEs ? 'Declive androgénico y fatiga metabólica' : 'Androgenic decline & metabolic fatigue';
+        prescribedRouteText = isEs ? 'Microdosificación de Secretagogos y Biorregulación' : 'Secretagogue Micro-dosing & Bioregulation';
+        prescribedRouteSub = isEs ? 'Kisspeptina-10 100 mcg 2x/semana + DIM/Zinc' : 'Kisspeptin-10 100 mcg 2x/wk + DIM/Zinc';
+        deltaTargetText = isEs ? `Déficit de -${Math.max(0, (20 - lvl)).toFixed(1)} nmol/L hacia diana` : `Deficit of -${Math.max(0, (20 - lvl)).toFixed(1)} nmol/L to target`;
+      } else if (baseline === 'optimal' || (lvl >= 15 && lvl <= 28)) {
+        tierColor = '#0d9488';
+        tierBg = '#f0fdfa';
+        tierBadgeText = isEs ? 'Rango Óptimo · Vitalidad Fisiológica' : 'Optimal Target · Physiological Vitality';
+        tierSubText = isEs ? 'Homeostasis endocrina y masa magra' : 'Endocrine homeostasis & lean mass retention';
+        prescribedRouteText = isEs ? 'Mantenimiento y Control de Aromatasa' : 'Maintenance & Aromatase Surveillance';
+        prescribedRouteSub = isEs ? 'Pulsos circadianos y vigilancia de estradiol' : 'Circadian pulses & estradiol monitoring';
+        deltaTargetText = isEs ? 'Nivel en zona diana androgénica (≥ 18 nmol/L)' : 'Level in target androgenic zone (≥ 18 nmol/L)';
+        retestScheduleText = isEs ? '6 Meses (Vigilancia Semestral)' : '6 Months (Biannual Check)';
+      } else if (baseline === 'peak' || lvl > 28) {
+        tierColor = '#2563eb';
+        tierBg = '#eff6ff';
+        tierBadgeText = isEs ? 'Pico Suprafisiológico · Meseta' : 'Upper Physiological · Peak';
+        tierSubText = isEs ? 'Respuesta máxima; vigilar hematocrito y E2' : 'Peak response; monitor hematocrit and E2';
+        prescribedRouteText = isEs ? 'Ciclado / Washout de Secretagogos' : 'Secretagogue Cycling / Washout Window';
+        prescribedRouteSub = isEs ? 'Ventana de descanso de 3–4 semanas' : '3-4 week physiological rest window';
+        deltaTargetText = isEs ? 'Umbral superior alcanzado con éxito' : 'Upper target successfully achieved';
+      }
+
+      return {
+        bType,
+        measuredValStr: `${lvl} nmol/L`,
+        targetRangeText,
+        titleText,
+        aiQueryText,
+        tierColor,
+        tierBg,
+        tierBadgeText,
+        tierSubText,
+        prescribedRouteText,
+        prescribedRouteSub,
+        deltaTargetText,
+        retestScheduleText,
+        retestScheduleSub
+      };
+    }
+
+    // ── 2. CORTISOL CALIBRATION PROFILE ──
+    if (bType === 'cortisol') {
+      const isExhaustion = baseline === 'exhaustion' || lvl < 150;
+      const isHyper = baseline === 'hypercortisol' || lvl > 500;
+      const tierColor = isExhaustion ? '#8b5cf6' : (isHyper ? '#dc2626' : '#0d9488');
+      const tierBg = isExhaustion ? '#f5f3ff' : (isHyper ? '#fef2f2' : '#f0fdfa');
+      const tierBadgeText = isExhaustion 
+        ? (isEs ? 'Agotamiento Suprarrenal · Curva Aplanada' : 'Adrenal Burnout · Blunted CAR Curve')
+        : (isHyper ? (isEs ? 'Hipercortisolemia · Estrés Crónico' : 'Hypercortisolemia · Chronic Stress') : (isEs ? 'Ritmo Circadiano Equilibrado' : 'Balanced Circadian Rhythm'));
+
+      return {
+        bType,
+        measuredValStr: `${lvl} nmol/L`,
+        targetRangeText: 'CAR: 300 – 500 nmol/L · PM: < 150 nmol/L',
+        titleText: isEs ? `Estratificación Circadiana para Cortisol Diurno: ${lvl} nmol/L` : `Circadian Stratification for Diurnal Cortisol: ${lvl} nmol/L`,
+        aiQueryText: isEs ? `Mi nivel de cortisol diurno es ${lvl} nmol/L (${tierBadgeText}). ¿Cómo modula este protocolo la curva circadiana y el eje HPA?` : `My diurnal cortisol is ${lvl} nmol/L (${tierBadgeText}). How does this protocol modulate circadian rhythm and HPA axis?`,
+        tierColor,
+        tierBg,
+        tierBadgeText,
+        tierSubText: isEs ? 'Carga alostática y modulación del eje HPA' : 'Allostatic load and HPA neuro-modulation',
+        prescribedRouteText: isEs ? 'Neuropéptidos Biorreguladores (Selank + DSIP)' : 'Bioregulatory Neuropeptides (Selank + DSIP)',
+        prescribedRouteSub: isEs ? 'Armonización del ciclo vigilia-sueño y resiliencia' : 'Sleep-wake harmonization & stress resilience',
+        deltaTargetText: isEs ? 'Optimización de la curva matutina CAR' : 'Optimization of awakening CAR slope',
+        retestScheduleText: isEs ? 'Semana 8 (En Tratamiento)' : 'Week 8 (On-Treatment)',
+        retestScheduleSub: isEs ? 'Control capilar matutino + vespertino' : 'Morning + Evening paired DBS check'
+      };
+    }
+
+    // ── 3. DEFAULT: NAD+ CALIBRATION PROFILE ──
     let tierColor = '#dc2626';
     let tierBg = '#fef2f2';
     let tierBadgeText = isEs ? 'Depleción Severa · Alto Riesgo' : 'Severe Depletion · High Risk';
@@ -166,6 +328,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
     }
 
     return {
+      bType: 'nad',
+      measuredValStr: `${lvl} µmol/L`,
+      targetRangeText: '30.0 – 50.0 µmol/L',
+      titleText: isEs ? `Estratificación Terapéutica para NAD⁺ Intracelular: ${lvl} µmol/L` : `Therapeutic Stratification for Intracellular NAD+: ${lvl} µmol/L`,
+      aiQueryText: isEs 
+        ? `Tengo un nivel de NAD+ de ${lvl} µmol/L (${tierBadgeText}). ¿Cómo debo administrar la vía ${biomarkerCalibration.modality} y los protectores de metilación con este protocolo?`
+        : `My intracellular NAD+ level is ${lvl} µmol/L (${tierBadgeText}). What is the clinical protocol for ${biomarkerCalibration.modality} dosing and methylation support?`,
       tierColor,
       tierBg,
       tierBadgeText,
@@ -667,9 +836,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                       <span className="pbc-source-tag">Bloodo DBS™ · LifeLab1 (Vilnius, EU)</span>
                     </div>
                     <h4 className="pbc-title">
-                      {lang === 'es' 
-                        ? `Estratificación Terapéutica para NAD⁺ Intracelular: ${biomarkerCalibration.nadLevel} µmol/L`
-                        : `Therapeutic Stratification for Intracellular NAD+: ${biomarkerCalibration.nadLevel} µmol/L`}
+                      {calibrationDisplay.titleText}
                     </h4>
                   </div>
                 </div>
@@ -693,15 +860,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                 <div className="pbc-stat-box">
                   <span className="pbc-stat-label">{lang === 'es' ? 'Nivel Basal Determinado:' : 'Simulated Baseline:'}</span>
                   <strong className="pbc-stat-val" style={{ color: calibrationDisplay.tierColor }}>
-                    {biomarkerCalibration.nadLevel} µmol/L
+                    {calibrationDisplay.measuredValStr}
                   </strong>
                   <small className="pbc-stat-sub">{calibrationDisplay.tierSubText}</small>
                 </div>
 
                 <div className="pbc-stat-box">
-                  <span className="pbc-stat-label">{lang === 'es' ? 'Rango Diana de Longevidad:' : 'Target Longevity Range:'}</span>
+                  <span className="pbc-stat-label">{lang === 'es' ? 'Rango Diana Terapéutico:' : 'Target Therapeutic Range:'}</span>
                   <strong className="pbc-stat-val" style={{ color: '#0d9488' }}>
-                    30.0 – 50.0 µmol/L
+                    {calibrationDisplay.targetRangeText}
                   </strong>
                   <small className="pbc-stat-sub">
                     {calibrationDisplay.deltaTargetText}
@@ -746,9 +913,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
                         window.dispatchEvent(
                           new CustomEvent('open-public-atlas-ai', {
                             detail: {
-                              initialQuery: lang === 'es'
-                                ? `Tengo un nivel de NAD+ de ${biomarkerCalibration.nadLevel} µmol/L (${calibrationDisplay.tierBadgeText}). ¿Cómo debo administrar la vía ${biomarkerCalibration.modality} y los protectores de metilación con este protocolo?`
-                                : `My intracellular NAD+ level is ${biomarkerCalibration.nadLevel} µmol/L (${calibrationDisplay.tierBadgeText}). What is the clinical protocol for ${biomarkerCalibration.modality} dosing and methylation support?`
+                              initialQuery: calibrationDisplay.aiQueryText
                             }
                           })
                         );

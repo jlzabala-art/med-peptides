@@ -50,6 +50,7 @@ import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import BloodoNadFaqCard from './BloodoNadFaqCard';
 import BloodoSuiteNav, { isBloodoProduct } from './BloodoSuiteNav';
+import BloodoClinicalAdvantageCard from './BloodoClinicalAdvantageCard';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
@@ -823,15 +824,18 @@ export default function PublicDatasheetView({
         { id: 'presentations-matrix', label: lang === 'es' ? 'Presentaciones del Kit' : 'Kit Presentations', icon: Layers },
         { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones Analíticas' : 'Analytical Specs', icon: Activity },
         { id: 'biomarker-simulator', label: lang === 'es' ? 'Simulador Clínico' : 'Biomarker Simulator', icon: Sparkles },
-        ...(isBloodoDiagnostic ? [
-          { id: 'bloodo-suite', label: lang === 'es' ? 'Suite Bloodo (6 Tests)' : 'Bloodo Suite (6 Tests)', icon: Sparkles }
-        ] : []),
         { id: 'collection-protocol', label: lang === 'es' ? 'Protocolo de Muestreo DBS' : 'DBS Collection Protocol', icon: Droplets },
         { id: 'pre-analytical-prep', label: lang === 'es' ? 'Estandarización Preanalítica' : 'Pre-Analytical Prep', icon: CheckCircle2 },
         { id: 'kit-contents', label: lang === 'es' ? 'Contenido del Kit' : 'Kit Included Items', icon: Layers },
         { id: 'specs-section', label: lang === 'es' ? 'Trazabilidad y Calidad' : 'Lab Quality & Traceability', icon: ShieldCheck },
         { id: 'nad-clinical-faq', label: lang === 'es' ? 'Guías y Preguntas Clínicas' : 'Clinical FAQs & Guidance', icon: HelpCircle },
-        { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Acompañantes' : 'Companion Protocols', icon: FlaskConical }
+        { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Acompañantes' : 'Companion Protocols', icon: FlaskConical },
+        ...(isBloodoDiagnostic ? [
+          { id: 'bloodo-suite', label: lang === 'es' ? 'Otros Tests Disponibles' : 'Other Diagnostic Tests', icon: Sparkles },
+          { id: 'clinical-dbs-advantages', label: lang === 'es' ? 'Ventaja DBS en Consulta' : 'In-Office DBS Advantages', icon: ShieldCheck }
+        ] : [
+          { id: 'clinical-dbs-advantages', label: lang === 'es' ? 'Ventaja DBS en Consulta' : 'In-Office DBS Advantages', icon: ShieldCheck }
+        ])
       ];
     }
 
@@ -2361,15 +2365,18 @@ export default function PublicDatasheetView({
           <BloodoNadFaqCard product={product} lang={lang} />
         )}
 
-        {/* ── Block 4.9: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
+        {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
+        <BloodoRelatedPeptidesSection product={product} lang={lang} />
+
+        {/* ── Block 6: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
         {isBloodoDiagnostic && (
           <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
         )}
 
-        {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
-        <BloodoRelatedPeptidesSection product={product} lang={lang} />
-
-
+        {/* ── Block 7: In-Office Clinical Advantage (Capillary DBS vs Traditional Phlebotomy) ── */}
+        {(isBloodoDiagnostic || isDiagnosticKit) && (
+          <BloodoClinicalAdvantageCard lang={lang} />
+        )}
 
         {/* Institutional Regulatory Footnote */}
         <footer className="pds-page-footer">

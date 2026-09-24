@@ -397,14 +397,15 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
   const slug = String(product?.slug || product?.id || '').toLowerCase();
 
   const matchedTestKey = useMemo(() => {
-    if (slug.includes('nad')) return 'bloodo-nad-level-test';
-    if (slug.includes('hba1c') || slug.includes('hemoglobin')) return 'hemoglobin-a1c-hba1c-test';
-    if (slug.includes('omega')) return 'omega-ratio-test';
-    if (slug.includes('vitamin') || slug.includes('vit-d')) return 'vitamin-d-test';
-    if (slug.includes('cortisol')) return 'cortisol-test';
-    if (slug.includes('testosterone')) return 'testosterone-test';
+    const s = `${product?.slug || ''} ${product?.id || ''} ${product?.name || ''}`.toLowerCase();
+    if (s.includes('testosterone') || s.includes('testosterona')) return 'testosterone-test';
+    if (s.includes('cortisol')) return 'cortisol-test';
+    if (s.includes('hba1c') || s.includes('hemoglobin') || s.includes('hemoglobina')) return 'hemoglobin-a1c-hba1c-test';
+    if (s.includes('omega')) return 'omega-ratio-test';
+    if (s.includes('vitamin-d') || s.includes('vitamina-d') || s.includes('vitamin d') || s.includes('vitamina d')) return 'vitamin-d-test';
+    if (s.includes('nad')) return 'bloodo-nad-level-test';
     return null;
-  }, [slug]);
+  }, [product]);
 
   const peptidesList = useMemo(() => {
     if (!matchedTestKey) return [];
@@ -412,8 +413,8 @@ export default function BloodoRelatedPeptidesSection({ product, lang = 'en' }) {
   }, [matchedTestKey]);
 
   const matchedProtocol = useMemo(() => {
-    if (!matchedTestKey) return DEFAULT_RELATED_PROTOCOLS['bloodo-nad-level-test'];
-    return DEFAULT_RELATED_PROTOCOLS[matchedTestKey] || DEFAULT_RELATED_PROTOCOLS['bloodo-nad-level-test'];
+    if (!matchedTestKey) return null;
+    return DEFAULT_RELATED_PROTOCOLS[matchedTestKey] || null;
   }, [matchedTestKey]);
 
   const isEs = lang === 'es';

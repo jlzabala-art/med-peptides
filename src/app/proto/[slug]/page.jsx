@@ -9,6 +9,36 @@ export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
+// ⚡ Layer 1 In-Memory Server RAM Cache (Golden Rule #2)
+const PUBLIC_PROTOCOL_RAM_CACHE = new Map();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+export function invalidatePublicProtocolCache(slug) {
+  if (!slug) {
+    PUBLIC_PROTOCOL_RAM_CACHE.clear();
+  } else {
+    const s = decodeURIComponent(slug).toLowerCase().trim();
+    for (const key of PUBLIC_PROTOCOL_RAM_CACHE.keys()) {
+      if (key.startsWith(s)) PUBLIC_PROTOCOL_RAM_CACHE.delete(key);
+    }
+  }
+}
+
+export async function generateStaticParams() {
+  // Pre-render flagship protocols at build time for instant Edge CDN responses
+  return [
+    { slug: 'hormonal-support-12w' },
+    { slug: 'nad-cellular-restoration-protocol' },
+    { slug: 'weight-management-structured-12w' },
+    { slug: 'recovery-foundation-bpc-tb' },
+    { slug: 'growth-hormone-optimization' },
+    { slug: 'immune-modulation-cellular' },
+    { slug: 'mitochondrial-metabolic-support' },
+    { slug: 'sleep-restoration-8w' },
+    { slug: 'lxv-neuro-restoration-12w' },
+  ];
+}
+
 const KNOWN_PROTOCOL_ALIASES = {
   'weight-management-structured-12w': 'wm_001',
   'structured-weight-management': 'wm_001',
@@ -31,6 +61,12 @@ async function getPublicProtocol(slug) {
   if (!adminDb || !slug) return null;
   const rawTarget = decodeURIComponent(slug).trim();
   const target = rawTarget.toLowerCase();
+
+  // 1. Layer 1 Check: Instant RAM Cache (< 0.1ms)
+  const cached = PUBLIC_PROTOCOL_RAM_CACHE.get(target);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
 
   let doc = null;
 
@@ -113,7 +149,15 @@ async function getPublicProtocol(slug) {
   if (raw.status === 'archived' || raw.status === 'hidden') return null;
 
   // 🛡️ Zero-Trust Sanitization
-  return sanitizePublicProtocol(raw);
+  const result = sanitizePublicProtocol(raw);
+
+  // Populate Layer 1 RAM Cache
+  PUBLIC_PROTOCOL_RAM_CACHE.set(target, {
+    data: result,
+    expiresAt: Date.now() + CACHE_TTL_MS,
+  });
+
+  return result;
 }
 
 export async function generateMetadata({ params }) {

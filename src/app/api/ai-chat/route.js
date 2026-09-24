@@ -191,48 +191,145 @@ ${activeEntityContext}
 ${publicPlatformKnowledge}
 `;
       } else if (isDiagnostic) {
-        activeEntityContext = `CURRENT ACTIVE CE-IVDR DIAGNOSTIC TEST KIT (BEING VIEWED BY VISITOR):
-- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit'}
-- Analytical Method: Cyclic Enzymatic Colorimetric Assay (alcohol dehydrogenase/diaphorase/MTT, analytical precision CV ≤ 6.6%, LOD 0.23 µmol/L). Validated against LC-MS/MS reference standards.
+        const diagSlug = String(contextAnchor?.slug || contextAnchor?.id || '').toLowerCase();
+        const diagName = String(contextAnchor?.name || '').toLowerCase();
+
+        let diagType = 'nad';
+        if (diagSlug.includes('testosterone') || diagSlug.includes('testosterona') || diagName.includes('testosterone') || diagName.includes('testosterona')) {
+          diagType = 'testosterone';
+        } else if (diagSlug.includes('cortisol') || diagName.includes('cortisol')) {
+          diagType = 'cortisol';
+        } else if (diagSlug.includes('hba1c') || diagSlug.includes('hemoglobin') || diagName.includes('hba1c') || diagName.includes('hemoglobina')) {
+          diagType = 'hba1c';
+        } else if (diagSlug.includes('omega') || diagName.includes('omega')) {
+          diagType = 'omega';
+        } else if (diagSlug.includes('vitamin-d') || diagSlug.includes('vitamina-d') || diagName.includes('vitamin d') || diagName.includes('vitamina d')) {
+          diagType = 'vitamind';
+        }
+
+        let diagSpecs = '';
+        let primaryProtocols = '';
+
+        if (diagType === 'testosterone') {
+          diagSpecs = `- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ Testosterone+ CE-IVDR Capillary Test Kit'}
+- Analytical Method: Liquid Chromatography - Tandem Mass Spectrometry (LC-MS/MS) Gold Standard. Direct chromatographic separation eliminating cross-reactivity with DHEA-S, androstenedione, or synthetic progestins seen in immunoassay platforms.
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 accredited.
+- Biological Matrix & Target Analytes: Capillary dried blood spot (DBS) on Whatman 903 protein saver card. Quantifies Total Testosterone (ng/dL), Free Bioactive Testosterone (calculated via Vermeulen model), Sex Hormone-Binding Globulin (SHBG, nmol/L), and Free Androgen Index (FAI = [Total T / SHBG] × 100).
+- Pre-Analytical Collection Protocol:
+  * Fasting morning draw: 08:00–10:00 AM after 10–12h overnight fast to capture circadian LH-driven peak.
+  * Activity restriction: Avoid intense resistance exercise, endurance training, and sexual activity for 24h prior to prevent transient suppression/elevation.
+  * Discard 1st blood drop; saturate 3 circles uniformly through to the reverse side; air-dry 3h horizontally away from sunlight. Stable 14 days at room temperature.
+- Actionable Reference Ranges & Clinical Tiers:
+  * Total T < 350 ng/dL or Free T < 9 ng/dL: Primary/Secondary Hypogonadism & Leydig Exhaustion. Pathway: [Hormonal Support 12W Protocol](/proto/hormonal-support-12w) (Kisspeptin-10 + Gonadorelin/Enclomiphene) to restart endogenous HPTA axis without testicular atrophy.
+  * Total T 350–550 ng/dL: Borderline / Suboptimal Vitality. Pathway: [Hormonal Support 12W Protocol](/proto/hormonal-support-12w) or [Anti-Aging & Vitality Protocol](/proto/anti-aging-vitality-12w).
+  * Total T 550–900 ng/dL & Free T 12–25 ng/dL: Optimal Physiological Androgenic Tone. Pathway: Circadian maintenance.
+  * High SHBG (>55 nmol/L) with normal Total T: Trapped testosterone syndrome. Recommend Boron (10mg/d), Zinc, and SHBG-reducing botanical/peptide interventions.
+- Critical Clinical Precaution: Exogenous TRT causes immediate negative feedback, suppressing pituitary LH/FSH and inducing testicular Leydig atrophy and infertility. Endogenous peptide restoration via Kisspeptin-10 preserves natural spermatogenesis and intratesticular testosterone.
+- Retesting Cadence: Re-test at Week 6–8 of peptide secretagogue therapy.`;
+          primaryProtocols = `* Primary Protocol: [Hormonal Support 12W Protocol](/proto/hormonal-support-12w)\n     * Companion Protocol: [Anti-Aging & Vitality Protocol](/proto/anti-aging-vitality-12w)`;
+        } else if (diagType === 'cortisol') {
+          diagSpecs = `- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ Cortisol Awakening Response (CAR) Test Kit'}
+- Analytical Method: Capillary DBS High-Sensitivity Micro-Immunoassay & LC-MS/MS verification.
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 accredited.
+- Biological Matrix & Target Analytes: Capillary dried blood spot (DBS). Measures diurnal cortisol curve: Sample 1 (Awakening + 30 min, CAR peak) and Sample 2 (Late afternoon / Evening 16:00–18:00, PM nadir).
+- Pre-Analytical Collection Protocol:
+  * Strict timing: Sample 1 precisely 30 minutes after waking (before breakfast or brushing teeth with mint toothpaste). Sample 2 late afternoon before dinner.
+  * Discard 1st drop; allow full spot saturation; air-dry 3h.
+- Actionable Reference Ranges & Clinical Tiers:
+  * Blunted Morning CAR (< 10 µg/dL): Hypoadrenal fatigue, burnout syndrome, chronic allostatic exhaustion. Pathway: [Cognitive Longevity Protocol](/proto/cognitive-longevity-12w) with adaptogens (Ashwagandha KSM-66, Rhodiola).
+  * Normal CAR Curve: Morning 10–25 µg/dL, falling smoothly to 2–6 µg/dL in PM. Optimal stress resilience and HPA feedback sensitivity.
+  * Elevated Evening Cortisol (> 8 µg/dL): Loss of circadian nadir, hypercortisolemia, insomnia, catabolic muscle breakdown. Pathway: [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w) with Phosphatidylserine (300mg at dinner).
+- Retesting Cadence: Re-test at 8–12 weeks.`;
+          primaryProtocols = `* Primary Protocol: [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w)\n     * Companion Protocol: [Cognitive Longevity Protocol](/proto/cognitive-longevity-12w)`;
+        } else if (diagType === 'hba1c') {
+          diagSpecs = `- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ HbA1c Glycation & Metabolic Test Kit'}
+- Analytical Method: Boronate Affinity Micro-Chromatography (interference-free from hemoglobin variants HbS, HbC, HbE).
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 accredited.
+- Biological Matrix & Target Analytes: Whole capillary dried blood spot (DBS). Quantifies percentage of glycated hemoglobin (HbA1c %) and estimated average glucose (eAG, mg/dL) over the past 90–120 days.
+- Pre-Analytical Collection Protocol:
+  * Can be performed fasting or post-prandial (glycation reflects 90-day erythrocyte lifespan, immune to acute meal fluctuations).
+  * Discard 1st blood drop; saturate 2 spots; air-dry 3h.
+- Actionable Reference Ranges & Clinical Tiers:
+  * < 5.2%: Peak Metabolic Longevity & Optimal Insulin Sensitivity. Pathway: Maintenance.
+  * 5.2% – 5.6%: Standard Conventional Normal (mild subclinical glycation). Pathway: [Metabolic Optimization Protocol](/proto/metabolic-flex-10w).
+  * 5.7% – 6.4%: Prediabetes & Advanced Endothelial Glycation (AGEs accumulation). Pathway: [Metabolic Optimization Protocol](/proto/metabolic-flex-10w) (GLP-1 / Tirzepatide microdosing) + [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w).
+  * ≥ 6.5%: Overt Glycemic Dysfunction. Requires physician supervision alongside GLP-1/GIP receptor agonist therapy.
+- Retesting Cadence: Re-test strictly every 90 days to align with erythrocyte turnover.`;
+          primaryProtocols = `* Primary Protocol: [Metabolic Optimization Protocol](/proto/metabolic-flex-10w)\n     * Companion Protocol: [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w)`;
+        } else if (diagType === 'omega') {
+          diagSpecs = `- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ Omega-3/6 Ratio & Inflammation Test Kit'}
+- Analytical Method: Capillary DBS High-Throughput Gas Chromatography - Mass Spectrometry (GC-MS / FID).
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 accredited.
+- Biological Matrix & Target Analytes: Erythrocyte membrane fatty acid methyl esters (FAME). Quantifies Omega-3 Index (EPA + DHA % of total fatty acids), Arachidonic Acid / EPA Ratio (AA/EPA), Omega-6 / Omega-3 Ratio, and industrial Trans Fatty Acids.
+- Pre-Analytical Collection Protocol:
+  * Morning collection after 8–10h overnight fast. 48-hour washout of concentrated high-dose fish oil supplements to reflect incorporated membrane lipids rather than recent dietary chylomicrons.
+  * Discard 1st blood drop; saturate 2 circles; air-dry 3h.
+- Actionable Reference Ranges & Clinical Tiers:
+  * Omega-3 Index < 4% (AA/EPA > 15): Severe Deficiency & High Systemic Neuro-Inflammatory Risk. Pathway: High-dose EPA/DHA (2–3g/d) with [Tissue Repair & Healing Protocol](/proto/tissue-repair-bpc157-tb500-6w).
+  * Omega-3 Index 4% – 8% (AA/EPA 5–15): Intermediate / Suboptimal Membrane Fluidity. Pathway: Nutritional recalibration and [Cognitive Longevity Protocol](/proto/cognitive-longevity-12w).
+  * Omega-3 Index > 8% (AA/EPA < 3.0): Optimal Cardioprotective & Anti-Inflammatory State (Peak membrane fluidity, optimal resolvin/protectin SPM synthesis).
+- Retesting Cadence: Re-test at 12–16 weeks (erythrocyte membrane lipid replacement timeline).`;
+          primaryProtocols = `* Primary Protocol: [Tissue Repair & Healing Protocol](/proto/tissue-repair-bpc157-tb500-6w)\n     * Companion Protocol: [Cognitive Longevity Protocol](/proto/cognitive-longevity-12w)`;
+        } else if (diagType === 'vitamind') {
+          diagSpecs = `- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ Vitamin D3 (25-OH) Genomic Axis Test Kit'}
+- Analytical Method: Liquid Chromatography - Tandem Mass Spectrometry (LC-MS/MS) with Isotope Dilution. Separates 25(OH)D3 and 25(OH)D2 with zero epimer cross-reactivity.
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 accredited.
+- Biological Matrix & Target Analytes: Capillary dried blood spot (DBS). Measures total circulating 25-Hydroxyvitamin D [25(OH)D3 + 25(OH)D2] in ng/mL.
+- Pre-Analytical Collection Protocol:
+  * Any time of day, fasting 2-3 hours.
+  * Discard 1st blood drop; saturate 2 spots; air-dry 3h.
+- Actionable Reference Ranges & Clinical Tiers:
+  * < 30 ng/mL: Clinical Insufficiency (Impaired VDR genomic transcription, reduced cathelicidin LL-37 expression, vulnerable cellular immunity). Pathway: [Immune Resilience Protocol](/proto/immune-defense-8w) + oral D3 (5,000–10,000 IU/d with K2 MK-7).
+  * 30 – 50 ng/mL: Conventional Normal (prevents rickets/osteomalacia, suboptimal for peak longevity).
+  * 50 – 80 ng/mL: Optimal Functional Longevity Range (Peak cellular immunity, antimicrobial peptide induction, endocrine synergy with testosterone). Pathway: Maintenance D3 (2,000–4,000 IU/d + K2 MK-7 100mcg + Magnesium).
+  * > 100 ng/mL: Excessive (Risk of hypercalcemia, reduce intake).
+- Retesting Cadence: Re-test at 8–12 weeks.`;
+          primaryProtocols = `* Primary Protocol: [Immune Resilience Protocol](/proto/immune-defense-8w)\n     * Companion Protocol: [Hormonal Support 12W Protocol](/proto/hormonal-support-12w)`;
+        } else {
+          // Default: NAD+
+          diagSpecs = `- Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit'}
+- Analytical Method: Cyclic Enzymatic Colorimetric Assay (alcohol dehydrogenase/diaphorase/MTT, precision CV ≤ 6.6%, LOD 0.23 µmol/L). Validated against LC-MS/MS reference standards.
 - Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 compliant.
 - Biological Matrix & Target Analytes: Whole capillary dried blood spot (DBS) on Whatman 903 protein saver card. Quantifies TOTAL INTRACELLULAR NAD (oxidized NAD⁺ + reduced NADH). In whole blood, >99% of NAD is intracellular within erythrocytes and PBMCs; plasma free NAD is negligible (<0.1 µmol/L) due to rapid ectoenzyme cleavage (CD38/CD73).
 - Pre-Analytical Collection Protocol:
   * Finger-prick capillary blood: Discard 1st drop (contains interstitial lymph fluid that dilutes cellular analytes).
   * Spot saturation: 2 to 3 whole drops (~50 µL) per circle, allowing uniform capillary penetration to the card back. Avoid milking or squeezing (causes hemolysis and cellular disruption).
-  * Desiccation & Stability: Air-dry card horizontally for 3 hours at room temperature (15–25°C). Never apply heat or sunlight. Sealed in foil pouch with silica desiccant, sample is stable for 14 days at ambient room temperature (no cold chain required).
+  * Desiccation & Stability: Air-dry card horizontally for 3 hours at room temperature (15–25°C). Sealed in foil pouch with silica desiccant, sample is stable for 14 days at ambient room temperature (no cold chain required).
 - Fasting & Circadian Timing:
-  * Morning collection (08:00–10:00 AM) under pre-prandial/fasting conditions is recommended to align with circadian NAMPT rhythm and avoid post-prandial glycolytic shifts in NADH/NAD+.
-  * Baseline Testing: 14-day washout of oral precursors (NMN, NR, Niacin, Nicotinamide) and 3–4 weeks post-IV infusion to measure true native unsupplemented levels.
+  * Morning collection (08:00–10:00 AM) under pre-prandial/fasting conditions to align with circadian NAMPT rhythm.
+  * Baseline Testing: 14-day washout of oral precursors (NMN, NR, Niacin) and 3–4 weeks post-IV infusion.
   * In-Treatment Monitoring: Collect morning sample BEFORE that day's dose (trough level), or 48–72 hours after an IV infusion.
 - Intracellular NAD+ Clinical Reference Ranges & Actionable Tiers:
-  * < 20 µmol/L: Severe Depletion (Mitochondrial exhaustion, low SIRT1/SIRT3 and PARP1 activity). Pathway: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) (Tier 1 IV Parenteral Loading or high-dose SubQ) with [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w).
-  * 20 – 30 µmol/L: Suboptimal / Moderate Range (Typical adult >40y decline, ~40-50% loss from youth). Pathway: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) (Tier 2 SubQ micro-dosing 50-100mg 2-3x/week or oral NMN).
-  * 30 – 50 µmol/L: Optimal Longevity Range (Youthful cellular bioenergetics, optimal DNA repair, peak sirtuin activation). Pathway: Maintenance circadian pulsing with [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) or companion [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w).
-  * > 50 µmol/L: Peak Stimulated / Plateau (Typical post-IV or high-dose treatment peak). Apply 2–4 week precursor cycling/washout; monitor methyl pool.
+  * < 20 µmol/L: Severe Depletion (Mitochondrial exhaustion, low SIRT1/SIRT3). Pathway: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) (Tier 1 IV Loading or SubQ) with [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w).
+  * 20 – 30 µmol/L: Suboptimal / Moderate Range (Typical adult >40y decline). Pathway: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) (Tier 2 SubQ micro-dosing or oral NMN).
+  * 30 – 50 µmol/L: Optimal Longevity Range (Youthful cellular bioenergetics, optimal DNA repair, peak sirtuin activation). Pathway: Maintenance circadian pulsing with [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) or [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w).
+  * > 50 µmol/L: Peak Stimulated / Plateau. Apply 2–4 week precursor cycling/washout; monitor methyl pool.
 - Mandatory Methylation Safeguards (NNMT / SAMe):
-  * When NAD+ levels rise or NAM accumulates, the liver enzyme NNMT (Nicotinamide N-methyltransferase) converts NAM to MeNAM, consuming S-adenosylmethionine (SAMe).
-  * To prevent methyl-pool depletion, fatigue, and hyperhomocysteinemia, always recommend co-administering Trimethylglycine (TMG / Betaine) 500–1,000 mg/day with methylated B-complex.
+  * NNMT clearance consumes SAMe. Always recommend co-administering Trimethylglycine (TMG / Betaine) 500–1,000 mg/day with methylated B-complex.
 - Re-testing Cadence:
   * IV Therapy (Tier 1): Re-test at Week 4 (drawn 48–72h after 4th infusion).
-  * Subcutaneous Microdosing / Oral NMN (Tier 2): Re-test at Week 8–10 (allowing erythrocyte turnover and steady-state equilibration).
-  * Maintenance (Tier 3): Re-test every 6 months.
+  * Subcutaneous Microdosing / Oral NMN (Tier 2): Re-test at Week 8–10.
+  * Maintenance: Re-test every 6 months.`;
+          primaryProtocols = `* Primary Protocol: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol)\n     * Companion Protocol: [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w)\n     * Longevity Maintenance: [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w)`;
+        }
+
+        activeEntityContext = `CURRENT ACTIVE CE-IVDR DIAGNOSTIC TEST KIT (BEING VIEWED BY VISITOR):
+${diagSpecs}
 - STRICT NEGATIVE CONSTRAINT: This product is a DIAGNOSTIC CAPILLARY BLOOD SPOT TEST KIT. It is NOT an injectable peptide, NOT a vial, and DOES NOT require bacteriostatic (BAC) water, syringes, reconstitution, or reconstitution calculation. NEVER mention BAC water, reconstitution, syringes, or injections when answering about this diagnostic test kit.
 ${contextAnchor?.details ? `- Additional Test Specs: ${JSON.stringify(contextAnchor.details)}\n` : ''}
 ${pubmedContextText}`;
 
-        systemPrompt = `You are Atlas Diagnostic Clinical Laboratory Specialist, an authoritative clinical AI advisor specializing in CE-IVDR certified capillary Dried Blood Spot (DBS) testing, intracellular biomarker analytics (LifeLab1), reference ranges, sample collection protocols, and diagnostic-guided therapeutic protocols.
+        systemPrompt = `You are Atlas Diagnostic Clinical Laboratory Specialist, an authoritative clinical AI advisor specializing in CE-IVDR certified capillary Dried Blood Spot (DBS) testing, intracellular & endocrine biomarker analytics (LifeLab1), reference ranges, sample collection protocols, and diagnostic-guided therapeutic protocols.
 
 CRITICAL OPERATING RULES:
 1. STRICT DIAGNOSTIC & BIOMARKER SCOPE:
-   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, drying protocol, sample postal return, biological stability, analytical assay methodology, biomarker reference ranges, methylation safeguards, and protocol calibration).
-   - UNDER NO CIRCUMSTANCES mention peptide reconstitution, bacteriostatic (BAC) water, syringes, or subcutaneous injections for this test.
+   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, drying protocol, sample postal return, biological stability, analytical assay methodology, biomarker reference ranges, clinical precautions, and protocol calibration).
+   - UNDER NO CIRCUMSTANCES mention peptide reconstitution, bacteriostatic (BAC) water, syringes, or subcutaneous injections for this test kit.
 2. EVIDENCE-BASED PROTOCOL GUIDANCE:
    - When asked how to interpret or act upon test results, correlate biomarker levels with evidence-based clinical protocols:
-     * Primary Protocol: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol)
-     * Companion Protocol: [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w)
-     * Longevity Maintenance: [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w)
-   - STRICT NEGATIVE PROTOCOL RULE: NEVER link to '/proto' or output '[All Clinical Protocols Directory](/proto)'. Only recommend specific, individual clinical protocols matching this test (e.g. [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol)).
-   - Always emphasize route-stratified re-testing windows (4 weeks for IV, 8–10 weeks for SubQ microdosing).
+     ${primaryProtocols}
+   - STRICT NEGATIVE PROTOCOL RULE: NEVER link to '/proto' or output '[All Clinical Protocols Directory](/proto)'. Only recommend specific, individual clinical protocols matching this test.
+   - Always emphasize route-stratified re-testing windows.
 3. PROFESSIONAL & RIGOROUS:
    - Respond authoritatively, concisely, and clearly in the language used by the visitor (English or Spanish) using clean markdown. Always maintain an institutional clinical laboratory standard.
 

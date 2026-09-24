@@ -110,9 +110,23 @@
 
 .dts-range-selector {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
   margin-bottom: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1280px) {
+  .dts-range-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .dts-range-selector {
+    grid-template-columns: 1fr;
+  }
 }
 
 .dts-range-btn {
@@ -501,33 +515,35 @@
   line-height: 1.45;
 }
 
-/* 4 Graphic Procedural Steps */
+/* Procedural Steps - Stacked Linear Layout ("en línea") */
 .dts-procedural-steps-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .dts-proc-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.15rem;
+  border-radius: 10px;
+  padding: 1.15rem 1.35rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .dts-proc-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
 }
 
 .dts-proc-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.65rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .dts-proc-num {
@@ -982,31 +998,81 @@
 }
 
 .dts-synergies-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.60rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dts-syn-pill {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
+  justify-content: center;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 0.3rem 0.55rem;
+  border-radius: 8px;
+  padding: 0.55rem 0.80rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dts-syn-pill:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.dts-syn-pill--link {
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.dts-syn-pill--link:hover {
+  border-color: #0284c7;
+  background: #f0f9ff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+  transform: translateY(-1px);
+}
+
+.dts-syn-pill--link .dts-syn-name {
+  color: #0369a1;
+}
+
+.dts-syn-link-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #0284c7;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.dts-syn-pill--link:hover .dts-syn-link-icon {
+  opacity: 1;
+}
+
+/* Google Cloud Console Standard: When there is an odd number of cards in a 2-column grid,
+   the last odd item spans across both columns (100% width) so it never sits alone leaving an empty hole */
+.dts-syn-pill:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .dts-syn-name {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 750;
   color: #0f172a;
+  line-height: 1.3;
 }
 
 .dts-syn-role {
-  font-size: 0.64rem;
+  font-size: 0.68rem;
   color: #64748b;
   font-weight: 500;
+  margin-top: 2px;
 }
 
 .dts-cadence-meta {
@@ -1097,11 +1163,6 @@
 }
 
 /* ── Responsive Mobile Breakpoints ── */
-@media (max-width: 1024px) {
-  .dts-procedural-steps-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
 @media (max-width: 900px) {
   .dts-metrics-grid {

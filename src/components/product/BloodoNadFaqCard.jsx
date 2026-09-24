@@ -276,6 +276,16 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
   const [isCopiedAll, setIsCopiedAll] = useState(false);
   const filteredFaqs = faqs;
 
+  const isAllExpanded = filteredFaqs.length > 0 && filteredFaqs.every(f => openIds.has(f.id));
+
+  const toggleExpandAll = () => {
+    if (isAllExpanded) {
+      setOpenIds(new Set());
+    } else {
+      setOpenIds(new Set(filteredFaqs.map(f => f.id)));
+    }
+  };
+
   const toggleAccordion = (id) => {
     setOpenIds(prev => {
       const next = new Set(prev);
@@ -372,8 +382,18 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
           </div>
         </div>
 
-        {/* Global Clinical Copy Action */}
+        {/* Global Clinical Actions */}
         <div className="bnf-header-actions">
+          <button
+            type="button"
+            className="bnf-btn-expand-all"
+            onClick={toggleExpandAll}
+            title={isAllExpanded ? (isEs ? 'Colapsar todas las preguntas' : 'Collapse all questions') : (isEs ? 'Expandir todas las preguntas' : 'Expand all questions')}
+          >
+            {isAllExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            <span>{isAllExpanded ? (isEs ? 'Colapsar Todo' : 'Collapse All') : (isEs ? 'Expandir Todo' : 'Expand All')}</span>
+          </button>
+
           <button
             type="button"
             className="bnf-btn-copy-guideline"
@@ -396,6 +416,7 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
           return (
             <div
               key={faq.id || index}
+              data-category={faq.category || 'clinical'}
               className={`bnf-accordion-item ${isOpen ? 'bnf-accordion-item--open' : ''}`}
             >
               <button

@@ -39,6 +39,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     tag: 'Bioenergética',
     accentColor: '#0284c7', // Sky Blue
     icon: Activity,
+    subtitleEn: 'UHPLC • NAD⁺ & NADH',
+    subtitleEs: 'UHPLC • NAD⁺ y NADH',
     synergyWithOthersEn: 'Establishes baseline mitochondrial redox capacity to guide peptide dosing.',
     synergyWithOthersEs: 'Determina la capacidad redox mitocondrial basal para calibrar dosis de péptidos.'
   },
@@ -58,6 +60,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     tag: 'Eje HPTA',
     accentColor: '#ea580c', // Orange Amber
     icon: Zap,
+    subtitleEn: 'LC-MS/MS • SHBG & FAI',
+    subtitleEs: 'LC-MS/MS • SHBG y FAI',
     synergyWithOthersEn: 'Assesses endocrine recovery without suppression during secretagogue protocols.',
     synergyWithOthersEs: 'Evalúa la reactivación endógena sin atrofia en protocolos con secretagogos.'
   },
@@ -77,6 +81,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     tag: 'Eje HPA',
     accentColor: '#8b5cf6', // Violet Purple
     icon: Clock,
+    subtitleEn: 'CAR Rhythm • AM/PM Diurnal',
+    subtitleEs: 'Ritmo CAR • Diurno AM/PM',
     synergyWithOthersEn: 'Differentiates primary mitochondrial fatigue from secondary adrenal exhaustion.',
     synergyWithOthersEs: 'Distingue la fatiga mitocondrial pura del agotamiento suprarrenal secundario.'
   },
@@ -96,6 +102,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     tag: 'Metabolismo',
     accentColor: '#e11d48', // Rose Red
     icon: Droplet,
+    subtitleEn: 'Affinity • 90-Day Glycation',
+    subtitleEs: 'Afinidad • Glicación 90 Días',
     synergyWithOthersEn: 'Direct biomarker verification for GLP-1/GIP and MOTS-c metabolic protocols.',
     synergyWithOthersEs: 'Verificación directa de biomarcadores para protocolos con GLP-1/GIP y MOTS-c.'
   },
@@ -115,6 +123,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     tag: 'Inflamación',
     accentColor: '#0d9488', // Emerald Teal
     icon: ShieldCheck,
+    subtitleEn: 'GC-MS • Index & AA/EPA',
+    subtitleEs: 'GC-MS • Índice y AA/EPA',
     synergyWithOthersEn: 'Monitors microvascular inflammation and cellular membrane repair alongside BPC/TB.',
     synergyWithOthersEs: 'Monitoriza la inflamación microvascular y reparación celular junto a BPC-157 y TB-500.'
   },
@@ -134,6 +144,8 @@ export const BLOODO_DIAGNOSTIC_TESTS = [
     tag: 'Inmunidad',
     accentColor: '#d97706', // Gold Amber
     icon: Sun,
+    subtitleEn: 'Isotope Dilution • 25(OH)D',
+    subtitleEs: 'Dilución Isotópica • 25(OH)D',
     synergyWithOthersEn: 'Essential co-factor for thymic peptide efficacy (Thymosin Alpha-1, LL-37).',
     synergyWithOthersEs: 'Cofactor indispensable para la eficacia de péptidos tímicos (Tα1 y LL-37).'
   }
@@ -193,34 +205,44 @@ export default function BloodoSuiteNav({
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // VARIANT 1: CHIPS (Horizontal Scrollable Switcher)
+  // VARIANT 1: CHIPS (Full-Width Responsive Grid - No Horizontal Scroll)
   // ═══════════════════════════════════════════════════════════════════════════
   if (variant === 'chips') {
     return (
       <div className="bloodo-suite-chips" role="navigation" aria-label="Bloodo Diagnostic Suite">
         <div className="bloodo-suite-chips__header">
-          <Sparkles size={13} className="bloodo-suite-chips__icon" />
-          <span className="bloodo-suite-chips__label">
-            {isEs ? 'Suite Bloodo™ (6 Tests):' : 'Bloodo™ Suite (6 Tests):'}
+          <div className="bloodo-suite-chips__title-group">
+            <Sparkles size={13} className="bloodo-suite-chips__icon" />
+            <span className="bloodo-suite-chips__label">
+              {isEs ? 'Suite Diagnóstica Bloodo™ (6 Paneles Clínicos):' : 'Bloodo™ Diagnostic Suite (6 Clinical Panels):'}
+            </span>
+          </div>
+          <span className="bloodo-suite-chips__subtag">
+            {isEs ? 'Capilar DBS LC-MS/MS' : 'Capillary DBS LC-MS/MS'}
           </span>
         </div>
-        <div className="bloodo-suite-chips__track">
+        <div className="bloodo-suite-chips__grid">
           {BLOODO_DIAGNOSTIC_TESTS.map((test) => {
             const isActive = test.slug === activeSlug;
             const Icon = test.icon;
+            const testLabel = test.shortName || (isEs ? test.nameEs : test.nameEn).replace(/^Bloodo™\s*/i, '');
+            const subText = isEs ? test.subtitleEs : test.subtitleEn;
             
             if (isActive) {
               return (
-                <span
+                <div
                   key={test.id}
                   className="bloodo-suite-chip bloodo-suite-chip--active"
                   style={{ '--chip-accent': test.accentColor }}
                   title={`${test.nameEn} (Active Test)`}
                 >
-                  <Icon size={12} className="bloodo-suite-chip__icon" />
-                  <span className="bloodo-suite-chip__text">{test.shortName}</span>
-                  <span className="bloodo-suite-chip__dot" />
-                </span>
+                  <Icon size={14} className="bloodo-suite-chip__icon" />
+                  <div className="bloodo-suite-chip__body">
+                    <span className="bloodo-suite-chip__text">{testLabel}</span>
+                    {subText && <span className="bloodo-suite-chip__sub">{subText}</span>}
+                  </div>
+                  <span className="bloodo-suite-chip__badge">{isEs ? 'Activo' : 'Active'}</span>
+                </div>
               );
             }
 
@@ -231,10 +253,13 @@ export default function BloodoSuiteNav({
                 onClick={handleNavClick}
                 className="bloodo-suite-chip"
                 style={{ '--chip-accent': test.accentColor }}
-                title={`${isEs ? 'Ir al test de' : 'View'} ${isEs ? test.nameEs : test.nameEn}`}
+                title={`${isEs ? 'Ir al panel de' : 'View'} ${isEs ? test.nameEs : test.nameEn}`}
               >
-                <Icon size={12} className="bloodo-suite-chip__icon" />
-                <span className="bloodo-suite-chip__text">{test.shortName}</span>
+                <Icon size={14} className="bloodo-suite-chip__icon" />
+                <div className="bloodo-suite-chip__body">
+                  <span className="bloodo-suite-chip__text">{testLabel}</span>
+                  {subText && <span className="bloodo-suite-chip__sub">{subText}</span>}
+                </div>
               </Link>
             );
           })}
@@ -283,7 +308,7 @@ export default function BloodoSuiteNav({
                   <div className="bloodo-suite-drawer-item__content">
                     <div className="bloodo-suite-drawer-item__title-row">
                       <span className="bloodo-suite-drawer-item__title">
-                        {isEs ? test.nameEs : test.nameEn}
+                        {test.shortName || (isEs ? test.nameEs : test.nameEn).replace(/^Bloodo™\s*/i, '')}
                       </span>
                     </div>
                     <span className="bloodo-suite-drawer-item__biomarker">
@@ -291,7 +316,7 @@ export default function BloodoSuiteNav({
                     </span>
                   </div>
                   <span className="bloodo-suite-drawer-item__current-badge">
-                    {isEs ? 'Viendo ahora' : 'Current'}
+                    {isEs ? 'Actual' : 'Current'}
                   </span>
                 </div>
               );
@@ -312,7 +337,7 @@ export default function BloodoSuiteNav({
                 <div className="bloodo-suite-drawer-item__content">
                   <div className="bloodo-suite-drawer-item__title-row">
                     <span className="bloodo-suite-drawer-item__title">
-                      {isEs ? test.nameEs : test.nameEn}
+                      {test.shortName || (isEs ? test.nameEs : test.nameEn).replace(/^Bloodo™\s*/i, '')}
                     </span>
                   </div>
                   <span className="bloodo-suite-drawer-item__biomarker">
@@ -339,12 +364,12 @@ export default function BloodoSuiteNav({
           <span>{isEs ? 'ECOSISTEMA DE BIOMARCADORES DBS • BLOODÔ BIOINFORMATICS' : 'DBS BIOMARKER ECOSYSTEM • BLOODÔ BIOINFORMATICS'}</span>
         </div>
         <h2 className="bloodo-suite-section__title">
-          {isEs ? 'Suite Diagnóstica Bloodo™ (6 Paneles Clínicos)' : 'Bloodo™ Diagnostic Suite (6 Clinical Panels)'}
+          {isEs ? 'Otros Paneles Diagnósticos (Suite Bloodo™)' : 'Other Diagnostic Panels (Bloodo™ Suite)'}
         </h2>
         <p className="bloodo-suite-section__subtitle">
           {isEs
-            ? 'Ensayos cuantitativos de alta precisión validados en micro-volumen capilar de sangre seca (DBS), analizados por LC-MS/MS y UHPLC en laboratorios certificados CE-IVDR / ISO 15189.'
-            : 'High-precision quantitative assays validated in capillary dried blood spot (DBS) micro-volumes, analyzed via LC-MS/MS and UHPLC in certified CE-IVDR / ISO 15189 facilities.'}
+            ? 'Explore otros ensayos cuantitativos validados en micro-volumen capilar de sangre seca (DBS), analizados por LC-MS/MS y UHPLC en instalaciones certificadas CE-IVDR / ISO 15189.'
+            : 'Explore additional quantitative assays validated in capillary dried blood spot (DBS) micro-volumes, analyzed via LC-MS/MS and UHPLC in certified CE-IVDR / ISO 15189 facilities.'}
         </p>
       </div>
 

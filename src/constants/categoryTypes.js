@@ -8,7 +8,8 @@
 export const CATEGORY_TYPES = {
   PEPTIDE:             'peptide',              // All peptides (monotherapies and blends)
   SUPPLEMENT:          'supplement',           // Capsules, nutraceuticals, oral supplements
-  GENOMICS_BIOMARKERS: 'genomics_biomarkers',  // Non-diagnostic genomic panels, DNA tests, biomarker kits
+  DIAGNOSTIC_TEST:     'diagnostic_test',      // Capillary blood tests, DBS biomarkers, diagnostic panels
+  GENOMICS_BIOMARKERS: 'genomics_biomarkers',  // DNA genetic panels, genomic saliva tests (Fagron, Eterna)
   RAW_MATERIAL:        'raw_material',         // API, compounding raw materials, excipients
   SERVICE:             'service',              // Digital services, SaaS, subscriptions
 };
@@ -18,8 +19,9 @@ export const VALID_CATEGORIES = new Set(Object.values(CATEGORY_TYPES));
 export const CATEGORY_LABELS = {
   peptide:             'Peptide',
   supplement:          'Supplement & Nutraceutical',
-  genomics_biomarkers: 'Genomics & Biomarkers',
-  diagnostic:          'Genomics & Biomarkers',
+  diagnostic_test:     'Diagnostic Test',
+  diagnostic:          'Diagnostic Test',
+  genomics_biomarkers: 'Genomics & DNA Panels',
   raw_material:        'Raw Material / API',
   service:             'Digital Service / SaaS',
 };
@@ -40,16 +42,23 @@ export const CATEGORY_ALIASES = {
   'capsules & consumables':    'supplement',
   'capsules_and_consumables':  'supplement',
 
-  // Genomics, DNA Panels & Biomarkers (Formerly Diagnostic)
+  // Capillary Blood Diagnostic Tests (Bloodo, etc.)
+  'diagnostic_test':           'diagnostic_test',
+  'diagnostic':                'diagnostic_test',
+  'diagnostics':               'diagnostic_test',
+  'blood_analysis':            'diagnostic_test',
+  'blood_test':                'diagnostic_test',
+  'biomarker_test':            'diagnostic_test',
+  'dbs_test':                  'diagnostic_test',
+
+  // Genomics & DNA Panels (Fagron Genomics, EternaDx, Saliva DNA)
   'genomics_biomarkers':       'genomics_biomarkers',
   'genomics':                  'genomics_biomarkers',
   'genetic_test':              'genomics_biomarkers',
-  'diagnostic':                'genomics_biomarkers',
-  'diagnostic_test':           'genomics_biomarkers',
   'dna_test':                  'genomics_biomarkers',
-  'test_kit':                  'genomics_biomarkers',
-  'biomarker_test':            'genomics_biomarkers',
-  'blood_analysis':            'genomics_biomarkers',
+  'trichotest':                'genomics_biomarkers',
+  'telotest':                  'genomics_biomarkers',
+  'nutrigen':                  'genomics_biomarkers',
   'proteomics':                'genomics_biomarkers',
 
   // Raw Materials

@@ -302,8 +302,9 @@ export default function MobileCatalogCard({
             const CHIP = {
               finished_product:  { label: 'Finished',   bg: 'rgba(29,78,216,0.08)', color: '#1d4ed8', border: 'rgba(29,78,216,0.2)', icon: '📦' },
               raw_material:      { label: 'Bulk API',   bg: 'rgba(22,163,74,0.1)',  color: '#16a34a', border: 'rgba(22,163,74,0.2)',  icon: '🧪' },
-              clinical_supplies: { label: 'Clinical',   bg: 'rgba(71,85,105,0.08)', color: '#475569', border: 'rgba(71,85,105,0.2)', icon: '💉' },
-              diagnostic:        { label: 'Diagnostic', bg: 'rgba(124,58,237,0.1)', color: '#7c3aed', border: 'rgba(124,58,237,0.2)', icon: '🧬' },
+              diagnostic_test:   { label: 'Diagnostic', bg: 'rgba(16,185,129,0.1)', color: '#059669', border: 'rgba(16,185,129,0.2)', icon: '🩸' },
+              diagnostic:        { label: 'Diagnostic', bg: 'rgba(16,185,129,0.1)', color: '#059669', border: 'rgba(16,185,129,0.2)', icon: '🩸' },
+              genomics_biomarkers:{ label: 'Genomics',   bg: 'rgba(124,58,237,0.1)', color: '#7c3aed', border: 'rgba(124,58,237,0.2)', icon: '🧬' },
               service:           { label: 'Service',    bg: 'rgba(217,119,6,0.08)', color: '#d97706', border: 'rgba(217,119,6,0.2)',  icon: '⚙️' },
             }[t] || { label: t, bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0', icon: '📋' };
             return (

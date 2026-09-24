@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   Activity, 
   ShieldCheck, 
@@ -26,6 +27,40 @@ import {
   Syringe
 } from '@/lib/icons';
 import './DiagnosticTestTechnicalSpecs.css';
+
+const COMPANION_SLUG_MAP = {
+  'kisspeptin-10': 'kisspeptin-10',
+  'kisspeptin': 'kisspeptin-10',
+  'testagen': 'testagen',
+  'dsip': 'dsip',
+  'selank': 'selank',
+  'semax': 'semax',
+  'epithalon': 'epithalon',
+  'mots-c': 'mots-c',
+  'tirzepatide': 'tirzepatide',
+  'semaglutide': 'semaglutide',
+  'retatrutide': 'retatrutide',
+  'bpc-157': 'bpc-157',
+  'tb-500': 'tb-500',
+  'thymosin alpha-1': 'thymosin-alpha-1',
+  'll-37': 'll-37',
+  'ss-31': 'ss-31',
+  'elamipretide': 'ss-31',
+  'nad+': 'nad-plus',
+  'nmn': 'nmn',
+  'cjc-1295': 'cjc-1295',
+  'ipamorelin': 'ipamorelin',
+  'ghk-cu': 'ghk-cu',
+  'kpv': 'kpv',
+};
+
+function resolveCompanionSlug(name = '') {
+  const clean = name.toLowerCase().replace(/[^a-z0-9+-]/g, ' ').trim();
+  for (const [key, slug] of Object.entries(COMPANION_SLUG_MAP)) {
+    if (clean.includes(key)) return slug;
+  }
+  return null;
+}
 
 /**
  * DiagnosticTestTechnicalSpecs
@@ -931,12 +966,30 @@ export default function DiagnosticTestTechnicalSpecs({
                     {isEs ? 'Péptidos & Precursores en Sinergia' : 'Synergistic Companion Compounds'}
                   </span>
                   <div className="dts-synergies-pills">
-                    {activeRange.clinicalProtocol.synergies.map((syn, synIdx) => (
-                      <div key={synIdx} className="dts-syn-pill">
-                        <span className="dts-syn-name">{syn.name}</span>
-                        <span className="dts-syn-role">{syn.role}</span>
-                      </div>
-                    ))}
+                    {activeRange.clinicalProtocol.synergies.map((syn, synIdx) => {
+                      const companionSlug = resolveCompanionSlug(syn.name);
+                      if (companionSlug) {
+                        return (
+                          <Link
+                            key={synIdx}
+                            href={`/p/${companionSlug}`}
+                            prefetch={true}
+                            className="dts-syn-pill dts-syn-pill--link"
+                            title={isEs ? `Ver ficha técnica de ${syn.name}` : `View clinical monograph for ${syn.name}`}
+                          >
+                            <span className="dts-syn-name">{syn.name}</span>
+                            <span className="dts-syn-role">{syn.role}</span>
+                            <ExternalLink size={10} className="dts-syn-link-icon" />
+                          </Link>
+                        );
+                      }
+                      return (
+                        <div key={synIdx} className="dts-syn-pill">
+                          <span className="dts-syn-name">{syn.name}</span>
+                          <span className="dts-syn-role">{syn.role}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -960,14 +1013,15 @@ export default function DiagnosticTestTechnicalSpecs({
 
               {/* Actions Footer */}
               <div className="dts-action-footer">
-                <a 
+                <Link 
                   href={`/proto/${activeRange.clinicalProtocol.slug}${activeRange.clinicalProtocol.queryParams || ''}`}
+                  prefetch={true}
                   className="dts-btn-explore-proto"
                   title={isEs ? `Ver protocolo clínico calibrado ${activeRange.clinicalProtocol.shortCode}` : `Explore calibrated clinical protocol ${activeRange.clinicalProtocol.shortCode}`}
                 >
                   <span>{isEs ? 'Ver Protocolo Clínico Calibrado para este Resultado' : 'Review Calibrated Clinical Protocol for this Result'}</span>
                   <ArrowRight size={14} />
-                </a>
+                </Link>
 
                 <button
                   type="button"

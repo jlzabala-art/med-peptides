@@ -117,18 +117,17 @@
 .brp-rows-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.85rem;
 }
 
 .brp-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  flex-direction: column;
+  gap: 0.70rem;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  padding: 1.10rem 1.30rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -141,11 +140,12 @@
 }
 
 .brp-row-lead {
-  flex: 0 0 260px;
-  max-width: 300px;
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .brp-target-tag {
@@ -164,33 +164,35 @@
 
 .brp-peptide-name {
   margin: 0;
-  font-size: 0.96rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: #0f172a;
   line-height: 1.35;
 }
 
 .brp-row-description {
-  flex: 1 1 auto;
-  min-width: 0;
+  width: 100%;
 }
 
 .brp-rationale {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   color: #334155;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .brp-row-actions {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: 0.75rem;
+  padding-top: 0.60rem;
+  border-top: 1px solid #f1f5f9;
 }
 
 .brp-spec-pill {
-  font-size: 0.7rem;
+  font-size: 0.70rem;
   color: #16a34a;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
@@ -428,25 +430,7 @@
   letter-spacing: 0.04em;
 }
 
-@media (max-width: 900px) {
-  .brp-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-
-  .brp-row-lead {
-    flex: none;
-    max-width: 100%;
-  }
-
-  .brp-row-actions {
-    justify-content: space-between;
-    padding-top: 0.65rem;
-    border-top: 1px solid #f1f5f9;
-  }
-
+@media (max-width: 1120px) {
   .brp-proto-banner-content {
     grid-template-columns: 1fr;
     gap: 1rem;
