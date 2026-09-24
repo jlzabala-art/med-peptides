@@ -25,18 +25,8 @@ export function invalidatePublicProtocolCache(slug) {
 }
 
 export async function generateStaticParams() {
-  // Pre-render flagship protocols at build time for instant Edge CDN responses
-  return [
-    { slug: 'hormonal-support-12w' },
-    { slug: 'nad-cellular-restoration-protocol' },
-    { slug: 'weight-management-structured-12w' },
-    { slug: 'recovery-foundation-bpc-tb' },
-    { slug: 'growth-hormone-optimization' },
-    { slug: 'immune-modulation-cellular' },
-    { slug: 'mitochondrial-metabolic-support' },
-    { slug: 'sleep-restoration-8w' },
-    { slug: 'lxv-neuro-restoration-12w' },
-  ];
+  // Render on-demand with ISR (revalidate = 3600) to avoid CI build hangs without credentials
+  return [];
 }
 
 const KNOWN_PROTOCOL_ALIASES = {
