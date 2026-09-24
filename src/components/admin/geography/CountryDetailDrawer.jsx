@@ -6,6 +6,7 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Users from "lucide-react/dist/esm/icons/users";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React from 'react';
 
 

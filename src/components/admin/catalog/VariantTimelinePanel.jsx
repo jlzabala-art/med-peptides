@@ -40,6 +40,7 @@ import SupplierAgreementCard from './cards/SupplierAgreementCard';
 import ZohoReconcilerCard from './cards/ZohoReconcilerCard';
 import SupplierQuotationDetailDrawer from '../quotations/SupplierQuotationDetailDrawer';
 import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
+import BulkApiYieldCalculator from './widgets/BulkApiYieldCalculator';
 
 /**
  * VariantTimelinePanel

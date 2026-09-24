@@ -444,7 +444,7 @@ export default function AdminAIAgentsTab({ isSubTab }) {
         />
       </div>
 
-      <AgentsSummaryBar agents={agents} />
+      <SummaryBar agents={agents} />
 
       {/* Agent Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>

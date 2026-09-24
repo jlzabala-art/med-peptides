@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Clock, FlaskConical, ShieldCheck, Activity, Layers, BookOpen, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, ExternalLink, Pill, Stethoscope, Target, BarChart2 } from '@/lib/icons';
 import StandardDrawerTabs from '../../common/StandardDrawerTabs';
+import { DataTable, EmptyState } from '../../ui';
 import { normalizeGoal } from '../../../services/clinicalTaxonomyNormalizer';
 import { GOAL_ICONS } from '../../ui/CanonicalGoalSelect';
 

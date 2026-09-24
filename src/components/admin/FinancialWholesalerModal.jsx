@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, DollarSign } from '@/lib/icons';
+import { X, DollarSign, Building2 } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 

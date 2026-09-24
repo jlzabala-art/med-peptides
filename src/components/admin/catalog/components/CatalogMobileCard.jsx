@@ -19,7 +19,8 @@ import {
   Bot,
   Building2,
   Droplets,
-  Plus
+  Plus,
+  Activity
 } from '@/lib/icons';
 import StatusBadge from '../../../ui/StatusBadge';
 import InlineEditableCell from '../../../ui/InlineEditableCell';

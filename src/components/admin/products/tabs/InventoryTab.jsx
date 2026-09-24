@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, StatusChip, Button } from '../../../ui';
-import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers } from '@/lib/icons';
+import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers, Brain } from '@/lib/icons';
 
 export default function InventoryTab({ form = {}, setForm }) {
   const stock = Number(form.stock || 0);

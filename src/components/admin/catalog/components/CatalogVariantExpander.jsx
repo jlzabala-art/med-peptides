@@ -18,7 +18,9 @@ import {
   Sun,
   Layers,
   FileCheck,
-  Sparkles
+  Sparkles,
+  Building2,
+  Share2
 } from 'lucide-react';
 
 /**

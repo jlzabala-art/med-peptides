@@ -3,6 +3,8 @@
 import Wrench from "lucide-react/dist/esm/icons/wrench";
 import Save from "lucide-react/dist/esm/icons/save";
 import Search from "lucide-react/dist/esm/icons/search";
+import Database from "lucide-react/dist/esm/icons/database";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';

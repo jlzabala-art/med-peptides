@@ -22,6 +22,7 @@ import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmptyState from '../../../ui/EmptyState';
+import DataTable from '../../../ui/DataTable';
 
 export default function SupplierInsightsView({ variants = [], onAction }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);

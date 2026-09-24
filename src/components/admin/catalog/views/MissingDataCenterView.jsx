@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { AlertTriangle, FileWarning, DollarSign, ImageOff, Building, ArrowRight, CheckCircle } from '@/lib/icons';
+import { AlertTriangle, FileWarning, DollarSign, ImageOff, Building, ArrowRight, CheckCircle, Settings2 } from '@/lib/icons';
 import DataTable from '../../../ui/DataTable';
 import EmptyState from '../../../ui/EmptyState';
 
