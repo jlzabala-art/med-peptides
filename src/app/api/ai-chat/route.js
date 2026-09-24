@@ -492,7 +492,7 @@ GUIDELINES:
         const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: validHistoryTurns,
           config: {
             systemInstruction: systemPrompt,
@@ -506,7 +506,7 @@ GUIDELINES:
           const res = NextResponse.json({
             reply: replyText,
             goal,
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.6-flash',
             timestamp: new Date().toISOString(),
             remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
             limit: isPublicSandbox ? 5 : undefined,
@@ -517,7 +517,7 @@ GUIDELINES:
       } catch (sdkErr) {
         console.warn('[Atlas AI API] GoogleGenAI SDK error, attempting REST fallback:', sdkErr.message);
         try {
-          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -539,7 +539,7 @@ GUIDELINES:
               const res = NextResponse.json({
                 reply: replyText,
                 goal,
-                model: 'gemini-2.5-flash',
+                model: 'gemini-3.5-flash',
                 timestamp: new Date().toISOString(),
                 remaining: isPublicSandbox ? sandboxRateInfo.remaining : undefined,
                 limit: isPublicSandbox ? 5 : undefined,
@@ -554,43 +554,80 @@ GUIDELINES:
       }
     }
 
-    // Dynamic, query-specific fallback responses (100% strictly on-topic, zero Lotusland mentions)
+    // Dynamic, context-specific and query-specific fallback responses
     const lowerMsg = (message || '').toLowerCase();
     let fallbackReply = '';
 
     if (isPublicSandbox) {
-      if (lowerMsg.includes('bac') || lowerMsg.includes('dilut') || lowerMsg.includes('reconstitut') || lowerMsg.includes('ratio') || lowerMsg.includes('water')) {
-        fallbackReply = `**Reconstitution & Dilution Specification**:\n\n` +
-          `• **Recommended Solvent**: Sterile bacteriostatic water containing 0.9% benzyl alcohol (USP-NF analytical grade).\n` +
-          `• **Dilution Volume**: Reconstitute lyophilized cake with **1.0 mL to 2.0 mL** sterile solvent based on desired micro-concentration.\n` +
-          `• **Aseptic Injection Technique**: Direct the solvent needle against the inner glass sidewall of the vial. Do not spray solvent directly onto the lyophilized cake.\n` +
-          `• **Dissolution**: Swirl gently with smooth circular motions. Avoid mechanical shaking or vortexing to prevent peptide peptide peptide shearing.\n\n` +
-          `Which specific concentration or syringe volume calculation would you like detailed?`;
-      } else if (lowerMsg.includes('refrigerat') || lowerMsg.includes('storage') || lowerMsg.includes('temp') || lowerMsg.includes('limit') || lowerMsg.includes('stabilit')) {
-        fallbackReply = `**Thermal Stability & Storage Protocol**:\n\n` +
-          `• **Lyophilized Powder**: Store sealed vials at **2°C to 8°C** for short-term handling (up to 90 days). For extended research preservation (12–24 months), store at **-20°C** in a frost-free, moisture-controlled environment.\n` +
-          `• **Reconstituted Solution**: Maintain reconstituted aqueous aliquots at **2°C to 8°C** shielded from UV light. Optimal analytical stability is observed within 28–35 days post-reconstitution.\n` +
-          `• **Thermal Excursion Safeguard**: Avoid repetitive freeze-thaw cycles. Protect from ambient heat sources and direct sunlight.\n\n` +
-          `Do you need storage criteria for alternate research solvent environments?`;
-      } else if (lowerMsg.includes('clinical') || lowerMsg.includes('pathway') || lowerMsg.includes('trial') || lowerMsg.includes('study') || lowerMsg.includes('pubmed') || lowerMsg.includes('evidence')) {
-        fallbackReply = `**Clinical Evidence & Investigational Overview**:\n\n` +
-          `• **Investigational Class**: Multi-receptor targeting peptide evaluated in peer-reviewed clinical research programs.\n` +
-          `• **Primary Biological Pathways**: Studies document potent agonist activity along regulated metabolic and cellular signaling cascades.\n` +
-          `• **Published Literature**: Peer-reviewed trials listed in the Clinical Evidence panel detail pharmacokinetics, dose-response curves, and safety endpoints.\n` +
-          `• **Research Scope**: Formulations are produced strictly for laboratory research, molecular investigation, and non-in-vivo analytical evaluation.\n\n` +
-          `Would you like to examine specific PubMed clinical trial citations or outcome endpoints?`;
-      } else if (lowerMsg.includes('receptor') || lowerMsg.includes('affinity') || lowerMsg.includes('target') || lowerMsg.includes('agonist')) {
-        fallbackReply = `**Receptor Target Affinities & Molecular Profile**:\n\n` +
-          `• **Signaling Dynamics**: Engineered for high-affinity receptor binding with nanomolar potency across designated target receptors.\n` +
-          `• **Downstream Cascades**: Stimulates selective intracellular cAMP accumulation and downstream enzymatic activation cascades without non-specific cross-reactivity.\n` +
-          `• **Molecular Integrity**: Sequence fidelity confirmed via high-resolution mass spectrometry (LC-MS).\n\n` +
-          `Would you like to review theoretical vs. observed molecular weight spectra?`;
+      if (isDiagnostic) {
+        if (lowerMsg.includes('trans') || lowerMsg.includes('acid') || lowerMsg.includes('membrane') || lowerMsg.includes('fluidity') || lowerMsg.includes('transport') || lowerMsg.includes('signaling')) {
+          fallbackReply = `**Cell Membrane Lipidome & Receptor Signaling Dynamics**:\n\n` +
+            `• **Biophysical Membrane Fluidity**: Incorporation of industrial trans fatty acids and excessive saturated fats increases erythrocyte and parenchymal membrane rigidity, distorting lipid rafts.\n` +
+            `• **Receptor & Substrate Transport Impairment**: Rigidified bilayers restrict the lateral mobility of integral transmembrane receptors (G-protein coupled receptors, insulin receptors) and inhibit glucose/amino acid nutrient transporters (GLUT4, LAT1).\n` +
+            `• **Peptide Signaling Blunting**: Downstream signaling cascades initiated by bioactive peptides (such as BPC-157, TB-500, or MOTS-c) depend on fluid membrane microdomains for effective ligand-receptor coupling and second-messenger phosphorylation.\n` +
+            `• **Clinical Recalibration**: Normalizing the Omega-3 Index to **> 8%** and reducing the AA/EPA ratio to **< 4:1** restores membrane fluidity and optimizes peptide therapeutic receptivity.\n\n` +
+            `Which clinical biomarker tier or therapeutic protocol correlation would you like detailed?`;
+        } else if (lowerMsg.includes('sample') || lowerMsg.includes('collect') || lowerMsg.includes('card') || lowerMsg.includes('finger') || lowerMsg.includes('dbs') || lowerMsg.includes('prick')) {
+          fallbackReply = `**Capillary DBS Sample Collection Protocol**:\n\n` +
+            `• **Preparation**: Warm hands under hot water for 2–3 minutes to promote peripheral capillary vasodilation. Clean finger with alcohol swab and dry completely.\n` +
+            `• **First Drop Discard**: Always wipe away the first drop of blood with sterile gauze; it contains lymph and interstitial fluid that dilutes target cellular biomarkers.\n` +
+            `• **Card Saturation**: Allow 2 to 3 large, hanging blood drops to saturate the designated Whatman 903 circles uniformly until visible on the reverse side.\n` +
+            `• **Drying & Desiccation**: Air-dry horizontally for 3 hours at room temperature away from direct sunlight before sealing in the foil pouch with silica desiccant.\n\n` +
+            `Would you like instructions for prepaid express postal dispatch to LifeLab1?`;
+        } else if (lowerMsg.includes('range') || lowerMsg.includes('level') || lowerMsg.includes('reference') || lowerMsg.includes('ratio') || lowerMsg.includes('tier')) {
+          fallbackReply = `**Clinical Reference Ranges & Actionable Stratification**:\n\n` +
+            `• **High Risk / Severe Depletion Tier**: Indicates acute metabolic imbalance, chronic inflammatory tone, or exhausted cellular reserves requiring immediate clinical intervention.\n` +
+            `• **Suboptimal / Moderate Tier**: Typical baseline in adult populations reflecting age-associated decline; highly responsive to targeted precursor or nutrient optimization.\n` +
+            `• **Optimal Therapeutic Tier**: Target longevity zone reflecting youthful cellular bioenergetics, optimal membrane fluidity, and resilient homeostatic repair.\n\n` +
+            `Which specific biomarker level would you like mapped to a clinical protocol?`;
+        } else {
+          fallbackReply = `**Diagnostic Test Kit Clinical Overview**:\n\n` +
+            `• **Analytical Certification**: CE-IVDR certified dried blood spot (DBS) assay processed at LifeLab1 (Vilnius, Lithuania) under ISO 15189 quality standards.\n` +
+            `• **Sample Stability**: Ambient postal transit stability for up to 14 days supported by medical-grade silica desiccant pouches.\n` +
+            `• **Diagnostic Accuracy**: Direct chromatographic and mass spectrometry quantification (GC-MS / LC-MS/MS) with analytical precision CV < 5%.\n\n` +
+            `What clinical specification, reference range, or collection procedure do you need clarified?`;
+        }
+      } else if (isCorporate) {
+        fallbackReply = `**Spanish Law 14/2013 Corporate Residency Overview**:\n\n` +
+          `• **Statutory Adjudication**: Fast-track 20 business days administrative silence resolution through UGE-CE / ENISA.\n` +
+          `• **Permit Scope**: 3-year initial residence authorization granting full employment and self-employment rights across Spain.\n` +
+          `• **Corporate Structure**: 100% turnkey acquisition of an existing debt-free Spanish S.L. with CIF, active bank account, and commercial background.\n` +
+          `• **Remote Closing**: Consular Power of Attorney (PoA) allows complete remote execution without visiting Spain until biometric fingerprinting.\n\n` +
+          `Would you like to review eligible applicant structures or schedule a confidential legal consultation?`;
       } else {
-        fallbackReply = `**Analytical Specifications Overview**:\n\n` +
-          `• **Synthesis Standard**: Certified ≥99.0% analytical purity verified via Dual-Stage RP-HPLC and high-resolution LC-MS release assay.\n` +
-          `• **Appearance**: Pure white to off-white lyophilized plug, sterilized and hermetically sealed under nitrogen.\n` +
-          `• **Quality Verification**: Each production lot is cataloged with an independent Certificate of Analysis (COA) confirming peptide content and trifluoroacetate (TFA) clearance.\n\n` +
-          `Which specific compounding or analytical parameter do you need clarified?`;
+        if (lowerMsg.includes('bac') || lowerMsg.includes('dilut') || lowerMsg.includes('reconstitut') || lowerMsg.includes('ratio') || lowerMsg.includes('water')) {
+          fallbackReply = `**Reconstitution & Dilution Specification**:\n\n` +
+            `• **Recommended Solvent**: Sterile bacteriostatic water containing 0.9% benzyl alcohol (USP-NF analytical grade).\n` +
+            `• **Dilution Volume**: Reconstitute lyophilized cake with **1.0 mL to 2.0 mL** sterile solvent based on desired micro-concentration.\n` +
+            `• **Aseptic Injection Technique**: Direct the solvent needle against the inner glass sidewall of the vial. Do not spray solvent directly onto the lyophilized cake.\n` +
+            `• **Dissolution**: Swirl gently with smooth circular motions. Avoid mechanical shaking or vortexing to prevent peptide shearing.\n\n` +
+            `Which specific concentration or syringe volume calculation would you like detailed?`;
+        } else if (lowerMsg.includes('refrigerat') || lowerMsg.includes('storage') || lowerMsg.includes('temp') || lowerMsg.includes('limit') || lowerMsg.includes('stabilit')) {
+          fallbackReply = `**Thermal Stability & Storage Protocol**:\n\n` +
+            `• **Lyophilized Powder**: Store sealed vials at **2°C to 8°C** for short-term handling (up to 90 days). For extended research preservation (12–24 months), store at **-20°C** in a frost-free, moisture-controlled environment.\n` +
+            `• **Reconstituted Solution**: Maintain reconstituted aqueous aliquots at **2°C to 8°C** shielded from UV light. Optimal analytical stability is observed within 28–35 days post-reconstitution.\n` +
+            `• **Thermal Excursion Safeguard**: Avoid repetitive freeze-thaw cycles. Protect from ambient heat sources and direct sunlight.\n\n` +
+            `Do you need storage criteria for alternate research solvent environments?`;
+        } else if (lowerMsg.includes('clinical') || lowerMsg.includes('pathway') || lowerMsg.includes('trial') || lowerMsg.includes('study') || lowerMsg.includes('pubmed') || lowerMsg.includes('evidence')) {
+          fallbackReply = `**Clinical Evidence & Investigational Overview**:\n\n` +
+            `• **Investigational Class**: Multi-receptor targeting peptide evaluated in peer-reviewed clinical research programs.\n` +
+            `• **Primary Biological Pathways**: Studies document potent agonist activity along regulated metabolic and cellular signaling cascades.\n` +
+            `• **Published Literature**: Peer-reviewed trials listed in the Clinical Evidence panel detail pharmacokinetics, dose-response curves, and safety endpoints.\n` +
+            `• **Research Scope**: Formulations are produced strictly for laboratory research, molecular investigation, and non-in-vivo analytical evaluation.\n\n` +
+            `Would you like to examine specific PubMed clinical trial citations or outcome endpoints?`;
+        } else if (lowerMsg.includes('receptor') || lowerMsg.includes('affinity') || lowerMsg.includes('target') || lowerMsg.includes('agonist')) {
+          fallbackReply = `**Receptor Target Affinities & Molecular Profile**:\n\n` +
+            `• **Signaling Dynamics**: Engineered for high-affinity receptor binding with nanomolar potency across designated target receptors.\n` +
+            `• **Downstream Cascades**: Stimulates selective intracellular cAMP accumulation and downstream enzymatic activation cascades without non-specific cross-reactivity.\n` +
+            `• **Molecular Integrity**: Sequence fidelity confirmed via high-resolution mass spectrometry (LC-MS).\n\n` +
+            `Would you like to review theoretical vs. observed molecular weight spectra?`;
+        } else {
+          fallbackReply = `**Analytical Specifications Overview**:\n\n` +
+            `• **Synthesis Standard**: Certified ≥99.0% analytical purity verified via Dual-Stage RP-HPLC and high-resolution LC-MS release assay.\n` +
+            `• **Appearance**: Pure white to off-white lyophilized plug, sterilized and hermetically sealed under nitrogen.\n` +
+            `• **Quality Verification**: Each production lot is cataloged with an independent Certificate of Analysis (COA) confirming peptide content and trifluoroacetate (TFA) clearance.\n\n` +
+            `Which specific compounding or analytical parameter do you need clarified?`;
+        }
       }
     } else {
       fallbackReply = `Here is what you should know about **${goal || 'peptide research'}**:\n\n` +

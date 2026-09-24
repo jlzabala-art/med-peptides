@@ -202,7 +202,7 @@ export default function PublicAtlasAIDrawer({
           scope: 'public_sandbox',
           message: query,
           context: {
-            screenScope: contextType === 'monograph' ? 'product_monograph' : 'catalog_portfolio',
+            screenScope: contextType || (contextType === 'monograph' ? 'product_monograph' : 'catalog_portfolio'),
             contextAnchor,
             catalogInventory,
           },
@@ -280,8 +280,12 @@ export default function PublicAtlasAIDrawer({
 
   const TOKEN_REGEX = /(\[[^\]]+\]\(\/[^)]+\)|\*\*[^*]+\*\*)/g;
 
-  const renderBodyWithHighlights = (text) => {
-    if (!text) return null;
+  const renderBodyWithHighlights = (rawText) => {
+    if (!rawText) return null;
+    // Clean any stray unclosed asterisks or trailing **: from broken upstream formatting
+    const text = String(rawText).replace(/\*\*:/g, ':').replace(/([^\n*]+)\*\*/g, (m, p1) => {
+      return p1.includes('**') ? m : p1;
+    });
     const tokens = text.split(TOKEN_REGEX);
 
     return tokens.map((chunk, cIdx) => {
@@ -547,6 +551,26 @@ export default function PublicAtlasAIDrawer({
     });
     const rawLines = sanitized.split('\n').map(l => l.trim()).filter(Boolean);
 
+    const isDiagContext = contextType === 'diagnostic_test' || contextAnchor?.category === 'Diagnostic Kits';
+    const isCorpContext = contextType === 'corporate_residency' || contextAnchor?.category === 'Corporate Services';
+    const isProtoContext = contextType === 'protocol_guide' || contextAnchor?.phases;
+
+    const microHeaderTitle = isDiagContext
+      ? (lang === 'es' ? 'ESPECIFICACIONES DE BIOMARCADORES CLÍNICOS' : 'VERIFIED CLINICAL BIOMARKER SPECIFICATIONS')
+      : isCorpContext
+      ? (lang === 'es' ? 'ESPECIFICACIONES ESTATUTARIAS CORPORATIVAS' : 'VERIFIED CORPORATE STATUTORY SPECIFICATIONS')
+      : isProtoContext
+      ? (lang === 'es' ? 'ARQUITECTURA DE PROTOCOLO CLÍNICO' : 'VERIFIED CLINICAL PROTOCOL BLUEPRINT')
+      : (lang === 'es' ? 'ESPECIFICACIONES ANALÍTICAS VERIFICADAS' : 'VERIFIED ANALYTICAL SPECIFICATIONS');
+
+    const microHeaderSubtitle = isDiagContext
+      ? 'CE-IVDR Diagnostic Test'
+      : isCorpContext
+      ? 'Spanish Law 14/2013'
+      : isProtoContext
+      ? 'Phased Pathway'
+      : 'Standard Monograph';
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {/* Institutional Micro-Header */}
@@ -562,9 +586,9 @@ export default function PublicAtlasAIDrawer({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.70rem', fontWeight: 800, color: '#003666', letterSpacing: '0.02em' }}>
             <Sparkles size={11} color="#0284c7" />
-            <span>VERIFIED ANALYTICAL SPECIFICATIONS</span>
+            <span>{microHeaderTitle}</span>
           </div>
-          <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>Standard Monograph</span>
+          <span style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 600 }}>{microHeaderSubtitle}</span>
         </div>
 
         {rawLines.map((line, idx) => {
@@ -641,8 +665,9 @@ export default function PublicAtlasAIDrawer({
           );
 
           if (isBullet) {
-            const stripped = line.replace(/^[\s•\-*]+|\s*^\d+\.\s*/, '').trim();
-            const colonMatch = stripped.match(/^(\*\*[^*]+:\*\*|\*\*[^*]+\*\*:\s*|[A-Za-z0-9\s/&—-]+:)\s*(.+)$/);
+            // Strip only bullet markers (e.g. "- ", "* ", "1. "), preserving any ** bold delimiters!
+            const stripped = line.replace(/^(\s*[-•*]|\s*\d+\.)\s+/, '').trim();
+            const colonMatch = stripped.match(/^(\*\*[^*]+:\*\*|\*\*[^*]+\*\*:\s*|\*\*[^*]+\*\*\s*|[A-Za-z0-9\s/&—-]+:)\s*(.+)$/);
 
             let label = null;
             let body = stripped;

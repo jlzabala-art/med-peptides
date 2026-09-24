@@ -358,51 +358,55 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
 
   return (
     <section id="nad-clinical-faq" className="bnf-card-container">
-      {/* ── Card Header ── */}
+      {/* ── Card Header (Google Cloud UX: Full-width Header with Meta Toolbar) ── */}
       <div className="bnf-card-header">
-        <div className="bnf-header-left">
-          <div className="bnf-header-icon-box">
-            <HelpCircle size={20} className="bnf-header-icon" />
-          </div>
-          <div>
+        <div className="bnf-header-top-bar">
+          <div className="bnf-header-meta-left">
+            <div className="bnf-header-icon-box">
+              <HelpCircle size={20} className="bnf-header-icon" />
+            </div>
             <div className="bnf-header-badge-row">
               <span className="bnf-chip bnf-chip-pharma">CE-IVDR Certified • Dried Blood Spot (DBS)</span>
               <span className="bnf-chip bnf-chip-protocol">
                 {isEs ? 'Guía para Profesionales' : 'Physician Clinical FAQ'}
               </span>
             </div>
-            <h3 className="bnf-title">
-              {isEs ? `Preguntas Frecuentes y Pautas Clínicas (${testTitle})` : `${testTitle} – Frequently Asked Questions & Clinical Guidelines`}
-            </h3>
-            <p className="bnf-subtitle">
-              {isEs
-                ? 'Información farmacológica rigurosa y parámetros de monitorización estandarizados para médicos, investigadores clínicos y consultas especializadas.'
-                : 'Pharma-grade clinical guidance and standardized testing parameters for medical practitioners, clinical investigators, and prescribing clinics.'}
-            </p>
+          </div>
+
+          {/* Global Clinical Actions */}
+          <div className="bnf-header-actions">
+            <button
+              type="button"
+              className="bnf-btn-expand-all"
+              onClick={toggleExpandAll}
+              title={isAllExpanded ? (isEs ? 'Colapsar todas las preguntas' : 'Collapse all questions') : (isEs ? 'Expandir todas las preguntas' : 'Expand all questions')}
+            >
+              {isAllExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              <span>{isAllExpanded ? (isEs ? 'Colapsar Todo' : 'Collapse All') : (isEs ? 'Expandir Todo' : 'Expand All')}</span>
+            </button>
+
+            <button
+              type="button"
+              className="bnf-btn-copy-guideline"
+              onClick={handleCopyAll}
+              title={isEs ? 'Copiar especificaciones clínicas al portapapeles' : 'Copy clinical specifications to clipboard'}
+            >
+              {isCopiedAll ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
+              <span>{isCopiedAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Pautas Clínicas' : 'Copy Clinical Guidelines')}</span>
+            </button>
           </div>
         </div>
 
-        {/* Global Clinical Actions */}
-        <div className="bnf-header-actions">
-          <button
-            type="button"
-            className="bnf-btn-expand-all"
-            onClick={toggleExpandAll}
-            title={isAllExpanded ? (isEs ? 'Colapsar todas las preguntas' : 'Collapse all questions') : (isEs ? 'Expandir todas las preguntas' : 'Expand all questions')}
-          >
-            {isAllExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            <span>{isAllExpanded ? (isEs ? 'Colapsar Todo' : 'Collapse All') : (isEs ? 'Expandir Todo' : 'Expand All')}</span>
-          </button>
-
-          <button
-            type="button"
-            className="bnf-btn-copy-guideline"
-            onClick={handleCopyAll}
-            title={isEs ? 'Copiar especificaciones clínicas al portapapeles' : 'Copy clinical specifications to clipboard'}
-          >
-            {isCopiedAll ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
-            <span>{isCopiedAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Pautas Clínicas' : 'Copy Clinical Guidelines')}</span>
-          </button>
+        {/* Full-width Title & Subtitle */}
+        <div className="bnf-header-body">
+          <h3 className="bnf-title">
+            {isEs ? `Preguntas Frecuentes y Pautas Clínicas (${testTitle})` : `${testTitle} – Frequently Asked Questions & Clinical Guidelines`}
+          </h3>
+          <p className="bnf-subtitle">
+            {isEs
+              ? 'Información farmacológica rigurosa y parámetros de monitorización estandarizados para médicos, investigadores clínicos y consultas especializadas.'
+              : 'Pharma-grade clinical guidance and standardized testing parameters for medical practitioners, clinical investigators, and prescribing clinics.'}
+          </p>
         </div>
       </div>
 

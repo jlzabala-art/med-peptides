@@ -846,7 +846,11 @@ export default function DiagnosticTestTechnicalSpecs({
           </div>
 
           {/* Range selection buttons */}
-          <div className="dts-range-selector">
+          <div 
+            className="dts-range-selector" 
+            data-range-count={biomarkerData.ranges.length}
+            style={{ '--range-count': biomarkerData.ranges.length }}
+          >
             {biomarkerData.ranges.map((rng, idx) => {
               const isSelected = selectedRangeIndex === idx;
               return (

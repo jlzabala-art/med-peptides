@@ -110,16 +110,34 @@
 
 .dts-range-selector {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(var(--range-count, 3), minmax(0, 1fr));
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   width: 100%;
   box-sizing: border-box;
 }
 
+/* For tests with 3 ranges (Omega, Cortisol, VitD, etc.), always 3 equal columns on desktop & laptop */
+.dts-range-selector[data-range-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* For tests with 4 ranges (NAD), 4 columns on large screens, balanced 2x2 on tablets */
+.dts-range-selector[data-range-count="4"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .dts-range-selector[data-range-count="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 640px) {
-  .dts-range-selector {
-    grid-template-columns: 1fr;
+  .dts-range-selector,
+  .dts-range-selector[data-range-count="3"],
+  .dts-range-selector[data-range-count="4"] {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -127,7 +145,7 @@
   border: 2px solid #e2e8f0;
   background: #ffffff;
   border-radius: 10px;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.65rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
