@@ -9,6 +9,7 @@ import {
   ArrowUp 
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
+import BloodoSuiteNav from './BloodoSuiteNav';
 import './PublicDatasheetTableOfContents.css';
 
 /**
@@ -27,7 +28,10 @@ import './PublicDatasheetTableOfContents.css';
 export default function PublicDatasheetTableOfContents({
   sections = [],
   lang = 'en',
-  title = null
+  title = null,
+  hideFloatingTrigger = false,
+  isBloodoSuite = false,
+  currentProductSlug = ''
 }) {
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
@@ -37,6 +41,16 @@ export default function PublicDatasheetTableOfContents({
   const availableSections = useMemo(() => {
     return sections.filter(sec => sec && sec.id);
   }, [sections]);
+
+  // Support external trigger (e.g. from PublicStickyActionBar)
+  useEffect(() => {
+    const handleExternalOpen = () => {
+      triggerHaptic('light');
+      setIsMobileDrawerOpen(true);
+    };
+    window.addEventListener('open-datasheet-toc', handleExternalOpen);
+    return () => window.removeEventListener('open-datasheet-toc', handleExternalOpen);
+  }, []);
 
   // Real-time ScrollSpy via IntersectionObserver
   useEffect(() => {
@@ -104,6 +118,20 @@ export default function PublicDatasheetTableOfContents({
   const currentProgress = activeIndex >= 0 ? activeIndex + 1 : 1;
   const activeLabel = availableSections.find(s => s.id === activeId)?.label || '';
 
+  // Broadcast TOC progress to bottom sticky action bar
+  useEffect(() => {
+    if (typeof window !== 'undefined' && availableSections.length > 0) {
+      window.dispatchEvent(new CustomEvent('datasheet-toc-progress', {
+        detail: {
+          currentProgress,
+          totalSections: availableSections.length,
+          activeId,
+          activeLabel
+        }
+      }));
+    }
+  }, [currentProgress, availableSections.length, activeId, activeLabel]);
+
   if (!availableSections.length) return null;
 
   return (
@@ -154,6 +182,15 @@ export default function PublicDatasheetTableOfContents({
             </ul>
           </nav>
 
+          {/* Bloodo Diagnostic Suite Direct Test Switcher (Bloodo Products Only) */}
+          {isBloodoSuite && (
+            <BloodoSuiteNav
+              currentSlug={currentProductSlug}
+              lang={lang}
+              variant="drawer"
+            />
+          )}
+
           {/* Quick Back to Top Action */}
           <div className="pds-toc-footer">
             <button
@@ -172,26 +209,28 @@ export default function PublicDatasheetTableOfContents({
       {/* ══════════════════════════════════════════════════════════════
           2. MOBILE FLOATING TRIGGER BUTTON (< 1024px)
           ══════════════════════════════════════════════════════════════ */}
-      <div className="pds-mobile-toc-fab-container">
-        <button
-          type="button"
-          className="pds-mobile-toc-fab"
-          onClick={() => {
-            triggerHaptic('light');
-            setIsMobileDrawerOpen(true);
-          }}
-          aria-label={isEs ? 'Abrir índice de contenido' : 'Open table of contents'}
-          aria-expanded={isMobileDrawerOpen}
-        >
-          <Menu size={16} className="pds-fab-icon" />
-          <span className="pds-fab-label">
-            {isEs ? 'Índice' : 'Sections'}
-          </span>
-          <span className="pds-fab-badge">
-            {currentProgress}/{availableSections.length}
-          </span>
-        </button>
-      </div>
+      {!hideFloatingTrigger && (
+        <div className="pds-mobile-toc-fab-container">
+          <button
+            type="button"
+            className="pds-mobile-toc-fab"
+            onClick={() => {
+              triggerHaptic('light');
+              setIsMobileDrawerOpen(true);
+            }}
+            aria-label={isEs ? 'Abrir índice de contenido' : 'Open table of contents'}
+            aria-expanded={isMobileDrawerOpen}
+          >
+            <Menu size={16} className="pds-fab-icon" />
+            <span className="pds-fab-label">
+              {isEs ? 'Índice' : 'Sections'}
+            </span>
+            <span className="pds-fab-badge">
+              {currentProgress}/{availableSections.length}
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════
           3. MOBILE SLIDE-IN DRAWER / BOTTOM SHEET (< 1024px)
@@ -277,6 +316,16 @@ export default function PublicDatasheetTableOfContents({
                   );
                 })}
               </ul>
+
+              {/* Bloodo Diagnostic Suite Direct Test Switcher (Bloodo Products Only) */}
+              {isBloodoSuite && (
+                <BloodoSuiteNav
+                  currentSlug={currentProductSlug}
+                  lang={lang}
+                  variant="drawer"
+                  onSelect={() => setIsMobileDrawerOpen(false)}
+                />
+              )}
             </div>
 
             {/* Drawer Footer Actions */}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, List } from 'lucide-react';
 import './PublicStickyActionBar.css';
 
 /**
@@ -12,6 +12,7 @@ import './PublicStickyActionBar.css';
  *
  * Adheres to GCP console standards:
  * - Persistent primary action (Inquire) and integrated Clinical AI Copilot.
+ * - Persistent Table of Contents / Sections trigger integrated on mobile & desktop.
  * - Always visible across desktop, tablet, and mobile.
  * - Keeps active entity context (Product or Protocol name + specs) clear.
  * - Synchronizes remaining AI quota with PublicAtlasAIDrawer in real-time.
@@ -25,8 +26,18 @@ export default function PublicStickyActionBar({
   onInquire,
   showClinicalAI = true,
   lang = 'en',
+  onOpenSections = null,
+  showSections = false,
+  sectionsCount = null,
+  activeSectionIndex = null,
+  sectionsLabel = null,
 }) {
   const [quota, setQuota] = useState({ remaining: 5, limit: 5 });
+  const [tocProgress, setTocProgress] = useState({
+    currentProgress: activeSectionIndex || 1,
+    totalSections: sectionsCount || 0,
+    hasToc: Boolean(showSections || onOpenSections),
+  });
 
   // 1. Fetch initial sandbox IP quota status
   useEffect(() => {
@@ -56,10 +67,23 @@ export default function PublicStickyActionBar({
       }
     };
 
+    // 3. Synchronize TOC sections progress in real-time
+    const handleTocUpdate = (e) => {
+      if (e.detail) {
+        setTocProgress({
+          currentProgress: e.detail.currentProgress || 1,
+          totalSections: e.detail.totalSections || 0,
+          hasToc: true,
+        });
+      }
+    };
+
     window.addEventListener('atlas-quota-updated', handleQuotaUpdate);
+    window.addEventListener('datasheet-toc-progress', handleTocUpdate);
     return () => {
       isMounted = false;
       window.removeEventListener('atlas-quota-updated', handleQuotaUpdate);
+      window.removeEventListener('datasheet-toc-progress', handleTocUpdate);
     };
   }, []);
 
@@ -69,11 +93,21 @@ export default function PublicStickyActionBar({
     }
   };
 
+  const handleOpenSections = () => {
+    if (onOpenSections) {
+      onOpenSections();
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+    }
+  };
+
   const getBadgeClass = () => {
     if (badgeType === 'diagnostic') return 'public-sticky-action-bar__badge public-sticky-action-bar__badge--diagnostic';
     if (badgeType === 'protocol') return 'public-sticky-action-bar__badge public-sticky-action-bar__badge--protocol';
     return 'public-sticky-action-bar__badge';
   };
+
+  const hasSectionsOutline = Boolean(showSections || onOpenSections || tocProgress.hasToc);
 
   return (
     <aside className="public-sticky-action-bar" aria-label="Quick Actions">
@@ -97,6 +131,27 @@ export default function PublicStickyActionBar({
 
         {/* Right: Actions Cluster */}
         <div className="public-sticky-action-bar__actions">
+          {/* Page Outline / Sections Trigger (Mobile & Desktop) */}
+          {hasSectionsOutline && (
+            <button
+              type="button"
+              onClick={handleOpenSections}
+              className="public-sticky-action-bar__sections-btn"
+              title={lang === 'es' ? 'Ver índice de secciones' : 'View page sections outline'}
+              aria-label={lang === 'es' ? 'Secciones' : 'Sections'}
+            >
+              <List size={15} className="public-sticky-action-bar__sections-icon" />
+              <span className="public-sticky-action-bar__sections-label">
+                {sectionsLabel || (lang === 'es' ? 'Secciones' : 'Sections')}
+              </span>
+              {tocProgress.totalSections > 0 && (
+                <span className="public-sticky-action-bar__sections-pill">
+                  {tocProgress.currentProgress}/{tocProgress.totalSections}
+                </span>
+              )}
+            </button>
+          )}
+
           {showClinicalAI && (
             <button
               type="button"

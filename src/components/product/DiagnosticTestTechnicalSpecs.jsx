@@ -348,7 +348,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fef2f2',
             description: isEs
               ? 'Nivel matutino severamente deprimido compatible con fatiga suprarrenal avanzada, síndrome de burnout crónico, hipotensión e incapacidad de respuesta ante el estrés.'
-              : 'Critically depressed morning awakening level indicative of severe HPA axis exhaustion, chronic burnout syndrome, orthostatic hypotension, and impaired stress resilience.'
+              : 'Critically depressed morning awakening level indicative of severe HPA axis exhaustion, chronic burnout syndrome, orthostatic hypotension, and impaired stress resilience.',
+            clinicalProtocol: {
+              slug: 'sleep-restoration-8w',
+              queryParams: '?baseline=exhaustion&cortisol_level=110&tier=critical&modality=neurorestoration&retest=8w',
+              shortCode: 'REF-CORT-REST',
+              name: isEs 
+                ? 'Protocolo de Rescate Adrenal y Recuperación Neuroendocrina' 
+                : 'Adrenal Burnout & Neuro-Endocrine Recovery Protocol',
+              tierTitle: isEs ? 'TIER 1 · RESCATE DEL EJE HPA Y RECUPERACIÓN ADRENAL' : 'TIER 1 · HPA AXIS RESCUE & ADRENAL RECOVERY',
+              targetGoal: isEs ? 'Restaurar el pico matutino de cortisol (CAR) a ≥ 250 nmol/L' : 'Restore morning cortisol awakening response (CAR) to ≥ 250 nmol/L',
+              recommendedModality: isEs ? 'Biorregulación Pineal Matutina + Soporte Suprarrenal Fisiológico' : 'Morning Pineal Bioregulation + Adrenal Adaptogen Support',
+              dosageGuide: isEs ? 'Semax 0.1% gotas intranasales matutinas (200 mcg) + Epithalon 500 mcg SC cada 3 días x 8 semanas' : 'Semax 0.1% intranasal morning drops (200 mcg) + Epithalon 500 mcg SC every 3 days x 8 weeks',
+              methylationRx: isEs ? 'Extracto de Regaliz DGL + Pregnenolona 25 mg + Vitamina C 1.000 mg + Sodio marino' : 'DGL Licorice + Pregnenolone 25 mg + Vitamin C 1,000 mg + Sea salt electrolytes',
+              retestWindow: isEs ? 'Semana 8 (Curva AM/PM en tratamiento activo)' : 'Week 8 (Diurnal AM/PM slope on treatment)',
+              cellularTarget: isEs ? 'Corteza suprarrenal (zona fasciculata), BDNF hipocampal, receptores CRH' : 'Adrenal cortex (zona fasciculata), hippocampal BDNF, CRH receptors',
+              clinicalRationale: isEs
+                ? 'Agotamiento profundo de la reserva corticosuprarrenal con incapacidad de producir la respuesta de vigilia al despertar (CAR). Se pautan péptidos reguladores neurotróficos (Semax) para revertir la atrofia dendrítica inducida por estrés crónico y Epithalon para resincronizar el reloj pineal, junto con precursores de esteroides suprarrenales.'
+                : 'Profound exhaustion of adrenocortical functional reserve with flattened morning awakening response. Indications warrant neurotrophic peptides (Semax) to reverse stress-induced hippocampal dendritic atrophy and Epithalon to resynchronize pineal clockwork, supported by adrenal adaptogens.',
+              synergies: [
+                { name: 'Semax 200mcg AM', role: isEs ? 'Neuroprotección BDNF' : 'BDNF Neuroprotection' },
+                { name: 'Epithalon 500mcg', role: isEs ? 'Sincronía Pineal' : 'Pineal Resync' },
+                { name: 'Pregnenolona 25mg', role: isEs ? 'Sustrato Suprarrenal' : 'Adrenal Substrate' },
+                { name: 'Electrolitos Sodio', role: isEs ? 'Tono Vascular' : 'Vascular Tone' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el protocolo con Semax y Epithalon para fatiga suprarrenal avanzada con cortisol inferior a 140 nmol/L?'
+                : 'What is the protocol with Semax and Epithalon for adrenal burnout with cortisol below 140 nmol/L?'
+            }
           },
           {
             label: isEs ? 'Línea Basal Equilibrada' : 'Balanced Circadian Baseline',
@@ -359,7 +386,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#f0fdfa',
             description: isEs
               ? 'Respuesta de despertar de cortisol (CAR) saludable. Indica una función óptima del eje hipotálamo-hipofisario-adrenal (HPA), vigilia matutina vigorosa y modulación inmunitaria armónica.'
-              : 'Healthy cortisol awakening response (CAR). Reflects balanced hypothalamic-pituitary-adrenal (HPA) axis dynamics, robust morning alertness, and balanced diurnal rhythm.'
+              : 'Healthy cortisol awakening response (CAR). Reflects balanced hypothalamic-pituitary-adrenal (HPA) axis dynamics, robust morning alertness, and balanced diurnal rhythm.',
+            clinicalProtocol: {
+              slug: 'sleep-restoration-8w',
+              queryParams: '?baseline=balanced&cortisol_level=350&tier=optimal&modality=maintenance&retest=6m',
+              shortCode: 'REF-CORT-REST',
+              name: isEs 
+                ? 'Protocolo de Mantenimiento Circadiano y Sueño Profundo' 
+                : 'Circadian Longevity & Deep Sleep Maintenance',
+              tierTitle: isEs ? 'TIER 2 · HOMEOSTASIS CIRCADIANA Y VIGILANCIA' : 'TIER 2 · CIRCADIAN HOMEOSTASIS & SLEEP MONITORING',
+              targetGoal: isEs ? 'Mantener pendiente diurna fisiológica (CAR vigoroso y nadir nocturno)' : 'Sustain physiological diurnal slope (sharp CAR and deep evening nadir)',
+              recommendedModality: isEs ? 'Mantenimiento del Ciclo Sueño-Vigilia y Biorregulación' : 'Sleep-Wake Architecture & Bioregulation',
+              dosageGuide: isEs ? 'Epithalon 100 mcg SC nocturno o DSIP 100 mcg pre-cama en periodos de sobrecarga de trabajo' : 'Epithalon 100 mcg SC nightly or DSIP 100 mcg pre-bed during high-workload cycles',
+              methylationRx: isEs ? 'Magnesio L-Treonato 400 mg nocturno + Apigenina 50 mg' : 'Magnesium L-Threonate 400 mg nightly + Apigenin 50 mg',
+              retestWindow: isEs ? '6 Meses (Monitoreo semestral DBS)' : '6 Months (Biannual DBS Surveillance)',
+              cellularTarget: isEs ? 'Fase delta de ondas lentas, receptores GABA-A, supresión de cortisol nocturno' : 'Stage-4 slow wave delta sleep, GABA-A receptors, nocturnal nadir',
+              clinicalRationale: isEs
+                ? 'Respuesta circadiana equilibrada. El objetivo clínico es consolidar la pendiente diurna evitando elevaciones anómalas nocturnas mediante péptidos que favorecen la arquitectura del sueño no REM (DSIP).'
+                : 'Balanced circadian dynamics. The clinical endpoint is sustaining the diurnal cortisol slope and protecting the restorative nocturnal nadir through delta sleep modulation (DSIP).',
+              synergies: [
+                { name: 'DSIP 100mcg pre-cama', role: isEs ? 'Sueño Delta Ondas Lentas' : 'Slow-Wave Sleep' },
+                { name: 'Magnesio Treonato', role: isEs ? 'Relajación Sináptica' : 'Synaptic Relaxation' },
+                { name: 'Luz Solar Matutina', role: isEs ? 'Anclaje Circadiano' : 'Circadian Anchor' },
+                { name: 'Control Semestral', role: isEs ? 'Vigilancia DBS' : 'DBS Surveillance' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo optimizar la pendiente diurna de cortisol y el sueño profundo cuando los niveles matutinos son normales?'
+                : 'How to optimize diurnal cortisol slope and deep sleep when morning cortisol levels are normal?'
+            }
           },
           {
             label: isEs ? 'Carga Alostática Elevada' : 'Subclinical Allostatic Stress',
@@ -370,7 +424,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fffbeb',
             description: isEs
               ? 'Activación persistente del sistema nervioso simpático. Suele asociarse a estrés ocupacional, fragmentación del sueño, resistencia a la insulina incipiente y tensión arterial límite.'
-              : 'Persistent sympathetic nervous drive. Associated with chronic allostatic load, sleep architecture disruption, early insulin resistance, and elevated cardiovascular strain.'
+              : 'Persistent sympathetic nervous drive. Associated with chronic allostatic load, sleep architecture disruption, early insulin resistance, and elevated cardiovascular strain.',
+            clinicalProtocol: {
+              slug: 'sleep-restoration-8w',
+              queryParams: '?baseline=allostatic&cortisol_level=620&tier=warning&modality=anxiolytic&retest=8w',
+              shortCode: 'REF-CORT-REST',
+              name: isEs 
+                ? 'Protocolo de Descompresión del Eje HPA y Modulación GABAérgica' 
+                : 'HPA Axis Decompression & GABAergic Modulation Protocol',
+              tierTitle: isEs ? 'TIER 3 · DESCOMPRESIÓN ALOSTÁTICA Y FRENO CORTISÓLICO' : 'TIER 3 · ALLOSTATIC DECOMPRESSION & CORTISOL DAMPENING',
+              targetGoal: isEs ? 'Atenuar la hiperreactividad simpática y normalizar cortisol matutino < 500 nmol/L' : 'Dampen sympathetic overdrive and normalize morning cortisol < 500 nmol/L',
+              recommendedModality: isEs ? 'Neuropéptidos Ansiolíticos No Sedantes + Inhibidores de Cortisol Vespertino' : 'Non-Sedating Anxiolytic Neuropeptides + Evening Cortisol Dampeners',
+              dosageGuide: isEs ? 'Selank 0.15% 2–3 gotas intranasales 2x/día + Fosfatidilserina 300 mg antes de la cena' : 'Selank 0.15% 2–3 drops intranasal 2x/day + Phosphatidylserine 300 mg pre-dinner',
+              methylationRx: isEs ? 'L-Teanina 200 mg + Ashwagandha Sensoril 250 mg + Magnesio Glicinato 400 mg' : 'L-Theanine 200 mg + Sensoril Ashwagandha 250 mg + Magnesium Glycinate 400 mg',
+              retestWindow: isEs ? 'Semana 8 (Evaluación de respuesta alostática)' : 'Week 8 (Allostatic response evaluation)',
+              cellularTarget: isEs ? 'Neurotransmisión GABA, receptores IL-6, eje noradrenérgico central' : 'GABA neurotransmission, IL-6 receptors, central noradrenergic drive',
+              clinicalRationale: isEs
+                ? 'Sobrecarga alostática subaguda con hiperactivación simpática y aumento de citoquinas inflamatorias. El heptapéptido Selank modula la expresión de receptores GABA sin generar dependencia ni embotamiento, reduciendo la secreción de ACTH ante el estrés ocupacional.'
+                : 'Subacute allostatic overload with sympathetic hyperactivity. Selank provides precise allosteric GABA receptor modulation without sedation, suppressing stress-induced ACTH secretion and inflammatory signaling.',
+              synergies: [
+                { name: 'Selank Intranasal', role: isEs ? 'Modulador GABAérgico' : 'GABA Modulator' },
+                { name: 'Fosfatidilserina 300mg', role: isEs ? 'Freno Vespertino' : 'Evening Cortisol Brake' },
+                { name: 'Ashwagandha Sensoril', role: isEs ? 'Resiliencia Alostática' : 'Stress Resilience' },
+                { name: 'L-Teanina', role: isEs ? 'Ondas Alfa Cerebrales' : 'Alpha Brain Waves' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo utilizar Selank y Fosfatidilserina para rebajar cortisol elevado en rango de estrés de 550 a 690 nmol/L?'
+                : 'How to use Selank and Phosphatidylserine to reduce elevated stress cortisol between 550 and 690 nmol/L?'
+            }
           },
           {
             label: isEs ? 'Hipercortisolemia Aguda' : 'Hypercortisolemia / Acute Stress',
@@ -381,7 +462,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fef2f2',
             description: isEs
               ? 'Exceso glucocorticoide crónico que promueve degradación muscular acelerada (catabolismo proteico), acumulación de grasa visceral, inmunosupresión y disfunción neurocognitiva.'
-              : 'Marked glucocorticoid excess driving muscle catabolism, visceral adiposity, immune suppression, and hippocampal neurotoxicity. Demands clinical intervention.'
+              : 'Marked glucocorticoid excess driving muscle catabolism, visceral adiposity, immune suppression, and hippocampal neurotoxicity. Demands clinical intervention.',
+            clinicalProtocol: {
+              slug: 'sleep-restoration-8w',
+              queryParams: '?baseline=hypercortisol&cortisol_level=750&tier=critical&modality=urgent&retest=6w',
+              shortCode: 'REF-CORT-REST',
+              name: isEs 
+                ? 'Protocolo de Rescate Neuroprotector y Neutralización Catabólica' 
+                : 'Neuroprotective Rescue & Anti-Catabolic Protocol',
+              tierTitle: isEs ? 'TIER 4 · INTERVENCIÓN CLÍNICA URGENTE Y NEUROPROTECCIÓN' : 'TIER 4 · CLINICAL INTERVENTION & NEUROPROTECTION',
+              targetGoal: isEs ? 'Frenar catabolismo proteico y suprimir neurotoxicidad hipocampal' : 'Halt muscle catabolism and suppress hippocampal neurotoxicity',
+              recommendedModality: isEs ? 'Terapia Combinada Dual (Selank + Semax) + Fosfatidilserina Dosis Alta' : 'Dual Peptide Therapy (Selank + Semax) + High-Dose Phosphatidylserine',
+              dosageGuide: isEs ? 'Selank 300 mcg AM/PM + Fosfatidilserina 600 mg diario (repartido tarde/noche) + DSIP 100 mcg nocturno' : 'Selank 300 mcg AM/PM + Phosphatidylserine 600 mg daily (split PM) + DSIP 100 mcg nightly',
+              methylationRx: isEs ? 'Vitamina C 2.000 mg + Magnesio Treonato 600 mg + Taurina 2.000 mg' : 'Vitamin C 2,000 mg + Magnesium Threonate 600 mg + Taurine 2,000 mg',
+              retestWindow: isEs ? 'Semana 6 (Control prioritario de pendiente diurna DCS)' : 'Week 6 (Priority DCS diurnal slope check)',
+              cellularTarget: isEs ? 'Receptores de glucocorticoides (GR), sinapsis CA1 hipocampal, miocitos' : 'Glucocorticoid receptors (GR), hippocampal CA1 neurons, myocytes',
+              clinicalRationale: isEs
+                ? 'Hipercortisolemia severa que induce atrofia muscular por ubiquitinación proteica, resistencia a la insulina y neurotoxicidad en células piramidales del hipocampo. Requiere intervención inmediata para amortiguar el tono simpático y proteger la plasticidad sináptica.'
+                : 'Severe glucocorticoid excess inducing muscular atrophy via proteasome ubiquitination, insulin resistance, and hippocampal neurotoxicity. Demands immediate neuroprotection and high-dose glucocorticoid dampening.',
+              synergies: [
+                { name: 'Selank + Semax Dual', role: isEs ? 'Neuroprotección Urgente' : 'Urgent Neuroprotection' },
+                { name: 'Fosfatidilserina 600mg', role: isEs ? 'Bloqueo ACTH' : 'ACTH Blocker' },
+                { name: 'DSIP 100mcg', role: isEs ? 'Nadir Nocturno' : 'Nocturnal Nadir' },
+                { name: 'Re-test a Semana 6', role: isEs ? 'Seguridad Analítica' : 'Safety Check' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué medidas clínicas urgentes y neuropéptidos se recomiendan ante hipercortisolemia grave superior a 690 nmol/L?'
+                : 'What urgent clinical measures and peptides are indicated for severe hypercortisolemia exceeding 690 nmol/L?'
+            }
           }
         ]
       };
@@ -406,7 +514,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fef2f2',
             description: isEs
               ? 'Concentración críticamente disminuida asociada a sarcopenia acelerada, baja densidad mineral ósea, depresión anímica, disfunción eréctil y pérdida de impulso metabólico.'
-              : 'Severe androgen deficiency correlated with accelerated sarcopenia, osteopenia, depressive mood, erectile dysfunction, and reduced metabolic clearance.'
+              : 'Severe androgen deficiency correlated with accelerated sarcopenia, osteopenia, depressive mood, erectile dysfunction, and reduced metabolic clearance.',
+            clinicalProtocol: {
+              slug: 'hormonal-support-12w',
+              queryParams: '?baseline=deficient&testosterone_level=8.5&tier=critical&modality=secretagogues&retest=8w',
+              shortCode: 'REF-TEST-HPTA',
+              name: isEs 
+                ? 'Protocolo de Reinicio Endocrino HPTA: Kisspeptina y Gonadorelina' 
+                : 'HPTA Endocrine Restart Protocol: Kisspeptin & Gonadorelin',
+              tierTitle: isEs ? 'TIER 1 · RESCATE ENDOCRINO Y REACTIVACIÓN DEL EJE HPTA' : 'TIER 1 · NEURO-ENDOCRINE HPTA AXIS RESCUE',
+              targetGoal: isEs ? 'Elevar testosterona total a ≥ 18 nmol/L (≥ 520 ng/dL)' : 'Escalate total testosterone to ≥ 18 nmol/L (≥ 520 ng/dL)',
+              recommendedModality: isEs ? 'Microdosificación Subcutánea de Secretagogos (Sin atrofia testicular)' : 'Subcutaneous Neuro-Endocrine Secretagogues (Non-suppressive)',
+              dosageGuide: isEs ? 'Kisspeptin-10 100 mcg SC 2–3x/semana + hCG 500 UI 2x/semana alternado x 8–12 semanas' : 'Kisspeptin-10 100 mcg SC 2–3x/week + hCG 500 IU 2x/week alternating x 8–12 weeks',
+              methylationRx: isEs ? 'Zinc Bisglicinato 30–50 mg + DIM 150 mg (Protección contra aromatización periférica)' : 'Zinc Bisglycinate 30–50 mg + DIM 150 mg (Peripheral aromatase safeguard)',
+              retestWindow: isEs ? 'Semana 8 (Evaluación hormonal en tratamiento activo)' : 'Week 8 (On-treatment biomarker evaluation)',
+              cellularTarget: isEs ? 'Neuronas GnRH hipotalámicas, receptores LH en células de Leydig, StAR' : 'Hypothalamic GnRH neurons, Leydig cell LH receptors, StAR protein',
+              clinicalRationale: isEs
+                ? 'Hipogonadismo con fallo de pulsatilidad hipofisaria. Requiere reactivación pulsátil del eje HPTA mediante agonistas del receptor KISS1 (Kisspeptina-10) y biomiméticos de LH (hCG), estimulando la esteroidogénesis endógena y preservando la fertilidad y el volumen testicular sin retroalimentación negativa.'
+                : 'Clinical hypogonadism with impaired pituitary-gonadal signaling. Demands pulsatile reactivation of the hypothalamic-pituitary-gonadal axis using KISS1 receptor agonists (Kisspeptin-10) and LH biomimetics (hCG), stimulating endogenous steroidogenesis while preserving fertility and testicular volume.',
+              synergies: [
+                { name: 'Kisspeptin-10 100mcg', role: isEs ? 'Pulsatilidad GnRH' : 'GnRH Pulsatility' },
+                { name: 'hCG 500 UI', role: isEs ? 'Estímulo Leydig' : 'Leydig Stimulation' },
+                { name: 'Testagen', role: isEs ? 'Biorregulador Testicular' : 'Testicular Bioregulator' },
+                { name: 'Zinc + DIM', role: isEs ? 'Control Aromatasa' : 'Aromatase Control' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el protocolo de reactivación del eje HPTA con Kisspeptin-10 y hCG cuando la testosterona es inferior a 10 nmol/L?'
+                : 'What is the recommended HPTA restart protocol using Kisspeptin-10 and hCG for testosterone below 10 nmol/L?'
+            }
           },
           {
             label: isEs ? 'Rango Límite / Subóptimo' : 'Borderline Suboptimal',
@@ -417,7 +552,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fffbeb',
             description: isEs
               ? 'Nivel androgénico limítrofe habitual en hombres con estrés crónico, obesidad visceral o síndrome metabólico. Se beneficia de secretagogos, optimización de estilo de vida o terapia hormonal.'
-              : 'Suboptimal androgenic reserve typical in metabolic syndrome or chronic stress. Responds well to lifestyle interventions, enclomiphene, or restorative secretagogues.'
+              : 'Suboptimal androgenic reserve typical in metabolic syndrome or chronic stress. Responds well to lifestyle interventions, enclomiphene, or restorative secretagogues.',
+            clinicalProtocol: {
+              slug: 'hormonal-support-12w',
+              queryParams: '?baseline=suboptimal&testosterone_level=12.5&tier=warning&modality=bioregulators&retest=8w',
+              shortCode: 'REF-TEST-HPTA',
+              name: isEs 
+                ? 'Protocolo de Optimización Androgénica y Biorregulación Testicular' 
+                : 'Androgenic Optimization & Testicular Bioregulation',
+              tierTitle: isEs ? 'TIER 2 · OPTIMIZACIÓN SECRETAGOGA Y VITALIDAD' : 'TIER 2 · SECRETAGOGUE & VITALITY OPTIMIZATION',
+              targetGoal: isEs ? 'Alcanzar el rango diana de vitalidad 18 – 25 nmol/L (520 – 720 ng/dL)' : 'Reach target vitality range 18 – 25 nmol/L (520 – 720 ng/dL)',
+              recommendedModality: isEs ? 'Péptidos Biorreguladores Testiculares + Modulación de SHBG' : 'Testicular Bioregulators + SHBG Modulation',
+              dosageGuide: isEs ? 'Testagen 2 cápsulas/día matutino en ciclos de 20 días + Sermorelin 200 mcg nocturno' : 'Testagen 2 caps/day morning (20-day cycles) + Sermorelin 200 mcg nightly',
+              methylationRx: isEs ? 'Boro 10 mg/día (reducción de SHBG) + Magnesio Bisglicinato 400 mg' : 'Boron 10 mg/day (SHBG reduction) + Magnesium Bisglycinate 400 mg',
+              retestWindow: isEs ? 'Semana 8 (Evaluación de respuesta biológica)' : 'Week 8 (Biological response evaluation)',
+              cellularTarget: isEs ? 'Síntesis proteica testicular, modulación de SHBG, eje somatotrópico' : 'Testicular protein synthesis, SHBG modulation, somatotropic axis',
+              clinicalRationale: isEs
+                ? 'Déficit androgénico funcional frecuente por estrés alostático, sobrepeso o descenso de pulsatilidad hipofisaria. Se prioriza la restauración funcional mediante el péptido biorregulador Testagen combinado con secretagogos nocturnos de GH (Sermorelin) y reducción de SHBG para liberar testosterona libre biodisponible.'
+                : 'Functional androgenic deficiency driven by allostatic load, visceral adiposity, or reduced pituitary output. Responsive to targeted bioregulator therapy (Testagen) combined with nocturnal GH secretagogues (Sermorelin) and SHBG optimization to expand free bioavailable testosterone.',
+              synergies: [
+                { name: 'Testagen', role: isEs ? 'Biorregulación Celular' : 'Cellular Bioregulation' },
+                { name: 'Sermorelin 200mcg', role: isEs ? 'Sinergia GH/IGF-1' : 'GH/IGF-1 Axis' },
+                { name: 'Boro 10mg', role: isEs ? 'Liberación Testo Libre' : 'Free T Liberation' },
+                { name: 'Ashwagandha KSM-66', role: isEs ? 'Freno Cortisol' : 'Cortisol Buffer' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo estructurar un protocolo con Testagen y Sermorelin para optimizar testosterona en rango límite (10–15 nmol/L)?'
+                : 'How to structure a protocol with Testagen and Sermorelin for borderline testosterone (10-15 nmol/L)?'
+            }
           },
           {
             label: isEs ? 'Rango Óptimo de Vitalidad' : 'Optimal Vitality & Longevity Target',
@@ -428,7 +590,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#f0fdfa',
             description: isEs
               ? 'Rango fisiológico óptimo asociado a composición corporal magra, vigor psicofísico, síntesis proteica muscular máxima y salud cardiovascular protectora.'
-              : 'Ideal physiological target supporting lean body mass retention, optimal neurocognitive clarity, robust bone mineral density, and metabolic vigor.'
+              : 'Ideal physiological target supporting lean body mass retention, optimal neurocognitive clarity, robust bone mineral density, and metabolic vigor.',
+            clinicalProtocol: {
+              slug: 'hormonal-support-12w',
+              queryParams: '?baseline=optimal&testosterone_level=22&tier=optimal&modality=maintenance&retest=6m',
+              shortCode: 'REF-TEST-HPTA',
+              name: isEs 
+                ? 'Protocolo de Mantenimiento Androgénico y Homeostasis Circadiana' 
+                : 'Androgenic Longevity & Circadian Maintenance',
+              tierTitle: isEs ? 'TIER 3 · VIGILANCIA Y MANTENIMIENTO HOMEOSTÁTICO' : 'TIER 3 · SURVEILLANCE & HOMEOSTATIC MAINTENANCE',
+              targetGoal: isEs ? 'Sostener homeostasis androgénica juvenil (18 – 25 nmol/L)' : 'Sustain youthful androgenic homeostasis (18 – 25 nmol/L)',
+              recommendedModality: isEs ? 'Pulsos Intermitentes de Biorregulación y Sueño Profundo' : 'Intermittent Bioregulation Pulsing & Sleep Architecture',
+              dosageGuide: isEs ? 'Ciclos trimestrales de Testagen (10 días) + optimización de fase delta con DSIP' : 'Quarterly Testagen cycles (10 days) + delta-sleep support with DSIP',
+              methylationRx: isEs ? 'Vitamina D3 5.000 UI + K2 (MK-7) 100 mcg + Zinc 15 mg' : 'Vitamin D3 5,000 IU + K2 (MK-7) 100 mcg + Zinc 15 mg',
+              retestWindow: isEs ? '6 Meses (Monitorización semestral DBS)' : '6 Months (Biannual DBS Surveillance)',
+              cellularTarget: isEs ? 'Densidad mineral ósea, masa muscular magra, neurovigor' : 'Bone mineral density, lean muscle mass, neurovascular tone',
+              clinicalRationale: isEs
+                ? 'Perfil androgénico óptimo asociado a máxima retención de masa magra, vigor psicofísico y salud cardiovascular. Se pautan micro-pulsos intermitentes de biorreguladores peptídicos y vigilancia semestral mediante punción capilar para monitorizar el ratio testosterona/cortisol sin intervención exógena.'
+                : 'Optimal androgenic status associated with lean body mass preservation, neurocognitive clarity, and metabolic health. Intermittent bioregulatory pulsing and biannual capillary surveillance maintain physiological equilibrium without exogenous endocrine disruption.',
+              synergies: [
+                { name: 'Testagen Ciclado', role: isEs ? 'Mantenimiento Testicular' : 'Testicular Maintenance' },
+                { name: 'DSIP 100mcg', role: isEs ? 'Pico Nocturno Testo' : 'Nocturnal T Peak' },
+                { name: 'Vitamina D3/K2', role: isEs ? 'Regulación Genómica' : 'Genomic VDR Support' },
+                { name: 'Monitoreo DBS', role: isEs ? 'Control Semestral' : 'Biannual Surveillance' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué pauta de mantenimiento y estilo de vida preserva niveles de testosterona en rango óptimo de 18 a 28 nmol/L?'
+                : 'What maintenance and peptide schedule preserves optimal testosterone between 18 and 28 nmol/L?'
+            }
           },
           {
             label: isEs ? 'Límite Superior Normal' : 'Upper Physiological Normal',
@@ -439,7 +628,34 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#eff6ff',
             description: isEs
               ? 'Nivel alcanzado comúnmente en hombres jóvenes de alto rendimiento o en protocolos de optimización hormonal bajo supervisión médica especializada.'
-              : 'Upper physiological threshold achieved in young athletic baselines or monitored hormone optimization programs. Maximum anabolic support.'
+              : 'Upper physiological threshold achieved in young athletic baselines or monitored hormone optimization programs. Maximum anabolic support.',
+            clinicalProtocol: {
+              slug: 'hormonal-support-12w',
+              queryParams: '?baseline=peak&testosterone_level=32&tier=super&modality=safety&retest=8w',
+              shortCode: 'REF-TEST-HPTA',
+              name: isEs 
+                ? 'Protocolo de Seguridad Endocrina, Hematocrito y Aromatización' 
+                : 'Endocrine Safety, Hematocrit & Aromatase Surveillance',
+              tierTitle: isEs ? 'TIER 4 · TITULACIÓN CLÍNICA Y CONTROL DE SEGURIDAD' : 'TIER 4 · CLINICAL TITRATION & SAFETY SURVEILLANCE',
+              targetGoal: isEs ? 'Verificar hematocrito (<52%), estradiol (<35 pg/mL) y PSA' : 'Verify hematocrit (<52%), sensitive estradiol, and PSA',
+              recommendedModality: isEs ? 'Pausa Terapéutica / Ventana de Lavado de Secretagogos' : 'Therapeutic Washout / Secretagogue Titration Pause',
+              dosageGuide: isEs ? 'Reducción de dosis activa; monitorizar panel hematológico y perfil lipídico' : 'Dose de-escalation; monitor complete blood count (CBC) and lipid panel',
+              methylationRx: isEs ? 'Hidratación abundante + Omega-3 EPA/DHA 3.000 mg + Citrus Bergamota' : 'Hydration + Omega-3 EPA/DHA 3,000 mg + Citrus Bergamot (Lipid protection)',
+              retestWindow: isEs ? 'Semana 8 (Control analítico hematológico)' : 'Week 8 (Hematology safety check)',
+              cellularTarget: isEs ? 'Viscosidad sanguínea, eritropoyesis, receptor de estrógeno beta' : 'Blood viscosity, erythropoiesis, estrogen receptor-beta',
+              clinicalRationale: isEs
+                ? 'Concentración suprafisiológica típica de protocolos activos intensivos o atletas de alta respuesta. Demanda verificación de hematocrito para descartar hiperviscosidad sanguínea, control de estradiol para prevenir ginecomastia o retención hídrica, y aplicación de ventana de descanso de secretagogos.'
+                : 'Upper physiological threshold typical of intensive secretagogue therapy. Warrants hematocrit monitoring to rule out polycythemia, sensitive estradiol tracking to prevent aromatization symptoms, and cycling pauses to allow endogenous receptor resensitization.',
+              synergies: [
+                { name: 'Control Hematocrito', role: isEs ? 'Seguridad Reológica' : 'Rheological Safety' },
+                { name: 'DIM / Anastrozol', role: isEs ? 'Modulación Estradiol' : 'Estradiol Control' },
+                { name: 'Omega-3 EPA 2g', role: isEs ? 'Fluidez Sanguínea' : 'Vascular Fluidity' },
+                { name: 'Cycling / Washout', role: isEs ? 'Ventana de Descanso' : 'Washout Window' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué controles médicos de seguridad (hematocrito, PSA, estradiol) son esenciales cuando la testosterona supera los 28 nmol/L?'
+                : 'What medical safety controls (hematocrit, PSA, estradiol) are required when testosterone exceeds 28 nmol/L?'
+            }
           }
         ]
       };
@@ -913,10 +1129,14 @@ export default function DiagnosticTestTechnicalSpecs({
                 <strong>{isEs ? 'Momento Óptimo de Recogida de Muestra' : 'Optimal Specimen Collection Window'}</strong>
                 <p>
                   {isEs
-                    ? (isHba1c
+                    ? (isNad
+                        ? 'Se recomienda realizar la extracción a primera hora de la mañana (08:00–10:00 AM) en ayunas. Para evaluar el nivel basal puro, suspender precursores (NMN, NR, B3) 14 días antes. Para monitorizar tratamiento activo, realizar la toma matutina en valle antes de la dosis del día o 48–72h tras una infusión IV.'
+                        : isHba1c
                         ? 'Se recomienda realizar la extracción a primera hora de la mañana tras 8–10 horas de ayuno nocturno para máxima consistencia analítica.'
                         : 'Se recomienda realizar la extracción a primera hora de la mañana, preferiblemente antes del desayuno o de la ingesta calórica principal, garantizando uniformidad en determinaciones evolutivas.')
-                    : (isHba1c
+                    : (isNad
+                        ? 'Recommended morning specimen (08:00–10:00 AM) in a fasting state. For unsupplemented baseline, pause precursors (NMN, NR, B3) for 14 days. For in-treatment monitoring, collect morning trough prior to daily dosing or 48–72h post-IV infusion.'
+                        : isHba1c
                         ? 'Recommended morning specimen following 8–10 hours of overnight fasting for peak analytical consistency.'
                         : 'Recommended morning collection, ideally prior to breakfast or heavy caloric intake, ensuring reproducibility across longitudinal measurements.')}
                 </p>

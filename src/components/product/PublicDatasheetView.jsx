@@ -49,6 +49,7 @@ import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import BloodoNadFaqCard from './BloodoNadFaqCard';
+import BloodoSuiteNav, { isBloodoProduct } from './BloodoSuiteNav';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
@@ -358,6 +359,10 @@ export default function PublicDatasheetView({
       pName.includes('level test')
     );
   }, [product]);
+
+  const isBloodoDiagnostic = useMemo(() => {
+    return isBloodoProduct(product, slug);
+  }, [product, slug]);
 
   const isEternaDiagnostic = useMemo(() => {
     const sId = (product?.supplierId || '').toLowerCase();
@@ -812,12 +817,15 @@ export default function PublicDatasheetView({
   const isPenAndCartridgeEcosystem = hasPenFormat && hasCartridgeFormat;
 
   const tocSections = useMemo(() => {
-    if (isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
+    if (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
       return [
         { id: 'overview', label: lang === 'es' ? 'Descripción y Utilidad' : 'Overview & Utility', icon: FileText },
         { id: 'presentations-matrix', label: lang === 'es' ? 'Presentaciones del Kit' : 'Kit Presentations', icon: Layers },
         { id: 'diagnostic-specs', label: lang === 'es' ? 'Especificaciones Analíticas' : 'Analytical Specs', icon: Activity },
-        { id: 'biomarker-simulator', label: lang === 'es' ? 'Simulador Clínico NAD+' : 'Biomarker Simulator', icon: Sparkles },
+        { id: 'biomarker-simulator', label: lang === 'es' ? 'Simulador Clínico' : 'Biomarker Simulator', icon: Sparkles },
+        ...(isBloodoDiagnostic ? [
+          { id: 'bloodo-suite', label: lang === 'es' ? 'Suite Bloodo (6 Tests)' : 'Bloodo Suite (6 Tests)', icon: Sparkles }
+        ] : []),
         { id: 'collection-protocol', label: lang === 'es' ? 'Protocolo de Muestreo DBS' : 'DBS Collection Protocol', icon: Droplets },
         { id: 'pre-analytical-prep', label: lang === 'es' ? 'Estandarización Preanalítica' : 'Pre-Analytical Prep', icon: CheckCircle2 },
         { id: 'kit-contents', label: lang === 'es' ? 'Contenido del Kit' : 'Kit Included Items', icon: Layers },
@@ -1241,6 +1249,7 @@ export default function PublicDatasheetView({
           category: category || 'Research Peptides'
         }}
         onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+        hideContactButton={true}
         loginRedirect={`/p/${encodeURIComponent(slug)}`}
         hideTier2={true}
         breadcrumb={[
@@ -1344,6 +1353,9 @@ export default function PublicDatasheetView({
                 </strong>{' '}
                 {targetSystem}
               </span>
+              {isBloodoDiagnostic && (
+                <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="chips" />
+              )}
             </>
           }
           meta={description && (
@@ -2345,8 +2357,13 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share ── */}
-        {(isDiagnosticKit || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
+        {(isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
           <BloodoNadFaqCard product={product} lang={lang} />
+        )}
+
+        {/* ── Block 4.9: Bloodo™ Diagnostic Suite Switcher (All 6 Clinical DBS Tests) ── */}
+        {isBloodoDiagnostic && (
+          <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="section" />
         )}
 
         {/* ── Block 5: Targeted Therapeutic Peptides (Lotusland Limited) ── */}
@@ -2368,7 +2385,13 @@ export default function PublicDatasheetView({
           </div>
 
           {/* Persistent Google Cloud Console Table of Contents (Desktop Sidebar + Mobile Drawer) */}
-          <PublicDatasheetTableOfContents sections={tocSections} lang={lang} />
+          <PublicDatasheetTableOfContents 
+            sections={tocSections} 
+            lang={lang} 
+            hideFloatingTrigger={true} 
+            isBloodoSuite={isBloodoDiagnostic}
+            currentProductSlug={slug || product?.slug}
+          />
         </div>
       </PublicPageShell>
 
@@ -2426,8 +2449,15 @@ export default function PublicDatasheetView({
           slug: slug,
           cas: product?.cas || (isCompoundingService ? 'EU GMP / Ph. Eur.' : isPeptideSupplyService ? 'B2B Certified Stock' : isDiagnosticKit ? 'CE-IVDR / Whatman 903' : 'N/A'),
           purity: isSpainResidency ? '100% S.L. Legal Ownership & Clean Due Diligence' : isCompoundingService ? 'EU GMP & Ph. Eur. Certified Compounding Pharmacy' : isPeptideSupplyService ? '≥ 99.0% (HPLC & Mass Spectrometry Certified In-Stock Inventory)' : isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV ≤ 6.6%)' : (product?.purity || '≥ 99.0% (Dual-Stage RP-HPLC Verified)'),
-          molecular: isSpainResidency ? 'Statutory Law 14/2013 Articles 68-72' : isCompoundingService ? 'Custom Prescription Matrix (Compounded Formulation)' : isPeptideSupplyService ? 'In-Stock Lyophilized Peptide Portfolio' : isDiagnosticKit ? 'Capillary DBS Enzymatic Cyclic Assay' : (product?.molecularWeight || product?.molecularFormula || 'N/A'),
           category: isSpainResidency ? 'Corporate Services' : isCompoundingService ? (lang === 'es' ? 'Compounding Farmacéutico' : 'Pharmaceutical Compounding') : isPeptideSupplyService ? (lang === 'es' ? 'Suministro de Péptidos' : 'Peptide Supply Management') : isDiagnosticKit ? 'Diagnostic Kits' : (product?.category || 'Peptides'),
+          faq: product?.clinical_faq || product?.faq || [],
+          associatedProtocols: (associatedProtocols || []).map(p => ({
+            name: p.name || p.title,
+            slug: p.slug,
+            url: `/proto/${p.slug}`,
+            goal: p.goal || p.category,
+            duration: p.duration
+          })),
           details: isSpainResidency ? {
             program: 'Spanish Corporate Acquisition & Law 14/2013 Residence',
             statutoryBasis: 'Law 14/2013 of September 27 (Articles 68 to 72)',
@@ -2560,6 +2590,13 @@ export default function PublicDatasheetView({
         }
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
+        showSections={true}
+        sectionsCount={tocSections.length}
+        onOpenSections={() => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+          }
+        }}
         lang={lang}
       />
     </div>

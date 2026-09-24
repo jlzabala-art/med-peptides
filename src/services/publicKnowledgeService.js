@@ -128,8 +128,7 @@ function formatKnowledgeForPrompt(protocols, products) {
   return `
 MED-PEPTIDES COMPLETE PUBLIC PLATFORM KNOWLEDGE BASE:
 
-1. PUBLIC INTERACTIVE DIRECTORIES & TOOLS:
-- [All Clinical Protocols Directory](/proto) — Interactive directory of 77 evidence-based protocols categorized by therapeutic goals.
+1. PUBLIC INTERACTIVE SPECIFIC TOOLS:
 - [Peptides Catalog](/catalog) — Searchable compendium of analytical peptide monographs.
 - [Interactive Reconstitution & Syringe Calculator](/calculator) — Accurate BAC water dilution and U-100 syringe units calculator.
 - [Peptide Science Primer](/what-are-peptides) — Foundational science, mechanisms of action, and biological pathways.
@@ -137,7 +136,7 @@ MED-PEPTIDES COMPLETE PUBLIC PLATFORM KNOWLEDGE BASE:
 - [European Pharmaceutical Compounding & Custom Formulation Service](/p/pharmaceutical-compounding-service) — Licensed EU compounding pharmacy manufacturing (5-7 days turnaround, mobile app & email desk at kasia@mediluxeme.com, clinic B2B vs direct patient RRP invoicing, cold-chain shipping to clinic or patient, free shipping on 10+ units).
 - [B2B Peptide Supply Chain & Dedicated Inventory Management Service](/p/peptide-supply-management) — In-stock HPLC ≥99% certified peptide inventory ready for 24-48h dispatch (zero manufacturing delay), assigned personal Account Manager, dual invoicing (clinic vs patient), dual destination delivery (clinic bulk vs patient home dropship), lot-locking, and free shipping on 10+ vials.
 
-2. VERIFIED PUBLIC CLINICAL PROTOCOLS (${protocols.length} Available):
+2. VERIFIED PUBLIC CLINICAL PROTOCOLS (${protocols.length} Available — NOTE: Link ONLY to specific protocols relevant to the active product):
 ${protocolEntries}
 
 3. VERIFIED PUBLIC PEPTIDE MONOGRAPHS (${products.length} Key Formulations):

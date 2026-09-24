@@ -411,6 +411,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           category: protocol?.goal || 'Clinical Protocols'
         }}
         onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+        hideContactButton={true}
         loginRedirect={`/proto/${encodeURIComponent(slug)}`}
         hideTier2={true}
         breadcrumb={[

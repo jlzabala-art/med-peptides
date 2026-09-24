@@ -19,6 +19,10 @@ import {
   BookOpen,
   ExternalLink,
 } from 'lucide-react';
+import {
+  getSuggestedInquiriesForProduct,
+  getContextualAndPopularSuggestions,
+} from '@/data/compoundSuggestedInquiries';
 
 /**
  * PublicAtlasAIDrawer
@@ -41,6 +45,7 @@ export default function PublicAtlasAIDrawer({
   storageKey = 'default',
   onOpenRegisterModal = null,
   hideFloatingTrigger = false,
+  lang = 'en',
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -522,46 +527,14 @@ export default function PublicAtlasAIDrawer({
     { label: 'Neuro & Longevity Monograph', query: 'What nootropic and cellular longevity peptides are available in the repository?', keys: ['neuro', 'longevity', 'semax', 'selank', 'epithalon'] },
   ];
 
-  const getDynamicSuggestions = () => {
-    // Gather all historical queries sent by user to eliminate repetition
-    const userQueries = messages
-      .filter((m) => m.sender === 'user')
-      .map((m) => (m.text || '').toLowerCase());
-
-    const pool = contextType === 'protocol'
-      ? PROTOCOL_TOPICS
-      : contextType === 'diagnostic_test'
-      ? DIAGNOSTIC_TOPICS
-      : contextType === 'monograph'
-      ? MONOGRAPH_TOPICS
-      : CATALOG_TOPICS;
-
-    // Filter out topics the user has already asked about
-    const unasked = pool.filter((topic) => {
-      const labelLower = topic.label.toLowerCase();
-      return !userQueries.some((uText) => {
-        if (uText.includes(labelLower)) return true;
-        return topic.keys.some((k) => uText.includes(k));
-      });
+  const getDynamicSuggestions = (activeBotText = '') => {
+    return getContextualAndPopularSuggestions({
+      messages,
+      contextAnchor,
+      contextType,
+      lang,
+      activeBotText,
     });
-
-    if (unasked.length >= 4) {
-      return unasked.slice(0, 4);
-    }
-
-    // If pool is near exhausted, supplement with unasked items from the alternative pool
-    const secondaryPool = contextType === 'diagnostic_test'
-      ? PROTOCOL_TOPICS
-      : contextType === 'monograph'
-      ? PROTOCOL_TOPICS
-      : MONOGRAPH_TOPICS;
-    const secondaryUnasked = secondaryPool.filter((t) => {
-      const labelLower = t.label.toLowerCase();
-      return !userQueries.some((uText) => uText.includes(labelLower) || t.keys.some((k) => uText.includes(k)));
-    });
-
-    const combined = [...unasked, ...secondaryUnasked];
-    return combined.slice(0, 4);
   };
 
   // Safe markdown cleaner and high-fidelity clinical parser
@@ -646,39 +619,14 @@ export default function PublicAtlasAIDrawer({
                   borderRadius: '8px',
                   padding: '9px 12px',
                   display: 'flex',
-                  flexDirection: 'column',
+                  alignItems: 'flex-start',
                   gap: '7px',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px' }}>
-                  <HelpCircle size={14} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
-                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#0369a1', lineHeight: 1.4 }}>
-                    {line}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', paddingLeft: '21px' }}>
-                  {getDynamicSuggestions().map((chip, cIdx) => (
-                    <button
-                      key={cIdx}
-                      type="button"
-                      onClick={() => handleSendMessage(chip.query || `Please detail: ${chip.label || chip}`)}
-                      disabled={isBlocked || isLoading}
-                      style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '12px',
-                        padding: '3px 9px',
-                        fontSize: '0.71rem',
-                        fontWeight: 600,
-                        color: '#003666',
-                        cursor: isBlocked || isLoading ? 'default' : 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      + {chip.label || chip}
-                    </button>
-                  ))}
-                </div>
+                <HelpCircle size={14} color="#0284c7" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#0369a1', lineHeight: 1.4 }}>
+                  {line}
+                </span>
               </div>
             );
           }
@@ -746,6 +694,76 @@ export default function PublicAtlasAIDrawer({
           );
         })}
 
+        {/* Interactive Follow-up Options / Continuation Chips (Always rendered after bot response) */}
+        <div
+          style={{
+            marginTop: '10px',
+            marginBottom: '4px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            padding: '9px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '7px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <HelpCircle size={13} color="#0284c7" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                {lang === 'es' ? 'Consultas Sugeridas de Continuación:' : 'Suggested Follow-Up Inquiries:'}
+              </span>
+            </div>
+            <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', border: '1px solid #ccfbf1', padding: '1px 6px', borderRadius: '4px' }}>
+              {lang === 'es' ? 'Continuar Consulta' : 'Continue Thread'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {getDynamicSuggestions(txt).map((chip, cIdx) => (
+              <button
+                key={cIdx}
+                type="button"
+                onClick={() => handleSendMessage(chip.query || `Please detail: ${chip.label || chip}`)}
+                disabled={isBlocked || isLoading}
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '4px 10px',
+                  fontSize: '0.73rem',
+                  fontWeight: 600,
+                  color: '#003666',
+                  cursor: isBlocked || isLoading ? 'default' : 'pointer',
+                  transition: 'all 0.15s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  textAlign: 'left',
+                  lineHeight: 1.3,
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isBlocked && !isLoading) {
+                    e.currentTarget.style.backgroundColor = '#f0f9ff';
+                    e.currentTarget.style.borderColor = '#0284c7';
+                    e.currentTarget.style.color = '#0284c7';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isBlocked && !isLoading) {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                    e.currentTarget.style.color = '#003666';
+                  }
+                }}
+              >
+                <span style={{ color: '#0d9488', fontWeight: 800 }}>+</span> {chip.label || chip}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Footer Verification Stamp */}
         <div
           style={{
@@ -770,32 +788,9 @@ export default function PublicAtlasAIDrawer({
     );
   };
 
-  const quickPrompts = contextType === 'protocol'
-    ? [
-        `Explain the phase titration schedule`,
-        `Which active peptides are included and how do they synergize?`,
-        `What are the baseline laboratory monitoring biomarkers?`,
-        `Are there companion peptide monographs or calculators?`,
-      ]
-    : contextType === 'diagnostic_test'
-    ? [
-        `How is the capillary blood sample collected on the Whatman 903 card?`,
-        `What are the clinical reference ranges for intracellular NAD+?`,
-        `How long is the blood sample stable at room temperature during transit?`,
-        `Which clinical longevity protocols correlate with deficient NAD+ levels?`,
-      ]
-    : contextType === 'monograph'
-    ? [
-        `How to reconstitute with 2mL BAC water?`,
-        `What are the storage guidelines?`,
-        `What is the purity specification?`,
-        `What does peer-reviewed clinical research say?`,
-      ]
-    : [
-        `What formulations are ready for immediate dispatch?`,
-        `Which peptides are intended for metabolic research?`,
-        `What is the certified synthesis purity standard?`,
-      ];
+  const quickPrompts = React.useMemo(() => {
+    return getSuggestedInquiriesForProduct(contextAnchor, contextType, lang);
+  }, [contextAnchor, contextType, lang]);
 
   return (
     <>
@@ -956,29 +951,45 @@ export default function PublicAtlasAIDrawer({
               </div>
             </div>
 
-            {/* Subheader Anchor Summary */}
+            {/* Subheader Anchor Summary: Clean, Full Product Title (Never Cut Off) */}
             <div
               style={{
                 backgroundColor: '#f8fafc',
                 padding: '9px 16px',
                 borderBottom: '1px solid #e2e8f0',
-                fontSize: '0.76rem',
-                color: '#334155',
+                fontSize: '0.80rem',
+                color: '#0f172a',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                justifyContent: 'space-between',
+                gap: '10px',
+                lineHeight: 1.35,
               }}
             >
-              <ShieldCheck size={14} color="#16a34a" style={{ flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                <strong style={{ color: '#003666' }}>Active Focus:</strong>{' '}
-                {contextType === 'protocol'
-                  ? `Active Clinical Protocol Guide (${contextAnchor?.duration || 'Multi-week cycle'})`
-                  : contextType === 'diagnostic_test'
-                  ? `CE-IVDR Diagnostic Test Kit • Capillary DBS (${contextAnchor?.method || 'LifeLab1 Central Lab'})`
-                  : contextType === 'monograph'
-                  ? `Active Formulation Monograph (${contextAnchor?.purity || '≥ 99.0% Dual RP-HPLC'})`
-                  : `Active Research Portfolio (${catalogInventory.length} Available Formulations)`}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                <ShieldCheck size={15} color="#16a34a" style={{ flexShrink: 0 }} />
+                <div style={{ fontWeight: 800, color: '#00284d', wordBreak: 'break-word' }}>
+                  {contextAnchor?.name || 'Active Formulation'}
+                </div>
+              </div>
+              <div style={{ flexShrink: 0 }}>
+                {contextType === 'diagnostic_test' ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bae6fd', whiteSpace: 'nowrap' }}>
+                    CE-IVDR Certified
+                  </span>
+                ) : contextType === 'protocol' ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', padding: '2px 7px', borderRadius: '4px', border: '1px solid #ccfbf1', whiteSpace: 'nowrap' }}>
+                    {contextAnchor?.duration || 'Clinical Blueprint'}
+                  </span>
+                ) : contextAnchor?.cas && contextAnchor.cas !== 'N/A' ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '2px 7px', borderRadius: '4px', border: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>
+                    CAS {contextAnchor.cas}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0369a1', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bfdbfe', whiteSpace: 'nowrap' }}>
+                    {contextAnchor?.purity?.includes('≥') ? contextAnchor.purity.split(' ')[0] : 'RP-HPLC'}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -1078,10 +1089,15 @@ export default function PublicAtlasAIDrawer({
                         : 'Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.'}
                     </div>
 
-                    {/* Suggested Prompts */}
+                    {/* Suggested Prompts: 5 Product-Tailored Clinical Questions (FAQ Alternative) */}
                     <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        Suggested Inquiries:
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {lang === 'es' ? 'Preguntas Frecuentes Clínicas:' : 'Suggested Clinical Inquiries:'}
+                        </div>
+                        <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '1px 6px', borderRadius: '4px' }}>
+                          {quickPrompts.length} {lang === 'es' ? 'habituales' : 'tailored'}
+                        </span>
                       </div>
                       {quickPrompts.map((q, qIdx) => (
                         <button
@@ -1093,16 +1109,18 @@ export default function PublicAtlasAIDrawer({
                             background: '#f8fafc',
                             border: '1px solid #e2e8f0',
                             borderRadius: '8px',
-                            padding: '8px 12px',
+                            padding: '9px 12px',
                             fontSize: '0.78rem',
                             color: '#003666',
                             fontWeight: 600,
                             textAlign: 'left',
                             cursor: isBlocked || isLoading ? 'default' : 'pointer',
                             transition: 'all 0.15s ease',
+                            lineHeight: 1.4,
                           }}
                         >
-                          → {q}
+                          <span style={{ color: '#0d9488', marginRight: '6px', fontWeight: 800 }}>→</span>
+                          {q}
                         </button>
                       ))}
                     </div>

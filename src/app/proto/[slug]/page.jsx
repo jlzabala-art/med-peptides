@@ -20,6 +20,11 @@ const KNOWN_PROTOCOL_ALIASES = {
   'immune-modulation-cellular': 'imm_001',
   'mitochondrial-metabolic-support': 'mit_001',
   'lxv-neuro-restoration-12w': '3GocJWVon5tKgOASM3it',
+  'nad-cellular-restoration-protocol': 'Ks2ThxuWoPmWzc3UW06R',
+  'nad-cellular-restoration': 'Ks2ThxuWoPmWzc3UW06R',
+  'hormonal-support-12w': 'horm_001',
+  'sleep-restoration-8w': 'qmzQ9qVRiMGKwUS1x4LQ',
+  'personalized-metabolic-weight-loss-12w': 'wm_001',
 };
 
 async function getPublicProtocol(slug) {

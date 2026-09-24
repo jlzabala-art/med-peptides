@@ -164,7 +164,7 @@ export default function GlobalSearchBar({
               variantCount: varCount,
               indexName: 'products'
             });
-            if (prods.length >= (isProtocolsPage ? 3 : 4)) break;
+            if (prods.length >= (isProtocolsPage ? 4 : 8)) break;
           }
 
           // Deduplicate protocols by title
@@ -183,11 +183,11 @@ export default function GlobalSearchBar({
               category: 'Protocol',
               indexName: 'protocols'
             });
-            if (protos.length >= (isProtocolsPage ? 4 : 3)) break;
+            if (protos.length >= (isProtocolsPage ? 8 : 4)) break;
           }
 
           // Contextual ordering: if on protocols page, show protocols first; otherwise products first
-          const combined = isProtocolsPage ? [...protos, ...prods] : [...prods, ...protos];
+          const combined = (isProtocolsPage ? [...protos, ...prods] : [...prods, ...protos]).slice(0, 10);
           setSuggestions(combined);
           if (combined.length > 0 && isFocused) {
             setShowDropdown(true);

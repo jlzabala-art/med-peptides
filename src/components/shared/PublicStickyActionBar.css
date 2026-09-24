@@ -92,6 +92,54 @@
   flex-shrink: 0;
 }
 
+/* Sections Outline Button (GCP Standard Navigation) */
+.public-sticky-action-bar__sections-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.public-sticky-action-bar__sections-btn:hover {
+  background: #ffffff;
+  border-color: #003666;
+  color: #003666;
+  box-shadow: 0 3px 10px rgba(0, 54, 102, 0.12);
+  transform: translateY(-1px);
+}
+
+.public-sticky-action-bar__sections-btn:active {
+  transform: translateY(0);
+}
+
+.public-sticky-action-bar__sections-icon {
+  color: #003666;
+  flex-shrink: 0;
+}
+
+.public-sticky-action-bar__sections-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  color: #003666;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
 /* Clinical AI Button */
 .public-sticky-action-bar__ai-btn {
   display: inline-flex;
@@ -200,6 +248,12 @@
     font-size: 0.68rem;
   }
 
+  .public-sticky-action-bar__sections-btn {
+    padding: 7px 10px;
+    font-size: 0.76rem;
+    gap: 5px;
+  }
+
   .public-sticky-action-bar__ai-btn {
     padding: 7px 10px;
     font-size: 0.76rem;
@@ -220,6 +274,15 @@
 
   .public-sticky-action-bar__subtitle {
     display: none;
+  }
+
+  .public-sticky-action-bar__sections-label {
+    display: none;
+  }
+
+  .public-sticky-action-bar__sections-btn {
+    padding: 7px 8px;
+    gap: 4px;
   }
 
   .public-sticky-action-bar__ai-label-full {

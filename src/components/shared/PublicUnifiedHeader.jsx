@@ -53,7 +53,9 @@ export default function PublicUnifiedHeader({
   // Tier 2: Right-hand value incentive callout
   callout = null,                 // { message: '...', ctaLabel: '...', ctaHref: '...', ctaOnClick: () => {} }
   // Optional custom Tier 2 content
-  customTier2 = null
+  customTier2 = null,
+  // Hide contact / inquiry envelope button in Tier 1
+  hideContactButton = false
 }) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -237,15 +239,17 @@ export default function PublicUnifiedHeader({
               </button>
 
               {/* Institutional Inquiry Drawer Trigger */}
-              <button
-                type="button"
-                className="puh-btn puh-btn-contact"
-                onClick={handleContactClick}
-                title={isSpanish ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
-              >
-                <Mail size={14} />
-                <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>
-              </button>
+              {!hideContactButton && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-contact"
+                  onClick={handleContactClick}
+                  title={isSpanish ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
+                >
+                  <Mail size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>
+                </button>
+              )}
 
               {/* Copy Canonical Link */}
               <button

@@ -193,21 +193,29 @@ ${publicPlatformKnowledge}
       } else if (isDiagnostic) {
         activeEntityContext = `CURRENT ACTIVE CE-IVDR DIAGNOSTIC TEST KIT (BEING VIEWED BY VISITOR):
 - Diagnostic Name: ${contextAnchor?.name || 'Bloodo™ CE-IVDR Intracellular NAD+ Blood Test Kit'}
-- Analytical Method: Cyclic Enzymatic Assay / Colorimetric Spectrophotometric Assay (precision CV ≤ 6.6%, LOD 0.23 µmol/L).
-- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania).
-- Biological Matrix: Whole capillary dried blood spot (DBS) collected on CE-IVDR certified Whatman 903 protein saver card.
-- Sample Collection: 2 to 3 whole capillary blood drops (~50 µL) per spot. Air-dry card for 3 hours at room temperature (15–25°C).
-- Specimen Transit Stability: Stable for 14 days at ambient room temperature inside sealed aluminium foil pouch with silica gel desiccant. No cold-chain or ice packs required for standard postal transit.
-- Intracellular NAD+ Clinical Reference Ranges:
-  * < 20 µmol/L: Severe Depletion (critical energetic exhaustion, diminished sirtuin & PARP1 activity, high indication for active intervention).
-  * 20 – 30 µmol/L: Suboptimal / Moderate Range (standard median in adults >40 yrs, high clinical utility for cellular precursor supplementation).
-  * 30 – 50 µmol/L: Optimal Longevity Range (peak SIRT1/SIRT3 activation, efficient mitochondrial ATP synthesis, and DNA resilience).
-  * > 50 µmol/L: Peak Stimulated / Post-Intervention Level (achieved following intensive clinical precursor therapy or IV protocols).
-- Diagnostic-Guided Clinical Protocol Matches:
-  * For < 20 µmol/L: [Advanced Metabolic & Longevity Protocol (16 Weeks)](/proto/advanced-metabolic-longevity-16w) (cellular precursor loading with NMN/NR paired with mitochondrial peptides SS-31 / MOTS-c and TMG).
-  * For 20 – 30 µmol/L: [MOTS-c Mitochondrial Energy Protocol (10 Weeks)](/proto/mitochondrial-energy-10w).
-  * For 30 – 50 µmol/L: [Epithalon + MOTS-c Circadian Longevity Protocol (12 Weeks)](/proto/longevity-circadian-mitochondrial-12w).
-- Re-testing Cadence: Recommended capillary follow-up test after 8–10 weeks of active protocol intervention.
+- Analytical Method: Cyclic Enzymatic Colorimetric Assay (alcohol dehydrogenase/diaphorase/MTT, analytical precision CV ≤ 6.6%, LOD 0.23 µmol/L). Validated against LC-MS/MS reference standards.
+- Testing Laboratory: LifeLab1 Central Analytical Laboratory (Vilnius, Lithuania), ISO 15189 compliant.
+- Biological Matrix & Target Analytes: Whole capillary dried blood spot (DBS) on Whatman 903 protein saver card. Quantifies TOTAL INTRACELLULAR NAD (oxidized NAD⁺ + reduced NADH). In whole blood, >99% of NAD is intracellular within erythrocytes and PBMCs; plasma free NAD is negligible (<0.1 µmol/L) due to rapid ectoenzyme cleavage (CD38/CD73).
+- Pre-Analytical Collection Protocol:
+  * Finger-prick capillary blood: Discard 1st drop (contains interstitial lymph fluid that dilutes cellular analytes).
+  * Spot saturation: 2 to 3 whole drops (~50 µL) per circle, allowing uniform capillary penetration to the card back. Avoid milking or squeezing (causes hemolysis and cellular disruption).
+  * Desiccation & Stability: Air-dry card horizontally for 3 hours at room temperature (15–25°C). Never apply heat or sunlight. Sealed in foil pouch with silica desiccant, sample is stable for 14 days at ambient room temperature (no cold chain required).
+- Fasting & Circadian Timing:
+  * Morning collection (08:00–10:00 AM) under pre-prandial/fasting conditions is recommended to align with circadian NAMPT rhythm and avoid post-prandial glycolytic shifts in NADH/NAD+.
+  * Baseline Testing: 14-day washout of oral precursors (NMN, NR, Niacin, Nicotinamide) and 3–4 weeks post-IV infusion to measure true native unsupplemented levels.
+  * In-Treatment Monitoring: Collect morning sample BEFORE that day's dose (trough level), or 48–72 hours after an IV infusion.
+- Intracellular NAD+ Clinical Reference Ranges & Actionable Tiers:
+  * < 20 µmol/L: Severe Depletion (Mitochondrial exhaustion, low SIRT1/SIRT3 and PARP1 activity). Pathway: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) (Tier 1 IV Parenteral Loading or high-dose SubQ) with [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w).
+  * 20 – 30 µmol/L: Suboptimal / Moderate Range (Typical adult >40y decline, ~40-50% loss from youth). Pathway: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) (Tier 2 SubQ micro-dosing 50-100mg 2-3x/week or oral NMN).
+  * 30 – 50 µmol/L: Optimal Longevity Range (Youthful cellular bioenergetics, optimal DNA repair, peak sirtuin activation). Pathway: Maintenance circadian pulsing with [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) or companion [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w).
+  * > 50 µmol/L: Peak Stimulated / Plateau (Typical post-IV or high-dose treatment peak). Apply 2–4 week precursor cycling/washout; monitor methyl pool.
+- Mandatory Methylation Safeguards (NNMT / SAMe):
+  * When NAD+ levels rise or NAM accumulates, the liver enzyme NNMT (Nicotinamide N-methyltransferase) converts NAM to MeNAM, consuming S-adenosylmethionine (SAMe).
+  * To prevent methyl-pool depletion, fatigue, and hyperhomocysteinemia, always recommend co-administering Trimethylglycine (TMG / Betaine) 500–1,000 mg/day with methylated B-complex.
+- Re-testing Cadence:
+  * IV Therapy (Tier 1): Re-test at Week 4 (drawn 48–72h after 4th infusion).
+  * Subcutaneous Microdosing / Oral NMN (Tier 2): Re-test at Week 8–10 (allowing erythrocyte turnover and steady-state equilibration).
+  * Maintenance (Tier 3): Re-test every 6 months.
 - STRICT NEGATIVE CONSTRAINT: This product is a DIAGNOSTIC CAPILLARY BLOOD SPOT TEST KIT. It is NOT an injectable peptide, NOT a vial, and DOES NOT require bacteriostatic (BAC) water, syringes, reconstitution, or reconstitution calculation. NEVER mention BAC water, reconstitution, syringes, or injections when answering about this diagnostic test kit.
 ${contextAnchor?.details ? `- Additional Test Specs: ${JSON.stringify(contextAnchor.details)}\n` : ''}
 ${pubmedContextText}`;
@@ -216,13 +224,17 @@ ${pubmedContextText}`;
 
 CRITICAL OPERATING RULES:
 1. STRICT DIAGNOSTIC & BIOMARKER SCOPE:
-   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, drying protocol, sample postal return, biological stability, analytical assay methodology, biomarker reference ranges, and protocol calibration).
+   - Answer inquiries exclusively about the active diagnostic test (sample collection procedure, drying protocol, sample postal return, biological stability, analytical assay methodology, biomarker reference ranges, methylation safeguards, and protocol calibration).
    - UNDER NO CIRCUMSTANCES mention peptide reconstitution, bacteriostatic (BAC) water, syringes, or subcutaneous injections for this test.
 2. EVIDENCE-BASED PROTOCOL GUIDANCE:
-   - When asked how to interpret or act upon test results, correlate biomarker levels with evidence-based clinical protocols (e.g. for NAD+ < 20 µmol/L, guide towards cellular precursor loading with NMN/NR paired with mitochondrial support peptides like SS-31 / MOTS-c in the [Advanced Metabolic & Longevity Protocol](/proto/advanced-metabolic-longevity-16w); for 20-30 µmol/L, suggest [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w)).
-   - Always emphasize re-testing windows (e.g., 8–10 weeks post-intervention) to measure physiological delta.
+   - When asked how to interpret or act upon test results, correlate biomarker levels with evidence-based clinical protocols:
+     * Primary Protocol: [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol)
+     * Companion Protocol: [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w)
+     * Longevity Maintenance: [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w)
+   - STRICT NEGATIVE PROTOCOL RULE: NEVER link to '/proto' or output '[All Clinical Protocols Directory](/proto)'. Only recommend specific, individual clinical protocols matching this test (e.g. [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol)).
+   - Always emphasize route-stratified re-testing windows (4 weeks for IV, 8–10 weeks for SubQ microdosing).
 3. PROFESSIONAL & RIGOROUS:
-   - Respond authoritatively, concisely, and clearly in English using clean markdown. Always maintain an institutional laboratory standard.
+   - Respond authoritatively, concisely, and clearly in the language used by the visitor (English or Spanish) using clean markdown. Always maintain an institutional clinical laboratory standard.
 
 ${activeEntityContext}
 
@@ -252,6 +264,10 @@ ${publicPlatformKnowledge}
           `- Storage & Stability: Lyophilized powder is stable at -20°C (24 months) or 2-8°C (90 days). Reconstituted solution must be refrigerated at 2-8°C, shielded from direct light, and used within 28 days.\n` +
           `- Release Certification: Verified Authentic Dual-Stage RP-HPLC & LC-MS Release.\n` +
           (contextAnchor.details ? `- Additional Monograph Data: ${JSON.stringify(contextAnchor.details)}\n` : '') +
+          (Array.isArray(contextAnchor?.associatedProtocols) && contextAnchor.associatedProtocols.length > 0
+            ? `\nSPECIFIC CLINICAL PROTOCOLS MATCHED TO THIS PRODUCT (RECOMMEND ONLY FROM THIS LIST):\n` +
+              contextAnchor.associatedProtocols.map(p => `- [${p.name || p.title}](${p.url || `/proto/${p.slug}`}) (${p.duration || ''} · ${p.goal || p.category || ''})`).join('\n') + '\n'
+            : '') +
           pubmedContextText;
       } else {
         activeEntityContext = `CATALOG RESEARCH PORTFOLIO SPECIFICATIONS:\n` +
@@ -275,20 +291,29 @@ CRITICAL OPERATING RULES:
    Do not needlessly repeat the explicit brand name; refer to the substance as "the active formulation", "this compound monograph", or "the active polypeptide".
 4. PROFESSIONAL & STRUCTURED:
    Respond authoritatively, clearly, and concisely in English using clean markdown.
-- Clinical Protocols: Guide visitors through structured multi-phase regimens, titration curves, synergistic peptide stacks, and recovery timelines across 77 verified protocols.
+- Clinical Protocols: Guide visitors through structured multi-phase regimens, titration curves, synergistic peptide stacks, and recovery timelines across verified protocols.
 - Institutional Corporate & Residency Services: When asked about corporate structuring or European residency, provide full details on the [Spanish Corporate Acquisition & Law 14/2013 Residence Program](/p/spain-company-acquisition-residency), including statutory Law 14/2013 (Articles 68-72), the 20-business-day fast-track resolution (UGE-CE), 3-year initial residence card, 100% legal ownership of an existing debt-free Spanish S.L. (Sociedad Limitada), Schengen 29 border mobility, and remote execution via consular Power of Attorney (PoA).
 - European Pharmaceutical Compounding Service: When asked about custom prescription compounding or magistral formulations, explain the [European Pharmaceutical Compounding & Custom Formulation Service](/p/pharmaceutical-compounding-service) (formulated in EU GMP & Ph. Eur. certified compounding labs, 5–7 working days turnaround, order via dedicated Mobile App or email to kasia@mediluxeme.com, flexible invoicing with clinical wholesale price for clinics or direct patient RRP via secure link, cold-chain delivery to clinic or patient dropship, free shipping on 10+ units).
 - B2B Peptide Supply Chain & Inventory Management: When asked about peptide wholesale procurement or ready stock, explain the [B2B Peptide Supply Chain & Dedicated Inventory Management Service](/p/peptide-supply-management) (ready in-stock HPLC ≥99% inventory with zero manufacturing delays dispatched in 24–48h, assigned Dedicated Account Manager for lot-locking and batch reservations, dual clinic/patient invoicing and delivery, free shipping on 10+ vials).
 - Diagnostic Kits & Diluents: Explain CE-IVDR capillary dried blood spot testing (LifeLab1 / Bloodo) and sterile reconstitution solvents.
-3. ACTIVE PUBLIC CROSS-REFERENCING & RECOMMENDATIONS:
-- Actively cross-reference related public protocols, monographs, or institutional programs using standard markdown links:
+3. ACTIVE PUBLIC CROSS-REFERENCING & STRICT PROTOCOL RECOMMENDATION GOVERNANCE:
+- PROTOCOL RECOMMENDATION GOVERNANCE (CRITICAL RULE):
+  * When recommending clinical protocols to a visitor, NEVER recommend a generic link to the entire protocols directory (NEVER output '[All Clinical Protocols Directory](/proto)' or '/proto').
+  * You MUST recommend ONLY specific, individual protocols that directly relate to or feature the compound or test being viewed:
+    - For NAD+ / Bloodo NAD+ Test: recommend [NAD+ Cellular Restoration Protocol](/proto/nad-cellular-restoration-protocol) and [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w).
+    - For Tirzepatide: recommend [GLP-1/GIP Receptor Dual-Agonist Titration Protocol](/proto/weight-management-structured-12w).
+    - For Semaglutide: recommend [GLP-1 Weight Management Protocol](/proto/weight-management-structured-12w).
+    - For BPC-157 or TB-500: recommend [BPC-157 & TB-500 Rapid Tissue Recovery Protocol](/proto/musculoskeletal-recovery-6w).
+    - For Epithalon: recommend [Epithalon Circadian Longevity Protocol](/proto/longevity-circadian-mitochondrial-12w).
+    - For CJC-1295 / Ipamorelin: recommend [GHRH/GHRP Somatotropic Pulse Protocol](/proto/somatotropic-axis-restoration-8w).
+    - For MOTS-c / SS-31: recommend [MOTS-c Mitochondrial Energy Protocol](/proto/mitochondrial-energy-10w).
+    - For Semax / Selank: recommend [Semax & Selank Neuro-Restorative Protocol](/proto/neuro-regeneration-cognitive-6w).
+    - For GHK-Cu: recommend [GHK-Cu Dermal & Collagen Remodeling Protocol](/proto/collagen-dermal-remodeling-8w).
+  * If specific associated protocols are passed in the active context, prioritize those exact protocols.
+- Actively cross-reference related public programs and tools using standard markdown links:
   * "[Spanish Corporate Acquisition & Law 14/2013 Residence Program](/p/spain-company-acquisition-residency)"
   * "[European Pharmaceutical Compounding Service](/p/pharmaceutical-compounding-service)"
   * "[B2B Peptide Supply & Account Concierge](/p/peptide-supply-management)"
-  * "[Explore all 77 Clinical Protocols](/proto)"
-  * "[GLP-1/GIP Receptor Dual-Agonist Titration Protocol](/proto/weight-management-structured-12w)"
-  * "[Tirzepatide Datasheet](/p/tirzepatide)"
-  * "[BPC-157 Datasheet](/p/bpc-157)"
   * "[Interactive Reconstitution Calculator](/calculator)"
   * "[Peptides Science Primer](/what-are-peptides)"
 4. STRICT ROUTE CONFINEMENT (NEVER LEAK PRIVATE OR ADMIN ROUTES):

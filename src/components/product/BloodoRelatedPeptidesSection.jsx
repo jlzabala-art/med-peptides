@@ -58,6 +58,45 @@ const DEFAULT_RELATED_PROTOCOLS = {
     summaryEs: 'Protocolo sistémico antiinflamatorio vascular y endotelial para resolver el daño microvascular crónico y optimizar la resiliencia lipídica.',
     keyCompounds: ['BPC-157', 'TB-500', 'KPV'],
     retestGuideline: 'DBS Omega-3/6 index follow-up at Week 10'
+  },
+  'testosterone-test': {
+    slug: 'hormonal-support-12w',
+    shortCode: 'REF-TEST-HPTA',
+    nameEn: 'Kisspeptin & Gonadorelin HPTA Endocrine Restart Protocol (12 Weeks)',
+    nameEs: 'Protocolo de Reinicio Endocrino del Eje HPTA con Kisspeptina y Gonadorelina (12 Semanas)',
+    category: 'Endocrine Vitality & Androgenic Axis',
+    duration: '12 Weeks · Progressive Secretagogue Pulsing',
+    evidenceGrade: 'Grade A · Evidence-Based',
+    summaryEn: 'Advanced neuro-endocrine protocol activating hypothalamic GnRH pulsatility and Leydig cell steroidogenesis to restore natural testosterone production without testicular atrophy.',
+    summaryEs: 'Protocolo neuroendocrino avanzado que activa la pulsatilidad de GnRH hipotalámica y la esteroidogénesis en células de Leydig para restablecer la testosterona natural sin atrofia testicular.',
+    keyCompounds: ['Kisspeptin-10', 'Testagen', 'hCG / Gonadorelin', 'CJC-1295 / Ipamorelin', 'Zinc + DIM'],
+    retestGuideline: 'Capillary DBS LC-MS/MS Testosterone+ follow-up at Week 8'
+  },
+  'cortisol-test': {
+    slug: 'sleep-restoration-8w',
+    shortCode: 'REF-CORT-REST',
+    nameEn: 'DSIP & Selank Circadian Neuro-Endocrine Stress Protocol (8 Weeks)',
+    nameEs: 'Protocolo Neuroendocrino de Estrés Circadiano con DSIP y Selank (8 Semanas)',
+    category: 'HPA Axis & Circadian Adrenal Recovery',
+    duration: '8 Weeks · Biphasic Diurnal Harmonization',
+    evidenceGrade: 'Grade A · Evidence-Based',
+    summaryEn: 'Chronobiological neuro-peptide regimen designed to suppress evening allostatic cortisol surges, promote deep stage-4 delta sleep, and restore healthy morning awakening response (CAR).',
+    summaryEs: 'Pauta cronobiológica de neuropéptidos diseñada para modular el cortisol vespertino, promover el sueño profundo delta y restaurar la respuesta matutina saludable al despertar (CAR).',
+    keyCompounds: ['Epithalon', 'Selank', 'Semax', 'DSIP', 'Phosphatidylserine'],
+    retestGuideline: 'Dual AM/PM capillary DBS Cortisol follow-up at Week 8'
+  },
+  'vitamin-d-test': {
+    slug: 'thymalin-epitalon-synergistic-longevity',
+    shortCode: 'REF-VITD-IMMU',
+    nameEn: 'Thymic & Innate Immune Bioregulation Protocol (8 Weeks)',
+    nameEs: 'Protocolo de Biorregulación Tímica e Inmunidad Innata (8 Semanas)',
+    category: 'Innate Immunity & Genomic VDR Axis',
+    duration: '8 Weeks · Dual Bioregulator Matrix',
+    evidenceGrade: 'Grade A · Evidence-Based',
+    summaryEn: 'Synergistic peptide protocol combining thymic bioregulators with 1,25(OH)2D3-VDR axis optimization to restore T-cell maturation, cathelicidin (LL-37) synthesis, and systemic immune resilience.',
+    summaryEs: 'Protocolo peptídico sinérgico que combina biorreguladores tímicos con la optimización del eje VDR de vitamina D para restaurar la maduración de linfocitos T y la síntesis de LL-37.',
+    keyCompounds: ['Thymosin Alpha-1', 'LL-37', 'Cartalax', 'Vitamin D3/K2', 'CJC-1295 / Ipamorelin'],
+    retestGuideline: 'Capillary DBS 25(OH)D follow-up at Week 10'
   }
 };
 
