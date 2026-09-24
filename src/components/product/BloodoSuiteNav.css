@@ -8,12 +8,12 @@
 .bloodo-suite-chips {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 12px 0 16px 0;
-  padding: 12px 14px;
+  gap: 8px;
+  margin: 10px 0 12px 0;
+  padding: 10px 12px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 10px;
   width: 100%;
   box-sizing: border-box;
 }

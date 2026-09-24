@@ -11,7 +11,7 @@
 @media (min-width: 1024px) {
   .pds-sidebar-toc {
     display: block;
-    width: 250px;
+    width: 290px;
     flex-shrink: 0;
     position: sticky;
     top: 88px;
@@ -102,16 +102,16 @@
 
 .pds-toc-link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.55rem;
-  padding: 0.50rem 0.65rem;
+  padding: 0.45rem 0.65rem;
   border-radius: 6px;
   font-size: 0.82rem;
   font-weight: 500;
   color: #475569;
   text-decoration: none;
   transition: all 0.15s ease;
-  border-left: 2px solid transparent;
+  border-left: 3px solid transparent;
   line-height: 1.35;
 }
 
@@ -139,6 +139,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .pds-toc-link.is-active .pds-toc-step-number {
@@ -151,6 +152,7 @@
   flex-shrink: 0;
   color: #64748b;
   transition: color 0.15s ease;
+  margin-top: 2px;
 }
 
 .pds-toc-link.is-active .pds-toc-item-icon {
@@ -159,15 +161,17 @@
 
 .pds-toc-item-text {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .pds-toc-active-arrow {
   flex-shrink: 0;
   color: #003666;
   margin-left: auto;
+  margin-top: 3px;
 }
 
 .pds-toc-footer {

@@ -2833,8 +2833,8 @@
 @media (min-width: 1024px) {
   .pds-content-with-sidebar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 250px;
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 1.5rem;
     align-items: flex-start;
   }
 }

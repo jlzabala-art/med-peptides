@@ -1022,26 +1022,6 @@ export default function DiagnosticTestTechnicalSpecs({
                   <span>{isEs ? 'Ver Protocolo Clínico Calibrado para este Resultado' : 'Review Calibrated Clinical Protocol for this Result'}</span>
                   <ArrowRight size={14} />
                 </Link>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.dispatchEvent(
-                        new CustomEvent('open-public-atlas-ai', {
-                          detail: {
-                            initialQuery: activeRange.clinicalProtocol.aiQuery
-                          }
-                        })
-                      );
-                    }
-                  }}
-                  className="dts-btn-ai-query"
-                  title={isEs ? 'Consultar este nivel y protocolo con el Asistente Clínico de IA' : 'Inquire about this biomarker tier with Clinical AI'}
-                >
-                  <Bot size={14} />
-                  <span>{isEs ? 'Consultar con Clinical AI este Nivel' : 'Ask Clinical AI About This Level'}</span>
-                </button>
               </div>
             </div>
           )}
