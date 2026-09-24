@@ -1254,3 +1254,278 @@
     justify-content: center;
   }
 }
+
+/* ── Bloodo™ Official Kit Showcase & Packaging Presentation ── */
+.dts-showcase-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.dts-showcase-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .dts-showcase-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dts-showcase-image-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.dts-showcase-image-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dts-showcase-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0d9488;
+  background: #f0fdfa;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccfbf1;
+}
+
+.dts-showcase-ce {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.dts-showcase-img-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  max-height: 290px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f8fafc 65%, #edf2f7 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  padding: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.dts-showcase-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 20px rgba(0, 54, 102, 0.12));
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dts-showcase-img:hover {
+  transform: scale(1.05);
+}
+
+.dts-showcase-caption {
+  font-size: 0.82rem;
+  color: #475569;
+  margin-top: 0.25rem;
+}
+
+.dts-showcase-caption strong {
+  display: block;
+  color: #003666;
+  font-size: 0.86rem;
+  margin-bottom: 2px;
+}
+
+.dts-showcase-caption p {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.dts-showcase-details-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.15rem;
+}
+
+.dts-contents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+}
+
+.dts-contents-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.dts-official-pdf-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.15rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #003666;
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-top: 0.65rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.dts-pdf-box-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex: 1;
+  min-width: 260px;
+}
+
+.dts-pdf-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #003666;
+}
+
+.dts-pdf-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.dts-pdf-name {
+  font-size: 0.90rem;
+  color: #0f172a;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.dts-pdf-meta {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.dts-pdf-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #003666;
+  color: #ffffff;
+  font-size: 0.80rem;
+  font-weight: 700;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.15);
+}
+
+.dts-pdf-preview-btn:hover {
+  background: #002244;
+  box-shadow: 0 4px 10px rgba(0, 54, 102, 0.25);
+}
+
+/* ── PDF Preview Modal (Google Cloud Document Viewer Standard) ── */
+.dts-pdf-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: dtsFadeIn 0.2s ease-out;
+}
+
+.dts-pdf-modal-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.dts-pdf-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.dts-pdf-modal-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dts-pdf-modal-sub {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.dts-pdf-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dts-pdf-modal-body {
+  flex: 1;
+  height: 75vh;
+  background: #f1f5f9;
+}
+
+.dts-pdf-modal-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}

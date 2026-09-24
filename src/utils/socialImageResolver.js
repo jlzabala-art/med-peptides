@@ -47,20 +47,21 @@ const COMPOUND_IMAGE_MAP = {
   'ghk-cu': '/assets/vials/generic-vial.png',
   'ghkcu': '/assets/vials/generic-vial.png',
 
-  // Diagnostic Kits & Bloodo tests (High-Res Visual Assets)
-  'bloodo-nad-test': '/images/nad_test_results.png',
-  'bloodo-nad-level-test': '/images/nad_test_results.png',
-  'nad-level-test': '/images/nad_test_results.png',
-  'bloodo-testosterone-test': '/images/hormone_balance.png',
-  'testosterone-test': '/images/hormone_balance.png',
-  'bloodo-cortisol-test': '/images/stress_resilience.png',
-  'cortisol-test': '/images/stress_resilience.png',
-  'bloodo-hba1c-test': '/images/metabolic_flex.png',
-  'hemoglobin-a1c-hba1c-test': '/images/metabolic_flex.png',
-  'bloodo-omega-ratio-test': '/images/biomarkers_aging_telomere.png',
-  'omega-ratio-test': '/images/biomarkers_aging_telomere.png',
-  'bloodo-vitamin-d-test': '/images/vitamin_d.png',
-  'vitamin-d-test': '/images/vitamin_d.png',
+  // Diagnostic Kits & Bloodo tests (Official High-Res Packaging Assets from bloodo.com)
+  'bloodo-nad-test': '/images/products/bloodo/nad.jpg',
+  'bloodo-nad-level-test': '/images/products/bloodo/nad.jpg',
+  'nad-level-test': '/images/products/bloodo/nad.jpg',
+  'bloodo-testosterone-test': '/images/products/bloodo/testosterone.jpg',
+  'testosterone-test': '/images/products/bloodo/testosterone.jpg',
+  'bloodo-cortisol-test': '/images/products/bloodo/cortisol.jpg',
+  'cortisol-test': '/images/products/bloodo/cortisol.jpg',
+  'bloodo-hba1c-test': '/images/products/bloodo/hba1c.jpg',
+  'hemoglobin-a1c-hba1c-test': '/images/products/bloodo/hba1c.jpg',
+  'bloodo-omega-ratio-test': '/images/products/bloodo/omega.jpg',
+  'omega-ratio-test': '/images/products/bloodo/omega.jpg',
+  'omega-index-test': '/images/products/bloodo/omega-index.jpg',
+  'bloodo-vitamin-d-test': '/images/products/bloodo/vitamin-d.jpg',
+  'vitamin-d-test': '/images/products/bloodo/vitamin-d.jpg',
 };
 
 // Delivery format visual fallbacks

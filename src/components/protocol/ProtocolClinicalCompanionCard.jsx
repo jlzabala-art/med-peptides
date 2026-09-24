@@ -53,28 +53,36 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
     try {
       await navigator.clipboard.writeText(text);
       setCopiedCadenceId(cadence.id);
-      toast.success(isEs ? 'Pauta copiada para WhatsApp' : 'Guideline copied for WhatsApp');
+      toast.success(isEs ? 'Pauta copiada al portapapeles' : 'Guideline copied to clipboard');
       setTimeout(() => setCopiedCadenceId(null), 2500);
     } catch {
       toast.error('Could not copy to clipboard');
     }
   };
 
-  const handleShareWhatsAppAll = () => {
-    const text = isEs
-      ? `*Pautas de Monitorización con Test de NAD (Bloodo™)*\n\n` +
-        `• *Día 0 (Basal):* Si toma precursores orales (NMN/NR), suspender 2-3 semanas antes si es clínicamente apropiado.\n` +
-        `• *Semana 4 (En Tratamiento):* NO suspender el tratamiento ni hacer lavado. Registrar dosis (ej. 250 mg IV ayer) y hora exacta.\n` +
-        `• *Semana 8 (Consolidación):* Mantener mismo horario e intervalo para comparar con la Semana 4.\n\n` +
-        `_Laboratorio central: LifeLab1 (Vilna, Lituania) / CE-IVDR_`
-      : `*Bloodo™ NAD Protocol Monitoring & Cadence Guidelines*\n\n` +
-        `• *Day 0 (Baseline):* If on oral NMN/NR, 2-3 week washout recommended before starting.\n` +
-        `• *Week 4 (On-Treatment):* DO NOT discontinue oral or IV NAD. Document exact doses (e.g. 250 mg IV yesterday) and standardise test timing.\n` +
-        `• *Week 8 (Consolidation):* Maintain identical collection window relative to doses for serial comparability.\n\n` +
-        `_Central Lab: LifeLab1 (Vilnius, EU) / CE-IVDR Certified_`;
+  const [copiedCadenceAll, setCopiedCadenceAll] = useState(false);
 
-    const encoded = encodeURIComponent(text);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
+  const handleCopyMonitoringGuidelines = async () => {
+    const text = isEs
+      ? `Pautas de Monitorización con Test de NAD (Bloodo™)\n\n` +
+        `• Día 0 (Basal): Si toma precursores orales (NMN/NR), suspender 2-3 semanas antes si es clínicamente apropiado.\n` +
+        `• Semana 4 (En Tratamiento): NO suspender el tratamiento ni hacer lavado. Registrar dosis (ej. 250 mg IV ayer) y hora exacta.\n` +
+        `• Semana 8 (Consolidación): Mantener mismo horario e intervalo para comparar con la Semana 4.\n\n` +
+        `Laboratorio central: LifeLab1 (Vilna, Lituania) / CE-IVDR`
+      : `Bloodo™ NAD Protocol Monitoring & Cadence Guidelines\n\n` +
+        `• Day 0 (Baseline): If on oral NMN/NR, 2-3 week washout recommended before starting.\n` +
+        `• Week 4 (On-Treatment): DO NOT discontinue oral or IV NAD. Document exact doses (e.g. 250 mg IV yesterday) and standardise test timing.\n` +
+        `• Week 8 (Consolidation): Maintain identical collection window relative to doses for serial comparability.\n\n` +
+        `Central Lab: LifeLab1 (Vilnius, EU) / CE-IVDR Certified`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedCadenceAll(true);
+      toast.success(isEs ? 'Pautas copiadas al portapapeles' : 'Guidelines copied to clipboard');
+      setTimeout(() => setCopiedCadenceAll(false), 2000);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
   };
 
   return (
@@ -109,11 +117,11 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
             <button
               type="button"
               className="pcc-wa-quick-btn"
-              onClick={handleShareWhatsAppAll}
-              title={isEs ? 'Compartir pautas de monitorización por WhatsApp' : 'Share monitoring cadence guidelines via WhatsApp'}
+              onClick={handleCopyMonitoringGuidelines}
+              title={isEs ? 'Copiar pautas de monitorización al portapapeles' : 'Copy monitoring cadence guidelines to clipboard'}
             >
-              <span>💬</span>
-              <span>{isEs ? 'Pautas para WhatsApp' : 'Share on WhatsApp'}</span>
+              {copiedCadenceAll ? <Check size={13} style={{ color: '#10b981' }} /> : <Copy size={13} />}
+              <span>{copiedCadenceAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Pautas Clínicas' : 'Copy Clinical Guidelines')}</span>
             </button>
           </div>
         )}
@@ -216,8 +224,8 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
             </p>
           </div>
 
-          {/* 3-Milestone Cadence Grid */}
-          <div className="pcc-cadence-grid">
+          {/* Google Cloud Symmetrical Balanced Cadence Grid */}
+          <div className={`pcc-cadence-grid cols-${(companion.sampling_cadence || []).length}`}>
             {(companion.sampling_cadence || []).map((cad, idx) => {
               const mTitle = isEs ? cad.milestone_es : cad.milestone;
               const mTiming = isEs ? cad.timing_es : cad.timing;
@@ -272,7 +280,7 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
                       type="button"
                       className="pcc-cadence-btn"
                       onClick={() => handleCopyGuideline(cad)}
-                      title={isEs ? 'Copiar esta pauta para WhatsApp' : 'Copy this guideline for WhatsApp'}
+                      title={isEs ? 'Copiar esta pauta al portapapeles' : 'Copy this guideline to clipboard'}
                     >
                       {isCopied ? <Check size={12} style={{ color: '#10b981' }} /> : <Copy size={12} />}
                       <span>{isCopied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar Pauta' : 'Copy Guideline')}</span>

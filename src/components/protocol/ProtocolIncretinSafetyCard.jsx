@@ -37,23 +37,31 @@ export default function ProtocolIncretinSafetyCard({ protocol, lang = 'en' }) {
   const decisionTree = giAlgorithm?.titration_decision_tree || [];
   const selectedGrade = decisionTree[selectedGradeIdx] || decisionTree[0];
 
-  const handleShareWhatsAppGuide = () => {
+  const [copiedHeader, setCopiedHeader] = useState(false);
+
+  const handleCopyIncretinGuide = async () => {
     const text = isEs
       ? `*Guía de Manejo Clínico Incretinas — Retatrutide & MOTS-c*\n\n` +
-        `• *Regulación Digestiva:* Ante náuseas leves o saciedad rápida, reducir el volumen de comida un 40% y evitar grasas densas.\n` +
-        `• *Regla de Desescalado:* Si las molestias persisten > 48h, pausar el aumento de dosis durante 2–4 semanas o regresar al escalón previo.\n` +
-        `• *Protección Muscular (DEXA):* Objetivo > 75% grasa perdida y < 25% masa magra. Consumir 1,6 – 2,2 g de proteína/kg peso objetivo diario + creatina 3-5g.\n` +
-        `• *Test Acompañante Bloodo™:* Realizar HbA1c en Día 0 (basal) y Semana 12 para validar la optimización metabólica.\n\n` +
-        `_Atlas Services Clinical Reference • Protocolo Metabólico_`
+        `• Regulación Digestiva: Ante náuseas leves o saciedad rápida, reducir el volumen de comida un 40% y evitar grasas densas.\n` +
+        `• Regla de Desescalado: Si las molestias persisten > 48h, pausar el aumento de dosis durante 2–4 semanas o regresar al escalón previo.\n` +
+        `• Protección Muscular (DEXA): Objetivo > 75% grasa perdida y < 25% masa magra. Consumir 1,6 – 2,2 g de proteína/kg peso objetivo diario + creatina 3-5g.\n` +
+        `• Test Acompañante Bloodo™: Realizar HbA1c en Día 0 (basal) y Semana 12 para validar la optimización metabólica.\n\n` +
+        `Atlas Services Clinical Reference • Protocolo Metabólico`
       : `*Clinical Incretin Management Guide — Retatrutide & MOTS-c*\n\n` +
-        `• *GI Adaptation:* In case of mild nausea or fullness, reduce meal volume by 40% and eliminate high-fat foods.\n` +
-        `• *Step-Down Rule:* For persistent symptoms > 48 hours, pause escalation for 2–4 weeks or drop to previous dose step.\n` +
-        `• *Lean Mass Target (DEXA):* Aim for > 75% fat mass loss and < 25% lean loss. Maintain 1.6–2.2 g protein/kg target weight/day + 3-5g creatine.\n` +
-        `• *Bloodo™ Companion Test:* Draw HbA1c at Day 0 (baseline) and Week 12 to verify glycemic optimization.\n\n` +
-        `_Atlas Services Clinical Reference • Precision Endocrinology_`;
+        `• GI Adaptation: In case of mild nausea or fullness, reduce meal volume by 40% and eliminate high-fat foods.\n` +
+        `• Step-Down Rule: For persistent symptoms > 48 hours, pause escalation for 2–4 weeks or drop to previous dose step.\n` +
+        `• Lean Mass Target (DEXA): Aim for > 75% fat mass loss and < 25% lean loss. Maintain 1.6–2.2 g protein/kg target weight/day + 3-5g creatine.\n` +
+        `• Bloodo™ Companion Test: Draw HbA1c at Day 0 (baseline) and Week 12 to verify glycemic optimization.\n\n` +
+        `Atlas Services Clinical Reference • Precision Endocrinology`;
 
-    const encoded = encodeURIComponent(text);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedHeader(true);
+      toast.success(isEs ? 'Pauta clínica copiada al portapapeles' : 'Clinical guidance copied to clipboard');
+      setTimeout(() => setCopiedHeader(false), 2500);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
   };
 
   const handleCopyGrade = async (grade) => {
@@ -65,7 +73,7 @@ export default function ProtocolIncretinSafetyCard({ protocol, lang = 'en' }) {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedCadence(true);
-      toast.success(isEs ? 'Instrucciones copiadas para WhatsApp' : 'Clinical guidance copied for WhatsApp');
+      toast.success(isEs ? 'Pauta de intervención copiada al portapapeles' : 'Intervention guidance copied to clipboard');
       setTimeout(() => setCopiedCadence(false), 2500);
     } catch {
       toast.error('Could not copy to clipboard');
@@ -102,12 +110,12 @@ export default function ProtocolIncretinSafetyCard({ protocol, lang = 'en' }) {
         <div className="pisc-header-cta-group">
           <button
             type="button"
-            className="pisc-btn pisc-btn-whatsapp"
-            onClick={handleShareWhatsAppGuide}
-            title={isEs ? 'Compartir pautas clínicas con el paciente por WhatsApp' : 'Share clinical guide with patient via WhatsApp'}
+            className="pisc-btn pisc-btn-outline"
+            onClick={handleCopyIncretinGuide}
+            title={isEs ? 'Copiar pautas clínicas al portapapeles' : 'Copy clinical guidelines to clipboard'}
           >
-            <Sparkles size={14} />
-            <span>{isEs ? 'Compartir Guía por WhatsApp' : 'Share Guide on WhatsApp'}</span>
+            {copiedHeader ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+            <span>{copiedHeader ? (isEs ? 'Pauta Copiada' : 'Guideline Copied') : (isEs ? 'Copiar Pauta Clínica' : 'Copy Clinical Guide')}</span>
           </button>
         </div>
       </div>

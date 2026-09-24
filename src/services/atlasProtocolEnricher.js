@@ -261,7 +261,7 @@ export async function enrichProtocolSection(protocolId, protocol, sectionId) {
   const prompt = promptFn(protocol);
 
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.6-flash',
     contents: prompt,
     config: {
       responseMimeType: 'application/json',

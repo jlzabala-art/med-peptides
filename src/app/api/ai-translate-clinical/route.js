@@ -76,11 +76,17 @@ ${JSON.stringify(fields, null, 2)}`;
         const ai = new GoogleGenAI({ apiKey });
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
           },
+        }).catch(async () => {
+          return ai.models.generateContent({
+            model: 'gemini-3.5-flash',
+            contents: prompt,
+            config: { responseMimeType: 'application/json' },
+          });
         });
 
         if (response.text) {
@@ -89,7 +95,7 @@ ${JSON.stringify(fields, null, 2)}`;
       } catch (aiErr) {
         console.warn('Gemini SDK on-demand translation failed, trying REST fallback:', aiErr.message);
         try {
-          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

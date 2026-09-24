@@ -31,23 +31,31 @@ export default function ProtocolSomatotropicAxisCard({ protocol, lang = 'en' }) 
   const cycling = somato.cycling_schedule;
   const lab = somato.laboratory_surveillance;
 
-  const handleShareWhatsAppGuide = () => {
+  const [copiedHeader, setCopiedHeader] = useState(false);
+
+  const handleCopySomatotropicGuide = async () => {
     const text = isEs
       ? `*Pautas Clínicas Eje Somatotrópico — CJC-1295 + Ipamorelina*\n\n` +
-        `• *Ventana de Ayuno Obligatoria:* Dejar transcurrir un mínimo de 2,5 – 3,0 horas de ayuno estricto tras la última comida antes de la inyección.\n` +
-        `• *Cronobiología:* Inyectar inmediatamente antes de dormir (22:00 – 23:30) para sincronizar con la fase Delta de ondas lentas.\n` +
-        `• *Seguridad Hormonal:* Ipamorelina no eleva prolactina ni cortisol (a diferencia de GHRP-6/2) ni produce picos de apetito descontrolado.\n` +
-        `• *Pauta 5 ON / 2 OFF:* Inyectar 5 días seguidos (lunes a viernes) y descansar 2 días (fines de semana) durante 10–12 semanas, seguido de 4 semanas de descanso.\n\n` +
-        `_Atlas Services Clinical Reference • Eje de Crecimiento & Longevidad_`
+        `• Ventana de Ayuno Obligatoria: Dejar transcurrir un mínimo de 2,5 – 3,0 horas de ayuno estricto tras la última comida antes de la inyección.\n` +
+        `• Cronobiología: Inyectar inmediatamente antes de dormir (22:00 – 23:30) para sincronizar con la fase Delta de ondas lentas.\n` +
+        `• Seguridad Hormonal: Ipamorelina no eleva prolactina ni cortisol (a diferencia de GHRP-6/2) ni produce picos de apetito descontrolado.\n` +
+        `• Pauta 5 ON / 2 OFF: Inyectar 5 días seguidos (lunes a viernes) y descansar 2 días (fines de semana) durante 10–12 semanas, seguido de 4 semanas de descanso.\n\n` +
+        `Atlas Services Clinical Reference • Eje de Crecimiento & Longevidad`
       : `*Clinical Guidelines Somatotropic Axis — CJC-1295 + Ipamorelin*\n\n` +
-        `• *Mandatory Fasting Window:* Maintain a strict 2.5 – 3.0 hour fasting window after the final meal prior to injection.\n` +
-        `• *Bedtime Synchronization:* Administer right before sleep (22:00 – 23:30) to coincide with Stage 3 Delta slow-wave release.\n` +
-        `• *Pituitary Selectivity:* Ipamorelin causes 0.0% surge in prolactin or cortisol, eliminating gynecomastia or stress response risks.\n` +
-        `• *5-On / 2-Off Cadence:* 5 consecutive days on (Mon–Fri), 2 days off (weekends) for 10–12 weeks with a 4-week washout break.\n\n` +
-        `_Atlas Services Clinical Reference • Growth Hormone & Longevity_`;
+        `• Mandatory Fasting Window: Maintain a strict 2.5 – 3.0 hour fasting window after the final meal prior to injection.\n` +
+        `• Bedtime Synchronization: Administer right before sleep (22:00 – 23:30) to coincide with Stage 3 Delta slow-wave release.\n` +
+        `• Pituitary Selectivity: Ipamorelin causes 0.0% surge in prolactin or cortisol, eliminating gynecomastia or stress response risks.\n` +
+        `• 5-On / 2-Off Cadence: 5 consecutive days on (Mon–Fri), 2 days off (weekends) for 10–12 weeks with a 4-week washout break.\n\n` +
+        `Atlas Services Clinical Reference • Growth Hormone & Longevity`;
 
-    const encoded = encodeURIComponent(text);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedHeader(true);
+      toast.success(isEs ? 'Pautas nocturnas copiadas al portapapeles' : 'Bedtime guidelines copied to clipboard');
+      setTimeout(() => setCopiedHeader(false), 2500);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
   };
 
   const handleCopyFastingRule = async () => {
@@ -58,7 +66,7 @@ export default function ProtocolSomatotropicAxisCard({ protocol, lang = 'en' }) 
     try {
       await navigator.clipboard.writeText(text);
       setCopiedCadence(true);
-      toast.success(isEs ? 'Regla de ayuno copiada para WhatsApp' : 'Fasting rule copied for WhatsApp');
+      toast.success(isEs ? 'Regla de ayuno copiada al portapapeles' : 'Fasting rule copied to clipboard');
       setTimeout(() => setCopiedCadence(false), 2500);
     } catch {
       toast.error('Could not copy');
@@ -95,12 +103,12 @@ export default function ProtocolSomatotropicAxisCard({ protocol, lang = 'en' }) 
         <div className="psac-header-cta-group">
           <button
             type="button"
-            className="psac-btn psac-btn-whatsapp"
-            onClick={handleShareWhatsAppGuide}
-            title={isEs ? 'Compartir pautas nocturnas con el paciente' : 'Share nighttime guide with patient'}
+            className="psac-btn psac-btn-outline"
+            onClick={handleCopySomatotropicGuide}
+            title={isEs ? 'Copiar pautas nocturnas al portapapeles' : 'Copy bedtime guidelines to clipboard'}
           >
-            <Sparkles size={14} />
-            <span>{isEs ? 'Compartir Pautas Nocturnas' : 'Share Bedtime Guide'}</span>
+            {copiedHeader ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+            <span>{copiedHeader ? (isEs ? 'Pautas Copiadas' : 'Guidelines Copied') : (isEs ? 'Copiar Pautas Nocturnas' : 'Copy Bedtime Guidelines')}</span>
           </button>
         </div>
       </div>

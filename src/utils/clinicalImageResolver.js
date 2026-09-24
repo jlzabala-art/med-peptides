@@ -35,6 +35,21 @@ export const CLINICAL_GOAL_IMAGES = {
  * @returns {string} Public URL of the clinical image
  */
 export function resolveVariantClinicalImage(variantOrPresentation, product = {}) {
+  // 0. Bloodo Diagnostic Kits (Direct High-Resolution Packaging from bloodo.com)
+  const productSlug = (product?.slug || product?.id || '').toLowerCase();
+  const suppName = (product?.supplier || product?.supplierName || '').toLowerCase();
+  if (product?.imageUrl && product.imageUrl.includes('/images/products/bloodo/')) return product.imageUrl;
+  if (product?.image && product.image.includes('/images/products/bloodo/')) return product.image;
+  if (suppName.includes('bloodo') || productSlug.includes('bloodo-') || productSlug.endsWith('-test')) {
+    if (productSlug.includes('nad')) return '/images/products/bloodo/nad.jpg';
+    if (productSlug.includes('cortisol')) return '/images/products/bloodo/cortisol.jpg';
+    if (productSlug.includes('hba1c') || productSlug.includes('hemoglobin')) return '/images/products/bloodo/hba1c.jpg';
+    if (productSlug.includes('omega-index')) return '/images/products/bloodo/omega-index.jpg';
+    if (productSlug.includes('omega')) return '/images/products/bloodo/omega.jpg';
+    if (productSlug.includes('testosterone')) return '/images/products/bloodo/testosterone.jpg';
+    if (productSlug.includes('vitamin-d') || productSlug.includes('vit-d')) return '/images/products/bloodo/vitamin-d.jpg';
+  }
+
   const isRaw = (typeof variantOrPresentation === 'object' && (
     variantOrPresentation?.type === 'raw_material' ||
     variantOrPresentation?.productType === 'raw_material' ||

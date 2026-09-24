@@ -23,7 +23,7 @@ import {
   Thermometer, Copy, Check, Clock,
   ExternalLink, Layers, ArrowRight, Package, Syringe,
   Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode, BarChart3,
-  Moon, ShieldAlert
+  Moon, ShieldAlert, Calculator
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -34,14 +34,15 @@ import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
-import PublicLocalQuickNav from '@/components/shared/public/PublicLocalQuickNav';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import ProtocolClinicalOutcomesCard from '@/components/protocol/ProtocolClinicalOutcomesCard';
+import ProtocolPersonalizationEngine from '@/components/protocol/ProtocolPersonalizationEngine';
 import ProtocolClinicalCompanionCard from '@/components/protocol/ProtocolClinicalCompanionCard';
 import ProtocolAnatomicalTargetingCard from '@/components/protocol/ProtocolAnatomicalTargetingCard';
 import ProtocolIncretinSafetyCard from '@/components/protocol/ProtocolIncretinSafetyCard';
 import ProtocolSomatotropicAxisCard from '@/components/protocol/ProtocolSomatotropicAxisCard';
 import ProtocolImmuneModulationCard from '@/components/protocol/ProtocolImmuneModulationCard';
+import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 
 const DAY_LABELS_ES = {
@@ -100,10 +101,10 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
       const modality = params.get('modality');
       const retest = params.get('retest');
 
-      if (testoLevel || (baseline && (slug?.includes('hormon') || protocol?.category === 'Hormonal Support'))) {
+      if (testoLevel || (baseline && (slug?.includes('hormon') || slug?.includes('hpta') || protocol?.category === 'Hormonal Support'))) {
         return {
           type: 'testosterone',
-          level: testoLevel ? parseFloat(testoLevel) : 8.5,
+          level: testoLevel ? parseFloat(testoLevel) : (baseline === 'optimal' ? 22 : 8.5),
           unit: 'nmol/L',
           baseline: baseline || 'deficient',
           tier: tier || 'critical',
@@ -115,7 +116,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
       if (cortisolLevel || (baseline && (slug?.includes('sleep') || slug?.includes('cortisol') || slug?.includes('stress')))) {
         return {
           type: 'cortisol',
-          level: cortisolLevel ? parseFloat(cortisolLevel) : 110,
+          level: cortisolLevel ? parseFloat(cortisolLevel) : (baseline === 'optimal' ? 380 : 110),
           unit: 'nmol/L',
           baseline: baseline || 'exhaustion',
           tier: tier || 'critical',
@@ -124,10 +125,10 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         };
       }
 
-      if (hba1cLevel) {
+      if (hba1cLevel || (baseline && (slug?.includes('metabolic') || slug?.includes('weight') || slug?.includes('glp') || protocol?.category === 'Weight Management' || protocol?.category === 'Metabolic Health'))) {
         return {
           type: 'hba1c',
-          level: parseFloat(hba1cLevel),
+          level: hba1cLevel ? parseFloat(hba1cLevel) : (baseline === 'optimal' ? 5.2 : 6.2),
           unit: '%',
           baseline: baseline || 'elevated',
           tier: tier || 'warning',
@@ -136,10 +137,10 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         };
       }
 
-      if (omegaRatio) {
+      if (omegaRatio || (baseline && (slug?.includes('injury') || slug?.includes('recovery') || slug?.includes('repair') || slug?.includes('omega')))) {
         return {
           type: 'omega',
-          level: parseFloat(omegaRatio),
+          level: omegaRatio ? parseFloat(omegaRatio) : (baseline === 'optimal' ? 9.2 : 3.8),
           unit: '%',
           baseline: baseline || 'suboptimal',
           tier: tier || 'warning',
@@ -148,10 +149,10 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         };
       }
 
-      if (vitdLevel) {
+      if (vitdLevel || (baseline && (slug?.includes('immune') || slug?.includes('defense') || protocol?.category === 'Immune & Inflammation'))) {
         return {
           type: 'vitd',
-          level: parseFloat(vitdLevel),
+          level: vitdLevel ? parseFloat(vitdLevel) : (baseline === 'optimal' ? 58 : 18),
           unit: 'ng/mL',
           baseline: baseline || 'deficient',
           tier: tier || 'critical',
@@ -160,11 +161,11 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         };
       }
 
-      if (nadLevel || baseline) {
+      if (nadLevel || (baseline && (slug?.includes('nad') || slug?.includes('longev') || protocol?.category === 'Longevity')) || baseline) {
         return {
           type: 'nad',
-          level: nadLevel ? parseFloat(nadLevel) : 18.0,
-          nadLevel: nadLevel ? parseFloat(nadLevel) : 18.0,
+          level: nadLevel ? parseFloat(nadLevel) : (baseline === 'optimal' ? 40.0 : 18.0),
+          nadLevel: nadLevel ? parseFloat(nadLevel) : (baseline === 'optimal' ? 40.0 : 18.0),
           unit: 'µmol/L',
           baseline: baseline || 'severe',
           tier: tier || 'critical',
@@ -284,7 +285,193 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
       };
     }
 
-    // ── 3. DEFAULT: NAD+ CALIBRATION PROFILE ──
+    // ── 3. HBA1C CALIBRATION PROFILE ──
+    if (bType === 'hba1c') {
+      let tierColor = '#dc2626';
+      let tierBg = '#fef2f2';
+      let tierBadgeText = isEs ? 'Glucemia Elevada · Alerta Diabética' : 'Elevated Glycemia · Clinical Action Required';
+      let tierSubText = isEs ? 'Resistencia insulínica crónica y riesgo de glicación AGEs' : 'Chronic insulin resistance & advanced glycation risk';
+      let prescribedRouteText = isEs ? 'Incretinas Duales GLP-1/GIP + Sensibilizadores' : 'Dual GLP-1/GIP Incretins + Insulin Sensitizers';
+      let prescribedRouteSub = isEs ? 'Titulación semanal progresiva para control glucémico' : 'Weekly titration schedule for glycemic control';
+      let deltaTargetText = isEs ? `Exceso de +${Math.max(0, (lvl - 5.4)).toFixed(1)}% sobre diana (≤ 5.4%)` : `Excess of +${Math.max(0, (lvl - 5.4)).toFixed(1)}% above target (≤ 5.4%)`;
+      let retestScheduleText = isEs ? '12 Semanas (Ciclo Recambio Eritrocitario)' : '12 Weeks (Erythrocyte Turnover Cycle)';
+      let retestScheduleSub = isEs ? 'Control capilar DBS de hemoglobina glicosilada' : 'Capillary DBS HbA1c verification';
+      let targetRangeText = '< 5.4% (< 36 mmol/mol)';
+      let titleText = isEs
+        ? `Estratificación Terapéutica para Hemoglobina Glicosilada (HbA1c): ${lvl}%`
+        : `Therapeutic Stratification for Glycated Hemoglobin (HbA1c): ${lvl}%`;
+      let aiQueryText = isEs
+        ? `Tengo una HbA1c de ${lvl}% (${tierBadgeText}). ¿Cómo optimiza este protocolo incretínico la sensibilidad a la insulina y la recomposición metabólica?`
+        : `My HbA1c level is ${lvl}% (${tierBadgeText}). How does this incretin protocol optimize insulin sensitivity and metabolic recomposition?`;
+
+      if (baseline === 'optimal' || lvl < 5.4) {
+        tierColor = '#0d9488';
+        tierBg = '#f0fdfa';
+        tierBadgeText = isEs ? 'Sensibilidad Insulínica Óptima' : 'Optimal Insulin Sensitivity';
+        tierSubText = isEs ? 'Excelente homeostasis glucémica y protección cardiovascular' : 'Superior glycemic homeostasis & vascular resilience';
+        prescribedRouteText = isEs ? 'Mantenimiento Metabólico y Flexibilidad' : 'Metabolic Maintenance & Flexibility';
+        prescribedRouteSub = isEs ? 'Microdosificación o soporte con péptidos mitocondriales' : 'Micro-dosing or mitochondrial peptide support';
+        deltaTargetText = isEs ? 'Nivel en zona diana óptima (< 5.4%)' : 'Level in optimal target zone (< 5.4%)';
+        retestScheduleText = isEs ? '6 Meses (Vigilancia Semestral)' : '6 Months (Biannual Check)';
+      } else if (baseline === 'normal' || (lvl >= 5.4 && lvl <= 5.6)) {
+        tierColor = '#16a34a';
+        tierBg = '#f0fdf4';
+        tierBadgeText = isEs ? 'Rango Fisiológico Normal' : 'Standard Normoglycemic Range';
+        tierSubText = isEs ? 'Metabolismo glucídico compensado' : 'Compensated glucose metabolism';
+        prescribedRouteText = isEs ? 'Optimización del Estilo de Vida y Longevidad' : 'Lifestyle & Longevity Optimization';
+        prescribedRouteSub = isEs ? 'Apoyo nutricional y ejercicio de resistencia' : 'Nutritional support & resistance training';
+        deltaTargetText = isEs ? 'Nivel dentro de límites clínicos estándar' : 'Level within standard clinical boundaries';
+        retestScheduleText = isEs ? '6 Meses (Control Rutinario)' : '6 Months (Routine Check)';
+      } else if (baseline === 'warning' || (lvl >= 5.7 && lvl < 6.5)) {
+        tierColor = '#d97706';
+        tierBg = '#fffbeb';
+        tierBadgeText = isEs ? 'Prediabetes · Resistencia Insulínica' : 'Prediabetes · Insulin Resistance Window';
+        tierSubText = isEs ? 'Ventana clave para intervención metabólica preventiva' : 'Key therapeutic window for preventative intervention';
+        prescribedRouteText = isEs ? 'Titulación Incretínica Temprana (Tirzepatida/Semaglutida)' : 'Early Incretin Titration (Tirzepatide/Semaglutide)';
+        prescribedRouteSub = isEs ? 'Dosis inicial baja de sensibilización pancreática' : 'Low starting dose for pancreatic resensitization';
+        deltaTargetText = isEs ? `Exceso de +${Math.max(0, (lvl - 5.4)).toFixed(1)}% sobre diana` : `Excess of +${Math.max(0, (lvl - 5.4)).toFixed(1)}% above target`;
+      }
+
+      return {
+        bType,
+        measuredValStr: `${lvl}%`,
+        targetRangeText,
+        titleText,
+        aiQueryText,
+        tierColor,
+        tierBg,
+        tierBadgeText,
+        tierSubText,
+        prescribedRouteText,
+        prescribedRouteSub,
+        deltaTargetText,
+        retestScheduleText,
+        retestScheduleSub
+      };
+    }
+
+    // ── 4. OMEGA-3 INDEX CALIBRATION PROFILE ──
+    if (bType === 'omega') {
+      let tierColor = '#dc2626';
+      let tierBg = '#fef2f2';
+      let tierBadgeText = isEs ? 'Alto Riesgo Inflamatorio · Rigidez de Membrana' : 'High Inflammatory Risk · Membrane Rigidity';
+      let tierSubText = isEs ? 'Desbalance severo AA/EPA y fragilidad de membrana celular' : 'Severe AA/EPA imbalance & membrane fragility';
+      let prescribedRouteText = isEs ? 'Biorregulación Tisular (BPC-157 + TB-500) + EPA/DHA' : 'Tissue Bioregulation (BPC-157 + TB-500) + EPA/DHA';
+      let prescribedRouteSub = isEs ? 'Resolución activa de inflamación y remodelado de membrana' : 'Active resolution of inflammation & membrane remodeling';
+      let deltaTargetText = isEs ? `Déficit de -${Math.max(0, (8.0 - lvl)).toFixed(1)}% hacia diana cardioprotectora (≥ 8.0%)` : `Deficit of -${Math.max(0, (8.0 - lvl)).toFixed(1)}% to target (≥ 8.0%)`;
+      let retestScheduleText = isEs ? '12 Semanas (Recambio Lipídico Membranas)' : '12 Weeks (Membrane Lipid Turnover)';
+      let retestScheduleSub = isEs ? 'Control capilar DBS GC-MS de 24 ácidos grasos' : 'Capillary DBS GC-MS fatty acid profile';
+      let targetRangeText = '> 8.0% (Cardioprotegido)';
+      let titleText = isEs
+        ? `Estratificación Terapéutica para Índice Omega-3: ${lvl}%`
+        : `Therapeutic Stratification for Omega-3 Index: ${lvl}%`;
+      let aiQueryText = isEs
+        ? `Tengo un Índice Omega-3 de ${lvl}% (${tierBadgeText}). ¿Cómo aceleran los péptidos de reparación tisular la resolución antiinflamatoria en este protocolo?`
+        : `My Omega-3 Index is ${lvl}% (${tierBadgeText}). How do tissue repair peptides accelerate anti-inflammatory resolution in this protocol?`;
+
+      if (baseline === 'optimal' || lvl >= 8.0) {
+        tierColor = '#0d9488';
+        tierBg = '#f0fdfa';
+        tierBadgeText = isEs ? 'Zona Cardioprotectora · Homeostasis Óptima' : 'Cardioprotective Target · Optimal Fluidity';
+        tierSubText = isEs ? 'Fluidez máxima de bicapa lipídica y baja producción de eicosanoides pro-inflamatorios' : 'Peak bilayer fluidity & suppressed pro-inflammatory eicosanoids';
+        prescribedRouteText = isEs ? 'Mantenimiento Vascular y Ciclado Preventivo' : 'Vascular Maintenance & Preventative Cycling';
+        prescribedRouteSub = isEs ? 'Dosis de mantenimiento y péptidos endoteliales' : 'Maintenance dose & endothelial peptide support';
+        deltaTargetText = isEs ? 'Nivel en zona diana cardioprotectora (≥ 8.0%)' : 'Level in target cardioprotective zone (≥ 8.0%)';
+        retestScheduleText = isEs ? '6 Meses (Vigilancia Semestral)' : '6 Months (Biannual Check)';
+      } else if (baseline === 'warning' || (lvl >= 4.0 && lvl < 8.0)) {
+        tierColor = '#d97706';
+        tierBg = '#fffbeb';
+        tierBadgeText = isEs ? 'Rango Moderado · Protección Parcial' : 'Moderate Protection · Room for Optimization';
+        tierSubText = isEs ? 'Protección cardiovascular intermedia con respuesta tisular lenta' : 'Intermediate protection with sluggish tissue recovery';
+        prescribedRouteText = isEs ? 'Titulación Nutracéutica y Biorregulación Celular' : 'Nutraceutical Titration & Cellular Bioregulation';
+        prescribedRouteSub = isEs ? 'EPA/DHA 3.000 mg + microdosificación de péptidos reparadores' : 'EPA/DHA 3,000 mg + repair peptide micro-dosing';
+        deltaTargetText = isEs ? `Déficit de -${Math.max(0, (8.0 - lvl)).toFixed(1)}% hacia diana` : `Deficit of -${Math.max(0, (8.0 - lvl)).toFixed(1)}% to target`;
+      }
+
+      return {
+        bType,
+        measuredValStr: `${lvl}%`,
+        targetRangeText,
+        titleText,
+        aiQueryText,
+        tierColor,
+        tierBg,
+        tierBadgeText,
+        tierSubText,
+        prescribedRouteText,
+        prescribedRouteSub,
+        deltaTargetText,
+        retestScheduleText,
+        retestScheduleSub
+      };
+    }
+
+    // ── 5. VITAMIN D CALIBRATION PROFILE ──
+    if (bType === 'vitd') {
+      let tierColor = '#dc2626';
+      let tierBg = '#fef2f2';
+      let tierBadgeText = isEs ? 'Deficiencia Severa · Disfunción Inmunológica' : 'Severe Deficiency · Compromised Immunity';
+      let tierSubText = isEs ? 'Inmunocompetencia reducida y desmineralización ósea' : 'Impaired innate immunity & bone demineralization';
+      let prescribedRouteText = isEs ? 'Inmunomodulación Tímica (Thymosin Alpha-1) + D3/K2' : 'Thymic Immunomodulation (Thymosin Alpha-1) + D3/K2';
+      let prescribedRouteSub = isEs ? 'Reconstitución inmune celular activa y corrección genómica' : 'Active cellular immune replenishment & genomic regulation';
+      let deltaTargetText = isEs ? `Déficit de -${Math.max(0, (50 - lvl)).toFixed(1)} ng/mL hacia diana óptima (≥ 50 ng/mL)` : `Deficit of -${Math.max(0, (50 - lvl)).toFixed(1)} ng/mL to target (≥ 50 ng/mL)`;
+      let retestScheduleText = isEs ? '8–10 Semanas (Cinética 25(OH)D)' : '8–10 Weeks (25(OH)D Kinetics)';
+      let retestScheduleSub = isEs ? 'Control capilar DBS LC-MS/MS' : 'Capillary DBS LC-MS/MS verification';
+      let targetRangeText = '50.0 – 70.0 ng/mL (125 – 175 nmol/L)';
+      let titleText = isEs
+        ? `Estratificación Terapéutica para Vitamina D Total [25(OH)D]: ${lvl} ng/mL`
+        : `Therapeutic Stratification for Total Vitamin D [25(OH)D]: ${lvl} ng/mL`;
+      let aiQueryText = isEs
+        ? `Tengo un nivel de Vitamina D de ${lvl} ng/mL (${tierBadgeText}). ¿Cómo sinergizan Thymosin Alpha-1 y la corrección de 25(OH)D para optimizar la inmunidad celular?`
+        : `My Vitamin D level is ${lvl} ng/mL (${tierBadgeText}). How do Thymosin Alpha-1 and 25(OH)D repletion synergize for cellular immune defense?`;
+
+      if (baseline === 'optimal' || (lvl >= 50 && lvl <= 70)) {
+        tierColor = '#0d9488';
+        tierBg = '#f0fdfa';
+        tierBadgeText = isEs ? 'Rango Óptimo de Longevidad e Inmunorregulación' : 'Optimal Longevity & Immunoregulation Range';
+        tierSubText = isEs ? 'Máxima expresión de péptidos antimicrobianos y homeostasis endocrina' : 'Peak antimicrobial peptide induction & endocrine homeostasis';
+        prescribedRouteText = isEs ? 'Mantenimiento Domiciliario Fisiológico' : 'Physiological At-Home Maintenance';
+        prescribedRouteSub = isEs ? 'Pulsos de mantenimiento D3/K2 y vigilancia semestral' : 'D3/K2 maintenance pulses & biannual check';
+        deltaTargetText = isEs ? 'Nivel en zona diana de longevidad (50–70 ng/mL)' : 'Level in target longevity zone (50–70 ng/mL)';
+        retestScheduleText = isEs ? '6 Meses (Vigilancia Semestral)' : '6 Months (Biannual Check)';
+      } else if (baseline === 'sufficient' || (lvl >= 30 && lvl < 50)) {
+        tierColor = '#16a34a';
+        tierBg = '#f0fdf4';
+        tierBadgeText = isEs ? 'Suficiencia Clínica Estándar' : 'Standard Clinical Sufficiency';
+        tierSubText = isEs ? 'Homeostasis de calcio adecuada; margen para optimización funcional' : 'Adequate calcium balance; room for longevity optimization';
+        prescribedRouteText = isEs ? 'Optimización Progresiva hacia Rango Funcional' : 'Progressive Functional Range Titration';
+        prescribedRouteSub = isEs ? 'Aporte moderado diario D3/K2 con cofactor magnesio' : 'Moderate daily D3/K2 with magnesium cofactor';
+        deltaTargetText = isEs ? `Margen de mejora de +${Math.max(0, (50 - lvl)).toFixed(1)} ng/mL hacia rango óptimo` : `Margin of +${Math.max(0, (50 - lvl)).toFixed(1)} ng/mL to longevity range`;
+        retestScheduleText = isEs ? '12 Semanas (Control Trimestral)' : '12 Weeks (Quarterly Check)';
+      } else if (baseline === 'warning' || (lvl >= 20 && lvl < 30)) {
+        tierColor = '#d97706';
+        tierBg = '#fffbeb';
+        tierBadgeText = isEs ? 'Insuficiencia · Inmunidad Subóptima' : 'Insufficiency · Suboptimal Immunity';
+        tierSubText = isEs ? 'Mayor vulnerabilidad respiratoria y declive inmunitario estacional' : 'Heightened seasonal infection susceptibility';
+        prescribedRouteText = isEs ? 'Repleción Acelerada y Biorregulación Inmune' : 'Accelerated Repletion & Immune Bioregulation';
+        prescribedRouteSub = isEs ? 'Carga terapéutica D3/K2 + Thymosin Alpha-1 preventivo' : 'D3/K2 therapeutic loading + preventative Thymosin Alpha-1';
+        deltaTargetText = isEs ? `Déficit de -${Math.max(0, (50 - lvl)).toFixed(1)} ng/mL hacia diana` : `Deficit of -${Math.max(0, (50 - lvl)).toFixed(1)} ng/mL to target`;
+      }
+
+      return {
+        bType,
+        measuredValStr: `${lvl} ng/mL`,
+        targetRangeText,
+        titleText,
+        aiQueryText,
+        tierColor,
+        tierBg,
+        tierBadgeText,
+        tierSubText,
+        prescribedRouteText,
+        prescribedRouteSub,
+        deltaTargetText,
+        retestScheduleText,
+        retestScheduleSub
+      };
+    }
+
+    // ── 6. DEFAULT / NAD+ CALIBRATION PROFILE ──
     let tierColor = '#dc2626';
     let tierBg = '#fef2f2';
     let tierBadgeText = isEs ? 'Depleción Severa · Alto Riesgo' : 'Severe Depletion · High Risk';
@@ -558,11 +745,125 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
     if (supplySummary.compounds.length === 1) {
       const single = supplySummary.compounds[0];
       const cleanName = single.name.replace(/\(.*?\)/g, '').trim();
-      const strengthPart = single.vialStrength ? ` (${single.vialStrength})` : '';
       return `${single.vials}x ${cleanName}${strengthPart}`;
     }
-    return lang === 'es' ? 'Viales de Formulación Activa' : 'Active Formulation Vials';
-  }, [supplySummary.compounds, lang]);
+    return `${supplySummary.totalVials} Vials`;
+  }, [supplySummary]);
+
+  // Check if protocol is specifically Tirzepatide (single-agent metabolic titration)
+  const isTirzepatideProtocol = useMemo(() => {
+    const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
+    const title = String(protocol?.protocol_title || protocol?.title || '').toLowerCase();
+    const compounds = (protocol?.items || []).map(i => String(i.name || i.title || '').toLowerCase()).join(' ');
+    return (
+      s.includes('tirzepatide') ||
+      title.includes('tirzepatide') ||
+      compounds.includes('tirzepatide') ||
+      s === 'wm_001' ||
+      s.includes('structured-weight-management') ||
+      s.includes('glp-1-gip') ||
+      protocol?.has_personalization_calculator === true
+    ) && !s.includes('retatrutide');
+  }, [slug, protocol]);
+
+  // ── Protocol Sections for Sticky Sidebar Table of Contents & Mobile QuickNav ──
+  const tocSections = useMemo(() => {
+    const isEs = lang === 'es';
+    return [
+      ...(protocol?.clinical_outcomes?.has_objective_data ? [
+        { 
+          id: 'clinical-outcomes', 
+          label: isEs ? 'Evidencia y Endpoints' : 'Clinical Evidence & Trials', 
+          href: '#clinical-outcomes',
+          icon: BarChart3 
+        }
+      ] : []),
+      ...((protocol?.companion_diagnostic || protocol?.methylation_support || (protocol?.administration_modalities && protocol.administration_modalities.length > 0)) ? [
+        { 
+          id: 'protocol-clinical-companion', 
+          label: isEs ? 'Farmacocinética & Diagnóstico' : 'Pharmacokinetics & Diagnostics', 
+          href: '#protocol-clinical-companion',
+          icon: Activity 
+        }
+      ] : []),
+      ...((protocol?.anatomical_targeting || (protocol?.mechanotherapy_phases && protocol.mechanotherapy_phases.length > 0)) ? [
+        { 
+          id: 'anatomical-targeting', 
+          label: isEs ? 'Técnica Anatómica' : 'Anatomical Targeting', 
+          href: '#anatomical-targeting',
+          icon: Activity 
+        }
+      ] : []),
+      ...((protocol?.gi_tolerance_algorithm || protocol?.lean_mass_preservation_target) ? [
+        { 
+          id: 'incretin-safety', 
+          label: isEs ? 'Seguridad Incretinas & DEXA' : 'Incretin Safety & DEXA Guard', 
+          href: '#incretin-safety',
+          icon: ShieldCheck 
+        }
+      ] : []),
+      ...(protocol?.somatotropic_axis_parameters ? [
+        { 
+          id: 'somatotropic-axis', 
+          label: isEs ? 'Eje GH / Somatotropo' : 'Somatotropic Axis', 
+          href: '#somatotropic-axis',
+          icon: Moon 
+        }
+      ] : []),
+      ...(protocol?.immune_modulation_matrix ? [
+        { 
+          id: 'immune-modulation', 
+          label: isEs ? 'Modulación Inmune' : 'Immune Modulation Matrix', 
+          href: '#immune-modulation',
+          icon: ShieldAlert 
+        }
+      ] : []),
+      { 
+        id: 'included-compounds', 
+        label: isEs ? 'Compuestos Activos' : 'Included Compounds', 
+        href: '#included-compounds',
+        icon: FlaskConical 
+      },
+      { 
+        id: 'pathway-timeline', 
+        label: isTirzepatideProtocol 
+          ? (isEs ? 'Personalización & Cronograma' : 'Titration Engine & Timeline')
+          : (isEs ? 'Cronograma Clínico' : 'Clinical Pathway Timeline'), 
+        href: '#pathway-timeline',
+        icon: isTirzepatideProtocol ? Calculator : CalendarDays 
+      },
+      { 
+        id: 'reconstitution-console', 
+        label: isEs ? 'Consola de Reconstitución' : 'Reconstitution Console', 
+        href: '#reconstitution-console',
+        icon: Droplets 
+      },
+      { 
+        id: 'cycle-supplies', 
+        label: isEs ? 'Suministros del Ciclo' : 'Cycle Supplies & Kit', 
+        href: '#cycle-supplies',
+        icon: Package 
+      },
+      { 
+        id: 'weekly-calendar', 
+        label: isEs ? 'Calendario Semanal' : 'Weekly Administration Schedule', 
+        href: '#weekly-calendar',
+        icon: Calendar 
+      },
+      { 
+        id: 'biomarkers-safety', 
+        label: isEs ? 'Biomarcadores de Control' : 'Biomarkers & Surveillance', 
+        href: '#biomarkers-safety',
+        icon: Activity 
+      },
+      { 
+        id: 'safety-governance', 
+        label: isEs ? 'Gobernanza y Seguridad' : 'Clinical Safety Governance', 
+        href: '#safety-governance',
+        icon: ShieldCheck 
+      }
+    ];
+  }, [lang, protocol]);
 
   return (
     <div className="public-datasheet-root">
@@ -785,43 +1086,15 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           ]}
         />
 
-        {/* ── Standardized Quick Section Jump Navigation ── */}
-        <PublicLocalQuickNav
-          lang={lang}
-          items={[
-            ...(protocol?.clinical_outcomes?.has_objective_data ? [
-              { label: lang === 'es' ? 'Evidencia' : 'Clinical Evidence', href: '#clinical-outcomes', icon: BarChart3 }
-            ] : []),
-            ...((protocol?.companion_diagnostic || protocol?.methylation_support || (protocol?.administration_modalities && protocol.administration_modalities.length > 0)) ? [
-              { label: lang === 'es' ? 'Farmacocinética' : 'Pharmacokinetics', href: '#protocol-clinical-companion', icon: Activity }
-            ] : []),
-            ...((protocol?.anatomical_targeting || (protocol?.mechanotherapy_phases && protocol.mechanotherapy_phases.length > 0)) ? [
-              { label: lang === 'es' ? 'Técnica Anatómica' : 'Anatomical Targeting', href: '#anatomical-targeting', icon: Activity }
-            ] : []),
-            ...((protocol?.gi_tolerance_algorithm || protocol?.lean_mass_preservation_target) ? [
-              { label: lang === 'es' ? 'Seguridad Incretinas' : 'Incretin Safety & DEXA', href: '#incretin-safety', icon: ShieldCheck }
-            ] : []),
-            ...(protocol?.somatotropic_axis_parameters ? [
-              { label: lang === 'es' ? 'Eje GH / Somatotropo' : 'Somatotropic Axis', href: '#somatotropic-axis', icon: Moon }
-            ] : []),
-            ...(protocol?.immune_modulation_matrix ? [
-              { label: lang === 'es' ? 'Modulación Inmune' : 'Immune Modulation', href: '#immune-modulation', icon: ShieldAlert }
-            ] : []),
-            { label: lang === 'es' ? 'Compuestos' : 'Compounds', href: '#included-compounds', icon: FlaskConical },
-            { label: lang === 'es' ? 'Timeline' : 'Timeline', href: '#pathway-timeline', icon: CalendarDays },
-            { label: lang === 'es' ? 'Reconstitución' : 'Reconstitution', href: '#reconstitution-console', icon: Droplets },
-            { label: lang === 'es' ? 'Suministros' : 'Supplies', href: '#cycle-supplies', icon: Package },
-            { label: lang === 'es' ? 'Calendario' : 'Roadmap', href: '#weekly-calendar', icon: Calendar },
-            { label: lang === 'es' ? 'Biomarcadores' : 'Biomarkers', href: '#biomarkers-safety', icon: Activity },
-            { label: lang === 'es' ? 'Seguridad' : 'Safety', href: '#safety-governance', icon: ShieldCheck },
-          ]}
-        />
 
-        {/* ── Core Pathway & Sections ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-          
-          {/* Biomarker-Driven Calibration Banner (Precision Diagnostic Integration) */}
-          {biomarkerCalibration && calibrationDisplay && (
+
+        {/* ── Google Cloud Console 2-Column Layout (Main Stream + Desktop Sticky Sidebar TOC) ── */}
+        <div className="pds-content-with-sidebar">
+          <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+            
+
+            {/* Biomarker-Driven Calibration Banner (Precision Diagnostic Integration) */}
+            {biomarkerCalibration && calibrationDisplay && (
             <div className="proto-biomarker-calibration-banner" style={{ borderLeftColor: calibrationDisplay.tierColor }}>
               <div className="pbc-header">
                 <div className="pbc-header-left">
@@ -1035,23 +1308,30 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
             </div>
           </PublicSectionCard>
 
-          {/* Section 2: Phased Timeline Gantt */}
-          <PublicSectionCard
-            id="titration-phases"
-            icon={Layers}
-            category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
-            title={t.sec2Title}
-            badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
-            badgeVariant="green"
-            rightAction={
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#93c5fd' }}>
-                <Activity size={14} />
-                <span>{t.sec2Subtitle}</span>
-              </div>
-            }
-          >
-            <ClinicalGanttTimeline protocol={protocol} />
-          </PublicSectionCard>
+          {/* Section 2: Phased Timeline Gantt & Tirzepatide Personalization Engine */}
+          <div id="pathway-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
+            {isTirzepatideProtocol && (
+              <ProtocolPersonalizationEngine protocol={protocol} lang={lang} />
+            )}
+
+            <PublicSectionCard
+              icon={Layers}
+              category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
+              title={isTirzepatideProtocol 
+                ? (lang === 'es' ? 'Cronograma Clínico y Fases de Titulación' : 'Clinical Titration Timeline & Phase Distribution')
+                : t.sec2Title}
+              badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
+              badgeVariant="green"
+              rightAction={
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#93c5fd' }}>
+                  <Activity size={14} />
+                  <span>{t.sec2Subtitle}</span>
+                </div>
+              }
+            >
+              <ClinicalGanttTimeline protocol={protocol} />
+            </PublicSectionCard>
+          </div>
 
           {/* Section 3: Interactive Reconstitution & Syringe Console */}
           <PublicSectionCard
@@ -1584,8 +1864,16 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
           </footer>
         </div>
 
-        {/* ── Modal QR Code Dialog ── */}
-        {isQrModalOpen && (
+        {/* Persistent Google Cloud Console Table of Contents (Desktop Sticky Sidebar + Mobile Drawer) */}
+        <PublicDatasheetTableOfContents 
+          sections={tocSections} 
+          lang={lang} 
+          title={lang === 'es' ? 'Secciones del Protocolo' : 'Protocol Navigation'}
+        />
+      </div>
+
+      {/* ── Modal QR Code Dialog ── */}
+      {isQrModalOpen && (
           <div className="gcp-qr-modal-backdrop" onClick={() => setIsQrModalOpen(false)}>
             <div className="gcp-qr-modal-card" onClick={e => e.stopPropagation()}>
               <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
@@ -1643,6 +1931,13 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl }) {
         inquireLabel={lang === 'es' ? 'Consultar Protocolo' : 'Inquire Protocol'}
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
+        showSections={true}
+        sectionsCount={tocSections.length}
+        onOpenSections={() => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+          }
+        }}
         lang={lang}
       />
 

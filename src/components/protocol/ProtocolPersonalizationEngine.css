@@ -1,0 +1,644 @@
+/* ══════════════════════════════════════════════════════════════════
+   PROTOCOL PERSONALIZATION ENGINE CSS (Google Cloud UX Standards)
+   Standards: Rule #23 (Mobile First), Rule #30 (Desktop Responsive), Rule #8 (Status Badges)
+   ══════════════════════════════════════════════════════════════════ */
+
+.ppe-container {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px -4px rgba(0, 54, 102, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ppe-container:hover {
+  border-color: #cbd5e1;
+}
+
+/* ── Header ── */
+.ppe-header {
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ppe-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  flex: 1;
+  min-width: 280px;
+}
+
+.ppe-header-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #003666;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 54, 102, 0.2);
+}
+
+.ppe-badge-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.ppe-badge-source {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ppe-badge-source.default-mode {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.ppe-badge-source.custom-mode {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.ppe-badge-trial {
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.ppe-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.ppe-subtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.ppe-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ppe-btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ppe-btn-reset:hover {
+  background: #f8fafc;
+  color: #003666;
+  border-color: #94a3b8;
+}
+
+/* ── TOP SECTION: Clinical Considerations Card (Al Principio) ── */
+.ppe-top-considerations-card {
+  padding: 1.15rem 1.35rem;
+  background: linear-gradient(135deg, #f0f7ff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ppe-tc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ppe-tc-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #003666;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ppe-tc-badge {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.ppe-considerations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+@media (min-width: 1600px) {
+  .ppe-considerations-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ppe-considerations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ppe-cons-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.ppe-cons-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #003666;
+  color: #ffffff;
+  font-size: 0.70rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ppe-cons-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ppe-cons-label {
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #0f172a;
+}
+
+.ppe-cons-desc {
+  margin: 0;
+  font-size: 0.73rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.ppe-output-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+
+/* ── Content Grid (Laptop: 2 columns, Mobile: 1 column) ── */
+.ppe-content-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .ppe-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Left Column: Form & Sliders ── */
+.ppe-form-col {
+  padding: 1.25rem;
+  border-right: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+@media (max-width: 960px) {
+  .ppe-form-col {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+.ppe-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ppe-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ppe-field-label {
+  font-size: 0.80rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ppe-field-val-badge {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #003666;
+  background: #ffffff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
+
+.ppe-unit-toggle {
+  display: inline-flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.ppe-unit-btn {
+  border: none;
+  background: transparent;
+  padding: 2px 7px;
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.ppe-unit-btn.active {
+  background: #003666;
+  color: #ffffff;
+}
+
+.ppe-slider-input {
+  width: 100%;
+  accent-color: #003666;
+  cursor: pointer;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.ppe-segmented-sex {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.ppe-sex-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 0.80rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ppe-sex-btn:hover {
+  border-color: #94a3b8;
+}
+
+.ppe-sex-btn.active {
+  background: #eff6ff;
+  border-color: #0284c7;
+  color: #003666;
+}
+
+/* Reduction Goal Chips */
+.ppe-goal-chips {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ppe-goal-chip {
+  padding: 6px 2px;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ppe-goal-chip:hover {
+  border-color: #94a3b8;
+}
+
+.ppe-goal-chip.active {
+  background: #003666;
+  border-color: #003666;
+  color: #ffffff;
+}
+
+/* ── Right Column: Outputs, Standard vs Custom Breakdown ── */
+.ppe-output-col {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+/* Explanation Banner for Default Mode (si la gente no pone valores personalizados) */
+.ppe-default-explanation-banner {
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #003666;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ppe-deb-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ppe-deb-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ppe-deb-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ppe-deb-item {
+  font-size: 0.78rem;
+  color: #334155;
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.ppe-deb-dot {
+  color: #003666;
+  font-weight: 800;
+}
+
+/* Active Customization Banner */
+.ppe-custom-banner {
+  padding: 0.85rem 1.15rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ppe-cb-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #14532d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 4 GCP Metric Cards (Regla #22) - Symmetrical 2x2 Grid inside Output Column */
+.ppe-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .ppe-kpis-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ppe-kpi-card {
+  padding: 0.95rem;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ppe-kpi-label {
+  font-size: 0.70rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.ppe-kpi-val {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #003666;
+  line-height: 1.1;
+}
+
+.ppe-kpi-val.highlight {
+  color: #0d9488;
+}
+
+.ppe-kpi-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+/* Protocol Integration Strip */
+.ppe-protocol-integration-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ppe-pi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ppe-pi-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ppe-pi-title {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ppe-phases-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.ppe-phase-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ppe-phase-title-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #003666;
+}
+
+.ppe-phase-weeks {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.ppe-phase-desc {
+  font-size: 0.72rem;
+  color: #475569;
+  line-height: 1.35;
+}
+
+/* Companion Test Callout */
+.ppe-bloodo-companion-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  flex-wrap: wrap;
+}
+
+.ppe-bloodo-companion-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ppe-bloodo-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #0d9488;
+  background: #ffffff;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #99f6e4;
+}
+
+.ppe-bloodo-text {
+  font-size: 0.78rem;
+  color: #134e4a;
+  line-height: 1.4;
+}
+
+.ppe-bloodo-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ppe-bloodo-cta-btn:hover {
+  background: #0f766e;
+}

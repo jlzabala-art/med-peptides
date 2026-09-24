@@ -34,23 +34,31 @@ export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' 
 
   const selectedMode = targeting?.modes?.find(m => m.id === selectedModeId) || targeting?.modes?.[0];
 
-  const handleShareWhatsAppInstructions = () => {
+  const [copiedHeader, setCopiedHeader] = useState(false);
+
+  const handleCopyAnatomicalGuide = async () => {
     const text = isEs
       ? `*Pautas de Inyección Anatómica — Protocolo BPC-157 & TB-500*\n\n` +
-        `• *Infiltración Perilesional:* Subcutánea a 2,0 – 4,0 cm del epicentro del dolor (NO inyectar dentro del tendón para evitar sobrepresión).\n` +
-        `• *Aguja recomendada:* 31G 8mm en ángulo de 45°.\n` +
-        `• *Fase 1 Fisioterapia (Sem 1-2):* Reposo relativo y contracciones isométricas suaves (sin movimiento articular brusco).\n` +
-        `• *Fase 2 Mecanoterapia (Sem 3-5):* Carga excéntrica progresiva lenta para organizar el colágeno tipo I.\n\n` +
-        `_Atlas Services Clinical Reference • Medicina Regenerativa_`
+        `• Infiltración Perilesional: Subcutánea a 2,0 – 4,0 cm del epicentro del dolor (NO inyectar dentro del tendón para evitar sobrepresión).\n` +
+        `• Aguja recomendada: 31G 8mm en ángulo de 45°.\n` +
+        `• Fase 1 Fisioterapia (Sem 1-2): Reposo relativo y contracciones isométricas suaves (sin movimiento articular brusco).\n` +
+        `• Fase 2 Mecanoterapia (Sem 3-5): Carga excéntrica progresiva lenta para organizar el colágeno tipo I.\n\n` +
+        `Atlas Services Clinical Reference • Medicina Regenerativa`
       : `*Anatomical Injection & Rehab Guidelines — BPC-157 & TB-500 Stack*\n\n` +
-        `• *Peri-Lesional Infiltration:* SubQ within 2.0 – 4.0 cm radius of lesion (NEVER inject intratendinous).\n` +
-        `• *Needle Specification:* 31G 8mm ultra-fine at 45° angle.\n` +
-        `• *Phase 1 Rehab (Weeks 1-2):* Low-intensity isometrics, protected range of motion (collagen III synthesis).\n` +
-        `• *Phase 2 Rehab (Weeks 3-5):* Progressive heavy slow eccentric resistance under Davis' Law.\n\n` +
-        `_Atlas Services Clinical Reference • Regenerative Sports Medicine_`;
+        `• Peri-Lesional Infiltration: SubQ within 2.0 – 4.0 cm radius of lesion (NEVER inject intratendinous).\n` +
+        `• Needle Specification: 31G 8mm ultra-fine at 45° angle.\n` +
+        `• Phase 1 Rehab (Weeks 1-2): Low-intensity isometrics, protected range of motion (collagen III synthesis).\n` +
+        `• Phase 2 Rehab (Weeks 3-5): Progressive heavy slow eccentric resistance under Davis' Law.\n\n` +
+        `Atlas Services Clinical Reference • Regenerative Sports Medicine`;
 
-    const encoded = encodeURIComponent(text);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedHeader(true);
+      toast.success(isEs ? 'Pauta anatómica copiada al portapapeles' : 'Anatomical guideline copied to clipboard');
+      setTimeout(() => setCopiedHeader(false), 2500);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
   };
 
   const handleCopyModeGuide = async (mode) => {
@@ -63,7 +71,7 @@ export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' 
     try {
       await navigator.clipboard.writeText(text);
       setCopiedCadence(true);
-      toast.success(isEs ? 'Técnica de inyección copiada para WhatsApp' : 'Injection guide copied for WhatsApp');
+      toast.success(isEs ? 'Técnica de inyección copiada al portapapeles' : 'Injection guide copied to clipboard');
       setTimeout(() => setCopiedCadence(false), 2500);
     } catch {
       toast.error('Could not copy to clipboard');
@@ -100,12 +108,12 @@ export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' 
         <div className="patc-header-cta-group">
           <button
             type="button"
-            className="patc-wa-btn"
-            onClick={handleShareWhatsAppInstructions}
-            title={isEs ? 'Compartir técnica de inyección y pauta por WhatsApp' : 'Share injection technique and rehab guide via WhatsApp'}
+            className="patc-copy-header-btn"
+            onClick={handleCopyAnatomicalGuide}
+            title={isEs ? 'Copiar pauta anatómica y técnica de inyección al portapapeles' : 'Copy anatomical guideline and injection protocol to clipboard'}
           >
-            <span>💬</span>
-            <span>{isEs ? 'Enviar Pauta por WhatsApp' : 'Share on WhatsApp'}</span>
+            {copiedHeader ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
+            <span>{copiedHeader ? (isEs ? 'Pauta Copiada' : 'Guideline Copied') : (isEs ? 'Copiar Pauta Anatómica' : 'Copy Anatomical Guide')}</span>
           </button>
         </div>
       </div>
@@ -197,7 +205,7 @@ export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' 
                   type="button"
                   className="patc-copy-btn"
                   onClick={() => handleCopyModeGuide(selectedMode)}
-                  title={isEs ? 'Copiar técnica para WhatsApp' : 'Copy guide for WhatsApp'}
+                  title={isEs ? 'Copiar técnica al portapapeles' : 'Copy technique to clipboard'}
                 >
                   {copiedCadence ? <Check size={12} style={{ color: '#10b981' }} /> : <Copy size={12} />}
                   <span>{copiedCadence ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar Técnica' : 'Copy Technique')}</span>

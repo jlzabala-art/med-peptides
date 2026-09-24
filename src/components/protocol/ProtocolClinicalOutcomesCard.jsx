@@ -129,12 +129,7 @@ export default function ProtocolClinicalOutcomesCard({ protocol, lang = 'en' }) 
         {/* ── Endpoints Grid with Comparative GCP Bars ── */}
         {endpoints.length > 0 && (
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
-              gap: '1rem',
-              width: '100%'
-            }}
+            className={`gcp-clinical-endpoints-grid cols-${endpoints.length <= 4 ? endpoints.length : '4'}`}
           >
             {endpoints.map((ep, idx) => {
               const title = isEs ? (ep.title_es || ep.title) : (ep.title || ep.title_es);
@@ -149,25 +144,25 @@ export default function ProtocolClinicalOutcomesCard({ protocol, lang = 'en' }) 
                 <div
                   key={ep.id || idx}
                   style={{
-                    padding: '1.1rem',
-                    borderRadius: '10px',
+                    padding: '1.25rem 1.35rem',
+                    borderRadius: '12px',
                     border: '1px solid #e2e8f0',
                     background: '#ffffff',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.85rem',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+                    gap: '0.95rem',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
                     transition: 'border-color 0.15s ease'
                   }}
                 >
                   {/* Endpoint Header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                     <div>
-                      <h4 style={{ margin: 0, fontSize: '0.90rem', fontWeight: 700, color: '#1e293b', lineHeight: 1.3 }}>
+                      <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>
                         {title}
                       </h4>
                       {timeframe && (
-                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>
+                        <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500, marginTop: '2px', display: 'inline-block' }}>
                           {timeframe}
                         </span>
                       )}
@@ -175,13 +170,13 @@ export default function ProtocolClinicalOutcomesCard({ protocol, lang = 'en' }) 
                     {ep.p_value && (
                       <span
                         style={{
-                          fontSize: '0.68rem',
+                          fontSize: '0.70rem',
                           fontWeight: 700,
                           color: '#0369a1',
                           background: '#f0f9ff',
                           border: '1px solid #bae6fd',
-                          padding: '2px 7px',
-                          borderRadius: '4px',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
                           whiteSpace: 'nowrap'
                         }}
                       >
@@ -190,13 +185,13 @@ export default function ProtocolClinicalOutcomesCard({ protocol, lang = 'en' }) 
                     )}
                   </div>
 
-                  {/* Quantitative Callout */}
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.65rem' }}>
+                  {/* Quantitative Callout with Google Cloud Comparative Badge */}
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <span
                       style={{
-                        fontSize: '1.75rem',
+                        fontSize: '1.95rem',
                         fontWeight: 800,
-                        letterSpacing: '-0.02em',
+                        letterSpacing: '-0.025em',
                         color: isReduction ? '#003666' : '#0d9488',
                         lineHeight: 1
                       }}
@@ -204,8 +199,16 @@ export default function ProtocolClinicalOutcomesCard({ protocol, lang = 'en' }) 
                       {ep.value}
                     </span>
                     {ep.comparator && (
-                      <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-                        {isEs ? 'vs' : 'vs'} {ep.comparator}
+                      <span style={{ 
+                        fontSize: '0.74rem', 
+                        color: '#475569', 
+                        fontWeight: 600,
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        padding: '3px 8px',
+                        borderRadius: '6px'
+                      }}>
+                        vs. {ep.comparator}
                       </span>
                     )}
                   </div>

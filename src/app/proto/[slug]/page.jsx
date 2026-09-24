@@ -2,9 +2,10 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { sanitizePublicProtocol } from '../../../repositories/publicDataSanitizer';
+import { generateProtocolJsonLd } from '../../../utils/seoStructuredData';
 import PublicProtocolPage from './PublicProtocolPage';
 
-export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
+export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
@@ -24,27 +25,42 @@ export function invalidatePublicProtocolCache(slug) {
   }
 }
 
-export async function generateStaticParams() {
-  // Render on-demand with ISR (revalidate = 3600) to avoid CI build hangs without credentials
-  return [];
-}
-
 const KNOWN_PROTOCOL_ALIASES = {
+  // Weight & Incretin Metabolism
   'weight-management-structured-12w': 'wm_001',
   'structured-weight-management': 'wm_001',
   'glp-1-gip-receptor-dual-agonist-titration-protocol': 'wm_001',
+  'personalized-metabolic-weight-loss-12w': 'wm_001',
+  'metabolic-optimization-10w': 'met_001',
+  // Cognitive & Neuro
   'cognitive-support-structured': 'cog_001',
-  'longevity-foundation-structured': 'lon_001',
-  'recovery-foundation-bpc-tb': 'rec_001',
-  'growth-hormone-optimization': 'gh_001',
-  'immune-modulation-cellular': 'imm_001',
-  'mitochondrial-metabolic-support': 'mit_001',
+  'cognitive-support-6w': 'cog_001',
+  'focus-resilience-8w': 'cog_002',
   'lxv-neuro-restoration-12w': '3GocJWVon5tKgOASM3it',
+  // Longevity & Bioenergetics
+  'longevity-foundation-structured': 'lon_001',
+  'longevity-foundation-12w': 'lon_001',
+  'mitochondrial-energy-10w': 'energy_001',
+  'mitochondrial-metabolic-support': 'energy_001',
   'nad-cellular-restoration-protocol': 'Ks2ThxuWoPmWzc3UW06R',
   'nad-cellular-restoration': 'Ks2ThxuWoPmWzc3UW06R',
+  // Recovery & Tissue Repair
+  'recovery-foundation-bpc-tb': 'rec_001',
+  'injury-recovery-8w': 'rec_001',
+  'bpc-157-tb-500-protocol': '1QR69jq0QQpu2NjCzpxg',
+  // Hormonal & Endocrine Axis
   'hormonal-support-12w': 'horm_001',
+  'kisspeptin-hpta-restart': 'horm_001',
+  'gh-axis-support-12w': 'horm_002',
+  'growth-hormone-optimization': 'horm_002',
+  // Sleep & Circadian
   'sleep-restoration-8w': 'qmzQ9qVRiMGKwUS1x4LQ',
-  'personalized-metabolic-weight-loss-12w': 'wm_001',
+  'sleep-circadian-6w': 'LaK9aKR8CDhVLnBfxZYK',
+  // Immune & Defense
+  'immune-modulation-8w': 'immune_001',
+  'immune-modulation-cellular': 'immune_001',
+  'immune-defense-8w': 'immune_001',
+  'thymosin-alpha-1-immune-resilience': '1k0p4FgSekpmUyAJhbsT',
 };
 
 async function getPublicProtocol(slug) {
@@ -196,8 +212,6 @@ export async function generateMetadata({ params }) {
     robots: { index: true, follow: true },
   };
 }
-
-import { generateProtocolJsonLd } from '../../../utils/seoStructuredData';
 
 export default async function PublicProtocolRoute({ params }) {
   const resolvedParams = await params;

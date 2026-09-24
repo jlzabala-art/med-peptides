@@ -31,23 +31,31 @@ export default function ProtocolImmuneModulationCard({ protocol, lang = 'en' }) 
   const tiers = imm.stratified_dosing_schemes || [];
   const labs = imm.laboratory_biomarkers;
 
-  const handleShareWhatsAppGuide = () => {
+  const [copiedHeader, setCopiedHeader] = useState(false);
+
+  const handleCopyImmuneGuide = async () => {
     const text = isEs
       ? `*Pautas Inmunitarias Clínicas — Timosina Alfa-1 (TA-1)*\n\n` +
-        `• *Linaje Terapéutico:* Fármaco huérfano FDA (Zadaxin® en >30 países) para restauración tímica y soporte inmune.\n` +
-        `• *Mecanismo Dual:* Estimula linfocitos citotóxicos CD4+/CD8+ y células NK, a la vez que estabiliza linfocitos T-reguladores (FoxP3+) para evitar autoinmunidad.\n` +
-        `• *Pauta Activa:* 1,6 mg SubQ 2–3 veces por semana durante 4–8 semanas.\n` +
-        `• *Pauta Estacional:* 1,6 mg semanal o ciclo de 10 días seguidos en cambios estacionales.\n\n` +
-        `_Atlas Services Clinical Reference • Inmunología & Longevidad_`
+        `• Linaje Terapéutico: Fármaco huérfano FDA (Zadaxin® en >30 países) para restauración tímica y soporte inmune.\n` +
+        `• Mecanismo Dual: Estimula linfocitos citotóxicos CD4+/CD8+ y células NK, a la vez que estabiliza linfocitos T-reguladores (FoxP3+) para evitar autoinmunidad.\n` +
+        `• Pauta Activa: 1,6 mg SubQ 2–3 veces por semana durante 4–8 semanas.\n` +
+        `• Pauta Estacional: 1,6 mg semanal o ciclo de 10 días seguidos en cambios estacionales.\n\n` +
+        `Atlas Services Clinical Reference • Inmunología & Longevidad`
       : `*Clinical Immune Guidelines — Thymosin Alpha-1 (TA-1)*\n\n` +
-        `• *Therapeutic Lineage:* FDA Orphan Drug designation (Zadaxin® lineage) for thymic restoration.\n` +
-        `• *Dual Orchestration:* Activates CD4+/CD8+ and NK cells while stabilizing FoxP3+ T-regs to prevent autoimmune hyper-reactivity.\n` +
-        `• *Active Induction:* 1.6 mg SubQ 2–3 times weekly for 4–8 weeks.\n` +
-        `• *Seasonal Maintenance:* 1.6 mg once weekly or 10-day pulse during seasonal transitions.\n\n` +
-        `_Atlas Services Clinical Reference • Cellular Immunology_`;
+        `• Therapeutic Lineage: FDA Orphan Drug designation (Zadaxin® lineage) for thymic restoration.\n` +
+        `• Dual Orchestration: Activates CD4+/CD8+ and NK cells while stabilizing FoxP3+ T-regs to prevent autoimmune hyper-reactivity.\n` +
+        `• Active Induction: 1.6 mg SubQ 2–3 times weekly for 4–8 weeks.\n` +
+        `• Seasonal Maintenance: 1.6 mg once weekly or 10-day pulse during seasonal transitions.\n\n` +
+        `Atlas Services Clinical Reference • Cellular Immunology`;
 
-    const encoded = encodeURIComponent(text);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedHeader(true);
+      toast.success(isEs ? 'Pautas inmunitarias copiadas al portapapeles' : 'Immune guidelines copied to clipboard');
+      setTimeout(() => setCopiedHeader(false), 2500);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
   };
 
   const handleCopyTier = async (tier) => {
@@ -59,7 +67,7 @@ export default function ProtocolImmuneModulationCard({ protocol, lang = 'en' }) 
     try {
       await navigator.clipboard.writeText(text);
       setCopiedCadence(true);
-      toast.success(isEs ? 'Pauta inmunológica copiada para WhatsApp' : 'Immune protocol copied for WhatsApp');
+      toast.success(isEs ? 'Pauta inmunológica copiada al portapapeles' : 'Immune protocol copied to clipboard');
       setTimeout(() => setCopiedCadence(false), 2500);
     } catch {
       toast.error('Could not copy');
@@ -96,12 +104,12 @@ export default function ProtocolImmuneModulationCard({ protocol, lang = 'en' }) 
         <div className="pimc-header-cta-group">
           <button
             type="button"
-            className="pimc-btn pimc-btn-whatsapp"
-            onClick={handleShareWhatsAppGuide}
-            title={isEs ? 'Compartir pautas inmunitarias con el paciente' : 'Share immune guide with patient'}
+            className="pimc-btn pimc-btn-outline"
+            onClick={handleCopyImmuneGuide}
+            title={isEs ? 'Copiar pautas inmunitarias al portapapeles' : 'Copy immune guidelines to clipboard'}
           >
-            <Sparkles size={14} />
-            <span>{isEs ? 'Compartir Pautas Inmunes' : 'Share Immune Guide'}</span>
+            {copiedHeader ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+            <span>{copiedHeader ? (isEs ? 'Pautas Copiadas' : 'Guidelines Copied') : (isEs ? 'Copiar Pautas Inmunes' : 'Copy Immune Guidelines')}</span>
           </button>
         </div>
       </div>

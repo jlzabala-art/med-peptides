@@ -24,7 +24,10 @@ import {
   Moon,
   AlertTriangle,
   Bot,
-  Syringe
+  Syringe,
+  Download,
+  Eye,
+  X
 } from '@/lib/icons';
 import './DiagnosticTestTechnicalSpecs.css';
 
@@ -88,8 +91,22 @@ export default function DiagnosticTestTechnicalSpecs({
   const isCortisol = slug.includes('cortisol');
   const isTestosterone = slug.includes('testosterone');
 
+  // Official Bloodo Kit Packaging Image from bloodo.com
+  const kitImage = isNad 
+    ? '/images/products/bloodo/nad.jpg'
+    : isCortisol
+    ? '/images/products/bloodo/cortisol.jpg'
+    : isHba1c
+    ? '/images/products/bloodo/hba1c.jpg'
+    : isOmega
+    ? (slug.includes('index') ? '/images/products/bloodo/omega-index.jpg' : '/images/products/bloodo/omega.jpg')
+    : isTestosterone
+    ? '/images/products/bloodo/testosterone.jpg'
+    : '/images/products/bloodo/vitamin-d.jpg';
+
   // Interactive biomarker level simulator state
   const [selectedRangeIndex, setSelectedRangeIndex] = useState(2); // Default to optimal/target
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
 
   // Biomarker ranges configuration
   const biomarkerData = (() => {
@@ -97,31 +114,33 @@ export default function DiagnosticTestTechnicalSpecs({
       return {
         name: isEs ? 'NAD Total Intracelular (NAD⁺ + NADH)' : 'Total Intracellular NAD (NAD+ & NADH)',
         unit: 'µmol/L',
-        method: isEs ? 'Ensayo Enzimático Cíclico (Espectrofotometría)' : 'Enzymatic Cyclic Assay (Colorimetric/Spectrophotometric)',
-        lab: 'LifeLab1 (Vilnius, Lithuania)',
+        method: isEs ? 'Ensayo Enzimático Cíclico (Código: XLT01690-0)' : 'Enzymatic Cyclic Assay (Test Code: XLT01690-0)',
+        lab: 'LifeLab1 (Vilnius, Lithuania) · Lic. 4864',
         lod: '0.23 µmol/L',
-        range: '5.0 – 60.0 µmol/L',
+        range: '5.0 – 60.0 µmol/L (Cohorte 1.068 Sujetos)',
         precision: 'RSD 6.6%',
+        officialReportPdf: '/docs/bloodo-nad-lab-protocol-dark-red.pdf',
+        officialReportDocName: 'NAD protokolas_F_18-20_DARK RED.pdf',
         ranges: [
           {
-            label: isEs ? 'Depleción Severa' : 'Severe Depletion',
-            value: '< 20 µmol/L',
+            label: isEs ? 'Depleción Severa / Déficit' : 'Severe Depletion / Deficit',
+            value: '< 10.3 µmol/L',
             status: 'critical',
-            badge: isEs ? 'Riesgo Energético Alto' : 'High Energy Deficit',
+            badge: isEs ? 'Déficit Mitocondrial Severo' : 'High Cellular Deficit',
             color: '#dc2626',
             bgColor: '#fef2f2',
             description: isEs 
-              ? 'Niveles críticamente bajos asociados a fatiga mitocondrial crónica, senescencia celular acelerada y capacidad de reparación de ADN disminuida (baja actividad de PARP1 y sirtuinas).'
-              : 'Critically depressed levels correlated with chronic mitochondrial exhaustion, accelerated cellular senescence, and impaired DNA repair (reduced sirtuin & PARP1 activity).',
+              ? 'Niveles críticamente bajos según la cohorte poblacional de LifeLab1 (1.068 participantes sanos). Asociados a agotamiento mitocondrial, senescencia celular acelerada y baja actividad de enzimas reparadoras de ADN dependientes de NAD⁺ (PARP1 y sirtuinas).'
+              : 'Critically depressed levels below 10.3 µmol/L (LifeLab1 healthy cohort baseline of 1,068 participants). Correlated with severe mitochondrial ATP depletion, accelerated cellular senescence, and impaired PARP1/sirtuin DNA repair capacity.',
             clinicalProtocol: {
               slug: 'nad-cellular-restoration-protocol',
-              queryParams: '?baseline=severe&nad_level=18&tier=critical&modality=intravenous&retest=4w',
+              queryParams: '?baseline=severe&nad_level=8.5&tier=critical&modality=intravenous&retest=4w',
               shortCode: 'REF-NAD-MSTR',
               name: isEs 
                 ? 'Protocolo NAD+ Maestro: Estrategia de Rescate Parenteral IV' 
                 : 'Master NAD+ Protocol: Parenteral IV Rescue Pathway',
               tierTitle: isEs ? 'TIER 1 · RESCATE MITOCONDRIAL PARENTERAL' : 'TIER 1 · PARENTERAL MITOCHONDRIAL RESCUE',
-              targetGoal: isEs ? 'Elevar NAD⁺ intracelular a ≥ 35 µmol/L' : 'Escalate intracellular NAD+ to ≥ 35 µmol/L',
+              targetGoal: isEs ? 'Elevar NAD⁺ al rango fisiológico óptimo (15.4 – 20.6 µmol/L)' : 'Restore intracellular NAD+ to optimal target (15.4 – 20.6 µmol/L)',
               recommendedModality: isEs ? 'Infusión Intravenosa (IV) Clínica Parenteral' : 'Clinical IV Infusion (Parenteral Loading)',
               dosageGuide: isEs ? '250 mg IV lento (goteo ≥ 120 min) semanal x 4 semanas, escalando a 500 mg' : '250 mg slow IV (≥ 120 min) weekly x 4 weeks, titrating to 500 mg',
               methylationRx: isEs ? 'TMG 1.000 mg diario + Complejo B metilado (Obligatorio frente a consumo NNMT)' : 'TMG 1,000 mg daily + Methyl-B Complex (Mandatory vs NNMT consumption)',
@@ -137,29 +156,29 @@ export default function DiagnosticTestTechnicalSpecs({
                 { name: 'B-Complex Metilado', role: isEs ? 'Reciclaje Homocisteína' : 'Homocysteine Clearance' }
               ],
               aiQuery: isEs
-                ? '¿Cuál es el algoritmo clínico de infusión IV de NAD+ y cofactores de metilación cuando el nivel es inferior a 20 µmol/L?'
-                : 'What is the recommended clinical NAD+ IV infusion and methylation cofactor protocol when levels are below 20 µmol/L?'
+                ? '¿Cuál es el algoritmo clínico de infusión IV de NAD+ y cofactores de metilación cuando el nivel es inferior a 10.3 µmol/L?'
+                : 'What is the recommended clinical NAD+ IV infusion and methylation cofactor protocol when levels are below 10.3 µmol/L?'
             }
           },
           {
-            label: isEs ? 'Rango Moderado / Subóptimo' : 'Suboptimal / Moderate',
-            value: '20 – 30 µmol/L',
+            label: isEs ? 'Rango Moderado / Subóptimo' : 'Suboptimal / Moderate Decline',
+            value: '10.3 – 15.4 µmol/L',
             status: 'warning',
             badge: isEs ? 'Margen de Optimización' : 'Room for Optimization',
             color: '#d97706',
             bgColor: '#fffbeb',
             description: isEs
-              ? 'Nivel medio poblacional en adultos mayores de 40 años. Pérdida típica del 40-50% respecto a la juventud. Recomendada optimización con precursores (NMN/NR/NAD+ IV) y ejercicio.'
-              : 'Standard adult population median (>40 yrs). Typical 40-50% decline from peak youthful levels. High clinical utility for supplementation (NMN/NR/NAD+ therapy) and exercise.',
+              ? 'Nivel subóptimo característico de declive fisiológico con la edad o alto consumo por estrés oxidativo y CD38. Indicación prioritaria para optimización con precursores subcutáneos u orales (NMN/NR) y ejercicio moderado.'
+              : 'Suboptimal adult baseline reflecting age-associated depletion and elevated CD38 consumption. High clinical indication for at-home subcutaneous titration or high-purity oral precursors (NMN/NR) and circadian sleep hygiene.',
             clinicalProtocol: {
               slug: 'nad-cellular-restoration-protocol',
-              queryParams: '?baseline=suboptimal&nad_level=25&tier=warning&modality=subcutaneous&retest=8w',
+              queryParams: '?baseline=suboptimal&nad_level=13.0&tier=warning&modality=subcutaneous&retest=8w',
               shortCode: 'REF-NAD-MSTR',
               name: isEs 
                 ? 'Protocolo NAD+ Maestro: Titulación Subcutánea y Precursores' 
                 : 'Master NAD+ Protocol: Subcutaneous & Precursor Titration',
               tierTitle: isEs ? 'TIER 2 · OPTIMIZACIÓN SUBCUTÁNEA & BIOENERGÉTICA' : 'TIER 2 · SUBCUTANEOUS & BIOENERGETIC OPTIMIZATION',
-              targetGoal: isEs ? 'Optimizar al rango diana de 35 – 50 µmol/L' : 'Optimize to clinical target range 35 – 50 µmol/L',
+              targetGoal: isEs ? 'Alcanzar y consolidar rango óptimo de 15.4 – 20.6 µmol/L' : 'Reach and consolidate optimal target 15.4 – 20.6 µmol/L',
               recommendedModality: isEs ? 'Microdosificación Subcutánea (SC) o NMN Oral' : 'Subcutaneous Micro-Dosing (SC) or Oral NMN',
               dosageGuide: isEs ? '50 – 100 mg SC 2–3 veces por semana o NMN 500–1.000 mg oral matutino' : '50 – 100 mg SC 2–3x/wk or oral NMN 500–1,000 mg morning',
               methylationRx: isEs ? 'TMG 500 mg diario con la primera comida matutina' : 'TMG 500 mg daily with first morning meal',
@@ -175,29 +194,29 @@ export default function DiagnosticTestTechnicalSpecs({
                 { name: 'Apigenina / Quercetina', role: isEs ? 'Inhibidor CD38' : 'CD38 Sinks Inhibitor' }
               ],
               aiQuery: isEs
-                ? '¿Qué pauta de dosificación subcutánea de NAD+ y TMG se aconseja para niveles en rango subóptimo de 20 a 30 µmol/L?'
-                : 'What is the recommended SubQ NAD+ and TMG dosing schedule for suboptimal NAD+ levels between 20 and 30 µmol/L?'
+                ? '¿Qué pauta de dosificación subcutánea de NAD+ y TMG se aconseja para niveles en rango subóptimo de 10.3 a 15.4 µmol/L?'
+                : 'What is the recommended SubQ NAD+ and TMG dosing schedule for suboptimal NAD+ levels between 10.3 and 15.4 µmol/L?'
             }
           },
           {
-            label: isEs ? 'Rango Óptimo de Longevidad' : 'Optimal Longevity Range',
-            value: '30 – 50 µmol/L',
+            label: isEs ? 'Rango Óptimo Poblacional Fisiológico' : 'Optimal Healthy Cohort Target',
+            value: '15.4 – 20.6 µmol/L',
             status: 'optimal',
-            badge: isEs ? 'Objetivo Terapéutico' : 'Target Clinical Range',
+            badge: isEs ? 'Objetivo Terapéutico (Norma LifeLab1)' : 'Target Clinical Range (LifeLab1 Standard)',
             color: '#0d9488',
             bgColor: '#f0fdfa',
             description: isEs
-              ? 'Nivel celular óptimo asociado a máxima activación de SIRT1 y SIRT3, biogénesis mitocondrial eficiente, alta capacidad física y recuperación celular sostenida.'
-              : 'Ideal therapeutic baseline reflecting youthful cellular bioenergetics, peak SIRT1/SIRT3 sirtuin activation, efficient ATP synthesis, and resilient DNA integrity.',
+              ? 'Rango diana fisiológico óptimo establecido por LifeLab1 sobre 1.068 individuos sanos. Se asocia a equilibrio bioenergético, activación balanceada de sirtuinas SIRT1/3 y preservación de la reserva de donantes de metilo.'
+              : 'Ideal physiological target range established across LifeLab1 cohort of 1,068 healthy adults. Reflects youthful cellular bioenergetics, balanced SIRT1/SIRT3 sirtuin activation, and stable methyl pool conservation.',
             clinicalProtocol: {
               slug: 'nad-cellular-restoration-protocol',
-              queryParams: '?baseline=optimal&nad_level=40&tier=optimal&modality=subcutaneous&retest=6m',
+              queryParams: '?baseline=optimal&nad_level=18.0&tier=optimal&modality=subcutaneous&retest=6m',
               shortCode: 'REF-NAD-MSTR',
               name: isEs 
                 ? 'Protocolo NAD+ Maestro: Mantenimiento Celular y Longevidad' 
                 : 'Master NAD+ Protocol: Circadian Longevity Maintenance',
               tierTitle: isEs ? 'TIER 3 · VIGILANCIA Y MANTENIMIENTO HOMEOSTÁTICO' : 'TIER 3 · SURVEILLANCE & HOMEOSTATIC MAINTENANCE',
-              targetGoal: isEs ? 'Sostener homeostasis fisiológica en 30 – 50 µmol/L' : 'Sustain steady-state homeostasis at 30 – 50 µmol/L',
+              targetGoal: isEs ? 'Sostener homeostasis fisiológica en 15.4 – 20.6 µmol/L' : 'Sustain steady-state homeostasis at 15.4 – 20.6 µmol/L',
               recommendedModality: isEs ? 'Mantenimiento Domiciliario SubQ / Oral Circadiano' : 'At-Home SubQ / Oral Circadian Maintenance',
               dosageGuide: isEs ? '50 mg SC semanal o ciclos de NMN 250–500 mg en días alternos' : '50 mg SC weekly or alternating-day oral NMN 250–500 mg',
               methylationRx: isEs ? 'TMG 500 mg en días de administración o aporte dietético de colina' : 'TMG 500 mg on administration days or dietary choline',
@@ -213,28 +232,65 @@ export default function DiagnosticTestTechnicalSpecs({
                 { name: 'Espermidina', role: isEs ? 'Autofagia Mitocondrial' : 'Mitophagy Inducer' }
               ],
               aiQuery: isEs
-                ? '¿Cómo estructurar un protocolo de mantenimiento circadiano cuando los niveles de NAD+ ya están en rango óptimo de 30 a 50 µmol/L?'
-                : 'How to structure a circadian maintenance protocol when intracellular NAD+ is already in the optimal 30-50 µmol/L range?'
+                ? '¿Cómo estructurar un protocolo de mantenimiento circadiano cuando los niveles de NAD+ ya están en rango óptimo de 15.4 a 20.6 µmol/L?'
+                : 'How to structure a circadian maintenance protocol when intracellular NAD+ is already in the optimal 15.4-20.6 µmol/L range?'
             }
           },
           {
-            label: isEs ? 'Nivel Máximo Estimulado' : 'Peak Stimulated / Supra-optimal',
-            value: '> 50 µmol/L',
-            status: 'super',
-            badge: isEs ? 'Pico Pos-Tratamiento' : 'Post-Intervention Peak',
-            color: '#2563eb',
-            bgColor: '#eff6ff',
+            label: isEs ? 'Rango Elevado / Post-Tratamiento' : 'Elevated / Active Treatment Response',
+            value: '20.6 – 25.3 µmol/L',
+            status: 'warning',
+            badge: isEs ? 'Respuesta Activa' : 'Active High Response',
+            color: '#ea580c',
+            bgColor: '#fff7ed',
             description: isEs
-              ? 'Valores alcanzados habitualmente tras protocolos activos de infusión intravenosa de NAD+, suplementación de alta dosis con activadores de sirtuinas o protocolos regenerativos.'
-              : 'Levels achieved following intensive clinical NAD+ IV therapy, high-dose precursor administration, and caloric restriction/longevity protocols.',
+              ? 'Valores alcanzados habitualmente tras protocolos activos de infusión intravenosa de NAD+ o suplementación intensiva. Se encuentra por encima de la media poblacional, indicando respuesta terapéutica favorable con necesidad de iniciar meseta.'
+              : 'Levels achieved following active clinical NAD+ IV therapy or intensive precursor supplementation. Indicates positive therapeutic responsiveness; transition to plateau maintenance indicated.',
             clinicalProtocol: {
               slug: 'nad-cellular-restoration-protocol',
-              queryParams: '?baseline=peak&nad_level=55&tier=super&modality=cycling&retest=12w',
+              queryParams: '?baseline=elevated&nad_level=22.5&tier=warning&modality=maintenance&retest=12w',
+              shortCode: 'REF-NAD-MSTR',
+              name: isEs 
+                ? 'Protocolo NAD+ Maestro: Titulación a Dosis de Mantenimiento' 
+                : 'Master NAD+ Protocol: Maintenance De-escalation',
+              tierTitle: isEs ? 'TIER 4 · TITULACIÓN A MANTENIMIENTO' : 'TIER 4 · MAINTENANCE TITRATION',
+              targetGoal: isEs ? 'Estabilizar respuesta sin sobrecargar el aclaramiento de metabolitos' : 'Stabilize response without overloading metabolite clearance',
+              recommendedModality: isEs ? 'Espaciamiento de Dosis (1x cada 10-14 días)' : 'Dose Spacing (Every 10-14 Days)',
+              dosageGuide: isEs ? 'Reducir frecuencia de infusión o alternar precursores orales' : 'Reduce infusion frequency or alternate oral precursors',
+              methylationRx: isEs ? 'TMG 500 mg diario y vigilancia de homocisteína sérica' : 'TMG 500 mg daily & serum homocysteine check',
+              retestWindow: isEs ? '12 Semanas (Monitoreo de Estabilidad)' : '12 Weeks (Stability Monitoring)',
+              cellularTarget: isEs ? 'Aclaramiento de MeNAM y balance redox NAD/NADH' : 'MeNAM clearance & NAD/NADH redox balance',
+              clinicalRationale: isEs
+                ? 'Nivel elevado que refleja respuesta clínica activa. Se recomienda espaciar dosis para asegurar que la enzima NNMT no drene donantes de metilo (SAMe).'
+                : 'Elevated level reflecting active clinical loading. Spacing doses is recommended to safeguard the hepatic methyl donor pool from NNMT-driven depletion.',
+              synergies: [
+                { name: 'TMG 500mg', role: isEs ? 'Protector de Metilación' : 'Methyl Safeguard' },
+                { name: 'B-Complex', role: isEs ? 'Ciclo de Metionina' : 'Methionine Cycle' },
+                { name: 'Monitoreo DBS', role: isEs ? 'Control de Estabilidad' : 'Stability Verification' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo desescalar a una pauta de mantenimiento cuando el NAD+ se sitúa entre 20.6 y 25.3 µmol/L?'
+                : 'How to de-escalate to maintenance when NAD+ is between 20.6 and 25.3 µmol/L?'
+            }
+          },
+          {
+            label: isEs ? 'Zona Dark Red (Alerta de Suplementación Excesiva)' : 'Dark Red Zone (Excessive Supplementation Alert)',
+            value: '> 25.3 µmol/L',
+            status: 'critical',
+            badge: isEs ? 'DARK RED ZONE · ALERTA METABÓLICA' : 'DARK RED ZONE · METABOLIC ALERT',
+            color: '#991b1b',
+            bgColor: '#fef2f2',
+            description: isEs
+              ? 'Nivel en zona rojo oscuro según LifeLab1. Puede indicar suplementación excesiva con precursores o desequilibrio metabólico. La sobredosificación sostenida puede perturbar la regulación celular basal y se ha vinculado a daño en ADN en modelos experimentales [6], así como a disfunciones metabólicas (lípidos, diabetes, ácido úrico) [7]. Se recomienda revisión médica, suspensión temporal de precursores y ventana de descanso.'
+              : 'Dark red zone per LifeLab1 laboratory monograph. May indicate excessive precursor supplementation or underlying metabolic imbalance. Sustained supra-elevations can disrupt normal cellular regulation and are linked to potential genomic stress or metabolic alterations [6,7]. Clinical review, precursor cessation, and washout window advised.',
+            clinicalProtocol: {
+              slug: 'nad-cellular-restoration-protocol',
+              queryParams: '?baseline=peak&nad_level=28.0&tier=super&modality=cycling&retest=12w',
               shortCode: 'REF-NAD-MSTR',
               name: isEs 
                 ? 'Protocolo NAD+ Maestro: Fase de Consolidación y Descanso' 
                 : 'Master NAD+ Protocol: Plateau Consolidation & Washout',
-              tierTitle: isEs ? 'TIER 4 · TITULACIÓN CLÍNICA Y CONTROL DE METILACIÓN' : 'TIER 4 · CLINICAL TITRATION & METHYL RESILIENCY',
+              tierTitle: isEs ? 'TIER 5 · TITULACIÓN CLÍNICA Y CONTROL DE SEGURIDAD' : 'TIER 5 · CLINICAL TITRATION & SAFETY SURVEILLANCE',
               targetGoal: isEs ? 'Consolidar y monitorizar balance de excreción de metilos' : 'Consolidate and monitor methyl excretion equilibrium',
               recommendedModality: isEs ? 'Ciclado de Precursores (Cycling / Washout de 2–4 Semanas)' : 'Precursor Cycling & Washout Window (2–4 Weeks)',
               dosageGuide: isEs ? 'Pausa temporal de aportes exógenos; evaluar meseta y respuesta celular basal' : 'Temporary pause of exogenous precursors; evaluate plateau retention',
@@ -242,8 +298,8 @@ export default function DiagnosticTestTechnicalSpecs({
               retestWindow: isEs ? '12 Semanas (Monitoreo post-lavado para evaluar meseta)' : '12 Weeks (Post-washout evaluation)',
               cellularTarget: isEs ? 'Balance de donantes de metilo (SAMe), excreción de MeNAM' : 'Methyl donor pool (SAMe), MeNAM urinary excretion',
               clinicalRationale: isEs
-                ? 'Nivel elevado característico de infusiones recientes o megadosis de precursores. Requiere verificar que la excreción de metabolitos metilados (MeNAM) no agote la reserva de donantes de metilo (SAMe / colina) y aplicar una ventana de ciclado/descanso para preservar la síntesis endógena de NAMPT.'
-                : 'Supra-physiological level typical of active high-dose therapy or recent IV infusions. Clinical oversight warrants checking that clearance of methylated metabolites (MeNAM) preserves the hepatic methyl donor pool and applying cycling windows to maintain endogenous NAMPT expression.',
+                ? 'Nivel en zona DARK RED característico de infusiones recientes o sobredosificación de precursores. Requiere verificar que la excreción de metabolitos metilados (MeNAM) no agote la reserva de donantes de metilo (SAMe / colina) y aplicar una ventana de ciclado/descanso para preservar la síntesis endógena de NAMPT.'
+                : 'DARK RED threshold typical of intensive megadosing or acute IV infusions. Clinical oversight warrants checking that clearance of methylated metabolites (MeNAM) preserves the hepatic methyl donor pool and applying cycling windows to maintain endogenous NAMPT expression.',
               synergies: [
                 { name: 'TMG (Betaína)', role: isEs ? 'Soporte de Metilación' : 'Methylation Safeguard' },
                 { name: 'Vitamina B12 / Folato', role: isEs ? 'Ciclo de Metionina' : 'Methionine Resynthesis' },
@@ -251,8 +307,8 @@ export default function DiagnosticTestTechnicalSpecs({
                 { name: 'Cycling / Washout', role: isEs ? 'Pausa Terapéutica' : 'Washout Window' }
               ],
               aiQuery: isEs
-                ? '¿Qué precauciones sobre metilación y donantes de metilo (TMG) deben tomarse con niveles de NAD+ superiores a 50 µmol/L?'
-                : 'What methyl donor safeguards (TMG) should be observed when intracellular NAD+ exceeds 50 µmol/L?'
+                ? '¿Qué precauciones médicas sobre metilación y donantes de metilo (TMG) deben tomarse cuando el NAD+ entra en la zona DARK RED (> 25.3 µmol/L)?'
+                : 'What clinical safeguards regarding methylation (TMG) should be observed when NAD+ enters the DARK RED zone (> 25.3 µmol/L)?'
             }
           }
         ]
@@ -278,7 +334,32 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#f0fdfa',
             description: isEs
               ? 'Excelente sensibilidad a la insulina y control glucémico estable a lo largo de los últimos 90 días. Bajo riesgo cardiovascular y de glicación tisular.'
-              : 'Optimal insulin sensitivity and stable 90-day glycemic tone. Minimal systemic advanced glycation end-products (AGEs).'
+              : 'Optimal insulin sensitivity and stable 90-day glycemic tone. Minimal systemic advanced glycation end-products (AGEs).',
+            clinicalProtocol: {
+              slug: 'weight-management-structured-12w',
+              queryParams: '?baseline=optimal&hba1c_level=5.1&tier=optimal&modality=maintenance&retest=6m',
+              shortCode: 'REF-MET-GLP1',
+              name: isEs 
+                ? 'Protocolo Metabólico Maestro: Mantenimiento y Flexibilidad' 
+                : 'Master Metabolic Protocol: Maintenance & Flexibility',
+              tierTitle: isEs ? 'TIER 1 · MANTENIMIENTO METABÓLICO' : 'TIER 1 · METABOLIC MAINTENANCE',
+              targetGoal: isEs ? 'Sostener HbA1c < 5.4% de manera continua' : 'Sustain continuous HbA1c < 5.4%',
+              recommendedModality: isEs ? 'Mantenimiento Domiciliario y Soporte Mitocondrial' : 'At-Home Maintenance & Mitochondrial Support',
+              dosageGuide: isEs ? 'Microdosificación o soporte con péptidos mitocondriales' : 'Micro-dosing or mitochondrial peptide support',
+              methylationRx: isEs ? 'Dieta de baja carga glucémica y antioxidantes' : 'Low-glycemic nutrition & antioxidant cofactors',
+              retestWindow: isEs ? '6 Meses (Vigilancia semestral DBS)' : '6 Months (Biannual DBS Check)',
+              cellularTarget: isEs ? 'Sensibilidad GLUT4, autofagia, mitofagia' : 'GLUT4 sensitivity, autophagy, mitophagy',
+              clinicalRationale: isEs
+                ? 'Excelente homeostasis glucémica. Se aconseja consolidar la flexibilidad metabólica con soporte mitocondrial preventivo.'
+                : 'Optimal glycemic control. Maintain metabolic flexibility with preventative lifestyle and mitochondrial resilience.',
+              synergies: [
+                { name: 'MOTS-c', role: isEs ? 'Sensibilizador AMPK' : 'AMPK Sensitizer' },
+                { name: 'Monitoreo DBS', role: isEs ? 'Vigilancia Semestral' : 'Biannual Surveillance' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo estructurar un protocolo de mantenimiento cuando la HbA1c es óptima (< 5.4%)?'
+                : 'How to maintain metabolic flexibility when HbA1c is in the optimal range (< 5.4%)?'
+            }
           },
           {
             label: isEs ? 'Rango Normal' : 'Standard Normal',
@@ -289,7 +370,32 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#f0fdf4',
             description: isEs
               ? 'Parámetro glucémico dentro de límites convencionales según criterios clínicos internacionales (ADA / OMS).'
-              : 'Conventional normoglycemic range compliant with international endocrinology guidelines (ADA / WHO).'
+              : 'Conventional normoglycemic range compliant with international endocrinology guidelines (ADA / WHO).',
+            clinicalProtocol: {
+              slug: 'weight-management-structured-12w',
+              queryParams: '?baseline=normal&hba1c_level=5.5&tier=optimal&modality=lifestyle&retest=6m',
+              shortCode: 'REF-MET-GLP1',
+              name: isEs 
+                ? 'Protocolo Metabólico Maestro: Optimización Preventiva' 
+                : 'Master Metabolic Protocol: Preventative Optimization',
+              tierTitle: isEs ? 'TIER 2 · PREVENCIÓN PRIMARIA' : 'TIER 2 · PRIMARY PREVENTION',
+              targetGoal: isEs ? 'Optimizar hacia rango funcional < 5.4%' : 'Optimize toward longevity target < 5.4%',
+              recommendedModality: isEs ? 'Optimización de Estilo de Vida y Sensibilización' : 'Lifestyle Optimization & Sensitization',
+              dosageGuide: isEs ? 'Entrenamiento de fuerza y soporte metabólico suave' : 'Resistance training & mild metabolic support',
+              methylationRx: isEs ? 'Cofactores de magnesio y cromo' : 'Magnesium & chromium cofactors',
+              retestWindow: isEs ? '6 Meses (Control de Rutina)' : '6 Months (Routine Check)',
+              cellularTarget: isEs ? 'Homeostasis de glucosa e insulina basal' : 'Basal glucose & insulin homeostasis',
+              clinicalRationale: isEs
+                ? 'Valores normales estándar. Margen de mejora para alcanzar la máxima protección cardiovascular y metabólica de longevidad.'
+                : 'Standard normal glycemia. Opportunity for functional improvement toward peak metabolic longevity.',
+              synergies: [
+                { name: 'Ejercicio Resistencia', role: isEs ? 'Captación Glucosa' : 'Glucose Clearance' },
+                { name: 'Monitoreo DBS', role: isEs ? 'Control Rutinario' : 'Routine Tracking' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué medidas permiten optimizar una HbA1c de 5.5% hacia el rango de máxima longevidad?'
+                : 'What clinical measures help optimize an HbA1c of 5.5% toward peak longevity?'
+            }
           },
           {
             label: isEs ? 'Prediabetes / Resistencia Insulínica' : 'Prediabetes / Insulin Resistance',
@@ -300,7 +406,33 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fffbeb',
             description: isEs
               ? 'Indica resistencia a la insulina y variabilidad glucémica crónica. Momento clave para intervención preventiva mediante péptidos GLP-1/GIP o cambios metabólicos.'
-              : 'Signals progressive insulin resistance and chronic glycemic spikes. High-yield window for therapeutic metabolic optimization and GLP-1/GIP therapies.'
+              : 'Signals progressive insulin resistance and chronic glycemic spikes. High-yield window for therapeutic metabolic optimization and GLP-1/GIP therapies.',
+            clinicalProtocol: {
+              slug: 'weight-management-structured-12w',
+              queryParams: '?baseline=warning&hba1c_level=6.0&tier=warning&modality=incretin_sensitization&retest=12w',
+              shortCode: 'REF-MET-GLP1',
+              name: isEs 
+                ? 'Protocolo Incretínico GLP-1/GIP: Sensibilización Temprana' 
+                : 'Incretin GLP-1/GIP Protocol: Early Sensitization',
+              tierTitle: isEs ? 'TIER 3 · INTERVENCIÓN PREVENTIVA TEMPRANA' : 'TIER 3 · EARLY PREVENTATIVE INTERVENTION',
+              targetGoal: isEs ? 'Reducir HbA1c a < 5.5% en 12 semanas' : 'Reduce HbA1c to < 5.5% in 12 weeks',
+              recommendedModality: isEs ? 'Titulación Incretínica Inicial (Tirzepatida/Semaglutida)' : 'Initial Incretin Titration (Tirzepatide/Semaglutide)',
+              dosageGuide: isEs ? '2.5 mg SC semanal escalando según tolerancia' : '2.5 mg SC weekly escalating per tolerance',
+              methylationRx: isEs ? 'Hidratación electrolítica y protección masa magra' : 'Electrolyte hydration & lean mass preservation',
+              retestWindow: isEs ? '12 Semanas (Recambio Eritrocitario DBS)' : '12 Weeks (DBS Erythrocyte Turnover)',
+              cellularTarget: isEs ? 'Células beta pancreáticas, receptor GLP-1, receptor GIP' : 'Pancreatic beta cells, GLP-1R, GIPR',
+              clinicalRationale: isEs
+                ? 'Ventana terapéutica crítica para revertir resistencia a la insulina antes del debut diabético franco.'
+                : 'Critical clinical window to reverse insulin resistance prior to formal diabetes onset.',
+              synergies: [
+                { name: 'Tirzepatida SC', role: isEs ? 'Doble Agonista' : 'Dual Agonist' },
+                { name: 'BPC-157', role: isEs ? 'Protección Gástrica' : 'Gastric Shield' },
+                { name: 'Electrolitos', role: isEs ? 'Hidratación' : 'Hydration' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo iniciar la titulación con agonistas duales GLP-1/GIP en prediabetes con HbA1c entre 5.7% y 6.4%?'
+                : 'How to titrate dual GLP-1/GIP agonists in prediabetes with HbA1c between 5.7% and 6.4%?'
+            }
           },
           {
             label: isEs ? 'Glucemia Elevada' : 'Elevated / Diabetic Range',
@@ -311,7 +443,33 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fef2f2',
             description: isEs
               ? 'Criterio diagnóstico de diabetes mellitus. Requiere seguimiento médico, ajuste farmacológico y monitorización continua.'
-              : 'Diagnostic threshold for diabetes mellitus. Demands clinical supervision, lifestyle intervention, and physician follow-up.'
+              : 'Diagnostic threshold for diabetes mellitus. Demands clinical supervision, lifestyle intervention, and physician follow-up.',
+            clinicalProtocol: {
+              slug: 'weight-management-structured-12w',
+              queryParams: '?baseline=elevated&hba1c_level=6.8&tier=critical&modality=dual_agonist_titration&retest=12w',
+              shortCode: 'REF-MET-GLP1',
+              name: isEs 
+                ? 'Protocolo Incretínico GLP-1/GIP: Titulación Terapéutica Intensiva' 
+                : 'Incretin GLP-1/GIP Protocol: Intensive Titration',
+              tierTitle: isEs ? 'TIER 4 · TITULACIÓN TERAPÉUTICA INTENSIVA' : 'TIER 4 · INTENSIVE THERAPEUTIC TITRATION',
+              targetGoal: isEs ? 'Control glucémico estricto (HbA1c < 6.0%)' : 'Strict glycemic control (HbA1c < 6.0%)',
+              recommendedModality: isEs ? 'Agonismo Dual Incretínico con Titulación Gradual' : 'Dual Incretin Agonism with Stepwise Titration',
+              dosageGuide: isEs ? 'Titulación mensual 2.5 mg → 5.0 mg → 7.5 mg SC' : 'Monthly titration 2.5 mg → 5.0 mg → 7.5 mg SC',
+              methylationRx: isEs ? 'Supervisión médica integral y monitorización continua de glucosa' : 'Full medical supervision & continuous glucose monitoring',
+              retestWindow: isEs ? '12 Semanas (Evaluación Trimestral DBS)' : '12 Weeks (Quarterly DBS Review)',
+              cellularTarget: isEs ? 'Sensibilidad insulínica periférica y vaciamiento gástrico' : 'Peripheral insulin sensitivity & gastric emptying',
+              clinicalRationale: isEs
+                ? 'Nivel de glucemia elevada que requiere control riguroso para prevenir complicaciones microvasculares.'
+                : 'Elevated HbA1c demanding intensive incretin therapy to mitigate microvascular risks.',
+              synergies: [
+                { name: 'Tirzepatida SC', role: isEs ? 'Agonista Dual' : 'Dual Agonist' },
+                { name: 'Monitoreo CGM', role: isEs ? 'Control Glucosa' : 'Glucose Monitoring' },
+                { name: 'Retest DBS', role: isEs ? 'Control Trimestral' : 'Quarterly Audit' }
+              ],
+              aiQuery: isEs
+                ? '¿Cuál es el protocolo escalonado de titulación de incretinas para HbA1c ≥ 6.5%?'
+                : 'What is the stepwise incretin titration protocol for HbA1c ≥ 6.5%?'
+            }
           }
         ]
       };
@@ -336,7 +494,33 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fef2f2',
             description: isEs
               ? 'Severo desbalance inflamatorio celular con rigidez de membrana y baja protección cardiovascular.'
-              : 'Severe cellular fatty acid imbalance, high eicosanoid inflammation, and elevated cardiovascular risk profile.'
+              : 'Severe cellular fatty acid imbalance, high eicosanoid inflammation, and elevated cardiovascular risk profile.',
+            clinicalProtocol: {
+              slug: 'injury-recovery-8w',
+              queryParams: '?baseline=critical&omega_ratio=3.2&tier=critical&modality=tissue_bioregulation&retest=12w',
+              shortCode: 'REF-RECOV-BPC',
+              name: isEs 
+                ? 'Protocolo de Rescate Tisular: BPC-157, TB-500 y Resolución Inflamatoria' 
+                : 'Tissue Rescue Protocol: BPC-157, TB-500 & Anti-Inflammatory Resolution',
+              tierTitle: isEs ? 'TIER 1 · RESCATE TISULAR Y RESOLUCIÓN INFLAMATORIA' : 'TIER 1 · TISSUE RESCUE & RESOLUTION',
+              targetGoal: isEs ? 'Elevar Índice Omega-3 a > 8.0% y recuperar fluidez' : 'Elevate Omega-3 Index > 8.0% and restore fluidity',
+              recommendedModality: isEs ? 'Biorregulación Tisular SubQ + Dosis de Carga EPA/DHA' : 'SubQ Tissue Bioregulation + High-Dose EPA/DHA Loading',
+              dosageGuide: isEs ? 'BPC-157 250 mcg 2x/día + TB-500 2.5 mg 2x/sem + EPA/DHA 3.000 mg' : 'BPC-157 250 mcg 2x/day + TB-500 2.5 mg 2x/wk + EPA/DHA 3,000 mg',
+              methylationRx: isEs ? 'Antioxidantes lipídicos (Vitamina E tocoferoles mixtos)' : 'Lipid antioxidants (mixed tocopherols Vitamin E)',
+              retestWindow: isEs ? '12 Semanas (Recambio de Membranas DBS)' : '12 Weeks (DBS Membrane Turnover)',
+              cellularTarget: isEs ? 'Bicapa lipídica eritrocitaria, cascada COX/LOX, eicosanoides' : 'Erythrocyte lipid bilayer, COX/LOX cascade, eicosanoids',
+              clinicalRationale: isEs
+                ? 'Rigidez de membrana celular y alta producción de eicosanoides inflamatorios. Se indica rescate con péptidos reparadores tisulares y dosis de carga de ácidos grasos poliinsaturados.'
+                : 'Cellular membrane rigidity and pro-inflammatory signaling. Clinical indication for regenerative peptides and high-purity EPA/DHA loading.',
+              synergies: [
+                { name: 'BPC-157 SubQ', role: isEs ? 'Reparación Endotelial' : 'Endothelial Repair' },
+                { name: 'TB-500 SubQ', role: isEs ? 'Migración Celular' : 'Actin Regulation' },
+                { name: 'EPA/DHA 3g', role: isEs ? 'Remodelado Membrana' : 'Lipid Remodeling' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo actúan BPC-157 y TB-500 frente a un índice Omega-3 deprimido (< 4%) con alto riesgo inflamatorio?'
+                : 'How do BPC-157 and TB-500 aid tissue repair when the Omega-3 index is depressed (< 4%)?'
+            }
           },
           {
             label: isEs ? 'Rango Moderado' : 'Moderate Protection',
@@ -347,7 +531,33 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#fffbeb',
             description: isEs
               ? 'Nivel promedio occidental. Protección cardiovascular parcial; se beneficia de suplementación con EPA/DHA de alta biodisponibilidad.'
-              : 'Typical Western baseline. Intermediate cardiovascular protection; highly responsive to high-purity EPA/DHA titration.'
+              : 'Typical Western baseline. Intermediate cardiovascular protection; highly responsive to high-purity EPA/DHA titration.',
+            clinicalProtocol: {
+              slug: 'injury-recovery-8w',
+              queryParams: '?baseline=suboptimal&omega_ratio=6.0&tier=warning&modality=repletion&retest=12w',
+              shortCode: 'REF-RECOV-BPC',
+              name: isEs 
+                ? 'Protocolo de Biorregulación y Optimización Vascular' 
+                : 'Bioregulation & Vascular Optimization Protocol',
+              tierTitle: isEs ? 'TIER 2 · OPTIMIZACIÓN VASCULAR & CELULAR' : 'TIER 2 · VASCULAR & CELLULAR OPTIMIZATION',
+              targetGoal: isEs ? 'Optimizar al rango cardioprotector (> 8.0%)' : 'Optimize to cardioprotective zone (> 8.0%)',
+              recommendedModality: isEs ? 'Microdosificación de Péptidos y Repleción Nutracéutica' : 'Peptide Micro-Dosing & Nutraceutical Repletion',
+              dosageGuide: isEs ? 'BPC-157 250 mcg diario + EPA/DHA 2.000 mg diario' : 'BPC-157 250 mcg daily + EPA/DHA 2,000 mg daily',
+              methylationRx: isEs ? 'Soporte con coenzima Q10 y astaxantina' : 'CoQ10 and astaxanthin antioxidant support',
+              retestWindow: isEs ? '12 Semanas (Recambio Membrana DBS)' : '12 Weeks (DBS Membrane Turnover)',
+              cellularTarget: isEs ? 'Fluidez de membrana y función mitocondrial' : 'Membrane fluidity & mitochondrial function',
+              clinicalRationale: isEs
+                ? 'Protección intermedia. La optimización a > 8% reduce marcadamente el riesgo cardiovascular y acelera la recuperación post-ejercicio.'
+                : 'Intermediate baseline. Achieving > 8% significantly lowers cardiovascular mortality and accelerates recovery.',
+              synergies: [
+                { name: 'BPC-157 250mcg', role: isEs ? 'Biorregulación' : 'Bioregulation' },
+                { name: 'EPA/DHA 2g', role: isEs ? 'Repleción' : 'Repletion' },
+                { name: 'Retest DBS', role: isEs ? 'Control Trimestral' : 'Quarterly Audit' }
+              ],
+              aiQuery: isEs
+                ? '¿Qué pauta combinada de péptidos y ácidos grasos se sugiere para un índice Omega-3 intermedio de 5% a 7%?'
+                : 'What peptide and fatty acid schedule is advised for an intermediate Omega-3 index of 5% to 7%?'
+            }
           },
           {
             label: isEs ? 'Rango Óptimo de Protección' : 'Cardioprotective Zone',
@@ -358,7 +568,32 @@ export default function DiagnosticTestTechnicalSpecs({
             bgColor: '#f0fdfa',
             description: isEs
               ? 'Máxima protección cardiovascular, fluidez de membrana celular óptima y resolución activa de procesos inflamatorios.'
-              : 'Target longevity zone associated with lowest all-cause cardiovascular mortality and maximal anti-inflammatory resolution.'
+              : 'Target longevity zone associated with lowest all-cause cardiovascular mortality and maximal anti-inflammatory resolution.',
+            clinicalProtocol: {
+              slug: 'injury-recovery-8w',
+              queryParams: '?baseline=optimal&omega_ratio=9.2&tier=optimal&modality=maintenance&retest=6m',
+              shortCode: 'REF-RECOV-BPC',
+              name: isEs 
+                ? 'Protocolo de Mantenimiento Celular y Longevidad Vascular' 
+                : 'Cellular Maintenance & Vascular Longevity Protocol',
+              tierTitle: isEs ? 'TIER 3 · MANTENIMIENTO HOMEOSTÁTICO' : 'TIER 3 · HOMEOSTATIC MAINTENANCE',
+              targetGoal: isEs ? 'Sostener índice > 8.0% de forma indefinida' : 'Sustain index > 8.0% continuously',
+              recommendedModality: isEs ? 'Mantenimiento Domiciliario Fisiológico' : 'Physiological At-Home Maintenance',
+              dosageGuide: isEs ? 'EPA/DHA 1.000–1.500 mg diario de mantenimiento' : 'EPA/DHA 1,000–1,500 mg daily maintenance',
+              methylationRx: isEs ? 'Aporte dietético de polifenoles y aceite de oliva virgen extra' : 'Dietary polyphenols & EVOO',
+              retestWindow: isEs ? '6 Meses (Vigilancia Semestral DBS)' : '6 Months (Biannual DBS Audit)',
+              cellularTarget: isEs ? 'Homeostasis de membrana y señalización celular' : 'Membrane homeostasis & cellular signaling',
+              clinicalRationale: isEs
+                ? 'Zona diana de longevidad celular. Fluidez óptima de membrana y resolución activa de cualquier foco pro-inflamatorio.'
+                : 'Target longevity zone. Peak membrane fluidity and efficient cellular resolution.',
+              synergies: [
+                { name: 'Omega-3 1.5g', role: isEs ? 'Mantenimiento' : 'Maintenance' },
+                { name: 'Monitoreo DBS', role: isEs ? 'Control Semestral' : 'Biannual Audit' }
+              ],
+              aiQuery: isEs
+                ? '¿Cómo estructurar el mantenimiento vascular cuando el índice Omega-3 ya se encuentra en rango cardioprotector (> 8%)?'
+                : 'How to structure vascular maintenance when the Omega-3 index is already cardioprotective (> 8%)?'
+            }
           }
         ]
       };
@@ -715,7 +950,34 @@ export default function DiagnosticTestTechnicalSpecs({
           bgColor: '#fef2f2',
           description: isEs
             ? 'Deficiencia clínica asociada a desmineralización ósea, mayor susceptibilidad a infecciones respiratorias y disfunción inmune.'
-            : 'Clinical deficiency linked to bone demineralization, compromised innate immunity, and systemic musculoskeletal weakness.'
+            : 'Clinical deficiency linked to bone demineralization, compromised innate immunity, and systemic musculoskeletal weakness.',
+          clinicalProtocol: {
+            slug: 'immune-modulation-8w',
+            queryParams: '?baseline=deficient&vitd_level=14&tier=critical&modality=rescue&retest=8w',
+            shortCode: 'REF-IMM-TA1',
+            name: isEs 
+              ? 'Protocolo de Rescate Inmunológico y Repleción Genómica VDR' 
+              : 'Immunological Rescue & VDR Genomic Repletion Protocol',
+            tierTitle: isEs ? 'TIER 1 · RESCATE INMUNOLÓGICO Y ESTIMULACIÓN TIMOCÍTICA' : 'TIER 1 · IMMUNOLOGICAL RESCUE & THYMIC ACTIVATION',
+            targetGoal: isEs ? 'Elevar 25(OH)D a rango óptimo funcional (50 – 70 ng/mL)' : 'Restore 25(OH)D to optimal functional range (50 – 70 ng/mL)',
+            recommendedModality: isEs ? 'Biorregulación con Thymosin Alpha-1 + Megadosis Oral D3/K2' : 'Thymosin Alpha-1 Bioregulation + High-Dose D3/K2 Repletion',
+            dosageGuide: isEs ? 'Thymosin Alpha-1 1.6 mg SC 2x/sem x 8 sem + Vitamina D3 10.000 UI/día con K2 (MK-7 200 mcg)' : 'Thymosin Alpha-1 1.6 mg SC 2x/wk x 8 wks + Vitamin D3 10,000 IU/day with K2 (MK-7 200 mcg)',
+            methylationRx: isEs ? 'Magnesio Malato/Glicinato 400 mg (Cofactor enzimático VDR obligatorio)' : 'Magnesium Malate/Glycinate 400 mg (Mandatory VDR cofactor)',
+            retestWindow: isEs ? 'Semana 8 (Evaluación de respuesta inmuno-endocrina DBS)' : 'Week 8 (DBS immuno-endocrine response check)',
+            cellularTarget: isEs ? 'Receptor nuclear VDR, linfocitos Treg, maduración de células T' : 'Nuclear VDR, regulatory T cells (Tregs), T-cell maturation',
+            clinicalRationale: isEs
+              ? 'Déficit severo de 25(OH)D que deteriora la transcripción de catelicidina y defensinas en macrófagos, favoreciendo hiperreactividad inflamatoria y autoinmunidad. Se asocia Thymosin Alpha-1 para modular la expresión de linfocitos T colaboradores y dosis de carga de colecalciferol con cofactores de fijación ósea.'
+              : 'Severe 25(OH)D deficiency crippling antimicrobial peptide transcription and T-cell differentiation. Indication for thymic peptide bioregulation (Thymosin Alpha-1) coupled with high-dose cholecalciferol repletion and critical magnesium cofactors.',
+            synergies: [
+              { name: 'Thymosin Alpha-1', role: isEs ? 'Inmunomodulación' : 'Immunomodulation' },
+              { name: 'Vitamina D3 10.000 UI', role: isEs ? 'Dosis de Carga' : 'Loading Dose' },
+              { name: 'Vitamina K2 MK-7', role: isEs ? 'Dirección de Calcio' : 'Calcium Routing' },
+              { name: 'Magnesio Glicinato', role: isEs ? 'Activación VDR' : 'VDR Activation' }
+            ],
+            aiQuery: isEs
+              ? '¿Cuál es la pauta de rescate con Thymosin Alpha-1 y Vitamina D3 ante deficiencia analítica inferior a 20 ng/mL?'
+              : 'What is the recommended Thymosin Alpha-1 and Vitamin D3 rescue protocol for severe deficiency below 20 ng/mL?'
+          }
         },
         {
           label: isEs ? 'Insuficiencia' : 'Insufficiency',
@@ -726,7 +988,33 @@ export default function DiagnosticTestTechnicalSpecs({
           bgColor: '#fffbeb',
           description: isEs
             ? 'Nivel insuficiente para la optimización metabólica e inmunológica. Muy frecuente durante los meses de baja insolación.'
-            : 'Suboptimal for endocrine regulation and cellular immunity. Common baseline in temperate latitudes requiring supplementation.'
+            : 'Suboptimal for endocrine regulation and cellular immunity. Common baseline in temperate latitudes requiring supplementation.',
+          clinicalProtocol: {
+            slug: 'immune-modulation-8w',
+            queryParams: '?baseline=insufficient&vitd_level=24&tier=warning&modality=repletion&retest=10w',
+            shortCode: 'REF-IMM-TA1',
+            name: isEs 
+              ? 'Protocolo de Biorregulación e Inmuno-Optimización Estacional' 
+              : 'Seasonal Immune Bioregulation & Repletion Protocol',
+            tierTitle: isEs ? 'TIER 2 · OPTIMIZACIÓN INMUNOLÓGICA Y BALANCE VDR' : 'TIER 2 · IMMUNE OPTIMIZATION & VDR HOMEOSTASIS',
+            targetGoal: isEs ? 'Alcanzar el umbral óptimo de 50 – 70 ng/mL' : 'Consolidate optimal threshold 50 – 70 ng/mL',
+            recommendedModality: isEs ? 'Repleción Fisiológica D3/K2 + Soporte Peptídico Ciclado' : 'Physiological D3/K2 Repletion + Cyclical Peptide Support',
+            dosageGuide: isEs ? 'Vitamina D3 5.000 UI/día + K2 100 mcg + Thymosin Alpha-1 1.6 mg SC semanal' : 'Vitamin D3 5,000 IU/day + K2 100 mcg + Thymosin Alpha-1 1.6 mg SC weekly',
+            methylationRx: isEs ? 'Magnesio Quelado 300 mg con la cena' : 'Chelated Magnesium 300 mg with dinner',
+            retestWindow: isEs ? 'Semana 10 (Evaluación analítica capilar)' : 'Week 10 (Capillary blood spot audit)',
+            cellularTarget: isEs ? 'Homeostasis de calcio, respuesta inmunitaria innata' : 'Calcium homeostasis, innate immune resilience',
+            clinicalRationale: isEs
+              ? 'Insuficiencia moderada común en estilos de vida bajo luz artificial. La suplementación orientada restaura la inmunovigilancia y reduce la fatiga estacional.'
+              : 'Moderate insufficiency common with low solar exposure. Target repletion restores immune surveillance and reduces seasonal allostatic fatigue.',
+            synergies: [
+              { name: 'Vitamina D3 5.000 UI', role: isEs ? 'Optimización' : 'Repletion' },
+              { name: 'K2 MK-7 100mcg', role: isEs ? 'Cofactor' : 'Cofactor' },
+              { name: 'Thymosin Alpha-1', role: isEs ? 'Vigilancia Inmune' : 'Immune Surveillance' }
+            ],
+            aiQuery: isEs
+              ? '¿Qué estrategia de suplementación se aconseja para insuficiencia de vitamina D entre 20 y 30 ng/mL?'
+              : 'What supplementation protocol is advised for vitamin D insufficiency between 20 and 30 ng/mL?'
+          }
         },
         {
           label: isEs ? 'Suficiencia Clínica' : 'Clinical Sufficiency',
@@ -737,7 +1025,32 @@ export default function DiagnosticTestTechnicalSpecs({
           bgColor: '#f0fdf4',
           description: isEs
             ? 'Concentración adecuada para homeostasis de calcio y mantenimiento del sistema musculoesquelético.'
-            : 'Standard therapeutic target for calcium homeostasis and baseline endocrine sufficiency.'
+            : 'Standard therapeutic target for calcium homeostasis and baseline endocrine sufficiency.',
+          clinicalProtocol: {
+            slug: 'immune-modulation-8w',
+            queryParams: '?baseline=sufficient&vitd_level=42&tier=optimal&modality=maintenance&retest=6m',
+            shortCode: 'REF-IMM-TA1',
+            name: isEs 
+              ? 'Protocolo de Mantenimiento y Regulación Inmunitaria' 
+              : 'Immune Regulation & Homeostatic Maintenance Protocol',
+            tierTitle: isEs ? 'TIER 3 · MANTENIMIENTO HOMEOSTÁTICO INMUNOLÓGICO' : 'TIER 3 · HOMEOSTATIC IMMUNE MAINTENANCE',
+            targetGoal: isEs ? 'Consolidar en la franja alta de longevidad (50 – 70 ng/mL)' : 'Consolidate within upper longevity zone (50 – 70 ng/mL)',
+            recommendedModality: isEs ? 'Mantenimiento Domiciliario Fisiológico' : 'Physiological At-Home Maintenance',
+            dosageGuide: isEs ? 'Vitamina D3 3.000 – 4.000 UI/día con K2 (MK-7) 100 mcg' : 'Vitamin D3 3,000 – 4,000 IU/day with K2 (MK-7) 100 mcg',
+            methylationRx: isEs ? 'Dieta rica en grasas saludables y exposición solar prudente' : 'Healthy dietary fats & sensible solar exposure',
+            retestWindow: isEs ? '6 Meses (Control semestral DBS)' : '6 Months (Biannual DBS check)',
+            cellularTarget: isEs ? 'Señalización VDR celular y mineralización ósea' : 'Cellular VDR signaling & bone mineral density',
+            clinicalRationale: isEs
+              ? 'Nivel suficiente según medicina tradicional, con margen para alcanzar la franja de mayor neuroprotección e inmunoresistencia.'
+              : 'Adequate level for bone metabolism, with clinical headroom to reach enhanced anti-inflammatory and longevity levels.',
+            synergies: [
+              { name: 'D3/K2 Mantenimiento', role: isEs ? 'Homeostasis' : 'Homeostasis' },
+              { name: 'Retest DBS', role: isEs ? 'Vigilancia Semestral' : 'Biannual Audit' }
+            ],
+            aiQuery: isEs
+              ? '¿Cómo optimizar de rango suficiente a rango funcional de longevidad en vitamina D (50-70 ng/mL)?'
+              : 'How to transition from sufficient to optimal longevity vitamin D range (50-70 ng/mL)?'
+          }
         },
         {
           label: isEs ? 'Rango Óptimo de Longevidad' : 'Optimal Longevity & Immune',
@@ -748,7 +1061,32 @@ export default function DiagnosticTestTechnicalSpecs({
           bgColor: '#f0fdfa',
           description: isEs
             ? 'Nivel óptimo recomendado en medicina funcional y longevidad para máxima resistencia inmunitaria y regulación genómica.'
-            : 'Target functional range for enhanced antimicrobial peptide induction, immune regulation, and longevity optimization.'
+            : 'Target functional range for enhanced antimicrobial peptide induction, immune regulation, and longevity optimization.',
+          clinicalProtocol: {
+            slug: 'immune-modulation-8w',
+            queryParams: '?baseline=optimal&vitd_level=62&tier=optimal&modality=longevity&retest=6m',
+            shortCode: 'REF-IMM-TA1',
+            name: isEs 
+              ? 'Protocolo de Longevidad Inmuno-Metabólica' 
+              : 'Immuno-Metabolic Longevity Protocol',
+            tierTitle: isEs ? 'TIER 4 · VIGILANCIA Y LONGEVIDAD GENÓMICA' : 'TIER 4 · SURVEILLANCE & GENOMIC LONGEVITY',
+            targetGoal: isEs ? 'Sostener homeostasis genómica de 50 – 70 ng/mL de forma indefinida' : 'Sustain genomic equilibrium at 50 – 70 ng/mL continuously',
+            recommendedModality: isEs ? 'Mantenimiento Fisiológico Continuo' : 'Continuous Physiological Maintenance',
+            dosageGuide: isEs ? 'Vitamina D3 2.000 – 4.000 UI/día con K2 + pulsos semestrales de biorreguladores' : 'Vitamin D3 2,000 – 4,000 IU/day with K2 + biannual peptide pulses',
+            methylationRx: isEs ? 'Magnesio diario + control de calcio sérico' : 'Daily magnesium + serum calcium monitoring',
+            retestWindow: isEs ? '6 Meses (Monitorización semestral DBS)' : '6 Months (Biannual DBS Surveillance)',
+            cellularTarget: isEs ? 'Transcripción de catelicidinas, inmunovigilancia antitumoral' : 'Cathelicidin transcription, antitumor immune surveillance',
+            clinicalRationale: isEs
+              ? 'Zona diana de longevidad celular. Máxima inducción de péptidos antimicrobianos endógenos y protección genómica frente a senescencia.'
+              : 'Target longevity zone associated with optimal innate immunity and genomic stability.',
+            synergies: [
+              { name: 'D3/K2 Mantenimiento', role: isEs ? 'Soporte Continuo' : 'Continuous Support' },
+              { name: 'Monitoreo DBS', role: isEs ? 'Control Semestral' : 'Biannual Audit' }
+            ],
+            aiQuery: isEs
+              ? '¿Por qué la medicina de longevidad sitúa el rango ideal de vitamina D entre 50 y 70 ng/mL?'
+              : 'Why does longevity medicine identify 50-70 ng/mL as the optimal 25(OH)D range?'
+          }
         }
       ]
     };
@@ -1366,36 +1704,155 @@ export default function DiagnosticTestTechnicalSpecs({
           </div>
         </div>
 
-        {/* ── 4. WHAT'S IN THE BOX CHECKLIST ── */}
-        <div id="kit-contents" className="dts-contents-card">
-          <h5 className="dts-contents-title">
-            <Layers size={16} color="#003666" />
-            {isEs ? 'Contenido del Kit de Diagnóstico' : 'Diagnostic Kit Included Accessories'}
-          </h5>
-          <div className="dts-contents-grid">
-            <div className="dts-content-item">
-              <Check size={14} color="#0d9488" />
-              <span>{isEs ? '1x Tarjeta de colección DBS certificada con desecante' : '1x Certified Dried Blood Spot (DBS) collection card'}</span>
+        {/* ── 4. OFFICIAL PRODUCT PACKAGING & KIT ACCESSORIES ── */}
+        <div id="kit-contents" className="dts-showcase-section">
+          <div className="dts-showcase-grid">
+            {/* Visual Box Packaging Card */}
+            <div className="dts-showcase-image-card">
+              <div className="dts-showcase-image-header">
+                <span className="dts-showcase-tag">
+                  <ShieldCheck size={13} color="#0d9488" /> {isEs ? 'KIT OFICIAL BLOODO™' : 'OFFICIAL BLOODO™ KIT'}
+                </span>
+                <span className="dts-showcase-ce">CE-IVDR · LifeLab1</span>
+              </div>
+              <div className="dts-showcase-img-wrap">
+                <img 
+                  src={kitImage} 
+                  alt={product?.canonicalName || product?.name || 'Bloodo Diagnostic Kit'} 
+                  className="dts-showcase-img"
+                  loading="lazy"
+                />
+              </div>
+              <div className="dts-showcase-caption">
+                <strong>{product?.canonicalName || product?.name || 'Bloodo Diagnostic Test'}</strong>
+                <p>
+                  {isEs 
+                    ? 'Empaque exterior oficial y suministros sellados estériles para toma capilar en domicilio.' 
+                    : 'Authentic clinical box packaging and sterile at-home capillary collection components.'}
+                </p>
+              </div>
             </div>
-            <div className="dts-content-item">
-              <Check size={14} color="#0d9488" />
-              <span>{isEs ? '2x Lancetas retráctiles de seguridad (punción indolora)' : '2x Single-use sterile retractable safety lancets'}</span>
-            </div>
-            <div className="dts-content-item">
-              <Check size={14} color="#0d9488" />
-              <span>{isEs ? '2x Toallitas desinfectantes con alcohol isopropílico 70%' : '2x 70% Isopropyl alcohol antiseptic prep pads'}</span>
-            </div>
-            <div className="dts-content-item">
-              <Check size={14} color="#0d9488" />
-              <span>{isEs ? '1x Apósitos adhesivos y gasa estéril de contención' : '1x Adhesive bandage & sterile cotton gauze pad'}</span>
-            </div>
-            <div className="dts-content-item">
-              <Check size={14} color="#0d9488" />
-              <span>{isEs ? '1x Sobre hermético de transporte con franqueo pagado' : '1x Prepaid laboratory return mailer to LifeLab1'}</span>
-            </div>
-            <div className="dts-content-item">
-              <Check size={14} color="#0d9488" />
-              <span>{isEs ? '1x Guía visual de instrucciones paso a paso' : '1x Step-by-step illustrated patient instructions'}</span>
+
+            {/* Included Accessories & Laboratory Document Card */}
+            <div className="dts-showcase-details-card">
+              <div className="dts-contents-header">
+                <h5 className="dts-contents-title">
+                  <Layers size={16} color="#003666" />
+                  {isEs ? 'Contenido del Kit de Diagnóstico' : 'Diagnostic Kit Included Accessories'}
+                </h5>
+                <span className="dts-contents-badge">
+                  {isEs ? 'Suministros Estériles' : 'Sterile Medical Supplies'}
+                </span>
+              </div>
+
+              <div className="dts-contents-grid">
+                <div className="dts-content-item">
+                  <Check size={14} color="#0d9488" />
+                  <span>{isEs ? '1x Tarjeta de colección DBS certificada Whatman 903' : '1x Certified Whatman 903 Dried Blood Spot (DBS) card'}</span>
+                </div>
+                <div className="dts-content-item">
+                  <Check size={14} color="#0d9488" />
+                  <span>{isEs ? '2x Lancetas retráctiles de seguridad (punción indolora)' : '2x Single-use sterile retractable safety lancets'}</span>
+                </div>
+                <div className="dts-content-item">
+                  <Check size={14} color="#0d9488" />
+                  <span>{isEs ? '2x Toallitas desinfectantes con alcohol isopropílico 70%' : '2x 70% Isopropyl alcohol antiseptic prep pads'}</span>
+                </div>
+                <div className="dts-content-item">
+                  <Check size={14} color="#0d9488" />
+                  <span>{isEs ? '1x Apósitos adhesivos y gasa estéril de contención' : '1x Adhesive bandage & sterile cotton gauze pad'}</span>
+                </div>
+                <div className="dts-content-item">
+                  <Check size={14} color="#0d9488" />
+                  <span>{isEs ? '1x Bolsa bio-barrier aluminizada con sobre desecante' : '1x Foil bio-barrier pouch with silica desiccant'}</span>
+                </div>
+                <div className="dts-content-item">
+                  <Check size={14} color="#0d9488" />
+                  <span>{isEs ? '1x Sobre hermético prepagado directo a LifeLab1 Vilnius' : '1x Prepaid laboratory return mailer to LifeLab1 Vilnius'}</span>
+                </div>
+              </div>
+
+              {/* Official Laboratory Validation Document (Generic Product Naming & Interactive In-Browser Preview) */}
+              <div className="dts-official-pdf-box">
+                <div className="dts-pdf-box-left">
+                  <div className="dts-pdf-icon-wrap">
+                    <FileText size={22} color="#003666" />
+                  </div>
+                  <div className="dts-pdf-info">
+                    <strong className="dts-pdf-name">
+                      {isNad 
+                        ? (isEs ? 'Bloodo™ Protocolo de Validación Clínica NAD+ (CE-IVDR)' : 'Bloodo™ NAD+ Clinical Validation Protocol (CE-IVDR)')
+                        : (isEs ? 'Bloodo™ Protocolo de Validación Analítica DBS (CE-IVDR)' : 'Bloodo™ DBS Analytical Validation Protocol (CE-IVDR)')
+                      }
+                    </strong>
+                    <span className="dts-pdf-meta">
+                      {isNad 
+                        ? (isEs ? 'LifeLab1 Laboratorio Central · Ensayo XLT01690-0 · Cohorte de Validación (n = 1.068) · PDF Técnico' : 'LifeLab1 Central Laboratory Specification · Assay XLT01690-0 · Validation Cohort (n = 1,068) · Technical PDF')
+                        : (isEs ? 'LifeLab1 Laboratorio Clínico Central · Homologación CE-IVDR · ISO 15189' : 'LifeLab1 Central Laboratory Specification · CE-IVDR Standard · ISO 15189')}
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  type="button"
+                  className="dts-pdf-preview-btn"
+                  onClick={() => setIsPdfPreviewOpen(true)}
+                  title={isEs ? 'Abrir vista previa del documento clínico' : 'Open clinical document preview'}
+                >
+                  <Eye size={15} />
+                  <span>{isEs ? 'Vista Previa del Documento' : 'Preview Document'}</span>
+                </button>
+              </div>
+
+              {/* In-Browser Document Preview Modal */}
+              {isPdfPreviewOpen && (
+                <div className="dts-pdf-modal-backdrop" onClick={() => setIsPdfPreviewOpen(false)}>
+                  <div className="dts-pdf-modal-card" onClick={(e) => e.stopPropagation()}>
+                    <div className="dts-pdf-modal-header">
+                      <div>
+                        <div className="dts-pdf-modal-title">
+                          {isNad 
+                            ? (isEs ? 'Bloodo™ Protocolo de Validación Clínica NAD+ (CE-IVDR)' : 'Bloodo™ NAD+ Clinical Validation Protocol (CE-IVDR)')
+                            : (isEs ? 'Bloodo™ Protocolo de Validación Analítica DBS' : 'Bloodo™ DBS Analytical Validation Protocol')}
+                        </div>
+                        <div className="dts-pdf-modal-sub">
+                          {isEs 
+                            ? 'Documentación Técnica y Validación Metodológica · LifeLab1 Vilnius (EU CE-IVDR)'
+                            : 'Official Technical Specification & Clinical Validation · LifeLab1 Vilnius (EU CE-IVDR)'}
+                        </div>
+                      </div>
+                      <div className="dts-pdf-modal-actions">
+                        <a 
+                          href={isNad ? '/docs/bloodo-nad-lab-protocol-dark-red.pdf' : '#'}
+                          download={isNad ? 'Bloodo_NAD_Clinical_Validation_Protocol.pdf' : undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="dts-pdf-preview-btn"
+                          style={{ background: '#f1f5f9', color: '#003666', border: '1px solid #cbd5e1' }}
+                        >
+                          <Download size={14} />
+                          <span>{isEs ? 'Descargar' : 'Download'}</span>
+                        </a>
+                        <button 
+                          type="button" 
+                          className="dts-pdf-preview-btn" 
+                          onClick={() => setIsPdfPreviewOpen(false)}
+                          aria-label="Close"
+                          style={{ padding: '8px 12px', background: '#e2e8f0', color: '#0f172a' }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="dts-pdf-modal-body">
+                      <iframe 
+                        src="/docs/bloodo-nad-lab-protocol-dark-red.pdf#toolbar=1" 
+                        className="dts-pdf-modal-frame"
+                        title="Bloodo Clinical Validation Document Preview"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -35,7 +35,7 @@ Include:
 3. Actionable Clinical & Inventory Recommendations (bullet points)`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt,
         config: {
           temperature: 0.3,
@@ -88,7 +88,7 @@ export async function extractApiPeptidesAction(imageBase64, mimeType = 'image/jp
 
       const prompt = `Extract all peptide names and their price per gram from this document image. ${instructions}`;
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: [
           prompt,
           { inlineData: { data: imageBase64, mimeType } }
@@ -147,7 +147,7 @@ export async function parsePrescriptionPdfAction(base64Data, mimeType = 'applica
 
       const prompt = `Extract all prescribed peptide medications from this prescription document with dosage, quantity/amount, form, and administration duration.`;
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: [
           prompt,
           { inlineData: { data: base64Data, mimeType } }

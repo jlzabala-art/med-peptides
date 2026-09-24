@@ -32,8 +32,10 @@ import {
   Loader2,
   Droplets,
   Printer,
-  HelpCircle
+  HelpCircle,
+  ZoomIn
 } from '@/lib/icons';
+import ImageModal from '@/snippets/ImageModal';
 import { 
   SUPPORTED_LANGUAGES, 
   getTranslations, 
@@ -115,6 +117,7 @@ export default function PublicDatasheetView({
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inlineSvg, setInlineSvg] = useState(null);
   const [svgError, setSvgError] = useState(false);
@@ -1236,6 +1239,20 @@ export default function PublicDatasheetView({
     });
   }, [activeSupplierId, activeSupplierObj, availableFormats, sortedStrengths, hierarchy.variantIndex, activeFormatId, selectedStrengthId, isSolventProduct, isDiagnosticKit, suppliersList, lang]);
 
+  // Official Bloodo Product Packaging Photo for Datasheet Hero
+  const diagnosticHeroImage = (isDiagnosticKit || isBloodoDiagnostic)
+    ? (product?.imageUrl || product?.image || (
+        slug.includes('nad') ? '/images/products/bloodo/nad.jpg' :
+        slug.includes('cortisol') ? '/images/products/bloodo/cortisol.jpg' :
+        slug.includes('hba1c') || slug.includes('hemoglobin') ? '/images/products/bloodo/hba1c.jpg' :
+        slug.includes('omega-index') ? '/images/products/bloodo/omega-index.jpg' :
+        slug.includes('omega') ? '/images/products/bloodo/omega.jpg' :
+        slug.includes('testosterone') ? '/images/products/bloodo/testosterone.jpg' :
+        slug.includes('vitamin-d') || slug.includes('vit-d') ? '/images/products/bloodo/vitamin-d.jpg' :
+        '/images/products/bloodo/nad.jpg'
+      ))
+    : null;
+
   return (
     <div className="public-datasheet-root">
       {/* ── Fixed Executive Navigation (Tier 1 Only on Product Page) ── */}
@@ -1385,6 +1402,82 @@ export default function PublicDatasheetView({
               <p className="pds-description-body">{description}</p>
             </div>
           )}
+          desktopSecondary={
+            diagnosticHeroImage ? (
+              <div 
+                className="pds-hero-square-showcase"
+                onClick={() => setIsImageModalOpen(true)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsImageModalOpen(true); }}
+                title={lang === 'es' ? 'Haz clic para ampliar la imagen del kit oficial' : 'Click to inspect official kit packaging'}
+              >
+                {/* 1. Frosted Glass Top Badges */}
+                <div className="pds-square-badge-strip">
+                  <div className="pds-square-frosted-pill">
+                    <ShieldCheck size={13} color="#0d9488" />
+                    <span>{lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit'}</span>
+                  </div>
+                  <div className="pds-square-zoom-btn" title={lang === 'es' ? 'Ampliar imagen' : 'Enlarge image'}>
+                    <ZoomIn size={14} />
+                  </div>
+                </div>
+
+                {/* 2. Studio Lighting Square Viewport */}
+                <div className="pds-square-img-viewport">
+                  <img
+                    src={diagnosticHeroImage}
+                    alt={name}
+                    className="pds-square-product-img"
+                    loading="eager"
+                  />
+                </div>
+
+                {/* 3. High-End Technical Spec Strip */}
+                <div className="pds-square-footer-spec">
+                  <div className="pds-square-lab-row">
+                    <span className="pds-square-lab-name">LifeLab1 Central Lab (Vilnius)</span>
+                    <span className="pds-square-ce-tag">CE-IVDR</span>
+                  </div>
+                  <div className="pds-square-sub-meta">
+                    <span>Whatman® 903 Card</span>
+                    <span>•</span>
+                    <span>Capillary DBS LC-MS</span>
+                  </div>
+                </div>
+              </div>
+            ) : null
+          }
+          mobileSecondary={
+            diagnosticHeroImage ? (
+              <div 
+                className="pds-hero-mobile-square-card"
+                onClick={() => setIsImageModalOpen(true)}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="pds-mobile-square-thumb-wrap">
+                  <img
+                    src={diagnosticHeroImage}
+                    alt={name}
+                    className="pds-mobile-square-thumb"
+                    loading="eager"
+                  />
+                </div>
+                <div className="pds-mobile-square-content">
+                  <div className="pds-mobile-square-badge">
+                    <ShieldCheck size={11} color="#0d9488" />
+                    <span>{lang === 'es' ? 'Kit Oficial Bloodo™' : 'Official Bloodo™ Kit'}</span>
+                  </div>
+                  <strong className="pds-mobile-square-title">LifeLab1 Clinical Laboratory</strong>
+                  <span className="pds-mobile-square-sub">CE-IVDR Certified · Whatman® 903 Card</span>
+                </div>
+                <div className="pds-mobile-square-action">
+                  <ZoomIn size={16} color="#0284c7" />
+                </div>
+              </div>
+            ) : null
+          }
         />
         </div>
 
@@ -2606,6 +2699,16 @@ export default function PublicDatasheetView({
         }}
         lang={lang}
       />
+
+      {/* Full-Screen Visual Kit Image Modal */}
+      {diagnosticHeroImage && (
+        <ImageModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imageSrc={diagnosticHeroImage}
+          altText={name}
+        />
+      )}
     </div>
   );
 }

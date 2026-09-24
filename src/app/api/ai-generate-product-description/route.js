@@ -63,7 +63,7 @@ Tags: ${tags}
 Ensure all text uses a strictly scientific and professional tone appropriate for doctors and medical distributors.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',

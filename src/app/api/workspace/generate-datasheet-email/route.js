@@ -197,7 +197,7 @@ Mandatory Email Content & Tone Requirements:
 Ensure all medical language is sophisticated, clinically accurate, reassuring, and strictly in English.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
