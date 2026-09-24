@@ -1,0 +1,166 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SimilarProtocolsSidebarWidget.css — GCP Console Clinical Evidence Widget
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.spw-similar-widget {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ── Header ── */
+.spw-similar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.spw-similar-header-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.spw-similar-icon {
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.spw-similar-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.spw-similar-subtitle {
+  font-size: 0.60rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Protocol List ── */
+.spw-similar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* ── Protocol Item ── */
+.spw-similar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  cursor: pointer;
+}
+
+.spw-similar-item:hover {
+  background: #faf5ff;
+  border-color: #ddd6fe;
+  transform: translateX(2px);
+}
+
+/* Highest-evidence item gets a subtle accent */
+.spw-similar-item.top-evidence {
+  background: linear-gradient(135deg, #fafffe 0%, #f8fafc 100%);
+  border-color: #d1fae5;
+}
+
+.spw-similar-item.top-evidence:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+/* ── Evidence Grade Badge ── */
+.spw-similar-grade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 6px;
+  border: 1.5px solid;
+  flex-shrink: 0;
+}
+
+.spw-grade-letter {
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* ── Protocol Content ── */
+.spw-similar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.spw-similar-name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spw-similar-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.spw-meta-chip {
+  font-size: 0.60rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.spw-meta-evidence {
+  font-size: 0.60rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ── Arrow ── */
+.spw-similar-arrow {
+  color: #cbd5e1;
+  flex-shrink: 0;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.spw-similar-item:hover .spw-similar-arrow {
+  color: #7c3aed;
+  transform: translateX(2px);
+}
+
+/* ── Footer Note ── */
+.spw-similar-footer-note {
+  margin: 0.45rem 0 0 0;
+  font-size: 0.60rem;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}

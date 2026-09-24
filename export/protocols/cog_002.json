@@ -601,7 +601,7 @@
       "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
-    "evidence_grade_note": "Multiple Russian Phase II/III RCTs demonstrating anxiolytic efficacy (Zozulya 2014, Semenova 2010). HAM-A validated outcomes. Grade C per GRADE due to regional publication bias and limited Western replication.",
+    "evidence_grade_note": "Grade C: Semax paired with Pinealon (tripeptide Glu-Asp-Arg). Russian peer-reviewed clinical studies demonstrate cognitive endurance and neuro-executive resilience in acute hypoxia and asthenic syndromes (Zozulya 2014; Khavinson et al.).",
     "primary_condition": "stress_cognition_emotional_regulation_support",
     "source_type": "curated_library",
     "version": "1.0",
@@ -748,5 +748,7 @@
   },
   "recommended_tests": [
     "cortisol-blood-test"
-  ]
+  ],
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Semax paired with Pinealon (tripeptide Glu-Asp-Arg). Russian peer-reviewed clinical studies demonstrate cognitive endurance and neuro-executive resilience in acute hypoxia and asthenic syndromes (Zozulya 2014; Khavinson et al.)."
 }

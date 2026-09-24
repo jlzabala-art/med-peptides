@@ -26,7 +26,9 @@
     "evidence_notes": [
       "Retatrutide-centered investigational pathway for metabolic research support.",
       "Auxiliary agents minimized to reduce unsupported stacking."
-    ]
+    ],
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Supported by landmark Phase II randomized clinical trial (Jastreboff AM et al., N Engl J Med 2023; 389:514-526) demonstrating up to 24.2% mean body weight reduction at 48 weeks with triple GIP/GLP-1/Glucagon agonism. Phase III trials (TRIUMPH) ongoing."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -562,5 +564,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Supported by landmark Phase II randomized clinical trial (Jastreboff AM et al., N Engl J Med 2023; 389:514-526) demonstrating up to 24.2% mean body weight reduction at 48 weeks with triple GIP/GLP-1/Glucagon agonism. Phase III trials (TRIUMPH) ongoing."
 }

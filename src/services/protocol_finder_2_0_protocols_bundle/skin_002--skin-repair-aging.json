@@ -408,7 +408,9 @@
     "schema_version": "antigravity_v2",
     "complexity_level": "moderate",
     "shortCode": "SKIN-002",
-    "primary_goal": "Skin & Aesthetics"
+    "primary_goal": "Skin & Aesthetics",
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: Dual dermal repair stack combining GHK-Cu (Grade B) with Epithalon cellular senescence modulation. Supported by in vitro human fibroblast proliferation studies and dermatological clinical cohorts."
   },
   "category": "Skin & Aesthetics",
   "_enrichment_notes": [
@@ -418,5 +420,7 @@
   "mechanism_of_action": [
     "Targeted receptor modulation and cellular signaling optimization.",
     "Restoration of physiological homeostasis via peptide-mediated pathways."
-  ]
+  ],
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Dual dermal repair stack combining GHK-Cu (Grade B) with Epithalon cellular senescence modulation. Supported by in vitro human fibroblast proliferation studies and dermatological clinical cohorts."
 }

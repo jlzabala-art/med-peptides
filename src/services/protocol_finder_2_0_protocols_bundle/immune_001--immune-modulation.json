@@ -47,7 +47,9 @@
         "Thymosin Alpha-1 has the strongest clinical support among common immune peptides.",
         "TB-4 is included as a repair-support adjunct rather than core immune evidence."
       ]
-    }
+    },
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Thymosin Alpha-1 (Thymalfasin) is clinically approved in over 30 countries with extensive randomized clinical trials in viral hepatitis, sepsis, and oncological immune reconstitution (Garaci E et al., Ann N Y Acad Sci; King et al.). Paired with Thymosin Beta-4 / TB-500 tissue regeneration."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -448,5 +450,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Thymosin Alpha-1 (Thymalfasin) is clinically approved in over 30 countries with extensive randomized clinical trials in viral hepatitis, sepsis, and oncological immune reconstitution (Garaci E et al., Ann N Y Acad Sci; King et al.). Paired with Thymosin Beta-4 / TB-500 tissue regeneration."
 }

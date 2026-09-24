@@ -453,7 +453,8 @@
       "last_reviewed_at": "2026-04-25",
       "review_status": "approved"
     },
-    "regulatory_note": "Updated 2026: KPV is not FDA/EMA-approved for inflammatory bowel disease, MCAS, autoimmune disease, or systemic inflammation; use remains research-oriented under clinician supervision."
+    "regulatory_note": "Updated 2026: KPV is not FDA/EMA-approved for inflammatory bowel disease, MCAS, autoimmune disease, or systemic inflammation; use remains research-oriented under clinician supervision.",
+    "evidence_grade_note": "Grade C: Thymosin Alpha-1 (Grade B) paired with KPV (alpha-MSH 11-13 tripeptide) and gut/mucosal barrier support (BPC-157). While TA-1 has extensive human RCT data, mucosal anti-inflammatory stack components rely largely on translational and preclinical evidence."
   },
   "monitoring_plan": {
     "baseline_required": [
@@ -562,5 +563,7 @@
       "phase_blueprints_legacy_mapped"
     ]
   },
-  "_syncedAt": "2026-04-26T12:46:29.477Z"
+  "_syncedAt": "2026-04-26T12:46:29.477Z",
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Thymosin Alpha-1 (Grade B) paired with KPV (alpha-MSH 11-13 tripeptide) and gut/mucosal barrier support (BPC-157). While TA-1 has extensive human RCT data, mucosal anti-inflammatory stack components rely largely on translational and preclinical evidence."
 }

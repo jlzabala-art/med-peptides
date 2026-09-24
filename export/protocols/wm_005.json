@@ -58,7 +58,8 @@
     "abbreviatedName": "Selank + BPC-157 + 5-Amino-1MQ + Tesamorelin",
     "shortCode": "WML-005",
     "clinical_summary": "A structured six-month multi-phase peptide protocol designed to support fat metabolism, mitochondrial efficiency, recovery, and metabolic resilience. The protocol integrates neuro-support, GH-axis stimulation, metabolic enhancers, and mitochondrial peptides to promote progressive weight-management support and metabolic optimization in aging populations.",
-    "evidence_grade": "B"
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components."
   },
   "overview_summary": "Six-month structured multi-compound peptide protocol targeting visceral fat, GH-axis activation, mitochondrial efficiency, and metabolic resilience through three progressive 8-week phases.",
   "monitoring_plan": {
@@ -645,5 +646,7 @@
     "fagron-nutrigen",
     "24-genomics-nutrigen",
     "nad-blood-test"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components."
 }

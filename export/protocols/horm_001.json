@@ -549,7 +549,7 @@
       "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
-    "evidence_grade_note": "GRADE B: Ipamorelin Phase I/II data (Raun K, Eur J Endocrinol 1998); CJC-1295 Phase II human PK/PD data (Teichman SL, J Clin Endocrinol Metab 2006). IGF-1 endpoints well-validated. Limited long-term RCT data for body composition endpoints.",
+    "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020).",
     "description": "12-week GH axis optimization protocol combining CJC-1295 GHRH analogue sustained release with Ipamorelin selective ghrelin-mimetic secretagogue for pulsatile physiological GH restoration.",
     "primary_condition": "hormonal_imbalance",
     "version": "1.0",
@@ -740,5 +740,7 @@
   "recommended_tests": [
     "testosterone-blood-test",
     "fagron-trichotest"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020)."
 }

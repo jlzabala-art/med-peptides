@@ -47,7 +47,9 @@
         "Circadian peptide literature is more exploratory than metabolic or immune peptide literature.",
         "Use as a research-oriented circadian support blueprint."
       ]
-    }
+    },
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: Epithalon pineal peptide bioregulation paired with circadian neuroendocrine signaling. Demonstrates restoration of nocturnal melatonin production and circadian clock gene expression in longitudinal clinical cohorts (Khavinson & Anisimov, Neuro Endocrinol Lett 2003)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -467,5 +469,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Epithalon pineal peptide bioregulation paired with circadian neuroendocrine signaling. Demonstrates restoration of nocturnal melatonin production and circadian clock gene expression in longitudinal clinical cohorts (Khavinson & Anisimov, Neuro Endocrinol Lett 2003)."
 }

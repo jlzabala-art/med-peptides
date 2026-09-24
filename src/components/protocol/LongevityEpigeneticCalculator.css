@@ -1,0 +1,315 @@
+/* ══════════════════════════════════════════════════════════════════
+   LongevityEpigeneticCalculator.css
+   GCP-standard Longevity / NAD+ Biological Age Offset Calculator
+   ══════════════════════════════════════════════════════════════════ */
+
+.longevity-calc {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── Header ── */
+.longevity-calc__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0c4a6e 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.longevity-calc__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.longevity-calc__icon-wrap {
+  width: 34px;
+  height: 34px;
+  background: rgba(250, 204, 21, 0.15);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+.longevity-calc__title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.longevity-calc__subtitle {
+  font-size: 0.70rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.longevity-calc__badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.longevity-calc__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Input Grid ── */
+.longevity-calc__inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .longevity-calc__inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.longevity-calc__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.longevity-calc__label {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.longevity-calc__input,
+.longevity-calc__select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.longevity-calc__input:focus,
+.longevity-calc__select:focus {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.12);
+  background: #ffffff;
+}
+
+.longevity-calc__select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.longevity-calc__hint {
+  font-size: 0.66rem;
+  color: #94a3b8;
+}
+
+/* ── Results Panel ── */
+.longevity-calc__results {
+  background: linear-gradient(135deg, #0f172a 0%, #0c4a6e 100%);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.longevity-calc__results-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.longevity-calc__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.longevity-calc__kpi {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.longevity-calc__kpi-label {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.longevity-calc__kpi-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.longevity-calc__kpi-value.positive {
+  color: #34d399;
+}
+
+.longevity-calc__kpi-value.neutral {
+  color: #60a5fa;
+}
+
+.longevity-calc__kpi-value.warning {
+  color: #fbbf24;
+}
+
+.longevity-calc__kpi-unit {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+/* ── Protocol Adjustments ── */
+.longevity-calc__adjustments {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.longevity-calc__adj-header {
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.longevity-calc__adj-list {
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.longevity-calc__adj-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.longevity-calc__adj-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fbbf24;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.longevity-calc__adj-text {
+  font-size: 0.78rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.longevity-calc__adj-text strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ── Reset + Copy Footer ── */
+.longevity-calc__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.longevity-calc__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.longevity-calc__btn--primary {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #0f172a;
+}
+
+.longevity-calc__btn--primary:hover {
+  background: linear-gradient(135deg, #fcd34d, #fbbf24);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.longevity-calc__btn--ghost {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.longevity-calc__btn--ghost:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.longevity-calc__disclaimer {
+  font-size: 0.67rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.85rem;
+}

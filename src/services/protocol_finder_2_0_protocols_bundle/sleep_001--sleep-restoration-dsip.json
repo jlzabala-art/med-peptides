@@ -409,7 +409,9 @@
     "schema_version": "antigravity_v2",
     "complexity_level": "moderate",
     "shortCode": "SLP-001",
-    "primary_goal": "Sleep & Recovery"
+    "primary_goal": "Sleep & Recovery",
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: DSIP (Delta Sleep-Inducing Peptide) evaluated in human clinical sleep architecture trials demonstrating enhanced delta sleep and slow-wave EEG activity (Schneider-Helmert D et al., Neuropsychobiology 1986). Paired with Selank GABAergic modulatory support."
   },
   "category": "Sleep & Recovery",
   "_enrichment_notes": [
@@ -419,5 +421,7 @@
   "mechanism_of_action": [
     "Targeted receptor modulation and cellular signaling optimization.",
     "Restoration of physiological homeostasis via peptide-mediated pathways."
-  ]
+  ],
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: DSIP (Delta Sleep-Inducing Peptide) evaluated in human clinical sleep architecture trials demonstrating enhanced delta sleep and slow-wave EEG activity (Schneider-Helmert D et al., Neuropsychobiology 1986). Paired with Selank GABAergic modulatory support."
 }

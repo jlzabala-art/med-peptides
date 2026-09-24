@@ -423,7 +423,8 @@
       "last_reviewed_at": "2026-04-25",
       "review_status": "approved"
     },
-    "regulatory_note": "Updated 2026: Thymosin alpha-1 is approved/used in selected non-US markets for immune and viral-hepatitis-related indications, but is not broadly FDA-approved in the United States. TB-500/thymosin beta-4 remains investigational for clinical immune optimization."
+    "regulatory_note": "Updated 2026: Thymosin alpha-1 is approved/used in selected non-US markets for immune and viral-hepatitis-related indications, but is not broadly FDA-approved in the United States. TB-500/thymosin beta-4 remains investigational for clinical immune optimization.",
+    "evidence_grade_note": "Grade B: Thymosin Alpha-1 (Thymalfasin) is clinically approved in over 30 countries with extensive randomized clinical trials in viral hepatitis, sepsis, and oncological immune reconstitution (Garaci E et al., Ann N Y Acad Sci; King et al.). Paired with Thymosin Beta-4 / TB-500 tissue regeneration."
   },
   "monitoring_plan": {
     "baseline_required": [
@@ -531,5 +532,7 @@
       "phase_blueprints_legacy_mapped"
     ]
   },
-  "_syncedAt": "2026-04-26T12:46:29.224Z"
+  "_syncedAt": "2026-04-26T12:46:29.224Z",
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Thymosin Alpha-1 (Thymalfasin) is clinically approved in over 30 countries with extensive randomized clinical trials in viral hepatitis, sepsis, and oncological immune reconstitution (Garaci E et al., Ann N Y Acad Sci; King et al.). Paired with Thymosin Beta-4 / TB-500 tissue regeneration."
 }

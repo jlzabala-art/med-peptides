@@ -111,10 +111,18 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
               const articleId = article.id || article.pmid || `pub-${idx}`;
               const isCurated = Boolean(article.clinicalSummary);
               const pubmedUrl = article.pubmedUrl || (article.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/` : null);
+              const hasSecondary = Boolean(
+                article.clinicalSummary || 
+                article.abstract || 
+                (Array.isArray(article.keyFindings) && article.keyFindings.length > 0)
+              );
 
               return (
-                <article key={articleId} className={`pds-pub-card pds-pub-card-horizontal ${displayArticles.length === 1 ? 'is-single-card' : ''}`}>
-                  {/* Left Column: Metadata, Title, Authors & Action Links */}
+                <article 
+                  key={articleId} 
+                  className={`pds-pub-card ${hasSecondary ? 'pds-pub-card-horizontal has-secondary' : 'pds-pub-card-compact no-secondary'} ${displayArticles.length === 1 ? 'is-single-card' : ''}`}
+                >
+                  {/* Primary Column: Metadata, Title, Authors & Action Links */}
                   <div className="pds-pub-card-primary">
                     <div className="pds-pub-card-meta-wrap">
                       {/* Journal Strip */}
@@ -169,8 +177,9 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
                     </div>
                   </div>
 
-                  {/* Right Column: Executive Summary & Key Findings */}
-                  <div className="pds-pub-card-secondary">
+                  {/* Right Column: Executive Summary & Key Findings (Only if content exists) */}
+                  {hasSecondary && (
+                    <div className="pds-pub-card-secondary">
                     {/* Executive Clinical Summary */}
                     {article.clinicalSummary ? (
                       <div className="pds-pub-summary-box">
@@ -209,6 +218,7 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
                       </div>
                     )}
                   </div>
+                  )}
                 </article>
               );
             })}

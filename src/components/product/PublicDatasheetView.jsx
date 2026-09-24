@@ -2491,6 +2491,7 @@ export default function PublicDatasheetView({
             hideFloatingTrigger={true} 
             isBloodoSuite={isBloodoDiagnostic}
             currentProductSlug={slug || product?.slug}
+            associatedProtocols={associatedProtocols}
           />
         </div>
       </PublicPageShell>

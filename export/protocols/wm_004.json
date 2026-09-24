@@ -42,7 +42,8 @@
     "abbreviatedName": "Tirzepatide + AOD + MOTS-c",
     "shortCode": "WMT-004",
     "clinical_summary": "Structured multi-phase metabolic protocol designed to improve adiposity regulation, insulin sensitivity, metabolic flexibility, and progressive body composition optimization through staged pharmacologic and peptide-based interventions.",
-    "evidence_grade": "B"
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Core anchor Tirzepatide possesses Grade A evidence. Adjunctive mitochondrial and lipolytic components (MOTS-c, AOD-9604) have Phase I/II human data (Cell Metab 2015; Stier et al., 2004). Combined synergistic stack graded B as an integrative protocol."
   },
   "schema_version": "antigravity_v2",
   "complexity_level": "moderate",
@@ -517,5 +518,7 @@
     "fagron-nutrigen",
     "24-genomics-nutrigen",
     "nad-blood-test"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Core anchor Tirzepatide possesses Grade A evidence. Adjunctive mitochondrial and lipolytic components (MOTS-c, AOD-9604) have Phase I/II human data (Cell Metab 2015; Stier et al., 2004). Combined synergistic stack graded B as an integrative protocol."
 }

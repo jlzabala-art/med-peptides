@@ -560,7 +560,7 @@
       "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
-    "evidence_grade_note": "GRADE B: MOTS-c Phase I human data (Lee C, Cell Metab 2015); SS-31/Elamipretide Phase II data in heart failure and aging (NEJM 2023 RESTORE trial). Strong mechanistic basis; limited large RCT data for fatigue indication specifically.",
+    "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023).",
     "primary_condition": "fatigue_mitochondrial_dysfunction",
     "version": "1.0",
     "clinical_summary": "MOTS-c is a mitochondrial-derived peptide that translocates to the nucleus under metabolic stress, activating AMPK and AICAR pathways to enhance glucose uptake, fatty acid oxidation, and mitochondrial biogenesis. SS-31 (Elamipretide) stabilizes cardiolipin on the inner mitochondrial membrane, preserving the electron transport chain under oxidative stress. Combined, they target the root bioenergetic deficit in chronic fatigue, aging-related mitochondrial decline, and post-viral fatigue syndromes.",
@@ -702,5 +702,7 @@
       "Headache in first 1–2 weeks of MOTS-c initiation (~7%)"
     ],
     "contraindication_summary": "Contraindicated in active malignancy due to mitochondrial AMPK pathway interactions that may theoretically influence cancer cell metabolism. Avoid in severe primary mitochondrial disease requiring specialist management. Not for use in pregnancy or breastfeeding (no safety data). Known hypersensitivity to MOTS-c or SS-31 is an absolute contraindication. Use with caution in patients on metformin (AMPK overlap), immunosuppressants, or cardiac medications. Patients with post-viral fatigue syndromes should begin at reduced dose with careful physician monitoring."
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023)."
 }

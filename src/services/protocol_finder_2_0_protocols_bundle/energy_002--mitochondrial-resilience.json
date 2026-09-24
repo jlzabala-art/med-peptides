@@ -31,7 +31,9 @@
         "Elamipretide has direct clinical exposure in mitochondrial-focused contexts.",
         "MOTS-c is included as an adaptive metabolic resilience adjunct."
       ]
-    }
+    },
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Elamipretide (SS-31) mitochondrial cardiolipin stabilization supported by Phase II clinical trials. NAD+ precursor augmentation validated in human randomized placebo-controlled trials (Martens CR et al., Nat Commun 2018; Yoshino et al., Science 2021)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -454,5 +456,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Elamipretide (SS-31) mitochondrial cardiolipin stabilization supported by Phase II clinical trials. NAD+ precursor augmentation validated in human randomized placebo-controlled trials (Martens CR et al., Nat Commun 2018; Yoshino et al., Science 2021)."
 }

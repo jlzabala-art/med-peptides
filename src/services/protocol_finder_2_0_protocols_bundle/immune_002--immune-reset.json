@@ -31,7 +31,9 @@
         "Designed as a recovery-oriented immune reset blueprint.",
         "BPC-157 is included only as an optional repair-support adjunct."
       ]
-    }
+    },
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: Thymosin Alpha-1 (Grade B) paired with KPV (alpha-MSH 11-13 tripeptide) and gut/mucosal barrier support (BPC-157). While TA-1 has extensive human RCT data, mucosal anti-inflammatory stack components rely largely on translational and preclinical evidence."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -437,5 +439,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Thymosin Alpha-1 (Grade B) paired with KPV (alpha-MSH 11-13 tripeptide) and gut/mucosal barrier support (BPC-157). While TA-1 has extensive human RCT data, mucosal anti-inflammatory stack components rely largely on translational and preclinical evidence."
 }

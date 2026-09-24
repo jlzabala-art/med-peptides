@@ -14,6 +14,7 @@ import {
   Sparkles
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
+import AnatomicalInjuryDoseCalculator from './AnatomicalInjuryDoseCalculator';
 import './ProtocolAnatomicalTargetingCard.css';
 
 export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' }) {
@@ -237,6 +238,9 @@ export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' 
               )}
             </div>
           )}
+
+          {/* Interactive Tissue Injury & Dose Calculator */}
+          <AnatomicalInjuryDoseCalculator lang={lang} />
         </div>
       )}
 

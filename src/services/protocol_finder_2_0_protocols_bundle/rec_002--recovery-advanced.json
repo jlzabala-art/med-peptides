@@ -27,7 +27,9 @@
       "organization": "Atlas Health"
     },
     "created_at": "2026-05-04T00:00:00.000Z",
-    "updated_at": "2026-05-04T00:00:00.000Z"
+    "updated_at": "2026-05-04T00:00:00.000Z",
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -193,5 +195,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013)."
 }

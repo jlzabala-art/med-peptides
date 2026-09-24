@@ -372,36 +372,36 @@ export default function ClinicalHandlingProtocolStepper({
         )}
       </div>
 
-      {/* 4-Step Visual Grid */}
-      <div className="chp-grid">
+      {/* 4-Step Linear Stepper Rows (GCP Standard) */}
+      <div className="chp-grid chp-stepper-rows">
         {activeProtocol.steps.map((item) => {
           const IconComponent = item.icon;
           const isSolventStep = activeProtocol.id === 'vial' && item.step === 2 && dynamicSolventText;
           const actionText = isSolventStep ? dynamicSolventText : item.action;
 
           return (
-            <div key={item.step} className="chp-card">
-              {/* Step Header */}
-              <div className="chp-card-top">
+            <div key={item.step} className="chp-card chp-card-row">
+              {/* Step Left: Badges & Icon */}
+              <div className="chp-card-left">
                 <div className="chp-step-badge" style={{ backgroundColor: item.accent }}>
                   {item.step}
                 </div>
                 <div className="chp-icon-wrap" style={{ color: item.accent, backgroundColor: `${item.accent}12` }}>
                   <IconComponent size={20} />
                 </div>
-                <div className="chp-step-phase-tag">
-                  STEP {item.step}
-                </div>
               </div>
 
-              {/* Step Title & Micro-Action */}
+              {/* Step Center: Title, Headline & Action */}
               <div className="chp-card-body">
-                <h4 className="chp-step-title">{item.title}</h4>
-                <div className="chp-step-headline">{item.headline}</div>
+                <div className="chp-step-meta-row">
+                  <span className="chp-step-phase-tag">STEP {item.step}</span>
+                  <h4 className="chp-step-title">{item.title}</h4>
+                  <span className="chp-step-headline-pill">{item.headline}</span>
+                </div>
                 <p className="chp-step-action">{actionText}</p>
               </div>
 
-              {/* Safety Badges: DO & DON'T */}
+              {/* Step Right: Safety DO & DON'T Pills */}
               <div className="chp-card-footer">
                 <div className="chp-rule-pill do">
                   <Check size={12} className="chp-rule-icon" />

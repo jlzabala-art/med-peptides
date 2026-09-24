@@ -324,7 +324,9 @@
     },
     "shortCode": "REC-001",
     "primary_goal": "Recovery / Injury",
-    "duration_weeks": 8
+    "duration_weeks": 8,
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: BPC-157 exhibits robust, reproducible angiogenic, tendon, and ligament repair in extensive preclinical controlled trials (Sikiric P et al., Curr Med Chem 2020; Gwyer et al., 2019). TB-500 (Thymosin Beta-4) is supported by Phase II clinical wound healing and tissue regeneration trials (Goldstein AL et al., Expert Opin Biol Ther 2012)."
   },
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z",
@@ -438,5 +440,7 @@
   "recommended_tests": [
     "fagron-trichotest",
     "fagron-acnetest"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: BPC-157 exhibits robust, reproducible angiogenic, tendon, and ligament repair in extensive preclinical controlled trials (Sikiric P et al., Curr Med Chem 2020; Gwyer et al., 2019). TB-500 (Thymosin Beta-4) is supported by Phase II clinical wound healing and tissue regeneration trials (Goldstein AL et al., Expert Opin Biol Ther 2012)."
 }

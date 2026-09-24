@@ -1,0 +1,141 @@
+/* AssociatedProtocolsSidebarWidget.css - GCP Inspired */
+.pds-sidebar-protocols-widget {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pds-spw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.pds-spw-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pds-spw-icon {
+  color: #0284c7;
+}
+
+.pds-spw-title {
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.pds-spw-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  padding: 1px 6px;
+  border-radius: 9999px;
+}
+
+.pds-spw-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.pds-spw-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  gap: 0.5rem;
+}
+
+.pds-spw-item:hover {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  transform: translateX(2px);
+}
+
+.pds-spw-item.is-primary {
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+  border-color: #99f6e4;
+}
+
+.pds-spw-item.is-primary:hover {
+  background: #ccfbf1;
+  border-color: #5eead4;
+}
+
+.pds-spw-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pds-spw-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.pds-spw-tag {
+  font-size: 0.60rem;
+  font-weight: 700;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.pds-spw-tag.primary {
+  color: #0d9488;
+}
+
+.pds-spw-duration {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.pds-spw-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pds-spw-category {
+  font-size: 0.66rem;
+  color: #64748b;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pds-spw-arrow {
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.pds-spw-item:hover .pds-spw-arrow {
+  color: #0284c7;
+  transform: translateX(2px);
+}

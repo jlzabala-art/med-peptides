@@ -45,7 +45,8 @@
     "schema_version": "antigravity_v2",
     "complexity_level": "advanced",
     "abbreviatedName": "Semaglutide + Cagrilintide",
-    "shortCode": "WMT-002"
+    "shortCode": "WMT-002",
+    "evidence_grade_note": "Grade A: Semaglutide has robust Grade A evidence across STEP 1-8 Phase III trials. Cagrilintide dual-agonist pairing is supported by Phase II/III randomized clinical trials (Frias JP et al., Lancet 2023) showing superior glycemic and weight loss outcomes compared to monotherapy."
   },
   "protocol_source_document": "ReGen_PEPT_Clinical_Guidelines_2026.pdf",
   "protocol_is_physician_authored": false,
@@ -605,5 +606,7 @@
     "fagron-nutrigen",
     "24-genomics-nutrigen",
     "nad-blood-test"
-  ]
+  ],
+  "evidence_grade": "A",
+  "evidence_grade_note": "Grade A: Semaglutide has robust Grade A evidence across STEP 1-8 Phase III trials. Cagrilintide dual-agonist pairing is supported by Phase II/III randomized clinical trials (Frias JP et al., Lancet 2023) showing superior glycemic and weight loss outcomes compared to monotherapy."
 }

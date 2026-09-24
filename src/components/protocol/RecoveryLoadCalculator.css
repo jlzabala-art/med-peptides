@@ -1,0 +1,307 @@
+/* ══════════════════════════════════════════════════════════════════
+   RecoveryLoadCalculator.css
+   GCP-standard Recovery Foundation / BPC-157 + TB-500 Load Calculator
+   ══════════════════════════════════════════════════════════════════ */
+
+.recovery-calc {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── Header ── */
+.recovery-calc__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #7c2d12 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recovery-calc__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.recovery-calc__icon-wrap {
+  width: 34px;
+  height: 34px;
+  background: rgba(251, 146, 60, 0.15);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fb923c;
+  flex-shrink: 0;
+}
+
+.recovery-calc__title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.recovery-calc__subtitle {
+  font-size: 0.70rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.recovery-calc__badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.12);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.recovery-calc__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Inputs ── */
+.recovery-calc__inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .recovery-calc__inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.recovery-calc__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.recovery-calc__label {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.recovery-calc__select,
+.recovery-calc__input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.recovery-calc__select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.recovery-calc__select:focus,
+.recovery-calc__input:focus {
+  border-color: #fb923c;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
+  background: #ffffff;
+}
+
+.recovery-calc__hint {
+  font-size: 0.66rem;
+  color: #94a3b8;
+}
+
+/* ── Results ── */
+.recovery-calc__results {
+  background: linear-gradient(135deg, #0f172a 0%, #7c2d12 100%);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recovery-calc__results-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fb923c;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.recovery-calc__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.recovery-calc__kpi {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.recovery-calc__kpi-label {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.recovery-calc__kpi-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.recovery-calc__kpi-value.orange { color: #fb923c; }
+.recovery-calc__kpi-value.blue   { color: #60a5fa; }
+.recovery-calc__kpi-value.green  { color: #34d399; }
+.recovery-calc__kpi-value.amber  { color: #fbbf24; }
+
+.recovery-calc__kpi-unit {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+/* ── Phase Timeline ── */
+.recovery-calc__phases {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.recovery-calc__phases-header {
+  background: #fff7ed;
+  border-bottom: 1px solid #fed7aa;
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #c2410c;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recovery-calc__phases-body {
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.recovery-calc__phase-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.recovery-calc__phase-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fb923c;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.recovery-calc__phase-text {
+  font-size: 0.78rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.recovery-calc__phase-text strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ── Footer ── */
+.recovery-calc__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.recovery-calc__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.recovery-calc__btn--primary {
+  background: linear-gradient(135deg, #fb923c, #ea580c);
+  color: #ffffff;
+}
+
+.recovery-calc__btn--primary:hover {
+  background: linear-gradient(135deg, #fdba74, #fb923c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
+}
+
+.recovery-calc__btn--ghost {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.recovery-calc__btn--ghost:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.recovery-calc__disclaimer {
+  font-size: 0.67rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.85rem;
+}

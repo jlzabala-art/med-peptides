@@ -166,6 +166,88 @@ async function getPublicProtocol(slug) {
   return result;
 }
 
+/**
+ * Fetch top-3 protocols sharing the same therapeutic goal,
+ * ordered by clinical evidence grade (A > B > C).
+ * Excludes the current protocol slug.
+ */
+const EVIDENCE_RANK = { A: 1, B: 2, C: 3, D: 4 };
+
+async function getSimilarProtocols(goal, excludeSlug) {
+  if (!adminDb || !goal) return [];
+  try {
+    // Try primary_goal first, fallback to goal field
+    let snapshot = await adminDb.collection('protocols')
+      .where('primary_goal', '==', goal)
+      .where('status', 'in', ['active', 'published'])
+      .limit(20)
+      .get()
+      .catch(() => null);
+
+    if (!snapshot || snapshot.empty) {
+      snapshot = await adminDb.collection('protocols')
+        .where('goal', '==', goal)
+        .where('status', 'in', ['active', 'published'])
+        .limit(20)
+        .get()
+        .catch(() => null);
+    }
+
+    if (!snapshot || snapshot.empty) {
+      // Broader fallback: fetch active protocols and filter by category/goal fields
+      snapshot = await adminDb.collection('protocols')
+        .where('status', 'in', ['active', 'published'])
+        .limit(50)
+        .get()
+        .catch(() => null);
+    }
+
+    if (!snapshot || snapshot.empty) return [];
+
+    const goalNorm = String(goal).toLowerCase().trim();
+    const excludeNorm = String(excludeSlug || '').toLowerCase().trim();
+
+    const similar = [];
+    for (const doc of snapshot.docs) {
+      const d = doc.data();
+      const docSlug = (d.slug || d.protocol_slug || doc.id || '').toLowerCase();
+      if (docSlug === excludeNorm) continue;
+
+      // Match by any goal-related field
+      const docGoal = String(d.primary_goal || d.goal || d.category || d.therapeutic_category || '').toLowerCase();
+      if (!docGoal.includes(goalNorm) && !goalNorm.includes(docGoal)) continue;
+
+      // Extract evidence grade from metadata or root
+      const grade = String(
+        d.metadata?.evidence_grade || d.evidence_grade || 'D'
+      ).trim().charAt(0).toUpperCase();
+
+      similar.push({
+        id: doc.id,
+        slug: d.slug || d.protocol_slug || doc.id,
+        name: d.name || d.title || d.protocol_title || 'Clinical Protocol',
+        title: d.name || d.title || d.protocol_title || 'Clinical Protocol',
+        durationWeeks: d.durationWeeks || d.duration_weeks || null,
+        duration: d.duration || null,
+        evidence_grade: grade,
+        compoundCount: Array.isArray(d.items) ? d.items.length : (d.compoundCount || null),
+      });
+    }
+
+    // Sort: A > B > C > D, then by name
+    similar.sort((a, b) => {
+      const ra = EVIDENCE_RANK[a.evidence_grade] || 99;
+      const rb = EVIDENCE_RANK[b.evidence_grade] || 99;
+      if (ra !== rb) return ra - rb;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    return similar.slice(0, 3);
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const slug = resolvedParams?.slug;
@@ -222,6 +304,10 @@ export default async function PublicProtocolRoute({ params }) {
     notFound();
   }
 
+  // Fetch similar protocols by the same therapeutic goal
+  const protocolGoal = protocol.primary_goal || protocol.goal || protocol.category || protocol.therapeutic_category || null;
+  const similarProtocols = protocolGoal ? await getSimilarProtocols(protocolGoal, slug) : [];
+
   const jsonLd = generateProtocolJsonLd(protocol, BASE_URL);
 
   return (
@@ -232,7 +318,7 @@ export default async function PublicProtocolRoute({ params }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <PublicProtocolPage protocol={protocol} slug={slug} baseUrl={BASE_URL} />
+      <PublicProtocolPage protocol={protocol} slug={slug} baseUrl={BASE_URL} similarProtocols={similarProtocols} />
     </>
   );
 }

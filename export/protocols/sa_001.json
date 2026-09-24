@@ -382,7 +382,9 @@
     "description": "12-week staged skin and aesthetics protocol using GHK-Cu for barrier support and dermal matrix remodeling, with optional localized BPC-157 for tissue repair support.",
     "primary_goal": "Skin / Anti-Aging",
     "shortCode": "SKN-001",
-    "duration_weeks": 12
+    "duration_weeks": 12,
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.)."
   },
   "generator_rules": {
     "allow_acceleration": false,
@@ -426,5 +428,7 @@
   "protocol_duration_weeks": 12,
   "recommended_tests": [
     "fagron-acnetest"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.)."
 }

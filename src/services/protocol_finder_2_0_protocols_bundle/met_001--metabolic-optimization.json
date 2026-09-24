@@ -47,7 +47,9 @@
         "Tirzepatide has the strongest human clinical basis in this set for metabolic / obesity support.",
         "MOTS-c is included as an adaptive bioenergetic adjunct."
       ]
-    }
+    },
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: MOTS-c demonstrates cellular metabolic optimization and insulin sensitivity restoration in Phase I human trials and mechanistic studies (Lee C et al., Cell Metab 2015). AOD-9604 is supported by multi-center Phase IIb randomized clinical trials (Metabolic Pharmaceuticals 2004)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -475,5 +477,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: MOTS-c demonstrates cellular metabolic optimization and insulin sensitivity restoration in Phase I human trials and mechanistic studies (Lee C et al., Cell Metab 2015). AOD-9604 is supported by multi-center Phase IIb randomized clinical trials (Metabolic Pharmaceuticals 2004)."
 }

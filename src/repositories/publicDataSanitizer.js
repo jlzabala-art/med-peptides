@@ -169,6 +169,13 @@ export function sanitizePublicProtocol(rawProtocol) {
     if (whitelisted[df]?.toDate) whitelisted[df] = whitelisted[df].toDate().toISOString();
   });
 
+  // Ensure title and name are always mutually defined
+  whitelisted.title = whitelisted.title || whitelisted.name || 'Clinical Protocol';
+  whitelisted.name = whitelisted.name || whitelisted.title || 'Clinical Protocol';
+  if (!whitelisted.peptides && whitelisted.items) {
+    whitelisted.peptides = whitelisted.items;
+  }
+
   return whitelisted;
 }
 

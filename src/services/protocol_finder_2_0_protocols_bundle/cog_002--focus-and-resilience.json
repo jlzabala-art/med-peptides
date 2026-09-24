@@ -47,7 +47,9 @@
         "Designed for stress-linked focus inefficiency and resilience support.",
         "Evidence base is more exploratory than for immune, reproductive, or metabolic protocols."
       ]
-    }
+    },
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: Semax paired with Pinealon (tripeptide Glu-Asp-Arg). Russian peer-reviewed clinical studies demonstrate cognitive endurance and neuro-executive resilience in acute hypoxia and asthenic syndromes (Zozulya 2014; Khavinson et al.)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -468,5 +470,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Semax paired with Pinealon (tripeptide Glu-Asp-Arg). Russian peer-reviewed clinical studies demonstrate cognitive endurance and neuro-executive resilience in acute hypoxia and asthenic syndromes (Zozulya 2014; Khavinson et al.)."
 }

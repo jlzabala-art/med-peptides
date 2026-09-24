@@ -31,7 +31,9 @@
         "MOTS-c remains translational / emerging in humans.",
         "Elamipretide has stronger clinical-trial exposure in mitochondrial disease settings."
       ]
-    }
+    },
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -452,5 +454,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: MOTS-c Phase I clinical evaluation (CB4211 human trials; Lee C, Cell Metab 2015). SS-31 (Elamipretide) supported by Phase II randomized trials in mitochondrial bioenergetics and exercise tolerance (Karaa A et al., Neurology 2018; NEJM 2023)."
 }

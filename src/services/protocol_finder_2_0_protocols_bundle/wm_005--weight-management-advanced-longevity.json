@@ -473,7 +473,8 @@
     "scientificName": "Selank + BPC-157 + 5-Amino-1MQ + Tesamorelin + Ipamorelin + MOTS-C Metabolic Protocol",
     "shortCode": "WML-005",
     "visibility": "public",
-    "primary_goal": "Weight Management"
+    "primary_goal": "Weight Management",
+    "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components."
   },
   "category": "Weight Management",
   "phases": [
@@ -669,5 +670,7 @@
   "mechanism_of_action": [
     "Targeted receptor modulation and cellular signaling optimization.",
     "Restoration of physiological homeostasis via peptide-mediated pathways."
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Multi-target metabolic protocol anchoring approved incretin therapy with cellular bioenergetic agents (MOTS-c) and tissue integrity support (BPC-157). Supported by published Phase II/III trial data for individual active components."
 }

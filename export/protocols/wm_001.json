@@ -215,12 +215,15 @@
       "last_reviewed_at": "2026-04-26",
       "review_status": "approved_for_clinical_use"
     },
-    "version": "1.0"
+    "version": "1.0",
+    "evidence_grade_note": "Grade A: Extensive multi-center Phase III double-blind RCTs (SURMOUNT-1 to 4; Jastreboff AM et al., N Engl J Med 2022). FDA and EMA approved for chronic weight management. Demonstrates 20.9% mean total body weight reduction at 72 weeks."
   },
   "clinical_disclaimer": "For use by qualified healthcare professionals only. Requires clinical evaluation, monitoring, and adherence to local regulatory standards.",
   "recommended_tests": [
     "fagron-nutrigen",
     "24-genomics-nutrigen",
     "nad-blood-test"
-  ]
+  ],
+  "evidence_grade": "A",
+  "evidence_grade_note": "Grade A: Extensive multi-center Phase III double-blind RCTs (SURMOUNT-1 to 4; Jastreboff AM et al., N Engl J Med 2022). FDA and EMA approved for chronic weight management. Demonstrates 20.9% mean total body weight reduction at 72 weeks."
 }

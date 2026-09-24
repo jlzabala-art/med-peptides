@@ -8,7 +8,9 @@
   "metadata": {
     "primary_goal": "Skin / Anti-Aging",
     "complexity_level": "standard",
-    "visibility": "public"
+    "visibility": "public",
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.)."
   },
   "phase_blueprints": [
     {
@@ -171,5 +173,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: GHK-Cu is clinically validated in multiple controlled human clinical trials demonstrating significant stimulation of procollagen synthesis, glycosaminoglycan accumulation, and dermal remodeling (Pickart L et al., Int J Mol Sci 2018; Finkey et al.)."
 }

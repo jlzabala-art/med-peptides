@@ -410,7 +410,9 @@
     "source_reference": "internal_guide",
     "schema_version": "antigravity_v2",
     "complexity_level": "simple",
-    "primary_goal": "Sleep Support"
+    "primary_goal": "Sleep Support",
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: DSIP delta-sleep induction combined with Epithalon chronobiological restoration. Promotes pineal gland restoration and natural circadian amplitude in translational and clinical cohort studies."
   },
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z"
@@ -436,5 +438,7 @@
   "_syncedAt": "2026-04-26T12:46:37.159Z",
   "recommended_tests": [
     "cortisol-blood-test"
-  ]
+  ],
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: DSIP delta-sleep induction combined with Epithalon chronobiological restoration. Promotes pineal gland restoration and natural circadian amplitude in translational and clinical cohort studies."
 }

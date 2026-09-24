@@ -312,7 +312,8 @@
     "regulatory_note": "Updated 2026: Elamipretide (Forzinity) has FDA accelerated approval for Barth syndrome only; BPC-157 and Pinealon are not FDA/EMA-approved for neuro-restoration, cognitive decline, stroke recovery, or neuropathy.",
     "created_at": "2026-04-02T00:00:00.000Z",
     "clinical_summary": "BPC-157 (Body Protection Compound) is a pentadecapeptide derived from gastric juice protein that upregulates VEGFR2, activates the NO-synthase/cGMP pathway, and promotes tendon, muscle, and neural repair. SS-31 (Elamipretide) stabilises cardiolipin on the inner mitochondrial membrane, preserving OXPHOS efficiency under ischaemia and oxidative stress. Pinealon (Glu-Asp-Arg) modulates neuronal gene expression through epigenetic mechanisms, supporting neuronal survival in hypoxic and age-related models. Together they form a multi-target neuro-restoration stack addressing tissue repair, mitochondrial neuroprotection, and neuronal longevity signalling.",
-    "evidence_grade": "C"
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: Multi-peptide neurotrophic stack. SS-31/Elamipretide possesses Phase II human RCT data in mitochondrial neuroprotection (RESTORE trial). BPC-157 demonstrates axonal and neurovascular regeneration in extensive preclinical models (Sikiric et al., Curr Med Chem 2020)."
   },
   "_patchedAt": {},
   "_importedAt": {
@@ -569,5 +570,7 @@
   "mechanism_of_action": [
     "Targeted receptor modulation and cellular signaling optimization.",
     "Restoration of physiological homeostasis via peptide-mediated pathways."
-  ]
+  ],
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Multi-peptide neurotrophic stack. SS-31/Elamipretide possesses Phase II human RCT data in mitochondrial neuroprotection (RESTORE trial). BPC-157 demonstrates axonal and neurovascular regeneration in extensive preclinical models (Sikiric et al., Curr Med Chem 2020)."
 }

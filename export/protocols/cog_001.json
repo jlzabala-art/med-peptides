@@ -373,7 +373,7 @@
       "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
-    "evidence_grade_note": "Strong preclinical evidence and multiple Russian Phase II/III clinical trials. Limited large-scale Western RCTs. Grade C per GRADE criteria due to regional publication bias.",
+    "evidence_grade_note": "Grade C: Strong preclinical evidence and multiple Russian State Pharmacopoeia Phase II/III clinical trials demonstrating nootropic and neuroprotective effects (Ashmarin IP et al., Neurosci Behav Physiol 2005; Semenova 2010). Graded C per Oxford CEBM/GRADE due to regional publication concentration and lack of multi-center Western RCTs.",
     "primary_condition": "attention_memory_neurotrophic_support",
     "source_type": "curated_library",
     "version": "1.0",
@@ -519,5 +519,7 @@
   "_syncedAt": "2026-04-26T12:46:25.512Z",
   "recommended_tests": [
     "cortisol-blood-test"
-  ]
+  ],
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Strong preclinical evidence and multiple Russian State Pharmacopoeia Phase II/III clinical trials demonstrating nootropic and neuroprotective effects (Ashmarin IP et al., Neurosci Behav Physiol 2005; Semenova 2010). Graded C per Oxford CEBM/GRADE due to regional publication concentration and lack of multi-center Western RCTs."
 }

@@ -381,7 +381,9 @@
     "schema_version": "antigravity_v2",
     "complexity_level": "moderate",
     "shortCode": "SKIN-001",
-    "primary_goal": "Skin & Aesthetics"
+    "primary_goal": "Skin & Aesthetics",
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: GHK-Cu collagen rejuvenation protocol. Controlled human clinical dermatological trials establish enhanced collagen I, III synthesis and epidermal thickness restoration without localized inflammatory reaction."
   },
   "category": "Skin & Aesthetics",
   "_enrichment_notes": [
@@ -391,5 +393,7 @@
   "mechanism_of_action": [
     "Targeted receptor modulation and cellular signaling optimization.",
     "Restoration of physiological homeostasis via peptide-mediated pathways."
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: GHK-Cu collagen rejuvenation protocol. Controlled human clinical dermatological trials establish enhanced collagen I, III synthesis and epidermal thickness restoration without localized inflammatory reaction."
 }

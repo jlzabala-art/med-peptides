@@ -466,7 +466,8 @@
       "last_reviewed_at": "2026-04-25",
       "review_status": "approved"
     },
-    "regulatory_note": "Updated 2026: Retatrutide remains investigational and is not FDA/EMA-approved for obesity, type 2 diabetes, or any commercial indication as of April 2026. Lilly reported positive Phase 3 TRIUMPH-4 topline data in December 2025, including average 28.7% body-weight reduction at 68 weeks in adults with obesity/overweight and knee osteoarthritis; full peer-reviewed Phase 3 publication and regulatory filing are still pending."
+    "regulatory_note": "Updated 2026: Retatrutide remains investigational and is not FDA/EMA-approved for obesity, type 2 diabetes, or any commercial indication as of April 2026. Lilly reported positive Phase 3 TRIUMPH-4 topline data in December 2025, including average 28.7% body-weight reduction at 68 weeks in adults with obesity/overweight and knee osteoarthritis; full peer-reviewed Phase 3 publication and regulatory filing are still pending.",
+    "evidence_grade_note": "Grade B: Retatrutide Phase II clinical data published in NEJM (2023) demonstrates profound metabolic regulation and hepatic steatosis resolution. Paired with MOTS-c mitochondrial signal transduction."
   },
   "monitoring_plan": {
     "baseline_required": [
@@ -688,5 +689,7 @@
     "fagron-nutrigen",
     "24-genomics-nutrigen",
     "nad-blood-test"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Retatrutide Phase II clinical data published in NEJM (2023) demonstrates profound metabolic regulation and hepatic steatosis resolution. Paired with MOTS-c mitochondrial signal transduction."
 }

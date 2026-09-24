@@ -47,7 +47,9 @@
         "Kisspeptin has a meaningful human reproductive endocrinology literature base.",
         "Protocol should remain focused on axis support rather than disease treatment claims."
       ]
-    }
+    },
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020)."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -451,5 +453,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Kisspeptin-10/54 clinical literature demonstrates potent, physiological stimulation of pulsatile LH/FSH and endogenous testosterone in published human RCTs (Jayasena CN et al., J Clin Invest 2014; Abbara A et al., JAMA Netw Open 2020)."
 }

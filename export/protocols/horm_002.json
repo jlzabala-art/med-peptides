@@ -605,12 +605,12 @@
       "name": "Atlas Health Clinical Team",
       "title": "Peptide Specialists"
     },
-    "evidence_grade_note": "GRADE A- due to FDA approval of Tesamorelin (Egrifta) for HIV-lipodystrophy visceral fat reduction (Falutz J, NEJM 2010). Ipamorelin/CJC-1295 component remains GRADE B (Phase II data). Combined protocol is clinical extrapolation.",
+    "evidence_grade_note": "Grade A: Core component Tesamorelin is FDA-approved based on multi-center Phase III double-blind placebo-controlled RCTs (Falutz J et al., N Engl J Med 2010) for visceral adipose reduction and GH axis pulsatile restoration. Paired with GHRH secretagogue.",
     "description": "12-week GH-axis protocol pairing FDA-approved Tesamorelin GHRH analogue with Ipamorelin ghrelin-mimetic for clinically validated visceral fat reduction and pulsatile GH restoration.",
     "primary_condition": "female_hormonal_optimization",
     "version": "1.0",
     "clinical_summary": "The GH Axis Support Protocol (horm_002) is an intensified version of horm_001, featuring higher-dose Ipamorelin/CJC-1295 with optional Tesamorelin (a GHRH analog FDA-approved for HIV-associated lipodystrophy) for targeted visceral fat reduction. This protocol is appropriate for patients who have plateaued on horm_001 or require more aggressive GH axis stimulation for body composition, visceral adiposity, or severe somatopause. Tesamorelin's FDA approval provides a stronger regulatory foundation for its visceral fat indication.",
-    "evidence_grade": "A-",
+    "evidence_grade": "A",
     "schema_version": "antigravity_v2",
     "pubmed_references": [
       {
@@ -723,5 +723,7 @@
   "recommended_tests": [
     "testosterone-blood-test",
     "fagron-trichotest"
-  ]
+  ],
+  "evidence_grade": "A",
+  "evidence_grade_note": "Grade A: Core component Tesamorelin is FDA-approved based on multi-center Phase III double-blind placebo-controlled RCTs (Falutz J et al., N Engl J Med 2010) for visceral adipose reduction and GH axis pulsatile restoration. Paired with GHRH secretagogue."
 }

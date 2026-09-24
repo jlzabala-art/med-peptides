@@ -15,6 +15,7 @@ import {
   AlertTriangle
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
+import SomatotropicCircadianCalculator from './SomatotropicCircadianCalculator';
 import './ProtocolSomatotropicAxisCard.css';
 
 export default function ProtocolSomatotropicAxisCard({ protocol, lang = 'en' }) {
@@ -189,6 +190,9 @@ export default function ProtocolSomatotropicAxisCard({ protocol, lang = 'en' }) 
               </div>
             </div>
           </div>
+
+          {/* Interactive Circadian Timing & Somatostatin Calculator */}
+          <SomatotropicCircadianCalculator lang={lang} />
         </div>
       )}
 

@@ -47,7 +47,9 @@
         "Use as a research-oriented cognitive support blueprint.",
         "Human clinical literature is narrower and region-specific compared with endocrine/metabolic peptides."
       ]
-    }
+    },
+    "evidence_grade": "C",
+    "evidence_grade_note": "Grade C: Strong preclinical evidence and multiple Russian State Pharmacopoeia Phase II/III clinical trials demonstrating nootropic and neuroprotective effects (Ashmarin IP et al., Neurosci Behav Physiol 2005; Semenova 2010). Graded C per Oxford CEBM/GRADE due to regional publication concentration and lack of multi-center Western RCTs."
   },
   "eligibility_rules": {
     "supported_age_groups": [
@@ -468,5 +470,7 @@
       "Active malignancies or history of specific hormone-sensitive cancers.",
       "Known hypersensitivity to any protocol components."
     ]
-  }
+  },
+  "evidence_grade": "C",
+  "evidence_grade_note": "Grade C: Strong preclinical evidence and multiple Russian State Pharmacopoeia Phase II/III clinical trials demonstrating nootropic and neuroprotective effects (Ashmarin IP et al., Neurosci Behav Physiol 2005; Semenova 2010). Graded C per Oxford CEBM/GRADE due to regional publication concentration and lack of multi-center Western RCTs."
 }

@@ -10,6 +10,8 @@ import {
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import BloodoSuiteNav from './BloodoSuiteNav';
+import AssociatedProtocolsSidebarWidget from './AssociatedProtocolsSidebarWidget';
+import SimilarProtocolsSidebarWidget from './SimilarProtocolsSidebarWidget';
 import './PublicDatasheetTableOfContents.css';
 
 /**
@@ -31,7 +33,10 @@ export default function PublicDatasheetTableOfContents({
   title = null,
   hideFloatingTrigger = false,
   isBloodoSuite = false,
-  currentProductSlug = ''
+  currentProductSlug = '',
+  associatedProtocols = [],
+  similarProtocols = [],
+  currentProtocolSlug = ''
 }) {
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
@@ -191,6 +196,23 @@ export default function PublicDatasheetTableOfContents({
             />
           )}
 
+          {/* Associated Clinical Protocols (All Products) */}
+          {Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
+            <AssociatedProtocolsSidebarWidget
+              protocols={associatedProtocols}
+              lang={lang}
+            />
+          )}
+
+          {/* Similar Protocols by Goal + Evidence Grade (Protocol Pages Only) */}
+          {Array.isArray(similarProtocols) && similarProtocols.length > 0 && (
+            <SimilarProtocolsSidebarWidget
+              protocols={similarProtocols}
+              lang={lang}
+              currentSlug={currentProtocolSlug}
+            />
+          )}
+
           {/* Quick Back to Top Action */}
           <div className="pds-toc-footer">
             <button
@@ -324,6 +346,23 @@ export default function PublicDatasheetTableOfContents({
                   lang={lang}
                   variant="drawer"
                   onSelect={() => setIsMobileDrawerOpen(false)}
+                />
+              )}
+
+              {/* Associated Clinical Protocols (All Products) */}
+              {Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
+                <AssociatedProtocolsSidebarWidget
+                  protocols={associatedProtocols}
+                  lang={lang}
+                />
+              )}
+
+              {/* Similar Protocols by Goal + Evidence Grade (Protocol Pages Only) */}
+              {Array.isArray(similarProtocols) && similarProtocols.length > 0 && (
+                <SimilarProtocolsSidebarWidget
+                  protocols={similarProtocols}
+                  lang={lang}
+                  currentSlug={currentProtocolSlug}
                 />
               )}
             </div>

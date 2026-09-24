@@ -346,7 +346,9 @@
     },
     "shortCode": "REC-002",
     "primary_goal": "Recovery / Injury",
-    "duration_weeks": 8
+    "duration_weeks": 8,
+    "evidence_grade": "B",
+    "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013)."
   },
   "_patchedAt": {
     "schema_gap_fix": "2026-04-26T12:37:11Z",
@@ -493,5 +495,7 @@
   "recommended_tests": [
     "fagron-trichotest",
     "fagron-acnetest"
-  ]
+  ],
+  "evidence_grade": "B",
+  "evidence_grade_note": "Grade B: Advanced musculoskeletal repair integrating BPC-157 and TB-500 with ARA-290 (Cibinetide). ARA-290 has demonstrated significant nerve regeneration and inflammatory attenuation in double-blind Phase II RCTs (Dahan A et al., Mol Med 2013)."
 }
