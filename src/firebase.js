@@ -38,9 +38,10 @@ if (getApps().length === 0) {
          (/AppleWebKit/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent)));
 
       if (isSafari) {
-        console.info('[Firebase] Safari/WebKit detected: initializing resilient single-tab localCache');
+        console.info('[Firebase] Safari/WebKit detected: initializing resilient single-tab localCache with long-polling');
         firestoreDb = initializeFirestore(app, {
-          localCache: persistentLocalCache({})
+          localCache: persistentLocalCache({}),
+          experimentalForceLongPolling: true
         });
       } else {
         firestoreDb = initializeFirestore(app, {
