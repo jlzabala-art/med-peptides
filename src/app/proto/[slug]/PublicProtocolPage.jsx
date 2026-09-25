@@ -120,11 +120,46 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   const rawDuration = protocol?.durationWeeks ? `${protocol.durationWeeks} ${t.weeksLabel || 'Weeks'}` : (protocol?.duration || `12 ${t.weeksLabel || 'Weeks'}`);
   const baseDescription = protocol?.description || protocol?.summary || protocol?.overview_summary || protocol?.clinicalRationale || '';
 
-  const items = (Array.isArray(protocol?.items) && protocol.items.length > 0) ? protocol.items :
-                (Array.isArray(protocol?.bom) && protocol.bom.length > 0) ? protocol.bom :
-                (Array.isArray(protocol?.products) && protocol.products.length > 0) ? protocol.products :
-                (Array.isArray(protocol?.peptides) && protocol.peptides.length > 0) ? protocol.peptides :
-                (Array.isArray(protocol?.compounds) && protocol.compounds.length > 0) ? protocol.compounds : [];
+  const items = useMemo(() => {
+    if (Array.isArray(protocol?.items) && protocol.items.length > 0) return protocol.items;
+    if (Array.isArray(protocol?.bom) && protocol.bom.length > 0) return protocol.bom;
+    if (Array.isArray(protocol?.products) && protocol.products.length > 0) return protocol.products;
+    if (Array.isArray(protocol?.peptides) && protocol.peptides.length > 0) return protocol.peptides;
+    if (Array.isArray(protocol?.compounds) && protocol.compounds.length > 0) return protocol.compounds;
+
+    // Dynamically derive distinct compounds from phases
+    if (Array.isArray(protocol?.phases) && protocol.phases.length > 0) {
+      const distinct = new Map();
+      protocol.phases.forEach((ph, pIdx) => {
+        const rawDrugs = [...(ph.compounds || []), ...(ph.items || []), ...(ph.drugs_used || [])];
+        rawDrugs.forEach(d => {
+          const rawSlug = d.product_slug || d.slug || (d.productId ? String(d.productId).toLowerCase().replace(/-vial.*$/, '') : null);
+          const rawName = d.name || d.product_name || d.product_slug || d.productId || '';
+          if (!rawName && !rawSlug) return;
+          const bm = matchClinicalBenchmark(rawName || rawSlug);
+          const cleanName = bm?.canonicalName || rawName;
+          const key = (rawSlug || cleanName).toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (key && !distinct.has(key)) {
+            distinct.set(key, {
+              ...d,
+              id: key,
+              name: cleanName,
+              slug: rawSlug || key,
+              format: d.format || (lang === 'es' ? 'Vial Liofilizado Estéril (Polvo)' : 'Lyophilized Sterile API'),
+              route: d.route || 'Subcutaneous (SubQ)',
+              dosage: d.selected_strength || (bm ? `${bm.defaultVialMg} mg Vial` : null),
+              timing: d.dosing_frequency && !d.weekly_dose?.includes('Consult protocol')
+                ? `${d.dosing_frequency.replace('_', ' ')} • ${d.weekly_dose}`
+                : (bm?.cadence || (lang === 'es' ? 'Titulación por fases' : 'Phased titration')),
+              phaseCoverage: `Phase ${pIdx + 1}`
+            });
+          }
+        });
+      });
+      if (distinct.size > 0) return Array.from(distinct.values());
+    }
+    return [];
+  }, [protocol, lang]);
   const phases = protocol?.phases || [];
 
   // ── Version & Update Date System (Homogeneous GCP Standard) ──

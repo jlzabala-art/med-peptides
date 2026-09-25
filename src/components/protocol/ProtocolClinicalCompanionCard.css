@@ -109,23 +109,23 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #25D366;
-  color: #ffffff;
-  font-size: 0.78rem;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 0.76rem;
   font-weight: 700;
   padding: 0.50rem 0.90rem;
-  border-radius: 8px;
-  border: 1px solid #20ba5a;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .pcc-wa-quick-btn:hover {
-  background: #20ba5a;
-  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
-  transform: translateY(-1px);
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 /* ── Google Cloud Navigation Tabs ── */

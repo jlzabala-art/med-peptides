@@ -63,22 +63,52 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
   const [copiedCadenceAll, setCopiedCadenceAll] = useState(false);
 
   const handleCopyMonitoringGuidelines = async () => {
+    const protoName = protocol?.name || protocol?.title || 'NAD+ Cellular Optimization';
+    const protoSlug = protocol?.slug || protocol?.protocol_slug || 'nad-plus-optimization';
     const text = isEs
-      ? `Pautas de Monitorización con Test de NAD (Bloodo™)\n\n` +
-        `• Día 0 (Basal): Si toma precursores orales (NMN/NR), suspender 2-3 semanas antes si es clínicamente apropiado.\n` +
-        `• Semana 4 (En Tratamiento): NO suspender el tratamiento ni hacer lavado. Registrar dosis (ej. 250 mg IV ayer) y hora exacta.\n` +
-        `• Semana 8 (Consolidación): Mantener mismo horario e intervalo para comparar con la Semana 4.\n\n` +
-        `Laboratorio central: LifeLab1 (Vilna, Lituania) / CE-IVDR`
-      : `Bloodo™ NAD Protocol Monitoring & Cadence Guidelines\n\n` +
-        `• Day 0 (Baseline): If on oral NMN/NR, 2-3 week washout recommended before starting.\n` +
-        `• Week 4 (On-Treatment): DO NOT discontinue oral or IV NAD. Document exact doses (e.g. 250 mg IV yesterday) and standardise test timing.\n` +
-        `• Week 8 (Consolidation): Maintain identical collection window relative to doses for serial comparability.\n\n` +
-        `Central Lab: LifeLab1 (Vilnius, EU) / CE-IVDR Certified`;
+      ? `*MEMORANDO CLÍNICO DE MONITORIZACIÓN Y CADENCIA DIAGNÓSTICA*\n` +
+        `Protocolo: ${protoName}\n` +
+        `Diagnóstico Acompañante: Bloodo™ Test Intracelular (pmol/10⁶ células)\n` +
+        `Laboratorio Central: LifeLab1 (Vilna, Lituania) / Certificación CE-IVDR\n` +
+        `----------------------------------------\n` +
+        `*CRONOGRAMA DE TOMA DE MUESTRAS:*\n` +
+        `1. Día 0 (Línea Basal):\n` +
+        `   • Objetivo: Nivel intracelular pre-tratamiento.\n` +
+        `   • Pauta pre-analítica: Si toma precursores orales (NMN/NR), suspender 2-3 semanas antes si es clínicamente apropiado.\n\n` +
+        `2. Semana 4 (En Tratamiento - Nadir):\n` +
+        `   • Objetivo: Respuesta temprana a la dosis y absorción celular.\n` +
+        `   • ¡ADVERTENCIA!: NO suspender el tratamiento ni realizar lavado. Registrar dosis exacta (ej. 250 mg IV ayer) y hora de infusión/inyección.\n\n` +
+        `3. Semana 8 (Consolidación):\n` +
+        `   • Objetivo: Estabilización a largo plazo y ajuste de mantenimiento.\n` +
+        `   • Pauta: Mantener exactamente la misma ventana horaria e intervalo tras la última dosis para comparabilidad seriada.\n\n` +
+        `*SALVAGUARDA DE METILACIÓN:*\n` +
+        `• TMG (Trimetilglicina) ratio 1:1 con precursores para prevenir agotamiento de donantes de metilo.\n\n` +
+        `Verificación clínica: https://med-peptides-app-27a3a.web.app/proto/${protoSlug}\n` +
+        `_Atlas Clinical Governance Engine · SSOT Standard_`
+      : `*CLINICAL COMPANION DIAGNOSTICS & CADENCE MEMORANDUM*\n` +
+        `Protocol: ${protoName}\n` +
+        `Companion Diagnostic: Bloodo™ Intracellular Test (pmol/10⁶ cells)\n` +
+        `Central Laboratory: LifeLab1 (Vilnius, EU) / CE-IVDR Certified\n` +
+        `----------------------------------------\n` +
+        `*SAMPLING CADENCE & PROTOCOL GUIDELINES:*\n` +
+        `1. Day 0 (Baseline Level):\n` +
+        `   • Purpose: Quantitative pre-treatment cellular NAD baseline.\n` +
+        `   • Pre-analytical: If on oral NMN/NR precursors, a 2-3 week washout is recommended if clinically safe.\n\n` +
+        `2. Week 4 (Mid-Cycle / On-Treatment):\n` +
+        `   • Purpose: Assess therapeutic uptake and initial cellular response.\n` +
+        `   • WARNING: DO NOT discontinue oral or IV treatment. Document exact previous dose and administration timestamp.\n\n` +
+        `3. Week 8 (Consolidation & Maintenance):\n` +
+        `   • Purpose: Confirm steady-state intracellular elevation.\n` +
+        `   • Guideline: Maintain identical collection window relative to last dose for serial comparability.\n\n` +
+        `*METHYLATION SAFEGUARD:*\n` +
+        `• TMG (Trimethylglycine) ratio 1:1 to preserve methyl donor pools against NNMT consumption.\n\n` +
+        `Verification: https://med-peptides-app-27a3a.web.app/proto/${protoSlug}\n` +
+        `_Atlas Clinical Governance Engine · SSOT Standard_`;
 
     try {
       await navigator.clipboard.writeText(text);
       setCopiedCadenceAll(true);
-      toast.success(isEs ? 'Pautas copiadas al portapapeles' : 'Guidelines copied to clipboard');
+      toast.success(isEs ? 'Memorando clínico copiado al portapapeles ✓' : 'Clinical memo copied to clipboard ✓');
       setTimeout(() => setCopiedCadenceAll(false), 2000);
     } catch {
       toast.error('Could not copy to clipboard');
@@ -93,7 +123,7 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
           <div className="pcc-header-icon-box">
             <Activity size={20} className="pcc-header-icon" />
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <div className="pcc-header-chips">
               <span className="pcc-chip pcc-chip-blue">CE-IVDR Diagnostic Companion</span>
               <span className="pcc-chip pcc-chip-green">Pharmacokinetic Guidance</span>
@@ -109,6 +139,75 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
                 ? 'Monitorización cuantitativa de biomarcadores celulares, salvaguarda del eje de metilación (NNMT/SAMe) y cronobiología de administración.'
                 : 'Objective cellular biomarker tracking, NNMT methylation safeguards, and circadian chronobiology parameters.'}
             </p>
+
+            {/* ── 3-Attribute Clinical Key-Value Strip (Google Cloud Resource Strip) ── */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: '0.65rem',
+              marginTop: '0.90rem',
+              width: '100%'
+            }}>
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.55rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? 'Biomarcador Diana' : 'Target Biomarker'}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                    {companion ? 'NAD+ Intracelular (pmol/10⁶)' : (isEs ? 'Respuesta Metabólica' : 'Metabolic Response')}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.55rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? 'Eje de Metilación' : 'Methylation Axis'}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                    {methylation ? (isEs ? 'Salvaguarda NNMT / TMG' : 'NNMT / TMG Safeguard') : (isEs ? 'Eje Protegido' : 'Protected')}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.55rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#d97706', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? 'Cronobiología' : 'Circadian Timing'}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                    {isEs ? 'Mañana (07:00–10:00) · Ayuno' : 'Morning (07:00–10:00) · Fasted'}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -118,10 +217,10 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
               type="button"
               className="pcc-wa-quick-btn"
               onClick={handleCopyMonitoringGuidelines}
-              title={isEs ? 'Copiar pautas de monitorización al portapapeles' : 'Copy monitoring cadence guidelines to clipboard'}
+              title={isEs ? 'Copiar memorando clínico de monitorización' : 'Copy clinical monitoring memorandum'}
             >
-              {copiedCadenceAll ? <Check size={13} style={{ color: '#10b981' }} /> : <Copy size={13} />}
-              <span>{copiedCadenceAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Pautas Clínicas' : 'Copy Clinical Guidelines')}</span>
+              {copiedCadenceAll ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+              <span>{copiedCadenceAll ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Memorando Clínico' : 'Copy Clinical Memo')}</span>
             </button>
           </div>
         )}

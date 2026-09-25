@@ -408,28 +408,31 @@ export function generateDynamicReconData(protocol) {
     ...(Array.isArray(protocol.products) ? protocol.products : []),
     ...(Array.isArray(protocol.compounds) ? protocol.compounds : []),
     ...(Array.isArray(protocol.peptides) ? protocol.peptides : []),
-    ...(Array.isArray(protocol.phases) ? protocol.phases.flatMap(ph => [...(ph.compounds || []), ...(ph.items || [])]) : [])
+    ...(Array.isArray(protocol.phases) ? protocol.phases.flatMap(ph => [...(ph.compounds || []), ...(ph.items || []), ...(ph.drugs_used || [])]) : [])
   ];
 
   allItems.forEach(it => {
-    const rawName = it.product_name || it.name || it.title || it.productId || '';
+    const rawName = it.product_name || it.name || it.title || it.product_slug || it.productId || '';
     if (!rawName) return;
     // Canonical clean base name: strip parenthesized text (e.g. "(LY-3437943)", "(Mitochondrial-Derived Peptide)")
-    const baseName = rawName.replace(/\(.*?\)/g, '').replace(/sterile vial|lyophilized|cartridge|pen/gi, '').trim();
+    const baseName = rawName.replace(/\(.*?\)/g, '').replace(/sterile vial|lyophilized|cartridge|pen|-vial/gi, '').trim();
     const cleanKey = baseName.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (!cleanKey) return;
+
+    const bm = matchClinicalBenchmark(baseName);
+    const resolvedName = bm?.canonicalName || (baseName.charAt(0).toUpperCase() + baseName.slice(1));
 
     if (!compoundMap.has(cleanKey)) {
       compoundMap.set(cleanKey, {
         raw: it,
-        name: baseName,
-        id: it.productId || it.id || cleanKey
+        name: resolvedName,
+        id: it.product_slug || it.productId || it.id || cleanKey
       });
     } else {
-      // If an existing entry has a longer name with parentheses, prefer the cleaner baseName
+      // If an existing entry has a longer name with parentheses, prefer the cleaner resolvedName
       const existing = compoundMap.get(cleanKey);
-      if (baseName.length < existing.name.length && baseName.length >= 3) {
-        existing.name = baseName;
+      if (resolvedName.length < existing.name.length && resolvedName.length >= 3) {
+        existing.name = resolvedName;
       }
     }
   });
@@ -444,7 +447,12 @@ export function generateDynamicReconData(protocol) {
 
   compoundMap.forEach(({ raw, name, id }) => {
     const bm = matchClinicalBenchmark(name);
-    const vialMg = raw.vial_size_mg || raw.strength_mg || bm?.defaultVialMg || 10;
+    let parsedVialMg = null;
+    if (raw.productId) {
+      const match = String(raw.productId).match(/(\d+(?:\.\d+)?)\s*mg/i);
+      if (match) parsedVialMg = parseFloat(match[1]);
+    }
+    const vialMg = raw.vial_size_mg || raw.strength_mg || parsedVialMg || bm?.defaultVialMg || 10;
     const bacMl = bm?.diluentMl || 2.0;
     const concMgMl = vialMg / bacMl;
     const isMicro = bm?.unit === 'mcg' || vialMg <= 2;
@@ -455,15 +463,20 @@ export function generateDynamicReconData(protocol) {
 
     // Calculate dynamic U-100 syringe draw units for each phase
     const dosingScale = phases.map((ph, pIdx) => {
-      const startW = phases.slice(0, pIdx).reduce((acc, p) => acc + (Number(p.durationWeeks) || 4), 0) + 1;
-      const endW = startW + (Number(ph.durationWeeks) || 4) - 1;
+      const rawPhWeeks = Number(ph.durationWeeks) ||
+        (ph.end_week && ph.start_week ? (Number(ph.end_week) - Number(ph.start_week) + 1) : null) || 4;
+      const startW = phases.slice(0, pIdx).reduce((acc, p) => {
+        const w = Number(p.durationWeeks) || (p.end_week && p.start_week ? (Number(p.end_week) - Number(p.start_week) + 1) : null) || 4;
+        return acc + w;
+      }, 0) + 1;
+      const endW = startW + rawPhWeeks - 1;
       const pLabel = `Phase ${pIdx + 1} (W${startW}–W${endW})`;
 
       // Find matching compound in this phase with alphanumeric normalization (ignoring hyphens, spaces)
-      const phCompounds = [...(ph.compounds || []), ...(ph.items || [])];
+      const phCompounds = [...(ph.compounds || []), ...(ph.items || []), ...(ph.drugs_used || [])];
       const normTarget = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const matched = phCompounds.find(c => {
-        const cClean = String(c.name || c.product_name || c.title || c.productId || c.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const cClean = String(c.name || c.product_name || c.title || c.product_slug || c.productId || c.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         return cClean.includes(normTarget) || normTarget.includes(cClean);
       });
 
@@ -476,7 +489,7 @@ export function generateDynamicReconData(protocol) {
 
       return {
         phase: pLabel,
-        phaseName: ph.name || `Phase ${pIdx + 1}`,
+        phaseName: ph.name || ph.phase_title || `Phase ${pIdx + 1}`,
         dose: `${res.unitDose} ${res.shortCadence}`,
         units: `${units} Units (${volMl.toFixed(2)} mL)`,
         syringe: units <= 30 ? '0.3 mL U-100 Syringe' : units <= 50 ? '0.5 mL U-100 Syringe' : '1.0 mL U-100 Syringe'
@@ -511,7 +524,8 @@ export function generateDynamicReconData(protocol) {
  */
 export function generateDynamicSupplySummary(protocol) {
   const durWeeks = Number(protocol?.durationWeeks) ||
-    (protocol?.phases ? protocol.phases.reduce((acc, p) => acc + (Number(p.durationWeeks) || 0), 0) : 8) || 8;
+    Number(protocol?.protocol_duration_weeks) ||
+    (protocol?.phases ? protocol.phases.reduce((acc, p) => acc + (Number(p.durationWeeks) || (p.end_week && p.start_week ? Number(p.end_week) - Number(p.start_week) + 1 : 0)), 0) : 8) || 8;
 
   const phases = Array.isArray(protocol?.phases) && protocol.phases.length > 0 ? protocol.phases : [
     { name: 'Full Cycle', durationWeeks: durWeeks }
@@ -529,10 +543,12 @@ export function generateDynamicSupplySummary(protocol) {
     const vialMg = vialMgMatch ? parseFloat(vialMgMatch[1]) : 10;
     
     let totalMgNeeded = 0;
-    const totalPhaseWeeks = phases.reduce((sum, p) => sum + (Number(p.durationWeeks) || 0), 0) || durWeeks;
+    const totalPhaseWeeks = phases.reduce((sum, p) => sum + (Number(p.durationWeeks) || (p.end_week && p.start_week ? Number(p.end_week) - Number(p.start_week) + 1 : 0) || 0), 0) || durWeeks;
     phases.forEach((ph, pIdx) => {
       // If sum of phases exceeds protocol duration, scale proportionally
-      const rawPhWeeks = Number(ph.durationWeeks) || Math.ceil(durWeeks / phases.length) || 4;
+      const rawPhWeeks = Number(ph.durationWeeks) || 
+        (ph.end_week && ph.start_week ? (Number(ph.end_week) - Number(ph.start_week) + 1) : null) || 
+        Math.ceil(durWeeks / phases.length) || 4;
       const phWeeks = totalPhaseWeeks > durWeeks ? (rawPhWeeks / totalPhaseWeeks) * durWeeks : rawPhWeeks;
       const scale = c.dosingScale[pIdx] || c.dosingScale[0];
       const doseMgMatch = scale?.dose?.match(/(\d+(?:\.\d+)?)\s*(mg|mcg)/i);
