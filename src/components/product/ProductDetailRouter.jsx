@@ -8,9 +8,11 @@ const ConsumableDetail = dynamic(() => import('./layouts/ConsumableDetail'));
 const EternaDiagnosticDetail = dynamic(() => import('./layouts/EternaDiagnosticDetail'));
 const BloodDiagnosticDetail = dynamic(() => import('./layouts/BloodDiagnosticDetail'));
 const CosmeticsDetail = dynamic(() => import('./layouts/CosmeticsDetail'));
+const AestheticInjectableDetail = dynamic(() => import('./layouts/AestheticInjectableDetail'));
 
 export default function ProductDetailRouter(props) {
-  const category = (props.product?.category || '').toLowerCase();
+  const product = props.product;
+  const category = (product?.category || '').toLowerCase();
 
   // Peptides, Hormones, and specific therapeutic categories
   const peptideCategories = [
@@ -71,6 +73,20 @@ export default function ProductDetailRouter(props) {
   // For physical consumables & raw compounding materials
   if (consumableCategories.includes(category) || ingredientCategories.includes(category)) {
     return <ConsumableDetail {...props} />;
+  }
+
+  // Aesthetic Injectables — B2B dermal fillers, skin boosters, biostimulators, PN, fat-dissolving
+  const aestheticInjectableCategories = [
+    'aesthetic injectables',
+    'aesthetic injectable',
+    'dermal fillers',
+    'skin boosters',
+    'biostimulators',
+    'polynucleotides',
+    'fat-dissolving injectables',
+  ];
+  if (aestheticInjectableCategories.includes(category) || product?.is_aesthetic_injectable === true) {
+    return <AestheticInjectableDetail {...props} />;
   }
 
   // Cosmeceuticals — hair, skin and scalp cosmetics

@@ -6,6 +6,8 @@ import { processProductVariants } from '../../../utils/productVariantProcessing'
 import { sanitizePublicProduct } from '../../../repositories/publicDataSanitizer';
 import { deriveCanonicalIdentity } from '../../../utils/canonicalProductRegistry';
 import PublicDatasheetView from '../../../components/product/PublicDatasheetView';
+import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
+import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -422,6 +424,38 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const safeProduct = sanitizeForClient(product);
   const associatedProtocols = await getAssociatedProtocols(safeProduct.id, slug, safeProduct.canonicalName || safeProduct.name);
   const jsonLd = generateProductJsonLd(safeProduct, BASE_URL);
+
+  const catLower = (safeProduct.category || '').toLowerCase();
+  const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
+  const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || safeProduct.is_cosmetic === true;
+
+  if (isAesthetic) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        <AestheticInjectableDetail product={safeProduct} isQuickView={false} />
+      </>
+    );
+  }
+
+  if (isCosmetics) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        <CosmeticsDetail product={safeProduct} />
+      </>
+    );
+  }
 
   return (
     <>

@@ -30,7 +30,8 @@ import {
   ClipboardList,
   FileText,
   Droplets,
-  Building2
+  Building2,
+  Syringe
 } from 'lucide-react';
 
 export function useMasterCatalogColumns({
@@ -113,6 +114,9 @@ export function useMasterCatalogColumns({
                     clinical_supplies:   { label: 'CLINICAL',    icon: <Stethoscope size={11} strokeWidth={2.2} />,  bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
                     diagnostic_test:     { label: 'DIAGNOSTIC',  icon: <Activity size={11} strokeWidth={2.2} />,     bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
                     diagnostic:          { label: 'DIAGNOSTIC',  icon: <Activity size={11} strokeWidth={2.2} />,     bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
+                    aesthetic_injectables: { label: 'AESTHETIC', icon: <Syringe size={11} strokeWidth={2.2} />,      bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd' },
+                    'Aesthetic Injectables': { label: 'AESTHETIC', icon: <Syringe size={11} strokeWidth={2.2} />,      bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd' },
+                    cosmetics:           { label: 'COSMETICS',   icon: <Droplets size={11} strokeWidth={2.2} />,     bg: '#f0fdfa', color: '#0d9488', border: '#5eead4' },
                     genomics_biomarkers: { label: 'GENOMICS',    icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
                     service:             { label: 'SERVICE',     icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
                     dual:                { label: 'DUAL',        icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: 'linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)', color: '#6d28d9', border: '#ddd6fe' },

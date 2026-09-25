@@ -23,6 +23,8 @@ const CANONICAL_CATEGORIES = [
   { id: 'supplement', label: '🌿 Supplements' },
   { id: 'hormone', label: '⚡ Hormones' },
   { id: 'diagnostic_test', label: '🧪 Diagnostic Tests' },
+  { id: 'Aesthetic Injectables', label: '💉 Aesthetic Injectables (Fillers/Boosters)' },
+  { id: 'cosmetics', label: '🧴 Hair & Scalp Cosmetics' },
   { id: 'raw_material', label: '⚖️ Bulk API Raw Materials' },
   { id: 'consumable', label: '💉 Consumables & Supplies' },
   { id: 'skincare', label: '✨ Skincare & Cosmeceuticals' },
@@ -34,6 +36,8 @@ const CANONICAL_CATEGORIES = [
 const PRODUCT_TYPES = [
   { id: 'multi_type', label: '🔄 Multi-Type / Hybrid (2+ Formats)' },
   { id: 'finished_product', label: '💊 Finished Products (Patient-Ready)' },
+  { id: 'aesthetic_injectable', label: '💉 Aesthetic Injectable' },
+  { id: 'cosmetic', label: '🧴 Cosmetic / Cosmeceutical' },
   { id: 'raw_material', label: '🧪 Bulk API Raw Materials' },
   { id: 'clinical_supplies', label: '💉 Clinical Supplies & Diluents' },
   { id: 'diagnostic', label: '🔬 Diagnostics & Testing Kits' },

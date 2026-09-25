@@ -1107,6 +1107,17 @@ export default function DiagnosticTestTechnicalSpecs({
 
   // Dynamically resolve active PDF report based on test and biological sex
   const activeReportPdf = (() => {
+    if (product?.gender_variants || isTestosterone) {
+      if (testosteroneGender === 'female' && product?.sample_report_url_female) {
+        return product.sample_report_url_female;
+      }
+      if (testosteroneGender !== 'female' && product?.sample_report_url_male) {
+        return product.sample_report_url_male;
+      }
+    }
+    if (product?.sample_report_url) {
+      return product.sample_report_url;
+    }
     if (isNad) return '/docs/bloodo-report-nad.pdf';
     if (isTestosterone) {
       return testosteroneGender === 'female' 

@@ -2,6 +2,9 @@ import { Dna } from '@/lib/icons';
 import { Heart } from '@/lib/icons';
 import { Activity } from '@/lib/icons';
 import { FileText } from '@/lib/icons';
+import { FileDown } from '@/lib/icons';
+import { Package } from '@/lib/icons';
+import { ExternalLink } from '@/lib/icons';
 import { Sparkles } from '@/lib/icons';
 import { ChevronRight } from '@/lib/icons';
 import { Plus } from '@/lib/icons';
@@ -57,8 +60,25 @@ export default function BloodDiagnosticDetail({
 }) {
   const [activeTab, setActiveTab] = useState('aging');
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || product);
+  const [reportGender, setReportGender] = useState('male');
   
   const isMobile = propsIsMobile || useMediaQuery('(max-width: 768px)'); 
+
+  const activeReportUrl = React.useMemo(() => {
+    if (product?.gender_variants) {
+      if (reportGender === 'female') {
+        return product?.sample_report_url_female || product?.sample_report_female || product?.sample_report_url || '/docs/bloodo-report-testosterone-female.pdf';
+      }
+      return product?.sample_report_url_male || product?.sample_report_male || product?.sample_report_url || '/docs/bloodo-report-testosterone-male.pdf';
+    }
+    return product?.sample_report_url || product?.sample_report_url_male || product?.sample_report_url_female || (
+      product?.slug?.includes('nad') ? '/docs/bloodo-report-nad.pdf' :
+      product?.slug?.includes('cortisol') ? '/docs/bloodo-report-cortisol-am-pm.pdf' :
+      product?.slug?.includes('hba1c') ? '/docs/bloodo-report-hba1c.pdf' :
+      product?.slug?.includes('omega') ? '/docs/bloodo-report-omega-ratio.pdf' :
+      product?.slug?.includes('vitamin-d') ? '/docs/bloodo-report-vitamin-d.pdf' : null
+    );
+  }, [product, reportGender]); 
 
   const displayPrice = React.useMemo(() => {
     if (!selectedVariant) return '—';
@@ -174,14 +194,69 @@ export default function BloodDiagnosticDetail({
             Last Report: April 2026
           </div>
         </div>
-        <div style={{ 
-          padding: '0.3rem 0.6rem', borderRadius: '6px', 
-          background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)',
-          fontSize: '0.65rem', fontWeight: 800, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.25rem'
-        }}>
-          <Check size={10} strokeWidth={3} /> PARSED PDF
-        </div>
+        {activeReportUrl ? (
+          <a
+            href={activeReportUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ 
+              padding: '0.35rem 0.75rem', borderRadius: '8px', 
+              background: 'rgba(168, 85, 247, 0.12)', border: '1px solid rgba(168, 85, 247, 0.3)',
+              fontSize: '0.7rem', fontWeight: 800, color: '#9333ea', display: 'flex', alignItems: 'center', gap: '0.35rem',
+              textDecoration: 'none', cursor: 'pointer'
+            }}
+          >
+            <FileDown size={12} strokeWidth={2.5} /> VIEW SAMPLE PDF
+          </a>
+        ) : (
+          <div style={{ 
+            padding: '0.3rem 0.6rem', borderRadius: '6px', 
+            background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)',
+            fontSize: '0.65rem', fontWeight: 800, color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.25rem'
+          }}>
+            <Check size={10} strokeWidth={3} /> PARSED PDF
+          </div>
+        )}
       </div>
+
+      {product?.gender_variants && (
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '1rem' }}>
+          <button
+            type="button"
+            onClick={() => setReportGender('male')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              border: '1px solid',
+              borderColor: reportGender === 'male' ? '#9333ea' : 'var(--border)',
+              background: reportGender === 'male' ? 'rgba(168, 85, 247, 0.15)' : 'var(--background)',
+              color: reportGender === 'male' ? '#9333ea' : 'var(--text-muted)',
+              cursor: 'pointer'
+            }}
+          >
+            Male Profile Report
+          </button>
+          <button
+            type="button"
+            onClick={() => setReportGender('female')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              border: '1px solid',
+              borderColor: reportGender === 'female' ? '#9333ea' : 'var(--border)',
+              background: reportGender === 'female' ? 'rgba(168, 85, 247, 0.15)' : 'var(--background)',
+              color: reportGender === 'female' ? '#9333ea' : 'var(--text-muted)',
+              cursor: 'pointer'
+            }}
+          >
+            Female Profile Report
+          </button>
+        </div>
+      )}
 
       {/* Biomarker list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -337,6 +412,93 @@ export default function BloodDiagnosticDetail({
                   <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>HL7 & FHIR compatible data feeds</p>
                 </div>
               </div>
+
+              {activeReportUrl && (
+                <div style={{
+                  padding: '1.1rem',
+                  background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.04) 0%, rgba(59, 130, 246, 0.04) 100%)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(147, 51, 234, 0.2)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'rgba(147, 51, 234, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9333ea', flexShrink: 0 }}>
+                      <FileDown size={18} />
+                    </div>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-main)', fontWeight: 700 }}>
+                        Official Laboratory Sample Report
+                      </h4>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                        ISO 15189 / CE-IVDR Anonymized Patient Output (PDF)
+                      </p>
+                    </div>
+                  </div>
+
+                  {product?.gender_variants && (
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setReportGender('male')}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          border: '1px solid',
+                          borderColor: reportGender === 'male' ? '#9333ea' : 'var(--border)',
+                          background: reportGender === 'male' ? '#9333ea' : 'var(--color-bg-muted)',
+                          color: reportGender === 'male' ? '#ffffff' : 'var(--text-muted)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Male Sample
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReportGender('female')}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          border: '1px solid',
+                          borderColor: reportGender === 'female' ? '#9333ea' : 'var(--border)',
+                          background: reportGender === 'female' ? '#9333ea' : 'var(--color-bg-muted)',
+                          color: reportGender === 'female' ? '#ffffff' : 'var(--text-muted)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Female Sample
+                      </button>
+                    </div>
+                  )}
+
+                  <a
+                    href={activeReportUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      background: '#9333ea',
+                      color: '#ffffff',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      width: 'fit-content'
+                    }}
+                  >
+                    <FileDown size={14} /> Download Sample Report ({product?.gender_variants ? (reportGender === 'female' ? 'Female' : 'Male') : 'PDF'}) ↗
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
@@ -479,6 +641,107 @@ export default function BloodDiagnosticDetail({
               ))}
             </div>
 
+            {/* Sample Clinical Report Download Card */}
+            {activeReportUrl && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)',
+                border: '1px solid rgba(147, 51, 234, 0.2)',
+                borderRadius: '18px',
+                padding: '1.25rem 1.5rem',
+                marginBottom: '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.85rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '10px',
+                      background: 'rgba(147, 51, 234, 0.12)', border: '1px solid rgba(147, 51, 234, 0.25)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9333ea', flexShrink: 0
+                    }}>
+                      <FileDown size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#9333ea', fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                        CLINICAL PATHOLOGY PREVIEW
+                      </div>
+                      <h4 style={{ margin: '2px 0 0', fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                        Sample Laboratory Diagnostic Report
+                      </h4>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', padding: '3px 8px', borderRadius: '99px', border: '1px solid #bbf7d0' }}>
+                    ISO 15189 Certified
+                  </span>
+                </div>
+
+                <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  Examine an illustrative, anonymized clinical patient report demonstrating biomarker quantification, biological age velocity, and personalized protocol alignment.
+                </p>
+
+                {product?.gender_variants && (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setReportGender('male')}
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        border: '1px solid',
+                        borderColor: reportGender === 'male' ? '#9333ea' : 'var(--border)',
+                        background: reportGender === 'male' ? '#9333ea' : 'var(--background)',
+                        color: reportGender === 'male' ? '#ffffff' : 'var(--text-main)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Male Reference Profile
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReportGender('female')}
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        border: '1px solid',
+                        borderColor: reportGender === 'female' ? '#9333ea' : 'var(--border)',
+                        background: reportGender === 'female' ? '#9333ea' : 'var(--background)',
+                        color: reportGender === 'female' ? '#ffffff' : 'var(--text-main)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Female Reference Profile
+                    </button>
+                  </div>
+                )}
+
+                <a
+                  href={activeReportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: '#9333ea',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    width: 'fit-content'
+                  }}
+                >
+                  <FileDown size={14} /> Download Sample Report ({product?.gender_variants ? (reportGender === 'female' ? 'Female' : 'Male') : 'PDF'}) ↗
+                </a>
+              </div>
+            )}
+
             {/* CTA Box */}
             <div style={{
               background: 'var(--background)',
@@ -502,11 +765,29 @@ export default function BloodDiagnosticDetail({
               </div>
 
               <div style={{ width: '100%', marginTop: '0.5rem' }}>
-                <AddToCartButton 
-                  product={product} 
-                  variant={selectedVariant} 
-                  quantity={1}
-                />
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)',
+                    color: 'white',
+                    border: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 4px 14px rgba(147, 51, 234, 0.35)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Package size={18} /> {addedToast ? 'Added to Cart ✓' : 'Add Biomarker Kit to Order'}
+                </button>
               </div>
             </div>
 

@@ -6,24 +6,29 @@
  */
 
 export const CATEGORY_TYPES = {
-  PEPTIDE:             'peptide',              // All peptides (monotherapies and blends)
-  SUPPLEMENT:          'supplement',           // Capsules, nutraceuticals, oral supplements
-  DIAGNOSTIC_TEST:     'diagnostic_test',      // Capillary blood tests, DBS biomarkers, diagnostic panels
-  GENOMICS_BIOMARKERS: 'genomics_biomarkers',  // DNA genetic panels, genomic saliva tests (Fagron, Eterna)
-  RAW_MATERIAL:        'raw_material',         // API, compounding raw materials, excipients
-  SERVICE:             'service',              // Digital services, SaaS, subscriptions
+  PEPTIDE:               'peptide',              // All peptides (monotherapies and blends)
+  SUPPLEMENT:            'supplement',           // Capsules, nutraceuticals, oral supplements
+  DIAGNOSTIC_TEST:       'diagnostic_test',      // Capillary blood tests, DBS biomarkers, diagnostic panels
+  GENOMICS_BIOMARKERS:   'genomics_biomarkers',  // DNA genetic panels, genomic saliva tests (Fagron, Eterna)
+  AESTHETIC_INJECTABLES: 'Aesthetic Injectables',// Dermal fillers, skin boosters, biostimulators
+  COSMETICS:             'cosmetics',            // Hair, skin and scalp cosmeceuticals
+  RAW_MATERIAL:          'raw_material',         // API, compounding raw materials, excipients
+  SERVICE:               'service',              // Digital services, SaaS, subscriptions
 };
 
 export const VALID_CATEGORIES = new Set(Object.values(CATEGORY_TYPES));
 
 export const CATEGORY_LABELS = {
-  peptide:             'Peptide',
-  supplement:          'Supplement & Nutraceutical',
-  diagnostic_test:     'Diagnostic Test',
-  diagnostic:          'Diagnostic Test',
-  genomics_biomarkers: 'Genomics & DNA Panels',
-  raw_material:        'Raw Material / API',
-  service:             'Digital Service / SaaS',
+  peptide:               'Peptide',
+  supplement:            'Supplement & Nutraceutical',
+  diagnostic_test:       'Diagnostic Test',
+  diagnostic:            'Diagnostic Test',
+  genomics_biomarkers:   'Genomics & DNA Panels',
+  'Aesthetic Injectables': 'Aesthetic Injectables',
+  aesthetic_injectables: 'Aesthetic Injectables',
+  cosmetics:             'Cosmetics & Cosmeceuticals',
+  raw_material:          'Raw Material / API',
+  service:               'Digital Service / SaaS',
 };
 
 export const CATEGORY_ALIASES = {
@@ -60,6 +65,27 @@ export const CATEGORY_ALIASES = {
   'telotest':                  'genomics_biomarkers',
   'nutrigen':                  'genomics_biomarkers',
   'proteomics':                'genomics_biomarkers',
+
+  // Aesthetic Injectables
+  'aesthetic injectables':     'Aesthetic Injectables',
+  'aesthetic_injectables':     'Aesthetic Injectables',
+  'aesthetic injectable':      'Aesthetic Injectables',
+  'aesthetic_injectable':      'Aesthetic Injectables',
+  'dermal fillers':            'Aesthetic Injectables',
+  'dermal_fillers':            'Aesthetic Injectables',
+  'skin boosters':             'Aesthetic Injectables',
+  'skin_boosters':             'Aesthetic Injectables',
+  'biostimulators':            'Aesthetic Injectables',
+  'polynucleotides':           'Aesthetic Injectables',
+  'fat-dissolving injectables':'Aesthetic Injectables',
+
+  // Cosmetics & Hair
+  'cosmetics':                 'cosmetics',
+  'cosmetic':                  'cosmetics',
+  'cosmeceuticals':            'cosmetics',
+  'cosmeceutical':             'cosmetics',
+  'hair cosmetics':            'cosmetics',
+  'hair & scalp':              'cosmetics',
 
   // Raw Materials
   'raw_material':              'raw_material',
