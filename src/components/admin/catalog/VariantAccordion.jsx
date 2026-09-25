@@ -24,6 +24,8 @@ const SUPPLIER_LEAD_TIMES = {
   'supplier-fagron-iberia': { label: '🇪🇸 24-72h (Iberia Hub)', color: '#047857', bg: '#ecfdf5', border: '#a7f3d0' },
   'supplier-fagron-genomics': { label: '🇪🇸 3-5 Days (Lab Processing)', color: '#047857', bg: '#ecfdf5', border: '#a7f3d0' },
   'supplier-pod-poland': { label: '🇵🇱 3-5 Days (EU Hub)', color: '#6b21a8', bg: '#faf5ff', border: '#e9d5ff' },
+  'supplier-colway': { label: '🇵🇱 3-5 Days (Poland Direct)', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' },
+  'colway': { label: '🇵🇱 3-5 Days (Poland Direct)', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' },
   'supplier-magenta': { label: '🇦🇪 24-48h (Dubai Compounding)', color: '#0369a1', bg: '#f0f9ff', border: '#bae6fd' },
   'supplier-bioniq': { label: '🇬🇧 3-5 Days (UK/EU)', color: '#334155', bg: '#f8fafc', border: '#e2e8f0' },
   'supplier-nplabs': { label: '🇬🇷 3-5 Days (Athens Hub)', color: '#0369a1', bg: '#f0f9ff', border: '#bae6fd' }
@@ -33,6 +35,7 @@ export function getSupplierLeadTime(suppIdOrName) {
   if (!suppIdOrName) return null;
   const key = String(suppIdOrName).toLowerCase().trim();
   if (SUPPLIER_LEAD_TIMES[key]) return SUPPLIER_LEAD_TIMES[key];
+  if (key.includes('colway')) return SUPPLIER_LEAD_TIMES['supplier-colway'];
   if (key.includes('centrico')) return SUPPLIER_LEAD_TIMES['supplier-centrico'];
   if (key.includes('europept')) return SUPPLIER_LEAD_TIMES['supplier-europeptides'];
   if (key.includes('lotus')) return SUPPLIER_LEAD_TIMES['supplier-lotusland'];
@@ -57,6 +60,8 @@ const SUPPLIER_ORIGINAL_CURRENCIES = {
   'supplier-fagron-iberia': { code: 'EUR', symbol: '€', flag: '🇪🇸', label: 'EUR (€)' },
   'supplier-fagron-genomics': { code: 'EUR', symbol: '€', flag: '🇪🇸', label: 'EUR (€)' },
   'supplier-pod-poland': { code: 'EUR', symbol: '€', flag: '🇵🇱', label: 'EUR (€)' },
+  'supplier-colway': { code: 'USD', symbol: '$', flag: '🇵🇱', label: 'USD ($)' },
+  'colway': { code: 'USD', symbol: '$', flag: '🇵🇱', label: 'USD ($)' },
   'supplier-bioniq': { code: 'GBP', symbol: '£', flag: '🇬🇧', label: 'GBP (£)' },
   'supplier-nplabs': { code: 'EUR', symbol: '€', flag: '🇬🇷', label: 'EUR (€)' },
   'nplabs': { code: 'EUR', symbol: '€', flag: '🇬🇷', label: 'EUR (€)' }
@@ -75,6 +80,7 @@ export function getSupplierOriginalCurrency(suppIdOrName, variants = []) {
   if (!suppIdOrName) return { code: 'USD', symbol: '$', flag: '🌐', label: 'USD ($)' };
   const key = String(suppIdOrName).toLowerCase().trim();
   if (SUPPLIER_ORIGINAL_CURRENCIES[key]) return SUPPLIER_ORIGINAL_CURRENCIES[key];
+  if (key.includes('colway')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-colway'];
   if (key.includes('centrico') || key.includes('magenta')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-magenta'];
   if (key.includes('lotus')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-lotusland'];
   if (key.includes('europept') || key.includes('fagron') || key.includes('np') || key.includes('poland') || key.includes('pod')) return SUPPLIER_ORIGINAL_CURRENCIES['supplier-europeptides'];

@@ -60,7 +60,7 @@ export default function SupplierAgreementCard({
                 (variant.dosage && String(variant.dosage).toLowerCase().includes('moq'));
 
   const suppPricing = variant.supplierPricing || {};
-  const rawSuppName = variant.supplierName || variant.supplier || suppPricing.supplierName || suppPricing.supplierId || variant.supplierId || (isRaw ? 'supplier-lotusland' : 'supplier-europeptides');
+  const rawSuppName = variant.supplierName || variant.supplier || suppPricing.supplierName || suppPricing.supplierId || variant.supplierId || selectedProduct?.supplierName || selectedProduct?.supplier || selectedProduct?.supplierId || (isRaw ? 'supplier-lotusland' : 'supplier-europeptides');
   const supplierName = getCanonicalSupplierName(rawSuppName);
   const isLotusland = supplierName.toLowerCase().includes('lotus');
 

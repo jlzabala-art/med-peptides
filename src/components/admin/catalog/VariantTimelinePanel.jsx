@@ -71,11 +71,19 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const isCosmetic = selectedProduct?.category === 'cosmetics' || 
+                     selectedProduct?.category === 'skincare' || 
+                     variant?.format === 'bottle' || 
+                     variant?.packaging === 'bottle' ||
+                     (variant?.presentation && variant.presentation.toLowerCase().includes('bottle'));
+
   // Deterministic fallback unique code if not explicitly saved on the variant
-  const defaultSuppCode = (variant?.supplierId || variant?.supplier || 'RP').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
-  const defaultDoseCode = String(variant?.dosage || variant?.dose || '10MG').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const defaultSuppCode = (variant?.supplierId || variant?.supplier || selectedProduct?.supplier || (isCosmetic ? 'CWY' : 'RP')).replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
+  const defaultDoseCode = String(variant?.dosage || variant?.dose || variant?.volume || (isCosmetic ? '250ML' : '10MG')).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   const idSuffix = String(variant?.id || 'V1').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || 'V01';
-  const defaultVialCode = `RP-${defaultSuppCode}-${defaultDoseCode}-${idSuffix}`;
+  const defaultVialCode = isCosmetic 
+    ? `${defaultSuppCode}-${defaultDoseCode}-${idSuffix}`
+    : `RP-${defaultSuppCode}-${defaultDoseCode}-${idSuffix}`;
   const currentVialCode = variant?.vialCode || variant?.batchCode || variant?.batchNumber || defaultVialCode;
 
   const handleCopyVialCode = (code) => {
@@ -83,27 +91,29 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(code);
       setCopiedCode(true);
-      notifier.success(`Vial Code copied: ${code}`);
+      notifier.success(`${isCosmetic ? 'Bottle Batch' : 'Vial Code'} copied: ${code}`);
       setTimeout(() => setCopiedCode(false), 2000);
     }
   };
 
   const productSlug = encodeURIComponent(selectedProduct?.slug || selectedProduct?.id || '');
   const variantIdParam = encodeURIComponent(variant?.id || '');
-  const suppParam = encodeURIComponent(variant?.supplierId || variant?.supplier || '');
-  const doseParam = encodeURIComponent(variant?.dosage || variant?.dose || '');
-  const formatParam = encodeURIComponent(variant?.presentation || variant?.format || 'vial');
+  const suppParam = encodeURIComponent(variant?.supplierId || variant?.supplier || selectedProduct?.supplierId || selectedProduct?.supplier || '');
+  const doseParam = encodeURIComponent(variant?.dosage || variant?.dose || variant?.volume || '');
+  const formatParam = encodeURIComponent(variant?.presentation || variant?.format || (isCosmetic ? '250 mL Bottle' : 'vial'));
   const batchParam = encodeURIComponent(currentVialCode);
 
   const rawSlug = selectedProduct?.slug || selectedProduct?.id || '';
-  const canonicalMonographPath = `/p/${encodeURIComponent(rawSlug)}?dose=${doseParam}&presentation=${formatParam}&supplier=${suppParam}&batch=${batchParam}&vialCode=${batchParam}`;
+  const canonicalMonographPath = isCosmetic
+    ? `/p/${encodeURIComponent(rawSlug)}?presentation=${formatParam}&supplier=${suppParam}&batch=${batchParam}`
+    : `/p/${encodeURIComponent(rawSlug)}?dose=${doseParam}&presentation=${formatParam}&supplier=${suppParam}&batch=${batchParam}&vialCode=${batchParam}`;
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const absoluteMonographUrl = `${origin}${canonicalMonographPath}`;
 
-  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}&vialCode=${batchParam}&url=${encodeURIComponent(absoluteMonographUrl)}`;
+  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}${isCosmetic ? '' : `&vialCode=${batchParam}`}&url=${encodeURIComponent(absoluteMonographUrl)}`;
 
   const cleanStr = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
-  const vFileSuffix = `${cleanStr(rawSlug)}_${cleanStr(variant?.dosage || variant?.dose || '10mg')}_${cleanStr(variant?.presentation || 'vial')}_${cleanStr(variant?.supplierId || variant?.supplier || 'lotusland')}_${cleanStr(currentVialCode)}`;
+  const vFileSuffix = `${cleanStr(rawSlug)}_${cleanStr(variant?.dosage || variant?.dose || variant?.volume || (isCosmetic ? '250ml' : '10mg'))}_${cleanStr(variant?.presentation || (isCosmetic ? 'bottle' : 'vial'))}_${cleanStr(variant?.supplierId || variant?.supplier || 'colway')}_${cleanStr(currentVialCode)}`;
 
   const shippingLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=shipping&${baseLabelQuery}&download=1`;
   const clientLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=client&${baseLabelQuery}&download=1`;
@@ -418,7 +428,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#0369a1' }}>
             <Barcode size={14} />
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-              Vial Code / Batch
+              {isCosmetic ? 'Bottle Lot / Batch' : 'Vial Code / Batch'}
             </span>
           </div>
 

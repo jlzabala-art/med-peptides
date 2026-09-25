@@ -1,0 +1,3094 @@
+{
+  "schema_version": "1.0",
+  "catalog_name": "Atlas Aesthetic Injectables – Lorenzo / PHARMAMEDIC EXPORT",
+  "generated_date": "2026-09-25",
+  "default_currency": "AED",
+  "category_taxonomy": {
+    "category": "Aesthetic Injectables",
+    "subcategories": [
+      "Dermal Fillers",
+      "Skin Boosters",
+      "Biostimulators",
+      "Polynucleotides",
+      "Fat-Dissolving Injectables"
+    ]
+  },
+  "supplier": {
+    "name": "PHARMAMEDIC EXPORT, S.L.",
+    "country": "Spain",
+    "address": "Calle de Eros 16, 1ºC, 28045 Madrid, Spain",
+    "bigin_account_id": "7006116000001567031",
+    "contact": {
+      "name": "Lorenzo",
+      "email": "admin@pharmaspain.net",
+      "phone": "+34 618 222 793",
+      "bigin_contact_id": "7006116000001559010"
+    }
+  },
+  "source": {
+    "file": "PRICE LIST DUBAI.xlsx",
+    "sheet": "Gulf Order 04.01",
+    "notes": [
+      "Prices are reproduced from the uploaded supplier spreadsheet.",
+      "The source spreadsheet does not specify whether each price is per syringe, vial, box, or other pack configuration.",
+      "Product names with obvious typographical errors were normalized while preserving source_product_name.",
+      "Clinical, regulatory and packaging details not present in the spreadsheet are explicitly marked for verification."
+    ]
+  },
+  "product_count": 40,
+  "products": [
+    {
+      "id": "juvederm-ultra-2",
+      "atlas_product_code": "AI-001",
+      "product_name": "Ultra 2",
+      "source_product_name": "Ultra 2",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 86,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Ultra 2",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "juvederm-ultra-3",
+      "atlas_product_code": "AI-002",
+      "product_name": "Ultra 3",
+      "source_product_name": "Ultra 3",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 143,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Ultra 3",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "juvederm-ultra-4",
+      "atlas_product_code": "AI-003",
+      "product_name": "Ultra 4",
+      "source_product_name": "Ultra 4",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 143,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Ultra 4",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "juvederm-voluma",
+      "atlas_product_code": "AI-004",
+      "product_name": "Voluma",
+      "source_product_name": "Voluma",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial volume restoration",
+          "contouring"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 178,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Voluma",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "juvederm-volbella",
+      "atlas_product_code": "AI-005",
+      "product_name": "Volbella",
+      "source_product_name": "Volbella",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "lips",
+          "perioral lines"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 178,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Volbella",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "juvederm-volift",
+      "atlas_product_code": "AI-006",
+      "product_name": "Volift",
+      "source_product_name": "Volift",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 178,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Volift",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "juvederm-skinvive",
+      "atlas_product_code": "AI-007",
+      "product_name": "Skinvive",
+      "source_product_name": "Skinvive",
+      "brand": "JUVEDERM",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Skin Boosters",
+      "product_type": "Injectable skin-quality treatment",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": true,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "hydration",
+          "texture"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 146,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "JUVEDERM",
+          "Skinvive",
+          "Skin Boosters",
+          "Injectable skin-quality treatment",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-rha-1",
+      "atlas_product_code": "AI-008",
+      "product_name": "RHA 1",
+      "source_product_name": "RHA 1",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 106,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "RHA 1",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-rha-2",
+      "atlas_product_code": "AI-009",
+      "product_name": "RHA 2",
+      "source_product_name": "RHA 2",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 111,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "RHA 2",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-rha-3",
+      "atlas_product_code": "AI-010",
+      "product_name": "RHA 3",
+      "source_product_name": "RHA 3",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 125,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "RHA 3",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-rha-4",
+      "atlas_product_code": "AI-011",
+      "product_name": "RHA 4",
+      "source_product_name": "RHA4",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 138,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "RHA 4",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: RHA4",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-rha-kiss",
+      "atlas_product_code": "AI-012",
+      "product_name": "RHA Kiss",
+      "source_product_name": "RHA KISS",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "lips",
+          "perioral area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 90,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "RHA Kiss",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: RHA KISS",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-redensity-i-2-x-1-ml",
+      "atlas_product_code": "AI-013",
+      "product_name": "Redensity I (2 x 1 mL)",
+      "source_product_name": "REDENSITY I (2X1ML)",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Skin Boosters",
+      "product_type": "Injectable skin-quality treatment",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": true,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "hydration",
+          "texture"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 68,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "Redensity I (2 x 1 mL)",
+          "Skin Boosters",
+          "Injectable skin-quality treatment",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: REDENSITY I (2X1ML)",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-redensity-ii",
+      "atlas_product_code": "AI-014",
+      "product_name": "Redensity II",
+      "source_product_name": "REDENSITY II",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Skin Boosters",
+      "product_type": "Injectable skin-quality treatment",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": true,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "periocular area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 128,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "Redensity II",
+          "Skin Boosters",
+          "Injectable skin-quality treatment",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: REDENSITY II",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-ultra-deep",
+      "atlas_product_code": "AI-015",
+      "product_name": "Ultra Deep",
+      "source_product_name": "ULTRA DEEP",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial volume restoration",
+          "contouring"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 126,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "Ultra Deep",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: ULTRA DEEP",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "teoxane-kiss-puresense",
+      "atlas_product_code": "AI-016",
+      "product_name": "Kiss PureSense",
+      "source_product_name": "KISS PURESENSE",
+      "brand": "TEOXANE",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "lips",
+          "perioral area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 126,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "TEOXANE",
+          "Kiss PureSense",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: KISS PURESENSE",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-sculptra",
+      "atlas_product_code": "AI-017",
+      "product_name": "Sculptra",
+      "source_product_name": "Scupltra",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Biostimulators",
+      "product_type": "Collagen biostimulator",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": false,
+        "is_biostimulator": true,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Poly-L-lactic acid (PLLA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "collagen stimulation",
+          "facial volume restoration"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 285,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Sculptra",
+          "Biostimulators",
+          "Collagen biostimulator",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Scupltra",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-lidocaine",
+      "atlas_product_code": "AI-018",
+      "product_name": "Restylane Lidocaine",
+      "source_product_name": "Restylane lido",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 74,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Lidocaine",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Restylane lido",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-kysse",
+      "atlas_product_code": "AI-019",
+      "product_name": "Restylane Kysse",
+      "source_product_name": "Restylane Kysse",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 79,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Kysse",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-volyme",
+      "atlas_product_code": "AI-020",
+      "product_name": "Restylane Volyme",
+      "source_product_name": "Restylane Volyme",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 79,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Volyme",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-lyft",
+      "atlas_product_code": "AI-021",
+      "product_name": "Restylane Lyft",
+      "source_product_name": "Restylane Lyft",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 79,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Lyft",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-defyne",
+      "atlas_product_code": "AI-022",
+      "product_name": "Restylane Defyne",
+      "source_product_name": "Restylane Defyne",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 79,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Defyne",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-refyne",
+      "atlas_product_code": "AI-023",
+      "product_name": "Restylane Refyne",
+      "source_product_name": "Restylane Refyne",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 79,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Refyne",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "galderma-restylane-vital-sb",
+      "atlas_product_code": "AI-024",
+      "product_name": "Restylane Vital SB",
+      "source_product_name": "Restylane Vital  SB",
+      "brand": "GALDERMA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Skin Boosters",
+      "product_type": "Injectable skin-quality treatment",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": true,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "hydration",
+          "texture"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 61,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "GALDERMA",
+          "Restylane Vital SB",
+          "Skin Boosters",
+          "Injectable skin-quality treatment",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Restylane Vital  SB",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-radiesse-w-out-lido",
+      "atlas_product_code": "AI-025",
+      "product_name": "Radiesse w/out Lido",
+      "source_product_name": "Radiesse w/out Lido",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "CaHA filler / biostimulator",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": true,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Calcium hydroxylapatite (CaHA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 100,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Radiesse w/out Lido",
+          "Dermal Fillers",
+          "CaHA filler / biostimulator",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-lips-shape",
+      "atlas_product_code": "AI-026",
+      "product_name": "Belotero Lips Shape",
+      "source_product_name": "Boletero Lips Shape",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "lips",
+          "perioral area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 60,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Lips Shape",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Boletero Lips Shape",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-balance",
+      "atlas_product_code": "AI-027",
+      "product_name": "Belotero Balance",
+      "source_product_name": "Belotero Balance",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 77,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Balance",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-lips-contour",
+      "atlas_product_code": "AI-028",
+      "product_name": "Belotero Lips Contour",
+      "source_product_name": "Belotero Lips Countour",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "lips",
+          "perioral area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 60,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Lips Contour",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Belotero Lips Countour",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-intense",
+      "atlas_product_code": "AI-029",
+      "product_name": "Belotero Intense",
+      "source_product_name": "Belotero Intense",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 77,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Intense",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-revive",
+      "atlas_product_code": "AI-030",
+      "product_name": "Belotero Revive",
+      "source_product_name": "Belotero Revive",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Skin Boosters",
+      "product_type": "Injectable skin-quality treatment",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": true,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "hydration",
+          "texture"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 60,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Revive",
+          "Skin Boosters",
+          "Injectable skin-quality treatment",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-soft",
+      "atlas_product_code": "AI-031",
+      "product_name": "Belotero Soft",
+      "source_product_name": "Belotero soft",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 71,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Soft",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Belotero soft",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "merz-xcelens-belotero-volume",
+      "atlas_product_code": "AI-032",
+      "product_name": "Belotero Volume",
+      "source_product_name": "Boletero Volume",
+      "brand": "MERZ/XCELENS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial volume restoration",
+          "contouring"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 161,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "MERZ/XCELENS",
+          "Belotero Volume",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Boletero Volume",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "neauvia-intense",
+      "atlas_product_code": "AI-033",
+      "product_name": "Intense",
+      "source_product_name": "Intense",
+      "brand": "NEAUVIA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 55,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "NEAUVIA",
+          "Intense",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "neauvia-intense-lips",
+      "atlas_product_code": "AI-034",
+      "product_name": "Intense Lips",
+      "source_product_name": "Intense Lips",
+      "brand": "NEAUVIA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hyaluronic acid dermal filler",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic acid (HA)",
+        "route": "injectable",
+        "treatment_positioning": [
+          "lips",
+          "perioral area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 55,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "NEAUVIA",
+          "Intense Lips",
+          "Dermal Fillers",
+          "Hyaluronic acid dermal filler",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "neauvia-stimulate",
+      "atlas_product_code": "AI-035",
+      "product_name": "Stimulate",
+      "source_product_name": "Stimulate",
+      "brand": "NEAUVIA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Dermal Fillers",
+      "product_type": "Hybrid HA filler / biostimulatory injectable",
+      "classification": {
+        "is_dermal_filler": true,
+        "is_skin_booster": false,
+        "is_biostimulator": true,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "facial soft-tissue augmentation"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 55,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "NEAUVIA",
+          "Stimulate",
+          "Dermal Fillers",
+          "Hybrid HA filler / biostimulatory injectable",
+          "aesthetic injectable",
+          "filler"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "neauvia-hydro-deluxe",
+      "atlas_product_code": "AI-036",
+      "product_name": "Hydro Deluxe",
+      "source_product_name": "Hydro  De Luxe",
+      "brand": "NEAUVIA",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Skin Boosters",
+      "product_type": "Injectable skin-quality treatment",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": true,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Hyaluronic-acid-based injectable",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "hydration",
+          "texture"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 54,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "NEAUVIA",
+          "Hydro Deluxe",
+          "Skin Boosters",
+          "Injectable skin-quality treatment",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Hydro  De Luxe",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "others-aqualyx",
+      "atlas_product_code": "AI-037",
+      "product_name": "Aqualyx",
+      "source_product_name": "Aqualyx",
+      "brand": "OTHERS",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Fat-Dissolving Injectables",
+      "product_type": "Adipocytolytic injectable",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": false,
+        "is_fat_dissolving": true,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Deoxycholate-based solution",
+        "route": "injectable",
+        "treatment_positioning": [
+          "localized adipose tissue contouring"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 140,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "OTHERS",
+          "Aqualyx",
+          "Fat-Dissolving Injectables",
+          "Adipocytolytic injectable",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": false,
+        "normalization_note": null,
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "croma-philart-croma-philart-eye",
+      "atlas_product_code": "AI-038",
+      "product_name": "Croma PhilArt Eye",
+      "source_product_name": "Croma® PhilArt Eye",
+      "brand": "CROMA PHILART",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Polynucleotides",
+      "product_type": "Polynucleotide injectable",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": true,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Polynucleotides",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "regenerative aesthetic treatment",
+          "periocular area"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 68,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "CROMA PHILART",
+          "Croma PhilArt Eye",
+          "Polynucleotides",
+          "Polynucleotide injectable",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Croma® PhilArt Eye",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "croma-philart-croma-philart",
+      "atlas_product_code": "AI-039",
+      "product_name": "Croma PhilArt",
+      "source_product_name": "Croma® PhilArt",
+      "brand": "CROMA PHILART",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Polynucleotides",
+      "product_type": "Polynucleotide injectable",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": true,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Polynucleotides",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "regenerative aesthetic treatment"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 68,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "CROMA PHILART",
+          "Croma PhilArt",
+          "Polynucleotides",
+          "Polynucleotide injectable",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Croma® PhilArt",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    },
+    {
+      "id": "croma-philart-croma-philart-next",
+      "atlas_product_code": "AI-040",
+      "product_name": "Croma PhilArt Next",
+      "source_product_name": "Croma® PhilArt Next",
+      "brand": "CROMA PHILART",
+      "category": "Aesthetic Injectables",
+      "subcategory": "Polynucleotides",
+      "product_type": "Polynucleotide injectable",
+      "classification": {
+        "is_dermal_filler": false,
+        "is_skin_booster": false,
+        "is_biostimulator": false,
+        "is_polynucleotide": true,
+        "is_fat_dissolving": false,
+        "professional_use_only": true
+      },
+      "clinical": {
+        "active_material_or_platform": "Polynucleotides",
+        "route": "injectable",
+        "treatment_positioning": [
+          "skin quality",
+          "regenerative aesthetic treatment"
+        ],
+        "specialties": [
+          "Aesthetic Medicine",
+          "Dermatology",
+          "Plastic Surgery"
+        ],
+        "clinical_data_status": "classification/positioning provided for catalog organization; verify exact IFU, composition, indications and contraindications against manufacturer documentation before clinical use"
+      },
+      "commercial": {
+        "supplier": "PHARMAMEDIC EXPORT, S.L.",
+        "supplier_contact": "Lorenzo",
+        "source_price": 68,
+        "currency": "AED",
+        "price_basis": "as listed in supplier spreadsheet; unit/pack basis not specified in source file",
+        "market_reference": "Dubai / UAE",
+        "selling_price": null,
+        "margin_percent": null,
+        "availability": "not specified",
+        "minimum_order_quantity": null
+      },
+      "regulatory": {
+        "prescription_status": "not established from source spreadsheet",
+        "uae_registration_status": "not established from source spreadsheet",
+        "requires_professional_administration": true,
+        "verify_before_sale": true
+      },
+      "packaging": {
+        "source_pack_description": "not specified in source spreadsheet",
+        "units_per_pack": null,
+        "syringe_or_vial_volume_ml": null
+      },
+      "atlas": {
+        "status": "active",
+        "visibility": "B2B",
+        "catalog_group": "Aesthetic Injectables",
+        "search_tags": [
+          "CROMA PHILART",
+          "Croma PhilArt Next",
+          "Polynucleotides",
+          "Polynucleotide injectable",
+          "aesthetic injectable"
+        ],
+        "featured": false
+      },
+      "data_provenance": {
+        "product_and_price_source": "PRICE LIST DUBAI.xlsx / Gulf Order 04.01",
+        "price_verified_from_uploaded_source": true,
+        "name_normalized": true,
+        "normalization_note": "Normalized from source spelling: Croma® PhilArt Next",
+        "clinical_fields": "catalog classification; not sourced from the uploaded price list",
+        "last_prepared": "2026-09-25"
+      }
+    }
+  ]
+}
