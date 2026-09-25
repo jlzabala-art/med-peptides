@@ -158,17 +158,32 @@ export default function ShareProductMonographDrawer({
   const slug = product.slug || product.id;
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
 
+  const catLowerSMD = (product.category || product.therapeutic_category || '').toLowerCase();
+  const isProductCosmeticSMD = (
+    catLowerSMD === 'cosmetics' ||
+    catLowerSMD === 'hair cosmetics' ||
+    catLowerSMD === 'cosmeceutical' ||
+    catLowerSMD === 'aesthetic injectables' ||
+    catLowerSMD === 'aesthetic injectable' ||
+    product.is_cosmetic === true ||
+    product.is_aesthetic_injectable === true
+  );
+
   // Build reactive URL
   const queryParams = new URLSearchParams();
-  if (selectedSupplierId && selectedSupplierId !== 'all') {
-    queryParams.set('supplier', selectedSupplierId);
+  if (!isProductCosmeticSMD) {
+    // Clinical params only for peptides & diagnostics
+    if (selectedSupplierId && selectedSupplierId !== 'all') {
+      queryParams.set('supplier', selectedSupplierId);
+    }
+    if (selectedFormatId && selectedFormatId !== 'all') {
+      queryParams.set('format', selectedFormatId);
+    }
+    if (selectedStrengthId && selectedStrengthId !== 'all') {
+      queryParams.set('dose', selectedStrengthId);
+    }
   }
-  if (selectedFormatId && selectedFormatId !== 'all') {
-    queryParams.set('format', selectedFormatId);
-  }
-  if (selectedStrengthId && selectedStrengthId !== 'all') {
-    queryParams.set('dose', selectedStrengthId);
-  }
+  // Lang applies to all product types
   if (selectedLang && selectedLang !== 'en') {
     queryParams.set('lang', selectedLang);
   }

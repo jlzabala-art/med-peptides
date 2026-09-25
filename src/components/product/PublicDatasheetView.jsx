@@ -263,7 +263,7 @@ export default function PublicDatasheetView({
       `• In-Use Concentration: ${reconVol.concentration} mg/mL\n` +
       `• Storage: 2°C – 8°C Refrigerated (Do Not Freeze) · 28-Day Stability\n\n` +
       (protocolsList ? `*ASSOCIATED CLINICAL BLUEPRINTS:*\n${protocolsList}\n\n` : '') +
-      `Official Verification: https://med-peptides-app-27a3a.web.app/p/${slug}\n` +
+      `Official Verification: https://med-peptides.com/p/${slug}\n` +
       `_Atlas Scientific & Clinical Sourcing · SSOT Standard_`;
 
     let success = false;

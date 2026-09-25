@@ -83,7 +83,7 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
         `   • Pauta: Mantener exactamente la misma ventana horaria e intervalo tras la última dosis para comparabilidad seriada.\n\n` +
         `*SALVAGUARDA DE METILACIÓN:*\n` +
         `• TMG (Trimetilglicina) ratio 1:1 con precursores para prevenir agotamiento de donantes de metilo.\n\n` +
-        `Verificación clínica: https://med-peptides-app-27a3a.web.app/proto/${protoSlug}\n` +
+        `Verificación clínica: https://med-peptides.com/proto/${protoSlug}\n` +
         `_Atlas Clinical Governance Engine · SSOT Standard_`
       : `*CLINICAL COMPANION DIAGNOSTICS & CADENCE MEMORANDUM*\n` +
         `Protocol: ${protoName}\n` +
@@ -102,7 +102,7 @@ export default function ProtocolClinicalCompanionCard({ protocol, lang = 'en', b
         `   • Guideline: Maintain identical collection window relative to last dose for serial comparability.\n\n` +
         `*METHYLATION SAFEGUARD:*\n` +
         `• TMG (Trimethylglycine) ratio 1:1 to preserve methyl donor pools against NNMT consumption.\n\n` +
-        `Verification: https://med-peptides-app-27a3a.web.app/proto/${protoSlug}\n` +
+        `Verification: https://med-peptides.com/proto/${protoSlug}\n` +
         `_Atlas Clinical Governance Engine · SSOT Standard_`;
 
     try {
