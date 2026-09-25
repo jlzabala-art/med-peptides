@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Activity, Calendar, Clock, ShieldAlert, Sparkles, CheckCircle2, 
   ChevronRight, ChevronDown, ChevronUp, Stethoscope, User, Droplets, Snowflake, AlertCircle,
-  Layers, Table, Printer, FileText, ShieldCheck
+  Layers, Table, Printer, FileText, ShieldCheck, Copy, Check
 } from 'lucide-react';
 import '../../styles/clinicalGantt.css';
 import StatusBadge from '../ui/StatusBadge';
@@ -47,14 +47,12 @@ function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, tota
 }
 
 export default function ClinicalGanttTimeline({
-  protocol,
-  onDoseTaken
+  protocol
 }) {
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [viewMode, setViewMode] = useState('doctor'); // 'doctor' | 'patient'
   const [activeLayout, setActiveLayout] = useState('accordions'); // 'accordions' | 'gantt'
   const [openPhaseIdx, setOpenPhaseIdx] = useState(0);
-  const [dosesTaken, setDosesTaken] = useState({});
 
   // Default phased dataset if protocol lacks full phases
   const defaultPhases = useMemo(() => [
@@ -243,12 +241,31 @@ export default function ClinicalGanttTimeline({
     });
   }, [distinctCompounds, normalizedPhases, selectedWeek]);
 
-  const handleToggleDose = (key) => {
-    setDosesTaken(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      if (onDoseTaken) onDoseTaken(key, next[key]);
-      return next;
-    });
+  const [copiedTakeaway, setCopiedTakeaway] = useState(false);
+
+  const handleCopyPatientTakeaway = async (phase, week) => {
+    const comp = activeWeekCompounds[0] || {};
+    const text = `*PAUTA DE ADMINISTRACIÓN PARA EL PACIENTE*\n` +
+      `Protocolo: ${protocol?.name || 'Protocolo Clínico'}\n` +
+      `Semana: ${week} (${phase?.phaseName || 'Fase Activa'})\n` +
+      `----------------------------------------\n` +
+      `• Compuesto Prescrito: ${comp.name || 'Péptido Activo'}\n` +
+      `• Dosis Unitaria: ${comp.unitDose || 'Dosis Estándar'}\n` +
+      `• Cadencia / Frecuencia: ${comp.frequency || '1 vez por semana'}\n` +
+      `• Vía: ${comp.route || 'Subcutánea (SubQ)'}\n\n` +
+      `*INSTRUCCIONES CLAVE DE ADMINISTRACIÓN:*\n` +
+      `1. Reconstitución del Vial: Desinfectar el tapón con alcohol, introducir el agua estéril suavemente por la pared del vial y rotar despacio sin agitar.\n` +
+      `2. Conservación en Frío: Mantener siempre refrigerado a 2°C – 8°C. No congelar.\n` +
+      `3. Soporte y Vigilancia: Ante cualquier síntoma adverso o duda de dosificación, consulte con su equipo médico.\n\n` +
+      `_Med-Peptides Clinical Governance Standard_`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedTakeaway(true);
+      setTimeout(() => setCopiedTakeaway(false), 2000);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Sync open accordion when selectedWeek changes
@@ -313,16 +330,16 @@ export default function ClinicalGanttTimeline({
               title="Doctor Clinical Calibration"
             >
               <Stethoscope size={14} />
-              <span className="gantt-btn-text">Doctor<span className="gantt-btn-sub"> View</span></span>
+              <span className="gantt-btn-text">Doctor<span className="gantt-btn-sub"> Calibration</span></span>
             </button>
             <button
               type="button"
               className={`gantt-mode-btn ${viewMode === 'patient' ? 'active' : ''}`}
               onClick={() => setViewMode('patient')}
-              title="Patient Treatment Journey"
+              title="Patient Takeaway & Administration Guide"
             >
-              <User size={14} />
-              <span className="gantt-btn-text">Patient<span className="gantt-btn-sub"> Journey</span></span>
+              <FileText size={14} />
+              <span className="gantt-btn-text">Patient<span className="gantt-btn-sub"> Takeaway</span></span>
             </button>
           </div>
         </div>
@@ -503,7 +520,6 @@ export default function ClinicalGanttTimeline({
                         <div className="pac-weeks-chips-grid">
                           {Array.from({ length: phase.durationWeeks }, (_, i) => phase.startWeek + i).map(w => {
                             const isSelected = selectedWeek === w;
-                            const isTaken = dosesTaken[`w_${w}`];
                             const primaryComp = phaseCompounds[0];
                             const primaryDose = primaryComp 
                               ? resolveWeeklyCompoundDose(primaryComp, phase, idx, w, normalizedPhases.length)
@@ -524,9 +540,6 @@ export default function ClinicalGanttTimeline({
                                   <div className="pwb-dose">
                                     {primaryDose.unitDose}
                                   </div>
-                                )}
-                                {isTaken && (
-                                  <CheckCircle2 size={12} style={{ color: '#10b981', marginTop: '2px' }} />
                                 )}
                               </button>
                             );
@@ -628,24 +641,26 @@ export default function ClinicalGanttTimeline({
 
                               <button
                                 type="button"
-                                onClick={() => handleToggleDose(`w_${selectedWeek}`)}
+                                onClick={() => handleCopyPatientTakeaway(phase, selectedWeek)}
                                 style={{
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   gap: '6px',
                                   padding: '5px 12px',
                                   borderRadius: '6px',
-                                  background: dosesTaken[`w_${selectedWeek}`] ? '#059669' : '#0d9488',
+                                  background: copiedTakeaway ? '#059669' : '#0d9488',
                                   border: 'none',
                                   color: '#ffffff',
                                   fontSize: '0.74rem',
                                   fontWeight: 700,
                                   cursor: 'pointer',
-                                  boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                                  transition: 'all 0.15s ease'
                                 }}
+                                title="Copiar pauta e instrucciones al portapapeles"
                               >
-                                <CheckCircle2 size={13} />
-                                <span>{dosesTaken[`w_${selectedWeek}`] ? '✓ Dosis Registrada' : 'Marcar Dosis Tomada'}</span>
+                                {copiedTakeaway ? <Check size={13} /> : <Copy size={13} />}
+                                <span>{copiedTakeaway ? '✓ Pauta Copiada' : 'Copiar Pauta'}</span>
                               </button>
                             </div>
                           </div>
@@ -910,27 +925,50 @@ export default function ClinicalGanttTimeline({
             </div>
 
             {viewMode === 'patient' && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px', gap: '8px' }}>
                 <button
                   type="button"
-                  onClick={() => handleToggleDose(`w_${selectedWeek}`)}
+                  onClick={() => handleCopyPatientTakeaway(currentPhase, selectedWeek)}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '7px 16px',
+                    padding: '6px 14px',
                     borderRadius: '6px',
-                    border: 'none',
-                    background: dosesTaken[`w_${selectedWeek}`] ? '#10b981' : '#0d9488',
-                    color: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#0f172a',
                     fontWeight: 700,
-                    fontSize: '0.78rem',
+                    fontSize: '0.76rem',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
+                  title="Copiar pauta e instrucciones al portapapeles"
                 >
-                  <CheckCircle2 size={14} />
-                  {dosesTaken[`w_${selectedWeek}`] ? '✓ Dose Confirmed Taken' : `Mark Week ${selectedWeek} Dose Taken`}
+                  {copiedTakeaway ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                  <span>{copiedTakeaway ? '✓ Copiado' : 'Copiar Pauta Semana'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: '#0d9488',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.76rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title="Imprimir o guardar pauta en PDF"
+                >
+                  <Printer size={13} />
+                  <span>Imprimir Guía PDF</span>
                 </button>
               </div>
             )}

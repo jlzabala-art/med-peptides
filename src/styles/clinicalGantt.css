@@ -1119,6 +1119,8 @@
   .gantt-layout-toggle,
   .gantt-mobile-phase-bar,
   button:has(.lucide-printer),
+  button:has(.lucide-copy),
+  button:has(.lucide-check),
   button:has(.lucide-check-circle-2) {
     display: none !important;
   }

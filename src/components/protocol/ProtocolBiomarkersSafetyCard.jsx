@@ -165,7 +165,7 @@ export default function ProtocolBiomarkersSafetyCard({
                   borderBottom: '1px solid #f1f5f9',
                   paddingBottom: '0.65rem',
                   marginBottom: '0.85rem',
-                  flexWrap: 'nowrap'
+                  flexWrap: 'wrap'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
                     <span style={{
