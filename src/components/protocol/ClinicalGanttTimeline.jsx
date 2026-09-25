@@ -244,20 +244,64 @@ export default function ClinicalGanttTimeline({
   const [copiedTakeaway, setCopiedTakeaway] = useState(false);
 
   const handleCopyPatientTakeaway = async (phase, week) => {
-    const comp = activeWeekCompounds[0] || {};
-    const text = `*CLINICAL PATIENT ADMINISTRATION SCHEDULE*\n` +
-      `Protocol: ${protocol?.name || 'Clinical Peptide Protocol'}\n` +
-      `Treatment Week: ${week} (${phase?.phaseName || 'Active Phase'})\n` +
-      `----------------------------------------\n` +
-      `• Prescribed Compound: ${comp.name || 'Active Peptide'}\n` +
-      `• Unit Calibration Dose: ${comp.unitDose || 'Standard Therapeutic Dose'}\n` +
-      `• Cadence / Regimen: ${comp.frequency || 'Once weekly'}\n` +
-      `• Administration Route: ${comp.route || 'Subcutaneous (SubQ)'}\n\n` +
-      `*MANDATORY RECONSTITUTION & STORAGE DIRECTIVES:*\n` +
-      `1. Aseptic Reconstitution: Disinfect vial rubber septum with 70% isopropyl alcohol swab. Dispense bacteriostatic water smoothly down the inner glass wall. Swirl gently in circular motion — NEVER shake.\n` +
-      `2. Cold Chain Preservation: Maintain refrigerated continuously at 2°C – 8°C (36°F – 46°F). Never freeze reconstituted peptides.\n` +
-      `3. Pharmacovigilance & Oversight: Promptly report unexpected systemic symptoms or injection-site reactions to your supervising clinical team.\n\n` +
-      `_Med-Peptides Clinical Governance & Safety Standard · GxP Compliant_`;
+    const pName = protocol?.name || protocol?.title || 'Clinical Peptide Protocol';
+    const phaseName = phase?.phaseName || phase?.name || 'Active Clinical Phase';
+    const phaseGoal = phase?.focus || protocol?.goal || 'Metabolic Optimization & Cellular Restoration';
+    const phaseWeekRange = phase ? `Weeks ${phase.startWeek}–${phase.endWeek}` : `Week ${week}`;
+
+    // Map ALL compounds active in this week
+    const compoundBlocks = (activeWeekCompounds && activeWeekCompounds.length > 0)
+      ? activeWeekCompounds.map((c, i) => {
+          return `  [Compound ${i + 1}]: ${c.name}
+  • Prescribed Unit Dose:   ${c.unitDose || 'Standard Therapeutic Calibration'} per injection
+  • Administration Cadence: ${c.frequency || 'Follow physician prescription schedule'}
+  • Target Weekly Exposure: ${c.weeklyTotal || 'As clinically titrated'}
+  • Injection Route:        Subcutaneous (SubQ) — rotate injection sites (periumbilical / outer thigh)
+  • Pharmaceutical Format:  ${c.format || 'Sterile Lyophilized Peptide Vial (Reconstitute with BAC water)'}`;
+        }).join('\n\n')
+      : '  • No active compounds recorded for this week interval.';
+
+    const text = `================================================================================
+PATIENT CLINICAL ADMINISTRATION SCHEDULE & PRESCRIBING REGIMEN
+Atlas Health SSOT Clinical Governance Framework · ISO 15189 Standard
+================================================================================
+
+1. PROTOCOL IDENTITY & TREATMENT CONTEXT
+--------------------------------------------------------------------------------
+• Protocol Name:          ${pName}
+• Current Clinical Phase:  ${phaseName} (${phaseWeekRange})
+• Active Treatment Week:  Week ${week}
+• Therapeutic Objective:  ${phaseGoal}
+
+2. PRESCRIBED COMPOUND DOSAGE & CADENCE (ALL ACTIVE COMPOUNDS)
+--------------------------------------------------------------------------------
+${compoundBlocks}
+
+3. ASEPTIC RECONSTITUTION & PREPARATION DIRECTIVES
+--------------------------------------------------------------------------------
+• Disinfection:   Swab rubber septum with 70% isopropyl alcohol swab and air-dry 15s.
+• Fluid Transfer: Dispense bacteriostatic sterile water slowly along inner glass vial wall.
+• Dissolution:    Swirl gently in slow circular motion until fully clear. NEVER shake vigorously.
+• Syringe Check:  Verify calibrated unit volume on U-100 insulin syringe prior to subcutaneous injection.
+
+4. BIO-STABILITY & COLD-CHAIN INTEGRITY DIRECTIVES
+--------------------------------------------------------------------------------
+• Storage Regimen:    Refrigerate continuously at 2°C – 8°C (36°F – 46°F).
+• Critical Safeguard: Do NOT freeze reconstituted peptide solutions under any circumstance.
+• Expiration Horizon: Maximum 28-day microbiological stability post-first septum puncture.
+• Light Sensitivity:  Shield vials from prolonged direct sunlight or elevated ambient heat.
+
+5. PHARMACOVIGILANCE & ESCALATION SENTINEL
+--------------------------------------------------------------------------------
+• Expected Response: Mild transient injection-site tingling or minimal erythema (<1 inch).
+• Immediate Physician Escalation: Discontinue use and contact your prescribing clinician
+  if you experience systemic urticaria, dyspnea, acute tachycardia, or persistent abdominal pain.
+
+================================================================================
+PRESCRIBING MEDICAL DIRECTOR ATTESTATION:
+Physician Name: _________________________________  License #: __________________
+Date Issued:    ${new Date().toISOString().split('T')[0]}                       Review Date: __________________
+================================================================================`;
 
     try {
       await navigator.clipboard.writeText(text);
@@ -943,10 +987,10 @@ export default function ClinicalGanttTimeline({
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
-                  title="Copiar pauta e instrucciones al portapapeles"
+                  title="Copy comprehensive weekly clinical schedule to clipboard"
                 >
                   {copiedTakeaway ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
-                  <span>{copiedTakeaway ? '✓ Copiado' : 'Copiar Pauta Semana'}</span>
+                  <span>{copiedTakeaway ? '✓ Schedule Copied' : 'Copy Weekly Schedule'}</span>
                 </button>
                 <button
                   type="button"
@@ -965,10 +1009,10 @@ export default function ClinicalGanttTimeline({
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
-                  title="Imprimir o guardar pauta en PDF"
+                  title="Print or export patient takeaway PDF"
                 >
                   <Printer size={13} />
-                  <span>Imprimir Guía PDF</span>
+                  <span>Print PDF Guide</span>
                 </button>
               </div>
             )}
