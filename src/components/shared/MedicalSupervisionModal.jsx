@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { X, ShieldCheck, Stethoscope, CheckCircle, ArrowRight } from '@/lib/icons';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 
 export default function MedicalSupervisionModal({ isOpen, onClose, itemName, itemType = 'protocol' }) {
   const [fullName, setFullName] = useState('');
@@ -150,12 +151,10 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
                     Phone / WhatsApp
                   </label>
-                  <input
-                    type="tel"
+                  <InternationalPhoneInput
                     value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    placeholder="+1 (555) 000-0000"
-                    className="msm-input"
+                    onChange={(val) => setPhone(val)}
+                    placeholder="612 34 56 78"
                   />
                 </div>
               </div>

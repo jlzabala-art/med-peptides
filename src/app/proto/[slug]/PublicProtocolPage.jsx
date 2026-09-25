@@ -890,8 +890,16 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             {/* Biomarker-Driven Calibration Banner (Precision Diagnostic Integration) */}
             <BiomarkerCalibrationBanner
               calibrationDisplay={calibrationDisplay}
-              lang={lang}
+              biomarkerCalibration={biomarkerCalibration}
+              onCalibrate={(newCal) => {
+                setBiomarkerCalibration(newCal);
+                toast.success(lang === 'es' ? 'Pauta recalibrada con éxito' : 'Protocol recalibrated successfully');
+              }}
               onClearCalibration={handleClearCalibration}
+              slug={slug}
+              protocolCategory={protocol?.category}
+              protocolTitle={protocol?.title || protocol?.name}
+              lang={lang}
             />
           
             {/* Section 0: Verified Clinical Outcomes & Endpoints */}

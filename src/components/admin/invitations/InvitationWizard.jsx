@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { User, Shield, MapPin, DollarSign, Cpu, CheckCircle, ArrowRight, ArrowLeft, Send, Mail } from '@/lib/icons';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 
 
 
@@ -95,7 +96,11 @@ export default function InvitationWizard({ onSend, onCancel, isSending }) {
             </div>
             <div>
               <label className="gcp-label">Phone Number</label>
-              <input type="tel" className="gcp-input" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+1 555-0199" />
+              <InternationalPhoneInput
+                value={formData.phone}
+                onChange={val => setFormData({ ...formData, phone: val })}
+                countryHint="US"
+              />
             </div>
           </div>
         );

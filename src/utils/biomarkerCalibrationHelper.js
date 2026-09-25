@@ -442,3 +442,147 @@ export function computeCalibrationDisplay(biomarkerCalibration, lang = 'en') {
     retestScheduleSub
   };
 }
+
+/**
+ * Detects the clinically relevant diagnostic biomarker profile for any protocol blueprint.
+ * Allows interactive in-situ calibration on protocol pages according to Google Cloud UX standards.
+ */
+export function detectProtocolBiomarker(slug = '', category = '', title = '') {
+  const text = `${slug} ${category} ${title}`.toLowerCase();
+
+  if (
+    text.includes('metabolic') ||
+    text.includes('weight') ||
+    text.includes('glp') ||
+    text.includes('retatrutide') ||
+    text.includes('tirzepatide') ||
+    text.includes('semaglutide') ||
+    text.includes('obesity') ||
+    text.includes('fat-loss')
+  ) {
+    return {
+      type: 'hba1c',
+      nameEn: 'HbA1c & Glycemic Control',
+      nameEs: 'Hemoglobina Glicosilada (HbA1c) y Glucemia',
+      unit: '%',
+      defaultLevel: 6.2,
+      min: 4.8,
+      max: 10.0,
+      step: 0.1,
+      targetStr: '< 5.4%',
+      companionTestSlug: 'bloodo-nad-test',
+      companionTestName: 'Bloodo™ Metabolic & Glucose Regulation Test',
+      presets: [
+        { labelEn: 'Severe Resistance (>6.5%)', labelEs: 'Resistencia Severa (>6.5%)', value: 7.2, baseline: 'severe', tier: 'critical', modality: 'incretin', retest: '12w' },
+        { labelEn: 'Prediabetes (5.7–6.4%)', labelEs: 'Prediabetes (5.7–6.4%)', value: 6.0, baseline: 'warning', tier: 'warning', modality: 'incretin', retest: '12w' },
+        { labelEn: 'Optimal (< 5.4%)', labelEs: 'Óptimo (< 5.4%)', value: 5.2, baseline: 'optimal', tier: 'normal', modality: 'maintenance', retest: '6m' }
+      ]
+    };
+  }
+
+  if (
+    text.includes('hormon') ||
+    text.includes('hpta') ||
+    text.includes('testo') ||
+    text.includes('kisspeptin') ||
+    text.includes('androgen') ||
+    text.includes('gonado') ||
+    text.includes('sermorelin')
+  ) {
+    return {
+      type: 'testosterone',
+      nameEn: 'Total Testosterone (DBS)',
+      nameEs: 'Testosterona Total y Eje HPTA',
+      unit: 'nmol/L',
+      defaultLevel: 11.5,
+      min: 4.0,
+      max: 35.0,
+      step: 0.5,
+      targetStr: '18.0 – 28.0 nmol/L',
+      companionTestSlug: 'bloodo-nad-test',
+      companionTestName: 'Bloodo™ Testosterone & Androgen Panel',
+      presets: [
+        { labelEn: 'Severe Deficit (<10)', labelEs: 'Déficit Severo (<10)', value: 8.5, baseline: 'deficient', tier: 'critical', modality: 'secretagogues', retest: '8w' },
+        { labelEn: 'Suboptimal (10–15)', labelEs: 'Subóptimo (10–15)', value: 12.5, baseline: 'suboptimal', tier: 'warning', modality: 'secretagogues', retest: '8w' },
+        { labelEn: 'Optimal (>18)', labelEs: 'Óptimo (>18)', value: 22.0, baseline: 'optimal', tier: 'normal', modality: 'maintenance', retest: '6m' }
+      ]
+    };
+  }
+
+  if (
+    text.includes('sleep') ||
+    text.includes('circadian') ||
+    text.includes('cortisol') ||
+    text.includes('stress') ||
+    text.includes('dsip') ||
+    text.includes('selank')
+  ) {
+    return {
+      type: 'cortisol',
+      nameEn: 'Diurnal Cortisol & HPA Rhythm',
+      nameEs: 'Cortisol Diurno y Ritmo Circadiano HPA',
+      unit: 'nmol/L',
+      defaultLevel: 140,
+      min: 50,
+      max: 700,
+      step: 10,
+      targetStr: 'CAR: 300 – 500 nmol/L',
+      companionTestSlug: 'bloodo-nad-test',
+      companionTestName: 'Bloodo™ Diurnal Cortisol & Stress Panel',
+      presets: [
+        { labelEn: 'Burnout / Blunted (<150)', labelEs: 'Agotamiento Suprarrenal (<150)', value: 110, baseline: 'exhaustion', tier: 'critical', modality: 'neurorestoration', retest: '8w' },
+        { labelEn: 'Hypercortisol (>500)', labelEs: 'Hipercortisolemia (>500)', value: 550, baseline: 'hypercortisol', tier: 'critical', modality: 'neurorestoration', retest: '8w' },
+        { labelEn: 'Balanced (300–450)', labelEs: 'Equilibrado (300–450)', value: 380, baseline: 'optimal', tier: 'normal', modality: 'maintenance', retest: '6m' }
+      ]
+    };
+  }
+
+  if (
+    text.includes('recovery') ||
+    text.includes('injury') ||
+    text.includes('repair') ||
+    text.includes('bpc') ||
+    text.includes('tb-500') ||
+    text.includes('joint') ||
+    text.includes('omega')
+  ) {
+    return {
+      type: 'omega',
+      nameEn: 'Cellular Omega-3 Index & hs-CRP',
+      nameEs: 'Índice Celular Omega-3 y PCR Ultrasensible',
+      unit: '%',
+      defaultLevel: 4.2,
+      min: 2.0,
+      max: 12.0,
+      step: 0.1,
+      targetStr: '≥ 8.0%',
+      companionTestSlug: 'bloodo-nad-test',
+      companionTestName: 'Bloodo™ Cellular Omega-3 & Inflammation Test',
+      presets: [
+        { labelEn: 'Severe Deficit (<4%)', labelEs: 'Déficit Inflamatorio (<4%)', value: 3.5, baseline: 'severe', tier: 'critical', modality: 'repletion', retest: '12w' },
+        { labelEn: 'Suboptimal (4–7.9%)', labelEs: 'Subóptimo (4–7.9%)', value: 5.5, baseline: 'suboptimal', tier: 'warning', modality: 'repletion', retest: '12w' },
+        { labelEn: 'Optimal (≥8%)', labelEs: 'Resolutivo Óptimo (≥8%)', value: 9.0, baseline: 'optimal', tier: 'normal', modality: 'maintenance', retest: '6m' }
+      ]
+    };
+  }
+
+  // Default: Cellular NAD+ & Mitochondrial Longevity
+  return {
+    type: 'nad',
+    nameEn: 'Intracellular NAD+ (DBS Whole Blood)',
+    nameEs: 'NAD⁺ Intracelular en Sangre Total (Bloodo™ DBS)',
+    unit: 'µmol/L',
+    defaultLevel: 10.3,
+    min: 5.0,
+    max: 60.0,
+    step: 0.5,
+    targetStr: '30.0 – 50.0 µmol/L',
+    companionTestSlug: 'bloodo-nad-test',
+    companionTestName: 'Bloodo™ Intracellular NAD+ DBS Kit',
+    presets: [
+      { labelEn: 'Severe Deficit (<10.3)', labelEs: 'Depleción Severa (<10.3)', value: 8.5, baseline: 'severe', tier: 'critical', modality: 'intravenous', retest: '4w' },
+      { labelEn: 'Suboptimal (10.3–15.4)', labelEs: 'Subóptimo (10.3–15.4)', value: 12.8, baseline: 'suboptimal', tier: 'warning', modality: 'subcutaneous', retest: '8w' },
+      { labelEn: 'Optimal Target (≥30)', labelEs: 'Diana Óptima (≥30)', value: 35.0, baseline: 'optimal', tier: 'normal', modality: 'maintenance', retest: '6m' }
+    ]
+  };
+}

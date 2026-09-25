@@ -24,6 +24,7 @@ import { COUNTRIES } from '../data/countries';
 import { useAuth } from '../context/AuthContext';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { trackFormEngagement } from '../hooks/useAnalytics';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 
 
 export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, region }) {
@@ -498,35 +499,13 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
 
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>Phone Number</label>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Includes WhatsApp support indicator.</p>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <div style={{ position: 'relative', width: '90px' }}>
-                      <select 
-                        style={{ width: '100%', padding: '0.85rem 0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', fontSize: '0.9rem', outline: 'none', appearance: 'none', backgroundColor: 'var(--surface-subtle)' }}
-                      >
-                        <option>ES +34</option>
-                        <option>US +1</option>
-                        <option>UK +44</option>
-                        <option>AE +971</option>
-                      </select>
-                      <ChevronDown size={14} style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                    </div>
-                    <div style={{ position: 'relative', flex: 1 }}>
-                      <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#25D366' }}>
-                        <MessageSquare size={16} fill="#25D366" />
-                      </div>
-                      <input 
-                        type="tel" 
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        onBlur={handleBlur}
-                        placeholder="600 000 000"
-                        style={{ width: '100%', padding: '0.85rem 2.8rem 0.85rem 1rem', borderRadius: 'var(--radius-md)', border: touched.phone && errors.phone ? '1px solid var(--danger)' : '1px solid var(--border)', fontSize: '1rem', outline: 'none' }}
-                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; }}
-                      />
-                    </div>
-                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Includes WhatsApp & mobile support indicator.</p>
+                  <InternationalPhoneInput
+                    value={formData.phone}
+                    onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                    countryHint="ES"
+                    placeholder="612 34 56 78"
+                  />
                   {touched.phone && errors.phone && <p style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.phone}</p>}
                 </div>
 

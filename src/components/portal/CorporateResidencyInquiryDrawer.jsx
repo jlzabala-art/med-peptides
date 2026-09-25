@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Check, ArrowRight, ShieldCheck, Briefcase, Globe, Users, Building2, Calendar, Phone, Mail, FileText, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 
 function WaIcon() {
   return (
@@ -595,19 +596,12 @@ export default function CorporateResidencyInquiryDrawer({
                     <label style={{ display: 'block', fontSize: '0.74rem', color: '#64748b', marginBottom: '2px' }}>
                       {isEs ? 'WhatsApp / Teléfono Directo' : 'Direct WhatsApp / Phone'}
                     </label>
-                    <input
-                      type="tel"
-                      placeholder="+1 (555) 000-0000"
+                    <InternationalPhoneInput
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.65rem 0.75rem',
-                        borderRadius: '8px',
-                        border: '1.5px solid #cbd5e1',
-                        fontSize: '0.84rem',
-                        boxSizing: 'border-box'
-                      }}
+                      onChange={setPhone}
+                      lang={isEs ? 'es' : 'en'}
+                      countryHint={isEs ? 'ES' : 'US'}
+                      placeholder="612 34 56 78"
                     />
                   </div>
                 </div>

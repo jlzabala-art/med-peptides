@@ -244,10 +244,121 @@ export const COUNTRIES = [
   { code: 'zw', name: 'Zimbabwe', flag: '🇿🇼', dial_code: '+263' }
 ];
 
+// Spanish Country Name Mappings
+export const SPANISH_COUNTRY_NAMES = {
+  es: 'España',
+  us: 'Estados Unidos',
+  gb: 'Reino Unido',
+  ae: 'Emiratos Árabes Unidos',
+  mx: 'México',
+  co: 'Colombia',
+  ar: 'Argentina',
+  cl: 'Chile',
+  pe: 'Perú',
+  de: 'Alemania',
+  fr: 'Francia',
+  it: 'Italia',
+  ch: 'Suiza',
+  pt: 'Portugal',
+  br: 'Brasil',
+  ca: 'Canadá',
+  sa: 'Arabia Saudita',
+  qa: 'Catar',
+  kw: 'Kuwait',
+  bh: 'Baréin',
+  om: 'Omán',
+  nl: 'Países Bajos',
+  be: 'Bélgica',
+  at: 'Austria',
+  se: 'Suecia',
+  no: 'Noruega',
+  dk: 'Dinamarca',
+  fi: 'Finlandia',
+  ie: 'Irlanda',
+  pl: 'Polonia',
+  cz: 'República Checa',
+  gr: 'Grecia',
+  tr: 'Turquía',
+  ec: 'Ecuador',
+  uy: 'Uruguay',
+  py: 'Paraguay',
+  bo: 'Bolivia',
+  ve: 'Venezuela',
+  cr: 'Costa Rica',
+  pa: 'Panamá',
+  do: 'República Dominicana',
+  gt: 'Guatemala',
+  hn: 'Honduras',
+  sv: 'El Salvador',
+  ni: 'Nicaragua',
+  cu: 'Cuba',
+  pr: 'Puerto Rico',
+  in: 'India',
+  cn: 'China',
+  jp: 'Japón',
+  kr: 'Corea del Sur',
+  sg: 'Singapur',
+  au: 'Australia',
+  nz: 'Nueva Zelanda',
+  za: 'Sudáfrica',
+  eg: 'Egipto',
+  il: 'Israel',
+  ru: 'Rusia',
+  ua: 'Ucrania',
+  ma: 'Marruecos',
+  ro: 'Rumania',
+  hu: 'Hungría'
+};
+
+// Common Search Synonyms & Aliases
+export const COUNTRY_SYNONYMS = {
+  us: ['usa', 'eeuu', 'estados unidos', 'america', 'ee.uu.'],
+  gb: ['uk', 'reino unido', 'gran bretaña', 'england', 'inglaterra'],
+  ae: ['uae', 'emirates', 'dubai', 'abu dhabi', 'eau', 'emiratos'],
+  es: ['spain', 'espana', 'espanol'],
+  mx: ['mexico', 'cdmx', 'mex'],
+  de: ['germany', 'deutschland'],
+  fr: ['france'],
+  it: ['italy', 'italia'],
+  ch: ['switzerland', 'suisse', 'schweiz', 'helvetia'],
+  nl: ['holland', 'holanda', 'netherlands'],
+  br: ['brazil', 'brasil'],
+  ca: ['canada']
+};
+
+// Priority Clinical Regions for default empty-query display
+export const PRIORITY_COUNTRY_CODES = [
+  'es', 'us', 'gb', 'ae', 'mx', 'co', 'ar', 'cl', 'pe', 'de', 'fr', 'it', 'ch', 'pt', 'ca', 'br', 'sa', 'qa'
+];
+
+// Enrich COUNTRIES array with nameEs and default sample placeholder
+COUNTRIES.forEach((c) => {
+  const codeLower = c.code.toLowerCase();
+  c.nameEs = SPANISH_COUNTRY_NAMES[codeLower] || c.name;
+  c.synonyms = COUNTRY_SYNONYMS[codeLower] || [];
+  
+  if (codeLower === 'es') c.samplePlaceholder = '612 34 56 78';
+  else if (codeLower === 'us' || codeLower === 'ca') c.samplePlaceholder = '(555) 000-0000';
+  else if (codeLower === 'gb') c.samplePlaceholder = '7911 123456';
+  else if (codeLower === 'ae') c.samplePlaceholder = '50 123 4567';
+  else if (codeLower === 'mx') c.samplePlaceholder = '55 1234 5678';
+  else if (codeLower === 'co') c.samplePlaceholder = '300 123 4567';
+  else if (codeLower === 'ar') c.samplePlaceholder = '11 1234-5678';
+  else if (codeLower === 'cl') c.samplePlaceholder = '9 1234 5678';
+  else if (codeLower === 'de') c.samplePlaceholder = '151 12345678';
+  else if (codeLower === 'fr') c.samplePlaceholder = '6 12 34 56 78';
+  else c.samplePlaceholder = '555-0199';
+});
+
 export const ALL_COUNTRIES = COUNTRIES;
 
+// Helper: Normalize diacritics / accents for seamless typing (e.g. 'españa' -> 'espana', 'méxico' -> 'mexico')
+const stripAccents = (str) => {
+  if (!str) return '';
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+};
+
 // O(1) Access Map
-// Optimized O(1) Maps for performance
 export const COUNTRY_MAP = COUNTRIES.reduce((acc, country) => {
   acc[country.code.toLowerCase()] = country;
   return acc;
@@ -264,18 +375,88 @@ export const DIAL_CODE_MAP = COUNTRIES.reduce((acc, country) => {
 export const getCountryByCode = (code) => COUNTRY_MAP[code?.toLowerCase()] || null;
 
 export const getCountryByDialCode = (dialCode) => {
-  const pureDial = dialCode?.startsWith('+') ? dialCode : `+${dialCode}`;
+  if (!dialCode) return null;
+  const pureDial = dialCode.startsWith('+') ? dialCode : `+${dialCode}`;
   return DIAL_CODE_MAP[pureDial] || null;
 };
 
-// Mobile-friendly Search Logic
-export const searchCountries = (query) => {
-  const normalized = query.toLowerCase().trim();
-  if (!normalized) return COUNTRIES;
-  
-  return COUNTRIES.filter(c => 
-    c.name.toLowerCase().includes(normalized) || 
-    c.dial_code.includes(normalized) ||
-    c.code.toLowerCase() === normalized
-  );
+/**
+ * High-performance search for countries conforming to Google Cloud UX standards:
+ * - Matches by English name, Spanish name, ISO-2 code, dial code, and regional aliases.
+ * - Accent/diacritic insensitive (e.g., 'espana' matches 'España').
+ * - Dial code without '+' (e.g., '34' matches '+34').
+ * - Prioritizes exact matches, starts-with matches, and clinical priority markets.
+ */
+export const searchCountries = (query, { lang = 'en', limit = 50 } = {}) => {
+  const raw = (query || '').trim();
+  if (!raw) {
+    // When no query is typed, sort priority clinical regions first, followed by alphabetical
+    const prioritySet = new Set(PRIORITY_COUNTRY_CODES);
+    const topTier = PRIORITY_COUNTRY_CODES.map((c) => COUNTRY_MAP[c]).filter(Boolean);
+    const rest = COUNTRIES.filter((c) => !prioritySet.has(c.code.toLowerCase()));
+    return [...topTier, ...rest];
+  }
+
+  const clean = stripAccents(raw);
+  const cleanNumeric = raw.replace(/[^\d]/g, '');
+
+  const matches = [];
+
+  for (const c of COUNTRIES) {
+    const code = c.code.toLowerCase();
+    const nameEn = stripAccents(c.name);
+    const nameEs = stripAccents(c.nameEs || '');
+    const dial = c.dial_code.replace(/[^\d]/g, '');
+    const synonyms = (c.synonyms || []).map(s => stripAccents(s));
+
+    let score = 0;
+
+    // 1. Dial code matches (e.g. '+34' or '34')
+    if (cleanNumeric && dial === cleanNumeric) {
+      score += 100;
+    } else if (cleanNumeric && dial.startsWith(cleanNumeric)) {
+      score += 60;
+    }
+
+    // 2. ISO 2-letter code exact match (e.g. 'es', 'us')
+    if (code === clean) {
+      score += 90;
+    }
+
+    // 3. Exact Name Match
+    if (nameEn === clean || nameEs === clean) {
+      score += 85;
+    }
+
+    // 4. Starts with name match
+    if (nameEn.startsWith(clean) || nameEs.startsWith(clean)) {
+      score += 70;
+    }
+
+    // 5. Synonyms / Aliases match (e.g. 'usa', 'eeuu', 'uk', 'dubai')
+    if (synonyms.some(s => s === clean)) {
+      score += 75;
+    } else if (synonyms.some(s => s.startsWith(clean))) {
+      score += 55;
+    }
+
+    // 6. Substring match
+    if (score === 0) {
+      if (nameEn.includes(clean) || nameEs.includes(clean) || synonyms.some(s => s.includes(clean))) {
+        score += 30;
+      }
+    }
+
+    if (score > 0) {
+      // Small bonus if in priority countries list
+      if (PRIORITY_COUNTRY_CODES.includes(code)) {
+        score += 5;
+      }
+      matches.push({ country: c, score });
+    }
+  }
+
+  matches.sort((a, b) => b.score - a.score);
+  return matches.slice(0, limit).map((m) => m.country);
 };
+

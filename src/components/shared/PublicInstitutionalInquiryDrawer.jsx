@@ -19,6 +19,7 @@ import {
 import { useAlgoliaSearch } from '@/hooks/data/useAlgoliaSearch';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
+import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 
 const INQUIRY_TOPICS = [
   {
@@ -63,25 +64,6 @@ const INQUIRY_TOPICS = [
   }
 ];
 
-const COUNTRY_CODES = [
-  { code: '+34', country: 'ES', flag: '🇪🇸', name: 'Spain (+34)' },
-  { code: '+1', country: 'US', flag: '🇺🇸', name: 'USA/Canada (+1)' },
-  { code: '+44', country: 'GB', flag: '🇬🇧', name: 'UK (+44)' },
-  { code: '+971', country: 'AE', flag: '🇦🇪', name: 'UAE (+971)' },
-  { code: '+49', country: 'DE', flag: '🇩🇪', name: 'Germany (+49)' },
-  { code: '+33', country: 'FR', flag: '🇫🇷', name: 'France (+33)' },
-  { code: '+39', country: 'IT', flag: '🇮🇹', name: 'Italy (+39)' },
-  { code: '+41', country: 'CH', flag: '🇨🇭', name: 'Switzerland (+41)' },
-  { code: '+351', country: 'PT', flag: '🇵🇹', name: 'Portugal (+351)' },
-  { code: '+52', country: 'MX', flag: '🇲🇽', name: 'Mexico (+52)' },
-  { code: '+57', country: 'CO', flag: '🇨🇴', name: 'Colombia (+57)' },
-  { code: '+54', country: 'AR', flag: '🇦🇷', name: 'Argentina (+54)' },
-  { code: '+56', country: 'CL', flag: '🇨🇱', name: 'Chile (+56)' },
-  { code: '+55', country: 'BR', flag: '🇧🇷', name: 'Brazil (+55)' },
-  { code: '+61', country: 'AU', flag: '🇦🇺', name: 'Australia (+61)' },
-  { code: '+966', country: 'SA', flag: '🇸🇦', name: 'Saudi Arabia (+966)' },
-  { code: '+974', country: 'QA', flag: '🇶🇦', name: 'Qatar (+974)' },
-];
 
 export default function PublicInstitutionalInquiryDrawer({
   isOpen = false,
@@ -849,52 +831,14 @@ export default function PublicInstitutionalInquiryDrawer({
                   <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 600, color: '#475569', marginBottom: '0.25rem' }}>
                     {lang === 'es' ? 'Teléfono / WhatsApp' : 'Phone / WhatsApp'}
                   </label>
-                  <div style={{ display: 'flex', width: '100%' }}>
-                    <select
-                      value={phonePrefix}
-                      onChange={(e) => setPhonePrefix(e.target.value)}
-                      style={{
-                        flexShrink: 0,
-                        width: '88px',
-                        padding: '0.5rem 0.3rem',
-                        borderRadius: '6px 0 0 6px',
-                        border: '1px solid #cbd5e1',
-                        borderRight: 'none',
-                        background: '#f8fafc',
-                        fontSize: '0.76rem',
-                        fontWeight: 700,
-                        color: '#1e293b',
-                        outline: 'none',
-                        cursor: 'pointer'
-                      }}
-                      aria-label="Country Dial Code"
-                    >
-                      {COUNTRY_CODES.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.flag} {c.code}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^\d\s-]/g, '');
-                        setPhoneNumber(val);
-                      }}
-                      placeholder={phonePrefix === '+34' ? '612 34 56 78' : '555-0199'}
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        padding: '0.5rem 0.65rem',
-                        borderRadius: '0 6px 6px 0',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.82rem',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
+                  <InternationalPhoneInput
+                    phonePrefix={phonePrefix}
+                    onPrefixChange={setPhonePrefix}
+                    phoneNumber={phoneNumber}
+                    onPhoneNumberChange={setPhoneNumber}
+                    lang={lang}
+                    countryHint={lang === 'es' ? 'ES' : 'US'}
+                  />
                 </div>
               </div>
 
