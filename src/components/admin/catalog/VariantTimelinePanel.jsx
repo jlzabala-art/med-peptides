@@ -105,7 +105,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
 
   const rawSlug = selectedProduct?.slug || selectedProduct?.id || '';
   const canonicalMonographPath = isCosmetic
-    ? `/p/${encodeURIComponent(rawSlug)}?presentation=${formatParam}&supplier=${suppParam}&batch=${batchParam}`
+    ? `/p/${encodeURIComponent(rawSlug)}`
     : `/p/${encodeURIComponent(rawSlug)}?dose=${doseParam}&presentation=${formatParam}&supplier=${suppParam}&batch=${batchParam}&vialCode=${batchParam}`;
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const absoluteMonographUrl = `${origin}${canonicalMonographPath}`;

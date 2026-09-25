@@ -136,15 +136,48 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const defaultDose = (product.dosage || (Array.isArray(product.variants) && product.variants[0]?.dosage) || '10 mg').replace(/_/g, ' ');
   const defaultFormat = product.format || product.presentation || (Array.isArray(product.variants) && product.variants[0]?.format) || 'vial';
   const productSlug = product.slug || product.id || 'peptide';
-  const canonicalProductUrl = `${origin}/p/${productSlug}?dose=${encodeURIComponent(defaultDose)}&presentation=${encodeURIComponent(defaultFormat)}&supplier=${encodeURIComponent(defaultSupplier)}&batch=${encodeURIComponent(batchCode)}&vialCode=${encodeURIComponent(batchCode)}`;
+
+  // ── Detect product type to build the correct canonical URL ──────────────────
+  // Cosmetics & Aesthetic Injectables → clean URL (no clinical query params)
+  // Peptides / Diagnostics           → retain dose, batch, supplier params
+  const catLowerTC = (product.category || product.therapeutic_category || '').toLowerCase();
+  const isProductCosmetic = (
+    catLowerTC === 'cosmetics' ||
+    catLowerTC === 'hair cosmetics' ||
+    catLowerTC === 'cosmeceutical' ||
+    catLowerTC === 'aesthetic injectables' ||
+    catLowerTC === 'aesthetic injectable' ||
+    product.is_cosmetic === true ||
+    product.is_aesthetic_injectable === true
+  );
+
+  const canonicalProductUrl = isProductCosmetic
+    ? `${origin}/p/${productSlug}`
+    : `${origin}/p/${productSlug}?dose=${encodeURIComponent(defaultDose)}&presentation=${encodeURIComponent(defaultFormat)}&supplier=${encodeURIComponent(defaultSupplier)}&batch=${encodeURIComponent(batchCode)}&vialCode=${encodeURIComponent(batchCode)}`;
+
   const cleanMonographUrl = monographUrl
-    ? monographUrl
-        .replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, origin)
-        .replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, origin)
-        .replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg')
-        .replace(/supplier=(all|supplier-all[^&]*)/gi, `supplier=${encodeURIComponent(defaultSupplier)}`)
+    ? (() => {
+        let url = monographUrl
+          .replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, origin)
+          .replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, origin);
+        if (isProductCosmetic) {
+          // Strip all clinical query params from externally-provided monograph URLs too
+          try {
+            const parsed = new URL(url);
+            parsed.search = '';
+            url = parsed.toString();
+          } catch (_) {
+            url = url.split('?')[0];
+          }
+        } else {
+          url = url
+            .replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg')
+            .replace(/supplier=(all|supplier-all[^&]*)/gi, `supplier=${encodeURIComponent(defaultSupplier)}`);
+        }
+        return url;
+      })()
     : canonicalProductUrl;
-  const activeMonographUrl = cleanMonographUrl.includes('#') ? cleanMonographUrl : `${cleanMonographUrl}#specs-section`;
+  const activeMonographUrl = cleanMonographUrl.includes('#') ? cleanMonographUrl : `${cleanMonographUrl}${isProductCosmetic ? '' : '#specs-section'}`;
   const pdfUrl = `/api/product-sheet/${product.id || slug}?format=${encodeURIComponent(defaultFormat)}`;
   const fullPdfUrl = `${origin}${pdfUrl}`;
 
