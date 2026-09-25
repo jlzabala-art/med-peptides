@@ -361,14 +361,16 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   const dynT = dynamicTranslations[lang] || {};
   const displayName = dynT.name || (lang === 'es' && protocol?.name_es) || baseName;
   const displayDescription = dynT.description || (lang === 'es' && protocol?.description_es) || baseDescription;
-  const displayDuration = lang === 'es'
-    ? rawDuration.replace(/\bWeeks?\b/i, 'Semanas').replace(/\bDays?\b/i, 'Días').replace(/\bMonths?\b/i, 'Meses')
-    : rawDuration;
+  const displayDuration = anatomicalCalibration?.cycleWeeks
+    ? (lang === 'es' ? `${anatomicalCalibration.cycleWeeks} Semanas` : `${anatomicalCalibration.cycleWeeks} Weeks`)
+    : (lang === 'es'
+        ? rawDuration.replace(/\bWeeks?\b/i, 'Semanas').replace(/\bDays?\b/i, 'Días').replace(/\bMonths?\b/i, 'Meses')
+        : rawDuration);
 
   // Protocol Supply Engine — Single Source of Truth
   const supplySummary = useMemo(() => {
-    return generateDynamicSupplySummary(protocol);
-  }, [protocol]);
+    return generateDynamicSupplySummary(protocol, anatomicalCalibration);
+  }, [protocol, anatomicalCalibration]);
 
   // Reconstitution Specs for interactive console — Single Source of Truth
   const reconData = useMemo(() => {
@@ -472,6 +474,24 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
       (compounds.includes('bpc-157') && (compounds.includes('tb-500') || s.includes('rec')))
     ) && !isTirzepatideProtocol && !isImmuneProtocol;
   }, [slug, protocol, isTirzepatideProtocol, isImmuneProtocol]);
+
+  // Check if protocol is a Hair / Scalp / Trichology protocol
+  const isHairProtocol = useMemo(() => {
+    const s = String(slug || protocol?.slug || protocol?.id || '').toLowerCase();
+    const title = String(protocol?.protocol_title || protocol?.title || protocol?.name || '').toLowerCase();
+    const goal = String(protocol?.goal || protocol?.category || '').toLowerCase();
+    const compounds = (protocol?.items || []).map(i => String(i.name || i.title || '').toLowerCase()).join(' ');
+    return (
+      s.includes('hair') ||
+      s.includes('scalp') ||
+      s.includes('follic') ||
+      s.includes('alopecia') ||
+      title.includes('hair') ||
+      title.includes('scalp') ||
+      goal.includes('hair') ||
+      compounds.includes('ghk-cu') && (s.includes('scalp') || title.includes('scalp') || title.includes('hair'))
+    );
+  }, [slug, protocol]);
 
   // ── Protocol Sections for Sticky Sidebar Table of Contents & Mobile QuickNav ──
   const tocSections = useMemo(() => {
@@ -871,7 +891,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               iconColor: '#0d9488',
               title: t.kpiPeptidesTitle,
               value: `${items.length || 1} ${items.length === 1 ? t.kpiFormulation : t.kpiFormulations}`,
-              subtitle: items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle,
+              subtitle: isHairProtocol 
+                ? (lang === 'es' ? 'Dianas de Anágeno y Papila Dérmica' : 'Anagen & Dermal Papilla Targets')
+                : (items.length > 1 ? t.kpiPeptidesSubtitle : t.kpiPeptidesFallbackSubtitle),
               subColor: '#0d9488'
             },
             {
@@ -909,7 +931,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               iconColor: '#c2410c',
               title: t.kpiInjectionsTitle,
               value: `${supplySummary.totalInjections} ${t.kpiInjectionsUnit}`,
-              subtitle: t.kpiInjectionsSubtitle,
+              subtitle: isHairProtocol
+                ? (lang === 'es' ? 'Vía SubQ / Mesoterapia Capilar' : 'SubQ & Scalp Mesotherapy')
+                : t.kpiInjectionsSubtitle,
               subColor: '#c2410c'
             }
           ]}
@@ -1075,6 +1099,20 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             title={lang === 'es' ? 'Secciones del Protocolo' : 'Protocol Navigation'}
             similarProtocols={similarProtocols}
             currentProtocolSlug={slug}
+            topicalAdjuncts={protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
+              {
+                product_slug: 'colway-strengthening-shampoo',
+                product_name: 'Colway Strengthening Hair Shampoo',
+                step: 'Step 1 — Scalp Prep',
+                key_mechanisms: ['DHT clearance (Zinc PCA)', 'pH 4.5–5.5 optimization']
+              },
+              {
+                product_slug: 'colway-strengthening-conditioner',
+                product_name: 'Colway Strengthening Conditioner',
+                step: 'Step 2 — Cortex Repair',
+                key_mechanisms: ['Native collagen & Keratin shield', 'Anti-breakage']
+              }
+            ] : null)}
           />
         </div>
 

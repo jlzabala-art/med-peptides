@@ -12,6 +12,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import BloodoSuiteNav from './BloodoSuiteNav';
 import AssociatedProtocolsSidebarWidget from './AssociatedProtocolsSidebarWidget';
 import SimilarProtocolsSidebarWidget from './SimilarProtocolsSidebarWidget';
+import ProtocolTopicalAdjunctsSidebarWidget from '@/components/protocol/ProtocolTopicalAdjunctsSidebarWidget';
 import './PublicDatasheetTableOfContents.css';
 
 /**
@@ -36,7 +37,9 @@ export default function PublicDatasheetTableOfContents({
   currentProductSlug = '',
   associatedProtocols = [],
   similarProtocols = [],
-  currentProtocolSlug = ''
+  currentProtocolSlug = '',
+  topicalAdjuncts = [],
+  children
 }) {
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
@@ -213,6 +216,17 @@ export default function PublicDatasheetTableOfContents({
             />
           )}
 
+          {/* Topical Cosmeceutical Adjuncts (Colway Hair System, etc.) */}
+          {Array.isArray(topicalAdjuncts) && topicalAdjuncts.length > 0 && (
+            <ProtocolTopicalAdjunctsSidebarWidget
+              adjuncts={topicalAdjuncts}
+              lang={lang}
+            />
+          )}
+
+          {/* Optional Injected Sidebar Children */}
+          {children}
+
           {/* Quick Back to Top Action */}
           <div className="pds-toc-footer">
             <button
@@ -365,6 +379,16 @@ export default function PublicDatasheetTableOfContents({
                   currentSlug={currentProtocolSlug}
                 />
               )}
+
+              {/* Topical Cosmeceutical Adjuncts (Colway Hair System, etc.) */}
+              {Array.isArray(topicalAdjuncts) && topicalAdjuncts.length > 0 && (
+                <ProtocolTopicalAdjunctsSidebarWidget
+                  adjuncts={topicalAdjuncts}
+                  lang={lang}
+                />
+              )}
+
+              {children}
             </div>
 
             {/* Drawer Footer Actions */}

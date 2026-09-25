@@ -522,8 +522,9 @@ export function generateDynamicReconData(protocol) {
 /**
  * Dynamically computes supply dispensing requirements across full cycle duration
  */
-export function generateDynamicSupplySummary(protocol) {
-  const durWeeks = Number(protocol?.durationWeeks) ||
+export function generateDynamicSupplySummary(protocol, calibratedDoses = null) {
+  const durWeeks = Number(calibratedDoses?.cycleWeeks) ||
+    Number(protocol?.durationWeeks) ||
     Number(protocol?.protocol_duration_weeks) ||
     (protocol?.phases ? protocol.phases.reduce((acc, p) => acc + (Number(p.durationWeeks) || (p.end_week && p.start_week ? Number(p.end_week) - Number(p.start_week) + 1 : 0)), 0) : 8) || 8;
 
@@ -542,6 +543,23 @@ export function generateDynamicSupplySummary(protocol) {
     const vialMgMatch = c.strength.match(/(\d+(?:\.\d+)?)/);
     const vialMg = vialMgMatch ? parseFloat(vialMgMatch[1]) : 10;
     
+    // Check if doctor calibrated dose overrides default baseline
+    let calibratedMgPerDose = null;
+    const lowerName = (c.name || '').toLowerCase();
+    if (calibratedDoses) {
+      if (lowerName.includes('ipamorelin') && calibratedDoses.ipamorelinDailyMcg) {
+        calibratedMgPerDose = calibratedDoses.ipamorelinDailyMcg / 1000;
+      } else if ((lowerName.includes('cjc') || lowerName.includes('dac') || lowerName.includes('mod grf')) && calibratedDoses.cjcDailyMcg) {
+        calibratedMgPerDose = calibratedDoses.cjcDailyMcg / 1000;
+      } else if (lowerName.includes('ghk') && calibratedDoses.ghkDailyMg) {
+        calibratedMgPerDose = Number(calibratedDoses.ghkDailyMg);
+      } else if (lowerName.includes('bpc') && calibratedDoses.bpcDose) {
+        calibratedMgPerDose = calibratedDoses.bpcDose / 1000;
+      } else if ((lowerName.includes('tb-500') || lowerName.includes('tb500') || lowerName.includes('thymosin')) && calibratedDoses.tbDose) {
+        calibratedMgPerDose = Number(calibratedDoses.tbDose);
+      }
+    }
+    
     let totalMgNeeded = 0;
     const totalPhaseWeeks = phases.reduce((sum, p) => sum + (Number(p.durationWeeks) || (p.end_week && p.start_week ? Number(p.end_week) - Number(p.start_week) + 1 : 0) || 0), 0) || durWeeks;
     phases.forEach((ph, pIdx) => {
@@ -550,14 +568,19 @@ export function generateDynamicSupplySummary(protocol) {
         (ph.end_week && ph.start_week ? (Number(ph.end_week) - Number(ph.start_week) + 1) : null) || 
         Math.ceil(durWeeks / phases.length) || 4;
       const phWeeks = totalPhaseWeeks > durWeeks ? (rawPhWeeks / totalPhaseWeeks) * durWeeks : rawPhWeeks;
-      const scale = c.dosingScale[pIdx] || c.dosingScale[0];
-      const doseMgMatch = scale?.dose?.match(/(\d+(?:\.\d+)?)\s*(mg|mcg)/i);
-      if (doseMgMatch) {
-        const val = parseFloat(doseMgMatch[1]);
-        const mg = doseMgMatch[2].toLowerCase() === 'mcg' ? val / 1000 : val;
-        totalMgNeeded += (mg * timesPerWeek * phWeeks);
+      
+      if (calibratedMgPerDose != null) {
+        totalMgNeeded += (calibratedMgPerDose * timesPerWeek * phWeeks);
       } else {
-        totalMgNeeded += (2.5 * timesPerWeek * phWeeks);
+        const scale = c.dosingScale[pIdx] || c.dosingScale[0];
+        const doseMgMatch = scale?.dose?.match(/(\d+(?:\.\d+)?)\s*(mg|mcg)/i);
+        if (doseMgMatch) {
+          const val = parseFloat(doseMgMatch[1]);
+          const mg = doseMgMatch[2].toLowerCase() === 'mcg' ? val / 1000 : val;
+          totalMgNeeded += (mg * timesPerWeek * phWeeks);
+        } else {
+          totalMgNeeded += (2.5 * timesPerWeek * phWeeks);
+        }
       }
     });
 
@@ -580,7 +603,9 @@ export function generateDynamicSupplySummary(protocol) {
       cadence: bm?.cadence || 'Once Weekly SubQ',
       injectionsPerWeek: timesPerWeek,
       totalInjections,
-      weeklyDose: `${c.dosingScale[0]?.dose || 'Active'} (Titrated)`
+      weeklyDose: calibratedMgPerDose != null 
+        ? `${calibratedMgPerDose >= 1 ? `${calibratedMgPerDose} mg` : `${Math.round(calibratedMgPerDose * 1000)} mcg`} (Calibrated)` 
+        : `${c.dosingScale[0]?.dose || 'Active'} (Titrated)`
     };
   });
 

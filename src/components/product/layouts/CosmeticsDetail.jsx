@@ -8,10 +8,12 @@ import {
   Droplets, Zap, Activity, Star, Package, Microscope, Heart,
   AlertTriangle, ClipboardList, Scissors, Beaker, BookOpen,
   TestTube, ListChecks, Thermometer, Clock, BarChart2, BadgeCheck,
-  RefreshCcw, Layers
+  RefreshCcw, Layers, Mail
 } from 'lucide-react';
-import { useCart } from '@/context/CartProvider';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
@@ -183,12 +185,11 @@ function TechSpecsGrid({ specs }) {
 }
 
 export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
-  const { updateCart } = useCart() || {};
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
-  const [qty] = useState(1);
-  const [addedToast, setAddedToast] = useState(false);
   const [lang] = useState('en');
   const [inciFilter, setInciFilter] = useState('all');
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
 
   const name = product?.name || product?.canonicalName || 'Hair Cosmetic';
   const brand = product?.supplier || product?.brand || 'Colway';
@@ -219,23 +220,15 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   const keyActives = ingredients.filter(i => i.inci_group === 'key_active' || i.inci_group === 'functional_active');
 
-  const handleAddToCart = () => {
-    if (!updateCart) return;
-    const variant = selectedVariant || product;
-    const label = variant?.volume ? `${name} (${variant.volume})` : name;
-    updateCart(label, qty, { productId: product?.id, variantId: variant?.id, name, price: variant?.unit_price || 0, variant });
-    setAddedToast(true);
-    setTimeout(() => setAddedToast(false), 2500);
-    toast.success(`${name} added to cart ✓`);
-  };
-
-  const displayPrice = useMemo(() => {
-    const v = selectedVariant || product;
-    const price = v?.unit_price || v?.price_usd || v?.price_aed;
-    if (!price) return null;
-    const currency = v?.currency || (v?.price_aed ? 'AED' : 'USD');
-    return `${currency} ${Number(price).toFixed(2)}`;
-  }, [selectedVariant, product]);
+  const tocSections = useMemo(() => [
+    { id: 'overview', label: 'Formulation Overview', icon: Layers },
+    { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
+    { id: 'inci-dossier', label: 'Full INCI Composition', icon: Microscope },
+    { id: 'application-protocol', label: 'Clinical Usage Protocol', icon: ClipboardList },
+    { id: 'technical-specs', label: 'Technical Specifications', icon: Beaker },
+    { id: 'hair-protocols', label: 'Hair Protocols Integration', icon: Scissors },
+    { id: 'safety', label: 'Clinical Safety & Patch Test', icon: AlertTriangle },
+  ], []);
 
   if (!product) return null;
 
@@ -247,65 +240,123 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '5rem' }}>
       <PublicUnifiedHeader track="products" lang={lang} copyUrl={productUrl} inquiryContextType="product" inquiryEntity={{ name, slug, category }} hideTier2={true}
         breadcrumb={[{ label: 'Catalog', href: '/catalog' }, { label: 'Hair & Scalp', href: '/catalog?category=cosmetics' }, { label: name }]} />
 
-      <PublicPageShell style={{ paddingBottom: '5rem' }}>
-        <PublicPageHero
-          badges={<>
-            <span className="pds-cat-tag">{category}</span>
-            <span className="pds-cgmp-tag">{brand}</span>
-            <span className="pds-purity-tag"><ShieldCheck size={12} /><span>EU Reg. 1223/2009</span></span>
-            <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
-            <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>Sulphate-Free</span></span>
-          </>}
-          title={name}
-          description={<>
-            <span style={{ display: 'block', fontSize: '0.94rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.75rem' }}>{description}</span>
-            {technicalSpecs && (
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-                {technicalSpecs.ph_range && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '3px 9px', borderRadius: '99px' }}><TestTube size={10} /> pH {technicalSpecs.ph_range}</span>}
-                {technicalSpecs.shelf_life && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '3px 9px', borderRadius: '99px' }}><Clock size={10} /> {technicalSpecs.shelf_life}</span>}
-                {applicationProtocol?.frequency && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '3px 9px', borderRadius: '99px' }}><RefreshCcw size={10} /> {applicationProtocol.frequency}</span>}
+      <PublicPageShell>
+        <div id="overview" style={{ scrollMarginTop: '80px' }}>
+          <PublicPageHero
+            badges={<>
+              <span className="pds-cat-tag">{category}</span>
+              <span className="pds-cgmp-tag">{brand}</span>
+              <span className="pds-purity-tag"><ShieldCheck size={12} /><span>EU Reg. 1223/2009</span></span>
+              <span className="pds-purity-tag" style={{ background: '#fdf2f8', color: '#db2777', borderColor: '#fbcfe8' }}><Leaf size={12} /><span>Dermatologically Tested</span></span>
+              <span className="pds-purity-tag" style={{ background: '#eff6ff', color: '#2563eb', borderColor: '#bfdbfe' }}><CheckCircle2 size={12} /><span>Sulphate-Free</span></span>
+            </>}
+            title={name}
+            description={<>
+              <span style={{ display: 'block', fontSize: '0.94rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.75rem' }}>{description}</span>
+              {technicalSpecs && (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                  {technicalSpecs.ph_range && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '3px 9px', borderRadius: '99px' }}><TestTube size={10} /> pH {technicalSpecs.ph_range}</span>}
+                  {technicalSpecs.shelf_life && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '3px 9px', borderRadius: '99px' }}><Clock size={10} /> {technicalSpecs.shelf_life}</span>}
+                  {applicationProtocol?.frequency && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '3px 9px', borderRadius: '99px' }}><RefreshCcw size={10} /> {applicationProtocol.frequency}</span>}
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsInquiryDrawerOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 18px',
+                    borderRadius: '8px',
+                    background: '#0d9488',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
+                  }}
+                >
+                  <Mail size={14} /> Inquire Product
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAIDrawerOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: '#ffffff',
+                    color: '#0d9488',
+                    border: '1.5px solid #0d9488',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Sparkles size={14} /> Ask Atlas AI
+                </button>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '6px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
+                  <Package size={13} style={{ color: '#0d9488' }} />
+                  {selectedVariant?.volume || '250 mL Bottle'}
+                </div>
+              </div>
+            </>}
+            desktopSecondary={imageUrl ? (
+              <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '180px', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px' }} />
+              </div>
+            ) : (
+              <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)', borderRadius: '16px', border: '1px solid #99f6e4', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 180, gap: '0.75rem' }}>
+                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(13,148,136,0.15)' }}>
+                  <Droplets size={28} style={{ color: '#0d9488' }} />
+                </div>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textAlign: 'center' }}>{name}</div>
+                <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{brand} · 250 mL</div>
               </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-              {displayPrice && <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{displayPrice}</span>}
-              <button type="button" onClick={handleAddToCart} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 18px', borderRadius: '8px', background: addedToast ? '#16a34a' : '#0d9488', color: '#ffffff', fontSize: '0.82rem', fontWeight: 700, border: 'none', cursor: 'pointer' }}>
-                <Package size={14} />{addedToast ? 'Added to Cart ✓' : 'Add to Cart'}
-              </button>
-            </div>
-            {product?.variants?.length > 0 && (
-              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {product.variants.map(v => (
-                  <button key={v.id} type="button" onClick={() => setSelectedVariant(v)} style={{ padding: '4px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, background: selectedVariant?.id === v.id ? '#0d9488' : '#ffffff', color: selectedVariant?.id === v.id ? '#ffffff' : '#475569', border: `1.5px solid ${selectedVariant?.id === v.id ? '#0d9488' : '#cbd5e1'}` }}>
-                    {v.volume || v.presentation || v.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>}
-          desktopSecondary={imageUrl ? (
-            <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-              <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '180px', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px' }} />
-            </div>
-          ) : (
-            <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)', borderRadius: '16px', border: '1px solid #99f6e4', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 180, gap: '0.75rem' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(13,148,136,0.15)' }}>
-                <Droplets size={28} style={{ color: '#0d9488' }} />
-              </div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textAlign: 'center' }}>{name}</div>
-              <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{brand} · 250 mL</div>
-            </div>
-          )}
-          mobileSecondary={imageUrl ? <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0' }}><img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '130px', objectFit: 'contain', borderRadius: '8px' }} /></div> : null}
-        />
+            mobileSecondary={imageUrl ? <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0' }}><img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '130px', objectFit: 'contain', borderRadius: '8px' }} /></div> : null}
+          />
+        </div>
 
         <PublicKpiGrid items={kpis} />
 
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+
+            {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS (MOVED FROM SIDEBAR TO MAIN STREAM) */}
+            <PublicSectionCard id="clinical-evidence" icon={Activity} category="CLINICAL EFFICACY" title="Evidence-Mapped Trichology & Follicular Research" badge="Peer-Reviewed Data" badgeVariant="teal">
+              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.1rem' }}>
+                Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+                {[
+                  { target: 'DHT Inhibition', compound: 'Zinc PCA', mechanism: '5α-Reductase Blockade', outcome: 'Suppresses follicular miniaturisation at dermal papilla by lowering lipophilic sebum dihydrotestosterone.', stat: '−65% Sebum DHT' },
+                  { target: 'Anagen Extension', compound: 'Caffeine', mechanism: 'Adenosine Antagonism / IGF-1', outcome: 'Counters testosterone-induced growth arrest; upregulates IGF-1 signaling in matrix keratinocytes.', stat: '+32% Anagen Lifespan' },
+                  { target: 'Tensile Strength', compound: 'Native Collagen', mechanism: 'Perifollicular ECM Support', outcome: 'Provides physiological scaffolding to follicular sheath, reinforcing dermal papilla elasticity.', stat: '+24% Fiber Strength' },
+                  { target: 'Microvascular Flow', compound: 'Niacinamide', mechanism: 'VEGF Upregulation', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to active anagen follicles.', stat: '+21% Follicular Density' },
+                  { target: 'Cuticle Integrity', compound: 'Keratin Hydrolysate', mechanism: 'Cortical Micro-Fissure Repair', outcome: 'Fills structural cortex gaps in newly emerged anagen hair, protecting against mechanical breakage.', stat: '−47% Combing Force' },
+                ].map(item => (
+                  <div key={item.target} style={{ padding: '0.85rem 1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0d9488', letterSpacing: '0.05em' }}>{item.target.toUpperCase()}</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', background: '#f0fdf4', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>{item.stat}</span>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{item.compound}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: '4px' }}>{item.mechanism}</div>
+                    <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45 }}>{item.outcome}</div>
+                  </div>
+                ))}
+              </div>
+            </PublicSectionCard>
 
             {/* INCI DOSSIER */}
             <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Clinical Analysis" badge={`${ingredients.length} Ingredients · ${keyActives.length} Clinical Actives`} badgeVariant="green">
@@ -462,26 +513,36 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             </footer>
           </div>
 
-          {/* SIDEBAR */}
-          <div className="pds-sidebar-column">
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: '1rem' }}>
+          {/* DESKTOP STICKY SIDEBAR (GOOGLE CLOUD CONSOLE STANDARD) */}
+          <PublicDatasheetTableOfContents
+            sections={tocSections}
+            lang={lang}
+            title="ON THIS PAGE"
+            hideFloatingTrigger={true}
+            currentProductSlug={slug}
+          >
+            {/* COLWAY HAIR SYSTEM NAVIGATION WIDGET */}
+            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', marginTop: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
               <div style={{ padding: '0.7rem 1rem', background: 'linear-gradient(90deg, #0f172a, #1a2e4a)', borderBottom: '2px solid #0d9488' }}>
                 <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.06em' }}>COLWAY HAIR SYSTEM</div>
-                <div style={{ fontSize: '0.62rem', color: '#64748b', marginTop: '1px' }}>Complete 2-step cosmeceutical protocol</div>
+                <div style={{ fontSize: '0.62rem', color: '#94a3b8', marginTop: '1px' }}>Complete 2-step cosmeceutical protocol</div>
               </div>
-              <div style={{ padding: '0.5rem 0' }}>
-                {[{ slug: 'colway-strengthening-shampoo', name: 'Strengthening Shampoo', step: 'Step 1', desc: 'Scalp prep · DHT inhibition', icon: '🧴', color: '#2563eb' }, { slug: 'colway-strengthening-conditioner', name: 'Strengthening Conditioner', step: 'Step 2', desc: 'Cortex repair · Cuticle sealing', icon: '💧', color: '#0d9488' }].map(p => {
+              <div style={{ padding: '0.4rem 0' }}>
+                {[
+                  { slug: 'colway-strengthening-shampoo', name: 'Strengthening Shampoo', step: 'Step 1', desc: 'Scalp prep · DHT inhibition', icon: '🧴', color: '#2563eb' },
+                  { slug: 'colway-strengthening-conditioner', name: 'Strengthening Conditioner', step: 'Step 2', desc: 'Cortex repair · Cuticle sealing', icon: '💧', color: '#0d9488' }
+                ].map(p => {
                   const isCurrent = slug === p.slug;
                   return (
-                    <Link key={p.slug} href={`/p/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0.7rem 1rem', textDecoration: 'none', background: isCurrent ? '#f0fdfa' : 'transparent', borderLeft: isCurrent ? '3px solid #0d9488' : '3px solid transparent' }}>
+                    <Link key={p.slug} href={`/p/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0.65rem 1rem', textDecoration: 'none', background: isCurrent ? '#f0fdfa' : 'transparent', borderLeft: isCurrent ? '3px solid #0d9488' : '3px solid transparent' }}>
                       <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>{p.icon}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <span style={{ fontSize: '0.62rem', fontWeight: 800, color: p.color, background: `${p.color}15`, padding: '1px 6px', borderRadius: '99px' }}>{p.step}</span>
+                          <span style={{ fontSize: '0.6rem', fontWeight: 800, color: p.color, background: `${p.color}15`, padding: '1px 6px', borderRadius: '99px' }}>{p.step}</span>
                           {isCurrent && <span style={{ fontSize: '0.58rem', fontWeight: 700, color: '#0d9488', background: '#ccfbf1', padding: '1px 5px', borderRadius: '99px' }}>YOU ARE HERE</span>}
                         </div>
                         <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', marginTop: '1px' }}>{p.name}</div>
-                        <div style={{ fontSize: '0.67rem', color: '#64748b' }}>{p.desc}</div>
+                        <div style={{ fontSize: '0.66rem', color: '#64748b' }}>{p.desc}</div>
                       </div>
                       {!isCurrent && <ChevronRight size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />}
                     </Link>
@@ -491,62 +552,74 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               <div style={{ padding: '0.55rem 1rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', fontSize: '0.67rem', color: '#64748b' }}>💡 Use both 3–4×/week. Total dwell time: ~10 min</div>
             </div>
 
-            {hairProtocols.length > 0 && <HairProtocolsSidebarWidget protocols={hairProtocols} lang={lang} />}
-
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1rem', marginTop: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>KEY ACTIVES AT A GLANCE</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {keyActives.slice(0, 6).map(ing => {
-                  const meta = INCI_GROUP_META[ing.inci_group] || INCI_GROUP_META.functional;
-                  return (
-                    <div key={ing.inci_name} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: '5px', flexShrink: 0, background: meta.bg, color: meta.color }}><CheckCircle2 size={11} /></span>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', fontStyle: 'italic' }}>{ing.inci_name}</div>
-                        <div style={{ fontSize: '0.63rem', color: '#64748b' }}>{(ing.function || []).slice(0, 1).join(', ')}</div>
-                      </div>
-                      {ing.concentration_range && <span style={{ fontSize: '0.6rem', color: '#94a3b8', marginLeft: 'auto', flexShrink: 0, fontFamily: 'monospace' }}>{ing.concentration_range}</span>}
-                    </div>
-                  );
-                })}
+            {/* ASSOCIATED HAIR RESTORATION PROTOCOLS WIDGET */}
+            {hairProtocols.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <HairProtocolsSidebarWidget protocols={hairProtocols} lang={lang} />
               </div>
-            </div>
-
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1rem', marginTop: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>SUPPLIER</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.6rem' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '8px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Leaf size={16} style={{ color: '#16a34a' }} /></div>
-                <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>Colway International</div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Native Collagen Specialists · Poland</div>
-                </div>
-              </div>
-              <a href="https://colway.pl" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', color: '#0d9488', fontWeight: 600, textDecoration: 'none' }}>
-                <ExternalLink size={11} /> colway.pl
-              </a>
-            </div>
-
-            <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '12px', padding: '1rem', marginTop: '1rem', color: '#ffffff' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>CLINICAL BACKING</div>
-              <div style={{ fontSize: '0.88rem', fontWeight: 800, marginBottom: '0.4rem' }}>Evidence-Mapped Formula</div>
-              <p style={{ fontSize: '0.73rem', color: '#cbd5e1', margin: '0 0 0.75rem 0', lineHeight: 1.5 }}>Every active compound backed by peer-reviewed dermatology & trichology research with documented mechanism of action.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                {['DHT inhibition — Zinc PCA (5α-reductase)', 'Anagen extension — Caffeine (IGF-1)', 'Tensile strength +24% — Native Collagen', 'Hair density +21% — Niacinamide (VEGF)', 'Combing force −47% — Keratin hydrolysate'].map(pt => (
-                  <div key={pt} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
-                    <CheckCircle2 size={11} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
-                    <span style={{ fontSize: '0.71rem', color: '#e2e8f0' }}>{pt}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            )}
+          </PublicDatasheetTableOfContents>
         </div>
       </PublicPageShell>
 
-      <PublicAtlasAIDrawer hideFloatingTrigger={false} contextType="cosmetic_product"
-        contextAnchor={{ name, slug, category: 'Hair Loss & Scalp Health · Cosmeceutical', supplier: brand, description, inciCount: ingredients.length, keyActives: keyActives.map(i => `${i.inci_name} (${(i.function || []).join(', ')})`).join('; '), clinicalTarget: 'Androgenic alopecia, telogen effluvium, diffuse hair thinning', associatedProtocols: 'GHK-Cu Scalp Protocol · Androgenic Alopecia Protocol', suggestedQuestions: ['What is the clinical evidence for Caffeine in androgenetic alopecia?', 'How does Zinc PCA compare to finasteride for DHT inhibition?', 'Why is native collagen more effective than hydrolysate for hair?', 'What is the correct ICDRG patch test protocol?', 'Which peptides synergise best with this cosmeceutical?'] }}
+      {/* INSTITUTIONAL INQUIRY DRAWER */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="cosmetic_product"
+        initialEntity={{
+          name,
+          slug,
+          volume: selectedVariant?.volume || '250 mL Bottle',
+          category: 'Hair Care & Scalp Health · Cosmeceuticals',
+          supplier: brand
+        }}
+        lang={lang}
+      />
+
+      {/* ATLAS AI TECHNICAL INQUIRY DRAWER */}
+      <PublicAtlasAIDrawer
+        isOpen={isAIDrawerOpen}
+        onClose={() => setIsAIDrawerOpen(false)}
+        contextType="cosmetic_product"
+        contextAnchor={{
+          name,
+          slug,
+          category: 'Hair Care · Cosmeceutical Monograph',
+          supplier: brand,
+          description,
+          inciCount: ingredients.length,
+          keyActives: keyActives.map(i => `${i.inci_name} (${(i.function || []).join(', ')})`).join('; '),
+          clinicalTarget: 'Follicular DHT, hair fiber strength, anagen phase support',
+          associatedProtocols: 'GHK-Cu Scalp Protocol · Androgenic Alopecia Protocol',
+          suggestedQuestions: [
+            'What is the clinical evidence for Caffeine in androgenetic alopecia?',
+            'How does Zinc PCA inhibit 5-alpha reductase at the scalp?',
+            'What is the recommended contact time for optimal active absorption?',
+            'Which clinical hair peptide protocols pair with this product?'
+          ]
+        }}
         storageKey={`cosmetic_${slug}`}
         onOpenRegisterModal={() => window.open('/auth/login?register=true', '_blank')}
+      />
+
+      {/* PERSISTENT GOOGLE CLOUD STICKY BOTTOM ACTION BAR */}
+      <PublicStickyActionBar
+        title={name}
+        subtitle={`${selectedVariant?.volume || '250 mL Bottle'} • Colway Native Collagen System • EU Reg. 1223/2009`}
+        badge="Cosmeceutical Monograph"
+        badgeType="default"
+        inquireLabel="Inquire Product"
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        showClinicalAI={true}
+        showSections={true}
+        sectionsCount={tocSections.length}
+        onOpenSections={() => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+          }
+        }}
+        lang={lang}
       />
     </div>
   );
