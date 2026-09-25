@@ -7,6 +7,8 @@ const PeptideDetail = dynamic(() => import('./layouts/PeptideDetail'));
 const ConsumableDetail = dynamic(() => import('./layouts/ConsumableDetail'));
 const EternaDiagnosticDetail = dynamic(() => import('./layouts/EternaDiagnosticDetail'));
 const BloodDiagnosticDetail = dynamic(() => import('./layouts/BloodDiagnosticDetail'));
+const CosmeticsDetail = dynamic(() => import('./layouts/CosmeticsDetail'));
+
 export default function ProductDetailRouter(props) {
   const category = (props.product?.category || '').toLowerCase();
 
@@ -69,6 +71,20 @@ export default function ProductDetailRouter(props) {
   // For physical consumables & raw compounding materials
   if (consumableCategories.includes(category) || ingredientCategories.includes(category)) {
     return <ConsumableDetail {...props} />;
+  }
+
+  // Cosmeceuticals — hair, skin and scalp cosmetics
+  const cosmeticsCategories = [
+    'cosmetics',
+    'hair cosmetics',
+    'cosmeceutical',
+    'hair & scalp',
+    'hair loss & cosmetics',
+    'scalp cosmetics',
+    'topical cosmetics'
+  ];
+  if (cosmeticsCategories.includes(category)) {
+    return <CosmeticsDetail {...props} />;
   }
 
   // Default to PeptideDetail for now, as it contains the original logic

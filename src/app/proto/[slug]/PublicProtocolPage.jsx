@@ -47,6 +47,7 @@ import ImmuneResilienceCalculator from '@/components/protocol/ImmuneResilienceCa
 import RecoveryLoadCalculator from '@/components/protocol/RecoveryLoadCalculator';
 import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
+import { generateProtocolGuidePdf } from '../../../services/protocolGuideExportService';
 
 // ── Extracted Modular Subcomponents & Diagnostic Helpers ──
 import { 
@@ -61,6 +62,7 @@ import ProtocolWeeklyRoadmapCard from '@/components/protocol/ProtocolWeeklyRoadm
 import ProtocolBiomarkersSafetyCard from '@/components/protocol/ProtocolBiomarkersSafetyCard';
 import ProtocolSafetyExclusionsCard from '@/components/protocol/ProtocolSafetyExclusionsCard';
 import ProtocolQrModal from '@/components/protocol/ProtocolQrModal';
+import ProtocolCosmeticsAdjunctsCard from '@/components/protocol/ProtocolCosmeticsAdjunctsCard';
 
 export default function PublicProtocolPage({ protocol, slug, baseUrl, similarProtocols = [] }) {
   const [lang, setLang] = useState(() => {
@@ -90,6 +92,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   const [activeReconTab, setActiveReconTab] = useState(0);
   const [activeRoadmapPhase, setActiveRoadmapPhase] = useState(0);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false);
   const [dynamicTranslations, setDynamicTranslations] = useState({});
   const requestedLangs = useRef(new Set());
   const [, startTransition] = useTransition();
@@ -525,6 +528,14 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         href: '#included-compounds',
         icon: FlaskConical 
       },
+      ...((protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) ? [
+        { 
+          id: 'cosmeceutical-adjuncts', 
+          label: isEs ? 'Coadyuvantes Tópicos' : 'Cosmeceutical Adjuncts', 
+          href: '#cosmeceutical-adjuncts',
+          icon: Sparkles 
+        }
+      ] : []),
       { 
         id: 'pathway-timeline', 
         label: isTirzepatideProtocol 
@@ -698,26 +709,44 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
 
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  disabled={isPdfGenerating}
+                  onClick={async () => {
+                    setIsPdfGenerating(true);
+                    try {
+                      await generateProtocolGuidePdf(protocol, { role: 'public', clinicName: 'Atlas Health' });
+                      triggerHaptic('success');
+                      toast.success(lang === 'es' ? 'PDF generado y descargado ✓' : 'PDF generated and downloaded ✓');
+                    } catch (err) {
+                      console.error('PDF generation failed:', err);
+                      toast.error(lang === 'es' ? 'Error al generar el PDF' : 'Could not generate PDF');
+                    } finally {
+                      setIsPdfGenerating(false);
+                    }
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
                     padding: '5px 12px',
                     borderRadius: '6px',
-                    background: '#ffffff',
+                    background: isPdfGenerating ? '#f1f5f9' : '#ffffff',
                     border: '1px solid #cbd5e1',
-                    color: '#1e293b',
+                    color: isPdfGenerating ? '#94a3b8' : '#1e293b',
                     fontSize: '0.74rem',
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: isPdfGenerating ? 'not-allowed' : 'pointer',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.15s ease',
+                    opacity: isPdfGenerating ? 0.7 : 1
                   }}
-                  title={lang === 'es' ? 'Imprimir o guardar protocolo en PDF' : 'Print or save protocol to PDF'}
+                  title={lang === 'es' ? 'Descargar protocolo como PDF' : 'Download protocol as PDF'}
                 >
                   <Printer size={13} />
-                  <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Protocol'}</span>
+                  <span>
+                    {isPdfGenerating
+                      ? (lang === 'es' ? 'Generando PDF…' : 'Generating PDF…')
+                      : (lang === 'es' ? 'Descargar PDF' : 'Download PDF')}
+                  </span>
                 </button>
 
                 <button
@@ -886,8 +915,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         {/* ── Google Cloud Console 2-Column Layout (Main Stream + Desktop Sticky Sidebar TOC) ── */}
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-            
-            {/* Biomarker-Driven Calibration Banner (Precision Diagnostic Integration) */}
+
+            {/* ── STEP 1: Biomarker-Driven Calibration Banner ──
+                 Always first — personalises all downstream sections */}
             <BiomarkerCalibrationBanner
               calibrationDisplay={calibrationDisplay}
               biomarkerCalibration={biomarkerCalibration}
@@ -901,51 +931,68 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               protocolTitle={protocol?.title || protocol?.name}
               lang={lang}
             />
-          
-            {/* Section 0: Verified Clinical Outcomes & Endpoints */}
+
+            {/* ── STEP 2: Personalisation Engines (Calculators) ──
+                 Rendered before evidence so the patient's profile is set
+                 before they read clinical outcomes */}
+            {(isTirzepatideProtocol || isLongevityProtocol || isImmuneProtocol || isRecoveryProtocol) && (
+              <div id="personalisation-engine" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
+                {isTirzepatideProtocol && (
+                  <ProtocolPersonalizationEngine protocol={protocol} lang={lang} />
+                )}
+                {isLongevityProtocol && (
+                  <LongevityEpigeneticCalculator lang={lang} />
+                )}
+                {isImmuneProtocol && !isTirzepatideProtocol && (
+                  <ImmuneResilienceCalculator lang={lang} />
+                )}
+                {isRecoveryProtocol && (
+                  <RecoveryLoadCalculator lang={lang} />
+                )}
+              </div>
+            )}
+
+            {/* ── STEP 3: Clinical Evidence & Endpoints ──
+                 After calibration — outcomes are now contextualised to the patient */}
             <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
 
-            {/* Section 0.5: Companion Diagnostics, Pharmacokinetics & Methylation Safeguards */}
-            <ProtocolClinicalCompanionCard 
-              protocol={protocol} 
-              lang={lang} 
+            {/* ── STEP 4: Pharmacokinetics, Companion Diagnostics & Methylation ── */}
+            <ProtocolClinicalCompanionCard
+              protocol={protocol}
+              lang={lang}
               biomarkerCalibration={biomarkerCalibration}
             />
 
-            {/* Section 0.6: Anatomical Targeting Geometry & Mechanotherapy Pathway */}
+            {/* ── STEP 5: Anatomical Targeting & Mechanotherapy Pathway ── */}
             <ProtocolAnatomicalTargetingCard protocol={protocol} lang={lang} />
 
-            {/* Section 0.7: Incretin GI Tolerance Algorithm, DEXA Lean Mass & Diagnostics */}
+            {/* ── STEP 6: Incretin Safety, GI Tolerance Algorithm & DEXA ── */}
             <ProtocolIncretinSafetyCard protocol={protocol} lang={lang} />
 
-            {/* Section 0.8: Somatotropic Axis Fasting Kinetics & 5-On/2-Off Cadence */}
+            {/* ── STEP 7: Somatotropic Axis Fasting Kinetics & 5-On/2-Off ── */}
             <ProtocolSomatotropicAxisCard protocol={protocol} lang={lang} />
 
-            {/* Section 0.9: Immune Modulation Matrix & Zadaxin Lineage */}
+            {/* ── STEP 8: Immune Modulation Matrix & Zadaxin Lineage ── */}
             <ProtocolImmuneModulationCard protocol={protocol} lang={lang} />
-          
-            {/* Section 1: Included Compounds */}
+
+            {/* ── STEP 9: Active Compounds / Bill of Materials ── */}
             <ProtocolCompoundsSection items={items} lang={lang} />
 
-            {/* Section 2: Phased Timeline Gantt & Personalization Engines */}
-            <div id="pathway-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
-              {isTirzepatideProtocol && (
-                <ProtocolPersonalizationEngine protocol={protocol} lang={lang} />
-              )}
-              {isLongevityProtocol && (
-                <LongevityEpigeneticCalculator lang={lang} />
-              )}
-              {isImmuneProtocol && !isTirzepatideProtocol && (
-                <ImmuneResilienceCalculator lang={lang} />
-              )}
-              {isRecoveryProtocol && (
-                <RecoveryLoadCalculator lang={lang} />
-              )}
+            {/* ── STEP 9B: Topical Cosmeceutical Adjuncts (Colway Hair System, etc.) ── */}
+            {(protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) && (
+              <ProtocolCosmeticsAdjunctsCard
+                products={protocol?.topical_adjuncts}
+                protocol={protocol}
+                lang={lang}
+              />
+            )}
 
+            {/* ── STEP 10: Phased Gantt Timeline ── */}
+            <div id="pathway-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
               <PublicSectionCard
                 icon={Layers}
                 category={lang === 'es' ? 'CRONOGRAMA DE TITULACIÓN' : 'CLINICAL PATHWAY ENGINE'}
-                title={isTirzepatideProtocol 
+                title={isTirzepatideProtocol
                   ? (lang === 'es' ? 'Cronograma Clínico y Fases de Titulación' : 'Clinical Titration Timeline & Phase Distribution')
                   : t.sec2Title}
                 badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
@@ -961,7 +1008,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               </PublicSectionCard>
             </div>
 
-            {/* Section 3: Interactive Reconstitution & Syringe Console */}
+            {/* ── STEP 11: Reconstitution Console ── */}
             <ProtocolReconstitutionConsole
               reconData={reconData}
               activeReconTab={activeReconTab}
@@ -970,7 +1017,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               lang={lang}
             />
 
-            {/* Section 4: Cycle Dispensing & Logistics Blueprint */}
+            {/* ── STEP 12: Cycle Supply & Logistics Blueprint ── */}
             <ProtocolSupplyLogisticsCard
               supplySummary={supplySummary}
               displayDuration={displayDuration}
@@ -978,7 +1025,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               lang={lang}
             />
 
-            {/* Section 5: Weekly Administration Roadmap */}
+            {/* ── STEP 13: Weekly Administration Roadmap ── */}
             <ProtocolWeeklyRoadmapCard
               weeklySchedule={weeklySchedule}
               phases={phases}
@@ -987,7 +1034,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               lang={lang}
             />
 
-            {/* Section 6: Laboratory Safety Biomarkers */}
+            {/* ── STEP 14: Biomarker & Laboratory Surveillance ── */}
             <ProtocolBiomarkersSafetyCard
               biomarkers={biomarkers}
               onCopyLabRequisition={handleCopyLabRequisition}
@@ -995,7 +1042,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               lang={lang}
             />
 
-            {/* Section 7: Safety & Clinical Exclusions */}
+            {/* ── STEP 15: Safety Governance & Clinical Exclusions ── */}
             <ProtocolSafetyExclusionsCard
               protocol={protocol}
               t={t}

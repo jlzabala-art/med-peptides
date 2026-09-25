@@ -1,0 +1,240 @@
+/* ── HairProtocolsSidebarWidget.css ── */
+
+.hsw-root {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.hsw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem 0.65rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1a2e4a 100%);
+  border-bottom: 2px solid #0d9488;
+}
+
+.hsw-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hsw-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(13, 148, 136, 0.2);
+  color: #0d9488;
+  flex-shrink: 0;
+}
+
+.hsw-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+}
+
+.hsw-subtitle {
+  font-size: 0.63rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.hsw-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.hsw-intro {
+  font-size: 0.74rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.hsw-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem 0;
+}
+
+.hsw-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.hsw-item:last-child {
+  border-bottom: none;
+}
+
+.hsw-item:hover {
+  background: #f8fafc;
+}
+
+.hsw-item--primary {
+  background: linear-gradient(90deg, #f0fdfa 0%, #ffffff 100%);
+}
+
+.hsw-item--primary:hover {
+  background: #e6faf8;
+}
+
+.hsw-item--primary::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #0d9488;
+  border-radius: 0 2px 2px 0;
+}
+
+.hsw-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #f0fdfa;
+  color: #0d9488;
+  flex-shrink: 0;
+}
+
+.hsw-item--primary .hsw-item-icon {
+  background: #ccfbf1;
+  color: #0d9488;
+}
+
+.hsw-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.hsw-item-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+  flex-wrap: wrap;
+}
+
+.hsw-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: #f1f5f9;
+  color: #475569;
+  letter-spacing: 0.02em;
+}
+
+.hsw-tag--primary {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.hsw-duration {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.62rem;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.hsw-item-name {
+  font-size: 0.79rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hsw-item-tagline {
+  font-size: 0.67rem;
+  color: #64748b;
+  margin-top: 2px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hsw-arrow {
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.hsw-item:hover .hsw-arrow {
+  transform: translateX(3px);
+  color: #0d9488;
+}
+
+.hsw-footer {
+  padding: 0.65rem 1rem;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.hsw-see-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0d9488;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.hsw-see-all:hover {
+  color: #0f766e;
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 768px) {
+  .hsw-item-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+  .hsw-item-tagline {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+}

@@ -13,7 +13,9 @@ import {
   Info,
   Calendar,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Copy,
+  Check
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -23,9 +25,24 @@ export default function ProtocolPersonalizationEngine({ protocol, lang = 'en' })
   const isEs = lang === 'es';
 
   // Extract base protocol characteristics
-  const protocolDurationWeeks = Number(protocol?.protocol_duration_weeks) || 16;
-  const protocolTitle = protocol?.protocol_title || (isEs ? 'Protocolo Metabólico' : 'Metabolic Protocol');
+  const protocolDurationWeeks = Number(protocol?.durationWeeks) || Number(protocol?.protocol_duration_weeks) || 16;
+  const protocolTitle = protocol?.name || protocol?.title || protocol?.protocol_title || (isEs ? 'Protocolo Metabólico' : 'Metabolic Protocol');
   const phases = Array.isArray(protocol?.phases) ? protocol.phases : [];
+
+  // Determine clinical trial model benchmark
+  const protoSlugLower = String(protocol?.slug || protocol?.id || protocolTitle).toLowerCase();
+  const trialModelLabel = useMemo(() => {
+    if (protoSlugLower.includes('retatrutide')) {
+      return isEs ? 'Modelo Clínico TRIUMPH-1 (Triple Agonismo GIP/GLP-1/GCG)' : 'TRIUMPH-1 Clinical Trial Model (Triple Agonism)';
+    }
+    if (protoSlugLower.includes('tirzepatide') || protoSlugLower.includes('wm_001') || protoSlugLower.includes('glp-1-gip')) {
+      return isEs ? 'Modelo Clínico SURMOUNT-1 (Dual Agonismo GIP/GLP-1)' : 'SURMOUNT-1 Clinical Trial Model (Dual Agonism)';
+    }
+    if (protoSlugLower.includes('semaglutide') || protoSlugLower.includes('cagrilintide')) {
+      return isEs ? 'Modelo Clínico STEP-1 & REDEFINE (Agonismo Incretínico)' : 'STEP-1 & REDEFINE Clinical Model (Incretin Agonism)';
+    }
+    return isEs ? 'Modelo Clínico Incretínico de Referencia' : 'Clinical Incretin Reference Model';
+  }, [protoSlugLower, isEs]);
 
   // Default Standard Reference Baseline (Cohorte Clínica Basal de Ensayos Clínicos)
   const BASELINE_WEIGHT = 90; // kg (~198 lbs)
@@ -173,7 +190,7 @@ export default function ProtocolPersonalizationEngine({ protocol, lang = 'en' })
                   : (isEs ? '✓ Cálculo Estándar de Referencia' : '✓ Standard Clinical Baseline')}
               </span>
               <span className="ppe-badge-trial">
-                {isEs ? 'Modelo Clínico SURMOUNT-1 & TRIUMPH-1' : 'SURMOUNT-1 & TRIUMPH-1 Trial Model'}
+                {trialModelLabel}
               </span>
             </div>
             <h3 className="ppe-title">

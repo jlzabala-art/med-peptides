@@ -54,16 +54,18 @@ export const SENSITIVE_FINANCIAL_FIELDS = [
   'internalNotes', 'procurementNotes', 'privateNotes',
 ];
 
-// ─── Whitelist of Allowed Public Protocol Fields ─────────────────────────────
 export const PROTOCOL_PUBLIC_WHITELIST = [
-  'id', 'name', 'title', 'displayName', 'slug', 'protocol_slug', 'protocol_id',
+  'id', 'name', 'title', 'protocol_title', 'displayName', 'slug', 'protocol_slug', 'protocol_id',
   'category', 'goal', 'goals', 'target', 'therapeutic_category',
-  'description', 'summary', 'overview_summary', 'clinicalRationale', 'mechanismOfAction',
+  'description', 'summary', 'overview_summary', 'clinicalRationale', 'clinical_rationale', 'mechanismOfAction',
   'duration', 'durationWeeks', 'totalWeeks', 'frequency',
-  'difficulty', 'phaseCount', 'phases', 'items', 'products', 'peptides', 'bom', 'compounds',
-  'schedule', 'instructions', 'administrationInstructions',
+  'difficulty', 'difficulty_level', 'phaseCount', 'phases', 'items', 'products', 'peptides', 'bom', 'compounds',
+  'schedule', 'instructions', 'administrationInstructions', 'dosage_schedule', 'weekly_doses',
   'contraindications', 'warnings', 'safetyGuidelines', 'storageInstructions',
-  'biomarkers', 'recommendedTests', 'status', 'isActive',
+  'biomarkers', 'recommendedTests', 'required_labs', 'monitoring_cadence', 'check_in_weeks', 'expected_outcomes',
+  'status', 'active', 'isActive', 'isFlagship', 'featured', 'author', 'target_audience', 'version_number',
+  'evidence_grade', 'evidence_grade_note', 'evidence_level', 'metadata', 'has_personalization_calculator',
+  'aliases', 'legacy_slug', 'code', 'shortCode',
   'translations', 'aiContent', 'clinical_outcomes', 'clinical_evidence', 'objective_benefits',
   'companion_diagnostic', 'companion_diagnostics', 'methylation_support', 'administration_modalities', 'chronobiology',
   'anatomical_targeting', 'mechanotherapy_phases', 'tissue_specific_dosages', 'angiogenesis_safety_screen',
@@ -170,8 +172,13 @@ export function sanitizePublicProtocol(rawProtocol) {
   });
 
   // Ensure title and name are always mutually defined
-  whitelisted.title = whitelisted.title || whitelisted.name || 'Clinical Protocol';
-  whitelisted.name = whitelisted.name || whitelisted.title || 'Clinical Protocol';
+  whitelisted.title = whitelisted.title || whitelisted.name || whitelisted.protocol_title || 'Clinical Protocol';
+  whitelisted.name = whitelisted.name || whitelisted.title || whitelisted.protocol_title || 'Clinical Protocol';
+  whitelisted.protocol_title = whitelisted.protocol_title || whitelisted.title || whitelisted.name;
+  whitelisted.clinicalRationale = whitelisted.clinicalRationale || whitelisted.clinical_rationale || whitelisted.description || '';
+  if (!whitelisted.items && Array.isArray(whitelisted.bom) && whitelisted.bom.length > 0) {
+    whitelisted.items = whitelisted.bom;
+  }
   if (!whitelisted.peptides && whitelisted.items) {
     whitelisted.peptides = whitelisted.items;
   }

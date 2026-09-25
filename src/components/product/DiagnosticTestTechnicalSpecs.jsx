@@ -107,6 +107,7 @@ export default function DiagnosticTestTechnicalSpecs({
   // Interactive biomarker level simulator state
   const [selectedRangeIndex, setSelectedRangeIndex] = useState(2); // Default to optimal/target
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+  const [testosteroneGender, setTestosteroneGender] = useState('male'); // 'male' | 'female'
 
   // Biomarker ranges configuration
   const biomarkerData = (() => {
@@ -119,8 +120,8 @@ export default function DiagnosticTestTechnicalSpecs({
         lod: '0.23 µmol/L',
         range: '5.0 – 60.0 µmol/L (Cohorte 1.068 Sujetos)',
         precision: 'RSD 6.6%',
-        officialReportPdf: '/docs/bloodo-nad-lab-protocol-dark-red.pdf',
-        officialReportDocName: 'NAD protokolas_F_18-20_DARK RED.pdf',
+        officialReportPdf: '/docs/bloodo-report-nad.pdf',
+        officialReportDocName: 'bloodo-report-nad.pdf',
         ranges: [
           {
             label: isEs ? 'Depleción Severa / Déficit' : 'Severe Depletion / Deficit',
@@ -324,6 +325,8 @@ export default function DiagnosticTestTechnicalSpecs({
         lod: '3.5% (15 mmol/mol)',
         range: '4.0% – 15.0%',
         precision: 'RSD < 3.2%',
+        officialReportPdf: '/docs/bloodo-report-hba1c.pdf',
+        officialReportDocName: 'bloodo-report-hba1c.pdf',
         ranges: [
           {
             label: isEs ? 'Metabolismo Óptimo' : 'Optimal Metabolic Health',
@@ -484,6 +487,8 @@ export default function DiagnosticTestTechnicalSpecs({
         lod: '0.05% total FA',
         range: '24 Ácidos Grasos (0.1% – 50%)',
         precision: 'RSD < 4.5%',
+        officialReportPdf: '/docs/bloodo-report-omega-ratio.pdf',
+        officialReportDocName: 'bloodo-report-omega-ratio.pdf',
         ranges: [
           {
             label: isEs ? 'Alto Riesgo Inflamatorio' : 'High Inflammatory Risk',
@@ -608,6 +613,8 @@ export default function DiagnosticTestTechnicalSpecs({
         lod: '1.5 nmol/L (0.05 µg/dL)',
         range: '5.0 – 1750.0 nmol/L',
         precision: 'RSD < 5.2%',
+        officialReportPdf: '/docs/bloodo-report-cortisol-am-pm.pdf',
+        officialReportDocName: 'bloodo-report-cortisol-am-pm.pdf',
         ranges: [
           {
             label: isEs ? 'Agotamiento Adrenal / Hipocortisolemia' : 'Adrenal Burnout / Hypocortisolemia',
@@ -774,6 +781,8 @@ export default function DiagnosticTestTechnicalSpecs({
         lod: '0.1 nmol/L (2.8 ng/dL)',
         range: '0.2 – 55.0 nmol/L (5.7 – 1580 ng/dL)',
         precision: 'RSD < 4.9%',
+        officialReportPdf: testosteroneGender === 'female' ? '/docs/bloodo-report-testosterone-female.pdf' : '/docs/bloodo-report-testosterone-male.pdf',
+        officialReportDocName: testosteroneGender === 'female' ? 'bloodo-report-testosterone-female.pdf' : 'bloodo-report-testosterone-male.pdf',
         ranges: [
           {
             label: isEs ? 'Deficiencia / Hipogonadismo' : 'Hypogonadism / Androgen Deficiency',
@@ -940,6 +949,8 @@ export default function DiagnosticTestTechnicalSpecs({
       lod: '5.0 ng/mL',
       range: '10.0 – 150.0 ng/mL',
       precision: 'RSD < 5.0%',
+      officialReportPdf: '/docs/bloodo-report-vitamin-d.pdf',
+      officialReportDocName: 'bloodo-report-vitamin-d.pdf',
       ranges: [
         {
           label: isEs ? 'Deficiencia Severa' : 'Deficiency',
@@ -1093,6 +1104,47 @@ export default function DiagnosticTestTechnicalSpecs({
   })();
 
   const activeRange = biomarkerData.ranges[selectedRangeIndex] || biomarkerData.ranges[0];
+
+  // Dynamically resolve active PDF report based on test and biological sex
+  const activeReportPdf = (() => {
+    if (isNad) return '/docs/bloodo-report-nad.pdf';
+    if (isTestosterone) {
+      return testosteroneGender === 'female' 
+        ? '/docs/bloodo-report-testosterone-female.pdf' 
+        : '/docs/bloodo-report-testosterone-male.pdf';
+    }
+    if (isCortisol) return '/docs/bloodo-report-cortisol-am-pm.pdf';
+    if (isHba1c) return '/docs/bloodo-report-hba1c.pdf';
+    if (isOmega) return '/docs/bloodo-report-omega-ratio.pdf';
+    if (isVitD) return '/docs/bloodo-report-vitamin-d.pdf';
+    return biomarkerData.officialReportPdf || '/docs/bloodo-report-nad.pdf';
+  })();
+
+  const activeReportTitle = (() => {
+    if (isNad) return isEs ? 'Bloodo™ Protocolo de Validación Clínica NAD+ (CE-IVDR)' : 'Bloodo™ NAD+ Clinical Validation Protocol (CE-IVDR)';
+    if (isTestosterone) {
+      return isEs
+        ? `Bloodo™ Informe Muestra TESTplus (${testosteroneGender === 'female' ? 'Mujer / Femenino' : 'Hombre / Masculino'})`
+        : `Bloodo™ TESTplus Sample Report (${testosteroneGender === 'female' ? 'Female Profile' : 'Male Profile'})`;
+    }
+    if (isCortisol) return isEs ? 'Bloodo™ Informe Muestra Ritmo Circadiano Cortisol AM/PM' : 'Bloodo™ Cortisol Circadian AM/PM Sample Report';
+    if (isHba1c) return isEs ? 'Bloodo™ Protocolo de Validación Clínica HbA1c (HPLC)' : 'Bloodo™ HbA1c Clinical Validation Protocol (HPLC)';
+    if (isOmega) return isEs ? 'Bloodo™ Informe Muestra Perfil de Ácidos Grasos Omega-3/6' : 'Bloodo™ Omega-3/6 Fatty Acids Profile Sample Report';
+    return isEs ? 'Bloodo™ Informe Muestra Vitamina D [25(OH)D LC-MS/MS]' : 'Bloodo™ Vitamin D [25(OH)D LC-MS/MS] Sample Report';
+  })();
+
+  const activeReportSub = (() => {
+    if (isNad) return isEs ? 'LifeLab1 Laboratorio Central · Ensayo XLT01690-0 · Cohorte de Validación (n = 1.068) · PDF Técnico' : 'LifeLab1 Central Laboratory Specification · Assay XLT01690-0 · Validation Cohort (n = 1,068) · Technical PDF';
+    if (isTestosterone) {
+      return isEs
+        ? `LifeLab1 · Panel Hormonal LC-MS/MS (${testosteroneGender === 'female' ? '8 Marcadores: Testosterona Libre Vermeulen, 17-OH-P, DHEAS' : '9 Marcadores: Testosterona Total, SHBG, Cortisol/Cortisona'})`
+        : `LifeLab1 · LC-MS/MS Hormone Panel (${testosteroneGender === 'female' ? '8 Markers: Vermeulen Free T, 17-OH-P, DHEAS' : '9 Markers: Total T, SHBG, Free T, Cortisol/Cortisone'})`;
+    }
+    if (isCortisol) return isEs ? 'LifeLab1 · Ritmo Circadiano Salival/DBS · Descenso Matutino-Vespertino y Ratio AM:PM' : 'LifeLab1 · Circadian Salivary/DBS Rhythm · Morning/Evening Curve & AM:PM Ratio';
+    if (isHba1c) return isEs ? 'LifeLab1 · Cromatografía Líquida de Alta Resolución (HPLC) · Certificación NGSP / IFCC' : 'LifeLab1 · High-Performance Liquid Chromatography (HPLC) · NGSP / IFCC Certified';
+    if (isOmega) return isEs ? 'LifeLab1 · Cromatografía de Gases (GC-FID) · Índice Omega-3, AA:EPA, Grasas Trans' : 'LifeLab1 · Gas Chromatography (GC-FID) · Omega-3 Index, AA:EPA, Trans Fats';
+    return isEs ? 'LifeLab1 · Espectrometría de Masas en Tándem LC-MS/MS · Formas D2/D3' : 'LifeLab1 · LC-MS/MS Tandem Mass Spectrometry · D2/D3 Active Fractions';
+  })();
 
   return (
     <div className="dts-wrapper">
@@ -1779,21 +1831,56 @@ export default function DiagnosticTestTechnicalSpecs({
                     <FileText size={22} color="#003666" />
                   </div>
                   <div className="dts-pdf-info">
+                    {/* Sex Profile Selector for Testosterone Test */}
+                    {isTestosterone && (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#e2e8f0', padding: '3px', borderRadius: '8px', marginBottom: '6px', width: 'fit-content' }}>
+                        <button
+                          type="button"
+                          onClick={() => setTestosteroneGender('male')}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            borderRadius: '6px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            background: testosteroneGender === 'male' ? '#003666' : 'transparent',
+                            color: testosteroneGender === 'male' ? '#ffffff' : '#475569',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          👨 {isEs ? 'Hombre' : 'Male'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTestosteroneGender('female')}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            borderRadius: '6px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            background: testosteroneGender === 'female' ? '#0d9488' : 'transparent',
+                            color: testosteroneGender === 'female' ? '#ffffff' : '#475569',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          👩 {isEs ? 'Mujer' : 'Female'}
+                        </button>
+                      </div>
+                    )}
+
                     <strong className="dts-pdf-name">
-                      {isNad 
-                        ? (isEs ? 'Bloodo™ Protocolo de Validación Clínica NAD+ (CE-IVDR)' : 'Bloodo™ NAD+ Clinical Validation Protocol (CE-IVDR)')
-                        : (isEs ? 'Bloodo™ Protocolo de Validación Analítica DBS (CE-IVDR)' : 'Bloodo™ DBS Analytical Validation Protocol (CE-IVDR)')
-                      }
+                      {activeReportTitle}
                     </strong>
                     <span className="dts-pdf-meta">
-                      {isNad 
-                        ? (isEs ? 'LifeLab1 Laboratorio Central · Ensayo XLT01690-0 · Cohorte de Validación (n = 1.068) · PDF Técnico' : 'LifeLab1 Central Laboratory Specification · Assay XLT01690-0 · Validation Cohort (n = 1,068) · Technical PDF')
-                        : (isEs ? 'LifeLab1 Laboratorio Clínico Central · Homologación CE-IVDR · ISO 15189' : 'LifeLab1 Central Laboratory Specification · CE-IVDR Standard · ISO 15189')}
+                      {activeReportSub}
                     </span>
                   </div>
                 </div>
                 <button 
-                  type="button"
+                  type="button" 
                   className="dts-pdf-preview-btn"
                   onClick={() => setIsPdfPreviewOpen(true)}
                   title={isEs ? 'Abrir vista previa del documento clínico' : 'Open clinical document preview'}
@@ -1809,21 +1896,54 @@ export default function DiagnosticTestTechnicalSpecs({
                   <div className="dts-pdf-modal-card" onClick={(e) => e.stopPropagation()}>
                     <div className="dts-pdf-modal-header">
                       <div>
+                        {/* Gender switcher inside modal for Testosterone */}
+                        {isTestosterone && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#e2e8f0', padding: '2px', borderRadius: '6px', marginBottom: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => setTestosteroneGender('male')}
+                              style={{
+                                padding: '3px 8px',
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                borderRadius: '5px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                background: testosteroneGender === 'male' ? '#003666' : 'transparent',
+                                color: testosteroneGender === 'male' ? '#ffffff' : '#475569'
+                              }}
+                            >
+                              👨 {isEs ? 'Hombre' : 'Male'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTestosteroneGender('female')}
+                              style={{
+                                padding: '3px 8px',
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                borderRadius: '5px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                background: testosteroneGender === 'female' ? '#0d9488' : 'transparent',
+                                color: testosteroneGender === 'female' ? '#ffffff' : '#475569'
+                              }}
+                            >
+                              👩 {isEs ? 'Mujer' : 'Female'}
+                            </button>
+                          </div>
+                        )}
                         <div className="dts-pdf-modal-title">
-                          {isNad 
-                            ? (isEs ? 'Bloodo™ Protocolo de Validación Clínica NAD+ (CE-IVDR)' : 'Bloodo™ NAD+ Clinical Validation Protocol (CE-IVDR)')
-                            : (isEs ? 'Bloodo™ Protocolo de Validación Analítica DBS' : 'Bloodo™ DBS Analytical Validation Protocol')}
+                          {activeReportTitle}
                         </div>
                         <div className="dts-pdf-modal-sub">
-                          {isEs 
-                            ? 'Documentación Técnica y Validación Metodológica · LifeLab1 Vilnius (EU CE-IVDR)'
-                            : 'Official Technical Specification & Clinical Validation · LifeLab1 Vilnius (EU CE-IVDR)'}
+                          {activeReportSub}
                         </div>
                       </div>
                       <div className="dts-pdf-modal-actions">
                         <a 
-                          href={isNad ? '/docs/bloodo-nad-lab-protocol-dark-red.pdf' : '#'}
-                          download={isNad ? 'Bloodo_NAD_Clinical_Validation_Protocol.pdf' : undefined}
+                          href={activeReportPdf}
+                          download={activeReportPdf.split('/').pop()}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="dts-pdf-preview-btn"
@@ -1845,7 +1965,7 @@ export default function DiagnosticTestTechnicalSpecs({
                     </div>
                     <div className="dts-pdf-modal-body">
                       <iframe 
-                        src="/docs/bloodo-nad-lab-protocol-dark-red.pdf#toolbar=1" 
+                        src={`${activeReportPdf}#toolbar=1`}
                         className="dts-pdf-modal-frame"
                         title="Bloodo Clinical Validation Document Preview"
                       />
