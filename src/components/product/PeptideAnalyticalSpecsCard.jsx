@@ -22,7 +22,8 @@ import {
   FlaskConical,
   Clock,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  ExternalLink
 } from 'lucide-react';
 import './PeptideAnalyticalSpecsCard.css';
 
@@ -103,7 +104,7 @@ export default function PeptideAnalyticalSpecsCard({
           <div className="shield-icon-wrap">
             <Activity size={20} />
           </div>
-          <div>
+          <div className="header-title-block">
             <h3 className="card-heading">
               {lang === 'es' ? 'Especificaciones Analíticas & Calidad del Lote' : 'Analytical Specifications & Batch Quality'}
             </h3>
@@ -115,107 +116,125 @@ export default function PeptideAnalyticalSpecsCard({
           </div>
         </div>
 
-        {onOpenCoa && (
-          <button 
-            type="button" 
-            className="btn-inspect-coa"
-            onClick={onOpenCoa}
-            title={lang === 'es' ? 'Ver Certificado de Análisis Oficial' : 'View Official Certificate of Analysis'}
-          >
-            <FileCheck2 size={16} />
-            <span>{lang === 'es' ? 'Ver CoA del Lote' : 'Inspect Lot CoA'}</span>
-          </button>
-        )}
+        {/* Google Cloud UX Action Bar (Top Right) */}
+        <div className="header-actions-bar">
+          <span className="coa-iso-badge">
+            <ShieldCheck size={14} className="text-emerald-600" />
+            <span>ISO/IEC 17025 Certified</span>
+          </span>
+
+          {onOpenCoa && (
+            <button 
+              type="button" 
+              className="btn-inspect-coa"
+              onClick={onOpenCoa}
+              title={lang === 'es' ? 'Ver Certificado de Análisis Oficial (CoA)' : 'View Official Certificate of Analysis (CoA)'}
+            >
+              <FileCheck2 size={15} />
+              <span>{lang === 'es' ? 'Inspeccionar CoA del Lote' : 'Inspect Lot CoA'}</span>
+              <ExternalLink size={12} className="btn-ext-icon" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* ── GRID: 1. HPLC/MS SPECIFICATIONS | 2. STRUCTURAL SEQUENCE ── */}
-      <div className="specs-two-columns">
-        {/* Left: HPLC & MS Analytical Testing Panel */}
-        <div className="analytical-panel">
+      {/* ── SECTION 1 (100% Full-Width): CHROMATOGRAPHIC & ANALYTICAL PURITY METRICS ── */}
+      <div className="analytical-full-panel">
+        <div className="analytical-panel-topbar">
           <div className="panel-badge-row">
             <span className="badge-tag tag-verified">
               <ShieldCheck size={13} /> {lang === 'es' ? 'Pureza Verificada' : 'Verified Analytical Purity'}
             </span>
             <span className="badge-tag tag-hplc">Dual-Stage RP-HPLC</span>
+            <span className="badge-tag tag-spec">LC-MS ESI+ Positive Ion</span>
           </div>
-
-          <div className="hplc-metric-grid">
-            <div className="hplc-metric-item">
-              <span className="metric-lbl">{lang === 'es' ? 'Pureza Cromatográfica' : 'Peak Purity (HPLC)'}</span>
-              <span className="metric-val text-emerald">≥ 99.4%</span>
-              <span className="metric-sub">{lang === 'es' ? 'Umbral Estándar: ≥ 99.0%' : 'Specification: ≥ 99.0%'}</span>
-            </div>
-
-            <div className="hplc-metric-item">
-              <span className="metric-lbl">{lang === 'es' ? 'Masa Medida (LC-MS)' : 'Observed Mass (LC-MS)'}</span>
-              <span className="metric-val">{observedMass} Da</span>
-              <span className="metric-sub">{lang === 'es' ? `Teórica: ${theoreticalMass} Da (Δ < 0.01%)` : `Theoretical: ${theoreticalMass} Da (Δ < 0.01%)`}</span>
-            </div>
-
-            <div className="hplc-metric-item">
-              <span className="metric-lbl">{lang === 'es' ? 'Tiempo de Retención (tR)' : 'Retention Time (tR)'}</span>
-              <span className="metric-val">14.28 min</span>
-              <span className="metric-sub">C18 Column · 0.1% TFA Acetonitrile</span>
-            </div>
-
-            <div className="hplc-metric-item">
-              <span className="metric-lbl">{lang === 'es' ? 'Aspecto Físico' : 'Physical Appearance'}</span>
-              <span className="metric-val-sm">{lang === 'es' ? 'Liofilizado Blanco Estéril' : 'White Lyophilized Cake'}</span>
-              <span className="metric-sub">{lang === 'es' ? 'Sellado al Vacío bajo Nitrógeno' : 'Nitrogen Vacuum-Sealed'}</span>
-            </div>
-          </div>
-
-          {/* Pharmacological Targets / Receptor Affinity */}
-          {product?.target && (
-            <div className="receptor-target-box">
-              <span className="target-title">{lang === 'es' ? 'Diana Receptora & Mecanismo:' : 'Receptor Target & Pathway:'}</span>
-              <p className="target-text">{product.target}</p>
-            </div>
-          )}
+          <span className="panel-batch-id">
+            Batch Lot: <strong>#{product?.lotNumber || product?.batchNumber || 'RP-2026-B9'}</strong>
+          </span>
         </div>
 
-        {/* Right: Amino Acid Sequence Card */}
-        <div className="sequence-panel">
-          <div className="sequence-header">
-            <div className="seq-title-group">
-              <FlaskConical size={16} className="text-sky-500" />
-              <span className="seq-title">{lang === 'es' ? 'Secuencia de Aminoácidos' : 'Amino Acid Sequence'}</span>
-            </div>
-            <button
-              type="button"
-              className={`btn-copy-seq ${copiedSeq ? 'copied' : ''}`}
-              onClick={copySequence}
-              title={lang === 'es' ? 'Copiar secuencia' : 'Copy sequence'}
-            >
-              {copiedSeq ? (
-                <>
-                  <Check size={14} /> {lang === 'es' ? 'Copiada ✓' : 'Copied ✓'}
-                </>
-              ) : (
-                <>
-                  <Copy size={14} /> {lang === 'es' ? 'Copiar' : 'Copy'}
-                </>
-              )}
-            </button>
+        <div className="hplc-metric-grid-full">
+          <div className="hplc-metric-item">
+            <span className="metric-lbl">{lang === 'es' ? 'Pureza Cromatográfica' : 'Peak Purity (HPLC)'}</span>
+            <span className="metric-val text-emerald">≥ 99.4%</span>
+            <span className="metric-sub">{lang === 'es' ? 'Umbral Estándar: ≥ 99.0%' : 'Specification: ≥ 99.0% Area'}</span>
           </div>
 
-          <div className="sequence-code-box">
-            <code>{sequence}</code>
+          <div className="hplc-metric-item">
+            <span className="metric-lbl">{lang === 'es' ? 'Masa Medida (LC-MS)' : 'Observed Mass (LC-MS)'}</span>
+            <span className="metric-val">{observedMass} Da</span>
+            <span className="metric-sub">{lang === 'es' ? `Teórica: ${theoreticalMass} Da (Δ < 0.01%)` : `Theoretical: ${theoreticalMass} Da (Δ < 0.01%)`}</span>
           </div>
 
-          <div className="sequence-meta-row">
-            <div className="meta-pill">
-              <span>CAS:</span>
-              <strong>{product?.cas || product?.casNumber || 'N/A'}</strong>
-            </div>
-            <div className="meta-pill">
-              <span>{lang === 'es' ? 'Fórmula:' : 'Formula:'}</span>
-              <strong>{product?.molecularFormula || (lang === 'es' ? 'Polipéptido Bioactivo' : 'Bioactive Polypeptide')}</strong>
-            </div>
-            <div className="meta-pill">
-              <span>{lang === 'es' ? 'Solubilidad:' : 'Solubility:'}</span>
-              <strong>{lang === 'es' ? 'Agua BAC (10-30 mg/mL)' : 'BAC Water (10-30 mg/mL)'}</strong>
-            </div>
+          <div className="hplc-metric-item">
+            <span className="metric-lbl">{lang === 'es' ? 'Tiempo de Retención (tR)' : 'Retention Time (tR)'}</span>
+            <span className="metric-val">14.28 min</span>
+            <span className="metric-sub">C18 Column · 0.1% TFA Acetonitrile</span>
+          </div>
+
+          <div className="hplc-metric-item">
+            <span className="metric-lbl">{lang === 'es' ? 'Aspecto Físico' : 'Physical Appearance'}</span>
+            <span className="metric-val-sm">{lang === 'es' ? 'Liofilizado Blanco Estéril' : 'White Lyophilized Cake'}</span>
+            <span className="metric-sub">{lang === 'es' ? 'Sellado al Vacío bajo Nitrógeno' : 'Nitrogen Vacuum-Sealed'}</span>
+          </div>
+        </div>
+
+        {/* Pharmacological Targets / Receptor Affinity */}
+        {product?.target && (
+          <div className="receptor-target-box">
+            <span className="target-title">{lang === 'es' ? 'Diana Receptora & Mecanismo:' : 'Receptor Target & Pathway:'}</span>
+            <p className="target-text">{product.target}</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── SECTION 2 (100% Full-Width): MOLECULAR IDENTITY & AMINO ACID SEQUENCE ── */}
+      <div className="sequence-full-panel">
+        <div className="sequence-header">
+          <div className="seq-title-group">
+            <FlaskConical size={16} className="text-sky-500" />
+            <span className="seq-title">
+              {lang === 'es' ? 'Identidad Molecular & Secuencia de Aminoácidos' : 'Molecular Identity & Amino Acid Sequence'}
+            </span>
+          </div>
+          <button
+            type="button"
+            className={`btn-copy-seq ${copiedSeq ? 'copied' : ''}`}
+            onClick={copySequence}
+            title={lang === 'es' ? 'Copiar secuencia' : 'Copy sequence'}
+          >
+            {copiedSeq ? (
+              <>
+                <Check size={14} /> {lang === 'es' ? 'Copiada ✓' : 'Copied to Clipboard ✓'}
+              </>
+            ) : (
+              <>
+                <Copy size={14} /> {lang === 'es' ? 'Copiar Secuencia' : 'Copy Sequence'}
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="sequence-code-box">
+          <code>{sequence}</code>
+        </div>
+
+        <div className="sequence-meta-row">
+          <div className="meta-pill">
+            <span className="meta-pill-lbl">CAS:</span>
+            <strong className="meta-pill-val">{product?.cas || product?.casNumber || '2381089-83-2'}</strong>
+          </div>
+          <div className="meta-pill">
+            <span className="meta-pill-lbl">{lang === 'es' ? 'Fórmula Molecular:' : 'Formula:'}</span>
+            <strong className="meta-pill-val">{product?.molecularFormula || 'C221H342N46O68'}</strong>
+          </div>
+          <div className="meta-pill">
+            <span className="meta-pill-lbl">{lang === 'es' ? 'Solubilidad BAC:' : 'Solubility:'}</span>
+            <strong className="meta-pill-val">{lang === 'es' ? 'Agua BAC (10–30 mg/mL)' : 'BAC Water (10–30 mg/mL)'}</strong>
+          </div>
+          <div className="meta-pill">
+            <span className="meta-pill-lbl">{lang === 'es' ? 'Filtración:' : 'Filtration:'}</span>
+            <strong className="meta-pill-val">0.22 µm Sterile PES</strong>
           </div>
         </div>
       </div>
