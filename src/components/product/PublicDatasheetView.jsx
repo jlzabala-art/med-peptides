@@ -266,13 +266,40 @@ export default function PublicDatasheetView({
       `Official Verification: https://med-peptides-app-27a3a.web.app/p/${slug}\n` +
       `_Atlas Scientific & Clinical Sourcing · SSOT Standard_`;
 
-    try {
-      await navigator.clipboard.writeText(text);
+    let success = false;
+    if (navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        success = true;
+      } catch (err) {
+        console.warn('Clipboard writeText failed, trying fallback:', err);
+      }
+    }
+
+    if (!success && typeof document !== 'undefined') {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr);
+      }
+    }
+
+    if (success) {
       setCopiedMonograph(true);
+      triggerHaptic('success');
       toast.success(isEs ? 'Ficha técnica copiada al portapapeles ✓' : 'Technical monograph copied to clipboard ✓');
-      setTimeout(() => setCopiedMonograph(false), 2000);
-    } catch {
-      toast.error('Could not copy to clipboard');
+      setTimeout(() => setCopiedMonograph(false), 2500);
+    } else {
+      toast.error(isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard');
     }
   };
 
@@ -1410,7 +1437,7 @@ export default function PublicDatasheetView({
 
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  onClick={() => setIsPreviewModalOpen(true)}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',

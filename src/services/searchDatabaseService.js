@@ -208,22 +208,27 @@ export const performDatabaseSearch = async (searchText, activeRole) => {
   // 2. Fallback to Firestore
   const promises = [];
 
-  if (['admin', 'clinic', 'doctor'].includes(activeRole)) {
-    promises.push(searchCollectionFirestore('protocols', 'name', searchText, 'Protocol', '/protocol', 'flask'));
+  // Protocols search (Admin, Doctor, Clinic, Patient)
+  if (['admin', 'clinic', 'doctor', 'patient'].includes(activeRole)) {
+    const protoPathPrefix = activeRole === 'admin' ? '/admin/protocols' : '/proto';
+    promises.push(searchCollectionFirestore('protocols', 'name', searchText, 'Protocol', protoPathPrefix, 'flask'));
   }
 
-  // All roles can search products. Fallback does not support complex where + prefix filters natively
-  // without composite indexes, so we just do prefix on name. B2C should ideally hit Algolia.
+  // All roles can search products.
   const productPathPrefix = ['retail', 'patient', 'guest'].includes(activeRole)
     ? '/collection/all'
-    : '/admin?s=operations&t=products&id=';
+    : activeRole === 'doctor' || activeRole === 'clinic'
+      ? '/p'
+      : '/admin?s=operations&t=products&id=';
   promises.push(searchCollectionFirestore('products', 'name', searchText, 'Product', productPathPrefix, 'package'));
 
-  // Search Blog Posts
+  // Search Blog Posts / Clinical Literature
   promises.push(searchCollectionFirestore('blogPosts', 'title', searchText, 'Article', '/blog', 'book-open'));
 
-  if (activeRole === 'admin') {
-    promises.push(searchCollectionFirestore('users', 'firstName', searchText, 'User/Patient', '/admin/patient', 'user'));
+  // Users & Patients Search: Admin, Doctor, Clinic
+  if (['admin', 'doctor', 'clinic'].includes(activeRole)) {
+    const userPathPrefix = activeRole === 'admin' ? '/admin/patient' : '/doctor/patients';
+    promises.push(searchCollectionFirestore('users', 'firstName', searchText, 'User/Patient', userPathPrefix, 'user'));
   }
 
   const resultsArray = await Promise.all(promises);

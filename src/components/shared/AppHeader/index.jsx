@@ -163,33 +163,37 @@ export default function AppHeader({
         <AdminPortalSwitcher />
       </div>
 
-      {/* Center: Dynamic Utility Content OR Global Search */}
+      {/* Center: Dynamic Utility Content OR Global Search Trigger */}
       <div className="app-header-center">
         {headerContent ? (
           headerContent
         ) : (
-          <div className="app-header-search-container">
-            <Search size={16} className="app-header-search-icon" />
-            <input 
-              type="text" 
-              className="app-header-search" 
-              placeholder={t('header.search')} 
-              onClick={() => setIsSearchOpen(true)}
-              readOnly 
-            />
-            <div className="app-header-shortcut">
+          <button
+            type="button"
+            className="app-header-search-trigger-btn"
+            onClick={() => setIsSearchOpen(true)}
+            aria-label="Global Search Command Palette (⌘K)"
+            title="Search workspace, protocols, products, patients (⌘K)"
+          >
+            <Search size={16} className="app-header-search-trigger-icon" />
+            <span className="app-header-search-trigger-label">
+              {t('header.search') || 'Search workspace, protocols, patients...'}
+            </span>
+            <div className="app-header-search-trigger-shortcut">
               <kbd>⌘</kbd><kbd>K</kbd>
             </div>
-          </div>
+          </button>
         )}
       </div>
-      {/* Mobile: compact search icon shown when bar is hidden */}
+      {/* Mobile: compact search icon button */}
       <button
+        type="button"
         className="app-header-search-mobile-btn"
         aria-label="Search"
+        title="Search workspace (⌘K)"
         onClick={() => setIsSearchOpen(true)}
       >
-        <Search size={20} strokeWidth={1.8} />
+        <Search size={19} strokeWidth={2} />
       </button>
 
       {/* Right: Actions & Profile — NO AdminPortalSwitcher here (moved to left) */}

@@ -502,41 +502,33 @@ export default function AdminPortalSwitcher() {
           setIsOpen(!isOpen);
         }}
         style={{
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
-          gap: '0.5rem',
-          background: isOpen ? 'rgba(0, 54, 102, 0.08)' : 'rgba(0, 54, 102, 0.04)',
-          border: '1px solid rgba(0, 54, 102, 0.1)',
-          padding: '0.5rem 0.8rem',
-          borderRadius: '20px',
+          justifyContent: 'center',
+          gap: '4px',
+          background: isOpen ? 'rgba(0, 54, 102, 0.12)' : 'rgba(0, 54, 102, 0.05)',
+          border: '1px solid rgba(0, 54, 102, 0.12)',
+          padding: '6px 8px',
+          borderRadius: '8px',
           cursor: 'pointer',
-          color: 'var(--color-primary)',
-          fontWeight: 600,
-          fontSize: '0.85rem',
-          height: '100%',
-          transition: 'all 0.2s',
+          color: currentPortal.color || 'var(--color-primary)',
+          height: '34px',
+          minWidth: '40px',
+          transition: 'all 0.15s ease',
           outline: 'none',
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
           WebkitTapHighlightColor: 'transparent',
         }}
-        title="Switch portal view"
+        title={`${currentPortal.label} · Switch workspace portal`}
+        aria-label={`Current portal: ${currentPortal.label}. Click to switch.`}
       >
-        <style>
-          {`
-            @media (max-width: 720px) {
-              .admin-switcher-label { display: none; }
-            }
-          `}
-        </style>
         <div style={{ color: currentPortal.color, display: 'flex', alignItems: 'center' }}>
-          {currentPortal.icon && <currentPortal.icon size={16} />}
+          {currentPortal.icon ? <currentPortal.icon size={17} strokeWidth={2.2} /> : <Shield size={17} />}
         </div>
-        <span className="admin-switcher-label" style={{ color: 'var(--color-text-primary)' }}>
-          {currentPortal.label}
-        </span>
         <ChevronDown
-          size={14}
+          size={12}
           style={{
-            color: 'var(--color-text-tertiary)',
+            color: 'var(--color-text-tertiary, #64748b)',
             transition: 'transform 0.2s',
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0)',
           }}
