@@ -722,15 +722,15 @@ export default function PublicDatasheetView({
     return supplierFilteredFormats;
   }, [isStrictlyLotusland, supplierFilteredFormats]);
 
-  // Priority-ordered available formats: Prefilled Pen always comes before Cartridge / Refill
+  // Priority-ordered available formats: Lyophilized Vial is the primary clinical standard
   const availableFormats = useMemo(() => {
     const list = sanitizedFormats.length > 0 ? [...sanitizedFormats] : [
       { id: 'vial', name: 'Lyophilized Subcutaneous Vial', strengths: sortedStrengths.map(s => s.id) }
     ];
     const getOrder = (id) => {
       const s = String(id || '').toLowerCase();
-      if (s.includes('pen') && !s.includes('cartridge')) return 1;
-      if (s.includes('vial')) return 2;
+      if (s.includes('vial')) return 1;
+      if (s.includes('pen') && !s.includes('cartridge')) return 2;
       if (s.includes('cartridge')) return 3;
       if (s.includes('spray') || s.includes('nasal')) return 4;
       if (s.includes('oral') || s.includes('capsule')) return 5;
@@ -745,9 +745,9 @@ export default function PublicDatasheetView({
       const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
       if (found) return found.id;
     }
-    // Prefer pre-filled pen over refill cartridge on initial load
-    const penFmt = availableFormats.find(f => f.id.toLowerCase().includes('pen') && !f.id.toLowerCase().includes('cartridge'));
-    return penFmt?.id || availableFormats[0]?.id || 'vial';
+    // Prefer lyophilized vial as primary standard; fall back to availableFormats[0]
+    const vialFmt = availableFormats.find(f => f.id.toLowerCase().includes('vial'));
+    return vialFmt?.id || availableFormats[0]?.id || 'vial';
   });
 
   // Keep activeFormatId valid when available formats change
@@ -870,15 +870,15 @@ export default function PublicDatasheetView({
     return f.includes('spray') || f.includes('nasal');
   }, [activeFormatId]);
 
-  const hasPenFormat = useMemo(() => {
-    return availableFormats.some(f => (f.id || '').toLowerCase().includes('pen'));
+  const distinctPenFmt = useMemo(() => {
+    return availableFormats.find(f => (f.id || '').toLowerCase().includes('pen') && !(f.id || '').toLowerCase().includes('cartridge'));
   }, [availableFormats]);
 
-  const hasCartridgeFormat = useMemo(() => {
-    return availableFormats.some(f => (f.id || '').toLowerCase().includes('cartridge'));
+  const distinctCartridgeFmt = useMemo(() => {
+    return availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge') && !(f.id || '').toLowerCase().includes('pen'));
   }, [availableFormats]);
 
-  const isPenAndCartridgeEcosystem = hasPenFormat && hasCartridgeFormat;
+  const isPenAndCartridgeEcosystem = Boolean(distinctPenFmt && distinctCartridgeFmt);
 
   const tocSections = useMemo(() => {
     if (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo')) {
@@ -969,6 +969,20 @@ export default function PublicDatasheetView({
     const canonicalDomain = 'https://med-peptides.com';
     return `${canonicalDomain}/p/${slug}${q ? `?${q}` : ''}`;
   }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, supplierName, effectiveBatchCode, lang]);
+
+  // 🔄 Synchronize browser address bar with unique product identity parameters (Golden UX Rule)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.history && dynamicPublicUrl) {
+      try {
+        const urlObj = new URL(dynamicPublicUrl);
+        const currentPathAndQuery = window.location.pathname + window.location.search;
+        const targetPathAndQuery = urlObj.pathname + urlObj.search;
+        if (currentPathAndQuery !== targetPathAndQuery) {
+          window.history.replaceState({}, '', targetPathAndQuery);
+        }
+      } catch {}
+    }
+  }, [dynamicPublicUrl]);
 
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
@@ -1818,10 +1832,16 @@ export default function PublicDatasheetView({
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', background: '#dcfce7', padding: '2px 8px', borderRadius: '6px' }}>
                   {packUnits === 10 ? (
                     realKitSavings?.hasDiscount 
-                      ? (lang === 'es' ? `Caja 10 Viales (Ahorro Real -${realKitSavings.discountPct}%)` : `10-Vial Kit (Verified Save -${realKitSavings.discountPct}%)`)
-                      : (lang === 'es' ? 'Caja 10 Viales (Kit Mayorista B2B)' : '10-Vial Box (Wholesale Kit)')
+                      ? (isPenOrCart
+                          ? (lang === 'es' ? `Caja 10 Unidades (Ahorro Real -${realKitSavings.discountPct}%)` : `10-Unit Box (Verified Save -${realKitSavings.discountPct}%)`)
+                          : (lang === 'es' ? `Caja 10 Viales (Ahorro Real -${realKitSavings.discountPct}%)` : `10-Vial Kit (Verified Save -${realKitSavings.discountPct}%)`))
+                      : (isPenOrCart
+                          ? (lang === 'es' ? 'Caja 10 Unidades (Kit Suministro B2B)' : '10-Unit Delivery Box (B2B Kit)')
+                          : (lang === 'es' ? 'Caja 10 Viales (Kit Mayorista B2B)' : '10-Vial Box (Wholesale Kit)'))
                   ) : (
-                    lang === 'es' ? 'Unidad Individual' : 'Single Unit'
+                    isPenOrCart
+                      ? (lang === 'es' ? 'Dispositivo / Cartucho Individual' : 'Single Device / Refill')
+                      : (lang === 'es' ? 'Unidad Individual' : 'Single Unit')
                   )}
                 </span>
               </div>
@@ -1832,7 +1852,11 @@ export default function PublicDatasheetView({
                     count: 1, 
                     label: lang === 'es' ? '1 Unidad' : '1 Unit', 
                     badge: null, 
-                    sub: lang === 'es' ? 'Vial Individual' : 'Standard Single Vial' 
+                    sub: isPenFormat
+                      ? (lang === 'es' ? 'Bolígrafo Inyector Multidosis' : 'Multi-Dose Pen Device')
+                      : isCartridgeFormat
+                        ? (lang === 'es' ? 'Cartucho de Recambio 3 mL' : '3 mL Refill Cartridge')
+                        : (lang === 'es' ? 'Vial Individual Liofilizado' : 'Standard Single Lyophilized Vial')
                   },
                   { 
                     count: 10, 
@@ -1840,7 +1864,9 @@ export default function PublicDatasheetView({
                     badge: realKitSavings?.hasDiscount ? `-${realKitSavings.discountPct}%` : (lang === 'es' ? 'Kit B2B' : 'B2B Kit'), 
                     sub: realKitSavings?.hasDiscount 
                       ? (lang === 'es' ? 'Ahorro real de escala' : 'Verified bulk savings')
-                      : (lang === 'es' ? 'Kit Completo de 10 Viales' : 'Full 10-Vial Kit Box') 
+                      : (isPenOrCart
+                          ? (lang === 'es' ? 'Kit Completo de 10 Unidades' : 'Full 10-Unit Supply Box')
+                          : (lang === 'es' ? 'Kit Completo de 10 Viales' : 'Full 10-Vial Kit Box'))
                   }
                 ].map(tier => {
                   const isSelected = packUnits === tier.count;
@@ -1905,8 +1931,12 @@ export default function PublicDatasheetView({
                 <span>
                   <strong>{lang === 'es' ? 'Especificación de Lote:' : 'Batch Specification:'}</strong>{' '}
                   {packUnits === 10 
-                    ? (lang === 'es' ? 'Caja institucional de 10 viales liofilizados al vacío' : 'Institutional kit of 10 vacuum-sealed lyophilized vials')
-                    : (lang === 'es' ? 'Vial clínico individual liofilizado' : 'Individual clinical lyophilized vial')}
+                    ? (isPenOrCart
+                        ? (lang === 'es' ? 'Caja institucional de 10 unidades multidosis selladas' : 'Institutional kit of 10 sealed multi-dose units')
+                        : (lang === 'es' ? 'Caja institucional de 10 viales liofilizados al vacío' : 'Institutional kit of 10 vacuum-sealed lyophilized vials'))
+                    : (isPenOrCart
+                        ? (lang === 'es' ? 'Dispositivo clínico multidosis / cartucho 3 mL sellado' : 'Clinical multi-dose dial device / sealed 3 mL cartridge')
+                        : (lang === 'es' ? 'Vial clínico individual liofilizado' : 'Individual clinical lyophilized vial'))}
                 </span>
                 <span style={{ color: '#0f172a', fontWeight: 700 }}>
                   Dual RP-HPLC ≥ 99.0% Verified
@@ -1916,7 +1946,7 @@ export default function PublicDatasheetView({
           )}
 
           {/* Refill Cross-Format Callouts (Pen vs 3 mL Refill Cartridge) */}
-          {isPenAndCartridgeEcosystem && isPenFormat && (
+          {isPenAndCartridgeEcosystem && distinctCartridgeFmt && activeFormatId !== distinctCartridgeFmt.id && (
             <div className="pds-refill-callout pds-refill-to-cartridge">
               <div className="pds-refill-callout-icon">💡</div>
               <div className="pds-refill-callout-content">
@@ -1931,11 +1961,8 @@ export default function PublicDatasheetView({
                 type="button"
                 className="pds-refill-switch-btn"
                 onClick={() => {
-                  const cartFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge'));
-                  if (cartFmt) {
-                    setActiveFormatId(cartFmt.id);
-                    triggerHaptic('selection');
-                  }
+                  setActiveFormatId(distinctCartridgeFmt.id);
+                  triggerHaptic('selection');
                 }}
               >
                 <span>{lang === 'es' ? 'Ver Cartucho de Recambio' : 'Switch to Refill Cartridge'}</span>
@@ -1944,7 +1971,7 @@ export default function PublicDatasheetView({
             </div>
           )}
 
-          {isPenAndCartridgeEcosystem && isCartridgeFormat && (
+          {isPenAndCartridgeEcosystem && distinctPenFmt && activeFormatId !== distinctPenFmt.id && (
             <div className="pds-refill-callout pds-refill-to-pen">
               <div className="pds-refill-callout-icon">🔄</div>
               <div className="pds-refill-callout-content">
@@ -1959,11 +1986,8 @@ export default function PublicDatasheetView({
                 type="button"
                 className="pds-refill-switch-btn"
                 onClick={() => {
-                  const penFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('pen'));
-                  if (penFmt) {
-                    setActiveFormatId(penFmt.id);
-                    triggerHaptic('selection');
-                  }
+                  setActiveFormatId(distinctPenFmt.id);
+                  triggerHaptic('selection');
                 }}
               >
                 <span>{lang === 'es' ? 'Ver Bolígrafo Completo' : 'View Complete Pen Device'}</span>

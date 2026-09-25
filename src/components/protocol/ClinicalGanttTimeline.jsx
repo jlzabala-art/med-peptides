@@ -23,6 +23,31 @@ import { resolveClinicalCompoundDose } from '../../utils/clinicalDosingEngine';
  */
 function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, totalPhases = 3) {
   if (!compound) return { unitDose: 'Active', shortCadence: '1x/wk', weeklyTotal: '', isStepUp: false };
+
+  if (compound.isCalibrated && compound.dosage) {
+    const isBpc = (compound.name || '').toUpperCase().includes('BPC-157');
+    const isTb = (compound.name || '').toUpperCase().includes('TB-500');
+    const doseNum = parseFloat(compound.dosage);
+    let weeklyTotal = '';
+    if (isBpc && !isNaN(doseNum)) {
+      weeklyTotal = `${((doseNum * 7) / 1000).toFixed(2)} mg/wk (${(doseNum * 7).toLocaleString()} mcg)`;
+    } else if (isTb && !isNaN(doseNum)) {
+      weeklyTotal = `${doseNum} mg/wk`;
+    }
+    return {
+      unitDose: compound.dosage,
+      shortCadence: isBpc ? 'Daily' : 'Weekly',
+      timesPerWeek: isBpc ? 7 : 2,
+      weeklyTotal,
+      isStepUp: false,
+      frequency: compound.frequency || (isBpc ? 'Daily (morning & evening)' : 'Weekly'),
+      route: compound.route || 'Subcutaneous',
+      storage: compound.storage || '❄️ 2°C – 8°C Refrigerator',
+      format: compound.format || '🧪 Sterile Lyophilized Vial',
+      isCalibrated: true
+    };
+  }
+
   const res = resolveClinicalCompoundDose(compound, phase, phaseIndex, totalPhases);
 
   let isStepUp = false;
@@ -47,7 +72,9 @@ function resolveWeeklyCompoundDose(compound, phase, phaseIndex, weekNumber, tota
 }
 
 export default function ClinicalGanttTimeline({
-  protocol
+  protocol,
+  calibratedDoses = null,
+  onCalibrationUpdate = null
 }) {
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [viewMode, setViewMode] = useState('doctor'); // 'doctor' | 'patient'
@@ -154,11 +181,59 @@ export default function ClinicalGanttTimeline({
     ? protocol.phases
     : defaultPhases;
 
+  // Adapt phases dynamically when patient-specific calibration is active
+  const effectivePhases = useMemo(() => {
+    if (!calibratedDoses) return rawPhases;
+
+    return rawPhases.map((p, pIdx) => {
+      // If cycle duration was calibrated (e.g. 6 weeks total for acute/subacute recovery)
+      let phaseDuration = Number(p.durationWeeks) || 4;
+      if (calibratedDoses.cycleWeeks && rawPhases.length === 2) {
+        phaseDuration = pIdx === 0 
+          ? Math.ceil(calibratedDoses.cycleWeeks / 2) 
+          : Math.floor(calibratedDoses.cycleWeeks / 2);
+      }
+
+      // Update compounds with calibrated dosages
+      const updatedCompounds = (p.compounds || []).map(c => {
+        const cName = (c.name || c.product_name || '').toUpperCase();
+        if (cName.includes('BPC-157') && calibratedDoses.bpcDailyMcg) {
+          const doseStr = `${calibratedDoses.bpcDailyMcg} mcg`;
+          return {
+            ...c,
+            dosage: doseStr,
+            dose: `${doseStr} Daily`,
+            calibratedFrom: `${calibratedDoses.tissueName || 'Tissue'} (${calibratedDoses.multiplier || 5} mcg/kg/d)`,
+            isCalibrated: true
+          };
+        }
+        if (cName.includes('TB-500') && calibratedDoses.tb500WeeklyMg) {
+          const weeklyTb = pIdx === 0 ? calibratedDoses.tb500WeeklyMg : Math.min(2.5, calibratedDoses.tb500WeeklyMg);
+          const doseStr = `${weeklyTb} mg`;
+          return {
+            ...c,
+            dosage: doseStr,
+            dose: `${doseStr} / week`,
+            calibratedFrom: calibratedDoses.cadenceNote || 'Systemic Titration',
+            isCalibrated: true
+          };
+        }
+        return c;
+      });
+
+      return {
+        ...p,
+        durationWeeks: phaseDuration,
+        compounds: updatedCompounds
+      };
+    });
+  }, [rawPhases, calibratedDoses]);
+
   // Normalized phases with accurate start/end week bounds
   const normalizedPhases = useMemo(() => {
     let currentStart = 1;
     const colorClasses = ['gantt-bar-induction', 'gantt-bar-optimization', 'gantt-bar-maintenance', 'gantt-bar-washout'];
-    return rawPhases.map((p, idx) => {
+    return effectivePhases.map((p, idx) => {
       const duration = Number(p.durationWeeks) || 4;
       const start = currentStart;
       const end = currentStart + duration - 1;
@@ -173,7 +248,7 @@ export default function ClinicalGanttTimeline({
         colorClass: p.colorClass || colorClasses[idx % colorClasses.length]
       };
     });
-  }, [rawPhases]);
+  }, [effectivePhases]);
 
   const totalWeeks = normalizedPhases.reduce((acc, p) => acc + (Number(p.durationWeeks) || 4), 0);
   const weeksArray = Array.from({ length: totalWeeks }, (_, i) => i + 1);
@@ -388,6 +463,201 @@ Date Issued:    ${new Date().toISOString().split('T')[0]}                       
           </div>
         </div>
       </div>
+
+      {/* 1B. Google Cloud Standard Live Calibration Banner */}
+      {calibratedDoses && (
+        <div className="gcp-calibration-banner" role="region" aria-label="Calibrated Dosage Parameters" style={{ marginBottom: '1rem' }}>
+          <div className="gcp-calib-indicator">
+            <span className="gcp-pulse-dot" />
+            <span className="gcp-calib-title">
+              Patient Calibrated Protocol Active
+            </span>
+          </div>
+          <div className="gcp-calib-chips">
+            <span className="gcp-chip">
+              Weight: <strong>{calibratedDoses.weightKg} kg</strong>
+            </span>
+            {calibratedDoses.tissueName && (
+              <span className="gcp-chip">
+                Target: <strong>{calibratedDoses.tissueName}</strong>
+              </span>
+            )}
+            {calibratedDoses.chronicityLabel && (
+              <span className="gcp-chip">
+                Phase: <strong>{calibratedDoses.chronicityLabel}</strong>
+              </span>
+            )}
+            <span className="gcp-chip highlight">
+              BPC-157: <strong>{calibratedDoses.bpcDailyMcg} mcg/day</strong>
+            </span>
+            <span className="gcp-chip highlight">
+              TB-500: <strong>{calibratedDoses.tb500WeeklyMg} mg/wk</strong>
+            </span>
+            <span className="gcp-chip">
+              Duration: <strong>{calibratedDoses.cycleWeeks} Weeks</strong>
+            </span>
+          </div>
+          {onCalibrationUpdate && (
+            <button
+              type="button"
+              className="gcp-reset-btn"
+              onClick={() => onCalibrationUpdate(null)}
+              title="Reset to default template dosing"
+            >
+              Reset to Standard
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 1C. Google Cloud Doctor Calibration Console (Active in Doctor View) */}
+      {viewMode === 'doctor' && (
+        <div className="gcp-doctor-console" role="region" aria-label="Physician Calibration Console" style={{ marginBottom: '1rem' }}>
+          <div className="gcp-doc-header">
+            <div className="gcp-doc-title">
+              <Stethoscope size={16} style={{ color: '#0d9488' }} />
+              <span>Physician Dosing Titration & Calibration Console</span>
+            </div>
+            <span style={{ fontSize: '0.73rem', color: '#64748b' }}>
+              Fine-tune daily & systemic kinetics for individual patient tolerance
+            </span>
+          </div>
+
+          <div className="gcp-doc-grid">
+            {/* BPC-157 Dose Stepper */}
+            <div className="gcp-doc-card">
+              <span className="gcp-doc-card-label">BPC-157 Daily Titration</span>
+              <div className="gcp-doc-card-controls">
+                <button
+                  type="button"
+                  className="gcp-doc-step-btn"
+                  onClick={() => {
+                    const current = calibratedDoses?.bpcDailyMcg || 500;
+                    const next = Math.max(100, current - 25);
+                    if (onCalibrationUpdate) {
+                      onCalibrationUpdate(prev => ({
+                        ...(prev || { weightKg: 75, tb500WeeklyMg: 2.5, cycleWeeks: 8 }),
+                        bpcDailyMcg: next
+                      }));
+                    }
+                  }}
+                  title="Decrease 25 mcg"
+                >
+                  -
+                </button>
+                <span className="gcp-doc-val">
+                  {calibratedDoses?.bpcDailyMcg || 500} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mcg/day</small>
+                </span>
+                <button
+                  type="button"
+                  className="gcp-doc-step-btn"
+                  onClick={() => {
+                    const current = calibratedDoses?.bpcDailyMcg || 500;
+                    const next = Math.min(1500, current + 25);
+                    if (onCalibrationUpdate) {
+                      onCalibrationUpdate(prev => ({
+                        ...(prev || { weightKg: 75, tb500WeeklyMg: 2.5, cycleWeeks: 8 }),
+                        bpcDailyMcg: next
+                      }));
+                    }
+                  }}
+                  title="Increase 25 mcg"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* TB-500 Weekly Cadence */}
+            <div className="gcp-doc-card">
+              <span className="gcp-doc-card-label">TB-500 Systemic Cadence</span>
+              <div className="gcp-doc-card-controls">
+                <button
+                  type="button"
+                  className="gcp-doc-step-btn"
+                  onClick={() => {
+                    const current = calibratedDoses?.tb500WeeklyMg || 2.5;
+                    const next = Math.max(1.0, Number((current - 0.5).toFixed(1)));
+                    if (onCalibrationUpdate) {
+                      onCalibrationUpdate(prev => ({
+                        ...(prev || { weightKg: 75, bpcDailyMcg: 500, cycleWeeks: 8 }),
+                        tb500WeeklyMg: next
+                      }));
+                    }
+                  }}
+                  title="Decrease 0.5 mg/wk"
+                >
+                  -
+                </button>
+                <span className="gcp-doc-val">
+                  {calibratedDoses?.tb500WeeklyMg || 2.5} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>mg/wk</small>
+                </span>
+                <button
+                  type="button"
+                  className="gcp-doc-step-btn"
+                  onClick={() => {
+                    const current = calibratedDoses?.tb500WeeklyMg || 2.5;
+                    const next = Math.min(10.0, Number((current + 0.5).toFixed(1)));
+                    if (onCalibrationUpdate) {
+                      onCalibrationUpdate(prev => ({
+                        ...(prev || { weightKg: 75, bpcDailyMcg: 500, cycleWeeks: 8 }),
+                        tb500WeeklyMg: next
+                      }));
+                    }
+                  }}
+                  title="Increase 0.5 mg/wk"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Total Protocol Duration Weeks */}
+            <div className="gcp-doc-card">
+              <span className="gcp-doc-card-label">Protocol Cycle Duration</span>
+              <div className="gcp-doc-card-controls">
+                <button
+                  type="button"
+                  className="gcp-doc-step-btn"
+                  onClick={() => {
+                    const current = calibratedDoses?.cycleWeeks || totalWeeks || 8;
+                    const next = Math.max(4, current - 2);
+                    if (onCalibrationUpdate) {
+                      onCalibrationUpdate(prev => ({
+                        ...(prev || { weightKg: 75, bpcDailyMcg: 500, tb500WeeklyMg: 2.5 }),
+                        cycleWeeks: next
+                      }));
+                    }
+                  }}
+                  title="Decrease 2 weeks"
+                >
+                  -
+                </button>
+                <span className="gcp-doc-val">
+                  {calibratedDoses?.cycleWeeks || totalWeeks || 8} <small style={{ fontSize: '0.72rem', color: '#64748b' }}>Weeks</small>
+                </span>
+                <button
+                  type="button"
+                  className="gcp-doc-step-btn"
+                  onClick={() => {
+                    const current = calibratedDoses?.cycleWeeks || totalWeeks || 8;
+                    const next = Math.min(16, current + 2);
+                    if (onCalibrationUpdate) {
+                      onCalibrationUpdate(prev => ({
+                        ...(prev || { weightKg: 75, bpcDailyMcg: 500, tb500WeeklyMg: 2.5 }),
+                        cycleWeeks: next
+                      }));
+                    }
+                  }}
+                  title="Increase 2 weeks"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 2. ACCORDION PHASE VIEW (Default & Clean Architecture) */}
       {activeLayout === 'accordions' ? (

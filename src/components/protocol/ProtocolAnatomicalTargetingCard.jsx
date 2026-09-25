@@ -17,7 +17,12 @@ import { toast } from 'react-hot-toast';
 import AnatomicalInjuryDoseCalculator from './AnatomicalInjuryDoseCalculator';
 import './ProtocolAnatomicalTargetingCard.css';
 
-export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' }) {
+export default function ProtocolAnatomicalTargetingCard({ 
+  protocol, 
+  lang = 'en',
+  onCalibrationChange = null,
+  initialCalibration = null
+}) {
   const isEs = lang === 'es';
   const targeting = protocol?.anatomical_targeting;
   const mechanotherapy = protocol?.mechanotherapy_phases || [];
@@ -240,7 +245,11 @@ export default function ProtocolAnatomicalTargetingCard({ protocol, lang = 'en' 
           )}
 
           {/* Interactive Tissue Injury & Dose Calculator */}
-          <AnatomicalInjuryDoseCalculator lang={lang} />
+          <AnatomicalInjuryDoseCalculator 
+            lang={lang} 
+            onCalibrationChange={onCalibrationChange}
+            initialCalibration={initialCalibration}
+          />
         </div>
       )}
 

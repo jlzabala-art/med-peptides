@@ -102,6 +102,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     return extractBiomarkerCalibrationFromUrl(slug, protocol?.category);
   });
 
+  // ── Anatomical & Musculoskeletal Kinetic Calibration State ──
+  const [anatomicalCalibration, setAnatomicalCalibration] = useState(null);
+
   const handleClearCalibration = () => {
     setBiomarkerCalibration(null);
     if (typeof window !== 'undefined' && window.history) {
@@ -474,6 +477,20 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   const tocSections = useMemo(() => {
     const isEs = lang === 'es';
     return [
+      { 
+        id: 'included-compounds', 
+        label: isEs ? 'Compuestos Activos' : 'Included Compounds', 
+        href: '#included-compounds',
+        icon: FlaskConical 
+      },
+      ...((protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) ? [
+        { 
+          id: 'cosmeceutical-adjuncts', 
+          label: isEs ? 'Coadyuvantes Tópicos' : 'Cosmeceutical Adjuncts', 
+          href: '#cosmeceutical-adjuncts',
+          icon: Sparkles 
+        }
+      ] : []),
       ...(protocol?.clinical_outcomes?.has_objective_data ? [
         { 
           id: 'clinical-outcomes', 
@@ -520,20 +537,6 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
           label: isEs ? 'Modulación Inmune' : 'Immune Modulation Matrix', 
           href: '#immune-modulation',
           icon: ShieldAlert 
-        }
-      ] : []),
-      { 
-        id: 'included-compounds', 
-        label: isEs ? 'Compuestos Activos' : 'Included Compounds', 
-        href: '#included-compounds',
-        icon: FlaskConical 
-      },
-      ...((protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) ? [
-        { 
-          id: 'cosmeceutical-adjuncts', 
-          label: isEs ? 'Coadyuvantes Tópicos' : 'Cosmeceutical Adjuncts', 
-          href: '#cosmeceutical-adjuncts',
-          icon: Sparkles 
         }
       ] : []),
       { 
@@ -932,9 +935,29 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               lang={lang}
             />
 
-            {/* ── STEP 2: Personalisation Engines (Calculators) ──
-                 Rendered before evidence so the patient's profile is set
-                 before they read clinical outcomes */}
+            {/* ── STEP 1: Included Therapeutic Compounds & Formulations (Primary Clinical Presentation) ── */}
+            <ProtocolCompoundsSection items={items} lang={lang} />
+
+            {/* ── STEP 1B: Topical Cosmeceutical Adjuncts (Colway Hair System, etc.) ── */}
+            {(protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) && (
+              <ProtocolCosmeticsAdjunctsCard
+                products={protocol?.topical_adjuncts}
+                protocol={protocol}
+                lang={lang}
+              />
+            )}
+
+            {/* ── STEP 2: Clinical Evidence & Endpoints ── */}
+            <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
+
+            {/* ── STEP 3: Pharmacokinetics, Companion Diagnostics & Methylation ── */}
+            <ProtocolClinicalCompanionCard
+              protocol={protocol}
+              lang={lang}
+              biomarkerCalibration={biomarkerCalibration}
+            />
+
+            {/* ── STEP 4: Personalisation Engines & Anatomical Targeting (Patient Calibration) ── */}
             {(isTirzepatideProtocol || isLongevityProtocol || isImmuneProtocol || isRecoveryProtocol) && (
               <div id="personalisation-engine" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
                 {isTirzepatideProtocol && (
@@ -952,42 +975,19 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
               </div>
             )}
 
-            {/* ── STEP 3: Clinical Evidence & Endpoints ──
-                 After calibration — outcomes are now contextualised to the patient */}
-            <ProtocolClinicalOutcomesCard protocol={protocol} lang={lang} />
-
-            {/* ── STEP 4: Pharmacokinetics, Companion Diagnostics & Methylation ── */}
-            <ProtocolClinicalCompanionCard
-              protocol={protocol}
-              lang={lang}
-              biomarkerCalibration={biomarkerCalibration}
+            {/* Anatomical Targeting with real-time reactive kinetic bridge */}
+            <ProtocolAnatomicalTargetingCard 
+              protocol={protocol} 
+              lang={lang} 
+              onCalibrationChange={setAnatomicalCalibration}
+              initialCalibration={anatomicalCalibration}
             />
 
-            {/* ── STEP 5: Anatomical Targeting & Mechanotherapy Pathway ── */}
-            <ProtocolAnatomicalTargetingCard protocol={protocol} lang={lang} />
-
-            {/* ── STEP 6: Incretin Safety, GI Tolerance Algorithm & DEXA ── */}
             <ProtocolIncretinSafetyCard protocol={protocol} lang={lang} />
-
-            {/* ── STEP 7: Somatotropic Axis Fasting Kinetics & 5-On/2-Off ── */}
             <ProtocolSomatotropicAxisCard protocol={protocol} lang={lang} />
-
-            {/* ── STEP 8: Immune Modulation Matrix & Zadaxin Lineage ── */}
             <ProtocolImmuneModulationCard protocol={protocol} lang={lang} />
 
-            {/* ── STEP 9: Active Compounds / Bill of Materials ── */}
-            <ProtocolCompoundsSection items={items} lang={lang} />
-
-            {/* ── STEP 9B: Topical Cosmeceutical Adjuncts (Colway Hair System, etc.) ── */}
-            {(protocol?.topical_adjuncts?.length > 0 || (protocol?.goal && protocol.goal.toLowerCase().includes('hair'))) && (
-              <ProtocolCosmeticsAdjunctsCard
-                products={protocol?.topical_adjuncts}
-                protocol={protocol}
-                lang={lang}
-              />
-            )}
-
-            {/* ── STEP 10: Phased Gantt Timeline ── */}
+            {/* ── STEP 5: Phased Gantt Timeline & Clinical Pathway Engine ── */}
             <div id="pathway-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', scrollMarginTop: '100px' }}>
               <PublicSectionCard
                 icon={Layers}
@@ -1004,7 +1004,11 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                   </div>
                 }
               >
-                <ClinicalGanttTimeline protocol={protocol} />
+                <ClinicalGanttTimeline 
+                  protocol={protocol} 
+                  calibratedDoses={anatomicalCalibration}
+                  onCalibrationUpdate={setAnatomicalCalibration}
+                />
               </PublicSectionCard>
             </div>
 

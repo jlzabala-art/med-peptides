@@ -865,7 +865,8 @@ export default function InteractiveReconstitutionGuide({
                   triggerHaptic('selection');
                   setPenPresentationMode('pen');
                   if (typeof onFormatChange === 'function') {
-                    const penFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('pen') && !(f.id || '').toLowerCase().includes('cartridge'));
+                    const penFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('pen') && !(f.id || '').toLowerCase().includes('cartridge'))
+                      || availableFormats.find(f => (f.id || '').toLowerCase().includes('pen'));
                     if (penFmt) onFormatChange(penFmt.id);
                   }
                 }}
@@ -891,7 +892,8 @@ export default function InteractiveReconstitutionGuide({
                   triggerHaptic('selection');
                   setPenPresentationMode('cartridge');
                   if (typeof onFormatChange === 'function') {
-                    const cartFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge'));
+                    const cartFmt = availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge') && !(f.id || '').toLowerCase().includes('pen'))
+                      || availableFormats.find(f => (f.id || '').toLowerCase().includes('cartridge'));
                     if (cartFmt) onFormatChange(cartFmt.id);
                   }
                 }}

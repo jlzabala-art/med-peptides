@@ -141,9 +141,13 @@ async function getPublicProduct(slug, supplierFilter = null) {
   }
 
   // Filter variants strictly for target supplier to prevent cross-supplier contamination.
-  // Clinical standard: Default to product's own supplier, or Lotusland Limited if multi-supplier,
-  // or the supplier of the available variants.
-  const inherentSupplier = raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (rawVariants && rawVariants[0]?.supplier);
+  // Clinical standard: Default to Lotusland Limited if available for peptide compounds,
+  // or the product's own supplier, or the first available variant's supplier.
+  const hasLotusland = (rawVariants || []).some(v => matchSupplier(v, 'supplier-lotusland') || matchSupplier(v, 'lotusland'));
+  const inherentSupplier = (hasLotusland && (!supplierFilter || supplierFilter.toLowerCase() === 'all'))
+    ? 'supplier-lotusland'
+    : (raw.supplierId || (rawVariants && rawVariants[0]?.supplierId) || (rawVariants && rawVariants[0]?.supplier));
+
   const targetSupplier = (supplierFilter && supplierFilter.toLowerCase() !== 'all')
     ? supplierFilter
     : (inherentSupplier && !String(inherentSupplier).toLowerCase().includes('unknown') ? inherentSupplier : 'supplier-lotusland');

@@ -1138,3 +1138,172 @@
     page-break-inside: avoid;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Google Cloud Standard Calibration Banner & Doctor Console Styles
+   ══════════════════════════════════════════════════════════════════ */
+.gcp-calibration-banner {
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-left: 4px solid #0d9488;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.gcp-calib-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gcp-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+.gcp-calib-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #0f766e;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.gcp-calib-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gcp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #ccfbf1;
+  font-size: 0.73rem;
+  color: #334155;
+}
+
+.gcp-chip.highlight {
+  background: #ccfbf1;
+  border-color: #99f6e4;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.gcp-reset-btn {
+  background: transparent;
+  border: 1px solid #99f6e4;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0f766e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gcp-reset-btn:hover {
+  background: #ffffff;
+  border-color: #0d9488;
+}
+
+/* Doctor Calibration Console */
+.gcp-doctor-console {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gcp-doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.gcp-doc-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gcp-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.gcp-doc-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.gcp-doc-card-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.gcp-doc-card-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gcp-doc-step-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+}
+
+.gcp-doc-step-btn:hover {
+  background: #e2e8f0;
+}
+
+.gcp-doc-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #003666;
+}
+

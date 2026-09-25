@@ -251,25 +251,36 @@ export default function ProtocolCompoundsSection({ items = [], lang = 'en' }) {
                 paddingTop: '0.75rem',
                 marginTop: '0.5rem'
               }}>
-                {itemSlug ? (
-                  <Link
-                    href={`/p/${itemSlug}`}
-                    target="_blank"
-                    style={{
-                      fontSize: '0.76rem',
-                      fontWeight: 700,
-                      color: '#0284c7',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
-                  >
-                    <FileText size={13} />
-                    <span>{isEs ? 'Ver Ficha Técnica Atlas' : 'View Technical Monograph'}</span>
-                    <ArrowRight size={11} />
-                  </Link>
-                ) : (
+                {itemSlug ? (() => {
+                  const targetSupplier = item.supplierId || item.supplier || (item.isCosmetic ? 'supplier-colway' : 'supplier-lotusland');
+                  const targetFormat = (item.format || (item.isCosmetic ? 'topical' : 'vial')).toLowerCase();
+                  const targetDose = item.selected_strength || item.dosage || item.dose || null;
+                  const itemUrlParams = new URLSearchParams();
+                  if (targetSupplier) itemUrlParams.set('supplier', targetSupplier);
+                  if (targetFormat) itemUrlParams.set('format', targetFormat);
+                  if (targetDose) itemUrlParams.set('dose', targetDose);
+                  const fullItemUrl = `/p/${itemSlug}${itemUrlParams.toString() ? `?${itemUrlParams.toString()}` : ''}`;
+
+                  return (
+                    <Link
+                      href={fullItemUrl}
+                      target="_blank"
+                      style={{
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        color: '#0284c7',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <FileText size={13} />
+                      <span>{isEs ? 'Ver Ficha Técnica Atlas' : 'View Technical Monograph'}</span>
+                      <ArrowRight size={11} />
+                    </Link>
+                  );
+                })() : (
                   <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
                     {isEs ? 'Formulación Clínica' : 'Clinical Formulation'}
                   </span>

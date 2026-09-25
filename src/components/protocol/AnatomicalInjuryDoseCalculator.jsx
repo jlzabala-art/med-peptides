@@ -23,20 +23,24 @@ import './AnatomicalInjuryDoseCalculator.css';
  * Calculates tissue-specific weight-based daily BPC-157 dose, systemic TB-500 cadence,
  * peri-lesional injection geometry, and total cycle vials required.
  */
-export default function AnatomicalInjuryDoseCalculator({ lang = 'en' }) {
+export default function AnatomicalInjuryDoseCalculator({ 
+  lang = 'en',
+  onCalibrationChange = null,
+  initialCalibration = null
+}) {
   const isEs = lang === 'es';
 
   // Baseline defaults
-  const DEFAULT_WEIGHT_KG = 75;
-  const DEFAULT_TISSUE = 'tendon';
-  const DEFAULT_CHRONICITY = 'subacute';
+  const DEFAULT_WEIGHT_KG = initialCalibration?.weightKg || 75;
+  const DEFAULT_TISSUE = initialCalibration?.tissue || 'tendon';
+  const DEFAULT_CHRONICITY = initialCalibration?.chronicity || 'subacute';
 
   // State
   const [unit, setUnit] = useState('kg');
   const [weightKg, setWeightKg] = useState(DEFAULT_WEIGHT_KG);
   const [tissue, setTissue] = useState(DEFAULT_TISSUE);
   const [chronicity, setChronicity] = useState(DEFAULT_CHRONICITY);
-  const [isCustomized, setIsCustomized] = useState(false);
+  const [isCustomized, setIsCustomized] = useState(Boolean(initialCalibration?.isCustomized));
   const [copied, setCopied] = useState(false);
 
   // Tissue options metadata
@@ -146,6 +150,32 @@ export default function AnatomicalInjuryDoseCalculator({ lang = 'en' }) {
     };
   }, [weightKg, tissue, chronicity, isEs]);
 
+  // Notify parent of calibration changes
+  React.useEffect(() => {
+    if (typeof onCalibrationChange === 'function') {
+      const selectedTissueObj = TISSUES.find(t => t.id === tissue) || TISSUES[0];
+      const selectedChronicityObj = CHRONICITIES.find(c => c.id === chronicity) || CHRONICITIES[1];
+      onCalibrationChange({
+        isCustomized,
+        weightKg,
+        unit,
+        tissue,
+        tissueName: isEs ? selectedTissueObj.nameEs : selectedTissueObj.nameEn,
+        multiplier: selectedTissueObj.multiplier,
+        chronicity,
+        chronicityLabel: isEs ? selectedChronicityObj.labelEs : selectedChronicityObj.labelEn,
+        bpcDailyMcg: calculations.bpcDailyMcg,
+        tb500WeeklyMg: calculations.tb500WeeklyMg,
+        cycleWeeks: calculations.cycleWeeks,
+        syringeUnitsPerDose: calculations.syringeUnitsPerDose,
+        bpcVials5mg: calculations.bpcVials5mg,
+        tb500Vials5mg: calculations.tb500Vials5mg,
+        geometry: calculations.geometry,
+        cadenceNote: calculations.cadenceNote
+      });
+    }
+  }, [weightKg, unit, tissue, chronicity, calculations, isCustomized, isEs, onCalibrationChange]);
+
   const displayedWeight = unit === 'kg' ? weightKg : Math.round(weightKg * 2.20462);
 
   const handleWeightChange = (val) => {
@@ -160,6 +190,9 @@ export default function AnatomicalInjuryDoseCalculator({ lang = 'en' }) {
     setChronicity(DEFAULT_CHRONICITY);
     setIsCustomized(false);
     toast.success(isEs ? 'Restablecido a los valores estándar de referencia' : 'Reset to standard tissue baseline');
+    if (typeof onCalibrationChange === 'function') {
+      onCalibrationChange(null);
+    }
   };
 
   const handleCopy = async () => {
@@ -341,11 +374,11 @@ export default function AnatomicalInjuryDoseCalculator({ lang = 'en' }) {
                 {isEs ? 'Dosis Diaria BPC-157' : 'BPC-157 Daily Dose'}
               </span>
               <div className="aidc-metric-value aidc-highlight">
-                {calculations.bpcDailyMcg} <small>mcg/día</small>
+                {calculations.bpcDailyMcg} <small>{isEs ? 'mcg/día' : 'mcg/day'}</small>
               </div>
               <span className="aidc-metric-sub">
                 <Syringe size={12} style={{ display: 'inline', marginRight: '3px' }} />
-                <strong>{calculations.syringeUnitsPerDose} UI</strong> {isEs ? 'en jeringa U-100 (vial 5mg reconstituido en 2.0 ml BAC)' : 'in U-100 syringe (5mg vial in 2.0 ml BAC)'}
+                <strong>{calculations.syringeUnitsPerDose} {isEs ? 'UI' : 'IU'}</strong> {isEs ? 'en jeringa U-100 (vial 5mg en 2.0 ml BAC)' : 'in U-100 syringe (5mg vial in 2.0 ml BAC)'}
               </span>
             </div>
 
@@ -355,7 +388,7 @@ export default function AnatomicalInjuryDoseCalculator({ lang = 'en' }) {
                 {isEs ? 'TB-500 Sistémico' : 'TB-500 Systemic Cadence'}
               </span>
               <div className="aidc-metric-value">
-                {calculations.tb500WeeklyMg} <small>mg/sem</small>
+                {calculations.tb500WeeklyMg} <small>{isEs ? 'mg/sem' : 'mg/wk'}</small>
               </div>
               <span className="aidc-metric-sub">
                 {calculations.cadenceNote}
