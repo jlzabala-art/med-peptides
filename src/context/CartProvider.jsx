@@ -534,7 +534,22 @@ export function CartProvider({ children }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
+    // 🛡️ Safe fallback for public standalone routes (/p/*, /proto/*) where CartProvider is bypassed for performance
+    return {
+      cart: {},
+      setCart: () => {},
+      cartMetadata: {},
+      setCartMetadata: () => {},
+      cartOwnership: { patientId: null },
+      setCartOwnership: () => {},
+      updateCart: () => {},
+      addProtocolToCart: () => {},
+      removeProtocolBundle: () => {},
+      cartBreakdown: { items: [], total: 0 },
+      cartCount: 0,
+      acceptRecommendation: () => {},
+      clearCart: () => {}
+    };
   }
   return context;
 }

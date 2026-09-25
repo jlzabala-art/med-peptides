@@ -25,22 +25,28 @@ export const VARIANT_PUBLIC_WHITELIST = [
 // ─── Whitelist of Allowed Public Product Fields ──────────────────────────────
 export const PRODUCT_PUBLIC_WHITELIST = [
   'id', 'name', 'originalName', 'displayName', 'slug', 'canonicalName',
-  'category', 'therapeutic_category', 'type', 'product_type',
-  'description', 'desc', 'objective', 'summary',
+  'category', 'therapeutic_category', 'type', 'product_type', 'subcategory',
+  'description', 'desc', 'objective', 'summary', 'overview_summary', 'clinical_rationale',
+  'brand', 'volume', 'packaging', 'bottleCount', 'formulation_type', 'target_pathway',
   'casNumber', 'cas', 'scientificName', 'purity',
   'goals', 'mechanisms', 'tags', 'synonyms', 'semanticKeywords',
   'primary_goal', 'target', 'targetSystem', 'pharmacology', 'aiContent', 'translations',
-  'isProfessional', 'requiresPrescription',
+  'isProfessional', 'requiresPrescription', 'professional_use_only', 'atlas_product_code',
   'status', 'isActive', 'qrScans',
-  'images', 'imageUrl', 'molecularWeight', 'molecularFormula', 'sequence', 'formula', 'molecular',
-  'format', 'presentation', 'storage', 'route',
+  'images', 'imageUrl', 'image_url', 'molecularWeight', 'molecularFormula', 'sequence', 'formula', 'molecular',
+  'format', 'presentation', 'storage', 'route', 'treatment_areas', 'specialties', 'active_ingredient',
   'batchNumber', 'lotNumber', 'vialCode', 'batchCode', 'expirationDate', 'expiryDate', 'coaUrl',
   'analyticalSpecs', 'testingStandards', 'storageConditions', 'mfgDate',
   'reconstitutionGuide', 'warnings', 'contraindications',
   'supplier', 'supplierName', 'laboratory', 'provenance', 'processedHierarchy',
   'clinicalOverview', 'clinical_overview', 'clinical_overview_en', 'clinical_overview_es', 'scientificData',
-  'faq', 'faqs', 'clinical_faq', 'clinicalFaq', 'testingFaq'
+  'faq', 'faqs', 'clinical_faq', 'clinicalFaq', 'testingFaq',
+  'ingredients', 'technical_specs', 'application_protocol', 'associated_protocols',
+  'clinical_indications', 'synergistic_products', 'product_positioning', 'post_transplant_protocol',
+  'paired_product', 'inci_complete', 'usage_steps', 'standard',
+  'is_cosmetic', 'is_aesthetic', 'is_aesthetic_injectable'
 ];
+
 
 // ─── Blacklist of Sensitive Fields to NEVER Expose ────────────────────────────
 export const SENSITIVE_FINANCIAL_FIELDS = [

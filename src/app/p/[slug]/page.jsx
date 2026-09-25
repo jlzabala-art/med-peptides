@@ -267,7 +267,10 @@ export async function generateMetadata({ params, searchParams }) {
 
   const pageTitle = resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`;
   const pageDesc = resolvedSocial.description;
-  const previewImageUrl = resolveSocialImage(product, formatParam);
+  const explicitProductImage = product.image_url || product.imageUrl || product.photo_url || null;
+  const previewImageUrl = (isCosmetic && explicitProductImage)
+    ? explicitProductImage
+    : resolveSocialImage(product, formatParam);
   const isPng = previewImageUrl.toLowerCase().endsWith('.png');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
   const canonicalUrl = isCosmetic || isAesthetic || product.isSingleSupplierLocked

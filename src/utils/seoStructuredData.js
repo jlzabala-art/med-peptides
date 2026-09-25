@@ -13,7 +13,10 @@ export function generateProductJsonLd(product, baseUrl = 'https://regenpept.com'
   const name = product.canonicalName || product.name || 'Peptide Compound';
   const scientificName = product.scientificName || product.chemicalName || name;
   const description = product.description || product.desc || `${name} clinical specification, purity verification, and administration guidelines.`;
-  const heroImage = `${baseUrl}${resolveVariantClinicalImage(product?.variants?.[0] || {}, product)}`;
+  const explicitImage = product.image_url || product.imageUrl || product.photo_url || null;
+  const heroImage = explicitImage 
+    ? (explicitImage.startsWith('http') ? explicitImage : `${baseUrl}${explicitImage}`)
+    : `${baseUrl}${resolveVariantClinicalImage(product?.variants?.[0] || {}, product)}`;
   const molecularWeight = product?.molecular?.molecularWeight || product?.molecularWeight || null;
   const formula = product?.molecular?.molecularFormula || product?.molecularFormula || product?.molecular?.formula || product?.formula || null;
   const casNumber = product?.molecular?.casNumber || product?.casNumber || product?.cas || null;
