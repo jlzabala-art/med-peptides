@@ -2,7 +2,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { sanitizePublicProtocol } from '../../../repositories/publicDataSanitizer';
-import { generateProtocolJsonLd } from '../../../utils/seoStructuredData';
+import { generateProtocolJsonLd, generateBreadcrumbJsonLd } from '../../../utils/seoStructuredData';
 import PublicProtocolPage from './PublicProtocolPage';
 
 export const dynamic = 'force-dynamic';
@@ -270,6 +270,9 @@ export async function generateMetadata({ params }) {
   return {
     title: `${name} — Protocol Guide | Atlas App`,
     description: desc,
+    alternates: {
+      canonical: `${BASE_URL}/proto/${slug}`,
+    },
     openGraph: {
       title: `${name} — Protocol Guide | Atlas App`,
       description: desc,
@@ -309,6 +312,12 @@ export default async function PublicProtocolRoute({ params }) {
   const similarProtocols = protocolGoal ? await getSimilarProtocols(protocolGoal, slug) : [];
 
   const jsonLd = generateProtocolJsonLd(protocol, BASE_URL);
+  const protocolTitle = protocol.title || protocol.name || slug;
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'Protocols', url: '/protocols' },
+    { name: protocolTitle, url: `/proto/${slug}` }
+  ], BASE_URL);
 
   return (
     <>
@@ -316,6 +325,12 @@ export default async function PublicProtocolRoute({ params }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       )}
       <PublicProtocolPage protocol={protocol} slug={slug} baseUrl={BASE_URL} similarProtocols={similarProtocols} />

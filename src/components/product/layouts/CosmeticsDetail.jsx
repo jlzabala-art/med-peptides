@@ -288,7 +288,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
           </>}
           desktopSecondary={imageUrl ? (
             <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-              <img src={imageUrl} alt={name} style={{ maxWidth: '180px', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px' }} />
+              <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '180px', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px' }} />
             </div>
           ) : (
             <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)', borderRadius: '16px', border: '1px solid #99f6e4', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 180, gap: '0.75rem' }}>
@@ -299,7 +299,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{brand} · 250 mL</div>
             </div>
           )}
-          mobileSecondary={imageUrl ? <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0' }}><img src={imageUrl} alt={name} style={{ maxWidth: '130px', objectFit: 'contain', borderRadius: '8px' }} /></div> : null}
+          mobileSecondary={imageUrl ? <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0' }}><img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '130px', objectFit: 'contain', borderRadius: '8px' }} /></div> : null}
         />
 
         <PublicKpiGrid items={kpis} />

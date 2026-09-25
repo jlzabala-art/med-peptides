@@ -254,21 +254,37 @@ export async function generateMetadata({ params, searchParams }) {
     recipient: null
   });
 
-  const pageTitle = resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — Clinical Monograph`;
+  const cat = (product.category || product.type || '').toLowerCase();
+  const isCosmetic = cat === 'cosmetic' || cat === 'cosmetics' || cat === 'topical' || cat === 'hair cosmetics' || cat === 'cosmeceutical' || product.is_cosmetic === true;
+  const isAesthetic = cat === 'aesthetic' || cat === 'aesthetic_injectable' || cat === 'injectable' || product.is_aesthetic === true;
+
+  let typeSuffix = 'Clinical Monograph';
+  if (isCosmetic) {
+    typeSuffix = 'Premium Cosmetic Care';
+  } else if (isAesthetic) {
+    typeSuffix = 'Clinical Aesthetics Monograph';
+  }
+
+  const pageTitle = resolvedSocial.title || `${name}${formatSuffix}${doseSuffix} — ${typeSuffix}`;
   const pageDesc = resolvedSocial.description;
   const previewImageUrl = resolveSocialImage(product, formatParam);
   const isPng = previewImageUrl.toLowerCase().endsWith('.png');
   const imageType = isPng ? 'image/png' : 'image/jpeg';
-  const canonicalUrl = `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
+  const canonicalUrl = isCosmetic || isAesthetic || product.isSingleSupplierLocked
+    ? `${BASE_URL}/p/${slug}`
+    : `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
 
   return {
     title: pageTitle,
     description: pageDesc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: pageTitle,
       description: pageDesc,
       url: canonicalUrl,
-      siteName: 'Clinical Reference Library',
+      siteName: isCosmetic ? 'Colway Clinical Care' : 'Clinical Reference Library',
       images: [
         {
           url: previewImageUrl,
@@ -293,14 +309,14 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:width': '1200',
       'og:image:height': '630',
       'og:image:alt': pageTitle,
-      'article:section': 'Clinical Reference Documentation',
+      'article:section': isCosmetic ? 'Dermocosmetic Care' : 'Clinical Reference Documentation',
     },
     robots: { index: true, follow: true },
   };
 }
 
 import { sanitizeForClient } from '../../../utils/sanitizeForClient';
-import { generateProductJsonLd } from '../../../utils/seoStructuredData';
+import { generateProductJsonLd, generateBreadcrumbJsonLd } from '../../../utils/seoStructuredData';
 
 async function getAssociatedProtocols(productId, productSlug, productName) {
   if (!adminDb) return [];
@@ -429,6 +445,14 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
   const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || safeProduct.is_cosmetic === true;
 
+  const productName = safeProduct.canonicalName || safeProduct.name || slug;
+  const sectionLabel = isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : 'Catalog';
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: sectionLabel, url: '/catalog' },
+    { name: productName, url: `/p/${slug}` }
+  ], BASE_URL);
+
   if (isAesthetic) {
     return (
       <>
@@ -436,6 +460,12 @@ export default async function PublicProductRoute({ params, searchParams }) {
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
           />
         )}
         <AestheticInjectableDetail product={safeProduct} isQuickView={false} />
@@ -452,6 +482,12 @@ export default async function PublicProductRoute({ params, searchParams }) {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           />
         )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
         <CosmeticsDetail product={safeProduct} />
       </>
     );
@@ -463,6 +499,12 @@ export default async function PublicProductRoute({ params, searchParams }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       )}
       <PublicDatasheetView 
