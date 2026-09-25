@@ -12,8 +12,27 @@ export default function HomeClientWrapper({ initialProducts = [] }) {
   const router = useRouter();
 
   React.useEffect(() => {
-    if (activeRole === 'admin') {
-      router.replace('/admin');
+    if (!activeRole || activeRole === 'guest') return;
+
+    // Auto-route authenticated users to their corresponding operational portal
+    const roleRoutes = {
+      admin: '/admin',
+      doctor: '/doctor',
+      medical_director: '/doctor',
+      fagron_doctor: '/doctor',
+      wholesaler: '/wholesaler',
+      wholeseller: '/wholesaler',
+      supplier: '/supplier',
+      clinic: '/clinic',
+      pharmacy: '/pharmacy',
+      compounding_pharmacy: '/pharmacy',
+      patient: '/patient',
+      pending: '/auth?tab=register',
+    };
+
+    const targetRoute = roleRoutes[activeRole];
+    if (targetRoute) {
+      router.replace(targetRoute);
     }
   }, [activeRole, router]);
 

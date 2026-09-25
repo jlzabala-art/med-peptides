@@ -99,13 +99,14 @@ export default function ProtocolBiomarkersSafetyCard({
         </span>
       </div>
 
-      {/* ── 3-Column Linear Stepper (Laptop) & Connected Stepper (Mobile) ── */}
+      {/* ── Google Cloud UX Linear Surveillance Sequence (1 Card Per Row) ── */}
       <div
         className="proto-biomarkers-stepper"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
-          gap: '1rem'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.85rem',
+          width: '100%'
         }}
       >
         {biomarkers.map((b, idx) => {
@@ -115,24 +116,27 @@ export default function ProtocolBiomarkersSafetyCard({
               bgLight: '#eff6ff',
               badgeBorder: '#bfdbfe',
               badgeText: '#1e40af',
-              tag: isEs ? '01 BASAL' : '01 PRE-FLIGHT',
-              statusLabel: isEs ? 'Línea de Base Requerida' : 'Baseline Clearance'
+              tag: '01 PRE-FLIGHT',
+              statusLabel: 'Baseline Clearance',
+              timingLabel: 'Day 0 (Baseline)'
             },
             {
               accent: '#0d9488',
               bgLight: '#f0fdfa',
               badgeBorder: '#ccfbf1',
               badgeText: '#0f766e',
-              tag: isEs ? '02 CONTROL' : '02 SURVEILLANCE',
-              statusLabel: isEs ? 'Seguridad y Tolerabilidad' : 'Safety & Tolerability'
+              tag: '02 SURVEILLANCE',
+              statusLabel: 'Safety & Tolerability',
+              timingLabel: 'Week 4 – 6 (Mid-Cycle)'
             },
             {
               accent: '#7c3aed',
               bgLight: '#f5f3ff',
               badgeBorder: '#ddd6fe',
               badgeText: '#6d28d9',
-              tag: isEs ? '03 CONSOLIDACIÓN' : '03 VALIDATION',
-              statusLabel: isEs ? 'Eficacia y Punto Final' : 'Efficacy & Consolidation'
+              tag: '03 VALIDATION',
+              statusLabel: 'Efficacy & Consolidation',
+              timingLabel: 'Week 8 – 12 (Post-Cycle)'
             }
           ];
 
@@ -145,139 +149,128 @@ export default function ProtocolBiomarkersSafetyCard({
               style={{
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
-                borderTop: `3px solid ${theme.accent}`,
-                borderRadius: '10px',
-                padding: '1.20rem',
+                borderLeft: `4px solid ${theme.accent}`,
+                borderRadius: '8px',
+                padding: '1.15rem 1.25rem',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                transition: 'box-shadow 0.15s ease'
+                gap: '0.75rem',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
               }}
             >
-              <div>
-                {/* Milestone Header */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.5rem',
-                  borderBottom: '1px solid #f1f5f9',
-                  paddingBottom: '0.65rem',
-                  marginBottom: '0.85rem',
-                  flexWrap: 'wrap'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                    <span style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: theme.accent,
-                      flexShrink: 0
-                    }} />
-                    <span style={{
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                      color: '#0f172a',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.03em',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      {b.phase || `Checkpoint ${idx + 1}`}
-                    </span>
-                  </div>
-
+              {/* Card Header Row: Step Pill, Title, and Right Timing Badge */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
                   <span style={{
-                    fontSize: '0.65rem',
+                    fontSize: '0.68rem',
                     fontWeight: 800,
                     textTransform: 'uppercase',
-                    padding: '2px 7px',
+                    padding: '2px 8px',
                     borderRadius: '4px',
                     backgroundColor: theme.bgLight,
                     border: `1px solid ${theme.badgeBorder}`,
                     color: theme.badgeText,
-                    letterSpacing: '0.03em',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0
+                    letterSpacing: '0.04em'
                   }}>
                     {theme.tag}
                   </span>
-                </div>
 
-                {/* Status / Timing Subtitle */}
-                <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontWeight: 600, color: '#334155' }}>{theme.statusLabel}</span>
-                  {b.timing && <span>• {b.timing}</span>}
-                </div>
+                  <span style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: theme.accent,
+                    flexShrink: 0
+                  }} />
 
-                {/* Structured Tests Chips */}
-                <div>
-                  <div style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    marginBottom: '0.45rem'
+                  <span style={{
+                    fontSize: '0.88rem',
+                    fontWeight: 800,
+                    color: '#0f172a',
+                    letterSpacing: '0.01em'
                   }}>
-                    {isEs ? 'Analíticas Requeridas:' : 'Required Diagnostic Tests:'}
-                  </div>
+                    {b.phase || `Surveillance Phase 0${idx + 1}`}
+                  </span>
 
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                    {testItems.map((testItem, tIdx) => (
-                      <span
-                        key={tIdx}
-                        style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          backgroundColor: '#f8fafc',
-                          color: '#1e293b',
-                          border: '1px solid #e2e8f0',
-                          padding: '2px 8px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        {testItem}
-                      </span>
-                    ))}
-                  </div>
+                  <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: '#64748b'
+                  }}>
+                    • {theme.statusLabel}
+                  </span>
                 </div>
 
-                {/* Clinical Rationale if available */}
-                {b.rationale && (
-                  <div style={{
-                    marginTop: '0.85rem',
-                    padding: '0.50rem 0.65rem',
-                    background: '#f8fafc',
-                    borderRadius: '6px',
-                    borderLeft: `2px solid ${theme.accent}`,
-                    fontSize: '0.72rem',
-                    color: '#475569',
-                    lineHeight: 1.45
-                  }}>
-                    {b.rationale}
-                  </div>
-                )}
+                <div style={{
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  padding: '3px 10px',
+                  borderRadius: '6px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  color: theme.accent,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <span>⏱️</span>
+                  <span>{theme.timingLabel}</span>
+                </div>
               </div>
 
-              {/* Step Footer Indicator */}
-              <div style={{
-                marginTop: '1rem',
-                borderTop: '1px solid #f1f5f9',
-                paddingTop: '0.65rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '0.70rem',
-                color: '#94a3b8'
-              }}>
-                <span>{isEs ? `Fase Analítica 0${idx + 1}` : `Surveillance Phase 0${idx + 1}`}</span>
-                <span style={{ fontWeight: 600, color: theme.accent }}>
-                  {idx === 0 ? 'Día 0' : idx === 1 ? 'Semana 4' : 'Semana 8–12'}
+              {/* Diagnostic Tests Row */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em'
+                }}>
+                  Required Diagnostic Tests:
                 </span>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {testItems.map((testItem, tIdx) => (
+                    <span
+                      key={tIdx}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        backgroundColor: '#f8fafc',
+                        color: '#1e293b',
+                        border: '1px solid #e2e8f0',
+                        padding: '3px 10px',
+                        borderRadius: '5px'
+                      }}
+                    >
+                      {testItem}
+                    </span>
+                  ))}
+                </div>
               </div>
+
+              {/* Clinical Rationale Note if Available */}
+              {b.rationale && (
+                <div style={{
+                  padding: '0.50rem 0.75rem',
+                  background: '#f8fafc',
+                  borderRadius: '6px',
+                  borderLeft: `2px solid ${theme.accent}`,
+                  fontSize: '0.74rem',
+                  color: '#475569',
+                  lineHeight: 1.45
+                }}>
+                  <strong style={{ color: '#1e293b' }}>Clinical Rationale:</strong> {b.rationale}
+                </div>
+              )}
             </div>
           );
         })}

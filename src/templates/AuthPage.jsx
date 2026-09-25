@@ -359,31 +359,38 @@ export default function AuthPage({ onBack }) {
     setSubmitting(false);
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (overrideRole = '') => {
     setError('');
     setSubmitting(true);
     try {
-      const { cred, profile } = await loginWithGoogle();
+      const target = redirectTo || (overrideRole ? `/${overrideRole}` : (accountType ? `/${accountType}` : ''));
+      const res = await loginWithGoogle(target);
+      if (res?.pendingRedirect) {
+        setSuccess('Redirecting securely to Google...');
+        return;
+      }
+      const { cred, profile } = res;
       setSuccess('Logged in with Google successfully!');
       setTimeout(() => {
-        const targetPath = resolveTargetPortal(profile?.role, cred?.user?.email, redirectTo);
-        router.replace(targetPath || '/admin');
+        const targetPath = resolveTargetPortal(profile?.role || overrideRole, cred?.user?.email, redirectTo);
+        router.replace(targetPath || (profile?.role === 'pending' ? '/auth?tab=register' : '/admin'));
       }, 300);
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         // User intentionally cancelled the popup, do not show an intrusive error
         setError('');
       } else if (err.code === 'auth/popup-blocked') {
-        setError('Tu navegador ha bloqueado la ventana emergente de Google. Por favor, permite ventanas emergentes (popups) para este sitio.');
+        setError('Your browser blocked the Google sign-in popup. Redirecting to secure sign-in...');
       } else if (err.code === 'auth/unauthorized-domain') {
-        setError('Este dominio aún no está autorizado en Firebase Authentication. Contacta al administrador.');
+        setError('This domain is not authorized in Firebase Authentication. Please contact system administration.');
       } else if (err.code === 'auth/network-request-failed') {
-        setError('Error de conexión con el servicio de autenticación de Google. Revisa tu red.');
+        setError('Connection error with Google Authentication service. Please check your network.');
       } else {
-        setError(err.message || 'Error al autenticar con Google.');
+        setError(err.message || 'Error authenticating with Google.');
       }
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   // Immediate redirect for Admin users to avoid rendering issues
@@ -399,8 +406,8 @@ export default function AuthPage({ onBack }) {
 
 
 
-  // If user is logged in, show profile status (Centered layout)
-  if (user) {
+  // If user is logged in and not pending onboarding, show profile status (Centered layout)
+  if (user && userProfile && userProfile.role !== 'pending') {
     if (loading) {
       return (
         <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
@@ -800,6 +807,41 @@ export default function AuthPage({ onBack }) {
                     For bulk purchasing and B2B distribution channels.
                   </div>
                 </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0' }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }}></div>
+                  <span style={{ padding: '0 1rem', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>OR QUICK ACCESS</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }}></div>
+                </div>
+
+                <button 
+                  type="button" 
+                  onClick={() => handleGoogleLogin('patient')}
+                  className="btn btn-secondary" 
+                  style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '0.75rem',
+                    backgroundColor: 'white',
+                    border: '2px solid var(--border)',
+                    color: 'var(--text-main)',
+                    padding: '0.85rem',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: submitting ? 'not-allowed' : 'pointer'
+                  }} 
+                  disabled={submitting}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                    <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+                    <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.712s.102-1.173.282-1.712V4.956H.957C.347 6.173 0 7.548 0 9s.347 2.827.957 4.044l3.007-2.332z" fill="#FBBC05"/>
+                    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.443 2.017.957 4.956l3.007 2.332C4.672 5.164 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                  </svg>
+                  Sign up with Google
+                </button>
               </div>
             )}
 
@@ -837,7 +879,7 @@ export default function AuthPage({ onBack }) {
                         transition: 'all 0.15s ease'
                       }}
                     >
-                      🔑 {submitting ? 'Enviando enlace...' : 'Establecer contraseña con 1 clic (vía email)'}
+                      🔑 {submitting ? 'Sending link...' : 'Set password with 1 click (via email)'}
                     </button>
                   </div>
                 )}

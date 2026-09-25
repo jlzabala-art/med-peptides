@@ -193,6 +193,63 @@ export function AuthProvider({ children, serverUser = null }) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('regenpept_userProfile', JSON.stringify(profile));
         }
+
+        // Sincronizar token con el servidor de Next.js
+        try {
+          const token = await cred.user.getIdToken();
+          await fetch('/api/login', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (e) {
+          console.warn('[AuthContext] Failed to sync auth token to server on redirect return:', e);
+        }
+
+        // Retrieve stored redirect origin and target
+        let storedOrigin = '';
+        let storedTarget = '';
+        if (typeof window !== 'undefined') {
+          try {
+            storedOrigin = sessionStorage.getItem('auth_redirect_origin') || localStorage.getItem('auth_redirect_origin') || '';
+            storedTarget = sessionStorage.getItem('auth_redirect_target') || localStorage.getItem('auth_redirect_target') || '';
+            sessionStorage.removeItem('auth_redirect_origin');
+            sessionStorage.removeItem('auth_redirect_target');
+            localStorage.removeItem('auth_redirect_origin');
+            localStorage.removeItem('auth_redirect_target');
+          } catch (e) {}
+        }
+
+        const role = (profile?.role || (isAdmin ? 'admin' : 'pending')).toLowerCase();
+        let destination = '';
+
+        if (role === 'pending') {
+          destination = '/auth?tab=register';
+        } else if (storedTarget && !storedTarget.startsWith('/auth') && !storedTarget.startsWith('/login') && storedTarget !== '/') {
+          destination = storedTarget;
+        } else {
+          const roleMap = {
+            admin: '/admin',
+            doctor: '/doctor',
+            medical_director: '/doctor',
+            fagron_doctor: '/doctor',
+            wholesaler: '/wholesaler',
+            wholeseller: '/wholesaler',
+            supplier: '/supplier',
+            clinic: '/clinic',
+            pharmacy: '/pharmacy',
+            compounding_pharmacy: '/pharmacy',
+            patient: '/patient',
+          };
+          destination = roleMap[role] || (isAdmin ? '/admin' : '/patient');
+        }
+
+        if (typeof window !== 'undefined' && destination) {
+          const currentOrigin = window.location.origin;
+          if (storedOrigin && storedOrigin !== currentOrigin && !storedOrigin.includes('localhost')) {
+            window.location.replace(`${storedOrigin}${destination}`);
+          } else {
+            window.location.replace(destination);
+          }
+        }
       }
     }).catch((err) => {
       console.warn('[AuthContext] getRedirectResult check:', err);
@@ -460,18 +517,37 @@ export function AuthProvider({ children, serverUser = null }) {
     await sendPasswordResetEmail(auth, email);
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (targetUrl = '') => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     let cred = null;
     try {
       cred = await signInWithPopup(auth, provider);
+      // If popup succeeds, clear any lingering redirect targets
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.removeItem('auth_redirect_origin');
+          sessionStorage.removeItem('auth_redirect_target');
+          localStorage.removeItem('auth_redirect_origin');
+          localStorage.removeItem('auth_redirect_target');
+        } catch (e) {}
+      }
     } catch (popupErr) {
       if (
         popupErr.code === 'auth/popup-blocked' || 
         popupErr.code === 'auth/cancelled-popup-request'
       ) {
         console.info('[AuthContext] Mobile popup blocked, falling back to signInWithRedirect');
+        if (typeof window !== 'undefined') {
+          const origin = window.location.origin;
+          const target = targetUrl || window.location.pathname + window.location.search;
+          try {
+            sessionStorage.setItem('auth_redirect_origin', origin);
+            sessionStorage.setItem('auth_redirect_target', target);
+            localStorage.setItem('auth_redirect_origin', origin);
+            localStorage.setItem('auth_redirect_target', target);
+          } catch (e) {}
+        }
         await signInWithRedirect(auth, provider);
         return { cred: null, profile: null, pendingRedirect: true };
       }

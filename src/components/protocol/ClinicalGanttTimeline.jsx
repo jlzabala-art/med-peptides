@@ -245,19 +245,19 @@ export default function ClinicalGanttTimeline({
 
   const handleCopyPatientTakeaway = async (phase, week) => {
     const comp = activeWeekCompounds[0] || {};
-    const text = `*PAUTA DE ADMINISTRACIÓN PARA EL PACIENTE*\n` +
-      `Protocolo: ${protocol?.name || 'Protocolo Clínico'}\n` +
-      `Semana: ${week} (${phase?.phaseName || 'Fase Activa'})\n` +
+    const text = `*CLINICAL PATIENT ADMINISTRATION SCHEDULE*\n` +
+      `Protocol: ${protocol?.name || 'Clinical Peptide Protocol'}\n` +
+      `Treatment Week: ${week} (${phase?.phaseName || 'Active Phase'})\n` +
       `----------------------------------------\n` +
-      `• Compuesto Prescrito: ${comp.name || 'Péptido Activo'}\n` +
-      `• Dosis Unitaria: ${comp.unitDose || 'Dosis Estándar'}\n` +
-      `• Cadencia / Frecuencia: ${comp.frequency || '1 vez por semana'}\n` +
-      `• Vía: ${comp.route || 'Subcutánea (SubQ)'}\n\n` +
-      `*INSTRUCCIONES CLAVE DE ADMINISTRACIÓN:*\n` +
-      `1. Reconstitución del Vial: Desinfectar el tapón con alcohol, introducir el agua estéril suavemente por la pared del vial y rotar despacio sin agitar.\n` +
-      `2. Conservación en Frío: Mantener siempre refrigerado a 2°C – 8°C. No congelar.\n` +
-      `3. Soporte y Vigilancia: Ante cualquier síntoma adverso o duda de dosificación, consulte con su equipo médico.\n\n` +
-      `_Med-Peptides Clinical Governance Standard_`;
+      `• Prescribed Compound: ${comp.name || 'Active Peptide'}\n` +
+      `• Unit Calibration Dose: ${comp.unitDose || 'Standard Therapeutic Dose'}\n` +
+      `• Cadence / Regimen: ${comp.frequency || 'Once weekly'}\n` +
+      `• Administration Route: ${comp.route || 'Subcutaneous (SubQ)'}\n\n` +
+      `*MANDATORY RECONSTITUTION & STORAGE DIRECTIVES:*\n` +
+      `1. Aseptic Reconstitution: Disinfect vial rubber septum with 70% isopropyl alcohol swab. Dispense bacteriostatic water smoothly down the inner glass wall. Swirl gently in circular motion — NEVER shake.\n` +
+      `2. Cold Chain Preservation: Maintain refrigerated continuously at 2°C – 8°C (36°F – 46°F). Never freeze reconstituted peptides.\n` +
+      `3. Pharmacovigilance & Oversight: Promptly report unexpected systemic symptoms or injection-site reactions to your supervising clinical team.\n\n` +
+      `_Med-Peptides Clinical Governance & Safety Standard · GxP Compliant_`;
 
     try {
       await navigator.clipboard.writeText(text);
@@ -607,10 +607,10 @@ export default function ClinicalGanttTimeline({
                               </div>
                               <div>
                                 <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#134e4a' }}>
-                                  Guía Rápida para el Paciente · Semana {selectedWeek}
+                                  Patient Quick Administration Guide · Week {selectedWeek}
                                 </div>
                                 <div style={{ fontSize: '0.70rem', color: '#0f766e' }}>
-                                  Pautas claras de administración domiciliaria sin jerga técnica
+                                  Clear, clinical-grade home administration instructions without technical jargon
                                 </div>
                               </div>
                             </div>
@@ -633,10 +633,10 @@ export default function ClinicalGanttTimeline({
                                   cursor: 'pointer',
                                   boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
                                 }}
-                                title="Imprimir o guardar como PDF para entregar al paciente"
+                                title="Print or save as clinical takeaway PDF for the patient"
                               >
                                 <Printer size={13} />
-                                <span>Imprimir Guía PDF</span>
+                                <span>Print PDF Guide</span>
                               </button>
 
                               <button
@@ -657,10 +657,10 @@ export default function ClinicalGanttTimeline({
                                   boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
                                   transition: 'all 0.15s ease'
                                 }}
-                                title="Copiar pauta e instrucciones al portapapeles"
+                                title="Copy administration schedule to clipboard"
                               >
                                 {copiedTakeaway ? <Check size={13} /> : <Copy size={13} />}
-                                <span>{copiedTakeaway ? '✓ Pauta Copiada' : 'Copiar Pauta'}</span>
+                                <span>{copiedTakeaway ? '✓ Schedule Copied' : 'Copy Schedule'}</span>
                               </button>
                             </div>
                           </div>
@@ -669,35 +669,35 @@ export default function ClinicalGanttTimeline({
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
                             <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
                               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                1. Dosis Semanal Prescrita
+                                1. Prescribed Weekly Dose
                               </div>
                               <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
-                                {activeWeekCompounds[0]?.name || 'Péptido Activo'}
+                                {activeWeekCompounds[0]?.name || 'Active Peptide Compound'}
                               </div>
                               <div style={{ fontSize: '0.76rem', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
-                                Dosis: {activeWeekCompounds[0]?.unitDose || 'Dosis Estándar'} · {activeWeekCompounds[0]?.frequency || '1x/semana'}
+                                Calibration: {activeWeekCompounds[0]?.unitDose || 'Standard Dose'} · {activeWeekCompounds[0]?.frequency || 'Once weekly'}
                               </div>
                             </div>
 
                             <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
                               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                2. Preparación del Vial
+                                2. Vial Reconstitution
                               </div>
                               <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
-                                • Desinfectar la goma con alcohol.<br />
-                                • Introducir el agua despacio por la pared.<br />
-                                • Girar suave en círculos sin agitar.
+                                • Swab rubber septum with 70% isopropyl alcohol.<br />
+                                • Dispense bacteriostatic water smoothly along vial wall.<br />
+                                • Swirl gently in slow circles — do not shake.
                               </div>
                             </div>
 
                             <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
                               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
-                                3. Conservación en Frío
+                                3. Cold Chain Storage
                               </div>
                               <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
-                                • Guardar en nevera a 2°C – 8°C.<br />
-                                • No congelar bajo ninguna circunstancia.<br />
-                                • Máximo 28 días tras la primera mezcla.
+                                • Keep refrigerated at 2°C – 8°C (36°F – 46°F).<br />
+                                • Never freeze reconstituted peptide vials.<br />
+                                • Maximum 28-day stability post-reconstitution.
                               </div>
                             </div>
                           </div>

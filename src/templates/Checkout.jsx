@@ -1061,7 +1061,7 @@ export default function Checkout({
                         onClick={async () => {
                           setLoginLoading(true);
                           try {
-                            await loginWithGoogle();
+                            await loginWithGoogle('/checkout');
                           } catch (err) {
                             console.error('Google auth error:', err);
                           } finally {
@@ -1329,7 +1329,7 @@ export default function Checkout({
                       onClick={async () => {
                         setLoginLoading(true);
                         try {
-                          await loginWithGoogle();
+                          await loginWithGoogle('/checkout');
                           setShowLogin(false);
                         } catch (err) {
                           console.error('Google sign-in error:', err);
