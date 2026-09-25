@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Activity, Calendar, Clock, ShieldAlert, Sparkles, CheckCircle2, 
   ChevronRight, ChevronDown, ChevronUp, Stethoscope, User, Droplets, Snowflake, AlertCircle,
-  Layers, Table
+  Layers, Table, Printer, FileText, ShieldCheck
 } from 'lucide-react';
 import '../../styles/clinicalGantt.css';
 import StatusBadge from '../ui/StatusBadge';
@@ -572,20 +572,120 @@ export default function ClinicalGanttTimeline({
                         </div>
                       )}
 
-                      {/* Patient Adherence Tracker */}
+                      {/* Patient Handout Guide & Takeaway Panel */}
                       {viewMode === 'patient' && (
-                        <div className="pac-adherence-footer">
-                          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
-                            Patient Adherence (Week {selectedWeek}):
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleDose(`w_${selectedWeek}`)}
-                            className={`pac-adherence-btn ${dosesTaken[`w_${selectedWeek}`] ? 'completed' : ''}`}
-                          >
-                            <CheckCircle2 size={14} />
-                            {dosesTaken[`w_${selectedWeek}`] ? '✓ Dose Confirmed Taken' : 'Mark Week Dose Taken'}
-                          </button>
+                        <div className="pac-patient-handout-card" style={{
+                          marginTop: '1.25rem',
+                          background: '#f0fdfa',
+                          border: '1px solid #ccfbf1',
+                          borderTop: '3px solid #0d9488',
+                          borderRadius: '10px',
+                          padding: '1.25rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '1rem',
+                          boxShadow: '0 1px 3px rgba(13, 148, 136, 0.06)'
+                        }}>
+                          {/* Header of Patient Handout */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #ccfbf1', paddingBottom: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#ccfbf1', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FileText size={15} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#134e4a' }}>
+                                  Guía Rápida para el Paciente · Semana {selectedWeek}
+                                </div>
+                                <div style={{ fontSize: '0.70rem', color: '#0f766e' }}>
+                                  Pautas claras de administración domiciliaria sin jerga técnica
+                                </div>
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                type="button"
+                                onClick={() => window.print()}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '5px 12px',
+                                  borderRadius: '6px',
+                                  background: '#ffffff',
+                                  border: '1px solid #99f6e4',
+                                  color: '#0f766e',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                                }}
+                                title="Imprimir o guardar como PDF para entregar al paciente"
+                              >
+                                <Printer size={13} />
+                                <span>Imprimir Guía PDF</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleDose(`w_${selectedWeek}`)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  padding: '5px 12px',
+                                  borderRadius: '6px',
+                                  background: dosesTaken[`w_${selectedWeek}`] ? '#059669' : '#0d9488',
+                                  border: 'none',
+                                  color: '#ffffff',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
+                                }}
+                              >
+                                <CheckCircle2 size={13} />
+                                <span>{dosesTaken[`w_${selectedWeek}`] ? '✓ Dosis Registrada' : 'Marcar Dosis Tomada'}</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* 3 Simple Actionable Steps */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.85rem' }}>
+                            <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
+                              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
+                                1. Dosis Semanal Prescrita
+                              </div>
+                              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                                {activeWeekCompounds[0]?.name || 'Péptido Activo'}
+                              </div>
+                              <div style={{ fontSize: '0.76rem', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
+                                Dosis: {activeWeekCompounds[0]?.unitDose || 'Dosis Estándar'} · {activeWeekCompounds[0]?.frequency || '1x/semana'}
+                              </div>
+                            </div>
+
+                            <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
+                              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
+                                2. Preparación del Vial
+                              </div>
+                              <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
+                                • Desinfectar la goma con alcohol.<br />
+                                • Introducir el agua despacio por la pared.<br />
+                                • Girar suave en círculos sin agitar.
+                              </div>
+                            </div>
+
+                            <div style={{ background: '#ffffff', border: '1px solid #e6fffa', borderRadius: '8px', padding: '0.85rem' }}>
+                              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', marginBottom: '4px' }}>
+                                3. Conservación en Frío
+                              </div>
+                              <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.45 }}>
+                                • Guardar en nevera a 2°C – 8°C.<br />
+                                • No congelar bajo ninguna circunstancia.<br />
+                                • Máximo 28 días tras la primera mezcla.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>

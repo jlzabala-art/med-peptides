@@ -1099,3 +1099,40 @@
   font-weight: 600;
   opacity: 0.9;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Print / PDF Styles for Clinical Gantt & Patient Handout Guide
+   ══════════════════════════════════════════════════════════════════ */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide navigation, top bars, fixed footers, and modal triggers */
+  header,
+  nav,
+  .pds-top-bar,
+  .pds-mobile-nav,
+  .public-sticky-action-bar,
+  .gantt-mode-toggle,
+  .gantt-layout-toggle,
+  .gantt-mobile-phase-bar,
+  button:has(.lucide-printer),
+  button:has(.lucide-check-circle-2) {
+    display: none !important;
+  }
+
+  .clinical-gantt-container {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .pac-patient-handout-card {
+    background: #ffffff !important;
+    border: 1px solid #94a3b8 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+}

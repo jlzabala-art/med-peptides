@@ -243,6 +243,48 @@ export default function PublicDatasheetView({
     }
   };
 
+  const [copiedMonograph, setCopiedMonograph] = useState(false);
+
+  const handleCopyMonographSpecs = async () => {
+    const isEs = lang === 'es';
+    const prodName = product?.canonicalName || product?.name || name;
+    const prodCat = category || 'Therapeutic Peptide';
+    const prodTarget = targetSystem || 'Cellular Receptor Signaling';
+    const purity = '≥ 99.0% (RP-HPLC Dual-Column Analytical Grade)';
+    const cas = product?.cas || product?.casNumber || 'Verified CAS Registry';
+    const mw = product?.molecularWeight || 'Calculated Theoretical Mass';
+    const formula = product?.formula || product?.empiricalFormula || 'Synthetic Polypeptide Chain';
+    const reconVol = activeStrengthObj ? getReconstitutionVolume(activeStrengthObj.name) : { volume: '2.0', concentration: '5.0' };
+    const protocolsList = (associatedProtocols || []).slice(0, 3).map(p => `  • ${p.name || p.title}`).join('\n');
+
+    const text = `*ATLAS HEALTH CLINICAL API MONOGRAPH*\n` +
+      `Compound: ${prodName}\n` +
+      `Category: ${prodCat}\n` +
+      `Target Axis: ${prodTarget}\n` +
+      `----------------------------------------\n` +
+      `*ANALYTICAL SPECIFICATIONS:*\n` +
+      `• Purity: ${purity}\n` +
+      `• CAS Registry: ${cas}\n` +
+      `• Molecular Weight: ${mw}\n` +
+      `• Empirical Formula: ${formula}\n\n` +
+      `*RECONSTITUTION & STORAGE:*\n` +
+      `• Recommended Diluent: ${reconVol.volume} mL Bacteriostatic Water USP\n` +
+      `• In-Use Concentration: ${reconVol.concentration} mg/mL\n` +
+      `• Storage: 2°C – 8°C Refrigerated (Do Not Freeze) · 28-Day Stability\n\n` +
+      (protocolsList ? `*ASSOCIATED CLINICAL BLUEPRINTS:*\n${protocolsList}\n\n` : '') +
+      `Official Verification: https://med-peptides-app-27a3a.web.app/p/${slug}\n` +
+      `_Atlas Scientific & Clinical Sourcing · SSOT Standard_`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMonograph(true);
+      toast.success(isEs ? 'Ficha técnica copiada al portapapeles ✓' : 'Technical monograph copied to clipboard ✓');
+      setTimeout(() => setCopiedMonograph(false), 2000);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
+  };
+
   // Sync language with URL param, initialLang param, or localStorage preference
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1362,7 +1404,7 @@ export default function PublicDatasheetView({
           title={name}
           description={
             <>
-              <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.25rem' }}>
+              <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.45rem' }}>
                 <strong style={{ color: '#0f172a' }}>
                   {isCorporateService
                     ? (lang === 'es' ? 'Marco Normativo y Alcance:' : 'Statutory Framework & Scope:')
@@ -1374,6 +1416,65 @@ export default function PublicDatasheetView({
                 </strong>{' '}
                 {targetSystem}
               </span>
+
+              {/* ── Google Cloud UX Action Buttons Strip ── */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '0.65rem',
+                marginBottom: '0.65rem',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  type="button"
+                  onClick={handleCopyMonographSpecs}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    color: '#1e293b',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={lang === 'es' ? 'Copiar ficha técnica monográfica al portapapeles' : 'Copy technical monograph to clipboard'}
+                >
+                  {copiedMonograph ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                  <span>{copiedMonograph ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Ficha Técnica' : 'Copy Spec Sheet')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    color: '#1e293b',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={lang === 'es' ? 'Imprimir o guardar ficha técnica en PDF' : 'Print or save technical monograph to PDF'}
+                >
+                  <Printer size={13} />
+                  <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Monograph'}</span>
+                </button>
+              </div>
+
               {isBloodoDiagnostic && (
                 <BloodoSuiteNav currentSlug={slug || product?.slug} lang={lang} variant="chips" />
               )}

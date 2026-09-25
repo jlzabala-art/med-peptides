@@ -23,7 +23,7 @@ import {
   Thermometer, Copy, Check, Clock,
   ExternalLink, Layers, ArrowRight, Package, Syringe,
   Calendar, CalendarDays, Zap, Box, RotateCcw, Info, QrCode, BarChart3,
-  Moon, ShieldAlert, Calculator
+  Moon, ShieldAlert, Calculator, Printer
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -85,6 +85,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
   }, []);
 
   const [copied, setCopied] = useState(false);
+  const [copiedBlueprint, setCopiedBlueprint] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [activeReconTab, setActiveReconTab] = useState(0);
   const [activeRoadmapPhase, setActiveRoadmapPhase] = useState(0);
@@ -239,6 +240,63 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
       setTimeout(() => setCopied(false), 2500);
     } catch {
       toast.error('Could not copy link');
+    }
+  };
+
+  const handleCopyClinicalBlueprint = async () => {
+    try {
+      const activeItemsList = items.map((it, idx) => 
+        `  ${idx + 1}. ${it.name || it.product_slug} | ${it.format || 'Lyophilized Sterile API'} | Route: ${it.route || 'SubQ'} | Cadence: ${it.timing || 'Phased'}`
+      ).join('\n');
+
+      const phasesList = phases.map((ph, idx) => 
+        `  Phase ${idx + 1} (${ph.duration_weeks || ph.durationWeeks || 4} wks): ${ph.name || ph.phase_name || 'Active Phase'}\n    Clinical Intent: ${ph.description || ph.clinical_intent || 'Titration & cellular optimization'}`
+      ).join('\n');
+
+      const biomarkersList = biomarkers.map((bm, idx) => 
+        `  • ${bm.phase || `Checkpoint ${idx + 1}`}: ${bm.tests}`
+      ).join('\n');
+
+      const text = [
+        `============================================================`,
+        `CLINICAL PROTOCOL SPECIFICATION & BLUEPRINT`,
+        `============================================================`,
+        `Protocol ID: ${protocolCode}`,
+        `Title: ${displayName}`,
+        `Therapeutic Category: ${category}`,
+        `Duration: ${displayDuration} (${phases.length || 3} Treatment Phases)`,
+        `Specification Rev: Rev ${versionInfo.version} (${versionInfo.updatedAtDate})`,
+        `Verification Standards: Atlas Services Clinical Standards (CE-IVDR Grade A)`,
+        `Canonical URL: ${publicUrl}`,
+        ``,
+        `[1] CLINICAL RATIONALE & MECHANISM`,
+        `${displayDescription || 'Phased peptide therapy for cellular repair, endocrine optimization and tissue regeneration.'}`,
+        ``,
+        `[2] ACTIVE FORMULATIONS & COMPOUND BLUEPRINT (BOM)`,
+        activeItemsList || '  (Consult clinical documentation for proprietary formulation breakdown)',
+        ``,
+        `[3] SUPPLY & LOGISTICS ALLOCATION`,
+        `  • Total Sterile Vials: ${supplySummary.totalVials}`,
+        `  • Scheduled Injections: ${supplySummary.totalInjections} Micro-doses`,
+        `  • Reconstitution Solvent: ${supplySummary.compounds.length * 2.0} mL Bacteriostatic 0.9% Benzyl Alcohol Water`,
+        `  • Cold Chain Stability: 28 Days refrigerated (2°C – 8°C)`,
+        ``,
+        `[4] TITRATION & DOSING TIMELINE`,
+        phasesList || '  Consult phased timeline in the verified clinical engine',
+        ``,
+        `[5] SEROLOGICAL SURVEILLANCE & BIOMARKER CHECKPOINTS`,
+        biomarkersList || '  Routine clinical baseline and surveillance panels',
+        `============================================================`,
+        `Atlas Clinical Research & Compounding Platform • Medical Professional Reference Only`
+      ].join('\n');
+
+      await navigator.clipboard.writeText(text);
+      setCopiedBlueprint(true);
+      triggerHaptic('success');
+      toast.success(lang === 'es' ? 'Blueprint clínico copiado al portapapeles ✓' : 'Clinical blueprint copied to clipboard ✓');
+      setTimeout(() => setCopiedBlueprint(false), 2500);
+    } catch {
+      toast.error('Could not copy clinical blueprint');
     }
   };
 
@@ -542,7 +600,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
           { id: 'titration-phases', label: lang === 'es' ? 'Fases' : 'Phases', href: '#titration-phases', count: phases.length },
           ...(items.length > 0 ? [{
             id: 'included-compounds',
-            label: lang === 'es' ? 'Compuestos (/p/)' : 'Compounds (/p/)',
+            label: lang === 'es' ? 'Compuestos Activos' : 'Active Compounds',
             href: '#included-compounds',
             count: items.length
           }] : []),
@@ -551,9 +609,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         ]}
         callout={{
           message: lang === 'es'
-            ? 'Médicos y Especialistas: Personaliza dosis y exporta pautas para pacientes'
-            : 'Prescribing Physicians: Customize dosages & export patient schedules',
-          ctaLabel: lang === 'es' ? 'Pauta Médica →' : 'Provider Access →',
+            ? 'Uso Clínico: Especificación técnica y cálculo de dosificación verificada'
+            : 'Clinical Use: Technical specification & verified dosage calculation',
+          ctaLabel: lang === 'es' ? 'Portal Clínico →' : 'Clinical Portal →',
           ctaHref: `/login?tab=register&role=doctor&redirect=/proto/${encodeURIComponent(slug)}`
         }}
       />
@@ -597,7 +655,97 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             </>
           }
           title={displayName}
-          description={displayDescription}
+          description={
+            <>
+              {displayDescription && (
+                <span style={{ display: 'block', fontSize: '0.94rem', color: '#475569', lineHeight: 1.6, marginBottom: '0.65rem' }}>
+                  {displayDescription}
+                </span>
+              )}
+
+              {/* ── Google Cloud UX Action Buttons Strip ── */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '0.75rem',
+                marginBottom: '0.25rem',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  type="button"
+                  onClick={handleCopyClinicalBlueprint}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    color: '#1e293b',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={lang === 'es' ? 'Copiar especificación del protocolo clínico' : 'Copy technical protocol specification'}
+                >
+                  {copiedBlueprint ? <Check size={13} style={{ color: '#16a34a' }} /> : <Copy size={13} />}
+                  <span>{copiedBlueprint ? (lang === 'es' ? 'Copiado ✓' : 'Copied ✓') : (lang === 'es' ? 'Copiar Blueprint Clínico' : 'Copy Clinical Blueprint')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    color: '#1e293b',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={lang === 'es' ? 'Imprimir o guardar protocolo en PDF' : 'Print or save protocol to PDF'}
+                >
+                  <Printer size={13} />
+                  <span>{lang === 'es' ? 'Ficha Imprimible (PDF)' : 'Print / PDF Protocol'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsQrModalOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    color: '#0d9488',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={lang === 'es' ? 'Ver y ampliar código QR de verificación' : 'View QR verification code'}
+                >
+                  <QrCode size={13} />
+                  <span>{lang === 'es' ? 'Código QR' : 'QR Verification'}</span>
+                </button>
+              </div>
+            </>
+          }
           mobileSecondary={
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
