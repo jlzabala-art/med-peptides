@@ -8,7 +8,7 @@ import {
   Droplets, Zap, Activity, Star, Package, Microscope, Heart,
   AlertTriangle, ClipboardList, Scissors, Beaker, BookOpen,
   TestTube, ListChecks, Thermometer, Clock, BarChart2, BadgeCheck,
-  RefreshCcw, Layers, Mail, QrCode, Copy, Check, ZoomIn, X
+  RefreshCcw, Layers, Mail, QrCode, Copy, Check, ZoomIn, X, Search
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -22,6 +22,7 @@ import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSidebarWidget';
 import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
+import ImageModal from '@/snippets/ImageModal';
 import toast from 'react-hot-toast';
 
 const INCI_GROUP_META = {
@@ -47,21 +48,21 @@ function InciCard({ ing, index, onCopy }) {
   const group = ing.inci_group || 'functional';
   const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
   const IconComp = INGREDIENT_ICONS[group] || FlaskConical;
-  const hasClinical = Boolean(ing.clinical_data?.mechanism || ing.clinical_data?.evidence || ing.pmid);
+  const hasClinical = Boolean(ing.clinical_data?.mechanism || ing.clinical_data?.evidence);
 
   return (
     <div style={{
       background: '#ffffff',
       border: '1px solid #e2e8f0',
       borderRadius: '10px',
-      padding: '0.95rem 1.15rem',
-      marginBottom: '0.75rem',
+      padding: '0.85rem 1rem',
+      marginBottom: '0.65rem',
       boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
       transition: 'border-color 0.2s, box-shadow 0.2s'
     }}>
-      {/* Top Header Row: 1 full-width row with numbering, name, badges and pubmed */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 240px', minWidth: 0 }}>
+      {/* Top Header Row: 1 full-width row with numbering, name, and functional category */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 220px', minWidth: 0 }}>
           <span style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -130,29 +131,6 @@ function InciCard({ ing, index, onCopy }) {
               {ing.concentration_range}
             </span>
           )}
-          {ing.pmid && (
-            <a
-              href={ing.pmid_url || `https://pubmed.ncbi.nlm.nih.gov/${ing.pmid}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="View indexed research study on PubMed NCBI"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '0.64rem',
-                fontWeight: 800,
-                color: '#0284c7',
-                background: '#f0f9ff',
-                border: '1px solid #bae6fd',
-                padding: '2px 8px',
-                borderRadius: '6px',
-                textDecoration: 'none'
-              }}
-            >
-              <BookOpen size={10} /> PMID: {ing.pmid} <ExternalLink size={9} />
-            </a>
-          )}
         </div>
       </div>
 
@@ -205,21 +183,11 @@ function InciCard({ ing, index, onCopy }) {
               borderLeft: `3px solid ${meta.color}`,
               border: `1px solid ${meta.color}30`
             }}>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
-                {ing.cas_number && (
-                  <div style={{ fontSize: '0.67rem', color: '#64748b' }}>
-                    <span style={{ fontWeight: 700, color: '#475569' }}>CAS: </span>{ing.cas_number}
-                  </div>
-                )}
-                {ing.pmid && (
-                  <div style={{ fontSize: '0.67rem', color: '#0284c7' }}>
-                    <span style={{ fontWeight: 700, color: '#475569' }}>PubMed ID: </span>
-                    <a href={ing.pmid_url || `https://pubmed.ncbi.nlm.nih.gov/${ing.pmid}/`} target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'underline' }}>
-                      {ing.pmid}
-                    </a>
-                  </div>
-                )}
-              </div>
+              {ing.cas_number && (
+                <div style={{ fontSize: '0.67rem', color: '#64748b', marginBottom: '0.4rem' }}>
+                  <span style={{ fontWeight: 700, color: '#475569' }}>CAS: </span>{ing.cas_number}
+                </div>
+              )}
 
               {ing.clinical_data?.mechanism && (
                 <div style={{ marginBottom: '0.5rem' }}>
@@ -291,12 +259,20 @@ function TechSpecsGrid({ specs }) {
 
   return (
     <div>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '0.75rem',
-        marginBottom: '1rem'
-      }}>
+      <style>{`
+        .pds-tech-specs-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.85rem;
+          margin-bottom: 1rem;
+        }
+        @media (max-width: 640px) {
+          .pds-tech-specs-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+      <div className="pds-tech-specs-grid">
         {rows.map(r => {
           const Icon = r.icon;
           return (
@@ -304,29 +280,32 @@ function TechSpecsGrid({ specs }) {
               display: 'flex',
               alignItems: 'flex-start',
               gap: '10px',
-              padding: '0.75rem 0.95rem',
+              padding: '0.85rem 1rem',
               background: '#f8fafc',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0'
+              border: '1px solid #e2e8f0',
+              minHeight: '68px',
+              boxSizing: 'border-box'
             }}>
               <div style={{
-                width: 28,
-                height: 28,
+                width: 30,
+                height: 30,
                 borderRadius: '6px',
                 background: '#f0fdfa',
                 color: '#0d9488',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                marginTop: '1px'
               }}>
-                <Icon size={14} />
+                <Icon size={15} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em', marginBottom: '2px' }}>
                   {r.label.toUpperCase()}
                 </div>
-                <div style={{ fontSize: '0.80rem', color: '#0f172a', fontWeight: 600, lineHeight: 1.45 }}>
+                <div style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 600, lineHeight: 1.45 }}>
                   {r.value}
                 </div>
               </div>
@@ -362,12 +341,142 @@ function TechSpecsGrid({ specs }) {
   );
 }
 
+function QrModal({ isOpen, onClose, url, productName }) {
+  const [copied, setCopied] = useState(false);
+  if (!isOpen) return null;
+
+  const handleCopy = () => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        backdropFilter: 'blur(8px)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          padding: '1.75rem',
+          maxWidth: '360px',
+          width: '100%',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+          textAlign: 'center',
+          position: 'relative',
+        }}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: '#f1f5f9',
+            border: 'none',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#64748b',
+          }}
+        >
+          <X size={16} />
+        </button>
+
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontSize: '0.7rem',
+          fontWeight: 800,
+          color: '#003666',
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          background: '#eff6ff',
+          padding: '3px 10px',
+          borderRadius: '99px',
+          marginBottom: '0.75rem',
+        }}>
+          <ShieldCheck size={13} color="#0d9488" />
+          Digital Product Verification
+        </span>
+
+        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+          {productName}
+        </h3>
+        <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 1.25rem 0', lineHeight: 1.45 }}>
+          Scan with your smartphone camera to access the live pharmaceutical monograph, certificates, and clinical dossier.
+        </p>
+
+        <div style={{
+          padding: '14px',
+          background: '#f8fafc',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          display: 'inline-block',
+          marginBottom: '1.25rem',
+        }}>
+          <QRCodeSVG value={url} size={200} level="H" />
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={handleCopy}
+            style={{
+              flex: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: '#003666',
+              color: '#ffffff',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {copied ? <Check size={14} style={{ color: '#4ade80' }} /> : <Copy size={14} />}
+            <span>{copied ? 'Link Copied!' : 'Copy Direct Link'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
   const [lang] = useState('en');
   const [inciFilter, setInciFilter] = useState('key_active');
+  const [inciSearchQuery, setInciSearchQuery] = useState('');
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const name = product?.name || product?.canonicalName || 'Hair Cosmetic';
   const brand = product?.supplier || product?.brand || 'Colway';
@@ -386,9 +495,22 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
 
   const filteredIngredients = useMemo(() => {
-    if (inciFilter === 'all') {
+    let list = ingredients;
+    if (inciFilter !== 'all') {
+      list = list.filter(i => (i.inci_group || 'functional') === inciFilter);
+    }
+    if (inciSearchQuery.trim()) {
+      const q = inciSearchQuery.toLowerCase();
+      list = list.filter(i =>
+        i.inci_name?.toLowerCase().includes(q) ||
+        i.common_name?.toLowerCase().includes(q) ||
+        i.role?.toLowerCase().includes(q) ||
+        i.clinical_data?.mechanism?.toLowerCase().includes(q)
+      );
+    }
+    if (inciFilter === 'all' && !inciSearchQuery.trim()) {
       // Prioritize Key Clinical Actives over technical carrier base
-      return [...ingredients].sort((a, b) => {
+      return [...list].sort((a, b) => {
         const isKeyA = a.inci_group === 'key_active' || a.inci_group === 'functional_active';
         const isKeyB = b.inci_group === 'key_active' || b.inci_group === 'functional_active';
         if (isKeyA && !isKeyB) return -1;
@@ -396,8 +518,8 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         return 0;
       });
     }
-    return ingredients.filter(i => (i.inci_group || 'functional') === inciFilter);
-  }, [ingredients, inciFilter]);
+    return list;
+  }, [ingredients, inciFilter, inciSearchQuery]);
 
   const groupCounts = useMemo(() => {
     const counts = {};
@@ -494,56 +616,81 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                   {applicationProtocol?.frequency && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', padding: '3px 9px', borderRadius: '99px' }}><RefreshCcw size={10} /> {applicationProtocol.frequency}</span>}
                 </div>
               )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsInquiryDrawerOpen(true)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    background: '#0d9488',
-                    color: '#ffffff',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)'
-                  }}
-                >
-                  <Mail size={14} /> Inquire Product
-                </button>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '6px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
-                  <Package size={13} style={{ color: '#0d9488' }} />
-                  {selectedVariant?.volume || '250 mL Bottle'}
-                </div>
-              </div>
             </>}
             desktopSecondary={
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
                 {imageUrl && (
-                  <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '200px', height: '260px', flexShrink: 0, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                  <div
+                    onClick={() => setIsImageModalOpen(true)}
+                    role="button"
+                    tabIndex={0}
+                    title="Click to enlarge product packaging"
+                    style={{
+                      position: 'relative',
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      border: '1px solid #e2e8f0',
+                      padding: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '200px',
+                      height: '260px',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                      cursor: 'zoom-in',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; }}
+                  >
                     <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '170px', maxHeight: '230px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px' }} />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      right: '8px',
+                      background: 'rgba(15,23,42,0.75)',
+                      borderRadius: '6px',
+                      padding: '4px 6px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.62rem',
+                      fontWeight: 600
+                    }}>
+                      <ZoomIn size={12} />
+                      <span>Zoom</span>
+                    </div>
                   </div>
                 )}
                 {/* Standard Public Verification QR Box */}
-                <div style={{
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '16px',
-                  padding: '1rem 0.85rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '160px',
-                  height: '260px',
-                  flexShrink: 0,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                  textAlign: 'center',
-                }}>
+                <div
+                  onClick={() => setIsQrModalOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  title="Click to enlarge digital verification QR code"
+                  style={{
+                    position: 'relative',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    padding: '1rem 0.85rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '160px',
+                    height: '260px',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s'
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; }}
+                >
                   <span style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.05em', color: '#003666', textTransform: 'uppercase', marginBottom: '8px' }}>
                     Digital Verification
                   </span>
@@ -551,16 +698,130 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                     <QRCodeSVG value={productUrl || `https://med-peptides.com/p/${slug}`} size={105} level="M" />
                   </div>
                   <span style={{ fontSize: '0.62rem', color: '#64748b', lineHeight: 1.3 }}>
-                    Scan with mobile for live clinical datasheet
+                    Click to enlarge &amp; scan with mobile
                   </span>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '8px',
+                    right: '8px',
+                    background: 'rgba(15,23,42,0.75)',
+                    borderRadius: '6px',
+                    padding: '4px 6px',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.62rem',
+                    fontWeight: 600
+                  }}>
+                    <ZoomIn size={12} />
+                    <span>Zoom</span>
+                  </div>
                 </div>
               </div>
             }
-            mobileSecondary={imageUrl ? (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '190px', height: '220px', margin: '0.5rem auto', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '160px', maxHeight: '200px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '4px' }} />
+            mobileSecondary={
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                width: '100%',
+                maxWidth: '360px',
+                margin: '0.5rem auto'
+              }}>
+                {imageUrl && (
+                  <div
+                    onClick={() => setIsImageModalOpen(true)}
+                    role="button"
+                    tabIndex={0}
+                    title="Tap to enlarge product photo"
+                    style={{
+                      position: 'relative',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flex: 1,
+                      height: '175px',
+                      background: '#ffffff',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      padding: '0.5rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }} />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '6px',
+                      right: '6px',
+                      background: 'rgba(15,23,42,0.75)',
+                      borderRadius: '4px',
+                      padding: '3px 6px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      fontSize: '0.58rem',
+                      fontWeight: 700
+                    }}>
+                      <ZoomIn size={11} />
+                      <span>Zoom</span>
+                    </div>
+                  </div>
+                )}
+                <div
+                  onClick={() => setIsQrModalOpen(true)}
+                  role="button"
+                  tabIndex={0}
+                  title="Tap to enlarge QR verification"
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flex: 1,
+                    height: '175px',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    padding: '0.5rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    cursor: 'pointer',
+                    textAlign: 'center'
+                  }}
+                >
+                  <span style={{ fontSize: '0.60rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', marginBottom: '6px' }}>
+                    Digital Verification
+                  </span>
+                  <div style={{ padding: '4px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #cbd5e1', marginBottom: '4px' }}>
+                    <QRCodeSVG value={productUrl || `https://med-peptides.com/p/${slug}`} size={85} level="M" />
+                  </div>
+                  <span style={{ fontSize: '0.58rem', color: '#64748b' }}>
+                    Tap to enlarge
+                  </span>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '6px',
+                    right: '6px',
+                    background: 'rgba(15,23,42,0.75)',
+                    borderRadius: '4px',
+                    padding: '3px 6px',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.58rem',
+                    fontWeight: 700
+                  }}>
+                    <ZoomIn size={11} />
+                    <span>Zoom</span>
+                  </div>
+                </div>
               </div>
-            ) : null}
+            }
           />
         </div>
 
@@ -576,11 +837,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                 {[
-                  { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss', pmid: '21514542' },
-                  { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors and prevents premature stem cell exhaustion and graying.', stat: '+5.6% Thickness', pmid: '17214716' },
-                  { target: 'Tensile Strength', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix ECM Scaffolding', outcome: 'Patented Polish freshwater fish tropocollagen (0% bovine) adheres to keratin fibrils, repairing cortical microfractures.', stat: '+24% Fiber Strength', pmid: '31574672' },
-                  { target: 'Microvascular Flow', compound: 'L-Arginine & Micronized Diosmin', mechanism: 'eNOS Vasodilation & VEGF Signaling', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density', pmid: '16029679' },
-                  { target: 'Bio-Silica Fortification', compound: 'Equisetum Arvense & Keratin Hydrolysate', mechanism: 'Orthosilicic Acid / Cuticle Sealing', outcome: 'Supplies bioavailable silica for structural disulfide bonding in the cortex, reducing combing breakage.', stat: '−47% Combing Force', pmid: '29744921' },
+                  { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
+                  { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors and prevents premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
+                  { target: 'Tensile Strength', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix ECM Scaffolding', outcome: 'Patented Polish freshwater fish tropocollagen (0% bovine) adheres to keratin fibrils, repairing cortical microfractures.', stat: '+24% Fiber Strength' },
+                  { target: 'Microvascular Flow', compound: 'L-Arginine & Micronized Diosmin', mechanism: 'eNOS Vasodilation & VEGF Signaling', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
+                  { target: 'Bio-Silica Fortification', compound: 'Equisetum Arvense & Keratin Hydrolysate', mechanism: 'Orthosilicic Acid / Cuticle Sealing', outcome: 'Supplies bioavailable silica for structural disulfide bonding in the cortex, reducing combing breakage.', stat: '−47% Combing Force' },
                 ].map(item => (
                   <div
                     key={item.target}
@@ -613,43 +874,17 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                           {item.compound}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {item.pmid && (
-                          <a
-                            href={`https://pubmed.ncbi.nlm.nih.gov/${item.pmid}/`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px',
-                              fontSize: '0.64rem',
-                              fontWeight: 700,
-                              color: '#0284c7',
-                              background: '#eff6ff',
-                              padding: '2px 7px',
-                              borderRadius: '4px',
-                              border: '1px solid #bfdbfe',
-                              textDecoration: 'none'
-                            }}
-                            title={`PubMed Reference: PMID ${item.pmid}`}
-                          >
-                            <span>PMID: {item.pmid}</span>
-                            <ExternalLink size={10} />
-                          </a>
-                        )}
-                        <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          color: '#16a34a',
-                          background: '#f0fdf4',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          border: '1px solid #bbf7d0'
-                        }}>
-                          {item.stat}
-                        </span>
-                      </div>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        color: '#16a34a',
+                        background: '#f0fdf4',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #bbf7d0'
+                      }}>
+                        {item.stat}
+                      </span>
                     </div>
                     <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
                       <span style={{ color: '#475569' }}>Mechanism:</span> {item.mechanism}
@@ -722,28 +957,187 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 </div>
               </div>
 
-              {/* INCI Filters (Swipeable on mobile) */}
-              <div style={{
-                display: 'flex',
-                gap: '6px',
-                overflowX: 'auto',
-                flexWrap: 'nowrap',
-                WebkitOverflowScrolling: 'touch',
-                scrollbarWidth: 'none',
-                paddingBottom: '6px',
-                marginBottom: '0.85rem'
-              }}>
-                <button type="button" onClick={() => setInciFilter('all')} style={{ flexShrink: 0, fontSize: '0.65rem', fontWeight: 700, padding: '4px 12px', borderRadius: '99px', border: '1.5px solid', cursor: 'pointer', background: inciFilter === 'all' ? '#0f172a' : '#ffffff', color: inciFilter === 'all' ? '#ffffff' : '#64748b', borderColor: inciFilter === 'all' ? '#0f172a' : '#e2e8f0' }}>
-                  All ({ingredients.length})
-                </button>
-                {Object.entries(groupCounts).map(([group, count]) => {
-                  const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
-                  return (
-                    <button key={group} type="button" onClick={() => setInciFilter(group)} style={{ flexShrink: 0, fontSize: '0.65rem', fontWeight: 700, padding: '4px 12px', borderRadius: '99px', border: `1.5px solid`, cursor: 'pointer', background: inciFilter === group ? meta.color : meta.bg, color: inciFilter === group ? '#ffffff' : meta.color, borderColor: meta.color }}>
-                      {meta.label} ({count})
+              {/* GOOGLE CLOUD UX FILTER TOOLBAR (DESKTOP CHIPS & MOBILE DROPDOWN + SEARCH) */}
+              <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <style>{`
+                  .pds-inci-desktop-bar {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    flex-wrap: wrap;
+                  }
+                  .pds-inci-mobile-bar {
+                    display: none;
+                  }
+                  @media (max-width: 768px) {
+                    .pds-inci-desktop-bar {
+                      display: none;
+                    }
+                    .pds-inci-mobile-bar {
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    }
+                  }
+                `}</style>
+
+                {/* Instant Search Bar (Universal on Desktop & Mobile) */}
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <Search size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                  <input
+                    type="text"
+                    value={inciSearchQuery}
+                    onChange={(e) => setInciSearchQuery(e.target.value)}
+                    placeholder="Search INCI ingredient, compound name, or biological role..."
+                    style={{
+                      width: '100%',
+                      padding: '7px 32px 7px 32px',
+                      fontSize: '0.78rem',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      color: '#0f172a'
+                    }}
+                  />
+                  {inciSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setInciSearchQuery('')}
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#94a3b8',
+                        padding: '2px 4px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700
+                      }}
+                    >
+                      ✕
                     </button>
-                  );
-                })}
+                  )}
+                </div>
+
+                {/* Desktop Wrapped Filter Chips (Zero Cutoff) */}
+                <div className="pds-inci-desktop-bar">
+                  <button
+                    type="button"
+                    onClick={() => setInciFilter('all')}
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '5px 12px',
+                      borderRadius: '99px',
+                      border: '1.5px solid',
+                      cursor: 'pointer',
+                      background: inciFilter === 'all' ? '#0f172a' : '#ffffff',
+                      color: inciFilter === 'all' ? '#ffffff' : '#64748b',
+                      borderColor: inciFilter === 'all' ? '#0f172a' : '#cbd5e1',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    All Ingredients ({ingredients.length})
+                  </button>
+                  {Object.entries(groupCounts).map(([group, count]) => {
+                    const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
+                    const isSelected = inciFilter === group;
+                    return (
+                      <button
+                        key={group}
+                        type="button"
+                        onClick={() => setInciFilter(group)}
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          padding: '5px 12px',
+                          borderRadius: '99px',
+                          border: '1.5px solid',
+                          cursor: 'pointer',
+                          background: isSelected ? meta.color : meta.bg,
+                          color: isSelected ? '#ffffff' : meta.color,
+                          borderColor: meta.color,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {meta.label} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile Dropdown Category Selector (GCP Standard) */}
+                <div className="pds-inci-mobile-bar">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      position: 'relative',
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <select
+                        value={inciFilter}
+                        onChange={(e) => setInciFilter(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 30px 8px 12px',
+                          borderRadius: '8px',
+                          border: '1.5px solid #003666',
+                          background: '#f8fafc',
+                          color: '#0f172a',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          appearance: 'none',
+                          cursor: 'pointer',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="all">🧪 All INCI Categories ({ingredients.length})</option>
+                        {Object.entries(groupCounts).map(([group, count]) => {
+                          const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
+                          return (
+                            <option key={group} value={group}>
+                              {meta.label} ({count})
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <ChevronDown size={14} style={{ position: 'absolute', right: '10px', pointerEvents: 'none', color: '#003666' }} />
+                    </div>
+                    {inciFilter !== 'all' && (
+                      <button
+                        type="button"
+                        onClick={() => setInciFilter('all')}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          background: '#ffffff',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: '#64748b',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', display: 'flex', justifyContent: 'space-between', padding: '0 2px' }}>
+                    <span>Showing <strong>{filteredIngredients.length}</strong> of {ingredients.length}</span>
+                    {inciFilter !== 'all' && (
+                      <span style={{ color: (INCI_GROUP_META[inciFilter] || INCI_GROUP_META.functional).color, fontWeight: 700 }}>
+                        Active: {(INCI_GROUP_META[inciFilter] || INCI_GROUP_META.functional).label}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* 1 Card Per Row Full-Width Master-Detail INCI Cards */}
@@ -967,6 +1361,24 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
           }
         }}
         lang={lang}
+      />
+
+      {/* Lightbox Image Zoom Modal */}
+      {imageUrl && (
+        <ImageModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imageSrc={imageUrl}
+          altText={name}
+        />
+      )}
+
+      {/* Digital Verification Large QR Modal */}
+      <QrModal
+        isOpen={isQrModalOpen}
+        onClose={() => setIsQrModalOpen(false)}
+        url={productUrl || `https://med-peptides.com/p/${slug}`}
+        productName={name}
       />
     </div>
   );

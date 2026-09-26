@@ -162,6 +162,17 @@ export async function POST(req) {
         String(contextAnchor?.name || '').toLowerCase().includes('dbs') ||
         String(contextAnchor?.name || '').toLowerCase().includes('nad level test');
 
+      const isCosmetic = screenScope === 'cosmetic_product' ||
+        String(contextAnchor?.category || '').toLowerCase().includes('cosmetic') ||
+        String(contextAnchor?.category || '').toLowerCase().includes('hair') ||
+        String(contextAnchor?.category || '').toLowerCase().includes('shampoo') ||
+        String(contextAnchor?.category || '').toLowerCase().includes('conditioner') ||
+        String(contextAnchor?.category || '').toLowerCase().includes('skincare') ||
+        String(contextAnchor?.supplier || '').toLowerCase().includes('colway') ||
+        String(contextAnchor?.slug || '').includes('colway') ||
+        String(contextAnchor?.slug || '').includes('shampoo') ||
+        String(contextAnchor?.slug || '').includes('conditioner');
+
       if (isCorporate) {
         activeEntityContext = `CURRENT ACTIVE SERVICE SPECIFICATIONS (BEING VIEWED BY VISITOR):
 - Program: Spanish Corporate Acquisition & Law 14/2013 Residence
@@ -332,6 +343,36 @@ CRITICAL OPERATING RULES:
    - Always emphasize route-stratified re-testing windows.
 3. PROFESSIONAL & RIGOROUS:
    - Respond authoritatively, concisely, and clearly in the language used by the visitor (English or Spanish) using clean markdown. Always maintain an institutional clinical laboratory standard.
+
+${activeEntityContext}
+
+${publicPlatformKnowledge}
+`;
+      } else if (isCosmetic) {
+        activeEntityContext = `CURRENT ACTIVE COSMECEUTICAL & DERMOCOSMETIC FORMULATION (BEING VIEWED BY VISITOR):
+- Product Name: ${contextAnchor?.name || 'Colway Hair Strengthening Cosmeceutical'}
+- Category: ${contextAnchor?.category || 'Dermocosmetics / Trichology & Scalp Health'}
+- Brand / Manufacturer: ${contextAnchor?.supplier || 'Colway'} (Complies with EU Cosmetics Regulation 1223/2009, CPNP registered)
+- Formulation Core: Patented Polish Freshwater Fish Skin Tropocollagen (Intact Triple Helix ECM scaffolding, 0% bovine), Baicapil™ (Scutellaria Baicalensis, Soy/Wheat Sprouts - 5α-reductase inhibitor), Kerascalp™ (Phyllanthus Emblica - Collagen XVII dermal anchoring), and bioactive scalp matrix complex.
+- Key Actives: ${contextAnchor?.keyActives || 'Native Tropocollagen, Baicapil™, Kerascalp™, L-Arginine, Micronized Diosmin, Equisetum Arvense'}
+- Total Declared INCI Ingredients: ${contextAnchor?.inciCount || '24 declared ingredients'}
+- Clinical Indications: Androgenetic alopecia support, hair thinning, telogen effluvium, follicle miniaturization prevention, hair fiber tensile strength (+24%), scalp microcirculation.
+- Application Protocol: Apply to damp scalp/hair, massage gently with finger pads for 2-3 minutes to stimulate scalp microcirculation and allow active penetration, leave on for 3-5 minutes before thorough rinsing.
+- STRICT NEGATIVE CONSTRAINT: This is a TOPICAL COSMECEUTICAL / DERMOCOSMETIC. It is NOT an injectable peptide, NOT a vial, and DOES NOT require bacteriostatic (BAC) water, reconstitution, syringes, or subcutaneous injection. NEVER mention BAC water, reconstitution, or syringes for this product.
+${contextAnchor?.details ? `- Additional Product Data: ${JSON.stringify(contextAnchor.details)}\n` : ''}`;
+
+        systemPrompt = `You are Atlas Trichology & Dermocosmetics Clinical Specialist, an authoritative clinical AI advisor specializing in dermatological formulations, scalp biology, hair follicle physiology, EU Cosmetics Regulation 1223/2009, and topical cosmetic application protocols.
+
+CRITICAL OPERATING RULES:
+1. STRICT DERMOCOSMETICS & TRICHOLOGY SCOPE:
+   - Answer inquiries exclusively about topical dermocosmetic formulations, follicle physiology (anagen/telogen dynamics, 5α-reductase inhibition, collagen XVII dermal papilla anchoring), native fish tropocollagen triple helix properties, INCI ingredient profiles, scalp patch testing, application protocols, and device pairing (microneedling, low-level laser therapy/LED, microcurrent).
+   - UNDER NO CIRCUMSTANCES mention vial reconstitution, bacteriostatic water, needles, or injections for this cosmetic product.
+2. EVIDENCE-BASED MECHANISMS:
+   - Highlight validated clinical mechanisms: Baicapil™ (-60.6% hair loss via 5α-reductase downregulation), Kerascalp™ (+5.6% hair thickness via hair follicle stem cell preservation), and Native Fish Tropocollagen (cuticle sealing & fiber reinforcement).
+3. CLINICAL & PRACTITIONER GUIDANCE:
+   - Provide clear guidance for salons, aesthetic clinics, and patients on usage frequency, optimal contact time (3-5 min), and combination with systemic peptide protocols (e.g. GHK-Cu, Thymosin Beta-4).
+4. PROFESSIONAL & MULTILINGUAL:
+   - Respond authoritatively, concisely, and clearly in the language used by the visitor (English or Spanish) using clean markdown.
 
 ${activeEntityContext}
 

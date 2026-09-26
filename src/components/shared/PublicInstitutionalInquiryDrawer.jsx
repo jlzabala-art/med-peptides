@@ -21,7 +21,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 
-const INQUIRY_TOPICS = [
+const INQUIRY_TOPICS_PEPTIDES = [
   {
     id: 'coa_specs',
     labelEn: 'Analytical CoA & Batch Purity Verification',
@@ -64,20 +64,184 @@ const INQUIRY_TOPICS = [
   }
 ];
 
+const INQUIRY_TOPICS_COLWAY = [
+  {
+    id: 'salon_wholesale',
+    labelEn: 'Wholesale Pricing & Salon / Clinic Accounts',
+    labelEs: 'Tarifas Mayoristas y Cuentas para Salones/Clínicas',
+    icon: Building2,
+    placeholderEn: 'Specify your salon, spa, or clinical practice type, estimated monthly unit volume, or B2B account onboarding...',
+    placeholderEs: 'Indique el tipo de salón, centro o clínica, volumen mensual estimado o solicitud de cuenta profesional B2B...'
+  },
+  {
+    id: 'cpnp_safety',
+    labelEn: 'CPNP Dossier & EU Cosmetic Safety Compliance',
+    labelEs: 'Dossier CPNP y Cumplimiento Normativo UE (Reg. 1223/2009)',
+    icon: ShieldCheck,
+    placeholderEn: 'Request official CPNP registration dossier, toxicological safety sheets, or non-bovine native tropocollagen certificates...',
+    placeholderEs: 'Solicite dossier oficial CPNP, fichas toxicológicas de seguridad o certificados de colágeno nativo de agua dulce...'
+  },
+  {
+    id: 'trichology_protocols',
+    labelEn: 'In-Clinic Trichology & Application Protocols',
+    labelEs: 'Protocolos en Cabina y Tricología Clínica',
+    icon: Sparkles,
+    placeholderEn: 'Inquire about in-clinic hair protocol pairing (microneedling, LED, scalp therapy), contact times, or post-treatment care...',
+    placeholderEs: 'Consulte sobre protocolos en cabina, combinación con aparatología (microneedling, LED), tiempos de pose o cuidados post-tratamiento...'
+  },
+  {
+    id: 'sample_merchandising',
+    labelEn: 'Professional Samples & Retail Merchandising',
+    labelEs: 'Muestras Profesionales y Expositores Punto de Venta',
+    icon: FileText,
+    placeholderEn: 'Request professional sample testing kits, retail display stands, or promotional clinic collateral...',
+    placeholderEs: 'Solicite kits de prueba profesional, expositores de mostrador o material promocional para su centro...'
+  },
+  {
+    id: 'general_cosmetics',
+    labelEn: 'General Dermocosmetics & Colway Inquiry',
+    labelEs: 'Consulta General de Dermocosmética Colway',
+    icon: Mail,
+    placeholderEn: 'How can the Colway clinical & aesthetic affairs desk assist your practice or salon?',
+    placeholderEs: '¿En qué puede asistirle el equipo clínico y estético de Colway?'
+  }
+];
+
+const INQUIRY_TOPICS_BLOODO = [
+  {
+    id: 'lab_specs',
+    labelEn: 'LC-MS/MS Methodology & Biomarker Ranges',
+    labelEs: 'Metodología Analítica LC-MS/MS y Rangos de Referencia',
+    icon: ShieldCheck,
+    placeholderEn: 'Inquire about capillary Dried Blood Spot (DBS) methodology, reference ranges, or ISO 15189 laboratory validation...',
+    placeholderEs: 'Consulte sobre metodología de micro-gota capilar seca (DBS), rangos de referencia o validación analítica ISO 15189...'
+  },
+  {
+    id: 'kit_logistics',
+    labelEn: 'Kit Logistics, Sample Stability & Turnaround',
+    labelEs: 'Logística de Kits, Estabilidad de Muestra y Plazos',
+    icon: Clock,
+    placeholderEn: 'Ask about sample temperature stability, prepaid return logistics, courier dispatch, or 48-72h result turnaround...',
+    placeholderEs: 'Consulte sobre estabilidad de la muestra, logística de devolución postal, mensajería o plazos de entrega de resultados...'
+  },
+  {
+    id: 'clinic_b2b',
+    labelEn: 'Clinic B2B Panel Packages & Volume Subscription',
+    labelEs: 'Tarifas B2B por Volumen y Packs para Clínicas',
+    icon: Building2,
+    placeholderEn: 'Inquire about recurring clinic diagnostic subscriptions, volume pricing on biomarker panels, or partner lab dashboard access...',
+    placeholderEs: 'Consulte sobre paquetes recurrentes para clínicas de longevidad, descuentos por volumen o acceso al portal médico...'
+  },
+  {
+    id: 'decision_support',
+    labelEn: 'Clinical Decision Support & Interpretation',
+    labelEs: 'Soporte de Interpretación Médica y Decisión Clínica',
+    icon: Sparkles,
+    placeholderEn: 'Request clinician-to-clinician consultation on biomarker correlation (intracellular NAD+, diurnal cortisol, FAI) with therapeutics...',
+    placeholderEs: 'Solicite soporte médico inter-colegial para correlacionar biomarcadores (NAD+ intracelular, cortisol, FAI) con tratamientos...'
+  },
+  {
+    id: 'general_diagnostic',
+    labelEn: 'General Diagnostic & Lab Inquiry',
+    labelEs: 'Consulta General de Diagnóstico Bloodo',
+    icon: Mail,
+    placeholderEn: 'How can the Bloodo laboratory & diagnostics desk assist your clinical practice?',
+    placeholderEs: '¿En qué puede asistirle el equipo de laboratorio y diagnóstico de Bloodo?'
+  }
+];
 
 export default function PublicInstitutionalInquiryDrawer({
   isOpen = false,
   onClose,
   contextType = 'general', // 'product' | 'protocol' | 'catalog' | 'protocols_directory' | 'general'
-  initialEntity = null,    // { name, slug, code, strength, category }
+  initialEntity = null,    // { name, slug, code, strength, category, supplier }
   lang = 'en'
 }) {
+  const brandType = useMemo(() => {
+    const rawCat = String(initialEntity?.category || contextType || '').toLowerCase();
+    const rawSupplier = String(initialEntity?.supplier || '').toLowerCase();
+    const rawName = String(initialEntity?.name || '').toLowerCase();
+    const rawSlug = String(initialEntity?.slug || '').toLowerCase();
+
+    if (
+      rawCat.includes('cosmetic') ||
+      rawCat.includes('hair') ||
+      rawSupplier.includes('colway') ||
+      rawSlug.includes('colway') ||
+      rawName.includes('shampoo') ||
+      rawName.includes('conditioner')
+    ) {
+      return 'colway';
+    }
+    if (
+      rawCat.includes('diagnostic') ||
+      rawSupplier.includes('bloodo') ||
+      rawSlug.includes('bloodo') ||
+      rawName.includes('blood test') ||
+      rawName.includes('dbs') ||
+      rawName.includes('nad level')
+    ) {
+      return 'bloodo';
+    }
+    return 'peptides';
+  }, [initialEntity, contextType]);
+
+  const activeTopics = useMemo(() => {
+    if (brandType === 'colway') return INQUIRY_TOPICS_COLWAY;
+    if (brandType === 'bloodo') return INQUIRY_TOPICS_BLOODO;
+    return INQUIRY_TOPICS_PEPTIDES;
+  }, [brandType]);
+
   const [topic, setTopic] = useState(() => {
+    if (brandType === 'colway') return 'salon_wholesale';
+    if (brandType === 'bloodo') return 'clinic_b2b';
     if (contextType === 'product') return 'coa_specs';
     if (contextType === 'protocol') return 'clinical_dosing';
     if (contextType === 'catalog') return 'wholesale_access';
     return 'general_inquiry';
   });
+
+  useEffect(() => {
+    if (!activeTopics.some(t => t.id === topic)) {
+      setTopic(activeTopics[0]?.id || 'general_inquiry');
+    }
+  }, [activeTopics, topic]);
+
+  const drawerHeaderTitle = useMemo(() => {
+    if (brandType === 'colway') {
+      return lang === 'es' ? 'Consulta Dermocosmética y Salones' : 'Cosmeceutical & Salon Inquiry';
+    }
+    if (brandType === 'bloodo') {
+      return lang === 'es' ? 'Consulta de Diagnóstico y Laboratorio' : 'Diagnostic & Laboratory Inquiry';
+    }
+    return lang === 'es' ? 'Consulta Médica e Institucional' : 'Institutional & Clinical Inquiry';
+  }, [brandType, lang]);
+
+  const drawerHeaderSubtitle = useMemo(() => {
+    if (brandType === 'colway') {
+      return lang === 'es' ? 'Mesa Oficial Colway • Cosmética Clínica y Tricología' : 'Official Colway Clinical & Trichology Desk';
+    }
+    if (brandType === 'bloodo') {
+      return lang === 'es' ? 'Mesa de Diagnóstico Bloodo • Red Acreditada ISO 15189' : 'Bloodo Diagnostic Affairs Desk • ISO 15189 Accredited';
+    }
+    return lang === 'es' ? 'Mesa Oficial de Asuntos Médicos & Científicos' : 'Official Medical & Scientific Affairs Desk';
+  }, [brandType, lang]);
+
+  const successDesc = useMemo(() => {
+    if (brandType === 'colway') {
+      return lang === 'es'
+        ? 'Su mensaje ha sido remitido a la Mesa Clínica y Estética de Colway. Un especialista en dermocosmética se pondrá en contacto en un plazo máximo de 24 horas laborables.'
+        : 'Your inquiry has been securely routed to the Colway Clinical & Aesthetic Affairs Desk. A specialist will follow up within 24 business hours.';
+    }
+    if (brandType === 'bloodo') {
+      return lang === 'es'
+        ? 'Su mensaje ha sido remitido a la Mesa de Diagnóstico de Bloodo. Un especialista de laboratorio clínico se pondrá en contacto en un plazo máximo de 24 horas laborables.'
+        : 'Your inquiry has been securely routed to the Bloodo Diagnostic Affairs Desk. A laboratory specialist will follow up within 24 business hours.';
+    }
+    return lang === 'es'
+      ? 'Su mensaje ha sido remitido con acuse de recibo a la Mesa Científica Oficial de Med-Peptides. Un enlace médico colegiado se pondrá en contacto en un plazo máximo de 24 horas laborables.'
+      : 'Your inquiry has been securely routed to the Med-Peptides Official Medical & Scientific Affairs Desk. A medical liaison will follow up within 24 business hours.';
+  }, [brandType, lang]);
 
   const [attachedEntity, setAttachedEntity] = useState(initialEntity);
   const [name, setName] = useState('');
@@ -141,8 +305,8 @@ export default function PublicInstitutionalInquiryDrawer({
   );
 
   const activeTopicObj = useMemo(() => {
-    return INQUIRY_TOPICS.find(t => t.id === topic) || INQUIRY_TOPICS[4];
-  }, [topic]);
+    return activeTopics.find(t => t.id === topic) || activeTopics[0] || INQUIRY_TOPICS_PEPTIDES[4];
+  }, [activeTopics, topic]);
 
   // Generate pre-filled mailto link for 1-click email client fallback
   const mailtoUrl = useMemo(() => {
@@ -298,12 +462,12 @@ export default function PublicInstitutionalInquiryDrawer({
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '0.98rem', letterSpacing: '-0.01em' }}>
-                {lang === 'es' ? 'Consulta Médica e Institucional' : 'Institutional & Clinical Inquiry'}
+                {drawerHeaderTitle}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#93c5fd', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ color: '#a7f3d0', fontWeight: 700 }}>●</span>
                 <span>
-                  {lang === 'es' ? 'Mesa Oficial de Asuntos Médicos & Científicos' : 'Official Medical & Scientific Affairs Desk'}
+                  {drawerHeaderSubtitle}
                 </span>
                 <span>•</span>
                 <span style={{ color: '#bae6fd' }}>
@@ -367,9 +531,7 @@ export default function PublicInstitutionalInquiryDrawer({
                   {lang === 'es' ? 'Consulta Registrada con Éxito' : 'Inquiry Successfully Received'}
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
-                  {lang === 'es'
-                    ? 'Su mensaje ha sido remitido con acuse de recibo a la Mesa Científica Oficial de Med-Peptides. Un enlace médico colegiado se pondrá en contacto en un plazo máximo de 24 horas laborables.'
-                    : 'Your inquiry has been securely routed to the Med-Peptides Official Medical & Scientific Affairs Desk. A medical liaison will follow up within 24 business hours.'}
+                  {successDesc}
                 </p>
               </div>
 
@@ -701,7 +863,7 @@ export default function PublicInstitutionalInquiryDrawer({
                   {lang === 'es' ? 'Clasificación de la Consulta *' : 'Inquiry Classification *'}
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.35rem' }}>
-                  {INQUIRY_TOPICS.map(t => {
+                  {activeTopics.map(t => {
                     const isSelected = topic === t.id;
                     const Icon = t.icon;
                     return (
