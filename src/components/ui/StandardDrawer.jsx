@@ -16,8 +16,9 @@ import { X, Maximize2, Minimize2 } from '@/lib/icons';
  * @param {string} subtitle - Optional header subtitle
  * @param {node} children - Drawer content
  * @param {node} footer - Optional footer actions
- * @param {string} width - Drawer width (default 'clamp(480px, 52vw, 760px)')
+ * @param {string} width - Drawer width (default '560px')
  * @param {boolean} expandable - Allow expanding width on desktop/laptop
+ * @param {boolean} disableBodyScroll - If true, inner content handles its own scroll container
  */
 export default function StandardDrawer({
   isOpen,
@@ -27,11 +28,12 @@ export default function StandardDrawer({
   children,
   footer,
   actions,
-  width = 'clamp(480px, 52vw, 760px)',
+  width = '560px',
   bodyPadding = '1.5rem',
   fullWorkspace = false,
   expandable = true,
   hideHeader = false,
+  disableBodyScroll = false,
   zIndex = 9999,
 }) {
   const bodyRef = React.useRef(null);
@@ -217,10 +219,12 @@ export default function StandardDrawer({
           className="drawer-condensed-layout"
           style={{
             flex: 1,
-            overflowY: 'auto',
+            overflowY: disableBodyScroll ? 'hidden' : 'auto',
             overscrollBehavior: 'contain',
-            padding: bodyPadding,
+            padding: disableBodyScroll ? 0 : bodyPadding,
             backgroundColor: 'var(--color-bg-app, #f8fafc)',
+            display: disableBodyScroll ? 'flex' : 'block',
+            flexDirection: disableBodyScroll ? 'column' : 'initial',
           }}
         >
           {children}
@@ -235,10 +239,11 @@ export default function StandardDrawer({
               borderTop: '1px solid var(--border-color, #e2e8f0)',
               backgroundColor: 'var(--bg-secondary, #ffffff)',
               display: 'flex',
-              justifyContent: 'flex-end',
+              justifyContent: 'space-between',
               alignItems: 'center',
               gap: '0.75rem',
-              zIndex: 2,
+              zIndex: 10,
+              flexShrink: 0,
             }}
           >
             {footer}
@@ -255,12 +260,8 @@ export default function StandardDrawer({
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
         }
-        @keyframes bottomSheetSlideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
 
-        /* ── Laptop / Desktop layout: Side-Over Drawer ── */
+        /* ── Laptop / Desktop layout: Side-Over Drawer (GCP Standard) ── */
         .standard-drawer-backdrop {
           position: fixed;
           top: 0;
@@ -269,42 +270,40 @@ export default function StandardDrawer({
           bottom: 0;
           width: 100vw;
           height: 100vh;
+          height: 100dvh;
           display: flex;
-          justify-content: flex-end;
+          justifyContent: flex-end;
           align-items: stretch;
-          background-color: rgba(15, 23, 42, 0.35);
+          background-color: rgba(15, 23, 42, 0.45);
           backdrop-filter: blur(2px);
           animation: drawerFadeIn 0.2s ease-out;
+          touch-action: none;
         }
         .drawer-full-workspace {
           width: calc(100vw - 260px);
         }
         .standard-drawer-panel {
           height: 100vh;
+          height: 100dvh;
+          max-height: 100dvh;
           transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          animation: drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: drawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .drawer-mobile-handle {
           display: none;
         }
 
-        /* ── Mobile layout: Native Bottom Sheet ── */
+        /* ── Mobile layout: Consistent Full Viewport Side-Sheet (GCP Mobile Standard) ── */
         @media (max-width: 768px) {
           .standard-drawer-backdrop {
-            align-items: flex-end !important;
-            justify-content: center !important;
+            align-items: stretch !important;
+            justify-content: flex-end !important;
           }
           .drawer-expand-btn {
             display: none !important;
           }
           .drawer-mobile-handle {
-            display: block !important;
-            width: 44px;
-            height: 5px;
-            background-color: #cbd5e1;
-            border-radius: 3px;
-            margin: 10px auto 4px auto;
-            flex-shrink: 0;
+            display: none !important;
           }
           .drawer-full-workspace {
             width: 100vw !important;
@@ -312,14 +311,15 @@ export default function StandardDrawer({
           .standard-drawer-panel {
             width: 100vw !important;
             max-width: 100vw !important;
-            height: auto !important;
-            max-height: 92vh !important;
-            border-radius: 20px 20px 0 0 !important;
-            box-shadow: 0 -8px 36px rgba(0, 0, 0, 0.22) !important;
-            animation: bottomSheetSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            animation: drawerSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
           }
           .standard-drawer-footer {
-            padding-bottom: calc(1rem + env(safe-area-inset-bottom, 16px)) !important;
+            padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 16px)) !important;
           }
         }
       `}</style>

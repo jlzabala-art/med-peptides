@@ -51,6 +51,7 @@ export async function POST(request) {
         strength: attachedEntity.strength || '',
       } : null,
       sourceUrl: String(sourceUrl || '').trim(),
+      subscribeNewsletter: Boolean(body.subscribeNewsletter),
       recipientDesk: 'business@med-peptides.com',
       status: 'new',
       createdAt: new Date().toISOString(),
@@ -61,6 +62,25 @@ export async function POST(request) {
       try {
         const docRef = await adminDb.collection('institutional_inquiries').add(inquiryRecord);
         const inquiryId = docRef.id;
+
+        // Auto-subscribe to clinical newsletter if opted in
+        if (body.subscribeNewsletter) {
+          try {
+            const subscriberRef = adminDb.collection('newsletter_subscribers').doc(inquiryRecord.email.replace(/[/.]/g, '_'));
+            await subscriberRef.set({
+              email: inquiryRecord.email,
+              name: inquiryRecord.name,
+              organization: inquiryRecord.organization,
+              source: 'inquiry_drawer',
+              status: 'active',
+              optedInAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              interests: ['clinical_digest', 'peptides', 'protocols']
+            }, { merge: true });
+          } catch (subErr) {
+            console.warn('[newsletter_subscribers] Auto-subscribe note:', subErr.message);
+          }
+        }
 
         // Asynchronously sync to Zoho Bigin CRM without blocking the web response
         syncInquiryToZohoBigin(inquiryRecord, inquiryId).catch(err => {

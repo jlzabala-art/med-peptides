@@ -159,6 +159,44 @@ export default function UserProfileTab({ inDrawer = false, onClose }) {
     }
   };
 
+  // Explicit Save all fields in one atomic batch
+  const handleExplicitSave = async () => {
+    setSaveStatus('saving');
+    try {
+      await updateProfileData({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        timezone: formData.timezone,
+        language: formData.language,
+        professionalRole: formData.professionalRole,
+        address: {
+          street: formData.address_street,
+          city: formData.address_city,
+          postalCode: formData.address_postalCode,
+          country: formData.address_country,
+        },
+        notifications: {
+          email: formData.notif_email,
+          sms: formData.notif_sms,
+          inApp: formData.notif_inApp,
+        }
+      });
+      setSaveStatus('saved');
+      notifier.toast('Profile changes saved successfully', 'success');
+      setTimeout(() => {
+        setSaveStatus(prev => prev === 'saved' ? 'idle' : prev);
+        if (inDrawer && onClose) {
+          onClose();
+        }
+      }, 700);
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      setSaveStatus('error');
+      notifier.toast('Failed to save changes: ' + (err.message || 'Unknown error'), 'error');
+    }
+  };
+
   const handleDataChange = (e) => {
     const { name, value } = e.target;
     setFormData(p => ({ ...p, [name]: value }));
@@ -303,101 +341,39 @@ export default function UserProfileTab({ inDrawer = false, onClose }) {
 
   return (
     <div style={{ 
+      display: 'flex',
+      flexDirection: 'column',
+      height: inDrawer ? '100%' : 'auto',
+      minHeight: inDrawer ? '100%' : 'auto',
+      maxHeight: inDrawer ? '100%' : 'none',
+      width: '100%',
       maxWidth: inDrawer ? '100%' : '820px', 
       margin: inDrawer ? '0' : '0 auto', 
-      padding: inDrawer ? '0' : '2rem' 
+      padding: 0,
+      overflow: 'hidden',
     }}>
-      {/* Title & Save Status Badge */}
+      {/* Scrollable Form Body */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1.25rem',
-        flexWrap: 'wrap',
-        gap: '0.75rem'
+        flex: 1,
+        overflowY: inDrawer ? 'auto' : 'visible',
+        padding: inDrawer ? '1.25rem 1.5rem 2rem 1.5rem' : '2rem',
+        WebkitOverflowScrolling: 'touch',
       }}>
+        {/* Title (Only on standalone page) */}
         {!inDrawer && (
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary, #003666)', margin: 0 }}>
-            My Profile
-          </h2>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.25rem',
+            flexWrap: 'wrap',
+            gap: '0.75rem'
+          }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary, #003666)', margin: 0 }}>
+              My Profile
+            </h2>
+          </div>
         )}
-
-        {/* Live Smart Save Status Indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
-          {saveStatus === 'saving' && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.78rem',
-              color: '#0284c7',
-              background: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              padding: '3px 10px',
-              borderRadius: '20px',
-              fontWeight: 600,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-            }}>
-              <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
-              Saving changes...
-            </span>
-          )}
-
-          {saveStatus === 'saved' && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.78rem',
-              color: '#166534',
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              padding: '3px 10px',
-              borderRadius: '20px',
-              fontWeight: 600,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-            }}>
-              <CheckCircle2 size={14} />
-              All changes saved
-            </span>
-          )}
-
-          {saveStatus === 'error' && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.78rem',
-              color: '#991b1b',
-              background: '#fef2f2',
-              border: '1px solid #fecaca',
-              padding: '3px 10px',
-              borderRadius: '20px',
-              fontWeight: 600
-            }}>
-              <AlertCircle size={14} />
-              Error saving
-            </span>
-          )}
-
-          {saveStatus === 'idle' && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '0.75rem',
-              color: '#64748b',
-              padding: '2px 8px',
-              borderRadius: '6px',
-              background: '#f8fafc',
-              border: '1px solid #f1f5f9'
-            }}>
-              <CheckCircle2 size={13} color="#10b981" />
-              Auto-saved on edit
-            </span>
-          )}
-        </div>
-      </div>
 
       {status.message && (
         <div style={{
@@ -886,6 +862,144 @@ export default function UserProfileTab({ inDrawer = false, onClose }) {
             <span>Update Password</span>
           </button>
         </form>
+      </div>
+      </div> {/* End Scrollable Form Body */}
+
+      {/* Sticky Action Bar (GCP Standard) */}
+      <div style={{
+        flexShrink: 0,
+        position: inDrawer ? 'sticky' : 'relative',
+        bottom: 0,
+        zIndex: 20,
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e2e8f0',
+        padding: inDrawer 
+          ? '0.85rem 1.5rem calc(0.85rem + env(safe-area-inset-bottom, 0px)) 1.5rem' 
+          : '1.25rem 0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '1rem',
+        boxShadow: inDrawer ? '0 -4px 16px rgba(0, 0, 0, 0.04)' : 'none',
+      }}>
+        {/* Left: Live status feedback */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {saveStatus === 'saving' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.82rem',
+              color: '#0284c7',
+              fontWeight: 600,
+            }}>
+              <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
+              Saving changes...
+            </span>
+          )}
+          {saveStatus === 'saved' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.82rem',
+              color: '#166534',
+              fontWeight: 600,
+            }}>
+              <CheckCircle2 size={16} color="#16a34a" />
+              All changes saved
+            </span>
+          )}
+          {saveStatus === 'error' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.82rem',
+              color: '#dc2626',
+              fontWeight: 600,
+            }}>
+              <AlertCircle size={15} />
+              Error saving
+            </span>
+          )}
+          {saveStatus === 'idle' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.8rem',
+              color: '#64748b',
+            }}>
+              <Check size={14} color="#10b981" />
+              Auto-saved on edit
+            </span>
+          )}
+        </div>
+
+        {/* Right: Actions */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          {inDrawer && onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '0.6rem 1.15rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#475569',
+                fontSize: '0.88rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+            >
+              Cancel
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleExplicitSave}
+            disabled={saveStatus === 'saving'}
+            style={{
+              padding: '0.6rem 1.4rem',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: saveStatus === 'saving' ? '#64748b' : 'var(--color-primary, #003666)',
+              color: '#ffffff',
+              fontSize: '0.88rem',
+              fontWeight: 600,
+              cursor: saveStatus === 'saving' ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseOver={(e) => {
+              if (saveStatus !== 'saving') e.currentTarget.style.backgroundColor = '#002244';
+            }}
+            onMouseOut={(e) => {
+              if (saveStatus !== 'saving') e.currentTarget.style.backgroundColor = 'var(--color-primary, #003666)';
+            }}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Check size={16} />
+                <span>Save Changes</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       <style>{`

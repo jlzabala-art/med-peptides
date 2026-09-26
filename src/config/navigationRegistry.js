@@ -231,8 +231,9 @@ export const NAVIGATION_REGISTRY = [
       { id: 'social-media',           label: 'Social Media',           icon: Share2,         roles: ['admin', 'sales'] },
       { id: 'templates',              label: 'Templates',              icon: LayoutTemplate, roles: ['admin'] },
       { id: 'automation-campaigns',   label: 'Automation Campaigns',   icon: Bot,            roles: ['admin'] },
-      { id: 'coupons',                label: 'Coupons',                icon: Ticket,         roles: ['admin', 'sales'] },
-      { id: 'segmentation',           label: 'Segmentation',           icon: PieChart,       roles: ['admin', 'sales'] },
+      // Temporarily hidden per UX guidelines (code preserved):
+      // { id: 'coupons',                label: 'Coupons',                icon: Ticket,         roles: ['admin', 'sales'] },
+      // { id: 'segmentation',           label: 'Segmentation',           icon: PieChart,       roles: ['admin', 'sales'] },
     ]
   },
 

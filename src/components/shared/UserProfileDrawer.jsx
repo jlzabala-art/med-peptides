@@ -18,8 +18,9 @@ export default function UserProfileDrawer({ isOpen, onClose }) {
       onClose={onClose}
       title="My Profile"
       subtitle="Personal identity, phone prefix, specialty & credentials"
-      width="clamp(520px, 48vw, 780px)"
-      bodyPadding="1.25rem"
+      width="560px"
+      bodyPadding="0"
+      disableBodyScroll={true}
       expandable={false}
       zIndex={99999}
     >

@@ -8,8 +8,9 @@ import {
   Droplets, Zap, Activity, Star, Package, Microscope, Heart,
   AlertTriangle, ClipboardList, Scissors, Beaker, BookOpen,
   TestTube, ListChecks, Thermometer, Clock, BarChart2, BadgeCheck,
-  RefreshCcw, Layers, Mail
+  RefreshCcw, Layers, Mail, QrCode, Copy, Check, ZoomIn, X
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
@@ -520,22 +521,44 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 </div>
               </div>
             </>}
-            desktopSecondary={imageUrl ? (
-              <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '220px', height: '280px', flexShrink: 0, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '180px', maxHeight: '250px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px' }} />
-              </div>
-            ) : (
-              <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)', borderRadius: '16px', border: '1px solid #99f6e4', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '220px', height: '280px', flexShrink: 0, gap: '0.75rem' }}>
-                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(13,148,136,0.15)' }}>
-                  <Droplets size={28} style={{ color: '#0d9488' }} />
+            desktopSecondary={
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+                {imageUrl && (
+                  <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '200px', height: '260px', flexShrink: 0, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                    <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '170px', maxHeight: '230px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px' }} />
+                  </div>
+                )}
+                {/* Standard Public Verification QR Box */}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '16px',
+                  padding: '1rem 0.85rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '160px',
+                  height: '260px',
+                  flexShrink: 0,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                  textAlign: 'center',
+                }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.05em', color: '#003666', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    Digital Verification
+                  </span>
+                  <div style={{ padding: '6px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1', marginBottom: '8px' }}>
+                    <QRCodeSVG value={productUrl || `https://med-peptides.com/p/${slug}`} size={105} level="M" />
+                  </div>
+                  <span style={{ fontSize: '0.62rem', color: '#64748b', lineHeight: 1.3 }}>
+                    Scan with mobile for live clinical datasheet
+                  </span>
                 </div>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a', textAlign: 'center' }}>{name}</div>
-                <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{brand} · 250 mL</div>
               </div>
-            )}
+            }
             mobileSecondary={imageUrl ? (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '180px', height: '210px', margin: '0.5rem auto', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '150px', maxHeight: '190px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '4px' }} />
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '190px', height: '220px', margin: '0.5rem auto', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '160px', maxHeight: '200px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '4px' }} />
               </div>
             ) : null}
           />

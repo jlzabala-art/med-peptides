@@ -368,6 +368,13 @@ export default function ClinicalGanttTimeline({
     return list;
   }, [normalizedPhases, protocol]);
 
+  // Detected compound helper flags for clinical calibration controls
+  const hasIpamorelin = useMemo(() => distinctCompounds.some(c => (c.name || '').toUpperCase().includes('IPAMORELIN')), [distinctCompounds]);
+  const hasCjc = useMemo(() => distinctCompounds.some(c => (c.name || '').toUpperCase().includes('CJC')), [distinctCompounds]);
+  const hasGhk = useMemo(() => distinctCompounds.some(c => (c.name || '').toUpperCase().includes('GHK')), [distinctCompounds]);
+  const hasBpc = useMemo(() => distinctCompounds.some(c => (c.name || '').toUpperCase().includes('BPC')), [distinctCompounds]);
+  const hasTb = useMemo(() => distinctCompounds.some(c => (c.name || '').toUpperCase().includes('TB-500') || (c.name || '').toUpperCase().includes('THYMOSIN BETA')), [distinctCompounds]);
+
   // Active week compound dosage & cumulative metrics
   const activeWeekCompounds = useMemo(() => {
     const currentPhaseIndex = normalizedPhases.findIndex(p => selectedWeek >= p.startWeek && selectedWeek <= p.endWeek);

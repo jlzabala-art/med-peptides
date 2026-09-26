@@ -242,65 +242,6 @@ export default function ProtocolsCatalogSidebar({
         </div>
       </div>
 
-      {/* ── CARD 2: Scannable Directory QR Code & Fast Copy ── */}
-      <div className="proto-sidebar-card">
-        <div className="proto-sidebar-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <QrCode size={15} style={{ color: '#0d9488' }} />
-            <h3 className="proto-sidebar-title">
-              {isEs ? 'VERIFICACIÓN DIGITAL & QR' : 'DIGITAL QR VERIFICATION'}
-            </h3>
-          </div>
-          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '1px 6px', borderRadius: '4px' }}>
-            SSOT 2026
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0.5rem 0 0.25rem' }}>
-          <div style={{
-            background: '#ffffff',
-            padding: '10px',
-            borderRadius: '10px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-            marginBottom: '0.75rem'
-          }}>
-            <QRCodeSVG value={publicUrl} size={135} level="M" />
-          </div>
-
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', marginBottom: '2px' }}>
-            {isEs ? 'Directorio Público de Protocolos' : 'Public Clinical Directory'}
-          </span>
-          <span style={{ fontSize: '0.66rem', color: '#64748b', marginBottom: '0.75rem' }}>
-            {isEs ? 'Escanear para acceso directo en móvil' : 'Scan for instant mobile lookup'}
-          </span>
-
-          <button
-            type="button"
-            onClick={handleCopyUrl}
-            style={{
-              width: '100%',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '7px 12px',
-              borderRadius: '8px',
-              background: copiedUrl ? '#16a34a' : '#003666',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 4px rgba(0,54,102,0.15)'
-            }}
-          >
-            {copiedUrl ? <Check size={13} /> : <Copy size={13} />}
-            <span>{copiedUrl ? (isEs ? 'Enlace Copiado ✓' : 'Link Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Directory Link')}</span>
-          </button>
-        </div>
-      </div>
 
       {/* ── CARD 3: Quick Jump to Primary Reference Standards ── */}
       <div className="proto-sidebar-card">

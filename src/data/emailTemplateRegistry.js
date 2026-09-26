@@ -7,7 +7,7 @@
  * Templates rendered here use sample data for preview purposes.
  */
 
-import { getApprovalEmailHtml, getInvitationEmailHtml } from './emailTemplate';
+import { getApprovalEmailHtml, getInvitationEmailHtml } from './emailTemplate.js';
 
 // ── Sample data for previews ──────────────────────────────────────────────────
 const SAMPLE_USER = {

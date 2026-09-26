@@ -87,6 +87,7 @@ export default function PublicInstitutionalInquiryDrawer({
   const [phonePrefix, setPhonePrefix] = useState(() => (lang === 'es' ? '+34' : '+1'));
   const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -195,6 +196,7 @@ export default function PublicInstitutionalInquiryDrawer({
           message: message.trim(),
           contextType,
           attachedEntity,
+          subscribeNewsletter,
           sourceUrl: typeof window !== 'undefined' ? window.location.href : ''
         })
       });
@@ -912,6 +914,56 @@ export default function PublicInstitutionalInquiryDrawer({
                     ? 'Canal Directo Institucional • Triaje y respuesta médica colegiada < 24h laborables.'
                     : 'Direct Institutional Desk • Average clinical triage & response < 24h.'}
                 </span>
+              </div>
+
+              {/* Subtle Preconfigured Newsletter Subscription Option */}
+              <div
+                style={{
+                  background: '#f0fdfa',
+                  border: '1px solid #ccfbf1',
+                  borderRadius: '8px',
+                  padding: '0.75rem 0.9rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s ease'
+                }}
+                onClick={() => setSubscribeNewsletter(!subscribeNewsletter)}
+              >
+                <input
+                  type="checkbox"
+                  id="drawer-newsletter-optin"
+                  checked={subscribeNewsletter}
+                  onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    marginTop: '2px',
+                    width: '16px',
+                    height: '16px',
+                    accentColor: '#0d9488',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                />
+                <label
+                  htmlFor="drawer-newsletter-optin"
+                  style={{
+                    fontSize: '0.74rem',
+                    color: '#0f766e',
+                    lineHeight: 1.45,
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    userSelect: 'none'
+                  }}
+                >
+                  <strong style={{ display: 'block', color: '#134e4a', fontWeight: 700, marginBottom: '1px' }}>
+                    {lang === 'es' ? 'Recibir Digest Científico Mensual (Recomendado)' : 'Receive Monthly Scientific Digest (Recommended)'}
+                  </strong>
+                  {lang === 'es'
+                    ? 'Actualizaciones sobre nuevos péptidos, monografías clínicas y alertas regulatorias. Sin spam. Darse de baja en cualquier momento.'
+                    : 'Updates on newly released peptides, clinical dosage blueprints & regulatory alerts. No spam, 1-click unsubscribe.'}
+                </label>
               </div>
 
               {/* Action Buttons Sticky Footer (Google Cloud Drawer Standard) */}

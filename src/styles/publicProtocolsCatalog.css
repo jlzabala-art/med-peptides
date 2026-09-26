@@ -33,10 +33,45 @@
   }
 }
 
-/* ── Hero Banner ── */
+/* ── Hero Banner with Google Cloud standard top-right verification QR ── */
 .proto-catalog-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.proto-hero-left {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.proto-hero-side-qr {
+  flex-shrink: 0;
+  width: 155px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
   text-align: center;
-  margin-bottom: 2.5rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (max-width: 768px) {
+  .proto-catalog-hero {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.25rem;
+  }
+  .proto-hero-side-qr {
+    display: none;
+  }
 }
 
 .proto-hero-pill {
@@ -671,6 +706,10 @@
   border-radius: 9999px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
 }
 
 .proto-card-title {
@@ -1089,8 +1128,9 @@
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  flex: 1 1 320px;
-  min-width: 240px;
+  flex: 1 1 360px;
+  min-width: 260px;
+  flex-wrap: wrap;
 }
 
 .proto-list-expand-btn {
@@ -1566,7 +1606,8 @@
 
 .proto-sidebar-goal-btn.is-active {
   background: #eff6ff;
-  border-color: #bfdbfe;
+  border-color: #93c5fd;
+  border-left: 3px solid #003666;
 }
 
 .proto-sidebar-goal-icon {
@@ -1604,8 +1645,9 @@
 }
 
 .proto-sidebar-goal-btn.is-active .proto-sidebar-goal-badge {
-  background: #003666;
-  color: #ffffff;
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
 }
 
 .proto-sidebar-select {

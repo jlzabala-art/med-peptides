@@ -91,35 +91,47 @@ export default function AdminEmailTemplatesTabClient({ templates = [], isSubTab 
     {
       key: 'id',
       header: 'ID',
-      render: (val) => <CopyableId value={val} />
+      render: (val, row) => {
+        const id = (row && row.id) || (typeof val === 'object' ? val?.id : val) || '';
+        return <CopyableId value={id} />;
+      }
     },
     {
       key: 'name',
       header: 'Template Name & Description',
-      render: (val, row) => (
-        <div>
-          <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '4px' }}>
-            {row.name}
+      render: (val, row) => {
+        const item = row || val || {};
+        return (
+          <div>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '4px' }}>
+              {item.name || 'Untitled Template'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              {item.description || ''}
+            </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-            {row.description}
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'tags',
       header: 'Tags',
-      render: (tags) => (
-        <div style={{ display: 'inline-flex', gap: '4px', flexWrap: 'wrap' }}>
-          {tags.map(tag => <TagBadge key={tag} tag={tag} />)}
-        </div>
-      )
+      render: (val, row) => {
+        const tags = Array.isArray(val) ? val : (Array.isArray(row?.tags) ? row.tags : (Array.isArray(val?.tags) ? val.tags : []));
+        return (
+          <div style={{ display: 'inline-flex', gap: '4px', flexWrap: 'wrap' }}>
+            {tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+          </div>
+        );
+      }
     },
     {
       key: 'trigger',
       header: 'Trigger',
-      render: (val) => <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{val}</span>
+      render: (val, row) => {
+        const trigger = (typeof val === 'string' ? val : (row?.trigger || val?.trigger || '—'));
+        return <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{trigger}</span>;
+      }
     }
   ], []);
 
@@ -184,19 +196,19 @@ export default function AdminEmailTemplatesTabClient({ templates = [], isSubTab 
         />
         <MetricCard
           title="Automatic Triggers"
-          value={templates.filter(t => t.tags.includes('auto')).length}
+          value={templates.filter(t => t.tags?.includes('auto')).length}
           icon={Zap}
           color="var(--color-success)"
         />
         <MetricCard
           title="Manual Triggers"
-          value={templates.filter(t => t.tags.includes('manual')).length}
+          value={templates.filter(t => t.tags?.includes('manual')).length}
           icon={Check}
           color="var(--color-warning)"
         />
         <MetricCard
           title="Custom Overrides"
-          value={templates.filter(t => t.tags.includes('custom')).length || 0}
+          value={templates.filter(t => t.tags?.includes('custom')).length || 0}
           icon={Mail}
           color="var(--color-info)"
         />

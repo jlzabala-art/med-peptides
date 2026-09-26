@@ -1237,8 +1237,15 @@ export default function DataTable({
                           </td>
                         )}
                         {activeColumns.map((col, idx) => {
-                          const effectiveAlign = idx === 0 ? 'left' : idx === activeColumns.length - 1 ? 'right' : 'center';
-                          let cellValue = col.render ? col.render(row) : row[col.key];
+                          let cellValue;
+                          if (col.render) {
+                            const rawVal = col.key ? row[col.key] : undefined;
+                            cellValue = col.render.length >= 2 && rawVal !== undefined
+                              ? col.render(rawVal, row, idx)
+                              : col.render(row, row, idx);
+                          } else {
+                            cellValue = row[col.key];
+                          }
                           const isProductColumn =
                             col.key === 'name' ||
                             col.header === 'Product Name' ||

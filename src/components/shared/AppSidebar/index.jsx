@@ -12,64 +12,14 @@ import QuickCreateDropdown from './QuickCreateDropdown';
 import { prefetchModuleData } from '../../../utils/speculativePrefetch';
 import './AppSidebar.css';
 
-// ── Section Theme Registry (Distinct vibrant colors & icon backgrounds for top-level navigation) ──
+// ── Institutional Clinical Sidebar Palette (GCP / Medical Standard: Clean Neutral Monochrome) ──
 const GROUP_THEMES = {
-  dashboard: {
-    color: '#2563eb', // Royal Blue
-    bg: 'rgba(37, 99, 235, 0.12)',
-  },
-  clinical: {
-    color: '#0d9488', // Medical Teal / Emerald
-    bg: 'rgba(13, 148, 136, 0.12)',
-  },
-  catalog: {
-    color: '#d97706', // Warm Amber / Gold
-    bg: 'rgba(217, 119, 6, 0.12)',
-  },
-  sales: {
-    color: '#16a34a', // Emerald Green
-    bg: 'rgba(22, 163, 74, 0.12)',
-  },
-  purchasing: {
-    color: '#7c3aed', // Purple / Violet
-    bg: 'rgba(124, 58, 237, 0.12)',
-  },
-  logistics: {
-    color: '#0284c7', // Sky Blue
-    bg: 'rgba(2, 132, 199, 0.12)',
-  },
-  finance: {
-    color: '#e11d48', // Rose / Red
-    bg: 'rgba(225, 29, 72, 0.12)',
-  },
-  marketing: {
-    color: '#db2777', // Fuchsia / Pink
-    bg: 'rgba(219, 39, 119, 0.12)',
-  },
-  ai: {
-    color: '#9333ea', // Electric Purple
-    bg: 'rgba(147, 51, 234, 0.12)',
-  },
-  administration: {
-    color: '#475569', // Slate / Steel
-    bg: 'rgba(71, 85, 105, 0.12)',
-  },
-  health: {
-    color: '#0d9488',
-    bg: 'rgba(13, 148, 136, 0.12)',
-  },
-  discover: {
-    color: '#2563eb',
-    bg: 'rgba(37, 99, 235, 0.12)',
-  },
-  executive: {
-    color: '#6366f1',
-    bg: 'rgba(99, 102, 241, 0.12)',
-  },
-  ops: {
-    color: '#0284c7',
-    bg: 'rgba(2, 132, 199, 0.12)',
-  },
+  default: {
+    color: '#64748b',
+    bg: 'transparent',
+    activeColor: 'var(--color-primary, #003666)',
+    activeBg: 'rgba(0, 54, 102, 0.08)',
+  }
 };
 
 // ── Main AppSidebar ───────────────────────────────────────────────────────────
@@ -437,10 +387,7 @@ export default function AppSidebar({
             ? mobileExpandedGroups.includes(group.id)
             : expandedGroups.includes(group.id);
           const GroupIcon = group.icon;
-          const theme = GROUP_THEMES[group.id] || {
-            color: 'var(--color-primary, #2563eb)',
-            bg: 'rgba(37, 99, 235, 0.12)',
-          };
+          const theme = GROUP_THEMES[group.id] || GROUP_THEMES.default;
 
           const handleGroupToggle = () => {
             if (isMobile) {
@@ -471,14 +418,14 @@ export default function AppSidebar({
                       width: 24,
                       height: 24,
                       borderRadius: 6,
-                      backgroundColor: theme.bg,
-                      color: theme.color,
+                      backgroundColor: isGroupExpanded ? (theme.activeBg || 'rgba(0, 54, 102, 0.08)') : 'transparent',
+                      color: isGroupExpanded ? (theme.activeColor || 'var(--color-primary, #003666)') : '#64748b',
                       marginRight: expanded ? 8 : 0,
                       flexShrink: 0,
-                      transition: 'transform 0.15s ease, background-color 0.2s ease',
+                      transition: 'all 0.15s ease',
                     }}
                   >
-                    <GroupIcon size={15} strokeWidth={2.5} style={{ color: theme.color }} />
+                    <GroupIcon size={16} strokeWidth={isGroupExpanded ? 2.2 : 1.8} style={{ color: 'inherit' }} />
                   </span>
                 )}
                 {expanded && (
