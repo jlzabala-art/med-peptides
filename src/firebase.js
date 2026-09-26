@@ -13,10 +13,18 @@ if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) 
   console.warn('[Firebase] NEXT_PUBLIC_FIREBASE_API_KEY not found in bundle — using built-in fallback config. Set this in GitHub Actions secrets > production environment to silence this warning.');
 }
 
+const getDynamicAuthDomain = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host.includes('med-peptides.com')) return host;
+  }
+  return process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "med-peptides-app-27a3a.firebaseapp.com";
+};
+
 const firebaseConfig = {
   // Non-secret identifiers — safe to have fallbacks for local dev convenience
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "med-peptides-app-27a3a.firebaseapp.com",
+  authDomain: getDynamicAuthDomain(),
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "med-peptides-app",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "med-peptides-app.firebasestorage.app",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "514143707883",

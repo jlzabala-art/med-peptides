@@ -171,25 +171,25 @@ END:VCARD`;
               <button 
                 onClick={handleShareWhatsApp} 
                 className="mediluxe-btn mediluxe-btn-whatsapp"
-                title="Compartir enlace oficial en WhatsApp"
+                title="Share official profile on WhatsApp"
               >
                 <Share2 size={15} />
-                <span>Compartir en WhatsApp</span>
+                <span>Share on WhatsApp</span>
               </button>
               <button 
                 onClick={downloadVCard} 
                 className="mediluxe-btn mediluxe-btn-primary"
-                title="Descargar tarjeta digital vCard"
+                title="Download digital vCard"
               >
                 <Download size={15} />
-                <span>Descargar vCard Oficial</span>
+                <span>Download Official vCard</span>
               </button>
               <button 
                 onClick={() => handleCopy('https://med-peptides.com/mediluxe', 'url')} 
                 className="mediluxe-btn mediluxe-btn-outline"
               >
                 {copiedKey === 'url' ? <Check size={15} style={{ color: '#10b981' }} /> : <Copy size={15} />}
-                <span>{copiedKey === 'url' ? '¡Enlace Copiado!' : 'Copiar URL Corta'}</span>
+                <span>{copiedKey === 'url' ? 'Link Copied!' : 'Copy Short URL'}</span>
               </button>
             </div>
           </div>
@@ -205,19 +205,19 @@ END:VCARD`;
             </div>
             <div className="mediluxe-cred-grid">
               <div className="mediluxe-cred-item">
-                <div className="mediluxe-cred-label">Fundación</div>
-                <div className="mediluxe-cred-val">2011 (14+ Años)</div>
+                <div className="mediluxe-cred-label">Established</div>
+                <div className="mediluxe-cred-val">2011 (14+ Years)</div>
               </div>
               <div className="mediluxe-cred-item">
-                <div className="mediluxe-cred-label">Sede Central</div>
+                <div className="mediluxe-cred-label">Headquarters</div>
                 <div className="mediluxe-cred-val">Abu Dhabi, UAE</div>
               </div>
               <div className="mediluxe-cred-item">
-                <div className="mediluxe-cred-label">Expansión 2024</div>
+                <div className="mediluxe-cred-label">2024 Expansion</div>
                 <div className="mediluxe-cred-val">Dubai Healthcare Hub</div>
               </div>
               <div className="mediluxe-cred-item">
-                <div className="mediluxe-cred-label">Regulación</div>
+                <div className="mediluxe-cred-label">Compliance</div>
                 <div className="mediluxe-cred-val">GMP &amp; ISO Standards</div>
               </div>
             </div>
@@ -241,28 +241,28 @@ END:VCARD`;
             <div className="mediluxe-kpi-icon"><Award size={22} /></div>
             <div>
               <div className="mediluxe-kpi-number">14+</div>
-              <div className="mediluxe-kpi-label">Años de Excelencia (2011–2025)</div>
+              <div className="mediluxe-kpi-label">Years of Excellence (2011–2025)</div>
             </div>
           </div>
           <div className="mediluxe-kpi-card">
             <div className="mediluxe-kpi-icon"><Globe size={22} /></div>
             <div>
               <div className="mediluxe-kpi-number">4</div>
-              <div className="mediluxe-kpi-label">Países del GCC Atendidos</div>
+              <div className="mediluxe-kpi-label">GCC Countries Served</div>
             </div>
           </div>
           <div className="mediluxe-kpi-card">
             <div className="mediluxe-kpi-icon"><FlaskConical size={22} /></div>
             <div>
               <div className="mediluxe-kpi-number">35+</div>
-              <div className="mediluxe-kpi-label">Formulaciones Especializadas</div>
+              <div className="mediluxe-kpi-label">Specialized Formulations</div>
             </div>
           </div>
           <div className="mediluxe-kpi-card">
             <div className="mediluxe-kpi-icon"><Layers size={22} /></div>
             <div>
               <div className="mediluxe-kpi-number">7</div>
-              <div className="mediluxe-kpi-label">Categorías Terapéuticas</div>
+              <div className="mediluxe-kpi-label">Therapeutic Categories</div>
             </div>
           </div>
         </div>
@@ -273,13 +273,13 @@ END:VCARD`;
           <main className="mediluxe-main">
             {/* ── Section 1: Overview ── */}
             <section id="overview" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Visión General</span>
-              <h2 className="mediluxe-section-title">Medicina Personalizada &amp; Farmacia Magistral</h2>
+              <span className="mediluxe-section-badge">Overview</span>
+              <h2 className="mediluxe-section-title">Personalized Medicine &amp; Advanced Compounding</h2>
               <p className="mediluxe-section-subtitle">
-                Desde su establecimiento en 2011 en Abu Dhabi, Mediluxe Medical Supplies L.L.C. se ha 
-                consolidado como el nexo autorizado de biotecnología europea en Oriente Medio, 
-                suministrando a clínicas privadas, centros hospitalarios e institutos de longevidad soluciones 
-                médicas personalizadas de grado farmacéutico.
+                Since its establishment in 2011 in Abu Dhabi, Mediluxe Medical Supplies L.L.C. has 
+                stood as the premier authorized European biotechnology gateway in the Middle East, 
+                supplying private clinics, hospitals, and longevity institutes with pharmaceutical-grade 
+                personalized medical solutions.
               </p>
 
               {/* Clean Clinical Flow Diagram (Anti-SciFi) */}
@@ -297,40 +297,40 @@ END:VCARD`;
                   {/* Step 1 */}
                   <circle cx="80" cy="42" r="22" fill="#003666" />
                   <text x="80" y="47" fill="#ffffff" fontSize="12" fontWeight="700" textAnchor="middle">01</text>
-                  <text x="80" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">Hisopado ADN</text>
-                  <text x="80" y="96" fill="#64748b" fontSize="10" textAnchor="middle">Muestra no invasiva</text>
+                  <text x="80" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">DNA Swab</text>
+                  <text x="80" y="96" fill="#64748b" fontSize="10" textAnchor="middle">Non-invasive sample</text>
 
                   {/* Step 2 */}
                   <circle cx="280" cy="42" r="22" fill="#0284c7" />
                   <text x="280" y="47" fill="#ffffff" fontSize="12" fontWeight="700" textAnchor="middle">02</text>
-                  <text x="280" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">Lab Europeo</text>
+                  <text x="280" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">European Lab</text>
                   <text x="280" y="96" fill="#64748b" fontSize="10" textAnchor="middle">Fagron Genomics</text>
 
                   {/* Step 3 */}
                   <circle cx="480" cy="42" r="22" fill="#0d9488" />
                   <text x="480" y="47" fill="#ffffff" fontSize="12" fontWeight="700" textAnchor="middle">03</text>
-                  <text x="480" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">Mapeo Clínico</text>
-                  <text x="480" y="96" fill="#64748b" fontSize="10" textAnchor="middle">30+ biomarcadores</text>
+                  <text x="480" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">Clinical Mapping</text>
+                  <text x="480" y="96" fill="#64748b" fontSize="10" textAnchor="middle">30+ biomarkers</text>
 
                   {/* Step 4 */}
                   <circle cx="680" cy="42" r="22" fill="#14b8a6" />
                   <text x="680" y="47" fill="#ffffff" fontSize="12" fontWeight="700" textAnchor="middle">04</text>
                   <text x="680" y="80" fill="#0f172a" fontSize="12" fontWeight="700" textAnchor="middle">Compounding</text>
-                  <text x="680" y="96" fill="#64748b" fontSize="10" textAnchor="middle">Viales &amp; Pellets GMP</text>
+                  <text x="680" y="96" fill="#64748b" fontSize="10" textAnchor="middle">GMP Vials &amp; Pellets</text>
                 </svg>
                 <div className="mediluxe-diagram-caption">
-                  Metodología Integral: Integración de diagnóstico genético europeo con formulación terapéutica de precisión.
+                  End-to-End Methodology: Integration of European genetic diagnostics with precision therapeutic compounding.
                 </div>
               </div>
             </section>
 
             {/* ── Section 2: Geographic Presence ── */}
             <section id="presence" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Cobertura Regional</span>
-              <h2 className="mediluxe-section-title">Presencia Geográfica en el GCC</h2>
+              <span className="mediluxe-section-badge">Regional Coverage</span>
+              <h2 className="mediluxe-section-title">Geographic Presence Across the GCC</h2>
               <p className="mediluxe-section-subtitle">
-                Infraestructura logística transfronteriza que garantiza el cumplimiento regulatorio aduanero y la 
-                integridad de la cadena de frío para productos biológicos y péptidos en los 4 mercados clave del Golfo.
+                Cross-border logistics infrastructure ensuring regulatory customs clearance and cold-chain 
+                integrity for biologicals and peptides across key Gulf markets.
               </p>
 
               {/* Realistic Regional Map Graphic (SVG) */}
@@ -360,7 +360,7 @@ END:VCARD`;
                   {/* Abu Dhabi HQ */}
                   <circle cx="510" cy="125" r="9" fill="#003666" stroke="#ffffff" strokeWidth="2" />
                   <text x="510" y="152" fill="#003666" fontSize="12" fontWeight="800" textAnchor="middle">Abu Dhabi (HQ)</text>
-                  <text x="510" y="166" fill="#64748b" fontSize="10" textAnchor="middle">Est. 2011 · Sede Central</text>
+                  <text x="510" y="166" fill="#64748b" fontSize="10" textAnchor="middle">Est. 2011 · Headquarters</text>
 
                   {/* Dubai Expansion */}
                   <circle cx="545" cy="105" r="7" fill="#0d9488" stroke="#ffffff" strokeWidth="2" />
@@ -379,7 +379,7 @@ END:VCARD`;
                   <text x="260" y="125" fill="#0f172a" fontSize="11" fontWeight="600">Saudi Arabia</text>
                 </svg>
                 <div className="mediluxe-diagram-caption">
-                  Red Logística Certificada MediLuxe: Conexión aérea y terrestre en cadena de frío regulada (+2°C a +8°C y -20°C).
+                  MediLuxe Certified Cold-Chain: Air &amp; overland transport in temperature-controlled environments (+2°C to +8°C and -20°C).
                 </div>
               </div>
 
@@ -387,34 +387,34 @@ END:VCARD`;
               <div className="mediluxe-geo-grid">
                 <div className="mediluxe-geo-card">
                   <div className="mediluxe-geo-flag">🇦🇪</div>
-                  <div className="mediluxe-geo-country">Emiratos Árabes</div>
-                  <div className="mediluxe-geo-role">Abu Dhabi (HQ Central) &amp; Nueva sucursal Dubai (2024). Cobertura total de clínicas y hospitales.</div>
+                  <div className="mediluxe-geo-country">United Arab Emirates</div>
+                  <div className="mediluxe-geo-role">Abu Dhabi (HQ) &amp; Dubai Branch (2024). Full coverage for clinics and hospitals.</div>
                 </div>
                 <div className="mediluxe-geo-card">
                   <div className="mediluxe-geo-flag">🇶🇦</div>
                   <div className="mediluxe-geo-country">Qatar</div>
-                  <div className="mediluxe-geo-role">Cobertura de mercado completa a través de distribuidores sanitarios autorizados.</div>
+                  <div className="mediluxe-geo-role">Comprehensive market coverage via authorized medical distribution partners.</div>
                 </div>
                 <div className="mediluxe-geo-card">
                   <div className="mediluxe-geo-flag">🇰🇼</div>
                   <div className="mediluxe-geo-country">Kuwait</div>
-                  <div className="mediluxe-geo-role">Alianzas estratégicas con clínicas de medicina preventiva, dermatología y estética.</div>
+                  <div className="mediluxe-geo-role">Strategic alliances with longevity, dermatology, and aesthetic practices.</div>
                 </div>
                 <div className="mediluxe-geo-card">
                   <div className="mediluxe-geo-flag">🇸🇦</div>
-                  <div className="mediluxe-geo-country">Arabia Saudí</div>
-                  <div className="mediluxe-geo-role">Presencia en constante expansión en Riad y Provincia Oriental cumpliendo estándares SFDA.</div>
+                  <div className="mediluxe-geo-country">Saudi Arabia</div>
+                  <div className="mediluxe-geo-role">Expanding footprint across Riyadh and Eastern Province complying with SFDA standards.</div>
                 </div>
               </div>
             </section>
 
             {/* ── Section 3: Precision Diagnostics & Genetic Testing ── */}
             <section id="diagnostics" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Diagnóstico Molecular</span>
-              <h2 className="mediluxe-section-title">Diagnóstico de Precisión &amp; Pruebas de ADN</h2>
+              <span className="mediluxe-section-badge">Molecular Diagnostics</span>
+              <h2 className="mediluxe-section-title">Precision Diagnostics &amp; DNA Testing</h2>
               <p className="mediluxe-section-subtitle">
-                Portfolio exclusivo de herramientas diagnósticas basadas en ADN desarrollado junto a biotecnológicas 
-                europeas pioneras (Fagron Genomics). Análisis genético exhaustivo para fundamentar pautas terapéuticas individualizadas.
+                Exclusive portfolio of DNA-based diagnostic tools developed alongside pioneering 
+                European genomics centers (Fagron Genomics). Comprehensive genetic testing to ground individualized therapies.
               </p>
 
               <div className="mediluxe-tests-grid">
@@ -424,11 +424,11 @@ END:VCARD`;
                     <div className="mediluxe-test-icon"><Activity size={18} /></div>
                     <h3 className="mediluxe-test-title">Biological Age Test</h3>
                   </div>
-                  <p className="mediluxe-test-desc">Análisis de longitud telomérica para la cuantificación exacta del envejecimiento celular.</p>
+                  <p className="mediluxe-test-desc">Telomere length analysis for precise cellular aging quantification.</p>
                   <ul className="mediluxe-test-bullets">
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Medición precisa de envejecimiento celular</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Diseño de protocolos de longevidad celular</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Formulaciones de rejuvenecimiento sistémico</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Precise cellular aging measurement</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Cellular longevity protocol design</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Targeted systemic rejuvenation compounding</span></li>
                   </ul>
                 </div>
 
@@ -438,11 +438,11 @@ END:VCARD`;
                     <div className="mediluxe-test-icon"><Dna size={18} /></div>
                     <h3 className="mediluxe-test-title">Weight Management Test</h3>
                   </div>
-                  <p className="mediluxe-test-desc">Nutrición de precisión y optimización metabólica según el perfil genético individual.</p>
+                  <p className="mediluxe-test-desc">Precision nutrition and metabolic optimization grounded in individual genetic profile.</p>
                   <ul className="mediluxe-test-bullets">
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Análisis de eficiencia metabólica y absorción</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Pautas dietéticas personalizadas por polimorfismo</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Formulaciones específicas para control de peso</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Metabolic efficiency &amp; absorption analysis</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Polymorphism-guided dietary strategies</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Custom weight management formulations</span></li>
                   </ul>
                 </div>
 
@@ -452,11 +452,11 @@ END:VCARD`;
                     <div className="mediluxe-test-icon"><FlaskConical size={18} /></div>
                     <h3 className="mediluxe-test-title">Acne Treatment Test</h3>
                   </div>
-                  <p className="mediluxe-test-desc">Identificación de los factores genéticos e inflamatorios que alteran la barrera dérmica.</p>
+                  <p className="mediluxe-test-desc">Identification of genetic and inflammatory triggers impairing dermal skin barrier function.</p>
                   <ul className="mediluxe-test-bullets">
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Predisposición a cascadas inflamatorias</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Análisis de regulación de producción sebácea</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Formulaciones tópicas magistrales personalizadas</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Inflammatory cascade predisposition</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Sebaceous regulation &amp; sebum profiling</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Customized topical compounding formulations</span></li>
                   </ul>
                 </div>
 
@@ -466,11 +466,11 @@ END:VCARD`;
                     <div className="mediluxe-test-icon"><HeartPulse size={18} /></div>
                     <h3 className="mediluxe-test-title">Hair Loss Treatment Test</h3>
                   </div>
-                  <p className="mediluxe-test-desc">Genómica capilar avanzada para pautas tricológicas de máxima eficacia preventiva.</p>
+                  <p className="mediluxe-test-desc">Advanced trichology genomics for preventative and targeted clinical management.</p>
                   <ul className="mediluxe-test-bullets">
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Evaluación de riesgo de alopecia androgenética</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Sensibilidad del folículo piloso a andrógenos</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Formulaciones de restauración capilar dirigidas</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Androgenetic alopecia risk evaluation</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Follicular androgen sensitivity profiling</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Targeted hair restoration formulations</span></li>
                   </ul>
                 </div>
 
@@ -480,11 +480,11 @@ END:VCARD`;
                     <div className="mediluxe-test-icon"><Award size={18} /></div>
                     <h3 className="mediluxe-test-title">Sports Performance Test</h3>
                   </div>
-                  <p className="mediluxe-test-desc">Factores genéticos para optimización atlética, rendimiento y prevención de microtraumatismos.</p>
+                  <p className="mediluxe-test-desc">Genetic insights for athletic performance, injury recovery, and tendon resilience.</p>
                   <ul className="mediluxe-test-bullets">
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Composición y tipología de fibras musculares</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Evaluación de vulnerabilidad articular y de tendones</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Protocolos de regeneración neuromuscular acelerada</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Muscle fiber composition &amp; power profile</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Joint and tendon vulnerability screening</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Accelerated neuromuscular recovery protocols</span></li>
                   </ul>
                 </div>
 
@@ -494,11 +494,11 @@ END:VCARD`;
                     <div className="mediluxe-test-icon"><Globe size={18} /></div>
                     <h3 className="mediluxe-test-title">Ancestry &amp; Health Test</h3>
                   </div>
-                  <p className="mediluxe-test-desc">Análisis genético integral para linaje biológico y estratificación de riesgos de salud.</p>
+                  <p className="mediluxe-test-desc">Comprehensive genetic profiling for biological heritage and health risk stratification.</p>
                   <ul className="mediluxe-test-bullets">
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Mapeo geográfico de ascendencia y linaje</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Detección de susceptibilidad a patologías hereditarias</span></li>
-                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Formulaciones preventivas para protección a largo plazo</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Geographic ancestry &amp; lineage mapping</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Hereditary health risk vulnerability detection</span></li>
+                    <li className="mediluxe-test-bullet"><Check size={14} /><span>Preventative longevity lifestyle mapping</span></li>
                   </ul>
                 </div>
               </div>
@@ -506,11 +506,11 @@ END:VCARD`;
               {/* Cross-Link Bridge to Public Catalog */}
               <div className="mediluxe-bridge-box">
                 <div className="mediluxe-bridge-text">
-                  <h4>¿Desea explorar las monografías de estas pruebas en el Catálogo?</h4>
-                  <p>Consulte las fichas técnicas, analitos evaluados y especificaciones para profesionales de la salud.</p>
+                  <h4>Explore technical monographs in the Public Catalog</h4>
+                  <p>Review clinical data sheets, tested biomarkers, and healthcare practitioner specifications.</p>
                 </div>
                 <Link href="/catalog" className="mediluxe-btn mediluxe-btn-primary">
-                  <span>Ir al Catálogo de Pruebas</span>
+                  <span>View Testing Catalog</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -518,96 +518,96 @@ END:VCARD`;
 
             {/* ── Section 4: Integrated Health Platforms ── */}
             <section id="platforms" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Tecnología de la Salud</span>
-              <h2 className="mediluxe-section-title">Plataformas de Salud Integrada</h2>
+              <span className="mediluxe-section-badge">Health Technology</span>
+              <h2 className="mediluxe-section-title">Integrated Health Platforms</h2>
               <p className="mediluxe-section-subtitle">
-                Fusión de datos biológicos heterogéneos para generar recomendaciones clínicas accionables y 
-                estrategias de prevención proactiva de enfermedades.
+                Fusing heterogeneous biological data to generate actionable clinical insights and proactive 
+                preventative care strategies.
               </p>
 
               {/* 3-Pillar Enterprise Architecture Diagram */}
               <div className="mediluxe-diagram-wrapper">
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
                   <div style={{ background: '#ffffff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ color: '#003666', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.5rem' }}>1. Ingesta de Datos Biológicos</div>
+                    <div style={{ color: '#003666', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.5rem' }}>1. Biological Data Ingestion</div>
                     <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                      Marcadores genéticos, biomarcadores sanguíneos (30+ panel), constantes vitales y estilo de vida.
+                      Genetic markers, blood panels (30+ analytes), biometric vitals, and lifestyle metrics.
                     </p>
                   </div>
                   <div style={{ background: '#ffffff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #0d9488' }}>
-                    <div style={{ color: '#0d9488', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.5rem' }}>2. Motor de Analítica Clínica</div>
+                    <div style={{ color: '#0d9488', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.5rem' }}>2. Clinical Analytics Engine</div>
                     <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                      Edad biológica, modelado predictivo de riesgos metabólicos y análisis longitudinal de tendencias.
+                      Biological age, metabolic risk modeling, and longitudinal trend analysis.
                     </p>
                   </div>
                   <div style={{ background: '#ffffff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ color: '#003666', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.5rem' }}>3. Herramientas Digitales</div>
+                    <div style={{ color: '#003666', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.5rem' }}>3. Connected Digital Tools</div>
                     <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                      Sincronización con wearables, alertas preventivas, pruebas domésticas y consola del facultativo.
+                      Wearable integration, preventative alerts, at-home test kits, and practitioner consoles.
                     </p>
                   </div>
                 </div>
                 <div className="mediluxe-diagram-caption">
-                  Arquitectura con Cifrado Grado Hospitalario y Cumplimiento de Seguridad HIPAA / GDPR.
+                  Enterprise-grade encryption and HIPAA / GDPR healthcare security compliance.
                 </div>
               </div>
             </section>
 
             {/* ── Section 5: Advanced Compounding & Product Development ── */}
             <section id="compounding" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Formulación Magistral</span>
-              <h2 className="mediluxe-section-title">Compounding Avanzado &amp; Desarrollo de Producto</h2>
+              <span className="mediluxe-section-badge">Precision Compounding</span>
+              <h2 className="mediluxe-section-title">Advanced Compounding &amp; Product Development</h2>
               <p className="mediluxe-section-subtitle">
-                Alianzas farmacéuticas con laboratorios europeos que proporcionan soluciones de formulación magistral 
-                personalizada y de alta calidad para médicos especialistas y clínicas de Oriente Medio.
+                Strategic pharmaceutical partnerships with European compounding labs delivering customized, 
+                high-potency formulations for physicians and clinical institutes across the Middle East.
               </p>
 
               <div className="mediluxe-compounding-grid">
                 <div className="mediluxe-pillar-card">
                   <div className="mediluxe-pillar-icon"><ShieldCheck size={20} /></div>
-                  <h4 className="mediluxe-pillar-title">Materias Primas GMP</h4>
+                  <h4 className="mediluxe-pillar-title">Certified GMP Actives</h4>
                   <p className="mediluxe-pillar-desc">
-                    Principios activos puros procedentes de fabricantes farmacéuticos europeos líderes con certificación GMP.
+                    High-purity APIs sourced exclusively from leading European GMP-compliant pharmaceutical manufacturers.
                   </p>
                 </div>
 
                 <div className="mediluxe-pillar-card">
                   <div className="mediluxe-pillar-icon"><Cpu size={20} /></div>
-                  <h4 className="mediluxe-pillar-title">Equipamiento Especializado</h4>
+                  <h4 className="mediluxe-pillar-title">Sterile Cleanroom Infrastructure</h4>
                   <p className="mediluxe-pillar-desc">
-                    Tecnología de última generación para salas blancas y formulaciones estériles y no estériles.
+                    State-of-the-art cleanroom technology for sterile injectable and topical formulations.
                   </p>
                 </div>
 
                 <div className="mediluxe-pillar-card">
                   <div className="mediluxe-pillar-icon"><FlaskConical size={20} /></div>
-                  <h4 className="mediluxe-pillar-title">Formulaciones a Medida</h4>
+                  <h4 className="mediluxe-pillar-title">Custom Tailored Formulations</h4>
                   <p className="mediluxe-pillar-desc">
-                    Pellets hormonales bioidénticos y viales inyectables individualizados para terapias de precisión.
+                    Bioidentical hormone pellets and individualized vials designed for precision therapies.
                   </p>
                 </div>
 
                 <div className="mediluxe-pillar-card">
                   <div className="mediluxe-pillar-icon"><Award size={20} /></div>
-                  <h4 className="mediluxe-pillar-title">Licencias &amp; Formación</h4>
+                  <h4 className="mediluxe-pillar-title">Clinical Education &amp; CME</h4>
                   <p className="mediluxe-pillar-desc">
-                    Programas continuados para médicos y farmacéuticos sobre técnicas de formulación y normativa internacional.
+                    Continuous training programs for physicians and clinical pharmacists on compounding methodologies.
                   </p>
                 </div>
 
                 <div className="mediluxe-pillar-card">
                   <div className="mediluxe-pillar-icon"><Layers size={20} /></div>
-                  <h4 className="mediluxe-pillar-title">Logística &amp; Cumplimiento</h4>
+                  <h4 className="mediluxe-pillar-title">Logistics &amp; Compliance</h4>
                   <p className="mediluxe-pillar-desc">
-                    Soporte integral que asegura una importación ágil, registro sanitario y cadena de suministro sin fricciones.
+                    End-to-end support ensuring streamlined cold-chain logistics, customs clearance, and product registration.
                   </p>
                 </div>
 
                 <div className="mediluxe-pillar-card">
                   <div className="mediluxe-pillar-icon"><Sparkles size={20} /></div>
-                  <h4 className="mediluxe-pillar-title">Desarrollo Marca Blanca</h4>
+                  <h4 className="mediluxe-pillar-title">Private Label Development</h4>
                   <p className="mediluxe-pillar-desc">
-                    Formulaciones cosmecéuticas exclusivas bajo los más rigurosos estándares de calidad internacional.
+                    Exclusive cosmeceutical and peptide formulations meeting stringent international cosmetic standards.
                   </p>
                 </div>
               </div>
@@ -615,11 +615,11 @@ END:VCARD`;
               {/* Cross-Link Bridge to Protocols */}
               <div className="mediluxe-bridge-box">
                 <div className="mediluxe-bridge-text">
-                  <h4>¿Busca protocolos clínicos detallados de compounding y péptidos?</h4>
-                  <p>Explore los planes estructurados de administración, dosificación y combinaciones sinérgicas.</p>
+                  <h4>Looking for detailed clinical compounding &amp; peptide protocols?</h4>
+                  <p>Explore evidence-based administration regimens, dosing guidelines, and synergistic pairings.</p>
                 </div>
                 <Link href="/proto" className="mediluxe-btn mediluxe-btn-primary">
-                  <span>Ver Protocolos Clínicos</span>
+                  <span>Explore Clinical Protocols</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -627,31 +627,31 @@ END:VCARD`;
 
             {/* ── Section 6: Mission, Vision & Management Team ── */}
             <section id="leadership" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Compromiso Institucional</span>
-              <h2 className="mediluxe-section-title">Misión, Visión &amp; Liderazgo Ejecutivo</h2>
+              <span className="mediluxe-section-badge">Institutional Leadership</span>
+              <h2 className="mediluxe-section-title">Mission, Vision &amp; Executive Leadership</h2>
               <p className="mediluxe-section-subtitle">
-                Guiados por la excelencia clínica, la investigación traslacional y el empoderamiento de la comunidad 
-                médica en la adopción de terapias del futuro.
+                Driven by clinical excellence, translational research, and empowering medical practitioners 
+                with next-generation preventative therapies.
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.75rem' }}>
                 <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#003666' }}>
                     <ShieldCheck size={20} />
-                    <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Nuestra Misión</h3>
+                    <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Our Mission</h3>
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <li style={{ display: 'flex', gap: '0.45rem', fontSize: '0.82rem', color: '#475569' }}>
                       <Check size={15} style={{ color: '#0d9488', flexShrink: 0 }} />
-                      <span>Conectar diagnósticos genómicos avanzados con soluciones terapéuticas personalizadas.</span>
+                      <span>Bridge advanced genomic diagnostics with customized therapeutic solutions.</span>
                     </li>
                     <li style={{ display: 'flex', gap: '0.45rem', fontSize: '0.82rem', color: '#475569' }}>
                       <Check size={15} style={{ color: '#0d9488', flexShrink: 0 }} />
-                      <span>Integrar biotecnología europea de vanguardia en la práctica clínica diaria.</span>
+                      <span>Integrate cutting-edge European biotechnology into everyday clinical workflows.</span>
                     </li>
                     <li style={{ display: 'flex', gap: '0.45rem', fontSize: '0.82rem', color: '#475569' }}>
                       <Check size={15} style={{ color: '#0d9488', flexShrink: 0 }} />
-                      <span>Priorizar enfoques preventivos y de medicina integrativa sobre el tratamiento reactivo.</span>
+                      <span>Prioritize preventative, root-cause medicine over reactive symptom treatment.</span>
                     </li>
                   </ul>
                 </div>
@@ -659,20 +659,20 @@ END:VCARD`;
                 <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#0d9488' }}>
                     <Globe size={20} />
-                    <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Nuestra Visión</h3>
+                    <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Our Vision</h3>
                   </div>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <li style={{ display: 'flex', gap: '0.45rem', fontSize: '0.82rem', color: '#475569' }}>
                       <Check size={15} style={{ color: '#0d9488', flexShrink: 0 }} />
-                      <span>Empoderar a las clínicas para liderar la vanguardia de la medicina moderna.</span>
+                      <span>Empower healthcare clinics to lead the frontier of modern personalized medicine.</span>
                     </li>
                     <li style={{ display: 'flex', gap: '0.45rem', fontSize: '0.82rem', color: '#475569' }}>
                       <Check size={15} style={{ color: '#0d9488', flexShrink: 0 }} />
-                      <span>Impulsar la transformación sistémica hacia una atención sanitaria hiper-personalizada.</span>
+                      <span>Drive systemic healthcare transition toward proactive, hyper-personalized longevity care.</span>
                     </li>
                     <li style={{ display: 'flex', gap: '0.45rem', fontSize: '0.82rem', color: '#475569' }}>
                       <Check size={15} style={{ color: '#0d9488', flexShrink: 0 }} />
-                      <span>Democratizar el acceso a tecnologías farmacéuticas avanzadas en todo Oriente Medio.</span>
+                      <span>Democratize access to advanced compounded therapeutics across the Middle East.</span>
                     </li>
                   </ul>
                 </div>
@@ -681,20 +681,20 @@ END:VCARD`;
               {/* Team Stats */}
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: '0 0 1rem 0' }}>
-                  Equipo Directivo Multidisciplinar
+                  Multidisciplinary Executive Team
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
                   <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '8px' }}>
                     <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#003666' }}>15+</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Años de Experiencia</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Years of Experience</div>
                   </div>
                   <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '8px' }}>
                     <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d9488' }}>6</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Nacionalidades</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Nationalities Represented</div>
                   </div>
                   <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '8px' }}>
                     <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0284c7' }}>4</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Disciplinas Clave</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>Core Disciplines</div>
                   </div>
                 </div>
               </div>
@@ -702,11 +702,11 @@ END:VCARD`;
 
             {/* ── Section 7: Verification & Contact ── */}
             <section id="contact" className="mediluxe-section">
-              <span className="mediluxe-section-badge">Contacto &amp; Verificación</span>
-              <h2 className="mediluxe-section-title">Directorio Ejecutivo &amp; Canales Oficiales</h2>
+              <span className="mediluxe-section-badge">Executive Verification</span>
+              <h2 className="mediluxe-section-title">Executive Directory &amp; Official Inquiries</h2>
               <p className="mediluxe-section-subtitle">
-                Atención directa para directores médicos, jefes de farmacia e instituciones sanitarias 
-                interesadas en alianzas de suministro o distribución regional.
+                Direct access for medical directors, chief pharmacists, and healthcare institutions 
+                seeking regional supply or partnership agreements.
               </p>
 
               <div className="mediluxe-contact-grid">
@@ -716,7 +716,7 @@ END:VCARD`;
                     <div className="mediluxe-contact-item-left">
                       <div className="mediluxe-contact-item-icon"><Mail size={18} /></div>
                       <div>
-                        <div className="mediluxe-contact-item-title">Correo Electrónico Oficial</div>
+                        <div className="mediluxe-contact-item-title">Official Executive Email</div>
                         <div className="mediluxe-contact-item-val">jose@mediluxegulf.com</div>
                       </div>
                     </div>
@@ -726,7 +726,7 @@ END:VCARD`;
                       style={{ padding: '0.4rem 0.75rem', minHeight: '32px' }}
                     >
                       {copiedKey === 'email' ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
-                      <span>{copiedKey === 'email' ? 'Copiado' : 'Copiar'}</span>
+                      <span>{copiedKey === 'email' ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
 
@@ -735,7 +735,7 @@ END:VCARD`;
                     <div className="mediluxe-contact-item-left">
                       <div className="mediluxe-contact-item-icon"><Phone size={18} /></div>
                       <div>
-                        <div className="mediluxe-contact-item-title">Línea Telefónica &amp; WhatsApp</div>
+                        <div className="mediluxe-contact-item-title">Direct Telephone &amp; WhatsApp</div>
                         <div className="mediluxe-contact-item-val">+971 56 4179256</div>
                       </div>
                     </div>
@@ -745,7 +745,7 @@ END:VCARD`;
                       style={{ padding: '0.4rem 0.75rem', minHeight: '32px' }}
                     >
                       {copiedKey === 'phone' ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
-                      <span>{copiedKey === 'phone' ? 'Copiado' : 'Copiar'}</span>
+                      <span>{copiedKey === 'phone' ? 'Copied' : 'Copy'}</span>
                     </button>
                   </div>
 
@@ -754,7 +754,7 @@ END:VCARD`;
                     <div className="mediluxe-contact-item-left">
                       <div className="mediluxe-contact-item-icon"><Globe size={18} /></div>
                       <div>
-                        <div className="mediluxe-contact-item-title">Portal Institucional</div>
+                        <div className="mediluxe-contact-item-title">Institutional Website</div>
                         <div className="mediluxe-contact-item-val">www.mediluxegulf.com</div>
                       </div>
                     </div>
@@ -766,7 +766,7 @@ END:VCARD`;
                       style={{ padding: '0.4rem 0.75rem', minHeight: '32px' }}
                     >
                       <ExternalLink size={14} />
-                      <span>Visitar</span>
+                      <span>Visit</span>
                     </a>
                   </div>
                 </div>
@@ -808,9 +808,9 @@ END:VCARD`;
                       <rect x="50" y="95" width="20" height="6" fill="#003666" />
                     </svg>
                   </div>
-                  <h4 className="mediluxe-qr-title">Verificación Digital Inmediata</h4>
+                  <h4 className="mediluxe-qr-title">Instant Digital Verification</h4>
                   <p className="mediluxe-qr-sub">
-                    Escanee con la cámara de su smartphone para abrir este perfil o descargar la tarjeta de contacto oficial.
+                    Scan with your smartphone camera to access this corporate dossier or download the official contact card.
                   </p>
                 </div>
               </div>
@@ -818,10 +818,10 @@ END:VCARD`;
           </main>
 
           {/* ── Sticky Right Sidebar (Google Cloud "On This Page" Standard) ── */}
-          <aside className="mediluxe-sidebar" aria-label="Navegación del Perfil">
+          <aside className="mediluxe-sidebar" aria-label="Corporate Profile Navigation">
             <div className="mediluxe-toc-card">
               <div className="mediluxe-toc-header">
-                <span>Índice del Perfil</span>
+                <span>On This Page</span>
                 <span>{Math.round(readingProgress)}%</span>
               </div>
               <div className="mediluxe-toc-progress">
@@ -847,14 +847,14 @@ END:VCARD`;
 
             {/* Quick Actions Drawer Box */}
             <div className="mediluxe-sidebar-actions">
-              <div className="mediluxe-sidebar-actions-title">Acciones Directas</div>
+              <div className="mediluxe-sidebar-actions-title">Quick Actions</div>
               <button
                 onClick={handleShareWhatsApp}
                 className="mediluxe-btn mediluxe-btn-whatsapp"
                 style={{ width: '100%', fontSize: '0.8rem' }}
               >
                 <Share2 size={14} />
-                <span>Enviar por WhatsApp</span>
+                <span>Share on WhatsApp</span>
               </button>
               <button
                 onClick={downloadVCard}
@@ -862,7 +862,7 @@ END:VCARD`;
                 style={{ width: '100%', fontSize: '0.8rem' }}
               >
                 <Download size={14} />
-                <span>Guardar vCard en Móvil</span>
+                <span>Save vCard to Mobile</span>
               </button>
               <button
                 onClick={() => handleCopy('https://med-peptides.com/mediluxe', 'sidebar-link')}
@@ -870,7 +870,7 @@ END:VCARD`;
                 style={{ width: '100%', fontSize: '0.8rem' }}
               >
                 {copiedKey === 'sidebar-link' ? <Check size={14} style={{ color: '#10b981' }} /> : <Copy size={14} />}
-                <span>{copiedKey === 'sidebar-link' ? 'Copiado ✓' : 'Copiar Enlace'}</span>
+                <span>{copiedKey === 'sidebar-link' ? 'Copied ✓' : 'Copy Link'}</span>
               </button>
             </div>
           </aside>

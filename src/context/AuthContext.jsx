@@ -221,9 +221,12 @@ export function AuthProvider({ children, serverUser = null }) {
         const role = (profile?.role || (isAdmin ? 'admin' : 'pending')).toLowerCase();
         let destination = '';
 
-        if (role === 'pending') {
+        if (isAdmin || role === 'admin') {
+          // If admin, prioritize /admin unless storedTarget is an explicit admin route
+          destination = (storedTarget && storedTarget.startsWith('/admin')) ? storedTarget : '/admin';
+        } else if (role === 'pending') {
           destination = '/auth?tab=register';
-        } else if (storedTarget && !storedTarget.startsWith('/auth') && !storedTarget.startsWith('/login') && storedTarget !== '/') {
+        } else if (storedTarget && !storedTarget.startsWith('/auth') && !storedTarget.startsWith('/login') && storedTarget !== '/' && storedTarget !== '/customer') {
           destination = storedTarget;
         } else {
           const roleMap = {
@@ -239,7 +242,7 @@ export function AuthProvider({ children, serverUser = null }) {
             compounding_pharmacy: '/pharmacy',
             patient: '/patient',
           };
-          destination = roleMap[role] || (isAdmin ? '/admin' : '/patient');
+          destination = roleMap[role] || '/patient';
         }
 
         if (typeof window !== 'undefined' && destination) {

@@ -261,38 +261,6 @@ export default function CosmeticsSidebarWidget({
           </div>
         </div>
 
-        {/* Institutional Inquiry Action Button */}
-        {onInquireRoutine && (
-          <div style={{ padding: '0.6rem 0.85rem', borderTop: '1px solid #e2e8f0', background: '#ffffff' }}>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('medium');
-                onInquireRoutine();
-              }}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '7px 12px',
-                borderRadius: '6px',
-                background: '#0d9488',
-                color: '#ffffff',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 1px 3px rgba(13,148,136,0.25)',
-                transition: 'background 0.15s ease'
-              }}
-            >
-              <Mail size={12} />
-              <span>{isEs ? 'Cotizar Rutina Completa 2 Pasos' : 'Inquire Complete 2-Step Routine'}</span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* ── CARD 2: CLINICAL PURITY & COMPLIANCE (GCP STYLE) ── */}

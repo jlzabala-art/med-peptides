@@ -41,13 +41,11 @@ export default function AuthPage({ onBack }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  // Deep-link redirect: Check searchParams first, fallback to history state
-  const redirectTo = searchParams.get('redirect')
+  // Deep-link redirect: Check explicit searchParams first
+  const explicitSearchRedirect = searchParams.get('redirect')
     || searchParams.get('returnUrl')
-    || searchParams.get('next')
-    || (typeof window !== 'undefined' && window.history.state?.from?.pathname
-      ? `${window.history.state.from.pathname}${window.history.state.from.search || ''}`
-      : null);
+    || searchParams.get('next');
+  const redirectTo = (explicitSearchRedirect && explicitSearchRedirect !== '/customer') ? explicitSearchRedirect : null;
   const { user, userProfile, updateProfileData, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, logout, resetPassword, linkPassword, loginWithGoogle, loading: authLoading } = useAuth();
   const { register, loading: registerLoading, error: registerError } = useRegistration();
   const loading = authLoading || registerLoading;
@@ -128,10 +126,21 @@ export default function AuthPage({ onBack }) {
   }, []);
 
   const resolveTargetPortal = (targetRole, userEmail, explicitRedirect) => {
-    if (explicitRedirect) return explicitRedirect;
     const cleanEmail = (userEmail || '').toLowerCase().trim();
     const cleanRole = (targetRole || 'guest').toLowerCase();
-    if (cleanRole === 'admin' || ADMIN_EMAILS.includes(cleanEmail)) return '/admin';
+    const isUserAdmin = cleanRole === 'admin' || ADMIN_EMAILS.includes(cleanEmail);
+
+    if (isUserAdmin) {
+      if (explicitRedirect && explicitRedirect.startsWith('/admin')) {
+        return explicitRedirect;
+      }
+      return '/admin';
+    }
+
+    if (explicitRedirect && !explicitRedirect.startsWith('/auth') && !explicitRedirect.startsWith('/login') && explicitRedirect !== '/customer') {
+      return explicitRedirect;
+    }
+
     if (cleanRole === 'doctor' || cleanRole === 'medical_director' || cleanRole === 'fagron_doctor') return '/doctor';
     if (cleanRole === 'wholesaler' || cleanRole === 'wholeseller') return '/wholesaler';
     if (cleanRole === 'supplier') return '/supplier';
@@ -363,7 +372,7 @@ export default function AuthPage({ onBack }) {
     setError('');
     setSubmitting(true);
     try {
-      const target = redirectTo || (overrideRole ? `/${overrideRole}` : (accountType ? `/${accountType}` : ''));
+      const target = redirectTo || (overrideRole ? `/${overrideRole}` : (accountType && accountType !== 'customer' ? `/${accountType}` : ''));
       const res = await loginWithGoogle(target);
       if (res?.pendingRedirect) {
         setSuccess('Redirecting securely to Google...');
