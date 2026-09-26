@@ -45,7 +45,7 @@ import ProtocolImmuneModulationCard from '@/components/protocol/ProtocolImmuneMo
 import LongevityEpigeneticCalculator from '@/components/protocol/LongevityEpigeneticCalculator';
 import ImmuneResilienceCalculator from '@/components/protocol/ImmuneResilienceCalculator';
 import RecoveryLoadCalculator from '@/components/protocol/RecoveryLoadCalculator';
-import PublicDatasheetTableOfContents from '@/components/product/PublicDatasheetTableOfContents';
+import ProtocolDetailSidebar from '@/components/protocol/ProtocolDetailSidebar';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../../config/publicVersionConfig';
 import { generateProtocolGuidePdf } from '../../../services/protocolGuideExportService';
 
@@ -1092,13 +1092,14 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             </footer>
           </div>
 
-          {/* Persistent Google Cloud Console Table of Contents (Desktop Sticky Sidebar + Mobile Drawer) */}
-          <PublicDatasheetTableOfContents 
+          {/* Persistent Google Cloud Console Protocol Sidebar (Desktop Sticky + Mobile Drawer) */}
+          <ProtocolDetailSidebar 
             sections={tocSections} 
             lang={lang} 
             title={lang === 'es' ? 'Secciones del Protocolo' : 'Protocol Navigation'}
+            protocol={protocol}
+            slug={slug}
             similarProtocols={similarProtocols}
-            currentProtocolSlug={slug}
             topicalAdjuncts={protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
               {
                 product_slug: 'colway-strengthening-shampoo',
@@ -1113,6 +1114,8 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                 key_mechanisms: ['Native collagen & Keratin shield', 'Anti-breakage']
               }
             ] : null)}
+            onOpenQrModal={() => setIsQrModalOpen(true)}
+            onCopyLabRequisition={handleCopyLabRequisition}
           />
         </div>
 

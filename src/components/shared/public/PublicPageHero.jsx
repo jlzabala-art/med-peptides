@@ -33,9 +33,9 @@ export default function PublicPageHero({
           </h1>
 
           {description && (
-            <p className="pds-hero-desc">
+            <div className="pds-hero-desc">
               {description}
-            </p>
+            </div>
           )}
 
           {meta && (

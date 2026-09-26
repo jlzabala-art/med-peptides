@@ -40,6 +40,7 @@ import '../../components/product/PublicDatasheetView.css';
 import PublicAtlasAIDrawer from '../shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInquiryDrawer';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
+import ProtocolsCatalogSidebar from './ProtocolsCatalogSidebar';
 import { Mail, Lock } from 'lucide-react';
 import { getProtocolTranslations, GOAL_TRANSLATIONS, SUPPORTED_LANGUAGES } from '../../utils/protocolTranslations';
 
@@ -162,6 +163,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   const [copiedId, setCopiedId] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // Default: list view
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState(() => new Set());
 
   const toggleExpanded = (id) => {
@@ -589,202 +591,140 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         </div>
       </div>
 
-      {/* ── 3. Search & Goals Engine Card ── */}
-      <section className="proto-search-engine-card">
-        {/* Search Input */}
-        <div className="proto-search-input-wrapper">
-          <Search size={20} className="proto-search-icon" />
-          <input
-            id="protocol-global-search"
-            type="text"
-            className="proto-search-input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t.searchPlaceholder}
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              className="proto-search-clear-btn"
-              onClick={() => {
-                triggerHaptic('light');
-                setSearchQuery('');
-              }}
-              title="Clear search"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
-
-        {/* Filter Controls Row */}
-        <div className="proto-controls-row">
-          <div className="proto-controls-left">
-            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
-              {lang === 'es' ? 'Filtros:' : 'Filters:'}
-            </span>
-
-            {/* Goal select */}
-            <select
-              className="proto-select-filter"
-              value={selectedGoal}
-              onChange={(e) => {
-                triggerHaptic('light');
-                setSelectedGoal(e.target.value);
-              }}
-            >
-              {GOAL_BUCKETS.map(g => {
-                const count = goalCounts[g.id] || 0;
-                const localizedLabel = GOAL_TRANSLATIONS[g.id]?.[lang] || g.label;
-                return (
-                  <option key={g.id} value={g.id}>
-                    {g.id === 'all' ? (lang === 'es' ? 'Todos los Objetivos' : 'All Goals') : localizedLabel} ({count})
-                  </option>
-                );
-              })}
-            </select>
-
-            {/* Duration select */}
-            <select
-              className="proto-select-filter"
-              value={durationFilter}
-              onChange={(e) => {
-                triggerHaptic('light');
-                setDurationFilter(e.target.value);
-              }}
-            >
-              <option value="all">{t.allDurations}</option>
-              <option value="short">{t.shortCycle}</option>
-              <option value="medium">{t.standardCycle}</option>
-              <option value="long">{t.extendedCycle}</option>
-            </select>
-
-            {/* Phases select */}
-            <select
-              className="proto-select-filter"
-              value={phasesFilter}
-              onChange={(e) => {
-                triggerHaptic('light');
-                setPhasesFilter(e.target.value);
-              }}
-            >
-              <option value="all">{t.allStructures}</option>
-              <option value="single">{t.singlePhase}</option>
-              <option value="titration">{t.titrationPhase}</option>
-            </select>
-
-            {/* Sort select */}
-            <select
-              className="proto-select-filter"
-              value={sortBy}
-              onChange={(e) => {
-                triggerHaptic('light');
-                setSortBy(e.target.value);
-              }}
-            >
-              <option value="relevance">{t.sortRecommended}</option>
-              <option value="duration-desc">{t.sortDurationDesc}</option>
-              <option value="duration-asc">{t.sortDurationAsc}</option>
-              <option value="phases-desc">{lang === 'es' ? 'Fases: Mayor complejidad' : 'Phases: Highest complexity'}</option>
-              <option value="name-asc">{t.sortNameAsc}</option>
-            </select>
-          </div>
-
-          <div className="proto-controls-right" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {/* Dual View Mode Switcher */}
-            <div className="proto-view-switcher" role="radiogroup" aria-label="Visual view mode">
-              <button
-                type="button"
-                className={`proto-view-btn ${viewMode === 'list' ? 'is-active' : ''}`}
-                onClick={() => { triggerHaptic('selection'); setViewMode('list'); }}
-                title={lang === 'es' ? 'Vista Lista (Compacta)' : 'Compact List View'}
-              >
-                <List size={14} />
-                <span>{lang === 'es' ? 'Lista' : 'List'}</span>
-              </button>
-              <button
-                type="button"
-                className={`proto-view-btn ${viewMode === 'cards' ? 'is-active' : ''}`}
-                onClick={() => { triggerHaptic('selection'); setViewMode('cards'); }}
-                title={lang === 'es' ? 'Vista Tarjetas' : 'Cards Grid View'}
-              >
-                <LayoutGrid size={14} />
-                <span>{lang === 'es' ? 'Tarjetas' : 'Cards'}</span>
-              </button>
+      {/* ── 3. Google Cloud Console 2-Column Responsive Layout (Main Column + Sticky Sidebar) ── */}
+      <div className="proto-content-grid">
+        <div className="proto-main-column">
+          {/* Prioritized Global Search Bar (Regla #7) & Active Filter Chips */}
+          <div className="proto-search-wrapper-clean" style={{ marginBottom: '1.25rem' }}>
+            <div className="proto-search-input-wrapper" style={{ marginBottom: hasActiveFilters ? '0.75rem' : '0' }}>
+              <Search size={20} className="proto-search-icon" />
+              <input
+                id="protocol-global-search"
+                type="text"
+                className="proto-search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.searchPlaceholder || (lang === 'es' ? 'Buscar protocolos clínicos (ej. BPC-157, Retatrutide, Longevidad...)' : 'Search clinical protocols (e.g. BPC-157, Retatrutide, Longevity...)')}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="proto-search-clear-btn"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setSearchQuery('');
+                  }}
+                  title="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </div>
 
-            {/* Reset Filters button */}
+            {/* Active Filter Chips */}
             {hasActiveFilters && (
+              <div className="proto-active-filters-strip" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700 }}>
+                  {lang === 'es' ? 'Filtros Activos:' : 'Active Filters:'}
+                </span>
+                {searchQuery && (
+                  <span className="proto-filter-badge">
+                    {lang === 'es' ? 'Búsqueda' : 'Search'}: "{searchQuery}"
+                    <span className="proto-filter-badge-remove" onClick={() => setSearchQuery('')}>×</span>
+                  </span>
+                )}
+                {selectedGoal !== 'all' && (
+                  <span className="proto-filter-badge">
+                    {lang === 'es' ? 'Objetivo' : 'Goal'}: {GOAL_TRANSLATIONS[selectedGoal]?.[lang] || selectedGoal}
+                    <span className="proto-filter-badge-remove" onClick={() => setSelectedGoal('all')}>×</span>
+                  </span>
+                )}
+                {durationFilter !== 'all' && (
+                  <span className="proto-filter-badge">
+                    {lang === 'es' ? 'Duración' : 'Duration'}: {durationFilter === 'short' ? '≤8w' : durationFilter === 'medium' ? '8–12w' : '>12w'}
+                    <span className="proto-filter-badge-remove" onClick={() => setDurationFilter('all')}>×</span>
+                  </span>
+                )}
+                {phasesFilter !== 'all' && (
+                  <span className="proto-filter-badge">
+                    {lang === 'es' ? 'Estructura' : 'Phases'}: {phasesFilter === 'single' ? (lang === 'es' ? 'Monofásico' : 'Continuous') : (lang === 'es' ? 'Titulación' : 'Titration')}
+                    <span className="proto-filter-badge-remove" onClick={() => setPhasesFilter('all')}>×</span>
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#003666',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: '2px 6px'
+                  }}
+                >
+                  {lang === 'es' ? 'Limpiar todo' : 'Clear all'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Scope Bar (Regla #22) & View Mode Controls */}
+          <div className="proto-scope-bar">
+            <div className="proto-scope-badge">
+              <Check size={16} />
+              <span>
+                {lang === 'es' ? 'Mostrando' : 'Showing'} <strong>{filteredProtocols.length}</strong> {lang === 'es' ? 'de' : 'of'} <strong>{enrichedProtocols.length}</strong> {lang === 'es' ? 'protocolos clínicos disponibles' : 'available clinical protocols'}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {/* Dual View Mode Switcher */}
+              <div className="proto-view-switcher" role="radiogroup" aria-label="Visual view mode">
+                <button
+                  type="button"
+                  className={`proto-view-btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                  onClick={() => { triggerHaptic('selection'); setViewMode('list'); }}
+                  title={lang === 'es' ? 'Vista Lista (Compacta)' : 'Compact List View'}
+                >
+                  <List size={14} />
+                  <span>{lang === 'es' ? 'Lista' : 'List'}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`proto-view-btn ${viewMode === 'cards' ? 'is-active' : ''}`}
+                  onClick={() => { triggerHaptic('selection'); setViewMode('cards'); }}
+                  title={lang === 'es' ? 'Vista Tarjetas' : 'Cards Grid View'}
+                >
+                  <LayoutGrid size={14} />
+                  <span>{lang === 'es' ? 'Tarjetas' : 'Cards'}</span>
+                </button>
+              </div>
+
+              {/* Mobile Filter Button (< 1024px) */}
               <button
                 type="button"
-                onClick={handleResetFilters}
-                style={{
-                  background: '#f1f5f9',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  padding: '0.45rem 0.85rem',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  color: '#475569',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                className="proto-mobile-filter-floating"
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setIsMobileDrawerOpen(true);
                 }}
               >
-                <RotateCcw size={13} />
-                <span>{t.resetFilters}</span>
+                <Filter size={13} />
+                <span>{lang === 'es' ? 'Filtros y QR' : 'Filters & QR'}</span>
+                {hasActiveFilters && (
+                  <span style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: '#5eead4'
+                  }} />
+                )}
               </button>
-            )}
+            </div>
           </div>
-        </div>
-
-        {/* Active Filter Tags */}
-        {hasActiveFilters && (
-          <div className="proto-active-filters-strip">
-            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{lang === 'es' ? 'Filtros Activos:' : 'Active Filters:'}</span>
-            {searchQuery && (
-              <span className="proto-filter-badge">
-                {lang === 'es' ? 'Búsqueda' : 'Search'}: "{searchQuery}"
-                <span className="proto-filter-badge-remove" onClick={() => setSearchQuery('')}>×</span>
-              </span>
-            )}
-            {selectedGoal !== 'all' && (
-              <span className="proto-filter-badge">
-                {lang === 'es' ? 'Objetivo' : 'Goal'}: {GOAL_TRANSLATIONS[selectedGoal]?.[lang] || selectedGoal}
-                <span className="proto-filter-badge-remove" onClick={() => setSelectedGoal('all')}>×</span>
-              </span>
-            )}
-            {durationFilter !== 'all' && (
-              <span className="proto-filter-badge">
-                {lang === 'es' ? 'Duración' : 'Duration'}: {durationFilter}
-                <span className="proto-filter-badge-remove" onClick={() => setDurationFilter('all')}>×</span>
-              </span>
-            )}
-            {phasesFilter !== 'all' && (
-              <span className="proto-filter-badge">
-                {lang === 'es' ? 'Fases' : 'Phases'}: {phasesFilter}
-                <span className="proto-filter-badge-remove" onClick={() => setPhasesFilter('all')}>×</span>
-              </span>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* ── 4. Scope Bar (Regla #22) ── */}
-      <div className="proto-scope-bar">
-        <div className="proto-scope-badge">
-          <Check size={16} />
-          <span>
-            {lang === 'es' ? 'Mostrando' : 'Showing'} <strong>{filteredProtocols.length}</strong> {lang === 'es' ? 'de' : 'of'} <strong>{enrichedProtocols.length}</strong> {lang === 'es' ? 'protocolos clínicos disponibles' : 'available clinical protocols'}
-          </span>
-        </div>
-        <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
-          {selectedGoal !== 'all' 
-            ? `${lang === 'es' ? 'Filtrado por' : 'Filtered by'}: ${GOAL_TRANSLATIONS[selectedGoal]?.[lang] || selectedGoal}` 
-            : (lang === 'es' ? 'Mostrando Catálogo Completo (Agrupado por Objetivos)' : 'Showing Complete Directory (Grouped by Goals)')}
-        </div>
-      </div>
 
       {/* ── 5. Protocol Groups by Therapeutic Goals ── */}
       {groupedProtocols.length > 0 ? (
@@ -1158,31 +1098,57 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         </div>
       )}
 
-      {/* ── 6. Institutional Prudence & Medical Notice (Bottom of page per GCP Standards) ── */}
-      <div className="pds-notice-card" style={{ marginTop: '2.5rem', marginBottom: '1.25rem' }}>
-        <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
-        <div className="pds-notice-text">
-          <strong>{lang === 'es' ? 'Compendio Clínico de Acceso Profesional' : 'Professional Clinical Reference Directory'}</strong>
-          <span>
-            {lang === 'es' 
-              ? 'Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.'
-              : 'All clinical protocols presented in this directory are formulated under molecular pharmacokinetics standards and international clinical trials (SURMOUNT, STEP, TRIUMPH). Administration requires medical prescription and supervision by a certified healthcare professional.'}
-          </span>
-        </div>
-      </div>
+          {/* ── 6. Institutional Prudence & Medical Notice (Bottom of page per GCP Standards) ── */}
+          <div className="pds-notice-card" style={{ marginTop: '2.5rem', marginBottom: '1.25rem' }}>
+            <ShieldCheck size={20} color="#0284c7" style={{ flexShrink: 0 }} />
+            <div className="pds-notice-text">
+              <strong>{lang === 'es' ? 'Compendio Clínico de Acceso Profesional' : 'Professional Clinical Reference Directory'}</strong>
+              <span>
+                {lang === 'es' 
+                  ? 'Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.'
+                  : 'All clinical protocols presented in this directory are formulated under molecular pharmacokinetics standards and international clinical trials (SURMOUNT, STEP, TRIUMPH). Administration requires medical prescription and supervision by a certified healthcare professional.'}
+              </span>
+            </div>
+          </div>
 
-      <footer style={{
-        background: '#f8fafc',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        padding: '1.25rem 1.5rem',
-        fontSize: '0.80rem',
-        color: '#64748b',
-        lineHeight: 1.5,
-        textAlign: 'center'
-      }}>
-        <strong>{lang === 'es' ? 'Aviso Médico Profesional:' : 'Professional Medical Notice:'}</strong> {lang === 'es' ? 'Todos los protocolos clínicos presentados en este directorio están formulados bajo estándares de farmacocinética molecular y guías clínicas internacionales (SURMOUNT, STEP, TRIUMPH). La administración requiere prescripción médica y supervisión por un profesional de la salud debidamente cualificado.' : 'All clinical protocols presented in this directory are formulated under molecular pharmacokinetics standards and international clinical trials (SURMOUNT, STEP, TRIUMPH). Administration requires medical prescription and supervision by a certified healthcare professional.'}
-      </footer>
+          {/* Standardized Institutional Regulatory Footer (PublicDatasheet Standard) */}
+          <footer className="pds-page-footer">
+            <div className="pds-footer-box">
+              <p className="pds-footer-text">
+                <strong>{lang === 'es' ? 'Gobernanza Clínica & Prescripción Facultativa:' : 'Clinical Governance & Prescriber Supervision:'}</strong>{' '}
+                {lang === 'es'
+                  ? 'Todos los protocolos clínicos de este directorio han sido estructurados conforme a estándares internacionales de farmacocinética molecular y guías clínicas basadas en evidencia (SURMOUNT, STEP, TRIUMPH). La dispensación, dosificación y ajuste de cada pauta requiere prescripción y supervisión directa por un profesional sanitario colegiado.'
+                  : 'All clinical protocols in this directory are structured according to molecular pharmacokinetics standards and international evidence-based guidelines (SURMOUNT, STEP, TRIUMPH). Dispensing and titration schedules require direct prescription and clinical oversight by a licensed medical practitioner.'}
+              </p>
+              <p className="pds-footer-meta">
+                Document Ref: DIR-PROTO-2026 • Rev 2026.4 • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Technologies
+              </p>
+            </div>
+          </footer>
+        </div>
+
+        {/* Persistent Google Cloud Console Sticky Sidebar */}
+        <ProtocolsCatalogSidebar
+          selectedGoal={selectedGoal}
+          onSelectGoal={setSelectedGoal}
+          goalBuckets={GOAL_BUCKETS}
+          goalCounts={goalCounts}
+          durationFilter={durationFilter}
+          onSelectDuration={setDurationFilter}
+          phasesFilter={phasesFilter}
+          onSelectPhases={setPhasesFilter}
+          sortBy={sortBy}
+          onSelectSort={setSortBy}
+          onResetFilters={handleResetFilters}
+          hasActiveFilters={hasActiveFilters}
+          lang={lang}
+          t={t}
+          publicUrl={typeof window !== 'undefined' ? `${window.location.origin}/proto` : 'https://med-peptides.com/proto'}
+          onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+          isMobileDrawerOpen={isMobileDrawerOpen}
+          onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
+        />
+      </div>
 
       {/* ── Floating Atlas AI Technical Inquiry (Single consolidated AI button across all public views) ── */}
       <PublicAtlasAIDrawer

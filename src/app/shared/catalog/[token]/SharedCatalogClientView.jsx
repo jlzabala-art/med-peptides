@@ -41,7 +41,9 @@ import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import SharedCatalogProductListRow from './components/SharedCatalogProductListRow';
-import SharedCatalogFloatingDock from './components/SharedCatalogFloatingDock';
+import CatalogRightSidebar from './components/CatalogRightSidebar';
+import CatalogStickyActionBar from './components/CatalogStickyActionBar';
+import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 
 function getPharmaMarginTheme(priceSource, meta = {}) {
@@ -246,6 +248,7 @@ export default function SharedCatalogClientView({
 
   // Dual view mode: 'list' (default) vs 'cards'
   const [viewMode, setViewMode] = React.useState('list');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [expandedProductIds, setExpandedProductIds] = React.useState(() => new Set());
   const toggleExpandedProduct = React.useCallback((id) => {
     setExpandedProductIds(prev => {
@@ -255,6 +258,34 @@ export default function SharedCatalogClientView({
       return next;
     });
   }, []);
+
+  const fdaStatusCounts = React.useMemo(() => {
+    const counts = {
+      all: (products || []).length,
+      fda_approved: 0,
+      fda_pcac_503a_recommended: 0,
+      clinical_investigational: 0,
+      research_analytical_standard: 0
+    };
+    (products || []).forEach(p => {
+      const st = getFdaPeptideStatus(p)?.status;
+      if (st && counts[st] !== undefined) {
+        counts[st]++;
+      }
+    });
+    return counts;
+  }, [products]);
+
+  const activeFiltersCount = React.useMemo(() => {
+    let count = 0;
+    if (selectedGoals && selectedGoals.length > 0) count += selectedGoals.length;
+    if (fdaFilter && fdaFilter !== 'all') count += 1;
+    if (dosageFilter && dosageFilter !== 'all') count += 1;
+    if (packagingMode && packagingMode !== 'all') count += 1;
+    if (routeFilter && routeFilter !== 'all') count += 1;
+    if (searchQuery?.trim()) count += 1;
+    return count;
+  }, [selectedGoals, fdaFilter, dosageFilter, packagingMode, routeFilter, searchQuery]);
 
   const groupedProducts = React.useMemo(() => {
     if (!displayedProducts || displayedProducts.length === 0) return [];
@@ -817,6 +848,7 @@ export default function SharedCatalogClientView({
           setRouteFilter={setRouteFilter}
           fdaFilter={fdaFilter}
           setFdaFilter={setFdaFilter}
+          onOpenMobileFilters={() => setIsMobileSidebarOpen(true)}
           protocols={protocols}
           productsWithProtocolsCount={productsWithProtocolsCount}
           onlyWithProtocols={onlyWithProtocols}
@@ -828,8 +860,11 @@ export default function SharedCatalogClientView({
           setViewMode={setViewMode}
         />
 
-        {/* ── MAIN CONTENT: Protocols vs Products (Google Cloud Console Standard) ── */}
-        {activeTab === 'protocols' ? (
+        {/* ── MAIN CONTENT: Dual-Column Layout with Right Facet Sidebar (Google Cloud UX Standard) ── */}
+        <div className="catalog-content-with-sidebar">
+          {/* Main Left Column (Products or Protocols List) */}
+          <div className="catalog-main-column" style={{ minWidth: 0 }}>
+            {activeTab === 'protocols' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {filteredProtocols.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
@@ -1142,23 +1177,47 @@ export default function SharedCatalogClientView({
             <AlgoliaRecommendCrossSell cartItems={cartItems} catalogProducts={products} onAddProduct={(prod, variant) => updateQuantity(variant, prod, 1)} />
           </div>
         )}
+          </div> {/* end .catalog-main-column */}
+
+          {/* ── Right Sidebar: Permanent Clinical Goals & FDA Regulatory Status Facets ── */}
+          <CatalogRightSidebar
+            availableGoals={availableGoals}
+            selectedGoals={selectedGoals}
+            toggleGoal={toggleGoal}
+            clearGoals={clearGoals}
+            fdaFilter={fdaFilter}
+            setFdaFilter={setFdaFilter}
+            fdaStatusCounts={fdaStatusCounts}
+            totalProductsCount={products?.length || 0}
+            displayedCount={displayedProducts?.length || 0}
+            isOpenMobile={isMobileSidebarOpen}
+            onCloseMobile={() => setIsMobileSidebarOpen(false)}
+            t={t}
+          />
+        </div> {/* end .catalog-content-with-sidebar */}
 
       </div> {/* end .catalog-container */}
 
-      {/* ── Floating Bottom Dock ── */}
-      <SharedCatalogFloatingDock
-        catalogMeta={catalogMeta}
+      {/* ── Fixed Bottom Footer Action Bar (Google Cloud UX Standards from /p/[slug] & /proto/[slug]) ── */}
+      <CatalogStickyActionBar
+        catalogTitle={catalogMeta?.title || 'Institutional Formulations Portfolio'}
+        catalogCode={catalogCode}
+        badgeText={pharmaMarginTheme?.tierCode || 'INSTITUTIONAL TERMS'}
+        displayedCount={displayedProducts?.length || 0}
+        totalCount={products?.length || 0}
         cartTotalUnits={cartTotalUnits}
         grandTotal={grandTotal}
         currencySymbol={currencySymbol}
         currentCurrency={currentCurrency}
-        activeShipping={activeShipping}
         isCartOpen={isCartOpen}
         setIsCartOpen={setIsCartOpen}
         clearCart={clearCart}
-        handleCopyOrderSummary={handleCopyOrderSummary}
-        copiedToast={copiedToast}
-        handleOpenWhatsAppCheckout={handleOpenWhatsAppCheckout}
+        activeFiltersCount={activeFiltersCount}
+        onOpenFilters={() => setIsMobileSidebarOpen(true)}
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        onSubmitOrder={handleOpenWhatsAppCheckout}
+        lang={lang}
+        t={t}
       />
 
       {/* ── Cart Review Drawer ── */}
@@ -2043,7 +2102,7 @@ export default function SharedCatalogClientView({
 
       {/* Sandboxed, Strictly English Public Atlas AI Research Copilot */}
       <PublicAtlasAIDrawer
-        hideFloatingTrigger={isCartOpen || isInquiryDrawerOpen || isRegisterModalOpen || Boolean(selectedPublicProtocol)}
+        hideFloatingTrigger={true}
         contextType="catalog"
         catalogInventory={products.map(p => ({
           name: p.canonicalName,

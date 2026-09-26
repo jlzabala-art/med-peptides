@@ -7,7 +7,6 @@ import { sanitizePublicProduct } from '../../../repositories/publicDataSanitizer
 import { deriveCanonicalIdentity } from '../../../utils/canonicalProductRegistry';
 import PublicDatasheetView from '../../../components/product/PublicDatasheetView';
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
-import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
@@ -480,25 +479,6 @@ export default async function PublicProductRoute({ params, searchParams }) {
     );
   }
 
-  if (isCosmetics) {
-    return (
-      <>
-        {jsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
-        )}
-        {breadcrumbJsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-          />
-        )}
-        <CosmeticsDetail product={safeProduct} />
-      </>
-    );
-  }
 
   return (
     <>

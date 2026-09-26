@@ -1555,6 +1555,126 @@ export default function DiagnosticTestTechnicalSpecs({
                   </div>
                 </div>
               </div>
+
+              {/* Bloodo Official AM/PM Ratio Callout */}
+              <div style={{ marginTop: '0.85rem', padding: '10px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.74rem', color: '#475569' }}>
+                <strong style={{ color: '#0f172a' }}>{isEs ? 'Interpretación del Ratio Circadiano AM/PM:' : 'Circadian AM/PM Ratio Interpretation:'}</strong>{' '}
+                {isEs 
+                  ? 'Un ratio AM/PM superior a 2:1 refleja un ritmo circadiano saludable con descenso fisiológico vespertino. Un ratio bajo/aplanado indica estrés crónico, fatiga adrenal y alteración cardiometabólica.'
+                  : 'An AM/PM ratio above 2:1 reflects a healthy cortisol rhythm with appropriate evening decline. A low or flattened ratio signals chronic stress, adrenal fatigue, and cardiometabolic dysregulation.'}
+              </div>
+            </div>
+          )}
+
+          {/* ── Testosterone+ Multi-Steroid & Functional Ratios Card (Bloodo Official Catalog) ── */}
+          {isTestosterone && (
+            <div style={{ marginTop: '1.25rem', padding: '1.25rem', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', paddingBottom: '0.65rem', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Activity size={16} color="#003666" />
+                  <strong style={{ fontSize: '0.85rem', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'PANEL MULTI-ESTEROIDEO & RATIOS FUNCIONALES (8 BIOMARCADORES)' : 'MULTI-STEROID PANEL & FUNCTIONAL RATIOS (8 BIOMARKERS)'}
+                  </strong>
+                </div>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#003666', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px' }}>
+                  LC-MS/MS + ELISA
+                </span>
+              </div>
+
+              <p style={{ fontSize: '0.76rem', color: '#64748b', lineHeight: 1.5, margin: '0 0 1rem 0' }}>
+                {isEs
+                  ? 'A diferencia de los inmunoensayos básicos, el test Bloodo Testosterone+ cuantifica por LC-MS/MS un panel completo de 8 esteroides y calcula la testosterona libre mediante la Ecuación de Vermeulen, junto con tres ratios funcionales clave del eje adrenal y androgénico:'
+                  : 'Unlike basic single-analyte immunoassays, the Bloodo Testosterone+ test quantifies a full panel of 8 steroid biomarkers via LC-MS/MS and calculates free testosterone using the Vermeulen equation, along with three key functional neuro-endocrine ratios:'}
+              </p>
+
+              {/* 3 Functional Ratios Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginBottom: '1rem' }}>
+                <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', display: 'block', marginBottom: '3px' }}>
+                    {isEs ? 'Eje de Estrés / Inactivación' : 'Stress Regulation Axis'}
+                  </span>
+                  <strong style={{ fontSize: '0.82rem', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
+                    Cortisol / Cortisona
+                  </strong>
+                  <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.4, display: 'block' }}>
+                    {isEs ? 'Equilibrio entre la forma activa e inactiva del cortisol (actividad 11β-HSD).' : 'Balance between active and inactive cortisol (11β-HSD activity).'}
+                  </span>
+                </div>
+
+                <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', display: 'block', marginBottom: '3px' }}>
+                    {isEs ? 'Eje Anabólico / Alostático' : 'Anabolic / Stress Balance'}
+                  </span>
+                  <strong style={{ fontSize: '0.82rem', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
+                    Cortisol / DHEAS
+                  </strong>
+                  <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.4, display: 'block' }}>
+                    {isEs ? 'Balance entre la respuesta catabólica de estrés y la reserva anabólica de recuperación.' : 'Balance between catabolic stress response and anabolic recovery reserve.'}
+                  </span>
+                </div>
+
+                <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', display: 'block', marginBottom: '3px' }}>
+                    {isEs ? 'Eje Androgénico' : 'Androgen Conversion Axis'}
+                  </span>
+                  <strong style={{ fontSize: '0.82rem', color: '#0f172a', display: 'block', marginBottom: '4px' }}>
+                    Testosterona / Androstenediona
+                  </strong>
+                  <span style={{ fontSize: '0.70rem', color: '#64748b', lineHeight: 1.4, display: 'block' }}>
+                    {isEs ? 'Eficiencia en la conversión de precursores androgénicos a testosterona activa.' : 'Efficiency of precursor hormone conversion into active testosterone.'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 8 Biomarkers list */}
+              <div style={{ padding: '8px 12px', background: '#eff6ff', borderRadius: '6px', border: '1px solid #bfdbfe', fontSize: '0.70rem', color: '#1e3a8a' }}>
+                <strong>{isEs ? 'Los 8 Biomarcadores Medidos:' : 'All 8 Quantified Biomarkers:'}</strong>{' '}
+                Total Testosterone · SHBG · Free Testosterone (Calculated) · DHEAS · Cortisol · Cortisone · Androstenedione · 17-OH Progesterone.
+              </div>
+            </div>
+          )}
+
+          {/* ── Vitamin D C-3 Epimer Exclusion Card (Bloodo Official Catalog) ── */}
+          {isVitD && (
+            <div style={{ marginTop: '1.25rem', padding: '1.25rem', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', paddingBottom: '0.65rem', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sun size={16} color="#d97706" />
+                  <strong style={{ fontSize: '0.85rem', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'DESGLOSE D3/D2 Y EXCLUSIÓN DE EPÍMEROS C-3' : 'D3/D2 RESOLUTION & C-3 EPIMER EXCLUSION'}
+                  </strong>
+                </div>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#d97706', background: '#fffbeb', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: '4px' }}>
+                  LC-MS/MS ESPECÍFICO
+                </span>
+              </div>
+              <p style={{ fontSize: '0.76rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+                {isEs
+                  ? 'A diferencia de los inmunoensayos convencionales que sobreestiman la vitamina D al confundirla con epímeros inactivos, el método LC-MS/MS de Bloodo cuantifica por separado la Vitamina D3 (colecalciferol) y Vitamina D2 (ergocalciferol), y excluye selectivamente la forma inactiva 3-epi-25(OH)D3. Esta precisión es crítica para evitar sobredosis o diagnósticos erróneos en personas suplementadas, lactantes y embarazadas.'
+                  : 'Unlike standard immunoassays that overestimate Vitamin D by co-measuring inactive epimers, Bloodo LC-MS/MS selectively quantifies Vitamin D3 (cholecalciferol) and Vitamin D2 (ergocalciferol) separately and excludes the biologically inactive 3-epi-25(OH)D3 epimer. This chromatographic separation prevents diagnostic overestimation in supplemented patients, infants, and pregnant women.'}
+              </p>
+            </div>
+          )}
+
+          {/* ── Omega Ratio 26-Fatty Acids Profile Card (Bloodo Official Catalog) ── */}
+          {isOmega && (
+            <div style={{ marginTop: '1.25rem', padding: '1.25rem', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', paddingBottom: '0.65rem', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Droplets size={16} color="#0284c7" />
+                  <strong style={{ fontSize: '0.85rem', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'PERFIL EXTENDIDO DE 26 ÁCIDOS GRASOS Y RATIO AA:EPA' : 'EXTENDED 26-FATTY ACID PROFILE & AA:EPA RATIO'}
+                  </strong>
+                </div>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '2px 8px', borderRadius: '4px' }}>
+                  GC-FID (10 MIN SECADO)
+                </span>
+              </div>
+              <p style={{ fontSize: '0.76rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+                {isEs
+                  ? 'El test Bloodo Omega Ratio analiza mediante cromatografía de gases (GC-FID) 26 ácidos grasos individuales (saturados, monoinsaturados y poliinsaturados). Cuantifica el Índice Omega-3 en membrana de glóbulos rojos, el ratio inflamatorio AA:EPA (Ácido Araquidónico a EPA), el índice de grasas trans y el ratio Omega-6/Omega-3. La tarjeta contiene un agente estabilizador de ácidos grasos y requiere solo 10 minutos de secado al aire.'
+                  : 'The Bloodo Omega Ratio test analyzes 26 distinct fatty acids (SFAs, MUFAs, PUFAs) using gas chromatography (GC-FID). It quantifies the red blood cell equivalent Omega-3 Index, the cellular neuro-inflammatory AA:EPA ratio, the trans fat index, and the Omega-6/Omega-3 balance. The collection paper includes a fatty acid stabilizing agent and requires only 10 minutes of drying time.'}
+              </p>
             </div>
           )}
 
@@ -1993,19 +2113,31 @@ export default function DiagnosticTestTechnicalSpecs({
           <div className="dts-footer-text">
             <strong className="dts-footer-headline">
               <Building2 size={16} color="#0d9488" />
-              LifeLab1 Clinical Laboratory — Vilnius, Lithuania
+              LifeLab1 Clinical Laboratory — Vilnius, Lithuania (Lic. NM-334 & NR-4864)
             </strong>
             <p className="dts-footer-sub">
               {isEs 
-                ? 'Laboratorio clínico homologado bajo regulación europea CE-IVDR (EU 2017/746). Informes cuantitativos generados en 3–5 días laborables mediante portal digital encriptado.'
-                : 'Licensed European central laboratory compliant with CE-IVDR (EU 2017/746). Turnaround time 3–5 business days with secure digital portal delivery.'}
+                ? 'Laboratorio clínico central acreditado según ISO 15189 y regulado bajo la normativa europea CE-IVDR (UE 2017/746). Equipamiento de alta resolución: LC-MS/MS, GC/MS, GC-FID, HPLC de intercambio iónico y ELISA. Informes cuantitativos en 48–72h mediante portal digital encriptado.'
+                : 'Licensed European central laboratory (Licenses NM-334 & NR-4864) compliant with ISO 15189 & CE-IVDR (EU 2017/746). Advanced instrumentation: LC-MS/MS, GC/MS, GC-FID, Ion-Exchange HPLC, and ELISA. Turnaround time 48–72h via secure encrypted portal.'}
             </p>
           </div>
 
           <div className="dts-footer-badges">
-            <span className="dts-accreditation-tag">ISO 15189 Compliant</span>
-            <span className="dts-accreditation-tag">CE-IVDR In Vitro Diagnostic</span>
+            <span className="dts-accreditation-tag">ISO 15189 Certified</span>
+            <span className="dts-accreditation-tag">CE-IVDR Certified</span>
+            <span className="dts-accreditation-tag">Lic. NM-334 / NR-4864</span>
             <span className="dts-accreditation-tag">Room Temp Stable (15–25°C)</span>
+            <a 
+              href="/docs/bloodo-product-catalog-2026.pdf" 
+              download="bloodo-product-catalog-2026.pdf"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="dts-accreditation-tag"
+              style={{ background: '#003666', color: '#ffffff', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 700 }}
+            >
+              <Download size={12} />
+              <span>{isEs ? 'Catálogo Completo Bloodo 2026 (PDF)' : 'Official 2026 Catalog (PDF)'}</span>
+            </a>
           </div>
         </div>
       </div>

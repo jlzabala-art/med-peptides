@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, ClipboardList, Clock, ShieldCheck, QrCode, ChevronDown, ChevronUp, FlaskConical, Package } from 'lucide-react';
-import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
-import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
+import { Download, ShieldCheck, QrCode, Copy, Check, ExternalLink, FileText, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
-/** Returns { daysLeft, urgency } where urgency is 'ok' | 'warning' | 'critical' | 'expired' */
+/** Returns { daysLeft, urgency, expiresAt } */
 function useValidityCountdown(catalogMeta) {
   return React.useMemo(() => {
     const validityDays = Number(catalogMeta?.validityDays) || 0;
@@ -22,49 +21,38 @@ function useValidityCountdown(catalogMeta) {
 }
 
 const URGENCY_STYLES = {
-  ok:       { bg: 'rgba(34,197,94,0.18)',  border: '#4ade80', color: '#bbf7d0' },
-  warning:  { bg: 'rgba(234,179,8,0.22)',  border: '#fde047', color: '#fef08a' },
-  critical: { bg: 'rgba(239,68,68,0.22)',  border: '#f87171', color: '#fecaca' },
-  expired:  { bg: 'rgba(100,116,139,0.2)', border: '#94a3b8', color: '#cbd5e1' },
-};
-
-const DEFAULT_PHARMA_MARGIN_THEME = {
-  tierCode: 'INSTITUTIONAL',
-  tierLabel: 'Lyophilized Formulations',
-  gradient: 'linear-gradient(135deg, #00284d 0%, #004d80 50%, #003366 100%)',
-  borderColor: 'rgba(255, 255, 255, 0.2)',
-  glow: 'rgba(0, 0, 0, 0.2)',
-  accentColor: '#93c5fd',
-  pillBg: 'rgba(255, 255, 255, 0.12)',
+  ok:       { bg: '#f0fdf4', border: '#bbf7d0', color: '#15803d' },
+  warning:  { bg: '#fefce8', border: '#fef08a', color: '#a16207' },
+  critical: { bg: '#fef2f2', border: '#fecaca', color: '#b91c1c' },
+  expired:  { bg: '#f8fafc', border: '#e2e8f0', color: '#64748b' },
 };
 
 /**
- * SharedCatalogHeader — Executive header card with dynamic pharma margin theme,
- * 3D holographic QR scan card, PDF download button, and protocol toggle.
- * Theme gradient changes based on the active pricing tier (margin %).
+ * SharedCatalogHeader — Neutral, Professional Google Cloud UX Hero Card.
+ * Matches PublicDatasheetView and PublicProtocolPage hero architecture:
+ *  - Crisp white surface, 1px light border, refined typography.
+ *  - Institutional verification badges & validity countdown.
+ *  - Clean GCP console action buttons (Download PDF, Copy Link).
+ *  - QR Code verification module on desktop + inline verification bar on mobile.
+ *  - Removed the bulky products/protocols tab switch.
  */
 export default function SharedCatalogHeader({
   pharmaMarginTheme,
-  isProtocolCatalog,
   catalogMeta,
-  products,
-  protocols,
-  totalVariants,
-  priceTierLabel,
-  isGeneratingPdf,
+  products = [],
+  protocols = [],
+  totalVariants = 0,
+  priceTierLabel = '',
+  isGeneratingPdf = false,
   handleDownloadPdf,
   catalogCode,
   batchCode,
   shareUrl,
-  showProtocolsUnderProducts,
-  setShowProtocolsUnderProducts,
-  activeTab = 'products',
-  setActiveTab,
-  t,
+  t = (k, f) => f || k,
 }) {
   const validity = useValidityCountdown(catalogMeta);
-  const theme = pharmaMarginTheme || DEFAULT_PHARMA_MARGIN_THEME;
-  const [showVerificationDetails, setShowVerificationDetails] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const rawRecipientName = catalogMeta?.recipientName || '';
   const isWholesaler = catalogMeta?.recipientType === 'wholeseller' || catalogMeta?.recipientType === 'wholesaler';
@@ -72,182 +60,397 @@ export default function SharedCatalogHeader({
     ? rawRecipientName.split('·')[0].trim()
     : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
 
+  const verifiedCode = batchCode || catalogCode || 'RP-CATALOG';
+  const activeShareUrl = shareUrl || (typeof window !== 'undefined' ? window.location.href : '');
+
+  const handleCopyLink = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(activeShareUrl);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch (e) {
+      console.error('Failed to copy share URL:', e);
+    }
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(verifiedCode);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) {}
+  };
+
   return (
     <>
-      {/* Executive Header Card with Dynamic Pharma Margin Theme & Optimized Laptop Layout */}
-      <div
-        className="header-card"
+      {/* ── Neutral Google Cloud UX Page Hero Card ── */}
+      <section
+        className="pds-hero-card"
         style={{
-          background: theme.gradient,
-          border: `1px solid ${theme.borderColor}`,
-          boxShadow: `0 12px 32px -6px rgba(0, 0, 0, 0.38), 0 0 20px ${theme.glow}`
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '14px',
+          padding: '1.4rem 1.65rem',
+          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+          marginBottom: '1rem'
         }}
       >
-        <div className="header-card-inner">
-          <div className="header-card-left">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  {isWholesaler && cleanRecipientName
-                    ? `Authorized Wholesaler Partner: ${cleanRecipientName}`
-                    : cleanRecipientName
-                    ? `Authorized Clinical Partner: ${cleanRecipientName}`
-                    : 'Atlas Services • Clinical Compendium & Monograph Registry'}
-                </span>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
-                  {cleanRecipientName
-                    ? (isWholesaler
-                        ? `Wholesale Peptide Catalog • ${cleanRecipientName}`
-                        : `Clinical Peptide Catalog • ${cleanRecipientName}`)
-                    : 'Clinical Peptide Catalog'}
-                </h1>
-              </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: '1.5rem',
+          flexWrap: 'wrap'
+        }}>
+          
+          {/* Left / Main Column */}
+          <div style={{ flex: '1 1 600px', minWidth: 0 }}>
+            
+            {/* Badges Strip */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              flexWrap: 'wrap',
+              marginBottom: '0.65rem'
+            }}>
               <span style={{
-                fontSize: '0.74rem',
+                background: '#eff6ff',
+                color: '#1d4ed8',
+                border: '1px solid #bfdbfe',
+                borderRadius: '9999px',
+                padding: '2px 9px',
+                fontSize: '0.72rem',
                 fontWeight: 800,
-                color: theme.accentColor,
-                backgroundColor: theme.pillBg,
-                border: `1px solid ${theme.borderColor}`,
-                padding: '4px 10px',
-                borderRadius: '12px',
-                letterSpacing: '0.02em',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase'
+              }}>
+                {isWholesaler ? 'WHOLESALE CATALOG' : 'CLINICAL CATALOG'}
+              </span>
+
+              <span style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '4px',
+                background: '#f0fdf4',
+                color: '#15803d',
+                border: '1px solid #bbf7d0',
+                borderRadius: '9999px',
+                padding: '2px 9px',
+                fontSize: '0.72rem',
+                fontWeight: 700
               }}>
-                <ShieldCheck size={12} />
-                Dual-Stage RP-HPLC & LC-MS Certified
+                <ShieldCheck size={12} color="#16a34a" />
+                <span>Dual-Stage RP-HPLC & LC-MS Certified</span>
               </span>
-            </div>
-            <p style={{ margin: '6px 0 0 0', fontSize: '0.84rem', color: '#e0f2fe', lineHeight: 1.4, maxWidth: '580px' }}>
-              Analytical-grade lyophilized peptide vials, multi-dose presentations, and standardized therapeutic protocols. Verified direct delivery terms for authorized healthcare institutions.
-            </p>
 
-            <div className="header-meta-container">
-              <span className="header-meta-pill" style={{ color: '#ffffff' }}>
-                📅 {catalogMeta.issuedAt || catalogMeta.iat
+              {/* Date / Validity badge */}
+              <span style={{
+                background: '#f8fafc',
+                color: '#475569',
+                border: '1px solid #e2e8f0',
+                borderRadius: '9999px',
+                padding: '2px 9px',
+                fontSize: '0.70rem',
+                fontWeight: 600
+              }}>
+                📅 {catalogMeta?.issuedAt || catalogMeta?.iat
                   ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                   : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
               </span>
-              {/* Validity countdown pill */}
+
               {validity && (
                 <span
-                  className="header-meta-pill"
-                  title={`Prices valid until ${validity.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`}
                   style={{
                     backgroundColor: URGENCY_STYLES[validity.urgency].bg,
                     borderColor: URGENCY_STYLES[validity.urgency].border,
                     color: URGENCY_STYLES[validity.urgency].color,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    animation: validity.urgency === 'critical' ? 'pulse 2s infinite' : 'none',
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
+                    borderRadius: '9999px',
+                    padding: '2px 9px',
+                    fontSize: '0.70rem',
+                    fontWeight: 700
                   }}
                 >
-                  <Clock size={11} />
-                  {validity.urgency === 'expired'
-                    ? 'Prices Expired'
-                    : validity.daysLeft === 1
-                    ? 'Prices valid for 1 day'
-                    : `Prices valid for ${validity.daysLeft} days`}
+                  ⏳ {validity.daysLeft > 0 ? `Valid for ${validity.daysLeft} days` : 'Terms under review'}
                 </span>
               )}
-              <span className="header-meta-pill pill-full" style={{ color: '#ffffff' }}>
-                {isProtocolCatalog
-                  ? `📋 ${protocols.length} Clinical Protocols`
-                  : `📦 ${products.length} Products • ${totalVariants} Verified Variants`}
+
+              <span style={{
+                background: '#eff6ff',
+                color: '#003666',
+                border: '1px solid #bfdbfe',
+                borderRadius: '9999px',
+                padding: '2px 9px',
+                fontSize: '0.70rem',
+                fontWeight: 700
+              }}>
+                📦 {products.length} Formulations • {totalVariants || products.length} SKUs
               </span>
             </div>
+
+            {/* Title */}
+            <h1 style={{
+              margin: '0 0 0.45rem 0',
+              fontSize: '1.95rem',
+              fontWeight: 800,
+              color: '#003666',
+              letterSpacing: '-0.025em',
+              lineHeight: 1.2
+            }}>
+              {cleanRecipientName
+                ? (isWholesaler
+                    ? `Wholesale Peptide Catalog • ${cleanRecipientName}`
+                    : `Clinical Peptide Catalog • ${cleanRecipientName}`)
+                : 'Clinical Peptide Catalog'}
+            </h1>
+
+            {/* Description */}
+            <p style={{
+              margin: '0 0 1rem 0',
+              fontSize: '0.90rem',
+              color: '#475569',
+              lineHeight: 1.55,
+              maxWidth: '680px'
+            }}>
+              Analytical-grade lyophilized peptide vials, multi-dose presentations, and standardized therapeutic protocols. Verified direct delivery terms for authorized healthcare institutions.
+            </p>
+
+            {/* Action Buttons Strip (GCP Style) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flexWrap: 'wrap'
+            }}>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#003666',
+                  color: '#ffffff',
+                  border: '1px solid #002244',
+                  borderRadius: '8px',
+                  padding: '7px 16px',
+                  fontSize: '0.80rem',
+                  fontWeight: 700,
+                  cursor: isGeneratingPdf ? 'wait' : 'pointer',
+                  boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Download size={14} />
+                <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Catalog (PDF)'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#ffffff',
+                  color: '#334155',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  padding: '7px 14px',
+                  fontSize: '0.80rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                  transition: 'all 0.15s ease'
+                }}
+                title="Copy direct web link to this catalog"
+              >
+                {copied ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
+                <span>{copied ? 'Link Copied ✓' : 'Copy Catalog Link'}</span>
+              </button>
+            </div>
+
+            {/* Mobile Verification Bar (< 768px) */}
+            <div className="catalog-mobile-verification-bar" style={{
+              marginTop: '1rem',
+              padding: '0.65rem 0.85rem',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <ShieldCheck size={15} color="#003666" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a' }}>
+                  Batch Verified:
+                </span>
+                <code style={{ fontSize: '0.70rem', color: '#003666', background: '#eff6ff', padding: '1px 5px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {verifiedCode}
+                </code>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsQrModalOpen(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: '#003666',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                <QrCode size={13} />
+                <span>View QR</span>
+              </button>
+            </div>
+
           </div>
 
-          <div className="header-card-actions">
-            <button
-              onClick={handleDownloadPdf}
-              disabled={isGeneratingPdf}
+          {/* Right Column: Clean Neutral QR Verification Box (Desktop ≥ 768px) */}
+          <div className="catalog-desktop-qr-box" style={{
+            flexShrink: 0,
+            width: '160px',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            padding: '12px',
+            textAlign: 'center',
+            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <div
+              onClick={() => setIsQrModalOpen(true)}
               style={{
-                backgroundColor: '#ffffff',
-                color: '#00284d',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '11px 18px',
-                fontWeight: 800,
-                fontSize: '0.86rem',
-                cursor: isGeneratingPdf ? 'wait' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
-                transition: 'all 0.15s ease',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <Download size={16} />
-              <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Catalog (PDF)'}</span>
-            </button>
-
-            {/* Mobile-only toggle for technical verification assets */}
-            <button
-              type="button"
-              className="mobile-qr-toggle-btn"
-              onClick={() => setShowVerificationDetails(!showVerificationDetails)}
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                color: '#e0f2fe',
-                border: '1px solid rgba(255, 255, 255, 0.22)',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                fontWeight: 700,
-                fontSize: '0.78rem',
                 cursor: 'pointer',
+                padding: '4px',
+                background: '#ffffff',
+                borderRadius: '8px',
+                border: '1px solid #f1f5f9',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.15s ease',
-                width: '100%'
+                transition: 'transform 0.15s ease'
               }}
+              title="Click to enlarge QR code"
             >
-              <QrCode size={14} />
-              <span>{showVerificationDetails ? 'Hide Verification & 3D QR' : 'Verify Catalog ID & 3D QR Code'}</span>
-              {showVerificationDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            </button>
-
-            <div className={`barcode-desktop-wrapper ${showVerificationDetails ? 'mobile-visible' : ''}`}>
-              <PharmaBarcodeStamp catalogCode={catalogCode} batchCode={batchCode} theme="dark" width={195} height={24} />
+              <QRCodeSVG value={activeShareUrl} size={110} level="M" />
             </div>
+
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+              <ShieldCheck size={12} color="#003666" />
+              <span>Verified Catalog</span>
+            </div>
+
+            <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 600 }}>
+              Scan for live app
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCopyCode}
+              style={{
+                marginTop: '4px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '6px',
+                padding: '3px 8px',
+                fontSize: '0.68rem',
+                fontFamily: 'monospace',
+                fontWeight: 800,
+                color: '#003666',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                width: '100%',
+                justifyContent: 'center'
+              }}
+              title="Copy verified batch code"
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{verifiedCode}</span>
+              <Copy size={10} color="#64748b" />
+            </button>
           </div>
 
-          {/* 3D Holographic Interactive Scan Card */}
-          <div className={`header-card-qr ${showVerificationDetails ? 'mobile-visible' : ''}`}>
-            <Interactive3DScanCard url={shareUrl} catalogCode={catalogCode} batchCode={batchCode} recipientName={catalogMeta?.recipientName} />
-          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Google Cloud Style Global Scope Switcher: Products vs Protocols */}
-      {protocols && protocols.length > 0 && products && products.length > 0 && (
-        <div className="catalog-scope-nav-bar">
-          <div className="catalog-scope-nav-inner">
+      {/* ── QR Enlarge Modal ── */}
+      {isQrModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            onClick={() => setIsQrModalOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(4px)' }}
+          />
+          <div style={{
+            position: 'relative',
+            background: '#ffffff',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '360px',
+            width: '90%',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            zIndex: 10000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
             <button
               type="button"
-              onClick={() => setActiveTab && setActiveTab('products')}
-              className={`catalog-scope-tab ${activeTab === 'products' ? 'is-active' : ''}`}
-              title="Browse Formulation Vials & Active Compounds"
+              onClick={() => setIsQrModalOpen(false)}
+              style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
             >
-              <FlaskConical size={15} />
-              <span>Products & Vials</span>
-              <span className="catalog-scope-badge">{products.length}</span>
+              <X size={20} />
             </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab && setActiveTab('protocols')}
-              className={`catalog-scope-tab ${activeTab === 'protocols' ? 'is-active' : ''}`}
-              title="Browse Standardized Clinical Protocols"
-            >
-              <ClipboardList size={15} />
-              <span>Clinical Protocols</span>
-              <span className="catalog-scope-badge">{protocols.length}</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontWeight: 800, fontSize: '0.95rem' }}>
+              <ShieldCheck size={18} />
+              <span>Verified Institutional Catalog</span>
+            </div>
+
+            <div style={{ padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+              <QRCodeSVG value={activeShareUrl} size={200} level="H" />
+            </div>
+
+            <div style={{ fontSize: '0.80rem', color: '#475569', lineHeight: 1.4 }}>
+              Scan with mobile camera to open and synchronize this real-time catalog.
+            </div>
+
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '6px 12px',
+              fontSize: '0.78rem',
+              fontFamily: 'monospace',
+              fontWeight: 800,
+              color: '#003666'
+            }}>
+              {verifiedCode}
+            </div>
           </div>
         </div>
       )}

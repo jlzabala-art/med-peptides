@@ -26,6 +26,7 @@ export default function MonographPreviewModal({
   initialBatch = null,
   version = null,
   updatedAtDate = null,
+  isCosmetic = false,
 }) {
   const [activeTab, setActiveTab] = useState('monograph'); // 'monograph' | 'shipping' | 'client'
   const [copied, setCopied] = useState(false);
@@ -37,6 +38,19 @@ export default function MonographPreviewModal({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Computed values needed by the second useEffect — must be derived before any hooks
+  const _monographPdfUrl = isOpen && product
+    ? `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`
+    : null;
+
+  // Low-priority background prefetch for the active tab's PDF
+  // NOTE: all useEffects must be declared BEFORE any early return
+  useEffect(() => {
+    if (isOpen && _monographPdfUrl) {
+      prefetchPdf(_monographPdfUrl);
+    }
+  }, [isOpen, _monographPdfUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen || !product) return null;
 
@@ -90,12 +104,7 @@ export default function MonographPreviewModal({
       ? `client_vial_label_${vSuffix}_38x90.pdf`
       : `${vSuffix}_monograph_a4.pdf`;
 
-  // Low-priority background prefetch for the active tab's PDF
-  useEffect(() => {
-    if (isOpen && currentDownloadUrl) {
-      prefetchPdf(currentDownloadUrl);
-    }
-  }, [isOpen, currentDownloadUrl]);
+  // (prefetch useEffect moved above the early return — see above)
 
   const handleCopyLink = async () => {
     triggerHaptic('light');
@@ -130,7 +139,10 @@ export default function MonographPreviewModal({
                   <span className="mpm-tag-supplier">{supplierName}</span>
                 </div>
                 <div className="mpm-sub-text">
-                  {name} • {doseName} ({formatName})
+                  {isCosmetic
+                    ? `${name} • ${selectedStrength?.name || product?.volume || '250 mL'}`
+                    : `${name} • ${doseName} (${formatName})`
+                  }
                 </div>
               </div>
             </div>
@@ -153,29 +165,33 @@ export default function MonographPreviewModal({
               className={`mpm-tab-btn ${activeTab === 'monograph' ? 'active' : ''}`}
             >
               <FileText size={14} />
-              <span className="mpm-tab-long">1. Monograph Dossier (A4)</span>
-              <span className="mpm-tab-short">1. Monograph</span>
+              <span className="mpm-tab-long">{isCosmetic ? '1. Product Dossier (A4)' : '1. Monograph Dossier (A4)'}</span>
+              <span className="mpm-tab-short">{isCosmetic ? '1. Dossier' : '1. Monograph'}</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => { triggerHaptic('selection'); setActiveTab('shipping'); }}
-              className={`mpm-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
-            >
-              <Box size={14} />
-              <span className="mpm-tab-long">2. Shipping Label (38×90)</span>
-              <span className="mpm-tab-short">2. Shipping</span>
-            </button>
+            {!isCosmetic && (
+              <button
+                type="button"
+                onClick={() => { triggerHaptic('selection'); setActiveTab('shipping'); }}
+                className={`mpm-tab-btn ${activeTab === 'shipping' ? 'active' : ''}`}
+              >
+                <Box size={14} />
+                <span className="mpm-tab-long">2. Shipping Label (38×90)</span>
+                <span className="mpm-tab-short">2. Shipping</span>
+              </button>
+            )}
 
-            <button
-              type="button"
-              onClick={() => { triggerHaptic('selection'); setActiveTab('client'); }}
-              className={`mpm-tab-btn ${activeTab === 'client' ? 'active' : ''}`}
-            >
-              <Tag size={14} />
-              <span className="mpm-tab-long">3. Client Vial Label (38×90)</span>
-              <span className="mpm-tab-short">3. Client Vial</span>
-            </button>
+            {!isCosmetic && (
+              <button
+                type="button"
+                onClick={() => { triggerHaptic('selection'); setActiveTab('client'); }}
+                className={`mpm-tab-btn ${activeTab === 'client' ? 'active' : ''}`}
+              >
+                <Tag size={14} />
+                <span className="mpm-tab-long">3. Client Vial Label (38×90)</span>
+                <span className="mpm-tab-short">3. Client Vial</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -218,11 +234,11 @@ export default function MonographPreviewModal({
                 {/* Meta Ribbon */}
                 <div className="mpm-meta-grid" style={{ margin: '0.75rem 0' }}>
                   <div className="mpm-meta-item">
-                    <span className="k">Class / Axis</span>
+                    <span className="k">{isCosmetic ? 'Product Type' : 'Class / Axis'}</span>
                     <span className="v">{category}</span>
                   </div>
                   <div className="mpm-meta-item">
-                    <span className="k">Target Receptor</span>
+                    <span className="k">{isCosmetic ? 'Active System' : 'Target Receptor'}</span>
                     <span className="v" style={{ fontSize: '0.7rem' }}>{targetSystem}</span>
                   </div>
                   <div className="mpm-meta-item">
@@ -235,7 +251,8 @@ export default function MonographPreviewModal({
                   </div>
                 </div>
 
-                {/* 1. Molecular Specs */}
+                {/* 1. Molecular Specs — hidden for cosmetics */}
+                {!isCosmetic && (
                 <div style={{ margin: '0.75rem 0' }}>
                   <div className="mpm-section-heading">1. Molecular &amp; Chemical Specifications</div>
                   <div className="mpm-specs-table-wrap">
@@ -257,8 +274,41 @@ export default function MonographPreviewModal({
                     </table>
                   </div>
                 </div>
+                )}
 
-                {/* 2. Formulations Matrix */}
+                {/* 1b. Cosmetic Product Summary — shown only for cosmetics */}
+                {isCosmetic && product && (
+                <div style={{ margin: '0.75rem 0' }}>
+                  <div className="mpm-section-heading">1. Cosmeceutical Product Summary</div>
+                  <div className="mpm-specs-table-wrap">
+                    <table className="mpm-table">
+                      <tbody>
+                        <tr>
+                          <td style={{ width: '30%', fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Brand / Supplier:</td>
+                          <td style={{ fontWeight: 700 }}>{supplierName || product?.brand || product?.supplier || 'Colway'}</td>
+                          <td style={{ width: '30%', fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Volume / Size:</td>
+                          <td style={{ fontFamily: 'monospace', fontWeight: 700 }}>{product?.volume || selectedStrength?.name || '250 mL'}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Formulation Type:</td>
+                          <td>{product?.technical_specs?.formulation_type || (slug?.includes('shampoo') ? 'Aqueous Surfactant Gel' : 'O/W Cosmetic Emulsion')}</td>
+                          <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>pH Range:</td>
+                          <td style={{ fontFamily: 'monospace' }}>{product?.technical_specs?.ph_range || '5.0–6.0'}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Shelf Life:</td>
+                          <td>{product?.technical_specs?.shelf_life || '24 months (unopened)'}</td>
+                          <td style={{ fontWeight: 700, color: '#64748b', background: '#f8fafc' }}>Regulatory:</td>
+                          <td>EU Reg. 1223/2009</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                )}
+
+                {/* 2. Formulations Matrix — hidden for cosmetics */}
+                {!isCosmetic && (
                 <div style={{ margin: '0.75rem 0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                     <div className="mpm-section-heading" style={{ margin: 0 }}>2. Available Presentations Matrix</div>
@@ -314,8 +364,10 @@ export default function MonographPreviewModal({
                     </table>
                   </div>
                 </div>
+                )}
 
-                {/* 3. Reconstitution Directives */}
+                {/* 3. Reconstitution Directives — hidden for cosmetics */}
+                {!isCosmetic && (
                 <div style={{ margin: '0.75rem 0' }}>
                   <div className="mpm-section-heading">3. Reconstitution &amp; Storage Directives</div>
                   <div className="mpm-directives-box">
@@ -329,6 +381,24 @@ export default function MonographPreviewModal({
                     </div>
                   </div>
                 </div>
+                )}
+
+                {/* 3b. Cosmetics Storage & Application — shown only for cosmetics */}
+                {isCosmetic && (
+                <div style={{ margin: '0.75rem 0' }}>
+                  <div className="mpm-section-heading">2. Storage &amp; Application Directives</div>
+                  <div className="mpm-directives-box">
+                    <div>
+                      <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Storage (Unopened):</strong>
+                      <span style={{ color: '#475569', lineHeight: 1.3 }}>Store below 25°C in a cool, dry place away from direct sunlight. Do not freeze. Shelf life: {product?.technical_specs?.shelf_life || '24 months'}.</span>
+                    </div>
+                    <div>
+                      <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Application Protocol:</strong>
+                      <span style={{ color: '#475569', lineHeight: 1.3 }}>{product?.application_protocol?.how_to_use || 'Apply to wet hair/scalp. Massage gently for 2–3 minutes. Rinse thoroughly. For best results, use as directed in the full product protocol.'}</span>
+                    </div>
+                  </div>
+                </div>
+                )}
               </div>
 
               {/* Sheet Footer */}

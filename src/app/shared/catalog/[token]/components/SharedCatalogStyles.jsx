@@ -7,9 +7,33 @@ export default function SharedCatalogStyles() {
   return (
     <style>{`
         .catalog-container {
-          max-width: 1160px;
+          max-width: 1360px;
           margin: 0 auto;
-          padding: 24px 16px;
+          padding: 20px 16px 80px 16px;
+        }
+        .catalog-content-with-sidebar {
+          display: block;
+          width: 100%;
+          margin-top: 1rem;
+        }
+        @media (min-width: 1024px) {
+          .catalog-content-with-sidebar {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) 310px !important;
+            gap: 1.5rem !important;
+            align-items: flex-start !important;
+          }
+          .catalog-desktop-sidebar {
+            display: block !important;
+          }
+        }
+        @media (max-width: 1023px) {
+          .catalog-content-with-sidebar {
+            display: block !important;
+          }
+          .catalog-desktop-sidebar {
+            display: none !important;
+          }
         }
         /* Sandboxed Institutional Topbar — Datasheet Deep Navy Blue (#003666) Theme */
         .institutional-topbar {

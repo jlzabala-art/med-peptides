@@ -33,7 +33,10 @@ import {
   Droplets,
   Printer,
   HelpCircle,
-  ZoomIn
+  ZoomIn,
+  Beaker,
+  Microscope,
+  ClipboardList
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import { 
@@ -48,6 +51,8 @@ import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import SolventTechnicalSpecs from './SolventTechnicalSpecs';
+import CosmeticTechnicalSpecs from './CosmeticTechnicalSpecs';
+import HairProtocolsSidebarWidget from './HairProtocolsSidebarWidget';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
 import BloodoNadFaqCard from './BloodoNadFaqCard';
@@ -63,6 +68,7 @@ import SpainCompanyResidencyTechnicalSpecs from './SpainCompanyResidencyTechnica
 import CompoundingServicesTechnicalSpecs from './CompoundingServicesTechnicalSpecs';
 import PeptideSupplyManagementTechnicalSpecs from './PeptideSupplyManagementTechnicalSpecs';
 import PeptideAnalyticalSpecsCard from './PeptideAnalyticalSpecsCard';
+import ProductRegulatoryWarningsSection from './ProductRegulatoryWarningsSection';
 import CoaModal from './CoaModal';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import MonographPreviewModal from './MonographPreviewModal';
@@ -74,7 +80,7 @@ import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
-import PublicDatasheetTableOfContents from './PublicDatasheetTableOfContents';
+import ProductDetailSidebar from './ProductDetailSidebar';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -456,44 +462,79 @@ export default function PublicDatasheetView({
     );
   }, [product, slug]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : 'Clinical Peptide'))));
-  const category = isSolventProduct 
+  const isCosmeticProduct = useMemo(() => {
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    const cat = (product?.category || product?.therapeutic_category || '').toLowerCase();
+    const pt = (product?.productType || product?.product_type || product?.type || '').toLowerCase();
+    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
+    const brand = (product?.brand || product?.supplier || '').toLowerCase();
+    return Boolean(
+      product?.is_cosmetic ||
+      cat === 'cosmetics' ||
+      cat === 'hair cosmetics' ||
+      cat === 'cosmeceutical' ||
+      cat === 'scalp cosmetics' ||
+      cat.includes('cosmetic') ||
+      pt === 'cosmetic' ||
+      pt === 'cosmetics' ||
+      brand.includes('colway') ||
+      pSlug.includes('colway') ||
+      pName.includes('colway') ||
+      pSlug.includes('strengthening-shampoo') ||
+      pSlug.includes('strengthening-conditioner')
+    );
+  }, [product, slug]);
+
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : 'Clinical Peptide')))));
+  const category = isCosmeticProduct
+    ? (lang === 'es' ? 'Cosmecéutica y Cuidado Capilar' : 'Hair & Scalp Cosmeceuticals')
+    : isSolventProduct 
     ? (lang === 'es' ? 'Solvente y Diluyente Estéril' : 'Sterile Reconstitution Solvent')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
     : isIvDrip
     ? (lang === 'es' ? 'Terapia Intravenosa y Nutrición Parenteral' : 'Sterile IV Infusion & Micronutrient Formulation')
     : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
-  const casNumber = isSolventProduct 
+  const casNumber = isCosmeticProduct
+    ? (lang === 'es' ? 'Reglamento Cosmético UE 1223/2009' : 'EU Cosmetics Reg. 1223/2009 (CPNP)')
+    : isSolventProduct 
     ? '100-51-6 (Benzyl Alcohol USP)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
     : isIvDrip
     ? 'USP <797> Compounded Parenteral'
     : (product?.casNumber || product?.cas || 'Documented on Monograph');
-  const formula = isSolventProduct 
+  const formula = isCosmeticProduct
+    ? (lang === 'es' ? `Complejo Bioactivo (${product?.ingredients?.length || '15+'} Activos INCI)` : `Bioactive Multi-Complex (${product?.ingredients?.length || '15+'} INCI Actives)`)
+    : isSolventProduct 
     ? 'H₂O + C₇H₈O (0.9%)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
     : isIvDrip
     ? `${product?.ingredients?.length || 12} Active Compounds (${product?.volume_ml || 50} mL)`
     : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
-  const mw = isSolventProduct 
+  const mw = isCosmeticProduct
+    ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
+    : isSolventProduct 
     ? '18.02 g/mol (H₂O)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
     : isIvDrip
     ? `Total Actives: ${(product?.totalActiveMg || 10000).toLocaleString()} mg`
     : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
-  const purity = isSolventProduct 
+  const purity = isCosmeticProduct
+    ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
+    : isSolventProduct 
     ? 'USP Pharmacopeial Grade (Sterile)' 
     : isDiagnosticKit
     ? (lang === 'es' ? 'Precisión CV ≤ 6.6% (LoD 0.23 µmol/L)' : 'Precision CV ≤ 6.6% (LoD 0.23 µmol/L)')
     : isIvDrip
     ? 'USP <797> Sterile / ISO Class 5 Certified'
     : (product?.purity || '≥ 99.4% (RP-HPLC)');
-  const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip) ? null : (product?.sequence || product?.molecular?.sequence || null);
-  const targetSystem = isSolventProduct
+  const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip || isCosmeticProduct) ? null : (product?.sequence || product?.molecular?.sequence || null);
+  const targetSystem = isCosmeticProduct
+    ? (lang === 'es' ? 'Folículo Piloso, Matriz Dérmica y Fase Anágena' : 'Hair Follicle, Scalp Dermal Matrix & Anagen Phase')
+    : isSolventProduct
     ? (lang === 'es' ? 'Vehículo Estéril de Reconstitución de Péptidos (USP)' : 'Universal Sterile Peptide Reconstitution Vehicle (USP)')
     : isDiagnosticKit
     ? (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring')
@@ -910,6 +951,19 @@ export default function PublicDatasheetView({
       ];
     }
 
+    if (isCosmeticProduct) {
+      return [
+        { id: 'overview', label: lang === 'es' ? 'Descripción y Perfil Clínico' : 'Overview & Clinical Profile', icon: FileText },
+        { id: 'presentations-matrix', label: lang === 'es' ? 'Presentaciones y Envase' : 'Packaging & Presentations', icon: Layers },
+        { id: 'reconstitution-section', label: lang === 'es' ? 'Especificaciones Físico-Químicas' : 'Formulation Technical Specs', icon: Beaker },
+        { id: 'clinical-evidence', label: lang === 'es' ? 'Evidencia y Dianas Foliculares' : 'Clinical Evidence & Targets', icon: Activity },
+        { id: 'inci-dossier', label: lang === 'es' ? 'Composición INCI Completa' : 'Full INCI Composition', icon: Microscope },
+        { id: 'application-protocol', label: lang === 'es' ? 'Protocolo de Aplicación' : 'Clinical Usage Protocol', icon: ClipboardList },
+        { id: 'colway-system', label: lang === 'es' ? 'Sistema Capilar Colway' : 'Colway 2-Step System', icon: Sparkles },
+        { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Test de Parche' : 'Safety & Patch Test', icon: ShieldCheck }
+      ];
+    }
+
     // Default therapeutic peptide monograph
     return [
       { id: 'overview', label: lang === 'es' ? 'Perfil Farmacológico' : 'Pharmacological Profile', icon: FileText },
@@ -924,7 +978,7 @@ export default function PublicDatasheetView({
       ] : []),
       { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Clínicos' : 'Clinical Protocols', icon: FlaskConical }
     ];
-  }, [isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, product, lang]);
+  }, [isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, isCosmeticProduct, product, lang]);
 
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
@@ -1339,8 +1393,8 @@ export default function PublicDatasheetView({
                     ? (t.lotuslandVerified || (lang === 'es' ? 'Certificado Atlas Services' : 'Atlas Services Certified')) 
                     : `${displaySupplierName} ${lang === 'es' ? 'Calidad Verificada' : 'Quality Verified'}`}
               </span>
-              {!isCorporateService && !isDiagnosticKit && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
-              {!isCorporateService && !isSolventProduct && !isDiagnosticKit && (
+              {!isCorporateService && !isDiagnosticKit && !isCosmeticProduct && <FdaRegulatoryBadge product={product} variant="hero-pill" lang={lang} />}
+              {!isCorporateService && !isSolventProduct && !isDiagnosticKit && !isCosmeticProduct && (
                 <>
                   <span style={{
                     display: 'inline-flex',
@@ -1370,6 +1424,40 @@ export default function PublicDatasheetView({
                     fontWeight: 700
                   }}>
                     <span>{lang === 'es' ? 'Grado Protocolo Clínico' : 'Clinical Protocol Grade'}</span>
+                  </span>
+                </>
+              )}
+              {isCosmeticProduct && (
+                <>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#f0fdfa',
+                    color: '#0d9488',
+                    border: '1px solid #99f6e4',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <ShieldCheck size={13} color="#0d9488" />
+                    <span>{lang === 'es' ? 'Reglamento UE 1223/2009 (CPNP)' : 'EU Reg. 1223/2009 (CPNP)'}</span>
+                  </span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '6px',
+                    padding: '2px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700
+                  }}>
+                    <Sparkles size={13} color="#2563eb" />
+                    <span>{lang === 'es' ? 'Testado Dermatológicamente' : 'Dermatologically Tested'}</span>
                   </span>
                 </>
               )}
@@ -1746,22 +1834,27 @@ export default function PublicDatasheetView({
               const isActive = fmt.id === activeFormatId;
               const isPen = fmt.id.includes('pen');
               const isCartridge = fmt.id.includes('cartridge');
-              let icon = '🧪';
+              let icon = '\ud83e\uddea';
               let subtitle = t.formatSubVial || 'Lyophilized SubQ Cake (Sterile Vial)';
-              if (isDiagnosticKit || fmt.id.includes('test') || fmt.id.includes('blood')) {
-                icon = '🩸';
-                subtitle = lang === 'es' ? 'Kit Diagnóstico Capilar DBS (CE-IVDR)' : 'Capillary DBS Diagnostic Kit (CE-IVDR)';
+              if (isCosmeticProduct) {
+                icon = fmt.id.includes('bottle') ? '\ud83e\uddf4' : fmt.id.includes('tube') ? '\uD83E\uDDF2' : '\ud83e\uddea';
+                subtitle = lang === 'es'
+                  ? (fmt.volume || product?.volume || '250 mL') + ' \u2014 Uso Cosm\u00e9tico Tópico'
+                  : (fmt.volume || product?.volume || '250 mL') + ' \u2014 Topical Cosmetic Use';
+              } else if (isDiagnosticKit || fmt.id.includes('test') || fmt.id.includes('blood')) {
+                icon = '\ud83e\ude78';
+                subtitle = lang === 'es' ? 'Kit Diagn\u00f3stico Capilar DBS (CE-IVDR)' : 'Capillary DBS Diagnostic Kit (CE-IVDR)';
               } else if (isPen) {
-                icon = '🖊️';
+                icon = '\ud83d\udd8a\ufe0f';
                 subtitle = t.formatSubPen || 'Prefilled Multi-Dose Dial Device';
               } else if (isCartridge) {
-                icon = '💉';
+                icon = '\ud83d\udc89';
                 subtitle = t.formatSubCart || '3 mL Multi-Dose Refill Cartridge';
               } else if (fmt.id.includes('spray')) {
-                icon = '💨';
+                icon = '\ud83d\udca8';
                 subtitle = t.formatSubSpray || 'Intranasal Spray Device';
               } else if (fmt.id.includes('capsule') || fmt.id.includes('tablet')) {
-                icon = '💊';
+                icon = '\ud83d\udc8a';
                 subtitle = t.formatSubOral || 'Oral Gastro-Resistant Formulation';
               }
 
@@ -2018,15 +2111,17 @@ export default function PublicDatasheetView({
           <div className="pds-selected-detail-card">
             <div className="pds-detail-grid">
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Contenido del Kit' : 'Kit Contents') : (t.activeContent || 'Active Content')}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Contenido del Kit' : 'Kit Contents') : isCosmeticProduct ? (lang === 'es' ? 'Volumen y Envase' : 'Volume & Packaging') : (t.activeContent || 'Active Content')}</span>
                 <span className="pds-dval font-bold text-sky-950">
-                  {selectedStrength?.name || (isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : '10 mg')}
+                  {selectedStrength?.name || (isCosmeticProduct ? '250 mL' : isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : '10 mg')}
                 </span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t.adminRoute || 'Administration Route')}</span>
                 <span className="pds-dval">
-                  {isSolventProduct 
+                  {isCosmeticProduct
+                    ? (lang === 'es' ? 'Uso Tópico Capilar (Cuero Cabelludo y Tallo)' : 'Topical Cosmeceutical (Scalp & Hair Shaft)')
+                    : isSolventProduct 
                     ? (lang === 'es' ? 'Vehículo de Reconstitución (No Inyección Directa)' : 'Reconstitution Vehicle (Not for Direct Injection)')
                     : isDiagnosticKit
                       ? (lang === 'es' ? 'Punción Capilar en Dedo (3 gotas en tarjeta DBS)' : 'Capillary Fingerstick (3 spots on DBS Card)')
@@ -2041,7 +2136,9 @@ export default function PublicDatasheetView({
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">
-                  {isSolventProduct 
+                  {isCosmeticProduct
+                    ? (lang === 'es' ? 'Mecanismo y Modo de Empleo' : 'Mechanism & Contact Time')
+                    : isSolventProduct 
                     ? (lang === 'es' ? 'Función Diluyente' : 'Diluent Function')
                     : isDiagnosticKit
                       ? (lang === 'es' ? 'Metodología Analítica' : 'Analytical Methodology')
@@ -2054,7 +2151,14 @@ export default function PublicDatasheetView({
                             : (t.recommendedRecon || 'Recommended Reconstitution')}
                 </span>
                 <span className="pds-dval">
-                  {isSolventProduct ? (
+                  {isCosmeticProduct ? (
+                    <>
+                      {lang === 'es' ? 'Inhibición DHT + Aporte Colágeno Nativo' : 'DHT Inhibition + Native Collagen Scaffolding'}
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {lang === 'es' ? 'Aplicar en cabello húmedo · Dejar actuar 3–5 min · Aclarar ≤38°C' : 'Apply to wet scalp · 3–5 min contact time · Rinse ≤38°C'}
+                      </span>
+                    </>
+                  ) : isSolventProduct ? (
                     <>
                       {lang === 'es' ? 'Solvente de Reconstitución Multidosis' : 'Universal Multi-Dose Peptide Diluent'}
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
@@ -2277,6 +2381,12 @@ export default function PublicDatasheetView({
                 supplierName={displaySupplierName}
                 lang={lang}
               />
+            ) : isCosmeticProduct ? (
+              <CosmeticTechnicalSpecs
+                product={product}
+                lang={lang}
+                onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              />
             ) : (
               <>
                 <div className="pds-section-header">
@@ -2347,7 +2457,7 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Elevated Top-Level Section) ── */}
-        {!isCorporateService && (
+        {!isCorporateService && !isCosmeticProduct && (
           <section id="specs-section" className="pds-traceability-wrapper">
             <ProductTraceabilityCard
               product={product}
@@ -2360,16 +2470,16 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Peer-Reviewed Scientific Literature & Clinical Trials ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
           <PeptidePublicationsSection product={product} lang={lang} />
         )}
 
         {/* ── Clinical Safety Profile: Contraindications & Precautions ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
           <PeptideContraindicationsSection product={product} lang={lang} />
         )}
 
-        {!isDiagnosticKit && !isCorporateService && (
+        {!isDiagnosticKit && !isCorporateService && !isCosmeticProduct && (
           <section id="labels-section" className="pds-section-card">
             <div className="pds-section-header">
               <div className="pds-section-header-left">
@@ -2554,7 +2664,7 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 4.5: Analytical Quality Verification & Clinical Dosing Parameters (EQNO Inspired) ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
           <PeptideAnalyticalSpecsCard
             product={product}
             selectedStrength={selectedStrength}
@@ -2564,7 +2674,7 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 4.8: Bloodo™ Clinical Diagnostic FAQ & WhatsApp Share ── */}
-        {(isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
+        {!isCosmeticProduct && (isDiagnosticKit || isBloodoDiagnostic || product?.slug?.includes('bloodo') || product?.canonicalKey?.includes('bloodo') || (Array.isArray(product?.clinical_faq) && product.clinical_faq.length > 0)) && (
           <BloodoNadFaqCard product={product} lang={lang} />
         )}
 
@@ -2581,11 +2691,54 @@ export default function PublicDatasheetView({
           <BloodoClinicalAdvantageCard lang={lang} />
         )}
 
+        {/* ── Block 8: Product Regulatory Warnings & Safety Governance ── */}
+        <ProductRegulatoryWarningsSection
+          product={product}
+          lang={lang}
+          isCosmeticProduct={isCosmeticProduct}
+          isDiagnosticKit={isDiagnosticKit || isBloodoDiagnostic}
+          isSolventProduct={isSolventProduct}
+          isCorporateService={isCorporateService}
+          supplierName={supplierName}
+        />
+
         {/* Institutional Regulatory Footnote */}
         <footer className="pds-page-footer">
           <div className="pds-footer-box">
             <p className="pds-footer-text">
-              <strong>Quality & Regulatory Governance:</strong> Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
+              {isCosmeticProduct ? (
+                <>
+                  <strong>{lang === 'es' ? 'Gobernanza y Regulación Cosmética Europea:' : 'Quality & European Cosmetic Regulatory Governance:'}</strong>{' '}
+                  {lang === 'es' 
+                    ? `Distribuido a través del socio oficial autorizado (${supplierName}). Formulado de plena conformidad con el Reglamento Europeo (CE) Nº 1223/2009 sobre productos cosméticos y estándares de Buenas Prácticas de Fabricación ISO 22716. Expediente activo en el Portal Europeo CPNP. Testado dermatológicamente. Ficha técnica elaborada para orientación tricológica, cosmética y de cuidado personal.`
+                    : `Sourced through authorized brand partner (${supplierName}). Formulated and packaged in full compliance with EU Cosmetic Regulation (EC) No 1223/2009 and ISO 22716 Cosmetic GMP standards. Notification active on the European CPNP. Dermatologically tested. This technical document is intended for trichological, cosmetic, and personal wellness advisory.`}
+                </>
+              ) : (isDiagnosticKit || isBloodoDiagnostic) ? (
+                <>
+                  <strong>{lang === 'es' ? 'Gobernanza y Regulación de Diagnóstico In Vitro:' : 'Quality & In Vitro Diagnostic Regulatory Governance:'}</strong>{' '}
+                  {lang === 'es'
+                    ? `Dispositivo de diagnóstico in vitro con marcado CE-IVD conforme a la Directiva 98/79/CE y el Reglamento Europeo (UE) 2017/746 (CE-IVDR). Procesamiento analítico cuantitativo ejecutado por laboratorio clínico acreditado (LifeLab1, certificación ISO 15189). Trazabilidad de muestra en sangre seca (Whatman 903). Destinado a profesionales sanitarios y seguimiento clínico.`
+                    : `CE-IVD Marked in accordance with EU Directive 98/79/EC & Regulation (EU) 2017/746 (CE-IVDR). Analytical processing performed by accredited central clinical laboratory (LifeLab1, ISO 15189 certified). Quantitative blood spot analytical reports delivered via secure encrypted clinical portal.`}
+                </>
+              ) : isSolventProduct ? (
+                <>
+                  <strong>{lang === 'es' ? 'Estándares de Calidad & Solvente Estéril:' : 'Sterile Solvent & Quality Governance:'}</strong>{' '}
+                  {lang === 'es'
+                    ? `Diluyente estéril preparado bajo estándares de Farmacopea Europea (Ph. Eur.) y cGMP para reconstitución de péptidos liofilizados. Control de endotoxinas (<0.25 EU/mL) con 0.9% de alcohol bencílico como conservante bacteriostático. Uso en reconstitución clínica y farmacia de compounding.`
+                    : `Pharmaceutical-grade sterile bacteriostatic diluent manufactured under EU GMP / cGMP standards. Multi-dose vial preserved with 0.9% benzyl alcohol. Endotoxin tested (<0.25 EU/mL). Intended for aseptic peptide and lyophilized compound reconstitution.`}
+                </>
+              ) : isCorporateService ? (
+                <>
+                  <strong>{lang === 'es' ? 'Cumplimiento Legal & Marco Corporativo:' : 'Corporate & Regulatory Governance:'}</strong>{' '}
+                  {lang === 'es'
+                    ? `Servicios corporativos gestionados conforme a la Ley 14/2013 y marco normativo europeo y emiratí. Diligencia debida, custodia fiduciaria y cumplimiento societario coordinado a través de despachos colegiados y socios institucionales.`
+                    : `Corporate acquisition and residency programs are processed under Spanish Law 14/2013 / UAE Corporate Framework. Comprehensive due diligence and institutional escrow compliance handled through verified institutional partners.`}
+                </>
+              ) : (
+                <>
+                  <strong>Quality & Regulatory Governance:</strong> Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing meeting pharmacopeial grade standards. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
+                </>
+              )}
             </p>
             <p className="pds-footer-meta">
               Document Ref: PDS-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
@@ -2594,14 +2747,23 @@ export default function PublicDatasheetView({
         </footer>
           </div>
 
-          {/* Persistent Google Cloud Console Table of Contents (Desktop Sidebar + Mobile Drawer) */}
-          <PublicDatasheetTableOfContents 
+          {/* Specialized Google Cloud Console Product Sidebar (Desktop Sticky + Mobile Drawer) */}
+          <ProductDetailSidebar 
             sections={tocSections} 
             lang={lang} 
-            hideFloatingTrigger={true} 
-            isBloodoSuite={isBloodoDiagnostic}
-            currentProductSlug={slug || product?.slug}
+            product={product}
+            slug={slug || product?.slug}
+            effectiveBatchCode={effectiveBatchCode}
             associatedProtocols={associatedProtocols}
+            onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
+            onOpenCoaModal={() => setIsCoaModalOpen(true)}
+            onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+            isDiagnosticKit={isDiagnosticKit}
+            isBloodoDiagnostic={isBloodoDiagnostic}
+            isCosmeticProduct={isCosmeticProduct}
+            isSolventProduct={isSolventProduct}
+            isCorporateService={isCorporateService}
+            hideFloatingTrigger={true}
           />
         </div>
       </PublicPageShell>
@@ -2632,6 +2794,7 @@ export default function PublicDatasheetView({
         initialBatch={effectiveBatchCode}
         version={versionInfo.version}
         updatedAtDate={versionInfo.updatedAtDate}
+        isCosmetic={isCosmeticProduct}
       />
 
       {/* Printable Lot Quality Certificate of Analysis (COA) Modal */}

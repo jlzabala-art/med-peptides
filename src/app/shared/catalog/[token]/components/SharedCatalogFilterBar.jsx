@@ -1,40 +1,25 @@
 'use client';
 
 import React from 'react';
-import { Search, Filter, ChevronDown, ClipboardList, List, LayoutGrid, ShieldCheck } from 'lucide-react';
-import { getFdaPeptideStatus, FDA_STATUS_TYPES } from '@/data/fdaPeptidesRegistry';
-
-/** Compact inline FDA emblem — 18×16 SVG that mirrors the FDA wordmark style */
-const FdaEmblem = ({ size = 18, color = '#1d4ed8' }) => (
-  <svg width={size} height={Math.round(size * 0.88)} viewBox="0 0 36 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="FDA" role="img" style={{ flexShrink: 0 }}>
-    <rect width="36" height="32" rx="4" fill={color} />
-    <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle"
-      fontFamily="'Arial Black', Arial, sans-serif"
-      fontWeight="900"
-      fontSize="14"
-      letterSpacing="0.5"
-      fill="#ffffff"
-    >FDA</text>
-  </svg>
-);
-
+import { Search, Filter, ChevronDown, List, LayoutGrid } from 'lucide-react';
+import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 
 /**
- * SharedCatalogFilterBar — Search box, Goals multi-select, Format/Packaging dropdown,
- * FDA Status dropdown, protocol filter chips, and result count indicator.
+ * SharedCatalogFilterBar — Streamlined Google Cloud UX Filter Toolbar.
+ *  - Primary Search box with clear button
+ *  - Quick Peptide Formats dropdown (Vials, Pens, Sprays, Kits, High Dose)
+ *  - Mobile Filter button (triggers slide-over drawer with Clinical Goals & FDA Status)
+ *  - Active Filter Chips Bar with instant 'Clear all'
+ *  - Dual view toggle (List vs Cards) & Results counter
  */
 export default function SharedCatalogFilterBar({
   searchQuery,
   setSearchQuery,
-  // Goals dropdown
-  isGoalDropdownOpen,
-  setIsGoalDropdownOpen,
-  selectedGoals,
+  selectedGoals = [],
   clearGoals,
-  availableGoals,
+  availableGoals = [],
   toggleGoal,
-  products,
-  // Format dropdown
+  products = [],
   isFormatDropdownOpen,
   setIsFormatDropdownOpen,
   packagingMode,
@@ -43,21 +28,13 @@ export default function SharedCatalogFilterBar({
   setDosageFilter,
   routeFilter = 'all',
   setRouteFilter,
-  // FDA Status dropdown
   fdaFilter = 'all',
   setFdaFilter,
-  // Protocol chips
-  protocols,
-  productsWithProtocolsCount,
-  onlyWithProtocols,
-  setOnlyWithProtocols,
-  showProtocolsUnderProducts,
-  setShowProtocolsUnderProducts,
-  // Result count
-  displayedProducts,
-  // Dual view mode
+  onOpenMobileFilters = () => {},
+  displayedProducts = [],
   viewMode = 'list',
   setViewMode,
+  lang = 'en'
 }) {
   const ROUTE_LABELS = {
     injectable: { label: 'Injectable / SubQ', icon: '💉' },
@@ -66,61 +43,22 @@ export default function SharedCatalogFilterBar({
     topical:    { label: 'Topical / Hair', icon: '💧' },
   };
 
-  const [isFdaDropdownOpen, setIsFdaDropdownOpen] = React.useState(false);
-
-  const FDA_OPTIONS = [
-    { id: 'all',                          label: 'All Regulatory Profiles',      icon: '🌐', desc: 'All evaluated & standard peptides' },
-    { id: 'fda_approved',                 label: 'FDA Approved APIs',            icon: '🏛️', desc: 'Approved NDA/ANDA ingredients (GLP-1, etc.)' },
-    { id: 'fda_pcac_503a_recommended',    label: '503A PCAC Recommended',       icon: '🛡️', desc: 'July 2026 PCAC Bulks List evaluation' },
-    { id: 'clinical_investigational',     label: 'Clinical Investigational (IND)',icon: '🔬', desc: 'Active clinical IND trials (Retatrutide, etc.)' },
-    { id: 'research_analytical_standard', label: 'Analytical Reference Standards',icon: '⚗️', desc: 'High-purity characterization standards' },
-  ];
-
-  const fdaStatusCounts = React.useMemo(() => {
-    const counts = {
-      all: (products || []).length,
-      fda_approved: 0,
-      fda_pcac_503a_recommended: 0,
-      clinical_investigational: 0,
-      research_analytical_standard: 0
-    };
-    (products || []).forEach(p => {
-      const st = getFdaPeptideStatus(p)?.status;
-      if (st && counts[st] !== undefined) {
-        counts[st]++;
-      }
-    });
-    return counts;
-  }, [products]);
-
-  const fdaButtonLabel = () => {
-    const opt = FDA_OPTIONS.find(o => o.id === fdaFilter);
-    if (fdaFilter && fdaFilter !== 'all' && opt) {
-      return opt.label;
-    }
-    return 'FDA Regulatory Status';
-  };
-
-  const fdaButtonIcon = () => {
-    const opt = FDA_OPTIONS.find(o => o.id === fdaFilter);
-    if (fdaFilter && fdaFilter !== 'all' && opt) {
-      // Show the category emoji when a specific filter is active
-      return <span style={{ fontSize: '0.95rem', lineHeight: 1 }}>{opt.icon}</span>;
-    }
-    // Default: show the FDA badge emblem
-    return <FdaEmblem size={18} color={isFdaActive ? '#1d4ed8' : '#475569'} />;
+  const FDA_LABELS = {
+    all: 'All Regulatory Profiles',
+    fda_approved: 'FDA Approved APIs',
+    fda_pcac_503a_recommended: '503A PCAC Recommended',
+    clinical_investigational: 'Clinical Investigational (IND)',
+    research_analytical_standard: 'Analytical Reference Standards'
   };
 
   const isFdaActive = fdaFilter && fdaFilter !== 'all';
+  const isFormatActive = packagingMode !== 'all' || dosageFilter === 'high_dose' || (routeFilter && routeFilter !== 'all');
 
   const hasActiveFilters = Boolean(
     searchQuery ||
     (selectedGoals && selectedGoals.length > 0) ||
-    packagingMode !== 'all' ||
-    dosageFilter !== 'all' ||
-    (routeFilter && routeFilter !== 'all') ||
-    isFdaActive ||
-    onlyWithProtocols
+    isFormatActive ||
+    isFdaActive
   );
 
   const handleClearAll = () => {
@@ -130,7 +68,6 @@ export default function SharedCatalogFilterBar({
     if (setDosageFilter) setDosageFilter('all');
     if (setRouteFilter) setRouteFilter('all');
     if (setFdaFilter) setFdaFilter('all');
-    if (setOnlyWithProtocols) setOnlyWithProtocols(false);
   };
 
   const formatButtonLabel = () => {
@@ -144,41 +81,48 @@ export default function SharedCatalogFilterBar({
     if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
       return ROUTE_LABELS[routeFilter].label;
     }
-    return 'All Peptide Formats';
+    return 'All Formats';
   };
 
-  const formatButtonIcon = () => {
-    if (dosageFilter === 'high_dose') return '💪';
-    if (packagingMode === 'vials') return '🧪';
-    if (packagingMode === 'pens') return '💉';
-    if (packagingMode === 'sprays') return '💨';
-    if (packagingMode === 'oral') return '💊';
-    if (packagingMode === 'kits') return '📦';
-    if (packagingMode === 'units') return '🧪';
-    if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
-      return ROUTE_LABELS[routeFilter].icon;
-    }
-    return '✨';
-  };
-
-  const isFormatActive = packagingMode !== 'all' || dosageFilter === 'high_dose' || (routeFilter && routeFilter !== 'all');
+  const activeFacetsCount = (selectedGoals?.length || 0) + (isFdaActive ? 1 : 0);
 
   return (
-    <div className="filter-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div className="catalog-filter-row">
+    <div className="filter-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
+      
+      {/* ── Toolbar: Search + Quick Format + Mobile Filter Trigger ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        flexWrap: 'wrap',
+        width: '100%'
+      }}>
+        
         {/* Search Input */}
-        <div className="catalog-search-box" style={{ flex: '1 1 260px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: '#ffffff',
+          border: '1px solid #cbd5e1',
+          borderRadius: '8px',
+          padding: '0 12px',
+          height: '40px',
+          flex: '1 1 260px',
+          minWidth: '220px',
+          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)'
+        }}>
           <Search size={16} color="#64748b" style={{ flexShrink: 0 }} />
           <input
             type="text"
-            placeholder="Search by product, active compound, dosage (e.g. 5mg)..."
+            placeholder={lang === 'es' ? 'Buscar formulación, principio activo, dosis...' : 'Search by formulation, compound, dosage (e.g. 5mg)...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               border: 'none',
               outline: 'none',
               background: 'transparent',
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
               color: '#0f172a',
               width: '100%',
               height: '100%'
@@ -188,7 +132,7 @@ export default function SharedCatalogFilterBar({
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+              style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
               title="Clear search"
             >
               ✕
@@ -196,505 +140,137 @@ export default function SharedCatalogFilterBar({
           )}
         </div>
 
-        {/* Mobile 2-column Dropdowns Row (Goals + Formats) */}
-        <div className="catalog-dropdowns-row">
-          {/* Goals Multi-Select Popover */}
-          <div className="category-dropdown-container" style={{ position: 'relative', flex: '0 1 290px', minWidth: '220px', boxSizing: 'border-box' }}>
-            <button
-              type="button"
-              onClick={() => setIsGoalDropdownOpen(prev => !prev)}
-              style={{
-                width: '100%',
-                height: '42px',
+        {/* Format Quick Dropdown Popover */}
+        <div style={{ position: 'relative', flex: '0 1 auto' }}>
+          <button
+            type="button"
+            onClick={() => setIsFormatDropdownOpen(prev => !prev)}
+            style={{
+              height: '40px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: isFormatActive ? '#eff6ff' : '#ffffff',
+              border: isFormatActive ? '1.5px solid #003666' : '1px solid #cbd5e1',
+              borderRadius: '8px',
+              padding: '0 12px',
+              cursor: 'pointer',
+              fontSize: '0.80rem',
+              fontWeight: 700,
+              color: isFormatActive ? '#003666' : '#334155',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <span>{formatButtonLabel()}</span>
+            <ChevronDown size={14} color="#64748b" style={{ transform: isFormatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+          </button>
+
+          {isFormatDropdownOpen && (
+            <>
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 999 }}
+                onClick={() => setIsFormatDropdownOpen(false)}
+              />
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 4px)',
+                left: 0,
+                width: '240px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.12)',
+                padding: '6px',
+                zIndex: 1000,
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-                backgroundColor: selectedGoals.length > 0 ? '#eff6ff' : '#ffffff',
-                border: selectedGoals.length > 0 ? '1.5px solid #3b82f6' : '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '0 12px',
-                cursor: 'pointer',
-                boxSizing: 'border-box',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                <Filter size={15} color={selectedGoals.length > 0 ? '#1d4ed8' : '#0284c7'} style={{ flexShrink: 0 }} />
-                <span style={{
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  color: selectedGoals.length > 0 ? '#1e40af' : '#0f172a',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {selectedGoals.length === 0
-                    ? `All Clinical Goals (${products.length})`
-                    : selectedGoals.length === 1
-                    ? `${availableGoals.find(g => g.id === selectedGoals[0])?.label || selectedGoals[0]}`
-                    : `${selectedGoals.length} Goals Selected`}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                {selectedGoals.length > 0 && (
-                  <span style={{
-                    backgroundColor: '#2563eb',
-                    color: '#ffffff',
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    padding: '1px 6px',
-                    borderRadius: '10px'
-                  }}>
-                    {selectedGoals.length}
-                  </span>
-                )}
-                <ChevronDown size={14} color="#64748b" style={{ transform: isGoalDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
-              </div>
-            </button>
+                flexDirection: 'column',
+                gap: '2px'
+              }}>
+                <div style={{ padding: '4px 8px', fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                  Filter by Format
+                </div>
 
-            {isGoalDropdownOpen && (
-              <>
-                <div
-                  style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
-                  onClick={() => setIsGoalDropdownOpen(false)}
-                />
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  left: 0,
-                  width: '320px',
-                  maxWidth: '92vw',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
-                  border: '1px solid #e2e8f0',
-                  zIndex: 1000,
-                  padding: '8px',
-                  maxHeight: '380px',
-                  overflowY: 'auto'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 8px', borderBottom: '1px solid #f1f5f9' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Filter by Clinical Goal
-                    </span>
-                    {selectedGoals.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={clearGoals}
-                        style={{ border: 'none', background: 'none', color: '#2563eb', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
-                      >
-                        Clear all
-                      </button>
-                    )}
-                  </div>
-
-                  <div
-                    onClick={() => { clearGoals(); setIsGoalDropdownOpen(false); }}
+                {[
+                  { id: 'all', label: 'All Formats', action: () => { setPackagingMode('all'); setDosageFilter('all'); setRouteFilter('all'); } },
+                  { id: 'high_dose', label: 'High Dose (≥10mg)', action: () => setDosageFilter(dosageFilter === 'high_dose' ? 'all' : 'high_dose') },
+                  { id: 'vials', label: '💉 Lyophilized Vials', action: () => setPackagingMode(packagingMode === 'vials' ? 'all' : 'vials') },
+                  { id: 'pens', label: '🖊️ Pre-filled Pens', action: () => setPackagingMode(packagingMode === 'pens' ? 'all' : 'pens') },
+                  { id: 'sprays', label: '👃 Nasal Sprays', action: () => setPackagingMode(packagingMode === 'sprays' ? 'all' : 'sprays') },
+                  { id: 'oral', label: '💊 Oral Formulations', action: () => setPackagingMode(packagingMode === 'oral' ? 'all' : 'oral') },
+                  { id: 'kits', label: '📦 10-Vial Kits', action: () => setPackagingMode(packagingMode === 'kits' ? 'all' : 'kits') },
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => { item.action(); setIsFormatDropdownOpen(false); }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '8px 10px',
-                      borderRadius: '8px',
+                      padding: '7px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'none',
                       cursor: 'pointer',
-                      backgroundColor: selectedGoals.length === 0 ? '#eff6ff' : 'transparent',
-                      transition: 'background 0.12s ease',
-                      marginTop: '4px'
+                      textAlign: 'left',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#1e293b'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '1rem' }}>🌐</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: selectedGoals.length === 0 ? 800 : 500, color: selectedGoals.length === 0 ? '#1d4ed8' : '#334155' }}>
-                        All Clinical Goals
-                      </span>
-                    </div>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: selectedGoals.length === 0 ? '#2563eb' : '#64748b',
-                      backgroundColor: selectedGoals.length === 0 ? '#dbeafe' : '#f1f5f9',
-                      padding: '2px 6px',
-                      borderRadius: '6px'
-                    }}>
-                      {products.length}
-                    </span>
-                  </div>
-
-                  {availableGoals?.map(goal => {
-                    const isChecked = selectedGoals.includes(goal.id);
-                    return (
-                      <div
-                        key={goal.id}
-                        onClick={() => toggleGoal(goal.id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '8px 10px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          backgroundColor: isChecked ? '#eff6ff' : 'transparent',
-                          transition: 'background 0.12s ease'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => {}}
-                            style={{ cursor: 'pointer', accentColor: '#2563eb' }}
-                          />
-                          <span style={{
-                            fontSize: '0.82rem',
-                            fontWeight: isChecked ? 700 : 500,
-                            color: isChecked ? '#1e40af' : '#1e293b',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
-                          }}>
-                            {goal.label}
-                          </span>
-                        </div>
-                        <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          color: isChecked ? '#2563eb' : '#64748b',
-                          backgroundColor: isChecked ? '#dbeafe' : '#f1f5f9',
-                          padding: '2px 6px',
-                          borderRadius: '6px',
-                          flexShrink: 0
-                        }}>
-                          {goal.count}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Format, Packaging & Route Dropdown */}
-          <div className="format-dropdown-container" style={{ position: 'relative', flex: '0 1 240px', minWidth: '200px', boxSizing: 'border-box' }}>
-            <button
-              type="button"
-              onClick={() => setIsFormatDropdownOpen(prev => !prev)}
-              style={{
-                width: '100%',
-                height: '42px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-                backgroundColor: isFormatActive ? '#f0fdf4' : '#ffffff',
-                border: isFormatActive ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '0 12px',
-                cursor: 'pointer',
-                boxSizing: 'border-box',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                <span style={{ fontSize: '1rem', flexShrink: 0 }}>
-                  {formatButtonIcon()}
-                </span>
-                <span style={{
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  color: isFormatActive ? '#15803d' : '#0f172a',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {formatButtonLabel()}
-                </span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
               </div>
-              <ChevronDown size={14} color="#64748b" style={{ transform: isFormatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
-            </button>
-
-            {isFormatDropdownOpen && (
-              <>
-                <div
-                  style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
-                  onClick={() => setIsFormatDropdownOpen(false)}
-                />
-                <div style={{
-                  position: 'absolute',
-                  top: '46px',
-                  right: 0,
-                  width: '275px',
-                  maxWidth: '92vw',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '12px',
-                  boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
-                  border: '1px solid #e2e8f0',
-                  zIndex: 1000,
-                  padding: '8px',
-                }}>
-                  <div style={{ padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Peptide Presentation & Format
-                    </span>
-                  </div>
-
-                  {[
-                    { id: 'all',       label: 'All Peptide Formats',         icon: '✨', desc: 'Every presentation & delivery system' },
-                    { id: 'vials',     label: 'Lyophilized Vials',            icon: '🧪', desc: 'Single lyophilized injection vials' },
-                    { id: 'pens',      label: 'Pre-filled Pens & Cartridges', icon: '💉', desc: 'Dial pens & 3 mL refill cartridges' },
-                    { id: 'sprays',    label: 'Nasal Sprays',                icon: '💨', desc: 'Metered mucosal actuation pumps' },
-                    { id: 'oral',      label: 'Oral & Sublingual',            icon: '💊', desc: 'Enteric capsules and oral tablets' },
-                    { id: 'kits',      label: '10-Vial Multi-Kits',           icon: '📦', desc: 'Volume multi-packs with savings' },
-                    { id: 'high_dose', label: 'High Dose (≥10mg)',            icon: '💪', desc: 'High-concentration peptide strength' },
-                  ].map(opt => {
-                    const isSelected = opt.id === 'high_dose'
-                      ? dosageFilter === 'high_dose'
-                      : (packagingMode === opt.id && dosageFilter !== 'high_dose' && (!routeFilter || routeFilter === 'all'));
-                    return (
-                      <div
-                        key={opt.id}
-                        onClick={() => {
-                          if (opt.id === 'high_dose') {
-                            setDosageFilter('high_dose');
-                            setPackagingMode('all');
-                            if (setRouteFilter) setRouteFilter('all');
-                          } else {
-                            setDosageFilter('all');
-                            setPackagingMode(opt.id);
-                            if (setRouteFilter) setRouteFilter('all');
-                          }
-                          setIsFormatDropdownOpen(false);
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '8px 10px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
-                          transition: 'background 0.12s ease',
-                          marginBottom: '2px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '0.95rem' }}>{opt.icon}</span>
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.82rem', fontWeight: isSelected ? 800 : 600, color: isSelected ? '#15803d' : '#1e293b' }}>
-                              {opt.label}
-                            </span>
-                            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                              {opt.desc}
-                            </span>
-                          </div>
-                        </div>
-                        {isSelected && <span style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.82rem' }}>✓</span>}
-                      </div>
-                    );
-                  })}
-
-                  {/* Route of Administration Section */}
-                  {setRouteFilter && (
-                    <>
-                      <div style={{ padding: '6px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: '4px', marginBottom: '2px' }}>
-                        <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          Administration Route
-                        </span>
-                      </div>
-                      {[
-                        { id: 'injectable', label: 'Injectable / SubQ', icon: '💉', desc: 'Vials, pens & ampoules' },
-                        { id: 'nasal',      label: 'Nasal Spray',     icon: '👃', desc: 'Intranasal delivery' },
-                        { id: 'oral',       label: 'Oral / Capsules', icon: '💊', desc: 'Oral peptide tablets' },
-                        { id: 'topical',    label: 'Topical / Hair',  icon: '💧', desc: 'Scalp & skin solutions' },
-                      ].map(r => {
-                        const isSelected = routeFilter === r.id;
-                        return (
-                          <div
-                            key={r.id}
-                            onClick={() => {
-                              setRouteFilter(isSelected ? 'all' : r.id);
-                              setIsFormatDropdownOpen(false);
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              padding: '7px 10px',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              backgroundColor: isSelected ? '#eff6ff' : 'transparent',
-                              transition: 'background 0.12s ease',
-                              marginBottom: '2px'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ fontSize: '0.92rem' }}>{r.icon}</span>
-                              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontSize: '0.80rem', fontWeight: isSelected ? 800 : 600, color: isSelected ? '#1d4ed8' : '#1e293b' }}>
-                                  {r.label}
-                                </span>
-                                <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
-                                  {r.desc}
-                                </span>
-                              </div>
-                            </div>
-                            {isSelected && <span style={{ color: '#2563eb', fontWeight: 800, fontSize: '0.82rem' }}>✓</span>}
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* FDA Regulatory Status Dropdown */}
-          <div className="fda-dropdown-container" style={{ position: 'relative', flex: '0 1 230px', minWidth: '185px', boxSizing: 'border-box' }}>
-            <button
-              type="button"
-              onClick={() => setIsFdaDropdownOpen(prev => !prev)}
-              style={{
-                width: '100%',
-                height: '42px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px',
-                backgroundColor: isFdaActive ? '#eff6ff' : '#ffffff',
-                border: isFdaActive ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '0 12px',
-                cursor: 'pointer',
-                boxSizing: 'border-box',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                <span style={{ fontSize: '1rem', flexShrink: 0 }}>
-                  {fdaButtonIcon()}
-                </span>
-                <span style={{
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  color: isFdaActive ? '#1d4ed8' : '#0f172a',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {fdaButtonLabel()}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                {isFdaActive && (
-                  <span style={{
-                    backgroundColor: '#2563eb',
-                    color: '#ffffff',
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    padding: '1px 6px',
-                    borderRadius: '10px'
-                  }}>
-                    {fdaStatusCounts[fdaFilter] || 0}
-                  </span>
-                )}
-                <ChevronDown size={14} color="#64748b" style={{ transform: isFdaDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
-              </div>
-            </button>
-
-            {isFdaDropdownOpen && (
-              <>
-                <div
-                  style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
-                  onClick={() => setIsFdaDropdownOpen(false)}
-                />
-                <div
-                  className="fda-dropdown-menu-popover"
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 4px)',
-                    left: 0,
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#ffffff',
-                    borderRadius: '12px',
-                    boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
-                    border: '1px solid #e2e8f0',
-                    zIndex: 1000,
-                    padding: '8px',
-                  }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
-                    <FdaEmblem size={16} color="#475569" />
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      FDA Regulatory Status
-                    </span>
-                    {isFdaActive && (
-                      <button
-                        type="button"
-                        onClick={() => { if (setFdaFilter) setFdaFilter('all'); setIsFdaDropdownOpen(false); }}
-                        style={{ border: 'none', background: 'none', color: '#2563eb', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: 0, marginLeft: 'auto' }}
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-
-                  {FDA_OPTIONS.map(opt => {
-                    const isSelected = fdaFilter === opt.id || (!fdaFilter && opt.id === 'all');
-                    const count = fdaStatusCounts[opt.id] ?? 0;
-                    return (
-                      <div
-                        key={opt.id}
-                        onClick={() => {
-                          if (setFdaFilter) setFdaFilter(opt.id);
-                          setIsFdaDropdownOpen(false);
-                        }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '8px 10px',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          backgroundColor: isSelected ? '#eff6ff' : 'transparent',
-                          transition: 'background 0.12s ease',
-                          marginBottom: '2px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '1rem', flexShrink: 0 }}>{opt.icon}</span>
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.82rem', fontWeight: isSelected ? 800 : 600, color: isSelected ? '#1d4ed8' : '#1e293b' }}>
-                              {opt.label}
-                            </span>
-                            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                              {opt.desc}
-                            </span>
-                          </div>
-                        </div>
-                        <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          color: isSelected ? '#2563eb' : '#64748b',
-                          backgroundColor: isSelected ? '#dbeafe' : '#f1f5f9',
-                          padding: '2px 6px',
-                          borderRadius: '6px',
-                          flexShrink: 0
-                        }}>
-                          {count}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
+
+        {/* Mobile Filter Button (< 1024px) */}
+        <button
+          type="button"
+          onClick={onOpenMobileFilters}
+          className="catalog-mobile-only-filter-btn"
+          style={{
+            height: '40px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: activeFacetsCount > 0 ? '#eff6ff' : '#ffffff',
+            border: activeFacetsCount > 0 ? '1.5px solid #003666' : '1px solid #cbd5e1',
+            borderRadius: '8px',
+            padding: '0 12px',
+            fontSize: '0.80rem',
+            fontWeight: 700,
+            color: activeFacetsCount > 0 ? '#003666' : '#334155',
+            cursor: 'pointer',
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)'
+          }}
+          title="Open Clinical Goals and FDA Regulatory Status filters"
+        >
+          <Filter size={14} color="#003666" />
+          <span>Goals & FDA</span>
+          {activeFacetsCount > 0 && (
+            <span style={{
+              background: '#003666',
+              color: '#ffffff',
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              padding: '1px 6px',
+              borderRadius: '9999px'
+            }}>
+              {activeFacetsCount}
+            </span>
+          )}
+        </button>
+
       </div>
 
-      {/* ── Active Filters Chips Bar ── */}
+      {/* ── Active Filter Chips Strip ── */}
       {hasActiveFilters && (
         <div style={{
           display: 'flex',
@@ -702,9 +278,9 @@ export default function SharedCatalogFilterBar({
           alignItems: 'center',
           gap: '6px',
           padding: '4px 0',
-          fontSize: '0.78rem'
+          fontSize: '0.76rem'
         }}>
-          <span style={{ color: '#64748b', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.03em', marginRight: '2px' }}>
+          <span style={{ color: '#64748b', fontWeight: 800, fontSize: '0.70rem', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '2px' }}>
             Active:
           </span>
 
@@ -739,23 +315,46 @@ export default function SharedCatalogFilterBar({
                 alignItems: 'center',
                 gap: '4px',
                 backgroundColor: '#eff6ff',
-                color: '#1d4ed8',
+                color: '#003666',
                 padding: '2px 8px',
                 borderRadius: '12px',
                 border: '1px solid #bfdbfe',
-                fontWeight: 600
+                fontWeight: 700
               }}>
                 🎯 {label}
                 <button
                   type="button"
                   onClick={() => toggleGoal(gId)}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#003666', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
                 >
                   ×
                 </button>
               </span>
             );
           })}
+
+          {isFdaActive && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#eff6ff',
+              color: '#1d4ed8',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #bfdbfe',
+              fontWeight: 700
+            }}>
+              🏛️ FDA: {FDA_LABELS[fdaFilter] || fdaFilter}
+              <button
+                type="button"
+                onClick={() => setFdaFilter('all')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
 
           {dosageFilter === 'high_dose' && (
             <span style={{
@@ -780,7 +379,7 @@ export default function SharedCatalogFilterBar({
             </span>
           )}
 
-          {packagingMode === 'kits' && (
+          {packagingMode !== 'all' && (
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -792,103 +391,11 @@ export default function SharedCatalogFilterBar({
               border: '1px solid #bbf7d0',
               fontWeight: 600
             }}>
-              📦 10-Vial Kits
+              📦 Format: {packagingMode}
               <button
                 type="button"
                 onClick={() => setPackagingMode('all')}
                 style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#15803d', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
-          {packagingMode === 'units' && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#f0fdf4',
-              color: '#15803d',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              border: '1px solid #bbf7d0',
-              fontWeight: 600
-            }}>
-              🧪 Single Vials
-              <button
-                type="button"
-                onClick={() => setPackagingMode('all')}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#15803d', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
-          {routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter] && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#eff6ff',
-              color: '#1d4ed8',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              border: '1px solid #bfdbfe',
-              fontWeight: 600
-            }}>
-              {ROUTE_LABELS[routeFilter].icon} {ROUTE_LABELS[routeFilter].label}
-              <button
-                type="button"
-                onClick={() => setRouteFilter('all')}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
-          {isFdaActive && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#eff6ff',
-              color: '#1d4ed8',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              border: '1px solid #bfdbfe',
-              fontWeight: 600
-            }}>
-              {fdaButtonIcon()} FDA: {fdaButtonLabel()}
-              <button
-                type="button"
-                onClick={() => setFdaFilter('all')}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
-              >
-                ×
-              </button>
-            </span>
-          )}
-
-          {onlyWithProtocols && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: '#fef3c7',
-              color: '#b45309',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              border: '1px solid #fde68a',
-              fontWeight: 600
-            }}>
-              📋 Has Protocols
-              <button
-                type="button"
-                onClick={() => setOnlyWithProtocols(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#b45309', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
               >
                 ×
               </button>
@@ -903,7 +410,7 @@ export default function SharedCatalogFilterBar({
               background: 'none',
               color: '#dc2626',
               fontWeight: 700,
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               cursor: 'pointer',
               marginLeft: '4px',
               padding: '2px 4px',
@@ -915,18 +422,46 @@ export default function SharedCatalogFilterBar({
         </div>
       )}
 
-      {/* Formulations count indicator & View Switcher */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '4px' }}>
+      {/* ── Sub-bar: Result count & List/Cards toggle ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '8px',
+        paddingTop: '2px'
+      }}>
         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
           Showing <strong>{displayedProducts.length}</strong> of <strong>{products.length}</strong> formulations
         </div>
 
         {setViewMode && (
-          <div className="proto-view-switcher" role="radiogroup" aria-label="Catalog view mode">
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            background: '#f1f5f9',
+            border: '1px solid #cbd5e1',
+            borderRadius: '8px',
+            padding: '2px',
+            gap: '2px'
+          }}>
             <button
               type="button"
-              className={`proto-view-btn ${viewMode === 'list' ? 'is-active' : ''}`}
               onClick={() => setViewMode('list')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: 'none',
+                background: viewMode === 'list' ? '#ffffff' : 'transparent',
+                color: viewMode === 'list' ? '#003666' : '#64748b',
+                fontWeight: viewMode === 'list' ? 800 : 600,
+                fontSize: '0.74rem',
+                cursor: 'pointer',
+                boxShadow: viewMode === 'list' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+              }}
               title="Compact list view"
             >
               <List size={13} />
@@ -934,8 +469,21 @@ export default function SharedCatalogFilterBar({
             </button>
             <button
               type="button"
-              className={`proto-view-btn ${viewMode === 'cards' ? 'is-active' : ''}`}
               onClick={() => setViewMode('cards')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: 'none',
+                background: viewMode === 'cards' ? '#ffffff' : 'transparent',
+                color: viewMode === 'cards' ? '#003666' : '#64748b',
+                fontWeight: viewMode === 'cards' ? 800 : 600,
+                fontSize: '0.74rem',
+                cursor: 'pointer',
+                boxShadow: viewMode === 'cards' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+              }}
               title="Cards grid view"
             >
               <LayoutGrid size={13} />
@@ -944,6 +492,7 @@ export default function SharedCatalogFilterBar({
           </div>
         )}
       </div>
+
     </div>
   );
 }

@@ -20,6 +20,7 @@ import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSidebarWidget';
+import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
 import toast from 'react-hot-toast';
 
 const INCI_GROUP_META = {
@@ -40,60 +41,206 @@ const INGREDIENT_ICONS = {
   fragrance: Star, base: Beaker, functional: TestTube,
 };
 
-function InciRow({ ing, index }) {
+function InciCard({ ing, index, onCopy }) {
   const [open, setOpen] = useState(false);
   const group = ing.inci_group || 'functional';
   const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
   const IconComp = INGREDIENT_ICONS[group] || FlaskConical;
-  const hasClinical = !!(ing.clinical_data?.mechanism || ing.clinical_data?.evidence);
+  const hasClinical = Boolean(ing.clinical_data?.mechanism || ing.clinical_data?.evidence || ing.pmid);
 
   return (
-    <div style={{ borderBottom: '1px solid #f1f5f9', padding: '0.65rem 0' }}>
-      <button type="button" onClick={() => hasClinical && setOpen(v => !v)}
-        style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', width: '100%', background: 'none', border: 'none', cursor: hasClinical ? 'pointer' : 'default', textAlign: 'left', padding: 0 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: '50%', flexShrink: 0, marginTop: '2px', background: '#f1f5f9', color: '#64748b', fontSize: '0.65rem', fontWeight: 700 }}>{index + 1}</span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: '6px', flexShrink: 0, background: meta.bg, color: meta.color }}>
-          <IconComp size={13} />
-        </span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.81rem', fontWeight: 800, color: '#0f172a', fontStyle: 'italic' }}>{ing.inci_name}</span>
-            {ing.common_name && <span style={{ fontSize: '0.7rem', color: '#64748b' }}>— {ing.common_name}</span>}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
-            <span style={{ fontSize: '0.6rem', fontWeight: 700, color: meta.color, background: meta.bg, padding: '1px 6px', borderRadius: '99px', border: `1px solid ${meta.color}30` }}>{meta.label}</span>
-            {(ing.function || []).slice(0, 2).map(f => (
-              <span key={f} style={{ fontSize: '0.6rem', color: '#64748b', background: '#f8fafc', padding: '1px 6px', borderRadius: '99px', border: '1px solid #e2e8f0' }}>{f}</span>
-            ))}
-            {ing.concentration_range && <span style={{ fontSize: '0.6rem', color: '#94a3b8', fontFamily: 'monospace' }}>{ing.concentration_range}</span>}
+    <div style={{
+      background: '#ffffff',
+      border: '1px solid #e2e8f0',
+      borderRadius: '10px',
+      padding: '0.95rem 1.15rem',
+      marginBottom: '0.75rem',
+      boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
+      transition: 'border-color 0.2s, box-shadow 0.2s'
+    }}>
+      {/* Top Header Row: 1 full-width row with numbering, name, badges and pubmed */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 240px', minWidth: 0 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 26,
+            height: 26,
+            borderRadius: '6px',
+            background: '#f1f5f9',
+            color: '#475569',
+            fontSize: '0.68rem',
+            fontWeight: 800,
+            flexShrink: 0,
+            fontFamily: 'monospace'
+          }}>
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 28,
+            height: 28,
+            borderRadius: '6px',
+            flexShrink: 0,
+            background: meta.bg,
+            color: meta.color
+          }}>
+            <IconComp size={14} />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
+              {ing.inci_name}
+            </div>
+            {ing.common_name && (
+              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, marginTop: '2px' }}>
+                {ing.common_name}
+              </div>
+            )}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-          {hasClinical && <span style={{ fontSize: '0.58rem', fontWeight: 700, color: '#0d9488', background: '#ccfbf1', padding: '2px 7px', borderRadius: '99px' }}>CLINICAL DATA</span>}
-          {hasClinical && (open ? <ChevronDown size={13} style={{ color: '#64748b' }} /> : <ChevronRight size={13} style={{ color: '#64748b' }} />)}
-        </div>
-      </button>
-      {ing.role && !open && <p style={{ margin: '4px 0 0 60px', fontSize: '0.72rem', color: '#64748b', lineHeight: 1.5 }}>{ing.role}</p>}
-      {open && hasClinical && (
-        <div style={{ marginTop: '0.7rem', marginLeft: '60px', background: 'linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%)', borderRadius: '8px', padding: '0.85rem 1rem', borderLeft: `3px solid ${meta.color}`, border: `1px solid ${meta.color}30` }}>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-            {ing.cas_number && <div style={{ fontSize: '0.65rem', color: '#64748b' }}><span style={{ fontWeight: 700, color: '#475569' }}>CAS </span>{ing.cas_number}</div>}
-            {ing.molecular_weight && <div style={{ fontSize: '0.65rem', color: '#64748b' }}><span style={{ fontWeight: 700, color: '#475569' }}>MW </span>{ing.molecular_weight}</div>}
-            {ing.origin && <div style={{ fontSize: '0.65rem', color: '#64748b' }}><span style={{ fontWeight: 700, color: '#475569' }}>Origin </span>{ing.origin}</div>}
-            {ing.purity && <div style={{ fontSize: '0.65rem', color: '#64748b' }}><span style={{ fontWeight: 700, color: '#475569' }}>Purity </span>{ing.purity}</div>}
-          </div>
-          {ing.role && <p style={{ fontSize: '0.75rem', color: '#334155', margin: '0 0 0.6rem 0', lineHeight: 1.55 }}>{ing.role}</p>}
-          {ing.clinical_data?.mechanism && (
-            <>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: meta.color, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '5px' }}><Beaker size={12} /> Mechanism of Action</div>
-              <p style={{ fontSize: '0.73rem', color: '#475569', margin: '0 0 0.6rem 0', lineHeight: 1.55 }}>{ing.clinical_data.mechanism}</p>
-            </>
+
+        {/* Right Action & Metadata Badges */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flexShrink: 0 }}>
+          <span style={{
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            color: meta.color,
+            background: meta.bg,
+            padding: '2px 8px',
+            borderRadius: '99px',
+            border: `1px solid ${meta.color}35`
+          }}>
+            {meta.label}
+          </span>
+          {ing.concentration_range && (
+            <span style={{
+              fontSize: '0.64rem',
+              fontWeight: 700,
+              color: '#334155',
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              padding: '2px 8px',
+              borderRadius: '99px',
+              fontFamily: 'monospace'
+            }}>
+              {ing.concentration_range}
+            </span>
           )}
-          {ing.clinical_data?.evidence && (
-            <>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: meta.color, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '5px' }}><BookOpen size={12} /> Clinical Evidence</div>
-              <p style={{ fontSize: '0.73rem', color: '#475569', margin: 0, lineHeight: 1.55 }}>{ing.clinical_data.evidence}</p>
-            </>
+          {ing.pmid && (
+            <a
+              href={ing.pmid_url || `https://pubmed.ncbi.nlm.nih.gov/${ing.pmid}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="View indexed research study on PubMed NCBI"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.64rem',
+                fontWeight: 800,
+                color: '#0284c7',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                textDecoration: 'none'
+              }}
+            >
+              <BookOpen size={10} /> PMID: {ing.pmid} <ExternalLink size={9} />
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Origin / Provenance */}
+      {ing.origin && (
+        <div style={{ marginTop: '0.45rem', fontSize: '0.68rem', color: '#64748b' }}>
+          <strong style={{ color: '#475569' }}>Origin: </strong>
+          {ing.origin}
+        </div>
+      )}
+
+      {/* Role & Functional Summary */}
+      {ing.role && (
+        <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+          {ing.role}
+        </p>
+      )}
+
+      {/* Expandable Clinical Mechanisms & In-Vivo Evidence */}
+      {hasClinical && (
+        <div style={{ marginTop: '0.65rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={() => setOpen(v => !v)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '0.70rem',
+              fontWeight: 700,
+              color: '#0d9488',
+              background: '#f0fdfa',
+              border: '1px solid #99f6e4',
+              borderRadius: '6px',
+              padding: '3px 10px',
+              cursor: 'pointer'
+            }}
+          >
+            <Activity size={12} />
+            <span>{open ? 'Hide Clinical Mechanism' : 'View Clinical Mechanism & Evidence'}</span>
+            {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          </button>
+
+          {open && (
+            <div style={{
+              marginTop: '0.65rem',
+              background: 'linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%)',
+              borderRadius: '8px',
+              padding: '0.85rem 1rem',
+              borderLeft: `3px solid ${meta.color}`,
+              border: `1px solid ${meta.color}30`
+            }}>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+                {ing.cas_number && (
+                  <div style={{ fontSize: '0.67rem', color: '#64748b' }}>
+                    <span style={{ fontWeight: 700, color: '#475569' }}>CAS: </span>{ing.cas_number}
+                  </div>
+                )}
+                {ing.pmid && (
+                  <div style={{ fontSize: '0.67rem', color: '#0284c7' }}>
+                    <span style={{ fontWeight: 700, color: '#475569' }}>PubMed ID: </span>
+                    <a href={ing.pmid_url || `https://pubmed.ncbi.nlm.nih.gov/${ing.pmid}/`} target="_blank" rel="noopener noreferrer" style={{ color: '#0284c7', textDecoration: 'underline' }}>
+                      {ing.pmid}
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {ing.clinical_data?.mechanism && (
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: meta.color, marginBottom: '0.15rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Beaker size={11} /> Molecular Mechanism of Action
+                  </div>
+                  <p style={{ fontSize: '0.73rem', color: '#475569', margin: 0, lineHeight: 1.55 }}>
+                    {ing.clinical_data.mechanism}
+                  </p>
+                </div>
+              )}
+              {ing.clinical_data?.evidence && (
+                <div>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 800, color: meta.color, marginBottom: '0.15rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <BookOpen size={11} /> Peer-Reviewed Clinical Evidence
+                  </div>
+                  <p style={{ fontSize: '0.73rem', color: '#475569', margin: 0, lineHeight: 1.55 }}>
+                    {ing.clinical_data.evidence}
+                  </p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -129,6 +276,7 @@ function ApplicationStep({ step, isLast }) {
 
 function TechSpecsGrid({ specs }) {
   if (!specs) return null;
+  // 8 balanced specs forming a perfectly symmetrical 2-column grid without orphan cards
   const rows = [
     { label: 'Formulation Type', value: specs.formulation_type, icon: Beaker },
     { label: 'pH Range', value: specs.ph_range, icon: TestTube },
@@ -136,21 +284,50 @@ function TechSpecsGrid({ specs }) {
     { label: 'Appearance', value: specs.appearance, icon: Sparkles },
     { label: 'Fragrance Family', value: specs.fragrance_family, icon: Star },
     { label: 'Shelf Life', value: specs.shelf_life, icon: Clock },
-    { label: 'Storage', value: specs.storage, icon: Thermometer },
-    { label: 'Regulatory Status', value: specs.regulatory_status, icon: BadgeCheck },
-    { label: 'Derm. Testing', value: specs.dermatological_testing, icon: ShieldCheck },
+    { label: 'Storage Conditions', value: specs.storage, icon: Thermometer },
+    { label: 'Regulatory Compliance', value: specs.regulatory_status, icon: BadgeCheck },
   ].filter(r => r.value);
+
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '0.75rem',
+        marginBottom: '1rem'
+      }}>
         {rows.map(r => {
           const Icon = r.icon;
           return (
-            <div key={r.label} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '0.6rem 0.8rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <Icon size={14} style={{ color: '#0d9488', flexShrink: 0, marginTop: '1px' }} />
-              <div>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em', marginBottom: '2px' }}>{r.label.toUpperCase()}</div>
-                <div style={{ fontSize: '0.78rem', color: '#0f172a', fontWeight: 500, lineHeight: 1.4 }}>{r.value}</div>
+            <div key={r.label} style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              padding: '0.75rem 0.95rem',
+              background: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '6px',
+                background: '#f0fdfa',
+                color: '#0d9488',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <Icon size={14} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.64rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em', marginBottom: '2px' }}>
+                  {r.label.toUpperCase()}
+                </div>
+                <div style={{ fontSize: '0.80rem', color: '#0f172a', fontWeight: 600, lineHeight: 1.45 }}>
+                  {r.value}
+                </div>
               </div>
             </div>
           );
@@ -170,7 +347,7 @@ function TechSpecsGrid({ specs }) {
       )}
       {specs.free_from?.length > 0 && (
         <div style={{ padding: '0.75rem 1rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#16a34a', marginBottom: '0.4rem', letterSpacing: '0.05em' }}>FREE FROM</div>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#16a34a', marginBottom: '0.4rem', letterSpacing: '0.05em' }}>FREE FROM (HYPOALLERGENIC STANDARD)</div>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {specs.free_from.map(f => (
               <span key={f} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.67rem', color: '#166534', background: '#ffffff', padding: '2px 8px', borderRadius: '99px', border: '1px solid #bbf7d0' }}>
@@ -187,7 +364,7 @@ function TechSpecsGrid({ specs }) {
 export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
   const [lang] = useState('en');
-  const [inciFilter, setInciFilter] = useState('all');
+  const [inciFilter, setInciFilter] = useState('key_active');
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
 
@@ -208,7 +385,16 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
 
   const filteredIngredients = useMemo(() => {
-    if (inciFilter === 'all') return ingredients;
+    if (inciFilter === 'all') {
+      // Prioritize Key Clinical Actives over technical carrier base
+      return [...ingredients].sort((a, b) => {
+        const isKeyA = a.inci_group === 'key_active' || a.inci_group === 'functional_active';
+        const isKeyB = b.inci_group === 'key_active' || b.inci_group === 'functional_active';
+        if (isKeyA && !isKeyB) return -1;
+        if (!isKeyA && isKeyB) return 1;
+        return 0;
+      });
+    }
     return ingredients.filter(i => (i.inci_group || 'functional') === inciFilter);
   }, [ingredients, inciFilter]);
 
@@ -232,11 +418,54 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   if (!product) return null;
 
+  // Cosmetics KPIs — derived from product data, no hardcoded peptide/vial concepts
+  const usageText = applicationProtocol?.frequency
+    ? applicationProtocol.frequency
+    : applicationProtocol?.leave_on === false
+      ? 'Rinse-off'
+      : applicationProtocol?.leave_on === true
+        ? 'Leave-on'
+        : 'Topical Use';
+
+  const volumeText = selectedVariant?.volume
+    || product?.volume
+    || product?.size
+    || technicalSpecs?.volume
+    || '250 mL';
+
   const kpis = [
-    { icon: Layers, iconBg: '#f0fdfa', iconColor: '#0d9488', title: 'Total Ingredients', value: `${ingredients.length || '15+'}`, subtitle: `${keyActives.length} clinical actives`, subColor: '#0d9488' },
-    { icon: FlaskConical, iconBg: '#eff6ff', iconColor: '#2563eb', title: 'Formulation', value: technicalSpecs?.formulation_type?.split('(')[0]?.trim() || (isShampoo ? 'Aqueous Gel' : 'O/W Emulsion'), subtitle: technicalSpecs?.ph_range ? `pH ${technicalSpecs.ph_range}` : 'Derm. tested', subColor: '#2563eb' },
-    { icon: ShieldCheck, iconBg: '#f0fdf4', iconColor: '#16a34a', title: 'Sulphate-Free', value: 'SLS / SLES Free', subtitle: 'EU Reg. 1223/2009', subColor: '#16a34a' },
-    { icon: Activity, iconBg: '#faf5ff', iconColor: '#7c3aed', title: 'Clinical Target', value: 'Follicular DHT', subtitle: 'Anagen phase support', subColor: '#7c3aed' }
+    {
+      icon: Layers,
+      iconBg: '#f0fdfa', iconColor: '#0d9488',
+      title: 'Total Ingredients',
+      value: `${ingredients.length || '15+'}`,
+      subtitle: `${keyActives.length} clinical actives`,
+      subColor: '#0d9488'
+    },
+    {
+      icon: FlaskConical,
+      iconBg: '#eff6ff', iconColor: '#2563eb',
+      title: 'Formulation',
+      value: technicalSpecs?.formulation_type?.split('(')[0]?.trim() || (isShampoo ? 'Aqueous Gel' : 'O/W Emulsion'),
+      subtitle: technicalSpecs?.ph_range ? `pH ${technicalSpecs.ph_range}` : 'Derm. tested',
+      subColor: '#2563eb'
+    },
+    {
+      icon: ShieldCheck,
+      iconBg: '#f0fdf4', iconColor: '#16a34a',
+      title: 'Sulphate-Free',
+      value: 'SLS / SLES Free',
+      subtitle: 'EU Reg. 1223/2009',
+      subColor: '#16a34a'
+    },
+    {
+      icon: Package,
+      iconBg: '#faf5ff', iconColor: '#7c3aed',
+      title: 'Presentation',
+      value: volumeText,
+      subtitle: usageText,
+      subColor: '#7c3aed'
+    }
   ];
 
   return (
@@ -272,7 +501,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '8px 18px',
+                    padding: '8px 20px',
                     borderRadius: '8px',
                     background: '#0d9488',
                     color: '#ffffff',
@@ -285,25 +514,6 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 >
                   <Mail size={14} /> Inquire Product
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setIsAIDrawerOpen(true)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    background: '#ffffff',
-                    color: '#0d9488',
-                    border: '1.5px solid #0d9488',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <Sparkles size={14} /> Ask Atlas AI
-                </button>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '6px', background: '#f1f5f9', border: '1px solid #cbd5e1', fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
                   <Package size={13} style={{ color: '#0d9488' }} />
                   {selectedVariant?.volume || '250 mL Bottle'}
@@ -311,11 +521,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </div>
             </>}
             desktopSecondary={imageUrl ? (
-              <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
-                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '180px', maxHeight: '240px', objectFit: 'contain', borderRadius: '8px' }} />
+              <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '220px', height: '280px', flexShrink: 0, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '180px', maxHeight: '250px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px' }} />
               </div>
             ) : (
-              <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)', borderRadius: '16px', border: '1px solid #99f6e4', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 180, gap: '0.75rem' }}>
+              <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)', borderRadius: '16px', border: '1px solid #99f6e4', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '220px', height: '280px', flexShrink: 0, gap: '0.75rem' }}>
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(13,148,136,0.15)' }}>
                   <Droplets size={28} style={{ color: '#0d9488' }} />
                 </div>
@@ -323,7 +533,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                 <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{brand} · 250 mL</div>
               </div>
             )}
-            mobileSecondary={imageUrl ? <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0' }}><img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '130px', objectFit: 'contain', borderRadius: '8px' }} /></div> : null}
+            mobileSecondary={imageUrl ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '180px', height: '210px', margin: '0.5rem auto', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '150px', maxHeight: '190px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '4px' }} />
+              </div>
+            ) : null}
           />
         </div>
 
@@ -332,53 +546,187 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
-            {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS (MOVED FROM SIDEBAR TO MAIN STREAM) */}
+            {/* CLINICAL EVIDENCE & MOLECULAR MECHANISMS */}
             <PublicSectionCard id="clinical-evidence" icon={Activity} category="CLINICAL EFFICACY" title="Evidence-Mapped Trichology & Follicular Research" badge="Peer-Reviewed Data" badgeVariant="teal">
               <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.1rem' }}>
                 Every active compound in this cosmeceutical is backed by peer-reviewed dermatology and trichology research with documented molecular targets across the hair follicle and scalp dermal matrix.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                 {[
-                  { target: 'DHT Inhibition', compound: 'Zinc PCA', mechanism: '5α-Reductase Blockade', outcome: 'Suppresses follicular miniaturisation at dermal papilla by lowering lipophilic sebum dihydrotestosterone.', stat: '−65% Sebum DHT' },
-                  { target: 'Anagen Extension', compound: 'Caffeine', mechanism: 'Adenosine Antagonism / IGF-1', outcome: 'Counters testosterone-induced growth arrest; upregulates IGF-1 signaling in matrix keratinocytes.', stat: '+32% Anagen Lifespan' },
-                  { target: 'Tensile Strength', compound: 'Native Collagen', mechanism: 'Perifollicular ECM Support', outcome: 'Provides physiological scaffolding to follicular sheath, reinforcing dermal papilla elasticity.', stat: '+24% Fiber Strength' },
-                  { target: 'Microvascular Flow', compound: 'Niacinamide', mechanism: 'VEGF Upregulation', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to active anagen follicles.', stat: '+21% Follicular Density' },
-                  { target: 'Cuticle Integrity', compound: 'Keratin Hydrolysate', mechanism: 'Cortical Micro-Fissure Repair', outcome: 'Fills structural cortex gaps in newly emerged anagen hair, protecting against mechanical breakage.', stat: '−47% Combing Force' },
+                  { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss', pmid: '21514542' },
+                  { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors and prevents premature stem cell exhaustion and graying.', stat: '+5.6% Thickness', pmid: '17214716' },
+                  { target: 'Tensile Strength', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix ECM Scaffolding', outcome: 'Patented Polish freshwater fish tropocollagen (0% bovine) adheres to keratin fibrils, repairing cortical microfractures.', stat: '+24% Fiber Strength', pmid: '31574672' },
+                  { target: 'Microvascular Flow', compound: 'L-Arginine & Micronized Diosmin', mechanism: 'eNOS Vasodilation & VEGF Signaling', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density', pmid: '16029679' },
+                  { target: 'Bio-Silica Fortification', compound: 'Equisetum Arvense & Keratin Hydrolysate', mechanism: 'Orthosilicic Acid / Cuticle Sealing', outcome: 'Supplies bioavailable silica for structural disulfide bonding in the cortex, reducing combing breakage.', stat: '−47% Combing Force', pmid: '29744921' },
                 ].map(item => (
-                  <div key={item.target} style={{ padding: '0.85rem 1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#0d9488', letterSpacing: '0.05em' }}>{item.target.toUpperCase()}</span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#16a34a', background: '#f0fdf4', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>{item.stat}</span>
+                  <div
+                    key={item.target}
+                    style={{
+                      padding: '0.95rem 1.25rem',
+                      background: '#ffffff',
+                      borderRadius: '10px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 800,
+                          color: '#0d9488',
+                          letterSpacing: '0.05em',
+                          background: '#f0fdfa',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #ccfbf1'
+                        }}>
+                          {item.target.toUpperCase()}
+                        </span>
+                        <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                          {item.compound}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {item.pmid && (
+                          <a
+                            href={`https://pubmed.ncbi.nlm.nih.gov/${item.pmid}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              fontSize: '0.64rem',
+                              fontWeight: 700,
+                              color: '#0284c7',
+                              background: '#eff6ff',
+                              padding: '2px 7px',
+                              borderRadius: '4px',
+                              border: '1px solid #bfdbfe',
+                              textDecoration: 'none'
+                            }}
+                            title={`PubMed Reference: PMID ${item.pmid}`}
+                          >
+                            <span>PMID: {item.pmid}</span>
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          color: '#16a34a',
+                          background: '#f0fdf4',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid #bbf7d0'
+                        }}>
+                          {item.stat}
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>{item.compound}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: '4px' }}>{item.mechanism}</div>
-                    <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45 }}>{item.outcome}</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                      <span style={{ color: '#475569' }}>Mechanism:</span> {item.mechanism}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#334155', lineHeight: 1.5 }}>
+                      {item.outcome}
+                    </div>
                   </div>
                 ))}
               </div>
             </PublicSectionCard>
 
             {/* INCI DOSSIER */}
-            <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Clinical Analysis" badge={`${ingredients.length} Ingredients · ${keyActives.length} Clinical Actives`} badgeVariant="green">
-              <p style={{ fontSize: '0.81rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: 1.6 }}>
-                Complete International Nomenclature of Cosmetic Ingredients (INCI) declaration as per EU Cosmetics Regulation 1223/2009. Listed in descending order of concentration (w/w). Click ingredients with a <strong style={{ color: '#0d9488' }}>CLINICAL DATA</strong> badge to view mechanism of action and peer-reviewed evidence.
+            <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Pharmacopoeial Breakdown" badge={`${ingredients.length} Declared Ingredients`} badgeVariant="green">
+              <p style={{ fontSize: '0.81rem', color: '#64748b', marginBottom: '0.85rem', lineHeight: 1.6 }}>
+                Official International Nomenclature of Cosmetic Ingredients (INCI) declaration complying with Article 19(1)(g) of EU Cosmetics Regulation 1223/2009. Listed in descending concentration order (w/w). Features <strong>Colway Patented Freshwater Fish Skin Tropocollagen</strong>, Baicapil™ (2%), and Kerascalp™.
               </p>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
-                <button type="button" onClick={() => setInciFilter('all')} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: '99px', border: '1.5px solid', cursor: 'pointer', background: inciFilter === 'all' ? '#0f172a' : '#ffffff', color: inciFilter === 'all' ? '#ffffff' : '#64748b', borderColor: inciFilter === 'all' ? '#0f172a' : '#e2e8f0' }}>
+
+              {/* Complete Raw INCI Copy Box (GCP Standard Copyable Format) */}
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.85rem 1rem',
+                marginBottom: '1rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#475569', letterSpacing: '0.04em' }}>
+                    OFFICIAL PHARMACOPOEIAL INCI LIST (EU REG. 1223/2009)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const fullInciStr = ingredients.map(i => i.inci_name).join(', ');
+                      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(fullInciStr);
+                        toast.success('Full INCI copied to clipboard');
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      color: '#0d9488',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      padding: '2px 8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Copy INCI String
+                  </button>
+                </div>
+                <div style={{
+                  fontSize: '0.74rem',
+                  color: '#334155',
+                  lineHeight: 1.6,
+                  fontFamily: 'monospace',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  padding: '0.6rem 0.75rem',
+                  maxHeight: '120px',
+                  overflowY: 'auto'
+                }}>
+                  {ingredients.map(i => i.inci_name).join(', ')}
+                </div>
+              </div>
+
+              {/* INCI Filters (Swipeable on mobile) */}
+              <div style={{
+                display: 'flex',
+                gap: '6px',
+                overflowX: 'auto',
+                flexWrap: 'nowrap',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                paddingBottom: '6px',
+                marginBottom: '0.85rem'
+              }}>
+                <button type="button" onClick={() => setInciFilter('all')} style={{ flexShrink: 0, fontSize: '0.65rem', fontWeight: 700, padding: '4px 12px', borderRadius: '99px', border: '1.5px solid', cursor: 'pointer', background: inciFilter === 'all' ? '#0f172a' : '#ffffff', color: inciFilter === 'all' ? '#ffffff' : '#64748b', borderColor: inciFilter === 'all' ? '#0f172a' : '#e2e8f0' }}>
                   All ({ingredients.length})
                 </button>
                 {Object.entries(groupCounts).map(([group, count]) => {
                   const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
                   return (
-                    <button key={group} type="button" onClick={() => setInciFilter(group)} style={{ fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: '99px', border: `1.5px solid`, cursor: 'pointer', background: inciFilter === group ? meta.color : meta.bg, color: inciFilter === group ? '#ffffff' : meta.color, borderColor: meta.color }}>
+                    <button key={group} type="button" onClick={() => setInciFilter(group)} style={{ flexShrink: 0, fontSize: '0.65rem', fontWeight: 700, padding: '4px 12px', borderRadius: '99px', border: `1.5px solid`, cursor: 'pointer', background: inciFilter === group ? meta.color : meta.bg, color: inciFilter === group ? '#ffffff' : meta.color, borderColor: meta.color }}>
                       {meta.label} ({count})
                     </button>
                   );
                 })}
               </div>
-              <div>
+
+              {/* 1 Card Per Row Full-Width Master-Detail INCI Cards */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {filteredIngredients.map((ing, i) => (
-                  <InciRow key={ing.inci_name || i} ing={ing} index={inciFilter === 'all' ? i : ingredients.indexOf(ing)} />
+                  <InciCard key={ing.inci_name || i} ing={ing} index={inciFilter === 'all' ? i : ingredients.indexOf(ing)} />
                 ))}
               </div>
               <div style={{ marginTop: '1rem', padding: '0.65rem 0.85rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.67rem', color: '#64748b', lineHeight: 1.5 }}>
@@ -521,40 +869,16 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             hideFloatingTrigger={true}
             currentProductSlug={slug}
           >
-            {/* COLWAY HAIR SYSTEM NAVIGATION WIDGET */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden', marginTop: '1rem', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
-              <div style={{ padding: '0.7rem 1rem', background: 'linear-gradient(90deg, #0f172a, #1a2e4a)', borderBottom: '2px solid #0d9488' }}>
-                <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.06em' }}>COLWAY HAIR SYSTEM</div>
-                <div style={{ fontSize: '0.62rem', color: '#94a3b8', marginTop: '1px' }}>Complete 2-step cosmeceutical protocol</div>
-              </div>
-              <div style={{ padding: '0.4rem 0' }}>
-                {[
-                  { slug: 'colway-strengthening-shampoo', name: 'Strengthening Shampoo', step: 'Step 1', desc: 'Scalp prep · DHT inhibition', icon: '🧴', color: '#2563eb' },
-                  { slug: 'colway-strengthening-conditioner', name: 'Strengthening Conditioner', step: 'Step 2', desc: 'Cortex repair · Cuticle sealing', icon: '💧', color: '#0d9488' }
-                ].map(p => {
-                  const isCurrent = slug === p.slug;
-                  return (
-                    <Link key={p.slug} href={`/p/${p.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0.65rem 1rem', textDecoration: 'none', background: isCurrent ? '#f0fdfa' : 'transparent', borderLeft: isCurrent ? '3px solid #0d9488' : '3px solid transparent' }}>
-                      <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>{p.icon}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <span style={{ fontSize: '0.6rem', fontWeight: 800, color: p.color, background: `${p.color}15`, padding: '1px 6px', borderRadius: '99px' }}>{p.step}</span>
-                          {isCurrent && <span style={{ fontSize: '0.58rem', fontWeight: 700, color: '#0d9488', background: '#ccfbf1', padding: '1px 5px', borderRadius: '99px' }}>YOU ARE HERE</span>}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', marginTop: '1px' }}>{p.name}</div>
-                        <div style={{ fontSize: '0.66rem', color: '#64748b' }}>{p.desc}</div>
-                      </div>
-                      {!isCurrent && <ChevronRight size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />}
-                    </Link>
-                  );
-                })}
-              </div>
-              <div style={{ padding: '0.55rem 1rem', borderTop: '1px solid #f1f5f9', background: '#f8fafc', fontSize: '0.67rem', color: '#64748b' }}>💡 Use both 3–4×/week. Total dwell time: ~10 min</div>
-            </div>
+            {/* COLWAY HAIR SYSTEM & CLINICAL PURITY WIDGET */}
+            <CosmeticsSidebarWidget
+              currentSlug={slug}
+              lang={lang}
+              onInquireRoutine={() => setIsInquiryDrawerOpen(true)}
+            />
 
             {/* ASSOCIATED HAIR RESTORATION PROTOCOLS WIDGET */}
             {hairProtocols.length > 0 && (
-              <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginTop: '0.85rem' }}>
                 <HairProtocolsSidebarWidget protocols={hairProtocols} lang={lang} />
               </div>
             )}
