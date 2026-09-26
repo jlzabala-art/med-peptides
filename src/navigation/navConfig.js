@@ -102,6 +102,12 @@ export const ACADEMIA_MENU = [
 
 // ── Resources ─────────────────────────────────────────────────────────────────
 export const RESOURCES_MENU = [
+  {
+    label: 'MediLuxe Profile',
+    path: '/mediluxe',
+    icon: 'Building2',
+    desc: 'Official company profile, GCC presence & compounding',
+  },
   { label: 'About', path: '/about', icon: 'Info', desc: 'Our mission and clinical standards' },
   { label: 'Contact', path: '/contact', icon: 'Mail', desc: 'Reach our clinical support team' },
   {

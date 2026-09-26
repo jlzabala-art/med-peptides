@@ -1,0 +1,875 @@
+/* ==========================================================================
+   MediLuxe Health Solutions — Official Company Profile Stylesheet
+   Google Cloud UX Standard & Mobile-First Clinical Aesthetics
+   ========================================================================== */
+
+:root {
+  --ml-navy: #003666;
+  --ml-navy-dark: #002244;
+  --ml-navy-light: #0a4d8c;
+  --ml-teal: #0d9488;
+  --ml-teal-light: #14b8a6;
+  --ml-teal-subtle: #f0fdfa;
+  --ml-slate-900: #0f172a;
+  --ml-slate-800: #1e293b;
+  --ml-slate-700: #334155;
+  --ml-slate-600: #475569;
+  --ml-slate-400: #94a3b8;
+  --ml-slate-200: #e2e8f0;
+  --ml-slate-100: #f1f5f9;
+  --ml-slate-50: #f8fafc;
+  --ml-card-bg: #ffffff;
+  --ml-card-border: #e2e8f0;
+  --ml-accent-blue: #0284c7;
+  --ml-blue-subtle: #eff6ff;
+  --ml-radius-sm: 8px;
+  --ml-radius-md: 12px;
+  --ml-radius-lg: 18px;
+  --ml-shadow-subtle: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --ml-shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --ml-shadow-elevated: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+}
+
+.mediluxe-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--ml-slate-50);
+  color: var(--ml-slate-900);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  padding-bottom: 5rem;
+  overflow-x: hidden;
+}
+
+/* ── Container ────────────────────────────────────────────────────────────── */
+.mediluxe-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+/* ── Top Executive Breadcrumb / Metadata Bar ──────────────────────────────── */
+.mediluxe-topbar {
+  background: #ffffff;
+  border-bottom: 1px solid var(--ml-slate-200);
+  padding: 0.75rem 0;
+  font-size: 0.82rem;
+  color: var(--ml-slate-600);
+}
+
+.mediluxe-topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.mediluxe-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.mediluxe-topbar-left a {
+  color: var(--ml-navy);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mediluxe-topbar-left a:hover {
+  text-decoration: underline;
+}
+
+.mediluxe-topbar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--ml-teal-subtle);
+  color: var(--ml-teal);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Hero Section ─────────────────────────────────────────────────────────── */
+.mediluxe-hero {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border-bottom: 1px solid var(--ml-slate-200);
+  padding: 3rem 0 2.5rem;
+  position: relative;
+}
+
+.mediluxe-hero-inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.mediluxe-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ml-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--ml-blue-subtle);
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 54, 102, 0.15);
+  margin-bottom: 1.25rem;
+}
+
+.mediluxe-hero-title {
+  font-size: clamp(2rem, 3.2vw, 2.85rem);
+  font-weight: 800;
+  color: var(--ml-navy-dark);
+  line-height: 1.15;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.025em;
+}
+
+.mediluxe-hero-tagline {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ml-teal);
+  margin: 0 0 1.25rem 0;
+}
+
+.mediluxe-hero-desc {
+  font-size: 1rem;
+  color: var(--ml-slate-600);
+  line-height: 1.65;
+  margin: 0 0 1.75rem 0;
+  max-width: 620px;
+}
+
+.mediluxe-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.mediluxe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--ml-radius-sm);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.mediluxe-btn-primary {
+  background: var(--ml-navy);
+  color: #ffffff;
+  border: 1px solid var(--ml-navy);
+  box-shadow: 0 1px 2px rgba(0, 54, 102, 0.2);
+}
+
+.mediluxe-btn-primary:hover {
+  background: var(--ml-navy-dark);
+  border-color: var(--ml-navy-dark);
+  transform: translateY(-1px);
+}
+
+.mediluxe-btn-outline {
+  background: #ffffff;
+  color: var(--ml-slate-700);
+  border: 1px solid var(--ml-slate-200);
+}
+
+.mediluxe-btn-outline:hover {
+  background: var(--ml-slate-50);
+  border-color: var(--ml-slate-400);
+}
+
+.mediluxe-btn-whatsapp {
+  background: #25D366;
+  color: #ffffff;
+  border: 1px solid #20ba5a;
+}
+
+.mediluxe-btn-whatsapp:hover {
+  background: #1fa851;
+}
+
+/* Hero Right: Official Credential Card */
+.mediluxe-credential-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--ml-shadow-elevated);
+}
+
+.mediluxe-cred-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--ml-slate-100);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mediluxe-cred-logo {
+  width: 48px;
+  height: 48px;
+  background: var(--ml-navy);
+  border-radius: var(--ml-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.mediluxe-cred-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ml-slate-900);
+  margin: 0;
+}
+
+.mediluxe-cred-sub {
+  font-size: 0.78rem;
+  color: var(--ml-slate-600);
+  margin: 0.2rem 0 0 0;
+}
+
+.mediluxe-cred-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.mediluxe-cred-item {
+  background: var(--ml-slate-50);
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-sm);
+  padding: 0.65rem 0.8rem;
+}
+
+.mediluxe-cred-label {
+  font-size: 0.7rem;
+  color: var(--ml-slate-400);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.mediluxe-cred-val {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ml-slate-800);
+}
+
+/* ── 4 KPI Highlights Bar ─────────────────────────────────────────────────── */
+.mediluxe-kpi-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-top: -1.75rem;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 2.5rem;
+}
+
+.mediluxe-kpi-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--ml-shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mediluxe-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ml-radius-sm);
+  background: var(--ml-blue-subtle);
+  color: var(--ml-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mediluxe-kpi-number {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--ml-slate-900);
+  line-height: 1;
+}
+
+.mediluxe-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ml-slate-600);
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Mobile & iPad Sticky Navigation Chips ────────────────────────────────── */
+.mediluxe-mobile-chips {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--ml-slate-200);
+  padding: 0.6rem 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mediluxe-mobile-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.mediluxe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ml-slate-700);
+  background: var(--ml-slate-100);
+  border: 1px solid transparent;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 36px;
+}
+
+.mediluxe-chip.active {
+  background: var(--ml-navy);
+  color: #ffffff;
+}
+
+/* ── Main Two-Column Layout ───────────────────────────────────────────────── */
+.mediluxe-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.mediluxe-main {
+  min-width: 0;
+}
+
+/* ── Right Sticky Sidebar (Google Cloud "On this page" TOC) ────────────────── */
+.mediluxe-sidebar {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.mediluxe-toc-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--ml-shadow-subtle);
+}
+
+.mediluxe-toc-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ml-slate-400);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mediluxe-toc-progress {
+  height: 3px;
+  background: var(--ml-slate-100);
+  border-radius: 99px;
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+}
+
+.mediluxe-toc-progress-fill {
+  height: 100%;
+  background: var(--ml-teal);
+  transition: width 0.15s ease-out;
+}
+
+.mediluxe-toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.mediluxe-toc-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: var(--ml-slate-600);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border-left: 2px solid transparent;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+}
+
+.mediluxe-toc-link:hover {
+  background: var(--ml-slate-50);
+  color: var(--ml-navy);
+}
+
+.mediluxe-toc-link.active {
+  background: var(--ml-blue-subtle);
+  color: var(--ml-navy);
+  font-weight: 600;
+  border-left: 3px solid var(--ml-navy);
+}
+
+/* Sidebar Actions Box */
+.mediluxe-sidebar-actions {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mediluxe-sidebar-actions-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ml-slate-400);
+  margin-bottom: 0.25rem;
+}
+
+/* ── Section Styling ──────────────────────────────────────────────────────── */
+.mediluxe-section {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-lg);
+  padding: 2.25rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--ml-shadow-subtle);
+  scroll-margin-top: 100px;
+}
+
+.mediluxe-section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ml-teal);
+  background: var(--ml-teal-subtle);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.mediluxe-section-title {
+  font-size: 1.5rem;
+  font-weight: 750;
+  color: var(--ml-navy-dark);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.015em;
+}
+
+.mediluxe-section-subtitle {
+  font-size: 0.95rem;
+  color: var(--ml-slate-600);
+  line-height: 1.6;
+  margin: 0 0 1.75rem 0;
+}
+
+/* ── SVG Diagrams (GCC Map, Flowcharts, Architecture) ─────────────────────── */
+.mediluxe-diagram-wrapper {
+  background: var(--ml-slate-50);
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow: hidden;
+}
+
+.mediluxe-diagram-caption {
+  font-size: 0.75rem;
+  color: var(--ml-slate-400);
+  text-align: center;
+  margin-top: 0.85rem;
+  font-weight: 500;
+}
+
+/* GCC Grid Details */
+.mediluxe-geo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.mediluxe-geo-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1rem;
+}
+
+.mediluxe-geo-flag {
+  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.mediluxe-geo-country {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ml-slate-900);
+  margin-bottom: 0.2rem;
+}
+
+.mediluxe-geo-role {
+  font-size: 0.75rem;
+  color: var(--ml-slate-600);
+  line-height: 1.4;
+}
+
+/* ── 6 Diagnostic Tests Grid ──────────────────────────────────────────────── */
+.mediluxe-tests-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.mediluxe-test-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mediluxe-test-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ml-shadow-card);
+  border-color: var(--ml-teal);
+}
+
+.mediluxe-test-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.mediluxe-test-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ml-radius-sm);
+  background: var(--ml-teal-subtle);
+  color: var(--ml-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mediluxe-test-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ml-slate-900);
+  margin: 0;
+}
+
+.mediluxe-test-desc {
+  font-size: 0.82rem;
+  color: var(--ml-slate-600);
+  margin: 0.25rem 0 0.85rem 0;
+  line-height: 1.45;
+}
+
+.mediluxe-test-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mediluxe-test-bullet {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--ml-slate-700);
+}
+
+.mediluxe-test-bullet svg {
+  color: var(--ml-teal);
+  flex-shrink: 0;
+}
+
+/* ── Compounding 6 Pillars Grid ───────────────────────────────────────────── */
+.mediluxe-compounding-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.mediluxe-pillar-card {
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.25rem;
+}
+
+.mediluxe-pillar-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--ml-radius-sm);
+  background: var(--ml-blue-subtle);
+  color: var(--ml-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+}
+
+.mediluxe-pillar-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ml-slate-900);
+  margin: 0 0 0.35rem 0;
+}
+
+.mediluxe-pillar-desc {
+  font-size: 0.8rem;
+  color: var(--ml-slate-600);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Cross-Link Banner / Public Bridges ────────────────────────────────────── */
+.mediluxe-bridge-box {
+  background: linear-gradient(135deg, var(--ml-blue-subtle) 0%, #ffffff 100%);
+  border: 1px solid rgba(0, 54, 102, 0.18);
+  border-radius: var(--ml-radius-md);
+  padding: 1.5rem;
+  margin-top: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.mediluxe-bridge-text h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ml-navy);
+  margin: 0 0 0.25rem 0;
+}
+
+.mediluxe-bridge-text p {
+  font-size: 0.82rem;
+  color: var(--ml-slate-600);
+  margin: 0;
+}
+
+/* ── Executive Verification & Contact Section ─────────────────────────────── */
+.mediluxe-contact-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.mediluxe-contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mediluxe-contact-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  background: var(--ml-slate-50);
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+}
+
+.mediluxe-contact-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.mediluxe-contact-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ml-radius-sm);
+  background: #ffffff;
+  border: 1px solid var(--ml-slate-200);
+  color: var(--ml-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mediluxe-contact-item-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--ml-slate-400);
+  letter-spacing: 0.04em;
+}
+
+.mediluxe-contact-item-val {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ml-slate-900);
+}
+
+.mediluxe-qr-card {
+  background: var(--ml-slate-50);
+  border: 1px solid var(--ml-slate-200);
+  border-radius: var(--ml-radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mediluxe-qr-frame {
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: var(--ml-radius-md);
+  box-shadow: var(--ml-shadow-subtle);
+  border: 1px solid var(--ml-slate-200);
+  margin-bottom: 0.85rem;
+}
+
+.mediluxe-qr-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ml-slate-900);
+  margin: 0 0 0.25rem 0;
+}
+
+.mediluxe-qr-sub {
+  font-size: 0.75rem;
+  color: var(--ml-slate-600);
+  margin: 0;
+  max-width: 220px;
+}
+
+/* ── Responsive Breakpoints ───────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .mediluxe-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .mediluxe-sidebar {
+    display: none;
+  }
+  .mediluxe-mobile-chips {
+    display: flex;
+  }
+  .mediluxe-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .mediluxe-kpi-bar {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 1rem;
+  }
+  .mediluxe-compounding-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .mediluxe-hero {
+    padding: 2rem 0 1.5rem;
+  }
+  .mediluxe-hero-title {
+    font-size: 1.85rem;
+  }
+  .mediluxe-kpi-bar {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .mediluxe-section {
+    padding: 1.35rem;
+  }
+  .mediluxe-tests-grid {
+    grid-template-columns: 1fr;
+  }
+  .mediluxe-compounding-grid {
+    grid-template-columns: 1fr;
+  }
+  .mediluxe-geo-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mediluxe-contact-grid {
+    grid-template-columns: 1fr;
+  }
+  .mediluxe-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .mediluxe-btn {
+    width: 100%;
+  }
+}

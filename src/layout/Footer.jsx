@@ -165,6 +165,7 @@ function Footer() {
   ];
 
   const institutionalLinks = [
+    { label: 'MediLuxe Profile (GCC)', path: '/mediluxe', icon: <ExternalLink size={14} /> },
     { label: 'Clinical Academy', path: '/academy', icon: <ExternalLink size={14} /> },
     { label: 'Science Blog', path: '/blog', icon: <ExternalLink size={14} /> },
     { label: 'Reconstitution Guide', path: '/reconstitution-guide', icon: <ExternalLink size={14} /> },

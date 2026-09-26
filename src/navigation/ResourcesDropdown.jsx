@@ -11,9 +11,9 @@ import Link from 'next/link';
 
 import { RESOURCES_MENU } from './navConfig';
 import '../styles/header.css';
-import { Info, Mail, Scale, ShieldCheck, FileText } from '@/lib/icons';
+import { Info, Mail, Scale, ShieldCheck, FileText, Building2 } from '@/lib/icons';
 
-const ICON_MAP = { Info, Mail, Scale, ShieldCheck, FileText };
+const ICON_MAP = { Info, Mail, Scale, ShieldCheck, FileText, Building2 };
 
 export default function ResourcesDropdown({ onClose }) {
   return (
