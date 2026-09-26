@@ -973,7 +973,7 @@ export default function DataTable({
 
               {activeColumns.map((col, idx) => {
                 const isSortable = col.key && col.sortable !== false;
-                const effectiveAlign = idx === 0 ? 'left' : idx === activeColumns.length - 1 ? 'right' : 'center';
+                const effectiveAlign = col.align || (idx === 0 ? 'left' : idx === activeColumns.length - 1 ? 'right' : 'center');
                 return (
                   <th
                     key={col.key || idx}
@@ -1237,6 +1237,7 @@ export default function DataTable({
                           </td>
                         )}
                         {activeColumns.map((col, idx) => {
+                          const effectiveAlign = col.align || (idx === 0 ? 'left' : idx === activeColumns.length - 1 ? 'right' : 'center');
                           let cellValue;
                           if (col.render) {
                             const rawVal = col.key ? row[col.key] : undefined;
