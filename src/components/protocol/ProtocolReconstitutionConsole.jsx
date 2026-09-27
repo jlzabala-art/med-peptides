@@ -28,15 +28,15 @@ export default function ProtocolReconstitutionConsole({
   lang = 'en'
 }) {
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
+  const [prevTabKey, setPrevTabKey] = useState(() => `${activeReconTab}-${currentRecon?.name || ''}`);
 
-  // Auto-reset phase index if recon tab changes
-  React.useEffect(() => {
+  const currentTabKey = `${activeReconTab}-${currentRecon?.name || ''}`;
+  if (prevTabKey !== currentTabKey) {
+    setPrevTabKey(currentTabKey);
     setSelectedPhaseIdx(0);
-  }, [activeReconTab, currentRecon?.name]);
+  }
 
-  if (!currentRecon) return null;
-
-  const dosingScale = currentRecon.dosingScale || [];
+  const dosingScale = currentRecon?.dosingScale || [];
   const activeDosing = dosingScale[selectedPhaseIdx] || dosingScale[0] || null;
 
   // Extract numeric units from strings like "12 Units (0.12 mL)" or "40 Units"
@@ -46,22 +46,13 @@ export default function ProtocolReconstitutionConsole({
     return match ? parseFloat(match[1]) : 40;
   }, [activeDosing]);
 
-  // Calculated mL volume (100 U = 1.0 mL)
-  const volumeMl = (numericUnits / 100).toFixed(2);
-  const isOver100 = numericUnits > 100;
-  const clampedUnits = Math.min(Math.max(0, numericUnits), 100);
-
   // SVG Geometry constants for the horizontal syringe:
-  // Barrel span: x = 90 (0 Units) to x = 690 (100 Units) -> 600px width (6px per unit)
-  const BARREL_START_X = 90;
-  const BARREL_WIDTH = 600;
+  // Compact calibrated span: 0 to 100 Units fitting fully on any screen with zero cutoff
+  const BARREL_START_X = 58;
+  const BARREL_WIDTH = 570;
   const BARREL_END_X = BARREL_START_X + BARREL_WIDTH;
-  const BARREL_Y = 48;
-  const BARREL_HEIGHT = 44;
-  
-  // Plunger position:
-  const fillWidth = (clampedUnits / 100) * BARREL_WIDTH;
-  const plungerX = BARREL_START_X + fillWidth;
+  const BARREL_Y = 44;
+  const BARREL_HEIGHT = 46;
 
   // Generate graduation ticks (every 2 units minor, every 5 units mid, every 10 units major)
   const graduationTicks = useMemo(() => {
@@ -73,7 +64,18 @@ export default function ProtocolReconstitutionConsole({
       ticks.push({ unit: u, x, isMajor, isMid });
     }
     return ticks;
-  }, []);
+  }, [BARREL_START_X, BARREL_WIDTH]);
+
+  if (!currentRecon) return null;
+
+  // Calculated mL volume (100 U = 1.0 mL)
+  const volumeMl = (numericUnits / 100).toFixed(2);
+  const isOver100 = numericUnits > 100;
+  const clampedUnits = Math.min(Math.max(0, numericUnits), 100);
+  
+  // Plunger position:
+  const fillWidth = (clampedUnits / 100) * BARREL_WIDTH;
+  const plungerX = BARREL_START_X + fillWidth;
 
   return (
     <PublicSectionCard
@@ -268,13 +270,13 @@ export default function ProtocolReconstitutionConsole({
           </div>
         </div>
 
-        {/* ── FULL-WIDTH HORIZONTAL SYRINGE VISUALIZER CARD ── */}
+        {/* ── FULL-WIDTH HORIZONTAL SYRINGE VISUALIZER CARD (RESPONSIVE FOR MOBILE & DESKTOP) ── */}
         <div style={{
           width: '100%',
           background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
           border: '1.5px solid #cbd5e1',
           borderRadius: '14px',
-          padding: '1.25rem 1.5rem',
+          padding: '1rem clamp(0.75rem, 2.5vw, 1.5rem)',
           boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.05)',
           position: 'relative',
           overflow: 'hidden'
@@ -285,9 +287,9 @@ export default function ProtocolReconstitutionConsole({
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '0.75rem',
-            marginBottom: '1rem',
-            paddingBottom: '0.85rem',
+            gap: '0.65rem',
+            marginBottom: '0.85rem',
+            paddingBottom: '0.75rem',
             borderBottom: '1px solid #e2e8f0'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -304,10 +306,10 @@ export default function ProtocolReconstitutionConsole({
                 <Syringe size={16} />
               </span>
               <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   {lang === 'es' ? 'Medición de Extracción en Jeringa U-100' : 'U-100 Draw Measurement'} • {activeDosing?.phase || 'Active Phase'}
                 </div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a' }}>
                   {activeDosing?.dose ? `${lang === 'es' ? 'Dosis prescrita' : 'Target Dose'}: ${activeDosing.dose}` : currentRecon.name}
                 </div>
               </div>
@@ -321,10 +323,10 @@ export default function ProtocolReconstitutionConsole({
               background: '#f0fdfa',
               border: '1.5px solid #99f6e4',
               borderRadius: '8px',
-              padding: '6px 14px'
+              padding: '5px 12px'
             }}>
               <span style={{
-                fontSize: '1.6rem',
+                fontSize: '1.5rem',
                 fontWeight: 900,
                 color: isOver100 ? '#dc2626' : '#0f766e',
                 fontFamily: 'monospace',
@@ -332,270 +334,268 @@ export default function ProtocolReconstitutionConsole({
               }}>
                 {numericUnits.toFixed(0)}
               </span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f766e' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f766e' }}>
                 {lang === 'es' ? 'Unidades' : 'Units'}
               </span>
-              <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#64748b', marginLeft: '4px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', marginLeft: '4px' }}>
                 ({volumeMl} mL)
               </span>
             </div>
           </div>
 
-          {/* Calibrated Horizontal Syringe SVG Canvas */}
-          <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-            <div style={{ minWidth: '640px', position: 'relative' }}>
-              <svg
-                viewBox="0 0 880 140"
-                width="100%"
-                height="auto"
-                style={{ display: 'block', overflow: 'visible' }}
-              >
-                <defs>
-                  {/* Glass Barrel Cylindrical Highlight */}
-                  <linearGradient id="horizontalGlass" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
-                    <stop offset="25%" stopColor="#f8fafc" stopOpacity="0.4" />
-                    <stop offset="50%" stopColor="#ffffff" stopOpacity="0.1" />
-                    <stop offset="75%" stopColor="#e2e8f0" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.75" />
-                  </linearGradient>
+          {/* Calibrated Horizontal Syringe SVG Canvas: 100% Scalable on Mobile with Zero Cutoffs */}
+          <div style={{ width: '100%', position: 'relative' }}>
+            <svg
+              viewBox="0 0 760 135"
+              width="100%"
+              height="auto"
+              style={{ display: 'block', width: '100%', height: 'auto' }}
+            >
+              <defs>
+                {/* Glass Barrel Cylindrical Highlight */}
+                <linearGradient id="horizontalGlass" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+                  <stop offset="25%" stopColor="#f8fafc" stopOpacity="0.4" />
+                  <stop offset="50%" stopColor="#ffffff" stopOpacity="0.1" />
+                  <stop offset="75%" stopColor="#e2e8f0" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#cbd5e1" stopOpacity="0.75" />
+                </linearGradient>
 
-                  {/* Medical Liquid Gradient */}
-                  <linearGradient id="liquidFillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor={isOver100 ? '#f87171' : '#0d9488'} stopOpacity="0.85" />
-                    <stop offset="70%" stopColor={isOver100 ? '#ef4444' : '#0284c7'} stopOpacity="0.75" />
-                    <stop offset="100%" stopColor={isOver100 ? '#dc2626' : '#0369a1'} stopOpacity="0.9" />
-                  </linearGradient>
+                {/* Medical Liquid Gradient */}
+                <linearGradient id="liquidFillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor={isOver100 ? '#f87171' : '#0d9488'} stopOpacity="0.85" />
+                  <stop offset="70%" stopColor={isOver100 ? '#ef4444' : '#0284c7'} stopOpacity="0.75" />
+                  <stop offset="100%" stopColor={isOver100 ? '#dc2626' : '#0369a1'} stopOpacity="0.9" />
+                </linearGradient>
 
-                  {/* Rubber Plunger Gradient */}
-                  <linearGradient id="rubberPlunger" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#334155" />
-                    <stop offset="40%" stopColor="#1e293b" />
-                    <stop offset="70%" stopColor="#0f172a" />
-                    <stop offset="100%" stopColor="#334155" />
-                  </linearGradient>
+                {/* Rubber Plunger Gradient */}
+                <linearGradient id="rubberPlunger" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#334155" />
+                  <stop offset="40%" stopColor="#1e293b" />
+                  <stop offset="70%" stopColor="#0f172a" />
+                  <stop offset="100%" stopColor="#334155" />
+                </linearGradient>
 
-                  {/* Plunger Shaft Metal Gradient */}
-                  <linearGradient id="plungerStem" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#e2e8f0" />
-                    <stop offset="50%" stopColor="#cbd5e1" />
-                    <stop offset="100%" stopColor="#94a3b8" />
-                  </linearGradient>
+                {/* Plunger Shaft Metal Gradient */}
+                <linearGradient id="plungerStem" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#e2e8f0" />
+                  <stop offset="50%" stopColor="#cbd5e1" />
+                  <stop offset="100%" stopColor="#94a3b8" />
+                </linearGradient>
 
-                  {/* Drop Shadow for dynamic indicator */}
-                  <filter id="laserShadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#003666" floodOpacity="0.25" />
-                  </filter>
-                </defs>
+                {/* Drop Shadow for dynamic indicator */}
+                <filter id="laserShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#003666" floodOpacity="0.25" />
+                </filter>
+              </defs>
 
-                {/* 1. NEEDLE ASSEMBLY (Left Flank) */}
-                {/* 30G Steel Needle */}
-                <line x1="15" y1="70" x2="65" y2="70" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
-                <polygon points="15,69 22,67.5 22,72.5" fill="#64748b" />
+              {/* 1. NEEDLE ASSEMBLY (Left Flank) */}
+              {/* 30G Steel Needle */}
+              <line x1="10" y1="67" x2="42" y2="67" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+              <polygon points="10,66 16,64.5 16,69.5" fill="#64748b" />
 
-                {/* Translucent Luer Slip Hub */}
-                <rect x="65" y="60" width="16" height="20" rx="3" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
-                <rect x="81" y="62" width="9" height="16" fill="#94a3b8" />
+              {/* Translucent Luer Slip Hub */}
+              <rect x="42" y="57" width="10" height="20" rx="2" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1" />
+              <rect x="52" y="59" width="6" height="16" fill="#94a3b8" />
 
-                {/* 2. PLUNGER ROD & SHAFT (Extends from rubber seal to the right thumb rest) */}
-                <g style={{ transition: 'all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-                  {/* Stem */}
-                  <rect
-                    x={plungerX}
-                    y={BARREL_Y + 14}
-                    width={Math.max(0, 810 - plungerX)}
-                    height="16"
-                    fill="url(#plungerStem)"
-                    stroke="#94a3b8"
-                    strokeWidth="1"
-                  />
-                  {/* Thumb Rest Flange at far right */}
-                  <rect
-                    x="810"
-                    y={BARREL_Y - 2}
-                    width="14"
-                    height={BARREL_HEIGHT + 4}
-                    rx="3"
-                    fill="url(#rubberPlunger)"
-                    stroke="#0f172a"
-                    strokeWidth="1"
-                  />
-                </g>
-
-                {/* 3. GLASS BARREL BACKDROP */}
+              {/* 2. PLUNGER ROD & SHAFT (Extends smoothly to the right thumb rest) */}
+              <g style={{ transition: 'all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+                {/* Stem */}
                 <rect
-                  x={BARREL_START_X}
-                  y={BARREL_Y}
-                  width={BARREL_WIDTH}
-                  height={BARREL_HEIGHT}
-                  rx="6"
-                  fill="#f8fafc"
+                  x={plungerX}
+                  y={BARREL_Y + 15}
+                  width={Math.max(0, 736 - plungerX)}
+                  height="16"
+                  fill="url(#plungerStem)"
                   stroke="#94a3b8"
-                  strokeWidth="2"
+                  strokeWidth="1"
                 />
-
-                {/* Barrel Finger Flanges (Right End of Glass) */}
-                <rect x={BARREL_END_X - 2} y={BARREL_Y - 14} width="10" height={BARREL_HEIGHT + 28} rx="3" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1.2" />
-
-                {/* 4. ACTIVE LIQUID FILL (Dynamic width based on units) */}
+                {/* Thumb Rest Flange at far right */}
                 <rect
-                  x={BARREL_START_X}
+                  x="736"
+                  y={BARREL_Y - 2}
+                  width="14"
+                  height={BARREL_HEIGHT + 4}
+                  rx="3"
+                  fill="url(#rubberPlunger)"
+                  stroke="#0f172a"
+                  strokeWidth="1"
+                />
+              </g>
+
+              {/* 3. GLASS BARREL BACKDROP */}
+              <rect
+                x={BARREL_START_X}
+                y={BARREL_Y}
+                width={BARREL_WIDTH}
+                height={BARREL_HEIGHT}
+                rx="6"
+                fill="#f8fafc"
+                stroke="#94a3b8"
+                strokeWidth="2"
+              />
+
+              {/* Barrel Finger Flanges (Right End of Glass) */}
+              <rect x={BARREL_END_X - 2} y={BARREL_Y - 12} width="10" height={BARREL_HEIGHT + 24} rx="3" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1.2" />
+
+              {/* 4. ACTIVE LIQUID FILL (Dynamic width based on units) */}
+              <rect
+                x={BARREL_START_X}
+                y={BARREL_Y + 2}
+                width={fillWidth}
+                height={BARREL_HEIGHT - 4}
+                fill="url(#liquidFillGrad)"
+                style={{ transition: 'width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+              />
+
+              {/* 5. BLACK RUBBER STOPPER / PISTON SEAL */}
+              <g style={{
+                transform: `translateX(${fillWidth}px)`,
+                transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}>
+                {/* Primary Ring */}
+                <rect
+                  x={BARREL_START_X - 1}
                   y={BARREL_Y + 2}
-                  width={fillWidth}
+                  width="14"
                   height={BARREL_HEIGHT - 4}
-                  fill="url(#liquidFillGrad)"
-                  style={{ transition: 'width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                  rx="2"
+                  fill="url(#rubberPlunger)"
+                  stroke="#0f172a"
+                  strokeWidth="1.2"
                 />
-
-                {/* 5. BLACK RUBBER STOPPER / PISTON SEAL */}
-                <g style={{
-                  transform: `translateX(${fillWidth}px)`,
-                  transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                }}>
-                  {/* Primary Ring */}
-                  <rect
-                    x={BARREL_START_X - 1}
-                    y={BARREL_Y + 2}
-                    width="14"
-                    height={BARREL_HEIGHT - 4}
-                    rx="2"
-                    fill="url(#rubberPlunger)"
-                    stroke="#0f172a"
-                    strokeWidth="1.2"
-                  />
-                  {/* Secondary Sealing Rib */}
-                  <rect
-                    x={BARREL_START_X + 8}
-                    y={BARREL_Y + 4}
-                    width="6"
-                    height={BARREL_HEIGHT - 8}
-                    fill="#0f172a"
-                  />
-                </g>
-
-                {/* 6. GLASS CYLINDRICAL OVERLAY (Reflections & Depth) */}
+                {/* Secondary Sealing Rib */}
                 <rect
-                  x={BARREL_START_X}
-                  y={BARREL_Y}
-                  width={BARREL_WIDTH}
-                  height={BARREL_HEIGHT}
-                  rx="6"
-                  fill="url(#horizontalGlass)"
-                  pointerEvents="none"
+                  x={BARREL_START_X + 8}
+                  y={BARREL_Y + 4}
+                  width="6"
+                  height={BARREL_HEIGHT - 8}
+                  fill="#0f172a"
+                />
+              </g>
+
+              {/* 6. GLASS CYLINDRICAL OVERLAY (Reflections & Depth) */}
+              <rect
+                x={BARREL_START_X}
+                y={BARREL_Y}
+                width={BARREL_WIDTH}
+                height={BARREL_HEIGHT}
+                rx="6"
+                fill="url(#horizontalGlass)"
+                pointerEvents="none"
+              />
+
+              {/* 7. U-100 CALIBRATED GRADUATION TICKS */}
+              {graduationTicks.map((t) => {
+                let tickHeight = 7;
+                let strokeWidth = 0.8;
+                let strokeColor = '#94a3b8';
+
+                if (t.isMajor) {
+                  tickHeight = 18;
+                  strokeWidth = 1.8;
+                  strokeColor = '#0f172a';
+                } else if (t.isMid) {
+                  tickHeight = 12;
+                  strokeWidth = 1.2;
+                  strokeColor = '#475569';
+                }
+
+                return (
+                  <g key={t.unit}>
+                    {/* Top graduation tick */}
+                    <line
+                      x1={t.x}
+                      y1={BARREL_Y}
+                      x2={t.x}
+                      y2={BARREL_Y + tickHeight}
+                      stroke={strokeColor}
+                      strokeWidth={strokeWidth}
+                    />
+                    {/* Bottom graduation tick */}
+                    <line
+                      x1={t.x}
+                      y1={BARREL_Y + BARREL_HEIGHT}
+                      x2={t.x}
+                      y2={BARREL_Y + BARREL_HEIGHT - tickHeight}
+                      stroke={strokeColor}
+                      strokeWidth={strokeWidth}
+                    />
+                    {/* Major Unit Number Label (Below barrel) */}
+                    {t.isMajor && (
+                      <text
+                        x={t.x}
+                        y={BARREL_Y + BARREL_HEIGHT + 19}
+                        fontSize="12"
+                        fontWeight="900"
+                        fill="#0f172a"
+                        textAnchor="middle"
+                        fontFamily="monospace"
+                      >
+                        {t.unit}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* 8. UNIT OF MEASURE LABEL ON BARREL */}
+              <text
+                x={BARREL_START_X + 14}
+                y={BARREL_Y + 27}
+                fill="#003666"
+                fontSize="10"
+                fontWeight="900"
+                letterSpacing="0.04em"
+                opacity="0.85"
+              >
+                U-100 (100U = 1.0 mL)
+              </text>
+
+              {/* 9. DYNAMIC LASER ALIGNMENT INDICATOR */}
+              <g style={{
+                transform: `translateX(${fillWidth}px)`,
+                transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}>
+                {/* Vertical Alignment Laser Line */}
+                <line
+                  x1={BARREL_START_X}
+                  y1="12"
+                  x2={BARREL_START_X}
+                  y2={BARREL_Y + BARREL_HEIGHT + 24}
+                  stroke={isOver100 ? '#ef4444' : '#0d9488'}
+                  strokeWidth="1.8"
+                  strokeDasharray="3 2"
                 />
 
-                {/* 7. U-100 CALIBRATED GRADUATION TICKS */}
-                {graduationTicks.map((t) => {
-                  let tickHeight = 7;
-                  let strokeWidth = 0.8;
-                  let strokeColor = '#94a3b8';
-
-                  if (t.isMajor) {
-                    tickHeight = 18;
-                    strokeWidth = 1.6;
-                    strokeColor = '#0f172a';
-                  } else if (t.isMid) {
-                    tickHeight = 12;
-                    strokeWidth = 1.2;
-                    strokeColor = '#475569';
-                  }
-
-                  return (
-                    <g key={t.unit}>
-                      {/* Top graduation tick */}
-                      <line
-                        x1={t.x}
-                        y1={BARREL_Y}
-                        x2={t.x}
-                        y2={BARREL_Y + tickHeight}
-                        stroke={strokeColor}
-                        strokeWidth={strokeWidth}
-                      />
-                      {/* Bottom graduation tick */}
-                      <line
-                        x1={t.x}
-                        y1={BARREL_Y + BARREL_HEIGHT}
-                        x2={t.x}
-                        y2={BARREL_Y + BARREL_HEIGHT - tickHeight}
-                        stroke={strokeColor}
-                        strokeWidth={strokeWidth}
-                      />
-                      {/* Major Unit Number Label (Below barrel) */}
-                      {t.isMajor && (
-                        <text
-                          x={t.x}
-                          y={BARREL_Y + BARREL_HEIGHT + 18}
-                          fontSize="9.5"
-                          fontWeight="700"
-                          fill="#334155"
-                          textAnchor="middle"
-                          fontFamily="monospace"
-                        >
-                          {t.unit}
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
-
-                {/* 8. UNIT OF MEASURE LABEL ON BARREL */}
-                <text
-                  x={BARREL_START_X + 16}
-                  y={BARREL_Y + 26}
-                  fill="#003666"
-                  fontSize="10"
-                  fontWeight="900"
-                  letterSpacing="0.05em"
-                  opacity="0.85"
-                >
-                  U-100 (100U = 1.0 mL)
-                </text>
-
-                {/* 9. DYNAMIC LASER ALIGNMENT INDICATOR */}
-                <g style={{
-                  transform: `translateX(${fillWidth}px)`,
-                  transition: 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                }}>
-                  {/* Vertical Alignment Laser Line */}
-                  <line
-                    x1={BARREL_START_X}
-                    y1="12"
-                    x2={BARREL_START_X}
-                    y2={BARREL_Y + BARREL_HEIGHT + 24}
-                    stroke={isOver100 ? '#ef4444' : '#0d9488'}
-                    strokeWidth="1.8"
-                    strokeDasharray="3 2"
+                {/* Top Target Indicator Plaque */}
+                <g filter="url(#laserShadow)">
+                  <rect
+                    x={BARREL_START_X - 44}
+                    y="4"
+                    width="88"
+                    height="22"
+                    rx="5"
+                    fill={isOver100 ? '#dc2626' : '#003666'}
                   />
-
-                  {/* Top Target Indicator Plaque */}
-                  <g filter="url(#laserShadow)">
-                    <rect
-                      x={BARREL_START_X - 44}
-                      y="4"
-                      width="88"
-                      height="20"
-                      rx="5"
-                      fill={isOver100 ? '#dc2626' : '#003666'}
-                    />
-                    <polygon
-                      points={`${BARREL_START_X - 5},24 ${BARREL_START_X + 5},24 ${BARREL_START_X},29`}
-                      fill={isOver100 ? '#dc2626' : '#003666'}
-                    />
-                    <text
-                      x={BARREL_START_X}
-                      y="18"
-                      fill="#ffffff"
-                      fontSize="9.5"
-                      fontWeight="900"
-                      textAnchor="middle"
-                      fontFamily="monospace"
-                    >
-                      ▼ {numericUnits.toFixed(0)} U ({volumeMl} mL)
-                    </text>
-                  </g>
+                  <polygon
+                    points={`${BARREL_START_X - 5},26 ${BARREL_START_X + 5},26 ${BARREL_START_X},31`}
+                    fill={isOver100 ? '#dc2626' : '#003666'}
+                  />
+                  <text
+                    x={BARREL_START_X}
+                    y="19"
+                    fill="#ffffff"
+                    fontSize="10"
+                    fontWeight="900"
+                    textAnchor="middle"
+                    fontFamily="monospace"
+                  >
+                    ▼ {numericUnits.toFixed(0)} U ({volumeMl} mL)
+                  </text>
                 </g>
-              </svg>
-            </div>
+              </g>
+            </svg>
           </div>
 
           {/* Bottom Clinical Safety Guidance Notice */}
@@ -639,3 +639,4 @@ export default function ProtocolReconstitutionConsole({
     </PublicSectionCard>
   );
 }
+

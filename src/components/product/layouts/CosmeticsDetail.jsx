@@ -746,104 +746,126 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               )}
             </>}
             desktopSecondary={
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
-                {imageUrl && (
-                  <div
-                    onClick={() => setIsImageModalOpen(true)}
-                    role="button"
-                    tabIndex={0}
-                    title="Click to enlarge product packaging"
-                    style={{
-                      position: 'relative',
-                      background: '#ffffff',
-                      borderRadius: '16px',
-                      border: '1px solid #e2e8f0',
-                      padding: '1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '200px',
-                      height: '260px',
-                      flexShrink: 0,
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                      cursor: 'zoom-in',
-                      transition: 'transform 0.2s, box-shadow 0.2s'
-                    }}
-                    onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
-                    onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; }}
-                  >
-                    <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '170px', maxHeight: '230px', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '6px' }} />
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '8px',
-                      right: '8px',
-                      background: 'rgba(15,23,42,0.75)',
-                      borderRadius: '6px',
-                      padding: '4px 6px',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '0.62rem',
-                      fontWeight: 600
-                    }}>
-                      <ZoomIn size={12} />
-                      <span>Zoom</span>
-                    </div>
-                  </div>
-                )}
-                {/* Standard Public Verification QR Box */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
                 <div
-                  onClick={() => setIsQrModalOpen(true)}
-                  role="button"
-                  tabIndex={0}
-                  title="Click to enlarge digital verification QR code"
                   style={{
                     position: 'relative',
                     background: '#ffffff',
-                    border: '1px solid #e2e8f0',
                     borderRadius: '16px',
-                    padding: '1rem 0.85rem',
+                    border: '1px solid #e2e8f0',
+                    padding: '1.1rem 1.1rem 0.9rem',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '160px',
-                    height: '260px',
-                    flexShrink: 0,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                    textAlign: 'center',
-                    cursor: 'pointer',
+                    width: '240px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
                     transition: 'transform 0.2s, box-shadow 0.2s'
                   }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)'; }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.09)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}
                 >
-                  <span style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.05em', color: '#003666', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    Digital Verification
-                  </span>
-                  <div style={{ padding: '6px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1', marginBottom: '8px' }}>
-                    <QRCodeSVG value={productUrl || `https://med-peptides.com/p/${slug}`} size={105} level="M" />
-                  </div>
-                  <span style={{ fontSize: '0.62rem', color: '#64748b', lineHeight: 1.3 }}>
-                    Click to enlarge &amp; scan with mobile
-                  </span>
+                  {imageUrl && (
+                    <div
+                      onClick={() => setIsImageModalOpen(true)}
+                      role="button"
+                      tabIndex={0}
+                      title="Click to enlarge product packaging"
+                      style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        height: '210px',
+                        cursor: 'zoom-in'
+                      }}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={name}
+                        loading="eager"
+                        fetchPriority="high"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          width: 'auto',
+                          height: 'auto',
+                          objectFit: 'contain',
+                          borderRadius: '6px'
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '4px',
+                        right: '4px',
+                        background: 'rgba(15,23,42,0.75)',
+                        borderRadius: '6px',
+                        padding: '4px 6px',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '0.62rem',
+                        fontWeight: 600
+                      }}>
+                        <ZoomIn size={12} />
+                        <span>Zoom</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Integrated GCP-Style Digital Verification & Mobile Scan Bar */}
                   <div style={{
-                    position: 'absolute',
-                    bottom: '8px',
-                    right: '8px',
-                    background: 'rgba(15,23,42,0.75)',
-                    borderRadius: '6px',
-                    padding: '4px 6px',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '0.62rem',
-                    fontWeight: 600
+                    width: '100%',
+                    marginTop: imageUrl ? '10px' : '0',
+                    paddingTop: imageUrl ? '10px' : '0',
+                    borderTop: imageUrl ? '1px solid #f1f5f9' : 'none'
                   }}>
-                    <ZoomIn size={12} />
-                    <span>Zoom</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsQrModalOpen(true)}
+                      title="Click to view digital certificate & mobile scan QR code"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        padding: '7px 10px',
+                        borderRadius: '8px',
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: '#003666',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.background = '#f0fdfa';
+                        e.currentTarget.style.borderColor = '#0d9488';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.background = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <QrCode size={14} style={{ color: '#0d9488' }} />
+                        <span>Digital QR Verification</span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.60rem',
+                        fontWeight: 800,
+                        color: '#0d9488',
+                        background: '#ccfbf1',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        letterSpacing: '0.04em'
+                      }}>
+                        SCAN
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -851,102 +873,91 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             mobileSecondary={
               <div style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
                 width: '100%',
-                maxWidth: '360px',
+                maxWidth: '260px',
                 margin: '0.5rem auto'
               }}>
-                {imageUrl && (
-                  <div
-                    onClick={() => setIsImageModalOpen(true)}
-                    role="button"
-                    tabIndex={0}
-                    title="Tap to enlarge product photo"
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    border: '1px solid #e2e8f0',
+                    padding: '0.75rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}
+                >
+                  {imageUrl && (
+                    <div
+                      onClick={() => setIsImageModalOpen(true)}
+                      role="button"
+                      tabIndex={0}
+                      title="Tap to enlarge product photo"
+                      style={{
+                        position: 'relative',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                        height: '180px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={name}
+                        loading="eager"
+                        fetchPriority="high"
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '4px',
+                        right: '4px',
+                        background: 'rgba(15,23,42,0.75)',
+                        borderRadius: '4px',
+                        padding: '3px 6px',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        fontSize: '0.58rem',
+                        fontWeight: 700
+                      }}>
+                        <ZoomIn size={11} />
+                        <span>Zoom</span>
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsQrModalOpen(true)}
                     style={{
-                      position: 'relative',
                       display: 'flex',
-                      justifyContent: 'center',
                       alignItems: 'center',
-                      flex: 1,
-                      height: '175px',
-                      background: '#ffffff',
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0',
-                      padding: '0.5rem',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      width: '100%',
+                      marginTop: '8px',
+                      padding: '6px 10px',
+                      borderRadius: '8px',
+                      background: '#f8fafc',
+                      border: '1px solid #cbd5e1',
+                      color: '#003666',
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
                       cursor: 'pointer'
                     }}
                   >
-                    <img src={imageUrl} alt={name} loading="eager" fetchPriority="high" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }} />
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '6px',
-                      right: '6px',
-                      background: 'rgba(15,23,42,0.75)',
-                      borderRadius: '4px',
-                      padding: '3px 6px',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '3px',
-                      fontSize: '0.58rem',
-                      fontWeight: 700
-                    }}>
-                      <ZoomIn size={11} />
-                      <span>Zoom</span>
-                    </div>
-                  </div>
-                )}
-                <div
-                  onClick={() => setIsQrModalOpen(true)}
-                  role="button"
-                  tabIndex={0}
-                  title="Tap to enlarge QR verification"
-                  style={{
-                    position: 'relative',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flex: 1,
-                    height: '175px',
-                    background: '#ffffff',
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    padding: '0.5rem',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                    cursor: 'pointer',
-                    textAlign: 'center'
-                  }}
-                >
-                  <span style={{ fontSize: '0.60rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', marginBottom: '6px' }}>
-                    Digital Verification
-                  </span>
-                  <div style={{ padding: '4px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #cbd5e1', marginBottom: '4px' }}>
-                    <QRCodeSVG value={productUrl || `https://med-peptides.com/p/${slug}`} size={85} level="M" />
-                  </div>
-                  <span style={{ fontSize: '0.58rem', color: '#64748b' }}>
-                    Tap to enlarge
-                  </span>
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '6px',
-                    right: '6px',
-                    background: 'rgba(15,23,42,0.75)',
-                    borderRadius: '4px',
-                    padding: '3px 6px',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    fontSize: '0.58rem',
-                    fontWeight: 700
-                  }}>
-                    <ZoomIn size={11} />
-                    <span>Zoom</span>
-                  </div>
+                    <QrCode size={13} style={{ color: '#0d9488' }} />
+                    <span>Digital QR Verification</span>
+                  </button>
                 </div>
               </div>
             }
