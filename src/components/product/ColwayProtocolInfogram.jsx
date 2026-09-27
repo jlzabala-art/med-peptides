@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import {
   Sparkles, Droplets, Thermometer, Clock, ShieldCheck,
@@ -166,18 +166,41 @@ export default function ColwayProtocolInfogram({
   const [activeZone, setActiveZone] = useState('papilla'); // for interactive zone exploration
   const [activeCondZone, setActiveCondZone] = useState('cortex');
 
+  const shampooCardRef = useRef(null);
+  const condCardRef = useRef(null);
+
+  const handleSelectShampooLayer = (zoneId, scrollToCard = true) => {
+    setActiveZone(zoneId);
+    if (scrollToCard && typeof window !== 'undefined' && shampooCardRef.current) {
+      shampooCardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const handleSelectCondZone = (zoneId, scrollToCard = true) => {
+    setActiveCondZone(zoneId);
+    if (scrollToCard && typeof window !== 'undefined' && condCardRef.current) {
+      condCardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   // Navigation helpers for Shampoo layers
   const currentShampooIndex = SHAMPOO_LAYERS.findIndex(l => l.id === activeZone);
   const currentShampooLayer = SHAMPOO_LAYERS[currentShampooIndex >= 0 ? currentShampooIndex : 0];
 
   const prevShampooLayer = () => {
     const prevIdx = (currentShampooIndex - 1 + SHAMPOO_LAYERS.length) % SHAMPOO_LAYERS.length;
-    setActiveZone(SHAMPOO_LAYERS[prevIdx].id);
+    handleSelectShampooLayer(SHAMPOO_LAYERS[prevIdx].id, true);
   };
 
   const nextShampooLayer = () => {
     const nextIdx = (currentShampooIndex + 1) % SHAMPOO_LAYERS.length;
-    setActiveZone(SHAMPOO_LAYERS[nextIdx].id);
+    handleSelectShampooLayer(SHAMPOO_LAYERS[nextIdx].id, true);
   };
 
   // Navigation helpers for Conditioner zones
@@ -186,12 +209,12 @@ export default function ColwayProtocolInfogram({
 
   const prevCondZone = () => {
     const prevIdx = (currentCondIndex - 1 + CONDITIONER_ZONES.length) % CONDITIONER_ZONES.length;
-    setActiveCondZone(CONDITIONER_ZONES[prevIdx].id);
+    handleSelectCondZone(CONDITIONER_ZONES[prevIdx].id, true);
   };
 
   const nextCondZone = () => {
     const nextIdx = (currentCondIndex + 1) % CONDITIONER_ZONES.length;
-    setActiveCondZone(CONDITIONER_ZONES[nextIdx].id);
+    handleSelectCondZone(CONDITIONER_ZONES[nextIdx].id, true);
   };
 
   return (
@@ -304,9 +327,13 @@ export default function ColwayProtocolInfogram({
           align-items: center;
           gap: 8px;
           overflow-x: auto;
-          padding: 4px 0 10px 0;
+          -webkit-overflow-scrolling: touch;
+          padding: 4px 2px 10px 2px;
           margin-bottom: 12px;
-          scrollbar-width: thin;
+          scrollbar-width: none;
+        }
+        .cpi-layer-stepper-bar::-webkit-scrollbar {
+          display: none;
         }
         .cpi-layer-stepper-pill {
           display: inline-flex;
@@ -318,8 +345,10 @@ export default function ColwayProtocolInfogram({
           border: 1.5px solid #e2e8f0;
           cursor: pointer;
           white-space: nowrap;
+          flex-shrink: 0;
           transition: all 0.2s ease;
           min-height: 40px;
+          touch-action: manipulation;
         }
         .cpi-layer-stepper-pill:hover {
           transform: translateY(-1px);
@@ -352,6 +381,29 @@ export default function ColwayProtocolInfogram({
           .cpi-inspector-grid {
             grid-template-columns: 1fr;
             gap: 10px;
+          }
+        }
+
+        /* Mobile Optimization (< 640px) */
+        @media (max-width: 640px) {
+          .cpi-layer-stepper-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            overflow-x: visible;
+            padding: 0 0 10px 0;
+          }
+          .cpi-layer-stepper-pill {
+            width: 100%;
+            justify-content: flex-start;
+            padding: 8px 10px;
+            font-size: 0.74rem;
+            min-height: 44px;
+            white-space: normal;
+            line-height: 1.25;
+            border-radius: 12px;
+            flex-shrink: 1;
+            box-sizing: border-box;
           }
         }
       `}</style>
@@ -603,7 +655,7 @@ export default function ColwayProtocolInfogram({
                       </g>
 
                       {/* Sebaceous Gland Multi-acinar Organ */}
-                      <g transform="translate(145, 120)" filter="url(#shadowFilter)" onClick={() => setActiveZone('sebum')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(145, 120)" filter="url(#shadowFilter)" onClick={() => handleSelectShampooLayer('sebum')} style={{ cursor: 'pointer' }}>
                         <ellipse cx="25" cy="20" rx="20" ry="16" fill="url(#sebumGrad)" stroke="#ca8a04" strokeWidth="1.5" />
                         <ellipse cx="10" cy="35" rx="16" ry="14" fill="url(#sebumGrad)" stroke="#ca8a04" strokeWidth="1.5" />
                         <ellipse cx="32" cy="40" rx="15" ry="13" fill="url(#sebumGrad)" stroke="#ca8a04" strokeWidth="1.5" />
@@ -637,7 +689,7 @@ export default function ColwayProtocolInfogram({
                       ))}
 
                       {/* Hair Bulb (Cell Matrix & Melanocytes) */}
-                      <ellipse cx="260" cy="370" rx="28" ry="32" fill="url(#bulbRadial)" filter="url(#shadowFilter)" onClick={() => setActiveZone('papilla')} style={{ cursor: 'pointer' }} />
+                      <ellipse cx="260" cy="370" rx="28" ry="32" fill="url(#bulbRadial)" filter="url(#shadowFilter)" onClick={() => handleSelectShampooLayer('papilla')} style={{ cursor: 'pointer' }} />
                       <ellipse cx="260" cy="385" rx="16" ry="14" fill="#042f2e" opacity="0.4" />
 
                       {/* Dermal Papilla Invagination */}
@@ -653,7 +705,7 @@ export default function ColwayProtocolInfogram({
 
                       {/* Interactive Clickable Hotspot Markers (Dynamic GCP Semantic Color Glow) */}
                       {/* Hotspot 1: Stratum Corneum */}
-                      <g transform="translate(25, 32)" onClick={() => setActiveZone('surface')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(25, 32)" onClick={() => handleSelectShampooLayer('surface')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="180" height="28" rx="7"
                           fill={activeZone === 'surface' ? '#0284c7' : '#1e293b'}
@@ -666,7 +718,7 @@ export default function ColwayProtocolInfogram({
                       </g>
 
                       {/* Hotspot 2: Sebaceous Gland */}
-                      <g transform="translate(20, 145)" onClick={() => setActiveZone('sebum')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(20, 145)" onClick={() => handleSelectShampooLayer('sebum')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="170" height="28" rx="7"
                           fill={activeZone === 'sebum' ? '#d97706' : '#1e293b'}
@@ -679,7 +731,7 @@ export default function ColwayProtocolInfogram({
                       </g>
 
                       {/* Hotspot 3: Bulge Stem Cells */}
-                      <g transform="translate(330, 225)" onClick={() => setActiveZone('bulge')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(330, 225)" onClick={() => handleSelectShampooLayer('bulge')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="175" height="28" rx="7"
                           fill={activeZone === 'bulge' ? '#0d9488' : '#1e293b'}
@@ -692,7 +744,7 @@ export default function ColwayProtocolInfogram({
                       </g>
 
                       {/* Hotspot 4: Dermal Papilla */}
-                      <g transform="translate(320, 370)" onClick={() => setActiveZone('papilla')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(320, 370)" onClick={() => handleSelectShampooLayer('papilla')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="190" height="28" rx="7"
                           fill={activeZone === 'papilla' ? '#dc2626' : '#1e293b'}
@@ -728,7 +780,7 @@ export default function ColwayProtocolInfogram({
                       <button
                         key={layer.id}
                         type="button"
-                        onClick={() => setActiveZone(layer.id)}
+                        onClick={() => handleSelectShampooLayer(layer.id, true)}
                         className="cpi-layer-stepper-pill"
                         style={{
                           background: isSelected ? layer.color : '#ffffff',
@@ -747,7 +799,8 @@ export default function ColwayProtocolInfogram({
                           fontSize: '0.68rem',
                           fontWeight: 900,
                           background: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                          color: isSelected ? '#ffffff' : '#475569'
+                          color: isSelected ? '#ffffff' : '#475569',
+                          flexShrink: 0
                         }}>
                           {idx + 1}
                         </span>
@@ -758,15 +811,19 @@ export default function ColwayProtocolInfogram({
                 </div>
 
                 {/* Full-Width GCP Master Detail Inspector Card with Dynamic Color */}
-                <div style={{
-                  width: '100%',
-                  borderRadius: '14px',
-                  border: `2px solid ${currentShampooLayer.color}`,
-                  background: '#ffffff',
-                  boxShadow: `0 8px 24px -6px ${currentShampooLayer.color}25`,
-                  overflow: 'hidden',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}>
+                <div
+                  ref={shampooCardRef}
+                  style={{
+                    scrollMarginTop: '85px',
+                    width: '100%',
+                    borderRadius: '14px',
+                    border: `2px solid ${currentShampooLayer.color}`,
+                    background: '#ffffff',
+                    boxShadow: `0 8px 24px -6px ${currentShampooLayer.color}25`,
+                    overflow: 'hidden',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
                   {/* Top Accent Strip */}
                   <div style={{
                     height: '4px',
@@ -1163,7 +1220,7 @@ export default function ColwayProtocolInfogram({
 
                       {/* Interactive Clickable Hotspots (Dynamic GCP Semantic Color Glow) */}
                       {/* Zone 1: Cortex */}
-                      <g transform="translate(150, 20)" onClick={() => setActiveCondZone('cortex')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(150, 20)" onClick={() => handleSelectCondZone('cortex')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="240" height="30" rx="8"
                           fill={activeCondZone === 'cortex' ? '#7c3aed' : '#1e293b'}
@@ -1176,7 +1233,7 @@ export default function ColwayProtocolInfogram({
                       </g>
 
                       {/* Zone 2: Cuticle Scales */}
-                      <g transform="translate(15, 135)" onClick={() => setActiveCondZone('cuticle')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(15, 135)" onClick={() => handleSelectCondZone('cuticle')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="185" height="28" rx="7"
                           fill={activeCondZone === 'cuticle' ? '#0284c7' : '#1e293b'}
@@ -1189,7 +1246,7 @@ export default function ColwayProtocolInfogram({
                       </g>
 
                       {/* Zone 3: 18-MEA Epicuticle */}
-                      <g transform="translate(340, 245)" onClick={() => setActiveCondZone('flayer')} style={{ cursor: 'pointer' }}>
+                      <g transform="translate(340, 245)" onClick={() => handleSelectCondZone('flayer')} style={{ cursor: 'pointer' }}>
                         <rect
                           x="0" y="0" width="180" height="28" rx="7"
                           fill={activeCondZone === 'flayer' ? '#16a34a' : '#1e293b'}
@@ -1225,7 +1282,7 @@ export default function ColwayProtocolInfogram({
                       <button
                         key={zone.id}
                         type="button"
-                        onClick={() => setActiveCondZone(zone.id)}
+                        onClick={() => handleSelectCondZone(zone.id, true)}
                         className="cpi-layer-stepper-pill"
                         style={{
                           background: isSelected ? zone.color : '#ffffff',
@@ -1244,7 +1301,8 @@ export default function ColwayProtocolInfogram({
                           fontSize: '0.68rem',
                           fontWeight: 900,
                           background: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                          color: isSelected ? '#ffffff' : '#475569'
+                          color: isSelected ? '#ffffff' : '#475569',
+                          flexShrink: 0
                         }}>
                           {idx + 1}
                         </span>
@@ -1255,15 +1313,19 @@ export default function ColwayProtocolInfogram({
                 </div>
 
                 {/* Full-Width GCP Master Detail Inspector Card with Dynamic Color */}
-                <div style={{
-                  width: '100%',
-                  borderRadius: '14px',
-                  border: `2px solid ${currentCondZone.color}`,
-                  background: '#ffffff',
-                  boxShadow: `0 8px 24px -6px ${currentCondZone.color}25`,
-                  overflow: 'hidden',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}>
+                <div
+                  ref={condCardRef}
+                  style={{
+                    scrollMarginTop: '85px',
+                    width: '100%',
+                    borderRadius: '14px',
+                    border: `2px solid ${currentCondZone.color}`,
+                    background: '#ffffff',
+                    boxShadow: `0 8px 24px -6px ${currentCondZone.color}25`,
+                    overflow: 'hidden',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
                   {/* Top Accent Strip */}
                   <div style={{
                     height: '4px',

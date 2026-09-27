@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Users2,
   Building2,
@@ -127,6 +127,30 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     return Array.from(map.values());
   }, [rawCustomers, rawClinics, rawWholesalers]);
 
+  const [serverKpis, setServerKpis] = useState(null);
+  const [loadingKpis, setLoadingKpis] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadKpis() {
+      try {
+        const res = await fetch('/api/customers/kpis');
+        const data = await res.json();
+        if (isMounted && res.ok && data.success) {
+          setServerKpis(data);
+        }
+      } catch (err) {
+        console.warn('Could not fetch server customer KPIs:', err);
+      } finally {
+        if (isMounted) setLoadingKpis(false);
+      }
+    }
+    loadKpis();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Filters State
   const selectedType = getUrlParam('type', 'All');
   const setSelectedType = (val) => updateUrlParam('type', val);
@@ -139,7 +163,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
   const [selectedIds, setSelectedIds] = useState([]);
   const [kpiScope, setKpiScope] = useState('filtered');
 
-  // Filter calculation
+  // Filter calculation across all 8 facets
   const filtered = useMemo(() => {
     return allCustomers.filter(c => {
       const name = (c.name || c.companyName || c.legalName || '').toLowerCase();
@@ -164,14 +188,26 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
         zoho.includes(q) ||
         (cleanQ.length >= 3 && cleanPhone.includes(cleanQ));
 
-      const matchesType = !selectedType || selectedType === 'All' ||
-        type.includes(selectedType.toLowerCase());
+      // 8-KPI Facet Matching
+      let matchesFacet = true;
+      if (selectedType && selectedType !== 'All') {
+        const sel = selectedType.toLowerCase();
+        if (sel === 'active') {
+          matchesFacet = (c.status || '').toLowerCase() === 'active';
+        } else if (sel === 'zoho') {
+          matchesFacet = Boolean(c.zohoContactId || c.zohoContactNumber || c.hasBooks);
+        } else if (sel === 'hybrid') {
+          matchesFacet = Boolean(c.isSupplier || (Array.isArray(c.roles) && c.roles.length > 1));
+        } else {
+          matchesFacet = type.includes(sel);
+        }
+      }
 
       const matchesCountry = !selectedCountry || selectedCountry === 'All' ||
         country.toLowerCase().includes(selectedCountry.toLowerCase()) ||
         city.toLowerCase().includes(selectedCountry.toLowerCase());
 
-      return matchesSearch && matchesType && matchesCountry;
+      return matchesSearch && matchesFacet && matchesCountry;
     });
   }, [allCustomers, searchTerm, selectedType, selectedCountry]);
 
@@ -185,12 +221,15 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
   }, [allCustomers]);
 
-  // Counts by type
+  // Counts by type & facets (Client fallback)
   const typeCounts = useMemo(() => {
     let clinicsCount = 0;
     let wholesalersCount = 0;
     let doctorsCount = 0;
     let patientsCount = 0;
+    let activeCount = 0;
+    let zohoCount = 0;
+    let hybridCount = 0;
 
     allCustomers.forEach(c => {
       const t = (c.customerType || c.type || '').toLowerCase();
@@ -198,6 +237,10 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       else if (t.includes('wholesal')) wholesalersCount++;
       else if (t.includes('doctor') || t.includes('physician')) doctorsCount++;
       else patientsCount++;
+
+      if ((c.status || '').toLowerCase() === 'active') activeCount++;
+      if (c.zohoContactId || c.zohoContactNumber || c.hasBooks) zohoCount++;
+      if (c.isSupplier || (Array.isArray(c.roles) && c.roles.length > 1)) hybridCount++;
     });
 
     return {
@@ -205,9 +248,46 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
       clinics: clinicsCount,
       wholesalers: wholesalersCount,
       doctors: doctorsCount,
-      patients: patientsCount
+      patients: patientsCount,
+      active: activeCount,
+      zoho: zohoCount,
+      hybrid: hybridCount
     };
   }, [allCustomers]);
+
+  // Dynamic filtered counts for Scope Switcher (Golden Rule #22)
+  const filteredCounts = useMemo(() => {
+    let clinicsCount = 0;
+    let wholesalersCount = 0;
+    let doctorsCount = 0;
+    let patientsCount = 0;
+    let activeCount = 0;
+    let zohoCount = 0;
+    let hybridCount = 0;
+
+    filtered.forEach(c => {
+      const t = (c.customerType || c.type || '').toLowerCase();
+      if (t.includes('clinic')) clinicsCount++;
+      else if (t.includes('wholesal')) wholesalersCount++;
+      else if (t.includes('doctor') || t.includes('physician')) doctorsCount++;
+      else patientsCount++;
+
+      if ((c.status || '').toLowerCase() === 'active') activeCount++;
+      if (c.zohoContactId || c.zohoContactNumber || c.hasBooks) zohoCount++;
+      if (c.isSupplier || (Array.isArray(c.roles) && c.roles.length > 1)) hybridCount++;
+    });
+
+    return {
+      all: filtered.length,
+      clinics: clinicsCount,
+      wholesalers: wholesalersCount,
+      doctors: doctorsCount,
+      patients: patientsCount,
+      active: activeCount,
+      zoho: zohoCount,
+      hybrid: hybridCount
+    };
+  }, [filtered]);
 
   // Bulk actions
   const bulkActions = [
@@ -425,15 +505,49 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
     }
   ];
 
+  const isFilteredScope = kpiScope === 'filtered';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-      {/* ── METRICS SUMMARY (tappable quick filters — GCP pattern) ── */}
-      <div className="kpi-grid-4">
+      {/* ── KPI SCOPE SWITCHER & SSOT SYNC (Rule #22) ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', width: '100%' }}>
+        <KpiScopeBar
+          scope={kpiScope}
+          onScopeChange={setKpiScope}
+          isFiltered={selectedType !== 'All' || selectedCountry !== 'All' || Boolean(searchTerm)}
+          filteredCount={filtered.length}
+          globalCount={serverKpis?.total ?? allCustomers.length}
+        />
+        {onSyncSSOT && (
+          <button
+            type="button"
+            className="gcp-btn-secondary"
+            onClick={onSyncSSOT}
+            disabled={isSyncing}
+            style={{ fontSize: '0.8125rem', padding: '0.35rem 0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
+            {isSyncing ? 'Syncing SSOT...' : 'Sync SSOT'}
+          </button>
+        )}
+      </div>
+
+      {/* ── 8 SERVER-SIDE INTERACTIVE KPIS (GCP Resource Console Standard) ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '10px',
+        width: '100%'
+      }}>
         {[
-          { title: 'All Customer Accounts', value: typeCounts.all, icon: Users2, color: '#1d4ed8', subtitle: 'Consolidated database', typeId: 'All' },
-          { title: 'Clinics & Centers', value: typeCounts.clinics, icon: Stethoscope, color: '#0d9488', subtitle: 'Physical medical facilities', typeId: 'clinic' },
-          { title: 'Wholesalers & Resellers', value: typeCounts.wholesalers, icon: Building2, color: '#c2410c', subtitle: 'Bulk commercial channels', typeId: 'wholesaler' },
-          { title: 'Direct Patients & Doctors', value: typeCounts.patients + typeCounts.doctors, icon: User, color: '#7c3aed', subtitle: 'Direct prescriptions', typeId: 'patient' },
+          { title: 'Total Accounts (SSOT)', value: isFilteredScope ? filteredCounts.all : (serverKpis?.total ?? typeCounts.all), icon: Users2, color: '#1d4ed8', subtitle: isFilteredScope ? 'Matching active filters' : 'Consolidated database', typeId: 'All' },
+          { title: 'Clinics & Centers', value: isFilteredScope ? filteredCounts.clinics : (serverKpis?.clinics ?? typeCounts.clinics), icon: Stethoscope, color: '#0d9488', subtitle: 'Medical facilities', typeId: 'clinic' },
+          { title: 'Wholesalers (B2B)', value: isFilteredScope ? filteredCounts.wholesalers : (serverKpis?.wholesalers ?? typeCounts.wholesalers), icon: Building2, color: '#c2410c', subtitle: 'Bulk commercial accounts', typeId: 'wholesaler' },
+          { title: 'Doctors / Prescribers', value: isFilteredScope ? filteredCounts.doctors : (serverKpis?.doctors ?? typeCounts.doctors), icon: Stethoscope, color: '#2563eb', subtitle: 'Licensed practitioners', typeId: 'doctor' },
+          { title: 'Direct Patients', value: isFilteredScope ? filteredCounts.patients : (serverKpis?.patients ?? typeCounts.patients), icon: User, color: '#7c3aed', subtitle: 'B2C end consumers', typeId: 'patient' },
+          { title: 'Active Accounts', value: isFilteredScope ? filteredCounts.active : (serverKpis?.active ?? typeCounts.active), icon: CheckCircle, color: '#16a34a', subtitle: 'Active status', typeId: 'active' },
+          { title: 'Zoho Books Synced', value: isFilteredScope ? filteredCounts.zoho : (serverKpis?.zohoSynced ?? typeCounts.zoho), icon: RefreshCw, color: '#0891b2', subtitle: 'SSOT ERP contacts', typeId: 'zoho' },
+          { title: 'Multi-Role / Hybrid', value: isFilteredScope ? filteredCounts.hybrid : (serverKpis?.multiRole ?? typeCounts.hybrid), icon: Layers, color: '#9333ea', subtitle: 'Cross-counterparty', typeId: 'hybrid' },
         ].map(card => {
           const isActiveCard = selectedType === card.typeId || (card.typeId === 'All' && (!selectedType || selectedType === 'All'));
           return (
@@ -448,8 +562,8 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
                 borderRadius: '12px',
                 outline: isActiveCard ? `2.5px solid ${card.color}` : '2.5px solid transparent',
                 outlineOffset: '2px',
-                transition: 'outline 0.15s ease, box-shadow 0.15s ease',
-                boxShadow: isActiveCard ? `0 0 0 3px ${card.color}22` : 'none',
+                transition: 'all 0.15s ease',
+                boxShadow: isActiveCard ? `0 4px 14px ${card.color}25` : '0 1px 3px rgba(0,0,0,0.03)',
               }}
               title={`Filter by ${card.title}`}
             >
@@ -477,8 +591,14 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
         filters={[
           selectedType && selectedType !== 'All' && {
             key: 'type',
-            label: 'Type',
-            value: selectedType,
+            label: 'Filter',
+            value: selectedType === 'clinic' ? 'Clinics' :
+                   selectedType === 'wholesaler' ? 'Wholesalers' :
+                   selectedType === 'doctor' ? 'Doctors' :
+                   selectedType === 'patient' ? 'Patients' :
+                   selectedType === 'active' ? 'Active Status' :
+                   selectedType === 'zoho' ? 'Zoho Books Synced' :
+                   selectedType === 'hybrid' ? 'Multi-Role / Hybrid' : selectedType,
             onRemove: () => setSelectedType('All')
           },
           selectedCountry && selectedCountry !== 'All' && {
@@ -491,14 +611,17 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
         filterOptions={[
           {
             key: 'type',
-            label: 'Customer Channel',
+            label: 'Filter Facet',
             value: selectedType === 'All' ? '' : selectedType,
             options: [
-              { label: 'All Channels', value: '' },
+              { label: 'All Accounts', value: '' },
               { label: `🏥 Clinics (${typeCounts.clinics})`, value: 'clinic' },
               { label: `🏢 Wholesalers (${typeCounts.wholesalers})`, value: 'wholesaler' },
               { label: `🩺 Doctors (${typeCounts.doctors})`, value: 'doctor' },
-              { label: `👤 Patients (${typeCounts.patients})`, value: 'patient' }
+              { label: `👤 Patients (${typeCounts.patients})`, value: 'patient' },
+              { label: `✅ Active (${typeCounts.active})`, value: 'active' },
+              { label: `⚡ Zoho Synced (${typeCounts.zoho})`, value: 'zoho' },
+              { label: `🔄 Multi-Role / Hybrid (${typeCounts.hybrid})`, value: 'hybrid' }
             ],
             onChange: (val) => setSelectedType(val || 'All')
           },
@@ -523,6 +646,7 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           data={filtered}
           columns={columns}
           keyField="id"
+          loading={loadingCustomers || loadingKpis}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           expandableRender={(row) => (

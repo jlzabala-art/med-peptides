@@ -2,30 +2,19 @@
 
 import React, { useState } from 'react';
 import PageHeader from '../ui/PageHeader';
-import { Tabs } from '../ui/Tabs';
 import AdminAllCustomersDirectory from './customers/AdminAllCustomersDirectory';
-import AdminClinicsTab from './AdminClinicsTab';
-import AdminWholesellersTabClient from './AdminWholesellersTabClient';
-import AdminPatientsTab from './AdminPatientsTab';
-import AdminCrmTab from './AdminCrmTab';
-import { Users2, Building2, User, Stethoscope, Briefcase } from '@/lib/icons';
+import { Users2 } from '@/lib/icons';
 import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import notifier from '../../services/NotificationService';
 
 /**
- * AdminCustomersTab (Zoho Books Standard)
+ * AdminCustomersTab (Zoho Books & Google Cloud Console Standard)
  * ─────────────────────────────────────────────────────────────────────────────
- * Unifies all customer channels into a single coherent interface:
- * 1. All Customers Directory (Consolidated Single Source of Truth)
- * 2. Clinics & Doctors (B2B Accounts)
- * 3. Wholesalers (Bulk Distributors / Resellers)
- * 4. Individuals / Patients (B2C Direct)
- * 5. All Accounts & CRM Overview
- *
- * Supports cross-counterparty identification (Customer that is also a Supplier).
+ * Authoritative Unified Customers Console projected from the master `users` collection.
+ * Replaces redundant top tabs with an integrated 8-KPI server-side facet bar
+ * and direct master-detail exploration.
  */
-export default function AdminCustomersTab({ defaultSubTab = 'all' }) {
-  const [activeTab, setActiveTab] = useState(defaultSubTab);
+export default function AdminCustomersTab() {
   const [isRegularizing, setIsRegularizing] = useState(false);
 
   const handleRegularizeCustomers = async () => {
@@ -49,59 +38,6 @@ export default function AdminCustomersTab({ defaultSubTab = 'all' }) {
       }
     );
   };
-
-  const tabs = [
-    {
-      id: 'all',
-      label: 'All Customers',
-      icon: Users2,
-      content: (
-        <div style={{ padding: '0.5rem 0' }}>
-          <AdminAllCustomersDirectory onSyncSSOT={handleRegularizeCustomers} isSyncing={isRegularizing} />
-        </div>
-      )
-    },
-    {
-      id: 'clinics',
-      label: 'Clinics & Doctors',
-      icon: Stethoscope,
-      content: (
-        <div style={{ padding: '0.5rem 0' }}>
-          <AdminClinicsTab isSubTab={true} />
-        </div>
-      )
-    },
-    {
-      id: 'wholesalers',
-      label: 'Wholesalers (B2B)',
-      icon: Building2,
-      content: (
-        <div style={{ padding: '0.5rem 0' }}>
-          <AdminWholesellersTabClient isSubTab={true} />
-        </div>
-      )
-    },
-    {
-      id: 'individuals',
-      label: 'Individual Patients',
-      icon: User,
-      content: (
-        <div style={{ padding: '0.5rem 0' }}>
-          <AdminPatientsTab isSubTab={true} />
-        </div>
-      )
-    },
-    {
-      id: 'crm',
-      label: 'All CRM Accounts & Leads',
-      icon: Users2,
-      content: (
-        <div style={{ padding: '0.5rem 0' }}>
-          <AdminCrmTab isSubTab={true} />
-        </div>
-      )
-    }
-  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--color-bg-app)' }}>
@@ -136,13 +72,8 @@ export default function AdminCustomersTab({ defaultSubTab = 'all' }) {
         }
       />
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem' }}>
-        <Tabs
-          tabs={tabs}
-          defaultTab={defaultSubTab}
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 1.5rem 1.5rem 1.5rem' }}>
+        <AdminAllCustomersDirectory onSyncSSOT={handleRegularizeCustomers} isSyncing={isRegularizing} />
       </div>
     </div>
   );

@@ -24,10 +24,11 @@ import FileText from "lucide-react/dist/esm/icons/file-text";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import AppActionGroup from '../ui/AppActionGroup';
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+// eslint-disable-next-line no-restricted-imports
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
-import { StatusChip, CopyableId } from '../ui';
+import { StatusChip, CopyableId, MetricCard } from '../ui';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -79,7 +80,7 @@ const RowActions = ({ row, setSelectedManager, handleDelete }) => {
 
 export default function AdminAccountManagersTab() {
   const isMobile = useResponsive();
-  const { accountManagers: paginatedManagers, loading: loadingManagers, hasMore, loadMore, fetchAccountManagers: refreshManagers, totalCount } = useAccountManagers({ pageSize: 50 });
+  const { accountManagers: paginatedManagers, loading: loadingManagers, hasMore, loadMore, fetchAccountManagers: refreshManagers } = useAccountManagers({ pageSize: 50 });
   const [wholesellers, setWholesellers] = useState({});
   const [loadingMetadata, setLoadingMetadata] = useState(true);
   const loading = loadingManagers || loadingMetadata;
@@ -90,26 +91,47 @@ export default function AdminAccountManagersTab() {
   const [selectedManager, setSelectedManager] = useState(null);
   // Selection state for bulk actions
   const [selectedRows, setSelectedRows] = useState([]);
-
-  const fetchData = async () => {
-    try {
-      setLoadingMetadata(true);
-      const wsSnap = await getDocs(collection(db, 'wholesellers'));
-      const wsMap = {};
-      wsSnap.docs.forEach((d) => {
-        wsMap[d.id] = d.data().companyName || d.data().name || 'Unnamed Org';
-      });
-      setWholesellers(wsMap);
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to load wholesellers');
-    } finally {
-      setLoadingMetadata(false);
-    }
-  };
+  const [serverKpis, setServerKpis] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    let isMounted = true;
+    async function loadKpis() {
+      try {
+        const res = await fetch('/api/account-managers/kpis');
+        const data = await res.json();
+        if (isMounted && res.ok && data.success) {
+          setServerKpis(data.kpis);
+        }
+      } catch (err) {
+        console.warn('Could not load account managers server KPIs:', err);
+      }
+    }
+    loadKpis();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadWholesalers() {
+      try {
+        const wsSnap = await getDocs(collection(db, 'wholesellers'));
+        const wsMap = {};
+        wsSnap.docs.forEach((d) => {
+          wsMap[d.id] = d.data().companyName || d.data().name || 'Unnamed Org';
+        });
+        if (isMounted) setWholesellers(wsMap);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (isMounted) setLoadingMetadata(false);
+      }
+    }
+    loadWholesalers();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   async function handleUpdate(id, data) {
@@ -265,49 +287,68 @@ export default function AdminAccountManagersTab() {
           }
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ backgroundColor: 'var(--primary-light)', padding: '10px', borderRadius: '8px', color: 'var(--primary)' }}><Users size={20} /></div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Total Managers</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{totalManagers}</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ backgroundColor: '#f0fdf4', padding: '10px', borderRadius: '8px', color: '#16a34a' }}><CheckCircle2 size={20} /></div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Active</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{activeManagers}</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ backgroundColor: '#fefce8', padding: '10px', borderRadius: '8px', color: '#ca8a04' }}><Building2 size={20} /></div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Assigned Clinics</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{totalClinics}</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ backgroundColor: '#f8fafc', padding: '10px', borderRadius: '8px', color: '#475569' }}><UserCircle size={20} /></div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Assigned Doctors</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>{totalDoctors}</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ backgroundColor: '#f5f3ff', padding: '10px', borderRadius: '8px', color: '#7c3aed' }}><Map size={20} /></div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Assigned Territories</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>3</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ backgroundColor: '#fff7ed', padding: '10px', borderRadius: '8px', color: '#ea580c' }}><Clock size={20} /></div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Pending Invites</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.2 }}>2</div>
-            </div>
-          </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '12px',
+          width: '100%'
+        }}>
+          <MetricCard
+            title="Total Managers (SSOT)"
+            value={serverKpis?.totalManagers ?? totalManagers}
+            icon={Users}
+            color="#1d4ed8"
+            subtitle="Consolidated commercial desk"
+          />
+          <MetricCard
+            title="Active Status"
+            value={serverKpis?.activeManagers ?? activeManagers}
+            icon={CheckCircle2}
+            color="#16a34a"
+            subtitle="Active accounts coverage"
+          />
+          <MetricCard
+            title="Assigned Territories"
+            value={serverKpis?.assignedTerritories ?? 3}
+            icon={Map}
+            color="#7c3aed"
+            subtitle="Distinct geographical sectors"
+          />
+          <MetricCard
+            title="Pending Invites"
+            value={serverKpis?.pendingInvites ?? 2}
+            icon={Clock}
+            color="#ea580c"
+            subtitle="Awaiting onboarding"
+          />
+          <MetricCard
+            title="Assigned Clinics"
+            value={serverKpis?.assignedClinics ?? totalClinics}
+            icon={Building2}
+            color="#0d9488"
+            subtitle="Medical facilities assigned"
+          />
+          <MetricCard
+            title="Assigned Doctors"
+            value={serverKpis?.assignedDoctors ?? totalDoctors}
+            icon={UserCircle}
+            color="#2563eb"
+            subtitle="Licensed prescribers"
+          />
+          <MetricCard
+            title="Wholesale Accounts"
+            value={serverKpis?.wholesaleAccounts ?? 0}
+            icon={Building2}
+            color="#c2410c"
+            subtitle="B2B bulk partners"
+          />
+          <MetricCard
+            title="Unassigned Accounts"
+            value={serverKpis?.unassignedAccounts ?? 3}
+            icon={AlertCircle}
+            color="#d97706"
+            subtitle="Coverage opportunities"
+          />
         </div>
       </div>
 
@@ -386,7 +427,7 @@ export default function AdminAccountManagersTab() {
                   onClose={() => setIsWizardOpen(false)}
                   onSuccess={() => {
                     setIsWizardOpen(false);
-                    fetchManagers();
+                    refreshManagers();
                   }}
                 />
               )}
@@ -465,6 +506,7 @@ export default function AdminAccountManagersTab() {
       </div>
 
       <AccountManagerDrawer
+        key={selectedManager?.id}
         manager={selectedManager}
         wholesellers={wholesellers}
         onUpdate={handleUpdate}

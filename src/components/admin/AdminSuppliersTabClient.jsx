@@ -14,20 +14,18 @@ import StandardDrawer from '../ui/StandardDrawer';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import Modal from '../ui/Modal';
 import { getSupplierColumns } from './suppliers/supplierColumns';
+import SupplierMasterDetailCard from './suppliers/SupplierMasterDetailCard';
 import AccountManagerSelect from '../ui/AccountManagerSelect';
 import Building2 from "lucide-react/dist/esm/icons/building-2";
-import { CheckCircle, XCircle, Users, CheckSquare, Mail, Download, Archive, RefreshCw } from '@/lib/icons';
+import { CheckCircle, XCircle, Users, CheckSquare, Mail, Download, Archive, RefreshCw, Eye, Mail as MailIcon } from '@/lib/icons';
 import toast from 'react-hot-toast';
-import { deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase';
 import notifier from '../../services/NotificationService';
 import { DataTableSkeleton } from '../ui';
 import { useCategories } from '../../hooks/admin/useCategories';
 import MobileSupplierCard from '../shared/mobile/MobileSupplierCard';
 import MobileActionSheet from '../ui/MobileActionSheet';
-import { Eye, Mail as MailIcon } from '@/lib/icons';
 
-export default function AdminSuppliersTabClient({ isMobile, initialData }) {
+export default function AdminSuppliersTabClient({ initialData }) {
   const { openDrawer } = useDrawer();
   const {
     suppliers,
@@ -89,10 +87,10 @@ export default function AdminSuppliersTabClient({ isMobile, initialData }) {
   useEffect(() => {
     if (urlSearch && paginatedData.length > 0 && !selectedSupplier) {
       const match = paginatedData.find(s => s.companyName === urlSearch || s.name === urlSearch);
-      if (match) {
-        setSelectedSupplier(match);
-      } else if (paginatedData.length === 1) {
-        setSelectedSupplier(paginatedData[0]);
+      const toSelect = match || (paginatedData.length === 1 ? paginatedData[0] : null);
+      if (toSelect) {
+        const timer = setTimeout(() => setSelectedSupplier(toSelect), 0);
+        return () => clearTimeout(timer);
       }
     }
   }, [urlSearch, paginatedData, selectedSupplier]);
@@ -108,20 +106,6 @@ export default function AdminSuppliersTabClient({ isMobile, initialData }) {
       </div>
     );
   }
-
-  const handleToggleSelect = (id) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
-  };
-
-  const handleToggleSelectAll = (checked) => {
-    if (checked) {
-      setSelectedIds(paginatedData.map(s => s.id));
-    } else {
-      setSelectedIds([]);
-    }
-  };
 
   const handleBulkAction = async (action) => {
     if (action === 'Activate B2B') {
@@ -153,93 +137,6 @@ export default function AdminSuppliersTabClient({ isMobile, initialData }) {
     await handleBulkUpdate(selectedIds, { accountManager: selectedManager });
     setManagerModalOpen(false);
     setSelectedIds([]);
-  };
-
-  const handleRowClick = (supplier) => {
-    setSelectedSupplier(supplier);
-  };
-
-  const handleDeleteSupplier = (row) => {
-    notifier.confirmCritical(`Are you sure you want to remove supplier "${row.name || row.companyName || row.id}" from the platform? This will NOT delete it from Zoho.`, async () => {
-      try {
-        await deleteDoc(doc(db, 'suppliers', row.id));
-        toast.success(`Supplier ${row.name || row.companyName || row.id} removed successfully`);
-        if (selectedSupplier?.id === row.id) setSelectedSupplier(null);
-        refresh();
-      } catch (e) {
-        console.error(e);
-        toast.error('Failed to remove supplier');
-      }
-    });
-  };
-
-  const supplierExpandableRender = (s) => {
-    return (
-      <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#f8fafc', borderTop: '1px solid var(--border)', borderRadius: '0 0 8px 8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-          <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              📦 Commercial Terms & MOQ
-            </span>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-main)' }}>
-              MOQ: {s.moq ? `${s.moq} units` : '1 unit (Flexible)'}
-            </span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Currency: {s.currency || 'USD / EUR'} • Terms: Net 30
-            </span>
-          </div>
-          <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              📧 Orders Desk & Dispatch
-            </span>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
-              {s.contactEmail || s.email || 'orders@laboratory.com'}
-            </span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Lead Time: {s.leadTimeDays ? `${s.leadTimeDays} Days` : '3-5 Business Days'}
-            </span>
-          </div>
-          <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              🏆 Quality & Certifications
-            </span>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#16a34a' }}>
-              {s.gmpCertified ? '✅ EU GMP / ISO 9001' : 'Verified Compounding Lab'}
-            </span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Purity Average: {s.avgPurity ? `${s.avgPurity}%` : '≥ 99.2% HPLC'}
-            </span>
-          </div>
-          <div style={{ backgroundColor: 'white', padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              👤 Internal Relationship Lead
-            </span>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-main)' }}>
-              {s.accountManager || s.manager || 'Sarah Jenkins'}
-            </span>
-            <span style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>
-              {s.productsSupplied || 0} SKUs in Active Catalog
-            </span>
-          </div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white', padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.78rem' }}>
-            <span>Products Supplied: <strong>{s.productsSupplied || 0} compounds</strong></span>
-            <span>•</span>
-            <span>Variants: <strong>{s.variantsSupplied || 0} active packages</strong></span>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setSelectedSupplier(s)}
-              className="gcp-btn-primary"
-              style={{ fontSize: '0.75rem', padding: '3px 10px' }}
-            >
-              View Supplier Dossier & Documents →
-            </button>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -404,6 +301,15 @@ export default function AdminSuppliersTabClient({ isMobile, initialData }) {
         })}
         keyField="id"
         onRowClick={(d) => setSelectedSupplier(d)}
+        expandableRender={(row) => (
+          <SupplierMasterDetailCard
+            supplier={row}
+            allCategories={categoryOptions}
+            onUpdateField={(id, field, value) => handleUpdate(id, { [field]: value })}
+            onOpenProfile={() => setSelectedSupplier(row)}
+            onViewCatalog={() => router.push(`/admin/catalog?supplier=${encodeURIComponent(row.id)}`)}
+          />
+        )}
         mobileCardComponent={MobileSupplierCard}
         mobileCardProps={mobileCardPropsForTable}
         onRefresh={refresh}
@@ -415,7 +321,7 @@ export default function AdminSuppliersTabClient({ isMobile, initialData }) {
 
       {/* Supplier mobile quick-action sheet */}
       <MobileActionSheet
-        isOpen={!!mobileActionSupplier}
+        isOpen={Boolean(mobileActionSupplier)}
         onClose={() => setMobileActionSupplier(null)}
         title={mobileActionSupplier?.companyName || mobileActionSupplier?.name || 'Supplier'}
         items={[
@@ -458,7 +364,7 @@ export default function AdminSuppliersTabClient({ isMobile, initialData }) {
       />
 
       <StandardDrawer
-        isOpen={!!selectedSupplier}
+        isOpen={Boolean(selectedSupplier)}
         onClose={() => setSelectedSupplier(null)}
         width="800px"
         hideHeader={true}

@@ -12,7 +12,9 @@ import {
   Check,
   QrCode,
   Sparkles,
-  ClipboardList
+  ClipboardList,
+  Download,
+  RefreshCw
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -52,6 +54,7 @@ export default function ProtocolDetailSidebar({
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [pdfStatus, setPdfStatus] = useState('idle'); // 'idle' | 'generating' | 'downloading' | 'success'
 
   const resolvedUrl = publicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/proto/${slug}`);
 
@@ -137,10 +140,54 @@ export default function ProtocolDetailSidebar({
     }
   };
 
-  const handlePrintBlueprint = () => {
+  const handlePrintBlueprint = async () => {
     triggerHaptic('selection');
-    if (typeof window !== 'undefined') {
-      window.print();
+    if (pdfStatus !== 'idle') return;
+
+    setPdfStatus('generating');
+    toast.loading(isEs ? 'Generando Blueprint en servidor...' : 'Generating Blueprint on server...', { id: 'pdf-toast' });
+
+    try {
+      const res = await fetch('/api/protocol/pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          protocol,
+          slug,
+          lang
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      setPdfStatus('downloading');
+      toast.loading(isEs ? 'Descargando Blueprint PDF...' : 'Downloading Blueprint PDF...', { id: 'pdf-toast' });
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Protocol-Blueprint-${slug || 'protocol'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      setPdfStatus('success');
+      toast.success(isEs ? '¡Blueprint descargado correctamente!' : 'Blueprint PDF downloaded successfully!', { id: 'pdf-toast' });
+
+      setTimeout(() => {
+        setPdfStatus('idle');
+      }, 2500);
+    } catch (err) {
+      console.warn('Server PDF generation failed, falling back to browser print:', err);
+      toast.error(isEs ? 'Apertura de impresión directa...' : 'Opening direct print window...', { id: 'pdf-toast' });
+      setPdfStatus('idle');
+      if (typeof window !== 'undefined') {
+        window.print();
+      }
     }
   };
 
@@ -230,6 +277,7 @@ export default function ProtocolDetailSidebar({
         <button
           type="button"
           onClick={handlePrintBlueprint}
+          disabled={pdfStatus !== 'idle'}
           style={{
             width: '100%',
             display: 'flex',
@@ -237,18 +285,47 @@ export default function ProtocolDetailSidebar({
             justifyContent: 'center',
             gap: '6px',
             padding: '7px 10px',
-            background: 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+            background: pdfStatus === 'success'
+              ? 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)'
+              : pdfStatus !== 'idle'
+              ? 'linear-gradient(135deg, #334155 0%, #475569 100%)'
+              : 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
             color: '#ffffff',
             border: 'none',
             borderRadius: '6px',
             fontSize: '0.74rem',
             fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 1px 3px rgba(0,54,102,0.15)'
+            cursor: pdfStatus !== 'idle' ? 'wait' : 'pointer',
+            boxShadow: '0 1px 3px rgba(0,54,102,0.15)',
+            transition: 'all 0.2s ease',
+            opacity: pdfStatus !== 'idle' && pdfStatus !== 'success' ? 0.9 : 1
           }}
+          title={isEs ? 'Generar y descargar PDF clínico oficial' : 'Generate and download official clinical PDF'}
         >
-          <Printer size={13} />
-          <span>{isEs ? 'Imprimir / Exportar Blueprint' : 'Print / Export Blueprint'}</span>
+          {pdfStatus === 'generating' && (
+            <>
+              <RefreshCw size={13} className="animate-spin" />
+              <span>{isEs ? 'Generando Blueprint...' : 'Generating Blueprint...'}</span>
+            </>
+          )}
+          {pdfStatus === 'downloading' && (
+            <>
+              <Download size={13} className="animate-bounce" />
+              <span>{isEs ? 'Descargando PDF...' : 'Downloading PDF...'}</span>
+            </>
+          )}
+          {pdfStatus === 'success' && (
+            <>
+              <Check size={13} />
+              <span>{isEs ? '¡Blueprint Descargado ✓!' : 'Blueprint Downloaded ✓!'}</span>
+            </>
+          )}
+          {pdfStatus === 'idle' && (
+            <>
+              <Printer size={13} />
+              <span>{isEs ? 'Imprimir / Exportar Blueprint' : 'Print / Export Blueprint'}</span>
+            </>
+          )}
         </button>
 
         {onOpenQrModal && (

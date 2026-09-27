@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import StatusBadge from '../../ui/StatusBadge';
 import { CopyableId, AppActionGroup } from '../../ui';
 import InlineEditableCell from '../../ui/InlineEditableCell';
 import Package from 'lucide-react/dist/esm/icons/package';
 import Layers from 'lucide-react/dist/esm/icons/layers';
-import { Check, X, Edit2, Sparkles } from 'lucide-react';
+import { Check, X, Edit2 } from 'lucide-react';
 import { openSupplierAI } from '../../../utils/openModuleAI';
 
 /**
@@ -14,28 +14,17 @@ import { openSupplierAI } from '../../../utils/openModuleAI';
 function CategoryPills({ categoryIds = [], allCategories = [], onSave }) {
   const [isEditing, setIsEditing] = useState(false);
   const [selected, setSelected] = useState([...categoryIds]);
+  const [prevCategoryIds, setPrevCategoryIds] = useState(categoryIds);
   const [isSaving, setIsSaving] = useState(false);
   const wrapRef = useRef(null);
 
-  // Sync when prop changes externally
-  useEffect(() => {
-    if (!isEditing) setSelected([...categoryIds]);
-  }, [categoryIds, isEditing]);
+  // Sync state if categoryIds prop changes while not editing
+  if (!isEditing && prevCategoryIds !== categoryIds) {
+    setPrevCategoryIds(categoryIds);
+    setSelected([...categoryIds]);
+  }
 
-  // Close on outside click
-  useEffect(() => {
-    if (!isEditing) return;
-    const handler = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
-        // auto-save on blur
-        handleSave();
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [isEditing, selected]);
-
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (arraysEqual(selected, categoryIds)) {
       setIsEditing(false);
       return;
@@ -49,7 +38,20 @@ function CategoryPills({ categoryIds = [], allCategories = [], onSave }) {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [categoryIds, onSave, selected]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!isEditing) return;
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        // auto-save on blur
+        handleSave();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [isEditing, handleSave]);
 
   const toggleCat = (catId) => {
     setSelected(prev => prev.includes(catId) ? prev.filter(c => c !== catId) : [...prev, catId]);
@@ -205,7 +207,7 @@ export const getSupplierColumns = ({
   return [
     {
       key: 'companyName',
-      width: '26%',
+      width: '28%',
       header: (
         <span onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
           Supplier {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
@@ -233,24 +235,26 @@ export const getSupplierColumns = ({
 
     {
       key: 'country',
-      width: '11%',
+      width: '16%',
       header: (
-        <span onClick={() => handleSort('country')} style={{ cursor: 'pointer' }}>
+        <span onClick={() => handleSort('country')} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
           Country {sortConfig.key === 'country' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
         </span>
       ),
       render: (row) => (
-        <InlineEditableCell
-          value={row.country || ''}
-          onSave={(val) => onUpdateField(row.id, 'country', val)}
-          placeholder="N/A"
-        />
+        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <InlineEditableCell
+            value={row.country || ''}
+            onSave={(val) => onUpdateField(row.id, 'country', val)}
+            placeholder="N/A"
+          />
+        </div>
       ),
     },
 
     {
       key: 'categoryIds',
-      width: '18%',
+      width: '16%',
       header: 'Categories',
       render: (row) => (
         <CategoryPills
@@ -263,40 +267,22 @@ export const getSupplierColumns = ({
 
     {
       key: 'status',
-      width: '18%',
+      width: '14%',
       header: <span>Status</span>,
-      render: (row) => (
-        <div style={{ display: 'inline-flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>B2B</span>
-            <InlineEditableCell
-              value={row.statusB2B || 'active'}
-              type="select"
-              options={[
-                { label: 'Active',   value: 'active' },
-                { label: 'Inactive', value: 'inactive' },
-                { label: 'Pending',  value: 'pending' },
-              ]}
-              onSave={(val) => onUpdateField(row.id, 'statusB2B', val)}
-              format={(val) => <StatusBadge status={val} />}
-            />
+      render: (row) => {
+        const isB2BActive = row.statusB2B === 'active' || (!row.statusB2B && row.status === 'active');
+        const isB2CActive = row.statusB2C === 'active';
+        return (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+            <StatusBadge status={isB2BActive ? 'active' : (row.statusB2B || row.status || 'inactive')} />
+            {isB2CActive && (
+              <span style={{ fontSize: '0.65rem', background: '#eff6ff', color: '#2563eb', padding: '1px 5px', borderRadius: '4px', fontWeight: 600 }} title="B2C Enabled">
+                +B2C
+              </span>
+            )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>B2C</span>
-            <InlineEditableCell
-              value={row.statusB2C || 'inactive'}
-              type="select"
-              options={[
-                { label: 'Active',   value: 'active' },
-                { label: 'Inactive', value: 'inactive' },
-                { label: 'Pending',  value: 'pending' },
-              ]}
-              onSave={(val) => onUpdateField(row.id, 'statusB2C', val)}
-              format={(val) => <StatusBadge status={val} />}
-            />
-          </div>
-        </div>
-      ),
+        );
+      },
     },
 
     {
