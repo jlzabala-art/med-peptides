@@ -31,6 +31,10 @@ export default function CatalogTableView({
   selectedIds,
   onSelectionChange,
   matrixViewType = 'grouped',
+  totalProducts = 505,
+  hasMore = true,
+  onNextPage,
+  onPrevPage,
 }) {
   const { user } = useAuth();
   const [drawerProduct, setDrawerProduct] = useState(null);
@@ -526,10 +530,14 @@ export default function CatalogTableView({
         } : undefined}
         onRowClick={matrixViewType === 'grouped' ? undefined : handleRowClick}
         currentPage={currentPage}
-        totalPages={Math.ceil(displayData.length / rowsPerPage) || 1}
-        totalItems={displayData.length}
+        totalPages={Math.ceil((totalProducts || 505) / (rowsPerPage || 25))}
+        totalItems={totalProducts || 505}
+        hasNextPage={hasMore}
+        hasPrevPage={currentPage > 1}
+        onNextPage={onNextPage}
+        onPrevPage={onPrevPage}
         onPageChange={onPageChange}
-        rowsPerPage={rowsPerPage}
+        rowsPerPage={rowsPerPage || 25}
         onRowsPerPageChange={onRowsPerPageChange}
         isLoading={loading}
         hideSearch={true}

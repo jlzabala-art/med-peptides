@@ -481,6 +481,7 @@ export default function CatalogIntelligenceHub({
             onAction={handleAction}
             isMobile={isMobile}
             hasMore={hasMore}
+            totalProducts={metrics?.totalProducts || 505}
             currentPage={currentPage}
             nextPage={nextPage}
             prevPage={prevPage}

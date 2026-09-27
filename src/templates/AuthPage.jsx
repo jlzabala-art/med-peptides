@@ -407,8 +407,12 @@ export default function AuthPage({ onBack }) {
     if (!loading && user) {
       const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
       if (isAdminNow) {
-        const target = redirectTo || '/admin';
-        router.replace(target);
+        const target = (redirectTo && redirectTo.startsWith('/admin')) ? redirectTo : '/admin';
+        if (typeof window !== 'undefined') {
+          window.location.replace(target);
+        } else {
+          router.replace(target);
+        }
       }
     }
   }, [user, loading, isAdmin, isAdminByEmail, userProfile, redirectTo, router]);

@@ -173,7 +173,51 @@ export async function POST(req) {
         String(contextAnchor?.slug || '').includes('shampoo') ||
         String(contextAnchor?.slug || '').includes('conditioner');
 
-      if (isCorporate) {
+      const isProtocolsDirectory = screenScope === 'protocols_directory' ||
+        contextAnchor?.type === 'protocols_catalog' ||
+        pathname === '/proto';
+
+      if (isProtocolsDirectory) {
+        activeEntityContext = `CURRENT ACTIVE VIEW: CLINICAL PROTOCOLS & PEPTIDES DIRECTORY (78 STANDARDIZED BLUEPRINTS)
+- Total Protocols: 78 evidence-based clinical pathways
+- 10 Standardized Therapeutic Goals:
+  1. Metabolism & GLP-1/GIP: Retatrutide + MOTS-c, Tirzepatide, Semaglutide titration curves
+  2. Longevity & Anti-Aging: NAD+ Cellular Restoration, Epithalon Circadian cycles, FOXO4-DRI
+  3. Tissue & Joint Regeneration: BPC-157 & TB-500 Rapid Tissue Recovery, KPV, Cartilage remodeling
+  4. Neuroplasticity & Cognition: Semax & Selank Neuro-Restoration, Dihexa, Cerebrolysin pathways
+  5. Muscle Mass & Performance: Somatotropic HGH (CJC-1295 + Ipamorelin, Tesamorelin, Sermorelin)
+  6. Immunity & Cellular Defense: Thymosin Alpha-1, LL-37 antimicrobial protocols
+  7. Hormonal & Sexual Health: Kisspeptin-10, PT-141 (Bremelanotide), Gonadorelin HPTA preservation
+  8. Sleep & Circadian Rhythm: Epithalon pineal restoration, DSIP circadian alignment
+  9. Skin, Hair & Aesthetics: GHK-Cu dermal bio-remodeling, Trichology topical protocols
+  10. ★ Primary Reference Standards (5 Flagships):
+      * BPC-157 & TB-500 Protocol (Anatomical Geometry & Tissue Repair) -> /proto/bpc-157-tb-500-protocol
+      * Retatrutide + MOTS-c Metabolic Intensification (Incretin & DEXA Safety) -> /proto/metabolic-retatrutide-motsc-12w
+      * NAD+ Cellular Restoration Protocol (Bloodo™ Companion Diagnostic) -> /proto/nad-cellular-restoration-protocol
+      * CJC-1295 & Ipamorelin HGH Optimization (Somatotropic Axis) -> /proto/cjc-1295-ipamorelin-synergistic-hgh-optimization
+      * Thymosin Alpha-1 Immune Resilience (Immune Lineage) -> /proto/thymosin-alpha-1-immune-resilience
+- Active Filter Goal: ${contextAnchor?.activeFilterGoal || 'All'}
+- Active Search Query: ${contextAnchor?.activeSearchQuery || 'None'}
+${Array.isArray(contextAnchor?.protocols) && contextAnchor.protocols.length > 0 ? `- Sample Filtered Protocols: ${contextAnchor.protocols.map(p => `[${p.name}](/proto/${p.slug}) (${p.duration}, ${p.phases} phases, compounds: ${p.compounds.join(', ')})`).join('; ')}\n` : ''}`;
+
+        systemPrompt = `You are Atlas Clinical Protocol Intelligence Advisor, the specialized AI clinical navigator for the 78 standardized therapeutic pathways in the Med-Peptides and Atlas Health Clinical Registry.
+
+OPERATING PRINCIPLES:
+1. SPECIALIZED CLINICAL PROTOCOL EXPERTISE:
+   - You assist clinicians, endocrinologists, functional medicine doctors, and researchers in identifying the optimal clinical protocol for specific therapeutic indications, multi-compound synergies, and patient titration schedules.
+   - When asked about a clinical goal (e.g. tissue repair, GLP-1 weight management, cognitive enhancement, HGH somatotropic axis), explain the physiological mechanism, recommended titration phases (e.g. Ramp-up, Therapeutic, Consolidation), and link to the specific protocol URL (/proto/[slug]).
+2. SPECIFIC PROTOCOL URL LINKING:
+   - Always link to specific protocol blueprints: [Protocol Name](/proto/[slug]).
+   - Never output generic empty links.
+3. CONVERSATIONAL & PROFESSIONAL:
+   - Provide dosing schedules, phase durations, administration parameters (SubQ / IM), and baseline/follow-up lab markers (e.g. Bloodo DBS tests for IGF-1, HbA1c, Cortisol, NAD+).
+   - Answer authoritatively in English (or Spanish if asked in Spanish) using clean, structured markdown.
+
+${activeEntityContext}
+
+${publicPlatformKnowledge}
+`;
+      } else if (isCorporate) {
         activeEntityContext = `CURRENT ACTIVE SERVICE SPECIFICATIONS (BEING VIEWED BY VISITOR):
 - Program: Spanish Corporate Acquisition & Law 14/2013 Residence
 - Statutory Basis: Spanish Law 14/2013 of September 27 (Articles 68 to 72). Adjudicated centrally by Large Business and Strategic Groups Unit (UGE-CE) under the Ministry of Inclusion, Social Security & Migration, in coordination with ENISA.

@@ -364,10 +364,12 @@ export const COUNTRY_MAP = COUNTRIES.reduce((acc, country) => {
   return acc;
 }, {});
 
-// Dial Code Map (handles shared codes by keeping the primary/first match)
+// Dial Code Map (handles shared codes by keeping the primary match, prioritizing US for +1)
 export const DIAL_CODE_MAP = COUNTRIES.reduce((acc, country) => {
   const pureDial = country.dial_code.replace(/[^\d+]/g, '');
-  if (!acc[pureDial]) acc[pureDial] = country;
+  if (!acc[pureDial] || country.code.toLowerCase() === 'us') {
+    acc[pureDial] = country;
+  }
   return acc;
 }, {});
 

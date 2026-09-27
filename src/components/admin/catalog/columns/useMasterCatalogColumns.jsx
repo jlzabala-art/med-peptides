@@ -65,9 +65,12 @@ export function useMasterCatalogColumns({
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                 <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
                   <InlineEditableCell 
-                    value={row.canonicalName || 'Unknown Product'} 
+                    value={row.canonicalName || row.name || row.displayName || row.title || 'Unknown Product'} 
                     type="text" 
-                    onSave={(v) => onParentFieldUpdate(row, 'canonicalName', v)} 
+                    onSave={(v) => {
+                      onParentFieldUpdate(row, 'canonicalName', v);
+                      onParentFieldUpdate(row, 'name', v);
+                    }} 
                   />
                 </span>
                 <CopyableId value={row.id} iconOnly={true} />

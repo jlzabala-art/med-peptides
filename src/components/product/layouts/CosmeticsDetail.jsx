@@ -155,23 +155,34 @@ function InciCard({ ing, index, onCopy }) {
           <button
             type="button"
             onClick={() => setOpen(v => !v)}
+            aria-expanded={open}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
-              fontSize: '0.70rem',
-              fontWeight: 700,
-              color: '#0d9488',
-              background: '#f0fdfa',
-              border: '1px solid #99f6e4',
-              borderRadius: '6px',
-              padding: '3px 10px',
-              cursor: 'pointer'
+              gap: '6px',
+              fontSize: '0.78rem',
+              fontWeight: 500,
+              color: '#1a73e8',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '4px',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              minHeight: '36px',
+              transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafd';
+              e.currentTarget.style.borderColor = '#1a73e8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ffffff';
+              e.currentTarget.style.borderColor = '#dadce0';
             }}
           >
-            <Activity size={12} />
+            <Activity size={14} color="#1a73e8" />
             <span>{open ? 'Hide Clinical Mechanism' : 'View Clinical Mechanism & Evidence'}</span>
-            {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            {open ? <ChevronDown size={14} color="#5f6368" /> : <ChevronRight size={14} color="#5f6368" />}
           </button>
 
           {open && (
@@ -471,7 +482,7 @@ function QrModal({ isOpen, onClose, url, productName }) {
 export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
   const [lang] = useState('en');
-  const [inciFilter, setInciFilter] = useState('key_active');
+  const [inciFilter, setInciFilter] = useState('all');
   const [inciSearchQuery, setInciSearchQuery] = useState('');
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
@@ -1083,21 +1094,27 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                       <select
                         value={inciFilter}
                         onChange={(e) => setInciFilter(e.target.value)}
+                        aria-label="Filter by INCI category"
                         style={{
                           width: '100%',
-                          padding: '8px 30px 8px 12px',
-                          borderRadius: '8px',
-                          border: '1.5px solid #003666',
-                          background: '#f8fafc',
-                          color: '#0f172a',
-                          fontSize: '0.78rem',
-                          fontWeight: 700,
+                          minHeight: '38px',
+                          padding: '8px 36px 8px 12px',
+                          borderRadius: '4px',
+                          border: '1px solid #dadce0',
+                          background: '#ffffff',
+                          color: '#202124',
+                          fontSize: '0.8125rem',
+                          fontWeight: 500,
                           appearance: 'none',
                           cursor: 'pointer',
-                          outline: 'none'
+                          outline: 'none',
+                          boxShadow: 'none',
+                          transition: 'border-color 0.15s ease'
                         }}
+                        onFocus={(e) => { e.currentTarget.style.borderColor = '#1a73e8'; }}
+                        onBlur={(e) => { e.currentTarget.style.borderColor = '#dadce0'; }}
                       >
-                        <option value="all">🧪 All INCI Categories ({ingredients.length})</option>
+                        <option value="all">All INCI Categories ({ingredients.length})</option>
                         {Object.entries(groupCounts).map(([group, count]) => {
                           const meta = INCI_GROUP_META[group] || INCI_GROUP_META.functional;
                           return (
@@ -1107,22 +1124,33 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
                           );
                         })}
                       </select>
-                      <ChevronDown size={14} style={{ position: 'absolute', right: '10px', pointerEvents: 'none', color: '#003666' }} />
+                      <ChevronDown size={16} style={{ position: 'absolute', right: '12px', pointerEvents: 'none', color: '#5f6368' }} />
                     </div>
                     {inciFilter !== 'all' && (
                       <button
                         type="button"
                         onClick={() => setInciFilter('all')}
+                        aria-label="Reset INCI category filter"
                         style={{
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid #cbd5e1',
+                          minHeight: '38px',
+                          padding: '0 14px',
+                          borderRadius: '4px',
+                          border: '1px solid #dadce0',
                           background: '#ffffff',
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          color: '#64748b',
+                          fontSize: '0.8125rem',
+                          fontWeight: 500,
+                          color: '#1a73e8',
                           cursor: 'pointer',
-                          whiteSpace: 'nowrap'
+                          whiteSpace: 'nowrap',
+                          transition: 'background-color 0.15s ease, border-color 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f8fafd';
+                          e.currentTarget.style.borderColor = '#1a73e8';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#ffffff';
+                          e.currentTarget.style.borderColor = '#dadce0';
                         }}
                       >
                         Reset

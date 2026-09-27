@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, ChevronDown, Check, X } from 'lucide-react';
 import { COUNTRIES, COUNTRY_MAP, DIAL_CODE_MAP, searchCountries, getCountryByCode, getCountryByDialCode } from '../../data/countries';
+import { getCachedDetectedCountry, getDetectedCountry } from '../../utils/geoIp';
 
 export default function InternationalPhoneInput({
   value = '',
@@ -32,12 +33,14 @@ export default function InternationalPhoneInput({
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  // Selected Country state
+  // Selected Country state: Prioritizes detected Geo-IP country
   const [selectedCountry, setSelectedCountry] = useState(() => {
     if (phonePrefix) {
       const match = getCountryByDialCode(phonePrefix);
       if (match) return match;
     }
+    const cachedGeo = getCachedDetectedCountry();
+    if (cachedGeo) return cachedGeo;
     if (countryHint) {
       const match = getCountryByCode(countryHint);
       if (match) return match;
@@ -101,6 +104,27 @@ export default function InternationalPhoneInput({
       if (match) setSelectedCountry(match);
     }
   }, [countryHint, value, phonePrefix]);
+
+  // Auto-detect visitor's country by IP
+  useEffect(() => {
+    // Only detect if user hasn't already entered a custom number
+    if (value || (phoneNumber && String(phoneNumber).trim().length > 0)) return;
+
+    let isMounted = true;
+    getDetectedCountry().then((detected) => {
+      if (!isMounted || !detected) return;
+      setSelectedCountry((prev) => {
+        // If current selection is default and differs from IP country, switch to IP country
+        if (prev.code !== detected.code) {
+          onPrefixChange?.(detected.dial_code);
+          return detected;
+        }
+        return prev;
+      });
+    }).catch(() => {});
+
+    return () => { isMounted = false; };
+  }, [value, phoneNumber, onPrefixChange]);
 
   // Filtered country list based on search query
   const filteredCountries = useMemo(() => {

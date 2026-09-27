@@ -154,11 +154,195 @@ function buildOrderNotificationHtml(order) {
   </body></html>`;
 }
 
+function buildNewsletterPeptidesHtml({ firstName = 'Researcher' } = {}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <style>
+    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.6;color:#334155;margin:0;padding:0;}
+    .container{max-width:600px;margin:0 auto;padding:20px;}
+    .header{background:linear-gradient(135deg,#003666,#0284c7);color:#fff;padding:32px 24px;text-align:center;border-radius:8px 8px 0 0;}
+    .content{background:#fff;padding:28px 24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;}
+    .footer{text-align:center;padding:20px;font-size:12px;color:#94a3b8;}
+    .badge{display:inline-block;background:#0284c7;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;}
+    .card{background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0284c7;border-radius:6px;padding:16px;margin:18px 0;}
+    .btn{display:inline-block;padding:12px 24px;background:#003666;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;margin-top:16px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+  </style></head><body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Research Intelligence</div>
+      <h1>Atlas Peptide Research Compendium</h1>
+      <p style="margin:8px 0 0;font-size:13px;opacity:0.9;">Reconstitution Calculations, Purity (HPLC >99%) & Cold-Chain Protocol</p>
+    </div>
+    <div class="content">
+      <p>Hello <strong>${firstName}</strong>,</p>
+      <p>Thank you for subscribing via the Atlas Health Peptide Monograph portal. Here is your comprehensive guide to laboratory reconstitution and stability protocols.</p>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px;color:#003666;">Included in this Compendium:</h3>
+        <ul style="margin:0;padding-left:20px;font-size:13px;color:#475569;">
+          <li>Bacteriostatic Water (BAC) titration formulas and vial dilution math.</li>
+          <li>Cold-chain storage standards (-20°C lyophilized vs 2-8°C reconstituted).</li>
+          <li>Batch-level HPLC analytical testing and mass spectrometry verification.</li>
+          <li>Synergistic cellular signaling research notes (BPC-157, TB-500, GHK-Cu).</li>
+        </ul>
+      </div>
+      <p style="font-size:13px;color:#64748b;">You will receive periodic peer-reviewed synthesis summaries and compound updates directly in your inbox.</p>
+      <a href="https://atlas-health.com/catalog" class="btn">Access Monograph Library →</a>
+    </div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Atlas Health. Research Peptides & Life Sciences.</p></div>
+  </div></body></html>`;
+}
+
+function buildNewsletterColwayHtml({ firstName = 'Specialist' } = {}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <style>
+    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.6;color:#334155;margin:0;padding:0;}
+    .container{max-width:600px;margin:0 auto;padding:20px;}
+    .header{background:linear-gradient(135deg,#047857,#059669);color:#fff;padding:32px 24px;text-align:center;border-radius:8px 8px 0 0;}
+    .content{background:#fff;padding:28px 24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;}
+    .footer{text-align:center;padding:20px;font-size:12px;color:#94a3b8;}
+    .badge{display:inline-block;background:#10b981;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;}
+    .card{background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #10b981;border-radius:6px;padding:16px;margin:18px 0;}
+    .btn{display:inline-block;padding:12px 24px;background:#047857;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;margin-top:16px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+  </style></head><body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Trichology & Cellular Cosmeceuticals</div>
+      <h1>Colway Clinical Dossier & Follicular Protocols</h1>
+      <p style="margin:8px 0 0;font-size:13px;opacity:0.9;">Native Tropocollagen, Baicapil™ 2% & Kerascalp™ Collagen XVII</p>
+    </div>
+    <div class="content">
+      <p>Hello <strong>${firstName}</strong>,</p>
+      <p>Thank you for requesting clinical data on Colway advanced cellular care. Below is the clinical summary of our biologically active native transdermal collagen formulas.</p>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px;color:#047857;">Clinical Evidence Highlights:</h3>
+        <ul style="margin:0;padding-left:20px;font-size:13px;color:#334155;">
+          <li><strong>Baicapil™ 2%:</strong> Clinically proven to stimulate anagen hair growth and reduce telogen shedding by up to 60.6% after 3 months.</li>
+          <li><strong>Kerascalp™ (Phyllanthus Emblica):</strong> Prevents follicular miniaturization via Collagen XVII preservation.</li>
+          <li><strong>Native Tropocollagen:</strong> Retains triple helix conformation at room temperature.</li>
+        </ul>
+      </div>
+      <a href="https://atlas-health.com/p/colway-collagen-scalp-treatment" class="btn">View Scalp Treatment Datasheet →</a>
+    </div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Colway Clinical Distribution · Atlas Health Partner.</p></div>
+  </div></body></html>`;
+}
+
+function buildNewsletterBloodoHtml({ firstName = 'Member' } = {}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <style>
+    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.6;color:#334155;margin:0;padding:0;}
+    .container{max-width:600px;margin:0 auto;padding:20px;}
+    .header{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;padding:32px 24px;text-align:center;border-radius:8px 8px 0 0;}
+    .content{background:#fff;padding:28px 24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;}
+    .footer{text-align:center;padding:20px;font-size:12px;color:#94a3b8;}
+    .badge{display:inline-block;background:#a855f7;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;}
+    .card{background:#faf5ff;border:1px solid #e9d5ff;border-left:4px solid #9333ea;border-radius:6px;padding:16px;margin:18px 0;}
+    .btn{display:inline-block;padding:12px 24px;background:#7c3aed;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;margin-top:16px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+  </style></head><body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Diagnostic Intelligence</div>
+      <h1>Bloodo CE-IVDR Capillary Biomarkers Requisition Guide</h1>
+      <p style="margin:8px 0 0;font-size:13px;opacity:0.9;">At-Home Blood Collection, Fasting Guidelines & Longevity Tracking</p>
+    </div>
+    <div class="content">
+      <p>Hello <strong>${firstName}</strong>,</p>
+      <p>Welcome to Bloodo at-home diagnostics. Before taking your capillary sample, review our certified laboratory preparation checklist.</p>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px;color:#7c3aed;">Sample Collection Best Practices:</h3>
+        <ul style="margin:0;padding-left:20px;font-size:13px;color:#334155;">
+          <li>Collect in the morning after a strict 10–12 hour overnight fast.</li>
+          <li>Hydrate with 500 mL of water 30 minutes prior to collection.</li>
+          <li>Warm your hands under water for 2 minutes to optimize capillary microcirculation.</li>
+          <li>Mail prepaid envelope on Monday–Thursday to ensure fresh transit to our accredited lab.</li>
+        </ul>
+      </div>
+      <a href="https://atlas-health.com/p/bloodo-at-home-blood-test" class="btn">View Full Diagnostic Panel →</a>
+    </div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Bloodo Diagnostics · CE-IVDR Certified Lab Partners.</p></div>
+  </div></body></html>`;
+}
+
+function buildNewsletterMediLuxeHtml({ firstName = 'Partner' } = {}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <style>
+    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.6;color:#334155;margin:0;padding:0;}
+    .container{max-width:600px;margin:0 auto;padding:20px;}
+    .header{background:linear-gradient(135deg,#003666,#1e293b);color:#fff;padding:32px 24px;text-align:center;border-radius:8px 8px 0 0;}
+    .content{background:#fff;padding:28px 24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;}
+    .footer{text-align:center;padding:20px;font-size:12px;color:#94a3b8;}
+    .badge{display:inline-block;background:#38bdf8;color:#0f172a;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;}
+    .card{background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #003666;border-radius:6px;padding:16px;margin:18px 0;}
+    .btn{display:inline-block;padding:12px 24px;background:#003666;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;margin-top:16px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+  </style></head><body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">GCC Compounding Concierge</div>
+      <h1>MediLuxe Middle East Executive Brief</h1>
+      <p style="margin:8px 0 0;font-size:13px;opacity:0.9;">Dubai & Abu Dhabi Licensed Telemedicine & Compounding Infrastructure</p>
+    </div>
+    <div class="content">
+      <p>Hello <strong>${firstName}</strong>,</p>
+      <p>Thank you for inquiring about MediLuxe institutional compounding and clinic partnerships in the United Arab Emirates and GCC region.</p>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px;color:#003666;">Corporate Partnership Capabilities:</h3>
+        <ul style="margin:0;padding-left:20px;font-size:13px;color:#334155;">
+          <li>MOHAP and DOH compliant custom peptide and hormone formulation.</li>
+          <li>Validated 24–48h cold-chain pharmaceutical delivery across UAE.</li>
+          <li>Doctor portal for electronic prescribing, titration logs and direct patient fulfillment.</li>
+        </ul>
+      </div>
+      <a href="https://atlas-health.com/mediluxe" class="btn">Explore Concierge Portal →</a>
+    </div>
+    <div class="footer"><p>© ${new Date().getFullYear()} MediLuxe Healthcare Concierge · Dubai & Abu Dhabi, UAE.</p></div>
+  </div></body></html>`;
+}
+
+function buildNewsletterProtocolsHtml({ firstName = 'Clinician' } = {}) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <style>
+    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.6;color:#334155;margin:0;padding:0;}
+    .container{max-width:600px;margin:0 auto;padding:20px;}
+    .header{background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;padding:32px 24px;text-align:center;border-radius:8px 8px 0 0;}
+    .content{background:#fff;padding:28px 24px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;}
+    .footer{text-align:center;padding:20px;font-size:12px;color:#94a3b8;}
+    .badge{display:inline-block;background:#14b8a6;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:14px;}
+    .card{background:#f0fdfa;border:1px solid #ccfbf1;border-left:4px solid #0d9488;border-radius:6px;padding:16px;margin:18px 0;}
+    .btn{display:inline-block;padding:12px 24px;background:#0f766e;color:#fff;text-decoration:none;border-radius:6px;font-weight:700;margin-top:16px;}
+    h1{margin:0;font-size:22px;font-weight:700;}
+  </style></head><body>
+  <div class="container">
+    <div class="header">
+      <div class="badge">Clinical Pathways Compendium</div>
+      <h1>Standardized Clinical Protocols Blueprint</h1>
+      <p style="margin:8px 0 0;font-size:13px;opacity:0.9;">78 Evidence-Based Pathways · Multi-Compound Synergies · Safety Checkpoints</p>
+    </div>
+    <div class="content">
+      <p>Hello <strong>${firstName}</strong>,</p>
+      <p>You have unlocked the Atlas Health Clinical Protocols Directory Blueprint. Below is the framework used by longevity and functional medicine practitioners.</p>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px;color:#0f766e;">Directory Architecture:</h3>
+        <ul style="margin:0;padding-left:20px;font-size:13px;color:#334155;">
+          <li><strong>10 Therapeutic Goals:</strong> Tissue Repair, Neuroprotection, Metabolic Health, Longevity, and more.</li>
+          <li><strong>Multi-Compound Synergies:</strong> Complementary peptide mechanisms (e.g. BPC-157 + TB-500, CJC-1295 + Ipamorelin).</li>
+          <li><strong>Surveillance Checkpoints:</strong> DEXA intervals, CBC/CMP baseline schedules, and IGF-1 titration targets.</li>
+        </ul>
+      </div>
+      <a href="https://atlas-health.com/proto" class="btn">Explore All 78 Protocols →</a>
+    </div>
+    <div class="footer"><p>© ${new Date().getFullYear()} Atlas Health Clinical Advisory Board.</p></div>
+  </div></body></html>`;
+}
+
 // ── REGISTRY ──────────────────────────────────────────────────────────────────
 export const EMAIL_TEMPLATE_REGISTRY = [
   {
     id: 'TPL-001',
     name: 'Welcome — Customer / Patient',
+    category: 'Onboarding',
     description: 'Sent automatically when a customer or patient registers. Account is immediately active. Prompts email verification.',
     trigger: 'Firestore: users/{userId} created (role: guest | patient)',
     channel: 'Cloud Function → Nodemailer (Gmail)',
@@ -169,6 +353,7 @@ export const EMAIL_TEMPLATE_REGISTRY = [
   {
     id: 'TPL-002',
     name: 'Welcome — Professional Application Received',
+    category: 'Onboarding',
     description: 'Sent automatically when a professional account (doctor, wholesaler, clinic…) registers. Informs the applicant that their request is under review.',
     trigger: 'Firestore: users/{userId} created (role: *_pending | professional_pending)',
     channel: 'Cloud Function → Nodemailer (Gmail)',
@@ -179,19 +364,20 @@ export const EMAIL_TEMPLATE_REGISTRY = [
   {
     id: 'TPL-003',
     name: 'Order Received — Customer Confirmation',
+    category: 'Orders',
     description: 'Sent to the customer immediately after they submit an order. Includes order ID, items, totals, and payment next steps.',
     trigger: 'Firestore: orders/{orderId} created → Cloud Function onNewOrder',
     channel: 'Cloud Function → Nodemailer (Gmail)',
     sourceFile: 'functions/emailTemplates/clientConfirmation.js',
     tags: ['order', 'auto'],
     getHtml: () => {
-      // Inline minimal version for preview
       return buildOrderNotificationHtml(SAMPLE_ORDER).replace('🛒 New Order — Admin', '✅ Order Received — Customer');
     },
   },
   {
     id: 'TPL-004',
     name: 'New Order — Admin Notification',
+    category: 'Orders',
     description: 'Sent to the admin team when a new order arrives. Includes deep link to the order in the admin dashboard.',
     trigger: 'Firestore: orders/{orderId} created → Cloud Function onNewOrder',
     channel: 'Cloud Function → Nodemailer (Gmail)',
@@ -202,6 +388,7 @@ export const EMAIL_TEMPLATE_REGISTRY = [
   {
     id: 'TPL-005',
     name: 'Professional Access Approved',
+    category: 'Access Control',
     description: 'Sent manually by admin from the Users tab when approving a professional account. Contains feature list per role and CTA to access the platform.',
     trigger: 'Manual — Admin: Users tab → Approve button',
     channel: 'EmailJS (browser)',
@@ -216,6 +403,7 @@ export const EMAIL_TEMPLATE_REGISTRY = [
   {
     id: 'TPL-006',
     name: 'Professional Access Denied',
+    category: 'Access Control',
     description: 'Sent manually by admin from the Users tab when denying a professional account application. Optionally includes a reason.',
     trigger: 'Manual — Admin: Users tab → Deny button',
     channel: 'EmailJS (browser)',
@@ -226,6 +414,7 @@ export const EMAIL_TEMPLATE_REGISTRY = [
   {
     id: 'TPL-007',
     name: 'Doctor — Patient Invitation',
+    category: 'Clinical / B2B',
     description: 'Sent by a physician to invite a patient to join the B2B supervised portal. Includes a referral registration link.',
     trigger: 'Manual — Doctor portal: Invite Patient action',
     channel: 'EmailJS (browser)',
@@ -237,6 +426,61 @@ export const EMAIL_TEMPLATE_REGISTRY = [
       customMessage: 'Ana, I have prepared a protocol for you. Please register using this link so we can manage your treatment together.',
       registerUrl: 'https://atlas-health.com/register?ref=doctor123',
     }),
+  },
+  {
+    id: 'TPL-008',
+    name: 'Public Newsletter — Peptide Research & Reconstitution Compendium',
+    category: 'Public Newsletters',
+    description: 'Sent automatically when a visitor subscribes from any Peptide Monograph inquiry drawer (/p/[slug]). Delivers reconstitution calculations, cold-chain guidelines, and HPLC purity standards.',
+    trigger: 'Firestore: inquiries/{id} created (type: newsletter, context: peptide_monograph)',
+    channel: 'Cloud Function → Nodemailer (Gmail)',
+    sourceFile: 'functions/emailTemplates/newsletterPeptides.js',
+    tags: ['newsletter', 'auto'],
+    getHtml: () => buildNewsletterPeptidesHtml({ firstName: 'Dr. Sarah' }),
+  },
+  {
+    id: 'TPL-009',
+    name: 'Public Newsletter — Colway Cellular Cosmeceuticals & Hair Follicle Dossier',
+    category: 'Public Newsletters',
+    description: 'Sent automatically when a visitor subscribes from the Colway AteloCollagen or Hair Scalp Treatment drawer. Delivers clinical trial data on Baicapil 2% and Collagen XVII preservation.',
+    trigger: 'Firestore: inquiries/{id} created (type: newsletter, context: colway_product)',
+    channel: 'Cloud Function → Nodemailer (Gmail)',
+    sourceFile: 'functions/emailTemplates/newsletterColway.js',
+    tags: ['newsletter', 'auto'],
+    getHtml: () => buildNewsletterColwayHtml({ firstName: 'Dr. Elena' }),
+  },
+  {
+    id: 'TPL-010',
+    name: 'Public Newsletter — Bloodo At-Home Capillary Biomarkers Requisition Guide',
+    category: 'Public Newsletters',
+    description: 'Sent automatically when a visitor inquires from the Bloodo diagnostic testing drawer. Delivers the CE-IVDR sample collection protocol, fasting guidelines, and biomarker reference ranges.',
+    trigger: 'Firestore: inquiries/{id} created (type: newsletter, context: bloodo_diagnostic)',
+    channel: 'Cloud Function → Nodemailer (Gmail)',
+    sourceFile: 'functions/emailTemplates/newsletterBloodo.js',
+    tags: ['newsletter', 'auto'],
+    getHtml: () => buildNewsletterBloodoHtml({ firstName: 'Marc' }),
+  },
+  {
+    id: 'TPL-011',
+    name: 'Public Newsletter — MediLuxe GCC Compounding Concierge Executive Brief',
+    category: 'Public Newsletters',
+    description: 'Sent automatically when a clinic or corporate partner requests partnership information via /mediluxe. Delivers UAE pharmacy licensing, MOHAP compounding frameworks, and turnaround SLAs.',
+    trigger: 'Firestore: inquiries/{id} created (type: inquiry, context: mediluxe_corporate)',
+    channel: 'Cloud Function → Nodemailer (Gmail)',
+    sourceFile: 'functions/emailTemplates/newsletterMediLuxe.js',
+    tags: ['newsletter', 'b2b', 'auto'],
+    getHtml: () => buildNewsletterMediLuxeHtml({ firstName: 'Dr. Al-Mansoor' }),
+  },
+  {
+    id: 'TPL-012',
+    name: 'Public Newsletter — Clinical Protocols Directory Blueprints',
+    category: 'Public Newsletters',
+    description: 'Sent automatically when a visitor or physician requests clinical blueprints from the Clinical Protocols Directory (/proto). Delivers the 78 evidence-based titration pathways and safety checklists.',
+    trigger: 'Firestore: inquiries/{id} created (type: newsletter, context: protocols_directory)',
+    channel: 'Cloud Function → Nodemailer (Gmail)',
+    sourceFile: 'functions/emailTemplates/newsletterProtocols.js',
+    tags: ['newsletter', 'clinical', 'auto'],
+    getHtml: () => buildNewsletterProtocolsHtml({ firstName: 'Dr. Vega' }),
   },
 ];
 

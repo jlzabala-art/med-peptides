@@ -554,11 +554,14 @@ export default function PublicAtlasAIDrawer({
     const isDiagContext = contextType === 'diagnostic_test' || contextAnchor?.category === 'Diagnostic Kits';
     const isCorpContext = contextType === 'corporate_residency' || contextAnchor?.category === 'Corporate Services';
     const isProtoContext = contextType === 'protocol_guide' || contextAnchor?.phases;
+    const isProtoDirContext = contextType === 'protocols_directory' || contextAnchor?.type === 'protocols_catalog';
 
     const microHeaderTitle = isDiagContext
       ? (lang === 'es' ? 'ESPECIFICACIONES DE BIOMARCADORES CLÍNICOS' : 'VERIFIED CLINICAL BIOMARKER SPECIFICATIONS')
       : isCorpContext
       ? (lang === 'es' ? 'ESPECIFICACIONES ESTATUTARIAS CORPORATIVAS' : 'VERIFIED CORPORATE STATUTORY SPECIFICATIONS')
+      : isProtoDirContext
+      ? (lang === 'es' ? 'DIRECTORIO DE PROTOCOLOS TERAPÉUTICOS' : 'CLINICAL PROTOCOL DIRECTORY BLUEPRINT')
       : isProtoContext
       ? (lang === 'es' ? 'ARQUITECTURA DE PROTOCOLO CLÍNICO' : 'VERIFIED CLINICAL PROTOCOL BLUEPRINT')
       : (lang === 'es' ? 'ESPECIFICACIONES ANALÍTICAS VERIFICADAS' : 'VERIFIED ANALYTICAL SPECIFICATIONS');
@@ -567,6 +570,8 @@ export default function PublicAtlasAIDrawer({
       ? 'CE-IVDR Diagnostic Test'
       : isCorpContext
       ? 'Spanish Law 14/2013'
+      : isProtoDirContext
+      ? '78 Standardized Pathways'
       : isProtoContext
       ? 'Phased Pathway'
       : 'Standard Monograph';
@@ -998,13 +1003,21 @@ export default function PublicAtlasAIDrawer({
                 </div>
               </div>
               <div style={{ flexShrink: 0 }}>
-                {contextType === 'diagnostic_test' ? (
+                {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', padding: '2px 7px', borderRadius: '4px', border: '1px solid #ccfbf1', whiteSpace: 'nowrap' }}>
+                    EU Reg. 1223/2009
+                  </span>
+                ) : contextType === 'diagnostic_test' ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bae6fd', whiteSpace: 'nowrap' }}>
                     CE-IVDR Certified
                   </span>
                 ) : contextType === 'protocol' ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', padding: '2px 7px', borderRadius: '4px', border: '1px solid #ccfbf1', whiteSpace: 'nowrap' }}>
                     {contextAnchor?.duration || 'Clinical Blueprint'}
+                  </span>
+                ) : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic') ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#9333ea', backgroundColor: '#faf5ff', padding: '2px 7px', borderRadius: '4px', border: '1px solid #f3e8ff', whiteSpace: 'nowrap' }}>
+                    CE Aesthetic Grade
                   </span>
                 ) : contextAnchor?.cas && contextAnchor.cas !== 'N/A' ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '2px 7px', borderRadius: '4px', border: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>
@@ -1100,17 +1113,25 @@ export default function PublicAtlasAIDrawer({
                       <Sparkles size={22} />
                     </div>
                     <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                      {contextType === 'diagnostic_test'
+                      {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
+                        ? 'Dermocosmetic & INCI Research Copilot'
+                        : contextType === 'diagnostic_test'
                         ? 'Diagnostic Laboratory & Biomarker AI Copilot'
                         : contextType === 'protocol'
                         ? 'Clinical Protocol Research Copilot'
+                        : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
+                        ? 'Aesthetic Medicine & Rheology Copilot'
                         : 'Dedicated Technical Research Assistant'}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
-                      {contextType === 'diagnostic_test'
+                      {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
+                        ? 'Ask questions regarding INCI active mechanisms, penetration kinetics, clinical scalp/skin protocols, or dermocosmetic safety.'
+                        : contextType === 'diagnostic_test'
                         ? 'Ask questions regarding capillary blood spot collection, sample transit stability, reference ranges, laboratory analytical methods, or clinical protocol matching.'
                         : contextType === 'protocol'
                         ? 'Ask questions regarding multi-phase titration schedules, companion compounds, safety precautions, or required laboratory monitoring.'
+                        : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
+                        ? 'Ask questions regarding rheological properties (G prime), tissue integration, injection planes, or vascular safety.'
                         : 'Ask specific compounding, dilution, thermal stability, or peer-reviewed literature questions regarding this monograph.'}
                     </div>
 
@@ -1232,9 +1253,25 @@ export default function PublicAtlasAIDrawer({
                     </span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <div><strong>CAS Registry:</strong> {contextAnchor?.cas || 'Verified Compendial ID'}</div>
-                    <div><strong>Synthesis Standard:</strong> {contextAnchor?.purity || '≥ 99.0% Dual-Stage RP-HPLC Verified'}</div>
-                    <div><strong>Formulation Quality:</strong> Lyophilized Analytical Grade (Dual-Stage RP-HPLC Certified)</div>
+                    {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
+                      <>
+                        <div><strong>Regulatory Standard:</strong> European Cosmetic Regulation (EC) No 1223/2009</div>
+                        <div><strong>Formulation Quality:</strong> Professional Dermocosmetic Grade (Bio-Active INCI)</div>
+                        {contextAnchor?.keyActives && <div><strong>Primary Actives:</strong> {contextAnchor.keyActives}</div>}
+                      </>
+                    ) : contextType === 'diagnostic_test' ? (
+                      <>
+                        <div><strong>Regulatory Standard:</strong> CE-IVDR Certified Diagnostic In-Vitro Device</div>
+                        <div><strong>Sample Matrix:</strong> Capillary Dried Blood Spot (DBS)</div>
+                        <div><strong>Analytical Quality:</strong> Centralized Reference Laboratory (LifeLab1)</div>
+                      </>
+                    ) : (
+                      <>
+                        <div><strong>CAS Registry:</strong> {contextAnchor?.cas || 'Verified Compendial ID'}</div>
+                        <div><strong>Synthesis Standard:</strong> {contextAnchor?.purity || '≥ 99.0% Dual-Stage RP-HPLC Verified'}</div>
+                        <div><strong>Formulation Quality:</strong> Lyophilized Analytical Grade (Dual-Stage RP-HPLC Certified)</div>
+                      </>
+                    )}
                   </div>
                 </div>
 

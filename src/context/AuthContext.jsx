@@ -246,12 +246,8 @@ export function AuthProvider({ children, serverUser = null }) {
         }
 
         if (typeof window !== 'undefined' && destination) {
-          const currentOrigin = window.location.origin;
-          if (storedOrigin && storedOrigin !== currentOrigin && !storedOrigin.includes('localhost')) {
-            window.location.replace(`${storedOrigin}${destination}`);
-          } else {
-            window.location.replace(destination);
-          }
+          // Always stay on the current host to prevent cross-domain ITP session dropping
+          window.location.replace(destination);
         }
       }
     }).catch((err) => {
@@ -524,6 +520,28 @@ export function AuthProvider({ children, serverUser = null }) {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     let cred = null;
+
+    // In iOS (iPhone/iPad/Safari) and Android mobile browsers, popup windows are blocked,
+    // window.opener is nullified, or WebKit ITP discards tokens. Use signInWithRedirect directly.
+    const isMobileDevice = typeof navigator !== 'undefined' && 
+      (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+       (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent)));
+
+    if (isMobileDevice) {
+      if (typeof window !== 'undefined') {
+        const origin = window.location.origin;
+        const target = targetUrl || window.location.pathname + window.location.search;
+        try {
+          sessionStorage.setItem('auth_redirect_origin', origin);
+          sessionStorage.setItem('auth_redirect_target', target);
+          localStorage.setItem('auth_redirect_origin', origin);
+          localStorage.setItem('auth_redirect_target', target);
+        } catch (e) {}
+      }
+      await signInWithRedirect(auth, provider);
+      return { cred: null, profile: null, pendingRedirect: true };
+    }
+
     try {
       cred = await signInWithPopup(auth, provider);
       // If popup succeeds, clear any lingering redirect targets
@@ -538,9 +556,10 @@ export function AuthProvider({ children, serverUser = null }) {
     } catch (popupErr) {
       if (
         popupErr.code === 'auth/popup-blocked' || 
-        popupErr.code === 'auth/cancelled-popup-request'
+        popupErr.code === 'auth/cancelled-popup-request' ||
+        popupErr.code === 'auth/popup-closed-by-user'
       ) {
-        console.info('[AuthContext] Mobile popup blocked, falling back to signInWithRedirect');
+        console.info('[AuthContext] Popup fallback to signInWithRedirect');
         if (typeof window !== 'undefined') {
           const origin = window.location.origin;
           const target = targetUrl || window.location.pathname + window.location.search;

@@ -39,6 +39,8 @@ import '../../styles/publicProtocolsCatalog.css';
 import '../../components/product/PublicDatasheetView.css';
 import PublicAtlasAIDrawer from '../shared/PublicAtlasAIDrawer';
 import PublicInstitutionalInquiryDrawer from '../shared/PublicInstitutionalInquiryDrawer';
+import PublicStickyActionBar from '../shared/PublicStickyActionBar';
+import ProtocolQrModal from './ProtocolQrModal';
 import PublicUnifiedHeader from '../shared/PublicUnifiedHeader';
 import ProtocolsCatalogSidebar from './ProtocolsCatalogSidebar';
 import { Mail, Lock } from 'lucide-react';
@@ -165,6 +167,8 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState(() => new Set());
+  const [qrModalProtocol, setQrModalProtocol] = useState(null);
+  const [copiedQrUrl, setCopiedQrUrl] = useState(false);
 
   const toggleExpanded = (id) => {
     triggerHaptic('light');
@@ -174,6 +178,23 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
       else next.add(id);
       return next;
     });
+  };
+
+  const handleOpenQr = (proto, e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    triggerHaptic('light');
+    setQrModalProtocol(proto);
+    setCopiedQrUrl(false);
+  };
+
+  const handleCopyQrUrl = () => {
+    if (!qrModalProtocol) return;
+    const url = `https://med-peptides.com/proto/${qrModalProtocol.cleanSlug}`;
+    navigator.clipboard?.writeText(url);
+    setCopiedQrUrl(true);
+    triggerHaptic('copy');
+    setTimeout(() => setCopiedQrUrl(false), 2000);
   };
 
   // Synchronized language state across all public views
@@ -860,6 +881,16 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                               <button
                                 type="button"
                                 className="proto-card-btn-icon"
+                                onClick={(e) => handleOpenQr(proto, e)}
+                                title={lang === 'es' ? 'Ver Código QR del Protocolo' : 'View Protocol QR Code'}
+                                aria-label="View QR Code"
+                              >
+                                <QrCode size={15} style={{ color: '#003666' }} />
+                              </button>
+
+                              <button
+                                type="button"
+                                className="proto-card-btn-icon"
                                 onClick={(e) => handleCopyCode(`https://med-peptides.com/proto/${proto.cleanSlug}`, e)}
                                 title={t.copyProtocolLink}
                               >
@@ -1057,6 +1088,16 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             <button
                               type="button"
                               className="proto-card-btn-icon"
+                              onClick={(e) => handleOpenQr(proto, e)}
+                              title={lang === 'es' ? 'Ver Código QR del Protocolo' : 'View Protocol QR Code'}
+                              aria-label="View QR Code"
+                            >
+                              <QrCode size={16} style={{ color: '#003666' }} />
+                            </button>
+
+                            <button
+                              type="button"
+                              className="proto-card-btn-icon"
                               onClick={(e) => handleCopyCode(`https://med-peptides.com/proto/${proto.cleanSlug}`, e)}
                               title={t.copyProtocolLink}
                             >
@@ -1150,15 +1191,57 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
         />
       </div>
 
-      {/* ── Floating Atlas AI Technical Inquiry (Single consolidated AI button across all public views) ── */}
+      {/* ── Protocol QR Modal ── */}
+      {qrModalProtocol && (
+        <ProtocolQrModal
+          isOpen={Boolean(qrModalProtocol)}
+          onClose={() => setQrModalProtocol(null)}
+          publicUrl={`https://med-peptides.com/proto/${qrModalProtocol.cleanSlug}`}
+          displayName={qrModalProtocol.cleanName}
+          protocolCode={qrModalProtocol.code || qrModalProtocol.cleanSlug}
+          t={t}
+          copied={copiedQrUrl}
+          onCopyUrl={handleCopyQrUrl}
+        />
+      )}
+
+      {/* ── Persistent Google Cloud Console Sticky Bottom Action Bar ── */}
+      <PublicStickyActionBar
+        title={t.catalogHeroTitle || 'Clinical Protocols & Peptides Directory'}
+        subtitle={`${filteredProtocols.length} Clinical Protocols • 10 Goals • Titration SSOT`}
+        badge="Clinical Pathways SSOT"
+        badgeType="teal"
+        inquireLabel={lang === 'es' ? 'Consultar Directorio' : 'Inquire Directory'}
+        onInquire={() => setIsInquiryDrawerOpen(true)}
+        showClinicalAI={true}
+        showSections={true}
+        sectionsCount={GOAL_BUCKETS.length}
+        sectionsLabel={lang === 'es' ? 'Objetivos & Filtros' : 'Goals & Filters'}
+        onOpenSections={() => setIsMobileDrawerOpen(true)}
+        lang={lang}
+      />
+
+      {/* ── Sandboxed Clinical Protocol AI Copilot (Integrated into Sticky Footer) ── */}
       <PublicAtlasAIDrawer
-        contextType="catalog"
+        contextType="protocols_directory"
         contextAnchor={{
           type: 'protocols_catalog',
+          name: 'Clinical Protocols & Peptides Directory',
           totalProtocols: enrichedProtocols.length,
           activeFilterGoal: selectedGoal,
-          activeSearchQuery: searchQuery
+          activeSearchQuery: searchQuery,
+          availableGoals: GOAL_BUCKETS.map(b => b.label),
+          protocols: filteredProtocols.slice(0, 30).map(p => ({
+            name: p.cleanName,
+            slug: p.cleanSlug,
+            duration: p.durationWeeks ? `${p.durationWeeks}w` : '8w',
+            phases: p.phasesCount,
+            compounds: p.compounds.map(c => c.name)
+          }))
         }}
+        storageKey="protocols_directory"
+        hideFloatingTrigger={true}
+        lang={lang}
       />
 
       {/* Non-Intrusive Institutional Inquiry Drawer */}

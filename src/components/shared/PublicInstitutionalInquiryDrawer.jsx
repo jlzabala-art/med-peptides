@@ -20,6 +20,7 @@ import { useAlgoliaSearch } from '@/hooks/data/useAlgoliaSearch';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
+import { getCachedDetectedCountry, getDetectedCountry } from '@/utils/geoIp';
 
 const INQUIRY_TOPICS_PEPTIDES = [
   {
@@ -247,13 +248,30 @@ export default function PublicInstitutionalInquiryDrawer({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [emailTouched, setEmailTouched] = useState(false);
-  const [organization, setOrganization] = useState('');
-  const [phonePrefix, setPhonePrefix] = useState(() => (lang === 'es' ? '+34' : '+1'));
+  const [detectedCountry, setDetectedCountry] = useState(() => getCachedDetectedCountry());
+  const [phonePrefix, setPhonePrefix] = useState(() => {
+    const cached = getCachedDetectedCountry();
+    if (cached?.dial_code) return cached.dial_code;
+    return lang === 'es' ? '+34' : '+1';
+  });
   const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Auto-detect visitor's country by IP
+  useEffect(() => {
+    let isMounted = true;
+    getDetectedCountry().then((c) => {
+      if (!isMounted || !c) return;
+      setDetectedCountry(c);
+      if (!phoneNumber) {
+        setPhonePrefix(c.dial_code);
+      }
+    }).catch(() => {});
+    return () => { isMounted = false; };
+  }, [phoneNumber]);
 
   const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const isEmailValid = useMemo(() => {
@@ -1001,7 +1019,7 @@ export default function PublicInstitutionalInquiryDrawer({
                     phoneNumber={phoneNumber}
                     onPhoneNumberChange={setPhoneNumber}
                     lang={lang}
-                    countryHint={lang === 'es' ? 'ES' : 'US'}
+                    countryHint={detectedCountry?.code?.toUpperCase() || (lang === 'es' ? 'ES' : 'US')}
                   />
                 </div>
               </div>

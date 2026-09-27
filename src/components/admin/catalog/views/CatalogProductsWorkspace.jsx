@@ -23,6 +23,7 @@ const CatalogProductsWorkspace = ({
   onDisplayModeChange,
   isMobile,
   hasMore,
+  totalProducts = 505,
   currentPage,
   nextPage,
   prevPage,
@@ -291,8 +292,15 @@ const CatalogProductsWorkspace = ({
                   variants={matrixViewType === 'flat' ? variants : variants}
                   loading={loading}
                   currentPage={currentPage}
-                  rowsPerPage={20}
-                  onPageChange={() => {}}
+                  rowsPerPage={25}
+                  totalProducts={totalProducts}
+                  hasMore={hasMore}
+                  onNextPage={nextPage}
+                  onPrevPage={prevPage}
+                  onPageChange={(page) => {
+                    if (page > currentPage) nextPage?.();
+                    else if (page < currentPage) prevPage?.();
+                  }}
                   onRowsPerPageChange={() => {}}
                   onRowClick={(item) => onAction && onAction('edit', item)}
                   onAction={onAction}
@@ -310,54 +318,6 @@ const CatalogProductsWorkspace = ({
                 />
               )}
             </div>
-
-            {/* Simple Pagination Bar (Only show if table mode, cards has load more) */}
-            {activeDisplayMode === 'table' && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 24px',
-                  backgroundColor: '#fff',
-                  borderTop: '1px solid #e2e8f0',
-                }}
-              >
-                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                  Page {currentPage}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={prevPage}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      border: '1px solid #e2e8f0',
-                      backgroundColor: currentPage === 1 ? '#f8fafc' : '#fff',
-                      color: currentPage === 1 ? '#94a3b8' : '#475569',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    Previous
-                  </button>
-                  <button
-                    disabled={!hasMore}
-                    onClick={nextPage}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '4px',
-                      border: '1px solid #e2e8f0',
-                      backgroundColor: !hasMore ? '#f8fafc' : '#fff',
-                      color: !hasMore ? '#94a3b8' : '#475569',
-                      cursor: !hasMore ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

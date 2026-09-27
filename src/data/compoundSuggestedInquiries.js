@@ -497,6 +497,76 @@ function resolveRegistryKey(slug, name = '', category = '') {
  * Generates 5 high-relevance clinical questions dynamically if the compound
  * is not in the curated registry.
  */
+function generateDynamicCosmeticInquiries(contextAnchor, lang = 'en') {
+  const isEs = lang === 'es';
+  const name = contextAnchor?.name || (isEs ? 'esta formulación cosmecéutica' : 'this cosmeceutical formulation');
+  const clinicalTarget = contextAnchor?.clinicalTarget || (isEs ? 'regeneración tisular y fortalecimiento celular' : 'tissue regeneration and cellular strengthening');
+
+  if (isEs) {
+    return [
+      `¿Cuál es el mecanismo molecular del complejo activo INCI en ${name}?`,
+      `¿Cuál es el tiempo de contacto y frecuencia de aplicación recomendada para ${name}?`,
+      `¿Cómo interactúa esta fórmula con la fisiología de ${clinicalTarget}?`,
+      `¿Cómo se combina esta fórmula dermocosmética con protocolos clínicos de aparatología o microneedling?`,
+      `¿Qué datos de seguridad clínica y cumplimiento europeo (Reg. CE 1223/2009) certifican esta fórmula?`
+    ];
+  }
+
+  return [
+    `What is the molecular mechanism and cellular action of the active INCI complex in ${name}?`,
+    `What is the recommended contact time, scalp/skin application cadence, and leave-on protocol?`,
+    `How does this formulation biologically target and support ${clinicalTarget}?`,
+    `Which clinical protocols (e.g. microneedling, trichology LED, peptide mesotherapy) pair with this product?`,
+    `What European dermocosmetic safety and compliance standards (EU Reg. 1223/2009) verify this monograph?`
+  ];
+}
+
+function generateDynamicDiagnosticInquiries(contextAnchor, lang = 'en') {
+  const isEs = lang === 'es';
+  const name = contextAnchor?.name || (isEs ? 'este test diagnóstico' : 'this diagnostic test');
+
+  if (isEs) {
+    return [
+      `¿Cuáles son las instrucciones paso a paso para la recolección capilar en tarjeta DBS de ${name}?`,
+      `¿Qué metodología analítica de laboratorio clínico (LC-MS/MS o microcromatografía) emplea LifeLab1?`,
+      `¿Cómo deben interpretarse los percentiles y rangos de referencia para protocolos de longevidad?`,
+      `¿Cuáles son las pautas de ayuno, horario matutino y estabilidad de la muestra capilar?`,
+      `¿Qué protocolos médicos y optimización terapéutica se asocian a los biomarcadores de ${name}?`
+    ];
+  }
+
+  return [
+    `What are the step-by-step instructions for capillary dried blood spot (DBS) collection for ${name}?`,
+    `What reference analytical methodologies (LC-MS/MS or affinity chromatography) are used at LifeLab1?`,
+    `How are clinical reference ranges and percentile percentiles interpreted for longevity protocols?`,
+    `What are the circadian timing, fasting, and specimen stability guidelines for this test?`,
+    `Which clinical interventions and peptide therapies correlate directly with these biomarker results?`
+  ];
+}
+
+function generateDynamicAestheticInquiries(contextAnchor, lang = 'en') {
+  const isEs = lang === 'es';
+  const name = contextAnchor?.name || (isEs ? 'este inyectable estético' : 'this aesthetic injectable');
+
+  if (isEs) {
+    return [
+      `¿Cuáles son las propiedades reológicas (G' elástico, viscosidad y cohesividad) de ${name}?`,
+      `¿Cuáles son los planos anatómicos de inyección y calibres recomendados (aguja vs cánula)?`,
+      `¿Cuál es el perfil de integración tisular y duración clínica estimada de la corrección?`,
+      `¿Qué precauciones de seguridad vascular y pautas de hialuronidasa de emergencia aplican?`,
+      `¿Qué protocolos combinados pre y post procedimiento optimizan la respuesta biológica?`
+    ];
+  }
+
+  return [
+    `What are the rheological properties (elastic modulus G', viscosity, cohesivity) of ${name}?`,
+    `What are the recommended anatomical injection planes and delivery techniques (needle vs cannula)?`,
+    `What is the tissue integration profile and documented clinical longevity of correction?`,
+    `What vascular safety precautions and emergency reversal guidelines apply to this monograph?`,
+    `Which pre- and post-procedure clinical protocols optimize tissue recovery and patient outcomes?`
+  ];
+}
+
 function generateDynamicCompoundInquiries(contextAnchor, lang = 'en') {
   const isEs = lang === 'es';
   const name = contextAnchor?.name || (isEs ? 'este compuesto' : 'this compound');
@@ -528,6 +598,39 @@ function generateDynamicCompoundInquiries(contextAnchor, lang = 'en') {
 export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'monograph', lang = 'en') {
   const isEs = lang === 'es';
 
+  // 0. If contextAnchor directly provides suggestedQuestions, honor them first!
+  if (Array.isArray(contextAnchor?.suggestedQuestions) && contextAnchor.suggestedQuestions.length >= 3) {
+    const list = [...contextAnchor.suggestedQuestions];
+    if (list.length >= 5) return list.slice(0, 5);
+    // Fill remaining up to 5
+    const fallbackList = generateDynamicCosmeticInquiries(contextAnchor, lang);
+    for (const q of fallbackList) {
+      if (list.length >= 5) break;
+      if (!list.includes(q)) list.push(q);
+    }
+    return list.slice(0, 5);
+  }
+
+  // 0b. If contextType is 'protocols_directory'
+  if (contextType === 'protocols_directory' || contextType === 'protocols_catalog') {
+    if (isEs) {
+      return [
+        '¿Cuáles son los 5 Protocolos Estándar de Referencia clínica más destacados?',
+        '¿Cómo funciona la titulación metabólica combinada de Retatrutida + MOTS-c?',
+        '¿Qué protocolo se recomienda para regeneración acelerada articular y tendinosa?',
+        '¿Cómo se estructuran los protocolos de eje somatotrópico con secretagogos de GH?',
+        '¿Cuáles son las pruebas de laboratorio de Bloodo recomendadas antes de iniciar?'
+      ];
+    }
+    return [
+      'What are the 5 Primary Reference Standard protocols in the clinical registry?',
+      'How does the Retatrutide + MOTS-c metabolic intensification protocol work?',
+      'Which protocol is recommended for accelerated tendon and joint regeneration?',
+      'How are somatotropic HGH secretagogue protocols structured across phases?',
+      'Which baseline Bloodo diagnostic panels are recommended before protocol start?'
+    ];
+  }
+
   // 1. If contextType is 'protocol'
   if (contextType === 'protocol') {
     if (isEs) {
@@ -547,6 +650,38 @@ export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'mo
       'What is the optimal weekly administration cadence and timing for each compound?'
     ];
   }
+
+  // Determine domain classification
+  const brand = String(contextAnchor?.brand || contextAnchor?.supplier || '').toLowerCase();
+  const cat = String(contextAnchor?.category || '').toLowerCase();
+  const slug = String(contextAnchor?.slug || '').toLowerCase();
+  const name = String(contextAnchor?.name || '').toLowerCase();
+
+  const isCosmetic = 
+    contextType === 'cosmetic_product' ||
+    contextAnchor?.isCosmetic ||
+    brand.includes('colway') ||
+    slug.includes('colway') ||
+    name.includes('colway') ||
+    cat.includes('cosmetic') ||
+    cat.includes('hair') ||
+    cat.includes('skin') ||
+    cat.includes('topical');
+
+  const isDiagnostic = 
+    contextType === 'diagnostic_test' ||
+    brand.includes('bloodo') ||
+    slug.includes('bloodo') ||
+    name.includes('bloodo') ||
+    cat.includes('diagnostic') ||
+    cat.includes('test') ||
+    slug.endsWith('-test');
+
+  const isAesthetic = 
+    contextType === 'aesthetic' ||
+    cat.includes('injectable') ||
+    cat.includes('aesthetic') ||
+    ['juvederm', 'belotero', 'profhilo', 'radiesse', 'ellanse', 'lemon bottle'].some(b => name.includes(b) || slug.includes(b));
 
   // 2. Check if contextAnchor contains clinical FAQ items (e.g. from Firestore or Bloodo)
   if (Array.isArray(contextAnchor?.faq) && contextAnchor.faq.length >= 3) {
@@ -568,7 +703,20 @@ export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'mo
     return isEs ? pack.es : pack.en;
   }
 
-  // 4. Fallback: Generate 5 tailored clinical questions based on product properties
+  // 4. Domain-specific fallbacks
+  if (isCosmetic) {
+    return generateDynamicCosmeticInquiries(contextAnchor, lang);
+  }
+
+  if (isDiagnostic) {
+    return generateDynamicDiagnosticInquiries(contextAnchor, lang);
+  }
+
+  if (isAesthetic) {
+    return generateDynamicAestheticInquiries(contextAnchor, lang);
+  }
+
+  // 5. Default Research Peptides / APIs
   return generateDynamicCompoundInquiries(contextAnchor, lang);
 }
 

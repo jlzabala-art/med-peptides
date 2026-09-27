@@ -99,7 +99,13 @@ export function resolveSocialImage(productOrSlug, format = null) {
 
   // 1b. Check if product object has an explicit valid image
   if (typeof productOrSlug === 'object' && productOrSlug !== null) {
-    const rawImg = productOrSlug.imageUrl || productOrSlug.image || productOrSlug.thumbnail || productOrSlug.photoUrl;
+    const rawImg = 
+      productOrSlug.image_url || 
+      productOrSlug.imageUrl || 
+      productOrSlug.image || 
+      productOrSlug.photo_url || 
+      productOrSlug.photoUrl || 
+      productOrSlug.thumbnail;
     if (rawImg && typeof rawImg === 'string' && !rawImg.endsWith('.svg')) {
       return rawImg.startsWith('http') ? rawImg : `${BASE_URL}${rawImg.startsWith('/') ? '' : '/'}${rawImg}`;
     }
@@ -154,6 +160,11 @@ export function resolveSocialImage(productOrSlug, format = null) {
 
 /**
  * Generates attractive OpenGraph title and description for WhatsApp / social sharing.
+ * Differentiates cleanly between:
+ * - Colway (Native Collagen & Dermocosmetics)
+ * - Bloodo (CE-IVDR Capillary DBS Diagnostic Kits)
+ * - Aesthetic Injectables (Dermal Matrices, Fillers, Biostimulators)
+ * - Peptides & APIs (Clinical Technical Monographs)
  */
 export function resolveSocialContent({ product, variant, code, recipient }) {
   // Prefer clean formatted product name over raw slug strings
@@ -164,27 +175,66 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
   // Remove markdown or technical artifacts if any
   pName = pName.replace(/^[#*\s]+/, '').trim();
 
+  const brand = String(product?.brand || product?.sourceBrand || product?.supplier || product?.supplierName || '').toLowerCase();
+  const cat = String(product?.category || product?.type || '').toLowerCase();
+  const slugLower = String(product?.slug || product?.id || '').toLowerCase();
+  const nameLower = String(pName).toLowerCase();
+
+  const isColway = 
+    brand.includes('colway') || 
+    slugLower.includes('colway') || 
+    String(product?.collection || '').toLowerCase().includes('colway') || 
+    nameLower.includes('colway');
+
+  const isCosmetic = 
+    isColway || 
+    cat === 'cosmetic' || 
+    cat === 'cosmetics' || 
+    cat === 'topical' || 
+    cat === 'hair cosmetics' || 
+    cat === 'cosmeceutical' || 
+    cat === 'skin care' || 
+    product?.is_cosmetic === true;
+
+  const isBloodo = 
+    brand.includes('bloodo') || 
+    slugLower.includes('bloodo') || 
+    nameLower.includes('bloodo');
+
   const isDiagnostic = 
-    product?.category === 'diagnostic_test' || 
-    product?.category === 'diagnostic_tests' || 
-    product?.category === 'genomics_biomarkers' ||
-    product?.category === 'tests' ||
-    String(product?.id || '').includes('bloodo') || 
-    String(product?.slug || '').includes('bloodo') || 
-    String(product?.id || '').endsWith('-test') ||
-    String(product?.slug || '').endsWith('-test') ||
-    String(pName).toLowerCase().includes('test');
+    isBloodo ||
+    cat === 'diagnostic_test' || 
+    cat === 'diagnostic_tests' || 
+    cat === 'genomics_biomarkers' || 
+    cat === 'tests' || 
+    slugLower.endsWith('-test') || 
+    slugLower.includes('-test-') ||
+    nameLower.includes('test kit') ||
+    nameLower.includes('blood test');
+
+  const isAesthetic = 
+    cat === 'aesthetic' || 
+    cat === 'aesthetic_injectable' || 
+    cat === 'injectable' || 
+    product?.is_aesthetic === true || 
+    ['juvederm', 'belotero', 'profhilo', 'radiesse', 'ellanse', 'lemon bottle'].some(b => nameLower.includes(b) || slugLower.includes(b));
 
   const rawFormat = variant?.format || product?.format || product?.presentation || '';
-  const dose = variant?.dose || product?.dose || product?.dosage || '';
-  // Never label a blood test kit as a "Vial" even if URL has presentation=Vial
-  const format = isDiagnostic ? 'CE-IVDR Capillary DBS Kit' : rawFormat;
+  const rawDose = variant?.dose || product?.dose || product?.dosage || '';
+  const rawSize = variant?.size || product?.size || product?.volume || '';
 
-  // ── 1. ATTRACTIVE TITLE ──
+  // ── 1. ATTRACTIVE & ACCURATE TITLE ──
   let title = '';
-  if (isDiagnostic) {
-    const slugLower = String(product?.slug || product?.id || '').toLowerCase();
-    const nameLower = String(pName).toLowerCase();
+
+  if (isCosmetic) {
+    const sizeSpec = rawSize || (rawFormat && !['bottle', 'tube', 'jar', 'vial', 'pump'].includes(rawFormat.toLowerCase()) ? rawFormat : '');
+    const cleanBrand = isColway ? 'Colway®' : '';
+    if (sizeSpec) {
+      title = `${pName} (${sizeSpec}) — ${cleanBrand} Native Collagen & Dermocosmetics`.trim();
+    } else {
+      title = `${pName} — ${cleanBrand} Native Collagen & Cellular Monograph`.trim();
+    }
+  } else if (isDiagnostic) {
     if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
       title = `⚡ Bloodo™ Testosterona+ Test (Total & Libre) | CE-IVDR Kit`;
     } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
@@ -198,10 +248,14 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
     } else if (slugLower.includes('vitamin-d') || slugLower.includes('vitamina-d') || nameLower.includes('vitamina d') || nameLower.includes('vitamin d')) {
       title = `☀️ Bloodo™ Vitamina D3 [25-OH] Test | CE-IVDR Kit`;
     } else {
-      title = `🔬 ${pName} | CE-IVDR Certified Diagnostic Kit`;
+      title = `🔬 Bloodo™ ${pName} | CE-IVDR Capillary Blood Test Kit`;
     }
+  } else if (isAesthetic) {
+    const spec = [rawDose, rawSize || rawFormat].filter(Boolean).join(' · ');
+    title = spec ? `${pName} (${spec}) — Aesthetic Medicine Monograph` : `${pName} — Clinical Aesthetics Monograph`;
   } else {
-    const specDetails = [dose, format].filter(Boolean).join(' · ');
+    // Standard Peptides / API Compounds
+    const specDetails = [rawDose, rawFormat].filter(Boolean).join(' · ');
     title = specDetails 
       ? `${pName} (${specDetails}) — Clinical Monograph`
       : `${pName} — Clinical Technical Monograph`;
@@ -212,11 +266,21 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
     title = `${title} • ${recipient.name}`;
   }
 
-  // ── 2. ATTRACTIVE SUMMARY DESCRIPTION ──
+  // ── 2. ATTRACTIVE & ACCURATE DESCRIPTION ──
   let description = '';
-  if (isDiagnostic) {
-    const slugLower = String(product?.slug || product?.id || '').toLowerCase();
-    const nameLower = String(pName).toLowerCase();
+
+  if (isCosmetic) {
+    if (product?.short_description && product.short_description.length > 25) {
+      description = product.short_description;
+    } else if (product?.description && product.description.length > 30) {
+      description = product.description.slice(0, 165).trim();
+      if (!description.endsWith('.')) description += '...';
+    } else {
+      description = isColway
+        ? 'Colágeno nativo biológicamente activo, péptidos señal biomiméticos y formulación dermocosmética certificada bajo normativa europea (Reg. CE 1223/2009).'
+        : 'Fórmula dermocosmética celular de alta pureza con activos biofuncionales certificados bajo normativa europea (Reg. CE 1223/2009). Monografía técnica e INCI.';
+    }
+  } else if (isDiagnostic) {
     if (slugLower.includes('testosterone') || slugLower.includes('testosterona') || nameLower.includes('testosterone') || nameLower.includes('testosterona')) {
       description = 'LC-MS/MS Gold Standard para cuantificar Testosterona Total, Libre, SHBG e Índice FAI por punción capilar DBS. Evalúa tu vitalidad hormonal y eje HPTA con LifeLab1.';
     } else if (slugLower.includes('cortisol') || nameLower.includes('cortisol')) {
@@ -234,7 +298,12 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
     } else {
       description = 'Test cuantitativo CE-IVDR por punción capilar Dried Blood Spot (DBS). Análisis centralizado en laboratorio de referencia LifeLab1 con informe clínico digital.';
     }
+  } else if (isAesthetic) {
+    description = product?.description && product.description.length > 30
+      ? product.description.slice(0, 160)
+      : 'Matriz dérmica biocompatible de grado médico, ácido hialurónico reticulado y bioestimuladores celulares. Referencia técnica para medicina estética avanzada.';
   } else {
+    // Default Research Peptides / APIs
     const purity = product?.purity || '≥ 99.0% (RP-HPLC & ESI-MS)';
     description = `Verified clinical specifications (${purity}), standardized reconstitution parameters, dosing titration schedules, and analytical monograph for medical practitioners.`;
   }
