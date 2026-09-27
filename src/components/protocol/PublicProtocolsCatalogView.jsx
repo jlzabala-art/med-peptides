@@ -110,11 +110,79 @@ function mapProtocolToGoals(p) {
   if (text.match(/sleep|dsip|circadian|insomnia|rest|pineal/i)) {
     matched.add('sleep');
   }
-  if (text.match(/skin|hair|ghk-cu|copper|cosmetic|aesthetics|wrinkle/i)) {
+  if (text.match(/skin|hair|ghk-cu|copper|cosmetic|aesthetics|wrinkle|melanogen|density|snap-8|follicul|scalp/i)) {
     matched.add('skin_hair');
   }
 
   return Array.from(matched);
+}
+
+/**
+ * Resolves the most clinically accurate goal to display on the protocol card badge.
+ * If the user filtered by a specific goal (e.g. skin_hair), that goal is prioritized.
+ * Otherwise, domain-specific clinical targets take precedence over generic 'longevity'.
+ */
+function resolveDisplayedGoal(proto, groupBucketId, selectedGoal) {
+  if (!proto) return 'longevity';
+  const mapped = Array.isArray(proto.mappedGoals) ? proto.mappedGoals : [];
+
+  // 1. If user explicitly filtered by a specific goal and the protocol belongs to it:
+  if (selectedGoal && selectedGoal !== 'all' && selectedGoal !== 'reference_standards') {
+    if (mapped.includes(selectedGoal)) {
+      return selectedGoal;
+    }
+  }
+
+  // 2. If inside a category group bucket:
+  if (groupBucketId && groupBucketId !== 'all' && groupBucketId !== 'reference_standards') {
+    if (mapped.includes(groupBucketId)) {
+      return groupBucketId;
+    }
+  }
+
+  // 3. Explicit properties on protocol data
+  const explicit = proto.goal || proto.primary_goal || proto.category || proto.therapeutic_category;
+  if (explicit && GOAL_BUCKETS.some(b => b.id === explicit)) {
+    return explicit;
+  }
+
+  // 4. Clinical specificity hierarchy (specific organ/tissue targets before general longevity)
+  const specificityHierarchy = [
+    'skin_hair',
+    'recovery',
+    'cognitive',
+    'fat_loss',
+    'muscle_growth',
+    'sexual_health',
+    'sleep',
+    'immune',
+    'longevity'
+  ];
+
+  for (const goalId of specificityHierarchy) {
+    if (mapped.includes(goalId)) {
+      return goalId;
+    }
+  }
+
+  return mapped.find(g => g !== 'all') || 'longevity';
+}
+
+function getGoalBadgeLabel(goalId, lang = 'en') {
+  const shortLabels = {
+    skin_hair: { en: 'Skin, Hair & Aesthetics', es: 'Piel, Cabello & Estética' },
+    recovery: { en: 'Tissue & Joint Repair', es: 'Regeneración Tisular' },
+    cognitive: { en: 'Neuroplasticity & Brain', es: 'Neuroplasticidad' },
+    fat_loss: { en: 'Metabolic & GLP-1', es: 'Metabolismo & GLP-1' },
+    muscle_growth: { en: 'Muscle & Performance', es: 'Masa Muscular' },
+    immune: { en: 'Immunity & Defense', es: 'Inmunidad & Defensa' },
+    sexual_health: { en: 'Hormonal & Vitality', es: 'Salud Hormonal' },
+    sleep: { en: 'Sleep & Circadian', es: 'Sueño & Circadiano' },
+    longevity: { en: 'Longevity & Cellular', es: 'Longevidad & Celular' },
+    reference_standards: { en: 'Reference Standard', es: 'Estándar Clínico' },
+    all: { en: 'Clinical Protocol', es: 'Protocolo Clínico' }
+  };
+  return shortLabels[goalId]?.[lang] || GOAL_TRANSLATIONS[goalId]?.[lang] || goalId;
 }
 
 /**
@@ -412,7 +480,7 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
     targetBuckets.forEach(bucket => {
       const matching = filteredProtocols.filter(p => {
-        const primary = p.mappedGoals.find(g => g !== 'all') || 'longevity';
+        const primary = resolveDisplayedGoal(p, bucket.id, selectedGoal);
         return primary === bucket.id || (selectedGoal !== 'all' && p.mappedGoals.includes(bucket.id));
       });
       if (matching.length > 0) {
@@ -789,9 +857,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                   <div className="proto-list-container">
                     {group.protocols.map(proto => {
                       const isExpanded = expandedIds.has(proto.cleanSlug);
-                      const primaryGoalId = proto.mappedGoals.find(g => g !== 'all') || 'longevity';
-                      const goalInfo = GOAL_BUCKETS.find(g => g.id === primaryGoalId) || GOAL_BUCKETS[0];
-                      const localizedGoal = (GOAL_TRANSLATIONS[primaryGoalId]?.[lang] || goalInfo.label).split('&')[0].trim();
+                      const displayedGoalId = resolveDisplayedGoal(proto, group.bucket?.id, selectedGoal);
+                      const goalInfo = GOAL_BUCKETS.find(g => g.id === displayedGoalId) || GOAL_BUCKETS[0];
+                      const GoalIcon = goalInfo.icon || Sparkles;
+                      const localizedGoal = getGoalBadgeLabel(displayedGoalId, lang);
 
                       return (
                         <article key={proto.cleanSlug} className={`proto-list-item ${proto.is_reference_standard ? 'is-reference-standard' : ''} ${isExpanded ? 'is-expanded' : ''}`}>
@@ -842,9 +911,17 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
 
                               <span
                                 className="proto-card-goal-pill"
-                                style={{ background: goalInfo.bg, color: goalInfo.color, border: `1px solid ${goalInfo.color}33` }}
+                                style={{
+                                  background: goalInfo.bg,
+                                  color: goalInfo.color,
+                                  border: `1px solid ${goalInfo.color}33`,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
                               >
-                                {localizedGoal}
+                                <GoalIcon size={11} style={{ flexShrink: 0 }} />
+                                <span>{localizedGoal}</span>
                               </span>
                             </div>
 
@@ -981,9 +1058,10 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                   /* Cards Mode */
                   <div className="proto-cards-grid">
                     {group.protocols.map(proto => {
-                      const primaryGoalId = proto.mappedGoals.find(g => g !== 'all') || 'longevity';
-                      const goalInfo = GOAL_BUCKETS.find(g => g.id === primaryGoalId) || GOAL_BUCKETS[0];
-                      const localizedGoal = (GOAL_TRANSLATIONS[primaryGoalId]?.[lang] || goalInfo.label).split('&')[0].trim();
+                      const displayedGoalId = resolveDisplayedGoal(proto, group.bucket?.id, selectedGoal);
+                      const goalInfo = GOAL_BUCKETS.find(g => g.id === displayedGoalId) || GOAL_BUCKETS[0];
+                      const GoalIcon = goalInfo.icon || Sparkles;
+                      const localizedGoal = getGoalBadgeLabel(displayedGoalId, lang);
 
                       return (
                         <article key={proto.id || proto.cleanSlug} className={`proto-card ${proto.is_reference_standard ? 'is-reference-standard' : ''}`}>
@@ -1016,9 +1094,17 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                             <div className="proto-card-header">
                               <span
                                 className="proto-card-goal-pill"
-                                style={{ background: goalInfo.bg, color: goalInfo.color, border: `1px solid ${goalInfo.color}33` }}
+                                style={{
+                                  background: goalInfo.bg,
+                                  color: goalInfo.color,
+                                  border: `1px solid ${goalInfo.color}33`,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
                               >
-                                {localizedGoal}
+                                <GoalIcon size={11} style={{ flexShrink: 0 }} />
+                                <span>{localizedGoal}</span>
                               </span>
                             </div>
 

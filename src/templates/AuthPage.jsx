@@ -402,45 +402,44 @@ export default function AuthPage({ onBack }) {
     }
   };
 
-  // Immediate redirect for Admin users to avoid rendering issues
+  // Immediate redirect for Authenticated users to avoid rendering limbo
   useEffect(() => {
-    if (!loading && user) {
-      const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
-      if (isAdminNow) {
-        const target = (redirectTo && redirectTo.startsWith('/admin')) ? redirectTo : '/admin';
+    if (!loading && user && userProfile) {
+      if (userProfile?.role === 'pending') {
+        // Pending profile onboarding: keep on auth page to complete details
+        return;
+      }
+      let storedTarget = '';
+      if (typeof window !== 'undefined') {
+        try {
+          storedTarget = sessionStorage.getItem('auth_redirect_target') || localStorage.getItem('auth_redirect_target') || '';
+          sessionStorage.removeItem('auth_redirect_target');
+          localStorage.removeItem('auth_redirect_target');
+        } catch (e) {}
+      }
+      const targetPath = resolveTargetPortal(userProfile?.role, user?.email, storedTarget || redirectTo);
+      if (targetPath) {
         if (typeof window !== 'undefined') {
-          window.location.replace(target);
+          window.location.replace(targetPath);
         } else {
-          router.replace(target);
+          router.replace(targetPath);
         }
       }
     }
-  }, [user, loading, isAdmin, isAdminByEmail, userProfile, redirectTo, router]);
+  }, [user, loading, userProfile, redirectTo, router]);
 
 
 
-  // If user is logged in and not pending onboarding, show profile status (Centered layout)
+  // If user is logged in and not pending onboarding, show loading state while redirecting
   if (user && userProfile && userProfile.role !== 'pending') {
-    if (loading) {
-      return (
-        <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
-          <div className="global-spinner" style={{ width: '32px', height: '32px' }}></div>
-          <div style={{ color: 'var(--text-muted)' }}>Loading account details...</div>
-        </div>
-      );
-    }
-
-    // Admin users: render a loading state while redirecting
-    const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
-    if (isAdminNow) {
-      return (
-        <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
-          <div className="global-spinner" style={{ width: '32px', height: '32px' }}></div>
-          <div style={{ color: 'var(--text-muted)' }}>Redirecting to admin panel...</div>
-        </div>
-      );
-    }
-
+    return (
+      <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
+        <div className="global-spinner" style={{ width: '32px', height: '32px' }}></div>
+        <div style={{ color: 'var(--text-muted)' }}>Redirecting to your workspace...</div>
+      </div>
+    );
+  }
+  if (user) {
     return (
       <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)' }}>
         <div className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem', maxWidth: '550px' }}>

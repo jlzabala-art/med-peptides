@@ -298,6 +298,20 @@ export function AuthProvider({ children, serverUser = null }) {
             setUserProfile(data);
             if (typeof window !== 'undefined') {
               localStorage.setItem('regenpept_userProfile', JSON.stringify(data));
+              const currentPath = window.location.pathname;
+              if (currentPath === '/auth' || currentPath === '/login') {
+                const storedTarget = sessionStorage.getItem('auth_redirect_target') || localStorage.getItem('auth_redirect_target');
+                if (storedTarget) {
+                  sessionStorage.removeItem('auth_redirect_target');
+                  localStorage.removeItem('auth_redirect_target');
+                  sessionStorage.removeItem('auth_redirect_origin');
+                  localStorage.removeItem('auth_redirect_origin');
+                  const role = (data.role || (isKnownAdmin ? 'admin' : 'pending')).toLowerCase();
+                  if (role !== 'pending') {
+                    window.location.replace(storedTarget);
+                  }
+                }
+              }
             }
 
             // Set User Properties for GA4

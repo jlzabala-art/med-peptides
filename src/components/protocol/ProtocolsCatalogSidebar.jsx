@@ -18,6 +18,7 @@ import {
   ArrowDown, 
   Building2, 
   ChevronRight,
+  ChevronDown,
   ShieldCheck,
   X
 } from '@/lib/icons';
@@ -113,12 +114,26 @@ export default function ProtocolsCatalogSidebar({
     <div className="proto-sidebar-content">
       {/* ── CARD 1: Clinical Filter Engine ── */}
       <div className="proto-sidebar-card">
+        {/* Sidebar Header with GCP Active Filter Count & Reset */}
         <div className="proto-sidebar-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Filter size={15} style={{ color: '#003666' }} />
             <h3 className="proto-sidebar-title">
               {isEs ? 'FILTROS CLÍNICOS' : 'CLINICAL FILTERS'}
             </h3>
+            {hasActiveFilters && (
+              <span style={{
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                backgroundColor: '#eff6ff',
+                color: '#003666',
+                border: '1px solid #bfdbfe',
+                padding: '1px 6px',
+                borderRadius: '999px'
+              }}>
+                {(selectedGoal !== 'all' ? 1 : 0) + (durationFilter !== 'all' ? 1 : 0) + (phasesFilter !== 'all' ? 1 : 0) + (sortBy !== 'relevance' ? 1 : 0)} {isEs ? 'activos' : 'active'}
+              </span>
+            )}
           </div>
           {hasActiveFilters && (
             <button
@@ -178,67 +193,176 @@ export default function ProtocolsCatalogSidebar({
           </div>
         </div>
 
-        {/* 1B. Duration Filter */}
+        {/* 1B. Duration Filter (GCP Segmented Chip Control) */}
         <div className="proto-sidebar-group" style={{ marginTop: '1rem' }}>
-          <label className="proto-sidebar-label">
-            <Clock size={12} style={{ color: '#0284c7' }} />
-            <span>{isEs ? 'Duración del Ciclo' : 'Cycle Duration'}</span>
-          </label>
-          <select
-            className="proto-sidebar-select"
-            value={durationFilter}
-            onChange={(e) => {
-              triggerHaptic('light');
-              onSelectDuration(e.target.value);
-            }}
-          >
-            <option value="all">{t.allDurations || (isEs ? 'Todas las duraciones' : 'All Durations')}</option>
-            <option value="short">{t.shortCycle || (isEs ? '≤ 8 Semanas (Corto)' : '≤ 8 Weeks (Short)')}</option>
-            <option value="medium">{t.standardCycle || (isEs ? '8–12 Semanas (Estándar)' : '8–12 Weeks (Standard)')}</option>
-            <option value="long">{t.extendedCycle || (isEs ? '> 12 Semanas (Extendido)' : '> 12 Weeks (Extended)')}</option>
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <label className="proto-sidebar-label" style={{ margin: 0 }}>
+              <Clock size={12} style={{ color: '#0284c7' }} />
+              <span>{isEs ? 'Duración del Ciclo' : 'Cycle Duration'}</span>
+            </label>
+            {durationFilter !== 'all' && (
+              <button
+                type="button"
+                onClick={() => onSelectDuration('all')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0284c7',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                {isEs ? 'Restablecer' : 'Reset'}
+              </button>
+            )}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '5px' }}>
+            {[
+              { id: 'all', label: isEs ? 'Todas' : 'All' },
+              { id: 'short', label: isEs ? '≤ 8 Sem (Corto)' : '≤ 8 W (Short)' },
+              { id: 'medium', label: isEs ? '8–12 Sem' : '8–12 W' },
+              { id: 'long', label: isEs ? '> 12 Sem (Ext)' : '> 12 W (Ext)' }
+            ].map((item) => {
+              const isSelected = durationFilter === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    onSelectDuration(item.id);
+                  }}
+                  style={{
+                    padding: '6px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    borderRadius: '7px',
+                    border: isSelected ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                    background: isSelected ? '#003666' : '#ffffff',
+                    color: isSelected ? '#ffffff' : '#334155',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.15s ease',
+                    boxShadow: isSelected ? '0 1px 4px rgba(0,54,102,0.2)' : 'none',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 1C. Titration Structure */}
+        {/* 1C. Titration Structure (GCP Segmented Pill Bar) */}
         <div className="proto-sidebar-group" style={{ marginTop: '0.85rem' }}>
-          <label className="proto-sidebar-label">
-            <Layers size={12} style={{ color: '#0d9488' }} />
-            <span>{isEs ? 'Estructura de Titulación' : 'Titration Structure'}</span>
-          </label>
-          <select
-            className="proto-sidebar-select"
-            value={phasesFilter}
-            onChange={(e) => {
-              triggerHaptic('light');
-              onSelectPhases(e.target.value);
-            }}
-          >
-            <option value="all">{t.allStructures || (isEs ? 'Todas las estructuras' : 'All Structures')}</option>
-            <option value="single">{t.singlePhase || (isEs ? 'Monofásico Continuo' : 'Continuous Protocol')}</option>
-            <option value="titration">{t.titrationPhase || (isEs ? 'Titulación Multifásica' : 'Progressive Titration')}</option>
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <label className="proto-sidebar-label" style={{ margin: 0 }}>
+              <Layers size={12} style={{ color: '#0d9488' }} />
+              <span>{isEs ? 'Estructura de Titulación' : 'Titration Structure'}</span>
+            </label>
+            {phasesFilter !== 'all' && (
+              <button
+                type="button"
+                onClick={() => onSelectPhases('all')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0d9488',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                {isEs ? 'Restablecer' : 'Reset'}
+              </button>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            {[
+              { id: 'all', label: isEs ? 'Todas' : 'All' },
+              { id: 'single', label: isEs ? 'Monofásico (1 Fase)' : 'Continuous (1-Ph)' },
+              { id: 'titration', label: isEs ? 'Multifásico (2+ Fases)' : 'Titration (2+ Ph)' }
+            ].map((item) => {
+              const isSelected = phasesFilter === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    onSelectPhases(item.id);
+                  }}
+                  style={{
+                    flex: item.id === 'all' ? '0 0 auto' : '1 1 auto',
+                    padding: '5px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    borderRadius: '7px',
+                    border: isSelected ? '1.5px solid #0d9488' : '1px solid #cbd5e1',
+                    background: isSelected ? '#0d9488' : '#ffffff',
+                    color: isSelected ? '#ffffff' : '#334155',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.15s ease',
+                    boxShadow: isSelected ? '0 1px 4px rgba(13,148,136,0.2)' : 'none',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 1D. Sort Criteria */}
+        {/* 1D. Sort Criteria (Refined GCP Select with Custom Chevron) */}
         <div className="proto-sidebar-group" style={{ marginTop: '0.85rem' }}>
-          <label className="proto-sidebar-label">
+          <label className="proto-sidebar-label" style={{ marginBottom: '6px' }}>
             <ArrowDown size={12} style={{ color: '#64748b' }} />
             <span>{isEs ? 'Ordenar Resultados' : 'Sort Criteria'}</span>
           </label>
-          <select
-            className="proto-sidebar-select"
-            value={sortBy}
-            onChange={(e) => {
-              triggerHaptic('light');
-              onSelectSort(e.target.value);
-            }}
-          >
-            <option value="relevance">{t.sortRecommended || (isEs ? 'Relevancia y Referencia Clínica' : 'Clinical Relevance & Reference')}</option>
-            <option value="duration-desc">{t.sortDurationDesc || (isEs ? 'Duración: Mayor a menor' : 'Duration: Longest first')}</option>
-            <option value="duration-asc">{t.sortDurationAsc || (isEs ? 'Duración: Menor a mayor' : 'Duration: Shortest first')}</option>
-            <option value="phases-desc">{isEs ? 'Fases: Mayor complejidad' : 'Phases: Highest complexity'}</option>
-            <option value="name-asc">{t.sortNameAsc || (isEs ? 'Nombre: A → Z' : 'Name: A → Z')}</option>
-          </select>
+          <div style={{ position: 'relative' }}>
+            <select
+              className="proto-sidebar-select"
+              value={sortBy}
+              onChange={(e) => {
+                triggerHaptic('light');
+                onSelectSort(e.target.value);
+              }}
+              style={{
+                paddingRight: '28px',
+                appearance: 'none',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '7px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: '#1e293b'
+              }}
+            >
+              <option value="relevance">{t.sortRecommended || (isEs ? 'Relevancia y Referencia Clínica' : 'Clinical Relevance & Reference')}</option>
+              <option value="duration-desc">{t.sortDurationDesc || (isEs ? 'Duración: Mayor a menor' : 'Duration: Longest first')}</option>
+              <option value="duration-asc">{t.sortDurationAsc || (isEs ? 'Duración: Menor a mayor' : 'Duration: Shortest first')}</option>
+              <option value="phases-desc">{isEs ? 'Fases: Mayor complejidad' : 'Phases: Highest complexity'}</option>
+              <option value="name-asc">{t.sortNameAsc || (isEs ? 'Nombre: A → Z' : 'Name: A → Z')}</option>
+            </select>
+            <div style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+              color: '#64748b'
+            }}>
+              <ChevronDown size={14} />
+            </div>
+          </div>
         </div>
       </div>
 

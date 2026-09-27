@@ -5,40 +5,124 @@ import Link from 'next/link';
 import {
   Sparkles, Droplets, Thermometer, Clock, ShieldCheck,
   Activity, CheckCircle2, AlertTriangle, ChevronRight,
-  Layers, Microscope, Zap, ArrowRight, RefreshCw, Scissors, Info, Beaker
+  Layers, Microscope, Zap, ArrowRight, RefreshCw, Scissors, Info, Beaker,
+  Compass, Check
 } from 'lucide-react';
 
 /**
  * ColwayProtocolInfogram
- * Visual trichology infographic & professional application protocol for Colway Hair System
+ * Photorealistic medical trichology infographic & professional application protocol
  * Covers both Colway Strengthening Shampoo & Strengthening Conditioner.
+ * Fully responsive for mobile (iOS/Android) and desktop/laptop screens.
  */
 export default function ColwayProtocolInfogram({
-  currentProduct = 'shampoo', // 'shampoo' | 'conditioner'
-  lang = 'en',
-  onSelectProduct
+  currentProduct = 'shampoo',
+  lang = 'en'
 }) {
   const isDefaultShampoo = currentProduct?.toLowerCase().includes('shampoo');
   const [activeTab, setActiveTab] = useState(isDefaultShampoo ? 'shampoo' : 'conditioner');
-  const [hoveredZone, setHoveredZone] = useState(null);
+  const [activeZone, setActiveZone] = useState('papilla'); // for interactive zone exploration
+  const [activeCondZone, setActiveCondZone] = useState('cortex');
 
   return (
-    <div style={{
+    <div className="cpi-root-container" style={{
       background: '#ffffff',
       border: '1px solid #e2e8f0',
       borderRadius: '16px',
       overflow: 'hidden',
-      boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-      marginBottom: '1.5rem'
+      boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.06)',
+      marginBottom: '1.75rem'
     }}>
+      <style>{`
+        .cpi-tab-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 14px;
+          font-size: 0.76rem;
+          font-weight: 700;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          color: #94a3b8;
+          background: transparent;
+          white-space: nowrap;
+        }
+        .cpi-tab-btn:hover {
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.08);
+        }
+        .cpi-tab-btn.active-shampoo {
+          background: #0d9488;
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
+        }
+        .cpi-tab-btn.active-cond {
+          background: #0284c7;
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+        }
+        .cpi-tab-btn.active-synergy {
+          background: #7c3aed;
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+        }
+        .cpi-infogram-layout {
+          display: grid;
+          grid-template-columns: 1.15fr 1fr;
+          gap: 1.25rem;
+          align-items: start;
+        }
+        .cpi-zone-card {
+          padding: 12px 14px;
+          border-radius: 10px;
+          border: 1.5px solid #e2e8f0;
+          background: #ffffff;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .cpi-zone-card:hover {
+          border-color: #0d9488;
+          background: #fcfdfd;
+          transform: translateY(-1px);
+        }
+        .cpi-zone-card.active-zone {
+          border-color: #0d9488;
+          background: #f0fdfa;
+          box-shadow: 0 4px 12px rgba(13, 148, 136, 0.12);
+        }
+        .cpi-cond-card.active-cond-zone {
+          border-color: #0284c7;
+          background: #f0f9ff;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);
+        }
+        @media (max-width: 900px) {
+          .cpi-infogram-layout {
+            grid-template-columns: 1fr;
+          }
+          .cpi-tabs-scroll {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+          }
+          .cpi-tabs-scroll::-webkit-scrollbar {
+            display: none;
+          }
+        }
+      `}</style>
+
       {/* Top Banner & Tab Controls */}
       <div style={{
-        background: 'linear-gradient(135deg, #071e3d 0%, #003666 50%, #0d9488 100%)',
+        background: 'linear-gradient(135deg, #071e3d 0%, #003666 45%, #0d9488 100%)',
         padding: '1.25rem 1.5rem',
-        color: '#ffffff',
-        position: 'relative'
+        color: '#ffffff'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
           <div>
             <div style={{
               display: 'inline-flex',
@@ -48,7 +132,7 @@ export default function ColwayProtocolInfogram({
               fontWeight: 800,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              background: 'rgba(255, 255, 255, 0.12)',
+              background: 'rgba(255, 255, 255, 0.14)',
               backdropFilter: 'blur(8px)',
               padding: '3px 10px',
               borderRadius: '99px',
@@ -56,488 +140,646 @@ export default function ColwayProtocolInfogram({
               border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
               <Microscope size={12} color="#5eead4" />
-              <span>Trichology Mechanism &amp; Application Protocol</span>
+              <span>Realistic Trichology Anatomy &amp; Cellular Pharmacodynamics</span>
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0, color: '#ffffff', letterSpacing: '-0.02em' }}>
-              Colway Dual-Action Hair Strengthening System
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, color: '#ffffff', letterSpacing: '-0.02em' }}>
+              Colway Hair Strengthening System — Biological Infogram
             </h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#cbd5e1', maxWidth: '640px', lineHeight: 1.45 }}>
-              Biological action infographic mapping active penetration at the scalp microenvironment, follicular papilla, and cortical hair shaft.
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#cbd5e1', maxWidth: '680px', lineHeight: 1.45 }}>
+              Realistic clinical cross-sections illustrating targeted transfollicular diffusion, 5α-reductase enzymatic blockade, and triple-helix cuticle reconstruction.
             </p>
           </div>
 
-          {/* Tab Switcher */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'rgba(15, 23, 42, 0.45)',
-            padding: '3px',
-            borderRadius: '10px',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            gap: '3px'
-          }}>
-            <button
-              type="button"
-              onClick={() => setActiveTab('shampoo')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                borderRadius: '7px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                background: activeTab === 'shampoo' ? '#0d9488' : 'transparent',
-                color: activeTab === 'shampoo' ? '#ffffff' : '#cbd5e1'
-              }}
-            >
-              <Droplets size={13} />
-              <span>1. Shampoo (Scalp &amp; Bulge)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('conditioner')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                borderRadius: '7px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                background: activeTab === 'conditioner' ? '#0284c7' : 'transparent',
-                color: activeTab === 'conditioner' ? '#ffffff' : '#cbd5e1'
-              }}
-            >
-              <Sparkles size={13} />
-              <span>2. Conditioner (Fiber &amp; Cuticle)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('synergy')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                borderRadius: '7px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                background: activeTab === 'synergy' ? '#7c3aed' : 'transparent',
-                color: activeTab === 'synergy' ? '#ffffff' : '#cbd5e1'
-              }}
-            >
-              <Layers size={13} />
-              <span>Dual-Action Routine</span>
-            </button>
+          {/* Interactive Navigation Tabs */}
+          <div className="cpi-tabs-scroll">
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: 'rgba(15, 23, 42, 0.55)',
+              padding: '4px',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              gap: '4px'
+            }}>
+              <button
+                type="button"
+                onClick={() => setActiveTab('shampoo')}
+                className={`cpi-tab-btn ${activeTab === 'shampoo' ? 'active-shampoo' : ''}`}
+              >
+                <Droplets size={14} />
+                <span>1. Shampoo: Scalp &amp; Papilla Influx</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('conditioner')}
+                className={`cpi-tab-btn ${activeTab === 'conditioner' ? 'active-cond' : ''}`}
+              >
+                <Sparkles size={14} />
+                <span>2. Conditioner: Fiber &amp; Cuticle Bioseal</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('synergy')}
+                className={`cpi-tab-btn ${activeTab === 'synergy' ? 'active-synergy' : ''}`}
+              >
+                <Layers size={14} />
+                <span>3. Dual-Action Synergy System</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Infographic Area */}
+      {/* Main Infographic Body */}
       <div style={{ padding: '1.25rem 1.5rem' }}>
 
         {/* ============================================================== */}
-        {/* TAB 1: SHAMPOO INFOGRAM (SCALP & FOLLICULAR PENETRATION)        */}
+        {/* TAB 1: SHAMPOO — SCALP & FOLLICULAR INFUSION INFOGRAM          */}
         {/* ============================================================== */}
         {activeTab === 'shampoo' && (
           <div>
-            {/* Quick Metrics Header */}
+            {/* Clinical Parameter Summary Gauges */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
               gap: '10px',
               marginBottom: '1.25rem'
             }}>
-              <div style={{ padding: '10px 12px', background: '#f0fdfa', borderRadius: '8px', border: '1px solid #ccfbf1' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0d9488', textTransform: 'uppercase' }}>Target Zone</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Scalp &amp; Dermal Papilla</div>
+              <div style={{ padding: '10px 12px', background: '#f0fdfa', borderRadius: '10px', border: '1px solid #ccfbf1' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#0d9488', textTransform: 'uppercase' }}>
+                  <Compass size={11} /> Primary Target
+                </div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Dermal Papilla &amp; Bulge</div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b' }}>Scalp microenvironment</div>
               </div>
-              <div style={{ padding: '10px 12px', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>Pre-Wash Water Temp</div>
+              <div style={{ padding: '10px 12px', background: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase' }}>
+                  <Thermometer size={11} /> Pre-Wash Water Temp
+                </div>
                 <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>36°C – 38°C (Warm)</div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b' }}>Opens follicular ostia</div>
               </div>
-              <div style={{ padding: '10px 12px', background: '#faf5ff', borderRadius: '8px', border: '1px solid #e9d5ff' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase' }}>Active Dwell Time</div>
+              <div style={{ padding: '10px 12px', background: '#faf5ff', borderRadius: '10px', border: '1px solid #e9d5ff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>
+                  <Clock size={11} /> Active Contact Dwell
+                </div>
                 <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>3 – 5 Minutes</div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b' }}>Caffeine 120s influx peak</div>
               </div>
-              <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Physiological pH</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>pH 4.8 – 5.2 (Acid Mantle)</div>
+              <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
+                  <Beaker size={11} /> Physiological pH
+                </div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>pH 4.8 – 5.2</div>
+                <div style={{ fontSize: '0.67rem', color: '#16a34a', fontWeight: 600 }}>Protects acid mantle</div>
               </div>
             </div>
 
-            {/* Visual Biological Scalp Cross-Section SVG Diagram */}
-            <div style={{
-              background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
-              border: '1px solid #cbd5e1',
-              borderRadius: '12px',
-              padding: '1.25rem',
-              marginBottom: '1.25rem',
-              position: 'relative'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Activity size={16} color="#0d9488" />
-                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
-                    Follicular Influx &amp; 5α-Reductase Blockade Diagram
+            {/* Side-by-Side: Realistic Scalp Illustration + Interactive Clinical Cards */}
+            <div className="cpi-infogram-layout">
+              {/* Left Column: Photorealistic Vector Scalp Anatomy */}
+              <div style={{
+                background: 'linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%)',
+                borderRadius: '14px',
+                border: '1px solid #cbd5e1',
+                padding: '1rem',
+                position: 'relative',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    Follicular Cross-Section &amp; Active Influx Pathway
+                  </span>
+                  <span style={{ fontSize: '0.62rem', color: '#64748b', background: '#ffffff', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    Tap layers to inspect
                   </span>
                 </div>
-                <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                  Hover over or review layers below to inspect cellular actions
-                </span>
+
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <svg
+                    viewBox="0 0 520 480"
+                    style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '10px', background: '#ffffff', border: '1px solid #e2e8f0' }}
+                  >
+                    <defs>
+                      {/* Realistic tissue and follicle gradients */}
+                      <linearGradient id="scalpSurfGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#bae6fd" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.1" />
+                      </linearGradient>
+                      <linearGradient id="stratumGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#fed7aa" />
+                        <stop offset="100%" stopColor="#fdba74" />
+                      </linearGradient>
+                      <linearGradient id="dermisTissueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#fff7ed" />
+                        <stop offset="40%" stopColor="#ffedd5" />
+                        <stop offset="100%" stopColor="#fed7aa" />
+                      </linearGradient>
+                      <linearGradient id="hairShaft3D" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#1e293b" />
+                        <stop offset="35%" stopColor="#475569" />
+                        <stop offset="70%" stopColor="#334155" />
+                        <stop offset="100%" stopColor="#0f172a" />
+                      </linearGradient>
+                      <linearGradient id="follicleSheathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#ccfbf1" />
+                        <stop offset="50%" stopColor="#f0fdfa" />
+                        <stop offset="100%" stopColor="#99f6e4" />
+                      </linearGradient>
+                      <radialGradient id="bulbRadial" cx="50%" cy="40%" r="60%">
+                        <stop offset="0%" stopColor="#0d9488" />
+                        <stop offset="70%" stopColor="#0f766e" />
+                        <stop offset="100%" stopColor="#115e59" />
+                      </radialGradient>
+                      <radialGradient id="papillaGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#ef4444" stopOpacity="0.9" />
+                        <stop offset="70%" stopColor="#b91c1c" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#991b1b" stopOpacity="0.6" />
+                      </radialGradient>
+                      <linearGradient id="sebumGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fef08a" />
+                        <stop offset="100%" stopColor="#eab308" />
+                      </linearGradient>
+                      <filter id="shadowFilter" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.1" />
+                      </filter>
+                    </defs>
+
+                    {/* Zone 1: Scalp Water Layer & Lather */}
+                    <rect x="0" y="0" width="520" height="45" fill="url(#scalpSurfGrad)" />
+                    {/* Microbubbles */}
+                    <circle cx="160" cy="22" r="7" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.2" />
+                    <circle cx="178" cy="18" r="10" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.2" />
+                    <circle cx="198" cy="25" r="6" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.2" />
+                    <circle cx="320" cy="22" r="8" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.2" />
+                    <circle cx="338" cy="16" r="11" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.2" />
+
+                    {/* Stratum Corneum & Epidermis Base */}
+                    <rect x="0" y="45" width="520" height="24" fill="url(#stratumGrad)" />
+                    <line x1="0" y1="45" x2="520" y2="45" stroke="#f97316" strokeWidth="1.5" strokeDasharray="3 3" />
+
+                    {/* Dermis Connective Tissue Base */}
+                    <rect x="0" y="69" width="520" height="411" fill="url(#dermisTissueGrad)" opacity="0.6" />
+
+                    {/* Collagen fiber bundles in extracellular matrix */}
+                    <g stroke="#fed7aa" strokeWidth="1.5" strokeOpacity="0.5" fill="none">
+                      <path d="M 30 110 Q 70 90 120 115" /><path d="M 40 180 Q 90 160 140 190" />
+                      <path d="M 380 120 Q 430 100 480 130" /><path d="M 370 210 Q 420 190 490 220" />
+                      <path d="M 20 280 Q 80 250 140 290" /><path d="M 390 320 Q 450 300 500 330" />
+                    </g>
+
+                    {/* Arrector Pili Muscle */}
+                    <path d="M 330 180 C 370 160, 420 120, 450 70" fill="none" stroke="#e11d48" strokeWidth="4.5" strokeLinecap="round" opacity="0.75" />
+                    <text x="390" y="115" fill="#be123c" fontSize="9" fontWeight="700">Arrector Pili</text>
+
+                    {/* Sebaceous Gland Multi-acinar Organ */}
+                    <g transform="translate(145, 120)" filter="url(#shadowFilter)" onClick={() => setActiveZone('sebum')} style={{ cursor: 'pointer' }}>
+                      <ellipse cx="25" cy="20" rx="20" ry="16" fill="url(#sebumGrad)" stroke="#ca8a04" strokeWidth="1.5" />
+                      <ellipse cx="10" cy="35" rx="16" ry="14" fill="url(#sebumGrad)" stroke="#ca8a04" strokeWidth="1.5" />
+                      <ellipse cx="32" cy="40" rx="15" ry="13" fill="url(#sebumGrad)" stroke="#ca8a04" strokeWidth="1.5" />
+                      {/* Lipid droplets inside duct */}
+                      <circle cx="22" cy="20" r="3" fill="#ffffff" opacity="0.6" />
+                      <circle cx="12" cy="34" r="2.5" fill="#ffffff" opacity="0.6" />
+                      <circle cx="32" cy="38" r="2.5" fill="#ffffff" opacity="0.6" />
+                      <path d="M 35 25 Q 55 22 75 35" fill="none" stroke="#ca8a04" strokeWidth="2.5" strokeDasharray="2 2" />
+                    </g>
+
+                    {/* Hair Follicle Channel (Infundibulum to Bulb) */}
+                    <path
+                      d="M 210 45 C 210 90, 225 240, 240 340 C 245 375, 240 405, 260 415 C 280 405, 275 375, 280 340 C 295 240, 310 90, 310 45 Z"
+                      fill="url(#follicleSheathGrad)"
+                      stroke="#0d9488"
+                      strokeWidth="2"
+                    />
+
+                    {/* Glowing Active Diffusion Wave from Surface down to Bulb */}
+                    <path
+                      d="M 220 45 C 220 110, 235 250, 245 340 C 250 370, 250 395, 260 405 C 270 395, 270 370, 275 340 C 285 250, 300 110, 300 45 Z"
+                      fill="#14b8a6"
+                      opacity="0.22"
+                    />
+
+                    {/* Emerging Hair Shaft (Shaded 3D Cylinder) */}
+                    <rect x="247" y="0" width="26" height="340" rx="4" fill="url(#hairShaft3D)" />
+                    {/* Cuticle micro-shingle ridges on shaft */}
+                    {[20, 50, 80, 110, 140, 170, 200, 230, 260, 290].map(y => (
+                      <line key={y} x1="247" y1={y} x2="273" y2={y + 3} stroke="#64748b" strokeWidth="0.8" opacity="0.6" />
+                    ))}
+
+                    {/* Hair Bulb (Cell Matrix & Melanocytes) */}
+                    <ellipse cx="260" cy="370" rx="28" ry="32" fill="url(#bulbRadial)" filter="url(#shadowFilter)" onClick={() => setActiveZone('papilla')} style={{ cursor: 'pointer' }} />
+                    <ellipse cx="260" cy="385" rx="16" ry="14" fill="#042f2e" opacity="0.4" />
+
+                    {/* Dermal Papilla Invagination */}
+                    <path d="M 252 402 C 252 380, 268 380, 268 402 Z" fill="url(#papillaGlow)" />
+
+                    {/* Perifollicular Capillary Loops (Arteriole & Venule) */}
+                    {/* Red Arteriole */}
+                    <path d="M 235 460 C 240 430, 252 410, 258 392" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
+                    {/* Blue Venule */}
+                    <path d="M 285 460 C 280 430, 268 410, 262 392" fill="none" stroke="#3b82f6" strokeWidth="2.8" strokeLinecap="round" />
+                    {/* Micro-anastomosis loop */}
+                    <path d="M 258 392 C 260 388, 260 388, 262 392" fill="none" stroke="#9333ea" strokeWidth="2.5" />
+
+                    {/* Interactive Clickable Hotspot Markers */}
+                    {/* Hotspot 1: Stratum Corneum */}
+                    <g transform="translate(60, 38)" onClick={() => setActiveZone('surface')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="130" height="22" rx="6" fill="#0369a1" />
+                      <text x="8" y="15" fill="#ffffff" fontSize="9" fontWeight="700">① Stratum Corneum</text>
+                    </g>
+
+                    {/* Hotspot 2: Sebaceous Gland */}
+                    <g transform="translate(45, 150)" onClick={() => setActiveZone('sebum')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="130" height="22" rx="6" fill="#ca8a04" />
+                      <text x="8" y="15" fill="#ffffff" fontSize="9" fontWeight="700">② Sebaceous Acini</text>
+                    </g>
+
+                    {/* Hotspot 3: Bulge Stem Cells */}
+                    <g transform="translate(335, 230)" onClick={() => setActiveZone('bulge')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="145" height="22" rx="6" fill="#0d9488" />
+                      <text x="8" y="15" fill="#ffffff" fontSize="9" fontWeight="700">③ Stem Cell Bulge</text>
+                    </g>
+
+                    {/* Hotspot 4: Dermal Papilla */}
+                    <g transform="translate(325, 375)" onClick={() => setActiveZone('papilla')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="155" height="22" rx="6" fill="#dc2626" />
+                      <text x="8" y="15" fill="#ffffff" fontSize="9" fontWeight="700">④ Dermal Papilla Bulb</text>
+                    </g>
+                  </svg>
+                </div>
               </div>
 
-              {/* Scalp & Follicle Anatomy Vector Illustration */}
-              <div style={{ width: '100%', overflowX: 'auto' }}>
-                <svg
-                  viewBox="0 0 800 320"
-                  style={{ width: '100%', minWidth: '640px', height: 'auto', display: 'block', background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+              {/* Right Column: Responsive Clinical Mechanism Cards (Zero Cutoff) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Activity size={15} color="#0d9488" />
+                  <span>Cellular Pharmacodynamics by Anatomical Layer</span>
+                </div>
+
+                {/* Layer 1 */}
+                <div
+                  className={`cpi-zone-card ${activeZone === 'surface' ? 'active-zone' : ''}`}
+                  onClick={() => setActiveZone('surface')}
                 >
-                  <defs>
-                    <linearGradient id="shampooWaterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#0284c7" stopOpacity="0.05" />
-                    </linearGradient>
-                    <linearGradient id="epidermisGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#fef3c7" />
-                      <stop offset="100%" stopColor="#fde68a" />
-                    </linearGradient>
-                    <linearGradient id="dermisGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#fed7aa" />
-                      <stop offset="100%" stopColor="#fdba74" />
-                    </linearGradient>
-                    <linearGradient id="hairBulbGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#0284c7" />
-                      <stop offset="100%" stopColor="#0369a1" />
-                    </linearGradient>
-                    <linearGradient id="activeBeam" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.8" />
-                      <stop offset="100%" stopColor="#0d9488" stopOpacity="0.1" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Zone 1: Scalp Surface / Water lather */}
-                  <rect x="0" y="0" width="800" height="55" fill="url(#shampooWaterGrad)" />
-                  <line x1="0" y1="55" x2="800" y2="55" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 4" />
-                  <text x="25" y="24" fill="#0369a1" fontSize="11" fontWeight="700">ZONE 1: SCALP STRATUM CORNEUM (pH 4.8–5.2)</text>
-                  <text x="25" y="42" fill="#0284c7" fontSize="10">Mild Cleansing (SCI) • Sebum Dissolution • Zinc PCA Acid Mantle Protection</text>
-
-                  {/* Surface foam bubbles */}
-                  <circle cx="280" cy="28" r="6" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.5" />
-                  <circle cx="295" cy="22" r="9" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.5" />
-                  <circle cx="312" cy="30" r="5" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.5" />
-                  <circle cx="325" cy="24" r="8" fill="#e0f2fe" stroke="#38bdf8" strokeWidth="1.5" />
-
-                  {/* Zone 2: Epidermis & Sebaceous Layer */}
-                  <rect x="0" y="55" width="800" height="70" fill="url(#epidermisGrad)" opacity="0.65" />
-                  <text x="25" y="78" fill="#92400e" fontSize="11" fontWeight="700">ZONE 2: FOLLICULAR INFUNDIBULUM &amp; SEBACEOUS GLAND</text>
-                  <text x="25" y="96" fill="#b45309" fontSize="10">Sebum plug cleared by lukewarm 36–38°C water • Zinc PCA suppresses 5α-reductase type II</text>
-
-                  {/* Zone 3: Dermis & Connective Tissue */}
-                  <rect x="0" y="125" width="800" height="195" fill="url(#dermisGrad)" opacity="0.5" />
-                  <text x="25" y="150" fill="#9a3412" fontSize="11" fontWeight="700">ZONE 3: DERMAL PAPILLA &amp; FOLLICULAR BULGE (STEM CELLS)</text>
-                  <text x="25" y="168" fill="#c2410c" fontSize="10">Caffeine 120s rapid penetration → ↑ cAMP → IGF-1 stimulation • Baicapil™ extends Anagen phase</text>
-
-                  {/* Hair Follicle Channel & Shaft */}
-                  {/* Follicle invagination background */}
-                  <path d="M 400 55 C 400 110, 420 220, 440 250 C 450 265, 470 270, 480 250 C 500 220, 520 110, 520 55 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" />
-
-                  {/* Active Penetration Flow Beam */}
-                  <path d="M 420 55 C 420 110, 435 210, 445 235 C 455 250, 465 250, 475 235 C 485 210, 500 110, 500 55 Z" fill="url(#activeBeam)" />
-
-                  {/* Hair Shaft Emerging */}
-                  <rect x="445" y="0" width="30" height="240" rx="3" fill="#1e293b" />
-                  <rect x="449" y="0" width="22" height="240" fill="#334155" opacity="0.5" />
-
-                  {/* Hair Bulb */}
-                  <ellipse cx="460" cy="250" rx="22" ry="20" fill="url(#hairBulbGrad)" />
-                  <circle cx="460" cy="254" r="8" fill="#0f766e" />
-
-                  {/* Capillary Blood Supply Loop */}
-                  <path d="M 430 295 C 440 275, 455 265, 460 265 C 465 265, 480 275, 490 295" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
-                  <line x1="430" y1="295" x2="430" y2="315" stroke="#ef4444" strokeWidth="2.5" />
-                  <line x1="490" y1="295" x2="490" y2="315" stroke="#ef4444" strokeWidth="2.5" />
-                  <text x="500" y="300" fill="#dc2626" fontSize="9" fontWeight="700">Perifollicular Capillaries</text>
-                  <text x="500" y="312" fill="#991b1b" fontSize="8.5">Niacinamide + Massage dilates VEGF flow</text>
-
-                  {/* Sebaceous Gland graphic */}
-                  <ellipse cx="375" cy="100" rx="18" ry="12" fill="#fde68a" stroke="#d97706" strokeWidth="1.5" />
-                  <ellipse cx="365" cy="112" rx="14" ry="10" fill="#fde68a" stroke="#d97706" strokeWidth="1.5" />
-                  <text x="260" y="112" fill="#b45309" fontSize="9" fontWeight="700">Sebaceous Gland</text>
-                  <line x1="345" y1="108" x2="360" y2="108" stroke="#b45309" strokeWidth="1" strokeDasharray="2 2" />
-
-                  {/* Active Compound Badges Floating In Shaft Channel */}
-                  {/* Caffeine */}
-                  <g transform="translate(535, 115)">
-                    <rect x="0" y="0" width="135" height="24" rx="12" fill="#0f766e" />
-                    <text x="10" y="16" fill="#ffffff" fontSize="9.5" fontWeight="700">⚡ Caffeine (120s Influx)</text>
-                  </g>
-                  {/* Baicapil */}
-                  <g transform="translate(535, 145)">
-                    <rect x="0" y="0" width="145" height="24" rx="12" fill="#0284c7" />
-                    <text x="10" y="16" fill="#ffffff" fontSize="9.5" fontWeight="700">🛡️ Baicapil™ (Anti-DHT)</text>
-                  </g>
-                  {/* Native Tropocollagen */}
-                  <g transform="translate(535, 175)">
-                    <rect x="0" y="0" width="155" height="24" rx="12" fill="#7c3aed" />
-                    <text x="10" y="16" fill="#ffffff" fontSize="9.5" fontWeight="700">🧬 Fish Tropocollagen</text>
-                  </g>
-                  {/* Zinc PCA */}
-                  <g transform="translate(205, 75)">
-                    <rect x="0" y="0" width="125" height="22" rx="11" fill="#d97706" />
-                    <text x="10" y="15" fill="#ffffff" fontSize="9" fontWeight="700">⚖️ Zinc PCA (Sebostatic)</text>
-                  </g>
-                </svg>
-              </div>
-            </div>
-
-            {/* 4 Step Sequential Process Protocol for Shampoo */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0d9488', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>1</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Pre-Wash Thermal Prep</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0369a1', background: '#e0f2fe', padding: '2px 8px', borderRadius: '99px' }}>
+                      LAYER 1 · SCALP STRATUM CORNEUM
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>pH 4.8 – 5.2</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Micro-Cleansing &amp; Acid Mantle Integrity
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    <strong>Sodium Cocoyl Isethionate (SCI)</strong> removes oxidized sebum and environmental particulate matter without disrupting the intercellular lipid bilayer. Prevents transepidermal water loss (TEWL −40% vs. SLS).
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Rinse scalp thoroughly with warm water (<strong>36–38°C</strong>) for 60 seconds. Opens follicular ostia and dissolves excess sebum plugs without irritating sensitive dermis.
-                </p>
-              </div>
 
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0d9488', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>2</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Scalp-First Emulsification</span>
+                {/* Layer 2 */}
+                <div
+                  className={`cpi-zone-card ${activeZone === 'sebum' ? 'active-zone' : ''}`}
+                  onClick={() => setActiveZone('sebum')}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '2px 8px', borderRadius: '99px' }}>
+                      LAYER 2 · INFUNDIBULUM &amp; SEBACEOUS DUCT
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#16a34a' }}>Sebostatic Action</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Zinc PCA 5α-Reductase Type II Inhibition
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    Zinc ions chelate the catalytic active center of intrafollicular <strong>5α-reductase</strong>, reducing the conversion of testosterone into DHT right at the sebaceous-follicular junction while reducing hyperseborrhea by <strong>−31%</strong>.
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Dispense 5–10 mL. Emulsify between palms for 10 seconds. Apply directly to the <strong>scalp crown &amp; vertex first</strong>, rather than hair tips, to focus active concentration.
-                </p>
-              </div>
 
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0d9488', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>2–3 Min Circular Massage</span>
+                {/* Layer 3 */}
+                <div
+                  className={`cpi-zone-card ${activeZone === 'bulge' ? 'active-zone' : ''}`}
+                  onClick={() => setActiveZone('bulge')}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0d9488', background: '#ccfbf1', padding: '2px 8px', borderRadius: '99px' }}>
+                      LAYER 3 · FOLLICULAR BULGE (STEM CELLS)
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488' }}>Wnt / β-Catenin</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Baicapil™ (Scutellaria) Anagen Induction
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    Flavonoids (Baicalin) stimulate dormant stem cells at the follicle bulge, promoting early telogen-to-anagen transition. Clinically proven to reduce hair shedding by <strong>−60.6%</strong> after 90 days.
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Use fingertip pads in slow circular pulses. Stimulates perifollicular capillary vasodilation (VEGF) and increases caffeine follicular penetration by up to <strong>+40%</strong>.
-                </p>
-              </div>
 
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0d9488', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>4</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>3–5 Min Active Dwell</span>
+                {/* Layer 4 */}
+                <div
+                  className={`cpi-zone-card ${activeZone === 'papilla' ? 'active-zone' : ''}`}
+                  onClick={() => setActiveZone('papilla')}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#dc2626', background: '#fee2e2', padding: '2px 8px', borderRadius: '99px' }}>
+                      LAYER 4 · DERMAL PAPILLA &amp; CAPILLARY BED
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#dc2626' }}>cAMP / IGF-1 / VEGF</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Caffeine 120s Rapid Influx &amp; Microvascular Perfusion
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    <strong>Caffeine (194 Da)</strong> traverses follicular barriers in 120s, blocking phosphodiesterase to elevate intracellular cAMP and stimulate <strong>IGF-1</strong>. Supported by <strong>Niacinamide</strong>, promoting VEGF microcapillary angiogenesis.
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Leave foam on scalp for 3 to 5 minutes before rinsing. Mandatory contact window for Caffeine &amp; Baicalin receptor binding at the dermal papilla. Rinse ≤38°C.
-                </p>
               </div>
             </div>
           </div>
         )}
 
         {/* ============================================================== */}
-        {/* TAB 2: CONDITIONER INFOGRAM (HAIR FIBER & CUTICLE BIOSEAL)      */}
+        {/* TAB 2: CONDITIONER — FIBER & CUTICLE BIOSEAL INFOGRAM          */}
         {/* ============================================================== */}
         {activeTab === 'conditioner' && (
           <div>
-            {/* Quick Metrics Header */}
+            {/* Clinical Parameter Summary Gauges */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
               gap: '10px',
               marginBottom: '1.25rem'
             }}>
-              <div style={{ padding: '10px 12px', background: '#e0f2fe', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>Target Zone</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Hair Shaft &amp; Cuticle (Lengths)</div>
+              <div style={{ padding: '10px 12px', background: '#e0f2fe', borderRadius: '10px', border: '1px solid #bae6fd' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+                  <Compass size={11} /> Primary Target
+                </div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Cortex &amp; Cuticle (Lengths)</div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b' }}>Avoid direct scalp contact</div>
               </div>
-              <div style={{ padding: '10px 12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#16a34a', textTransform: 'uppercase' }}>Final Cold Lock Rinse</div>
+              <div style={{ padding: '10px 12px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#16a34a', textTransform: 'uppercase' }}>
+                  <Thermometer size={11} /> Cryo Cuticle Lock Rinse
+                </div>
                 <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>18°C – 22°C (Cool Rinse)</div>
+                <div style={{ fontSize: '0.67rem', color: '#16a34a', fontWeight: 600 }}>Mechanical scale closure</div>
               </div>
-              <div style={{ padding: '10px 12px', background: '#faf5ff', borderRadius: '8px', border: '1px solid #e9d5ff' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase' }}>Tensile Reinforcement</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>+24% Fiber Breakage Resistance</div>
+              <div style={{ padding: '10px 12px', background: '#faf5ff', borderRadius: '10px', border: '1px solid #e9d5ff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>
+                  <Activity size={11} /> Tensile Strength Gain
+                </div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>+24% Fiber Break Resistance</div>
+                <div style={{ fontSize: '0.67rem', color: '#64748b' }}>Fish Tropocollagen matrix</div>
               </div>
-              <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Acidic Sealing pH</div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>pH 4.0 – 4.5 (Cuticle Closes)</div>
+              <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.62rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
+                  <Beaker size={11} /> Acidic Sealing pH
+                </div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>pH 4.0 – 4.5</div>
+                <div style={{ fontSize: '0.67rem', color: '#0284c7', fontWeight: 600 }}>Tightens cuticular tiles</div>
               </div>
             </div>
 
-            {/* Visual Biological Hair Fiber Cross-Section SVG Diagram */}
-            <div style={{
-              background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
-              border: '1px solid #cbd5e1',
-              borderRadius: '12px',
-              padding: '1.25rem',
-              marginBottom: '1.25rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={16} color="#0284c7" />
-                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
-                    Hair Shaft Structural Microarchitecture &amp; Cuticular Bioseal Diagram
+            {/* Side-by-Side: Realistic Hair Fiber Anatomy + Interactive Cards */}
+            <div className="cpi-infogram-layout">
+              {/* Left Column: 3D Hair Fiber Cutaway Vector Illustration */}
+              <div style={{
+                background: 'linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%)',
+                borderRadius: '14px',
+                border: '1px solid #cbd5e1',
+                padding: '1rem',
+                position: 'relative',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    3D Hair Shaft Microarchitecture &amp; Bioseal
+                  </span>
+                  <span style={{ fontSize: '0.62rem', color: '#64748b', background: '#ffffff', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    Concentric layer cutaway
                   </span>
                 </div>
-                <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                  Tropocollagen triple helix matrix &amp; hydrophobic F-layer restoration
-                </span>
-              </div>
 
-              {/* Vector diagram of Hair Cuticle & Cortex Layers */}
-              <div style={{ width: '100%', overflowX: 'auto' }}>
-                <svg
-                  viewBox="0 0 800 320"
-                  style={{ width: '100%', minWidth: '640px', height: 'auto', display: 'block', background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                >
-                  <defs>
-                    <linearGradient id="cortexGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#f3e8ff" />
-                      <stop offset="50%" stopColor="#e9d5ff" />
-                      <stop offset="100%" stopColor="#d8b4fe" />
-                    </linearGradient>
-                    <linearGradient id="cuticleScaleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" stopColor="#0284c7" />
-                      <stop offset="100%" stopColor="#0369a1" />
-                    </linearGradient>
-                    <linearGradient id="flayerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#10b981" />
-                      <stop offset="100%" stopColor="#059669" />
-                    </linearGradient>
-                  </defs>
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <svg
+                    viewBox="0 0 520 480"
+                    style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '10px', background: '#ffffff', border: '1px solid #e2e8f0' }}
+                  >
+                    <defs>
+                      {/* Realistic Fiber Gradients */}
+                      <linearGradient id="fiberOuterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#0f172a" />
+                        <stop offset="30%" stopColor="#334155" />
+                        <stop offset="60%" stopColor="#1e293b" />
+                        <stop offset="100%" stopColor="#0f172a" />
+                      </linearGradient>
+                      <linearGradient id="cortexCutawayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#e9d5ff" />
+                        <stop offset="60%" stopColor="#d8b4fe" />
+                        <stop offset="100%" stopColor="#c084fc" />
+                      </linearGradient>
+                      <linearGradient id="cuticleScaleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#0284c7" />
+                        <stop offset="50%" stopColor="#38bdf8" />
+                        <stop offset="100%" stopColor="#0369a1" />
+                      </linearGradient>
+                      <linearGradient id="lipidShieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+                      <radialGradient id="medullaGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#cbd5e1" />
+                        <stop offset="100%" stopColor="#64748b" />
+                      </radialGradient>
+                    </defs>
 
-                  {/* Left Column: Cortex Core */}
-                  <rect x="40" y="30" width="220" height="260" rx="8" fill="url(#cortexGrad)" stroke="#c084fc" strokeWidth="1.5" />
-                  <text x="55" y="58" fill="#581c87" fontSize="12" fontWeight="800">1. CORTEX INTERIOR</text>
-                  <text x="55" y="76" fill="#7e22ce" fontSize="9.5" fontWeight="600">Native Collagen &amp; Keratin Core</text>
+                    {/* Outer Cylindrical Fiber Outline */}
+                    {/* Top Elliptical Cross-Section Face */}
+                    <ellipse cx="260" cy="110" rx="190" ry="60" fill="url(#fiberOuterGrad)" stroke="#475569" strokeWidth="2" />
 
-                  {/* Keratin microfibril bundles */}
-                  <g fill="#a855f7" opacity="0.3">
-                    <circle cx="80" cy="110" r="14" /><circle cx="115" cy="110" r="14" /><circle cx="150" cy="110" r="14" />
-                    <circle cx="97" cy="138" r="14" /><circle cx="132" cy="138" r="14" /><circle cx="167" cy="138" r="14" />
-                    <circle cx="80" cy="166" r="14" /><circle cx="115" cy="166" r="14" /><circle cx="150" cy="166" r="14" />
-                    <circle cx="97" cy="194" r="14" /><circle cx="132" cy="194" r="14" />
-                  </g>
+                    {/* Concentric Layer 1: Cuticle Ring */}
+                    <ellipse cx="260" cy="110" rx="180" ry="55" fill="#0284c7" opacity="0.3" stroke="#0284c7" strokeWidth="1.5" />
 
-                  {/* Collagen Triple Helix Overlay Lines */}
-                  <path d="M 60 230 Q 110 215 160 230 T 240 230" fill="none" stroke="#7c3aed" strokeWidth="3" />
-                  <path d="M 60 240 Q 110 255 160 240 T 240 240" fill="none" stroke="#9333ea" strokeWidth="2.5" strokeDasharray="3 3" />
-                  <text x="55" y="272" fill="#6b21a8" fontSize="9">Intact Gly-Pro-Hyp Triple Helix</text>
-                  <text x="55" y="284" fill="#581c87" fontSize="8.5">+24% Tensile Elasticity (PMID: 36585145)</text>
+                    {/* Concentric Layer 2: Cortex Core */}
+                    <ellipse cx="260" cy="110" rx="145" ry="42" fill="url(#cortexCutawayGrad)" stroke="#a855f7" strokeWidth="2" />
 
-                  {/* Middle Column: Cuticle Scales (Overlapping shingles) */}
-                  <g transform="translate(290, 30)">
-                    <rect x="0" y="0" width="220" height="260" rx="8" fill="#f0f9ff" stroke="#bae6fd" strokeWidth="1.5" />
-                    <text x="15" y="28" fill="#0369a1" fontSize="12" fontWeight="800">2. CUTICLE LAMELLAE</text>
-                    <text x="15" y="46" fill="#0284c7" fontSize="9.5" fontWeight="600">Acidic Realignment &amp; Cationic Seal</text>
+                    {/* Keratin Macrofibril Bundles in Cortex face */}
+                    <g fill="#7e22ce" opacity="0.5">
+                      <circle cx="210" cy="100" r="10" /><circle cx="235" cy="95" r="11" /><circle cx="260" cy="92" r="12" /><circle cx="285" cy="95" r="11" /><circle cx="310" cy="100" r="10" />
+                      <circle cx="195" cy="112" r="9" /><circle cx="220" cy="112" r="10" /><circle cx="245" cy="110" r="11" /><circle cx="275" cy="110" r="11" /><circle cx="300" cy="112" r="10" /><circle cx="325" cy="112" r="9" />
+                      <circle cx="210" cy="122" r="10" /><circle cx="235" cy="124" r="11" /><circle cx="260" cy="125" r="12" /><circle cx="285" cy="124" r="11" /><circle cx="310" cy="122" r="10" />
+                    </g>
 
-                    {/* Shingle overlapping scales */}
-                    {[0, 35, 70, 105, 140, 175].map((yOffset, idx) => (
-                      <path
-                        key={idx}
-                        d={`M 15 ${65 + yOffset} L 195 ${60 + yOffset} L 185 ${80 + yOffset} L 25 ${85 + yOffset} Z`}
-                        fill="#0284c7"
-                        opacity={0.85 - idx * 0.08}
-                        stroke="#0369a1"
-                        strokeWidth="1"
-                      />
+                    {/* Concentric Layer 3: Central Medulla */}
+                    <ellipse cx="260" cy="110" rx="40" ry="14" fill="url(#medullaGrad)" stroke="#475569" strokeWidth="1" />
+                    <text x="242" y="113" fill="#0f172a" fontSize="8" fontWeight="800">MEDULLA</text>
+
+                    {/* Longitudinal Shaft Body Dropping Down */}
+                    <path d="M 70 110 L 70 420 C 70 455, 450 455, 450 420 L 450 110" fill="url(#fiberOuterGrad)" opacity="0.95" />
+
+                    {/* Longitudinal Cutaway Window Revealing Cortex & Collagen Spiral */}
+                    <path
+                      d="M 140 180 Q 260 210 380 180 L 380 390 Q 260 420 140 390 Z"
+                      fill="url(#cortexCutawayGrad)"
+                      stroke="#9333ea"
+                      strokeWidth="2"
+                    />
+
+                    {/* Macrofibril lines along vertical cutaway */}
+                    <g stroke="#9333ea" strokeWidth="1.2" strokeOpacity="0.4" strokeDasharray="6 3">
+                      <line x1="170" y1="190" x2="170" y2="395" />
+                      <line x1="205" y1="196" x2="205" y2="402" />
+                      <line x1="240" y1="200" x2="240" y2="406" />
+                      <line x1="275" y1="200" x2="275" y2="406" />
+                      <line x1="310" y1="196" x2="310" y2="402" />
+                      <line x1="345" y1="190" x2="345" y2="395" />
+                    </g>
+
+                    {/* 3D Native Tropocollagen Triple-Helix Spring Overlay (Gly-Pro-Hyp) */}
+                    <path
+                      d="M 235 220 Q 285 240 235 260 T 235 300 T 235 340 T 235 380"
+                      fill="none"
+                      stroke="#6b21a8"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 255 220 Q 205 240 255 260 T 255 300 T 255 340 T 255 380"
+                      fill="none"
+                      stroke="#a855f7"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M 245 225 Q 265 245 245 265 T 245 305 T 245 345 T 245 385"
+                      fill="none"
+                      stroke="#e9d5ff"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Cuticle Surface Scales on Left and Right flanks */}
+                    {/* Realistic overlapping shingle scales */}
+                    {[130, 165, 200, 235, 270, 305, 340, 375].map((y, idx) => (
+                      <g key={idx}>
+                        {/* Left flank scale */}
+                        <path
+                          d={`M 70 ${y} Q 105 ${y - 8} 140 ${y + 5} L 140 ${y + 24} Q 105 ${y + 16} 70 ${y + 24} Z`}
+                          fill="url(#cuticleScaleGrad)"
+                          stroke="#0369a1"
+                          strokeWidth="1.2"
+                          opacity={0.9}
+                        />
+                        {/* Right flank scale */}
+                        <path
+                          d={`M 380 ${y + 5} Q 415 ${y - 8} 450 ${y} L 450 ${y + 24} Q 415 ${y + 16} 380 ${y + 24} Z`}
+                          fill="url(#cuticleScaleGrad)"
+                          stroke="#0369a1"
+                          strokeWidth="1.2"
+                          opacity={0.9}
+                        />
+                      </g>
                     ))}
-                    <text x="25" y="260" fill="#0284c7" fontSize="8.5">BTMS-50 neutralizes -60mV charge</text>
-                    <text x="25" y="272" fill="#0369a1" fontSize="8.5">Silk Amino Acids (Ra −34% roughness)</text>
-                  </g>
 
-                  {/* Right Column: Outer F-Layer Lipid Shield */}
-                  <g transform="translate(540, 30)">
-                    <rect x="0" y="0" width="220" height="260" rx="8" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1.5" />
-                    <text x="15" y="28" fill="#166534" fontSize="12" fontWeight="800">3. 18-MEA LIPID SHIELD</text>
-                    <text x="15" y="46" fill="#15803d" fontSize="9.5" fontWeight="600">Virgin Argan Oil &amp; Cool Rinse</text>
+                    {/* Outer 18-MEA Lipid Protective Membrane (Glowing Green Sheen on Outer Cuticle) */}
+                    <path d="M 68 115 L 68 420" stroke="#10b981" strokeWidth="4.5" strokeLinecap="round" opacity="0.9" />
+                    <path d="M 452 115 L 452 420" stroke="#10b981" strokeWidth="4.5" strokeLinecap="round" opacity="0.9" />
 
-                    {/* Hydrophobic lipid protective coating barrier */}
-                    <rect x="15" y="65" width="190" height="15" rx="7.5" fill="#10b981" />
-                    <text x="25" y="76" fill="#ffffff" fontSize="8.5" fontWeight="700">18-MEA Hydrophobic Coating</text>
+                    {/* Water Droplet Deflecting from 18-MEA Barrier (Hydrophobic Contact Angle > 95°) */}
+                    <g transform="translate(30, 230)">
+                      <circle cx="20" cy="20" r="14" fill="#38bdf8" stroke="#0284c7" strokeWidth="2" />
+                      <path d="M 20 6 C 20 6 32 18 32 24 C 32 30 26 34 20 34 C 14 34 8 30 8 24 C 8 18 20 6 20 6 Z" fill="#e0f2fe" opacity="0.7" />
+                      <line x1="36" y1="20" x2="52" y2="18" stroke="#10b981" strokeWidth="2" strokeDasharray="3 2" />
+                      <text x="-15" y="48" fill="#0369a1" fontSize="8.5" fontWeight="700">Hydrophobic Rebound</text>
+                    </g>
 
-                    <circle cx="50" cy="120" r="16" fill="#ecfdf5" stroke="#10b981" strokeWidth="2" />
-                    <text x="44" y="124" fill="#047857" fontSize="12">💧</text>
-                    <text x="75" y="118" fill="#166534" fontSize="9" fontWeight="700">Water Repellent Barrier</text>
-                    <text x="75" y="130" fill="#15803d" fontSize="8">Hydrophobic contact angle &gt; 95°</text>
+                    {/* Interactive Clickable Hotspots */}
+                    <g transform="translate(160, 26)" onClick={() => setActiveCondZone('cortex')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="200" height="24" rx="6" fill="#7c3aed" />
+                      <text x="12" y="16" fill="#ffffff" fontSize="9.5" fontWeight="700">① Cortex Tropocollagen Core</text>
+                    </g>
 
-                    <circle cx="50" cy="165" r="16" fill="#fffbeb" stroke="#f59e0b" strokeWidth="2" />
-                    <text x="44" y="170" fill="#b45309" fontSize="12">🛡️</text>
-                    <text x="75" y="163" fill="#92400e" fontSize="9" fontWeight="700">Thermal Defense (230°C)</text>
-                    <text x="75" y="175" fill="#b45309" fontSize="8">α-Tocopherols absorb free radicals</text>
+                    <g transform="translate(15, 140)" onClick={() => setActiveCondZone('cuticle')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="130" height="22" rx="6" fill="#0284c7" />
+                      <text x="8" y="15" fill="#ffffff" fontSize="8.5" fontWeight="700">② Cuticle Scale Shingles</text>
+                    </g>
 
-                    <circle cx="50" cy="210" r="16" fill="#eff6ff" stroke="#3b82f6" strokeWidth="2" />
-                    <text x="44" y="215" fill="#1d4ed8" fontSize="12">❄️</text>
-                    <text x="75" y="208" fill="#1e40af" fontSize="9" fontWeight="700">Cold Water Lock (18–22°C)</text>
-                    <text x="75" y="220" fill="#2563eb" fontSize="8">Shrinks cuticle cells shut</text>
-                  </g>
-
-                  {/* Connective Arrows across stages */}
-                  <path d="M 265 160 L 285 160" stroke="#0284c7" strokeWidth="2" markerEnd="url(#arrow)" />
-                  <path d="M 515 160 L 535 160" stroke="#16a34a" strokeWidth="2" markerEnd="url(#arrow)" />
-                </svg>
-              </div>
-            </div>
-
-            {/* 4 Step Sequential Process Protocol for Conditioner */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0284c7', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>1</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Towel Press Excess Moisture</span>
+                    <g transform="translate(370, 250)" onClick={() => setActiveCondZone('flayer')} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="140" height="22" rx="6" fill="#059669" />
+                      <text x="8" y="15" fill="#ffffff" fontSize="8.5" fontWeight="700">③ 18-MEA Lipid Shield</text>
+                    </g>
+                  </svg>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Gently press excess water using a microfiber towel until hair is <strong>~70% damp</strong>. Never rub vigorously, which fractures open wet cuticles.
-                </p>
               </div>
 
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0284c7', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>2</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Lengths &amp; Ends (Avoid Scalp)</span>
+              {/* Right Column: Responsive Clinical Cards for Conditioner (Zero Cutoff) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={15} color="#0284c7" />
+                  <span>Fiber Structural Remodeling by Microarchitectural Zone</span>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Apply 5–8 mL starting <strong>5 cm below roots down to the tips</strong>. Never apply directly to scalp to prevent clogging newly opened follicular ostia.
-                </p>
-              </div>
 
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0284c7', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Wide-Tooth Section Detangle</span>
+                {/* Zone 1: Cortex */}
+                <div
+                  className={`cpi-zone-card cpi-cond-card ${activeCondZone === 'cortex' ? 'active-cond-zone' : ''}`}
+                  onClick={() => setActiveCondZone('cortex')}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#7c3aed', background: '#faf5ff', padding: '2px 8px', borderRadius: '99px' }}>
+                      ZONE 1 · CORTICAL MACROFIBRILS
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#7c3aed' }}>+24% Tensile Elasticity</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Native Fish Tropocollagen &amp; Hydrolyzed Keratin Scaffolding
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    Under acidic pH 4.0–4.5, intact <strong>triple-helix tropocollagen (Gly-Pro-Hyp repeats)</strong> penetrates cortical microvoids created by bleach or thermal fatigue. Enzymatic keratin fragments (MW 500–1,500 Da) crosslink disulfide bonds (-S-S-), arresting fiber split-ends.
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Distribute using a wide-tooth comb from tips upward. Ensures even BTMS-50 lipid deposition and reduces wet comb drag force by <strong>−62%</strong>.
-                </p>
-              </div>
 
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#0284c7', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>4</span>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>18–22°C Cold Cuticle Lock</span>
+                {/* Zone 2: Cuticle Lamellae */}
+                <div
+                  className={`cpi-zone-card cpi-cond-card ${activeCondZone === 'cuticle' ? 'active-cond-zone' : ''}`}
+                  onClick={() => setActiveCondZone('cuticle')}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: '99px' }}>
+                      ZONE 2 · CUTICULAR SCALES (EXOCUTICLE)
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0284c7' }}>−62% Combing Friction</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Cationic Charge Neutralization &amp; Silk β-Sheet Film
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    Rapeseed-derived <strong>BTMS-50</strong> electrostatically neutralizes the negative surface zeta potential (−60 mV). <strong>Silk Amino Acids (Bombyx mori)</strong> self-assemble into an ultra-smooth lamellar β-sheet protein film, dropping surface roughness (Ra) by <strong>34%</strong>.
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.74rem', color: '#475569', lineHeight: 1.5 }}>
-                  Rinse with <strong>cool/cold water (18–22°C) for 30–45s</strong>. Cold thermal stimulus contracts cuticle scales flat, sealing inside the collagen peptides &amp; gloss lipids.
-                </p>
+
+                {/* Zone 3: 18-MEA Epicuticle Lipid Shield */}
+                <div
+                  className={`cpi-zone-card cpi-cond-card ${activeCondZone === 'flayer' ? 'active-cond-zone' : ''}`}
+                  onClick={() => setActiveCondZone('flayer')}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 800, color: '#16a34a', background: '#f0fdf4', padding: '2px 8px', borderRadius: '99px' }}>
+                      ZONE 3 · 18-MEA LIPID LAYER (EPICUTICLE)
+                    </span>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#16a34a' }}>230°C Heat Defense</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    Virgin Argan Oil Barrier &amp; 18–22°C Cryo-Lock
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.73rem', color: '#475569', lineHeight: 1.5 }}>
+                    Cold water rinse (<strong>18–22°C</strong>) triggers hydrogen-bond contraction, tightening cuticular tiles over the cortex. <strong>Virgin Argan Oil</strong> restores the hydrophobic 18-methyl eicosanoic acid (18-MEA) film, preventing moisture loss and resisting thermal styling damage.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* ============================================================== */}
-        {/* TAB 3: DUAL-ACTION SYNERGY (THE COMPLETE COLWAY SYSTEM)        */}
+        {/* TAB 3: DUAL-ACTION SYNERGY — COMBINED ROUTINE & MESOTHERAPY    */}
         {/* ============================================================== */}
         {activeTab === 'synergy' && (
           <div>
@@ -551,26 +793,26 @@ export default function ColwayProtocolInfogram({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
                 <Layers size={18} color="#7c3aed" />
                 <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>
-                  The 2-Phase Trichology Synergy System
+                  The 2-Phase Trichological Synergy System
                 </span>
               </div>
-              <p style={{ fontSize: '0.78rem', color: '#475569', margin: '0 0 1rem 0', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.78rem', color: '#475569', margin: '0 0 1rem 0', lineHeight: 1.55 }}>
                 When applied in sequence, the Shampoo and Conditioner create a complementary inside-out biological cascade: Phase 1 reactivates the dermal root and neutralizes DHT; Phase 2 locks the cortex and coats the fiber against environmental trauma.
               </p>
 
-              {/* Dual System Comparison Columns */}
+              {/* Side-by-side Dual Phase Comparison Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                {/* Shampoo Column */}
+                {/* Shampoo Phase */}
                 <div style={{
                   background: '#ffffff',
                   border: '1.5px solid #ccfbf1',
                   borderRadius: '10px',
                   padding: '1rem',
-                  position: 'relative'
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0d9488', background: '#f0fdfa', padding: '2px 8px', borderRadius: '99px' }}>
-                      STEP 1 · SCALP &amp; ROOT
+                      STEP 1 · SCALP &amp; ROOT INFLUX
                     </span>
                     <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>pH 4.8 – 5.2</span>
                   </div>
@@ -585,17 +827,17 @@ export default function ColwayProtocolInfogram({
                   </ul>
                 </div>
 
-                {/* Conditioner Column */}
+                {/* Conditioner Phase */}
                 <div style={{
                   background: '#ffffff',
                   border: '1.5px solid #bae6fd',
                   borderRadius: '10px',
                   padding: '1rem',
-                  position: 'relative'
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: '99px' }}>
-                      STEP 2 · SHAFT &amp; CUTICLE
+                      STEP 2 · SHAFT &amp; CUTICLE BIOSEAL
                     </span>
                     <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b' }}>pH 4.0 – 4.5</span>
                   </div>
@@ -612,7 +854,7 @@ export default function ColwayProtocolInfogram({
               </div>
             </div>
 
-            {/* Clinical Mesotherapy / GHK-Cu Pairing Box */}
+            {/* Mesotherapy / Peptide Adjunct Protocol Guidance */}
             <div style={{
               background: 'linear-gradient(135deg, #f0fdfa 0%, #eff6ff 100%)',
               border: '1px solid #99f6e4',
@@ -623,8 +865,8 @@ export default function ColwayProtocolInfogram({
               gap: '12px'
             }}>
               <div style={{
-                width: 34,
-                height: 34,
+                width: 36,
+                height: 36,
                 borderRadius: '8px',
                 background: '#0d9488',
                 color: '#ffffff',
@@ -636,18 +878,18 @@ export default function ColwayProtocolInfogram({
                 <Zap size={18} />
               </div>
               <div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f766e', marginBottom: '2px' }}>
-                  Adjunct Integration with GHK-Cu &amp; Mesotherapy Protocols
+                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f766e', marginBottom: '2px' }}>
+                  Adjunct Integration with GHK-Cu &amp; Scalp Mesotherapy Protocols
                 </div>
                 <p style={{ margin: 0, fontSize: '0.74rem', color: '#334155', lineHeight: 1.55 }}>
-                  The Colway Hair System is clinically paired as a <strong>topical homecare adjunct</strong> with clinical hair restoration protocols. For patients undergoing scalp microneedling or subcutaneous GHK-Cu / PTD-DBM peptide therapy: resume Colway Shampoo washing 24 hours post-procedure once microchannels have re-epithelialized.
+                  The Colway Hair System is clinically formulated as a <strong>topical homecare adjunct</strong> alongside regenerative hair protocols (e.g. GHK-Cu, PTD-DBM, PRP, and exosome mesotherapy). For patients receiving in-clinic scalp microneedling or injections, resume Colway washing <strong>24 to 48 hours post-procedure</strong> once cutaneous microchannels have completely closed.
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Trichologist Guidelines & Professional Precautions Footer */}
+        {/* Trichology Standards & Regulatory Badges */}
         <div style={{
           marginTop: '1.25rem',
           borderTop: '1px solid #e2e8f0',
@@ -661,7 +903,7 @@ export default function ColwayProtocolInfogram({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldCheck size={16} color="#16a34a" />
             <span style={{ fontSize: '0.74rem', color: '#475569', fontWeight: 600 }}>
-              EU Regulation 1223/2009 Compliant · CPNP Registered · 0% Bovine Collagen
+              EU Cosmetics Regulation 1223/2009 Compliant · CPNP Registered · 0% Bovine (Fish Tropocollagen)
             </span>
           </div>
 
