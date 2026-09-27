@@ -30,6 +30,7 @@ import {
   HeartPulse,
   Scale
 } from '@/lib/icons';
+import GccRealisticVectorMap from '../components/corporate/GccRealisticVectorMap';
 import '../styles/mediluxe.css';
 
 // ── Navigation Section Anchors ────────────────────────────────────────────────
@@ -333,54 +334,9 @@ END:VCARD`;
                 integrity for biologicals and peptides across key Gulf markets.
               </p>
 
-              {/* Realistic Regional Map Graphic (SVG) */}
-              <div className="mediluxe-diagram-wrapper">
-                <svg viewBox="0 0 760 280" width="100%" height="auto" style={{ display: 'block', background: '#f8fafc', borderRadius: '12px' }}>
-                  {/* Subtle GCC landmass silhouette approximation */}
-                  <path
-                    d="M 120 70 Q 220 50 360 40 Q 520 40 640 100 Q 690 140 680 210 Q 640 260 520 260 Q 420 250 310 230 Q 180 200 120 150 Z"
-                    fill="#e2e8f0"
-                    stroke="#cbd5e1"
-                    strokeWidth="1.5"
-                  />
-                  {/* Arabian Gulf Water Representation */}
-                  <path
-                    d="M 380 40 Q 480 30 570 70 Q 620 100 580 140 Q 510 130 460 100 Z"
-                    fill="#e0f2fe"
-                    opacity="0.8"
-                  />
-
-                  {/* Route lines */}
-                  <line x1="510" y1="125" x2="545" y2="105" stroke="#003666" strokeWidth="2" strokeDasharray="3 3" />
-                  <line x1="510" y1="125" x2="480" y2="90" stroke="#003666" strokeWidth="2" strokeDasharray="3 3" />
-                  <line x1="510" y1="125" x2="430" y2="55" stroke="#003666" strokeWidth="2" strokeDasharray="3 3" />
-                  <line x1="510" y1="125" x2="330" y2="120" stroke="#003666" strokeWidth="2" strokeDasharray="3 3" />
-
-                  {/* Nodes */}
-                  {/* Abu Dhabi HQ */}
-                  <circle cx="510" cy="125" r="9" fill="#003666" stroke="#ffffff" strokeWidth="2" />
-                  <text x="510" y="152" fill="#003666" fontSize="12" fontWeight="800" textAnchor="middle">Abu Dhabi (HQ)</text>
-                  <text x="510" y="166" fill="#64748b" fontSize="10" textAnchor="middle">Est. 2011 · Headquarters</text>
-
-                  {/* Dubai Expansion */}
-                  <circle cx="545" cy="105" r="7" fill="#0d9488" stroke="#ffffff" strokeWidth="2" />
-                  <text x="575" y="105" fill="#0d9488" fontSize="11" fontWeight="700">Dubai Hub (2024)</text>
-
-                  {/* Qatar */}
-                  <circle cx="480" cy="90" r="6" fill="#0284c7" stroke="#ffffff" strokeWidth="1.5" />
-                  <text x="445" y="85" fill="#0f172a" fontSize="11" fontWeight="600">Qatar</text>
-
-                  {/* Kuwait */}
-                  <circle cx="430" cy="55" r="6" fill="#0284c7" stroke="#ffffff" strokeWidth="1.5" />
-                  <text x="390" y="55" fill="#0f172a" fontSize="11" fontWeight="600">Kuwait</text>
-
-                  {/* Saudi Arabia */}
-                  <circle cx="330" cy="120" r="6" fill="#0284c7" stroke="#ffffff" strokeWidth="1.5" />
-                  <text x="260" y="125" fill="#0f172a" fontSize="11" fontWeight="600">Saudi Arabia</text>
-                </svg>
-                <div className="mediluxe-diagram-caption">
-                  MediLuxe Certified Cold-Chain: Air &amp; overland transport in temperature-controlled environments (+2°C to +8°C and -20°C).
-                </div>
+              {/* Realistic Regional Map Graphic (Option 1: Cartographic Realism) */}
+              <div style={{ margin: '1.75rem 0' }}>
+                <GccRealisticVectorMap />
               </div>
 
               {/* Geographic Cards */}

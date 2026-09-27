@@ -1172,7 +1172,21 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
           })),
           includedCompounds: items.map(i => i.name || i.title).join(', '),
           totalVials: `${supplySummary.totalVials} Vials (${vialBreakdownText})`,
-          totalInjections: `${supplySummary.totalInjections} Micro-doses`
+          totalInjections: `${supplySummary.totalInjections} Micro-doses`,
+          topicalAdjuncts: (protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
+            {
+              name: 'Colway Strengthening Hair Shampoo',
+              slug: 'colway-strengthening-shampoo',
+              step: 'Step 1 — Scalp Prep (Pre-treatment)',
+              role: 'Removes DHT-laden sebum and normalizes scalp pH to 4.5–5.5 to enhance peptide penetration.'
+            },
+            {
+              name: 'Colway Strengthening Conditioner',
+              slug: 'colway-strengthening-conditioner',
+              step: 'Step 2 — Cortex Repair (Cuticle Seal)',
+              role: 'Fills cortical micro-fractures with native fish tropocollagen and hydrolyzed keratin to reinforce fragile anagen fibers.'
+            }
+          ] : []))
         }}
         storageKey={`protocol_${protocol?.slug || slug}`}
         onOpenRegisterModal={() => {

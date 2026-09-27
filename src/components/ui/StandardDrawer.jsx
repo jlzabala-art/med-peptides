@@ -85,7 +85,22 @@ export default function StandardDrawer({
     <div
       className="standard-drawer-backdrop"
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        height: '100dvh',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'stretch',
+        backgroundColor: 'rgba(15, 23, 42, 0.45)',
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
         zIndex: zIndex,
+        touchAction: 'none',
       }}
     >
       {/* Backdrop click layer */}
@@ -96,6 +111,7 @@ export default function StandardDrawer({
         className={`standard-drawer-panel ${fullWorkspace ? 'drawer-full-workspace' : ''}`}
         style={{
           position: 'relative',
+          marginLeft: 'auto',
           width: fullWorkspace ? undefined : resolvedWidth,
           maxWidth: '100%',
           backgroundColor: 'var(--background, #fff)',

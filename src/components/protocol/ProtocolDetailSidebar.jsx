@@ -325,64 +325,30 @@ export default function ProtocolDetailSidebar({
         />
       )}
 
-      {/* ── CARD 4: MICRO QR PROTOCOL VERIFICATION ── */}
-      <div style={{
-        marginTop: '1rem',
-        padding: '0.85rem',
-        background: '#ffffff',
-        borderRadius: '8px',
-        border: '1px solid #e2e8f0',
-        textAlign: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <QrCode size={14} color="#003666" />
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase' }}>
-              {isEs ? 'ACCESO MÓVIL' : 'MOBILE ACCESS'}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 5px', borderRadius: '3px' }}>
-            VERIFICADO
-          </span>
-        </div>
-
-        <div style={{
-          display: 'inline-block',
-          padding: '6px',
-          background: '#ffffff',
-          borderRadius: '6px',
-          border: '1px solid #e2e8f0'
-        }}>
-          <QRCodeSVG 
-            value={resolvedUrl}
-            size={90}
-            level="M"
-            includeMargin={false}
-          />
-        </div>
-
+      {/* Quick Link Copy (Minimalist, without duplicate QR) */}
+      <div style={{ marginTop: '0.85rem' }}>
         <button
           type="button"
           onClick={handleCopyLink}
           style={{
             width: '100%',
-            marginTop: '8px',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            padding: '6px 10px',
+            padding: '7px 10px',
             borderRadius: '6px',
             fontSize: '0.72rem',
             fontWeight: 700,
-            background: copiedUrl ? '#f0fdf4' : '#f8fafc',
-            color: copiedUrl ? '#16a34a' : '#334155',
+            background: copiedUrl ? '#f0fdf4' : '#ffffff',
+            color: copiedUrl ? '#16a34a' : '#475569',
             border: copiedUrl ? '1px solid #86efac' : '1px solid #cbd5e1',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
           }}
         >
           {copiedUrl ? <Check size={13} /> : <Copy size={13} />}
-          <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Direct Link')}</span>
+          <span>{copiedUrl ? (isEs ? 'Enlace Copiado ✓' : 'Link Copied ✓') : (isEs ? 'Copiar Enlace Directo' : 'Copy Direct Link')}</span>
         </button>
       </div>
 

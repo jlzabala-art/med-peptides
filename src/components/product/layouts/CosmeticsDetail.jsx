@@ -22,6 +22,7 @@ import PublicSectionCard from '@/components/shared/public/PublicSectionCard';
 import PublicKpiGrid from '@/components/shared/public/PublicKpiGrid';
 import HairProtocolsSidebarWidget from '@/components/product/HairProtocolsSidebarWidget';
 import CosmeticsSidebarWidget from '@/components/product/CosmeticsSidebarWidget';
+import ColwayProtocolInfogram from '@/components/product/ColwayProtocolInfogram';
 import ImageModal from '@/snippets/ImageModal';
 import toast from 'react-hot-toast';
 
@@ -253,6 +254,115 @@ function ApplicationStep({ step, isLast }) {
     </div>
   );
 }
+
+const FALLBACK_SHAMPOO_APPLICATION = {
+  title: 'Professional Application Protocol',
+  frequency: '3–4 times per week (or as directed by trichologist)',
+  duration_of_use: 'Minimum 8 weeks for clinical assessment; 6–12 months for sustained follicular benefit',
+  steps: [
+    {
+      step: 1,
+      phase: 'Pre-Wash Scalp Preparation',
+      instruction: 'For optimal active penetration, pre-condition the scalp with lukewarm water (36–38°C) for 60 seconds before product application. This opens follicular ostia and softens sebum.',
+      duration: '60 seconds',
+      temp: '36–38°C'
+    },
+    {
+      step: 2,
+      phase: 'Emulsification & Scalp Distribution',
+      instruction: 'Dispense 5–10 mL into palm. Emulsify for 10 seconds until rich lather forms. Apply directly to scalp crown and areas of visible thinning first, distributing outward.',
+      duration: '10s emulsification',
+      clinical_note: 'Scalp-first application maximises contact time of Zinc PCA and Caffeine with the follicular unit — the primary target of anti-DHT actives.'
+    },
+    {
+      step: 3,
+      phase: 'Active Penetration Massage',
+      instruction: 'Using fingertip pads (not nails), massage in firm circular motions for 2–3 minutes focusing on the vertex and frontal hairline.',
+      duration: '2–3 minutes',
+      clinical_note: 'Mechanical massage stimulates dermal papilla microcirculation (VEGF) and increases transdermal absorption of Caffeine by up to 40%.'
+    },
+    {
+      step: 4,
+      phase: 'Active Dwell Time',
+      instruction: 'Leave lather on scalp for 3–5 minutes without rinsing. This contact window allows Caffeine and Baicalin to bind to cell receptors at the hair bulb.',
+      duration: '3–5 minutes',
+      clinical_note: 'Fischer et al. (2007): Maximum caffeine follicular penetration occurs within 2 minutes of scalp application. Extended dwell time ensures deep diffusion.'
+    },
+    {
+      step: 5,
+      phase: 'Lukewarm Water Rinse',
+      instruction: 'Rinse thoroughly with lukewarm water (maximum 38°C). Avoid hot water above 42°C which causes cuticle swelling and lipid leaching.',
+      duration: '60–90 seconds',
+      temp: 'Max 38°C'
+    },
+    {
+      step: 6,
+      phase: 'Follow-Up Conditioning',
+      instruction: 'Follow immediately with Colway Strengthening Conditioner applied to mid-lengths and ends to seal cuticular scales and lock in hydration.',
+      clinical_note: 'Sequential use creates layered protection: the shampoo targets dermal follicles; the conditioner reconstructs cortical keratin and cuticle scales.'
+    }
+  ],
+  professional_notes: [
+    'Recommended as topical adjunct therapy alongside GHK-Cu peptide scalp mesotherapy in androgenetic alopecia protocols.',
+    'Compatible with PRP (Platelet-Rich Plasma) scalp treatments — apply 24h post-treatment once microchannels have re-epithelialized.',
+    'Colour-treated hair: physiological formulation pH 4.8–5.2 preserves pigment and will not accelerate fading.',
+    'Daily use is not necessary: 3–4× weekly maintains optimal follicular stimulation without disrupting the scalp microbiome.'
+  ]
+};
+
+const FALLBACK_CONDITIONER_APPLICATION = {
+  title: 'Professional Application Protocol',
+  frequency: '3–4 times per week, always following Colway Strengthening Shampoo',
+  duration_of_use: 'Minimum 8 weeks for clinical assessment; 6 months for sustained cortex remodelling',
+  steps: [
+    {
+      step: 1,
+      phase: 'Post-Shampoo Hair Preparation',
+      instruction: 'After rinsing the shampoo, gently press excess moisture with a microfiber towel or cupped hands. Hair should be damp (~70% moisture retained), never dripping wet.',
+      duration: '30 seconds',
+      clinical_note: 'Damp hair provides the optimal water-to-oil interface for cationic conditioning agents. Excess water dilutes active concentration and reduces substantivity.'
+    },
+    {
+      step: 2,
+      phase: 'Application — Lengths & Ends (Avoid Scalp)',
+      instruction: 'Dispense 5–8 mL into palm. Apply exclusively from mid-lengths to tips. Avoid direct scalp contact to prevent follicular blockage and excess sebum.',
+      duration: '60 seconds',
+      clinical_note: 'Conditioners are formulated for the hair shaft, not the scalp. Scalp application of cationic conditioning agents can disrupt the scalp microbiome.'
+    },
+    {
+      step: 3,
+      phase: 'Sectioning & Wide-Tooth Detangle',
+      instruction: 'Using a wide-tooth detangling comb, distribute conditioner in sections from ends upward toward mid-lengths to ensure even lipid deposition.',
+      clinical_note: 'Sectioning ensures uniform BTMS-50 lipid deposition and reduces wet comb friction force by −62%.'
+    },
+    {
+      step: 4,
+      phase: 'Dwell Time & Thermal Enhancement',
+      instruction: 'Leave on for 3–5 minutes (standard). For intensive restructuring: cover with a shower cap and apply mild hooded heat at 35°C for 10–15 minutes.',
+      duration: '3–5 min (std) · 10–15 min (intensive)',
+      clinical_note: 'Heat increases keratin diffusion into the hair cortex by 3× (Arrhenius relationship). Collagen triple helix remains stable up to 40°C.'
+    },
+    {
+      step: 5,
+      phase: 'Cold-Water Rinse (Cuticle Lock)',
+      instruction: 'Rinse with cool water (18–22°C) for 30–45 seconds. The cold water stimulus contracts cuticle scales flat, sealing collagen and silk proteins inside.',
+      duration: '30–45 seconds',
+      temp: '18–22°C (cool)',
+      clinical_note: 'Mechanical cuticle closure under cold stimulus reduces light scattering (Mie model), directly increasing optical shine and gloss.'
+    },
+    {
+      step: 6,
+      phase: 'Towel Pressing & Styling',
+      instruction: 'Gently press (do not rub) with a clean microfiber towel. Allow to air-dry 70% before applying any thermal styling with dedicated heat protectant.',
+      clinical_note: 'Virgin Argan Oil provides baseline heat defense up to 230°C, but dedicated heat protectants are advised for high-heat iron styling.'
+    }
+  ],
+  professional_notes: [
+    'Use as part of the GHK-Cu Hair Restoration Protocol: apply conditioner 24–48 hours post-mesotherapy.',
+    'Colour longevity: The acidic pH (4.0–4.5) reduces pigment elution from dyed fibers, extending color longevity by 25–35%.',
+    'Protein balance check: If hair feels stiff after 4–6 weeks, reduce frequency to 2×/week and introduce a hydrating humectant mask.'
+  ]
+};
 
 function TechSpecsGrid({ specs }) {
   if (!specs) return null;
@@ -505,6 +615,13 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
 
   const isShampoo = slug?.includes('shampoo') || name?.toLowerCase().includes('shampoo');
 
+  const effectiveProtocol = useMemo(() => {
+    if (applicationProtocol?.steps?.length > 0) {
+      return applicationProtocol;
+    }
+    return isShampoo ? FALLBACK_SHAMPOO_APPLICATION : FALLBACK_CONDITIONER_APPLICATION;
+  }, [applicationProtocol, isShampoo]);
+
   const filteredIngredients = useMemo(() => {
     let list = ingredients;
     if (inciFilter !== 'all') {
@@ -544,7 +661,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
     { id: 'overview', label: 'Formulation Overview', icon: Layers },
     { id: 'clinical-evidence', label: 'Clinical Evidence & Targets', icon: Activity },
     { id: 'inci-dossier', label: 'Full INCI Composition', icon: Microscope },
-    { id: 'application-protocol', label: 'Clinical Usage Protocol', icon: ClipboardList },
+    { id: 'application-protocol', label: 'Professional Application Protocol & Infogram', icon: ClipboardList },
     { id: 'technical-specs', label: 'Technical Specifications', icon: Beaker },
     { id: 'hair-protocols', label: 'Hair Protocols Integration', icon: Scissors },
     { id: 'safety', label: 'Clinical Safety & Patch Test', icon: AlertTriangle },
@@ -1179,43 +1296,65 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </div>
             </PublicSectionCard>
 
-            {/* APPLICATION PROTOCOL */}
-            {applicationProtocol ? (
-              <PublicSectionCard id="application-protocol" icon={ClipboardList} category="CLINICAL USAGE" title={applicationProtocol.title || 'Application Protocol'} badge={applicationProtocol.frequency} badgeVariant="teal">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                  <div style={{ padding: '0.7rem 0.9rem', background: '#f0fdfa', borderRadius: '8px', border: '1px solid #99f6e4' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0d9488', marginBottom: '2px' }}>FREQUENCY</div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{applicationProtocol.frequency}</div>
-                  </div>
-                  <div style={{ padding: '0.7rem 0.9rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#2563eb', marginBottom: '2px' }}>DURATION OF USE</div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{applicationProtocol.duration_of_use}</div>
-                  </div>
+            {/* APPLICATION PROTOCOL & TRICHOLOGY INFOGRAM */}
+            <PublicSectionCard
+              id="application-protocol"
+              icon={ClipboardList}
+              category="CLINICAL USAGE & MECHANISM"
+              title="Professional Application Protocol & Biological Infogram"
+              badge={effectiveProtocol.frequency || '3–4× Weekly'}
+              badgeVariant="teal"
+            >
+              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                Standardized trichological protocol developed for clinical application, mesotherapy recovery, and long-term hair follicle restoration. Interactive biological infogram details active transdermal diffusion down the follicular canal and structural cuticular biosealing.
+              </p>
+
+              {/* Interactive Visual Biological Trichology Infogram for Both Products */}
+              <ColwayProtocolInfogram
+                currentProduct={isShampoo ? 'shampoo' : 'conditioner'}
+                lang={lang}
+              />
+
+              {/* Treatment Frequency & Cycle Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                <div style={{ padding: '0.7rem 0.9rem', background: '#f0fdfa', borderRadius: '8px', border: '1px solid #99f6e4' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#0d9488', marginBottom: '2px' }}>CLINICAL FREQUENCY</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{effectiveProtocol.frequency}</div>
+                </div>
+                <div style={{ padding: '0.7rem 0.9rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#2563eb', marginBottom: '2px' }}>TREATMENT CYCLE DURATION</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{effectiveProtocol.duration_of_use}</div>
+                </div>
+              </div>
+
+              {/* Step-by-Step Clinical Workflow */}
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ListChecks size={16} color="#0d9488" />
+                  <span>Sequential Clinical Steps ({isShampoo ? 'Scalp Focus' : 'Fiber Focus'})</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {(applicationProtocol.steps || []).map((step, i) => (
-                    <ApplicationStep key={step.step || i} step={step} isLast={i === (applicationProtocol.steps.length - 1)} />
+                  {(effectiveProtocol.steps || []).map((step, i) => (
+                    <ApplicationStep key={step.step || i} step={step} isLast={i === (effectiveProtocol.steps.length - 1)} />
                   ))}
                 </div>
-                {applicationProtocol.professional_notes?.length > 0 && (
-                  <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '10px' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>PROFESSIONAL / TRICHOLOGIST NOTES</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {applicationProtocol.professional_notes.map((note, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                          <CheckCircle2 size={12} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
-                          <span style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.5 }}>{note}</span>
-                        </div>
-                      ))}
-                    </div>
+              </div>
+
+              {/* Trichologist Clinical Notes */}
+              {effectiveProtocol.professional_notes?.length > 0 && (
+                <div style={{ marginTop: '1.25rem', padding: '0.85rem 1rem', background: 'linear-gradient(135deg, #0f172a, #1e3a5f)', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>PROFESSIONAL / TRICHOLOGIST NOTES</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {effectiveProtocol.professional_notes.map((note, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                        <CheckCircle2 size={12} style={{ color: '#0d9488', flexShrink: 0, marginTop: '2px' }} />
+                        <span style={{ fontSize: '0.75rem', color: '#cbd5e1', lineHeight: 1.5 }}>{note}</span>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </PublicSectionCard>
-            ) : (
-              <PublicSectionCard id="application-protocol" icon={ClipboardList} category="CLINICAL USAGE" title="Application Protocol & Directions">
-                <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.6 }}>Apply to wet hair. Massage into scalp for 2–3 minutes. Leave 3–5 min. Rinse with lukewarm water ≤38°C. Use 3–4×/week for min. 8 weeks.</p>
-              </PublicSectionCard>
-            )}
+                </div>
+              )}
+            </PublicSectionCard>
 
             {/* TECHNICAL SPECS */}
             <PublicSectionCard id="technical-specs" icon={Beaker} category="TECHNICAL DOSSIER" title="Formulation Technical Specifications">

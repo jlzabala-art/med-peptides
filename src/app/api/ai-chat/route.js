@@ -177,7 +177,43 @@ export async function POST(req) {
         contextAnchor?.type === 'protocols_catalog' ||
         pathname === '/proto';
 
-      if (isProtocolsDirectory) {
+      const isSingleProtocol = screenScope === 'protocol' || screenScope === 'protocol_guide' ||
+        contextAnchor?.type === 'protocol' || Boolean(contextAnchor?.phasesCount) || Boolean(contextAnchor?.phases);
+
+      if (isSingleProtocol) {
+        activeEntityContext = `CURRENT ACTIVE CLINICAL PROTOCOL (BEING VIEWED BY VISITOR):
+- Protocol Name: ${contextAnchor?.name || 'Clinical Protocol Blueprint'}
+- Protocol Code: ${contextAnchor?.code || 'PR-CLINICAL'}
+- Total Duration: ${contextAnchor?.duration || 'Multi-week cycle'}
+- Therapeutic Goal / Axis: ${contextAnchor?.category || contextAnchor?.goal || 'General Health'}
+- Target Physiological System: ${contextAnchor?.targetSystem || 'Regenerative Pathway'}
+- Clinical Summary: ${contextAnchor?.description || 'Structured clinical pathway guide'}
+- Active Compounds Included: ${contextAnchor?.includedCompounds || 'Bioactive peptides'}
+- Total Phases: ${contextAnchor?.phasesCount || (Array.isArray(contextAnchor?.phases) ? contextAnchor.phases.length : 3)}
+${Array.isArray(contextAnchor?.phases) && contextAnchor.phases.length > 0 ? `- Phase Structure:\n` + contextAnchor.phases.map((p, idx) => `  * Phase ${idx + 1} (${p.name}): ${p.durationWeeks || ''} weeks — ${p.description || ''}${p.administrationSchedule ? ` [Schedule: ${p.administrationSchedule}]` : ''}`).join('\n') + '\n' : ''}
+- Treatment Allocation: ${contextAnchor?.totalVials || 'N/A'} vials allocation, ${contextAnchor?.totalInjections || 'N/A'} micro-dose administrations
+${Array.isArray(contextAnchor?.topicalAdjuncts) && contextAnchor.topicalAdjuncts.length > 0 ? `- Recommended Topical Adjuncts:\n` + contextAnchor.topicalAdjuncts.map(a => `  * ${typeof a === 'string' ? a : `${a.name} (${a.step || ''}): ${a.role || ''}`}`).join('\n') + '\n' : ''}
+${pubmedContextText}`;
+
+        systemPrompt = `You are Atlas Protocol Intelligence Advisor, the specialized clinical AI navigator for the active clinical protocol blueprint being viewed by a clinician, researcher, or patient.
+
+CRITICAL OPERATING PRINCIPLES:
+1. STRICT PROTOCOL CONTEXT:
+   - Answer inquiries exclusively about the active protocol (${contextAnchor?.name || 'this protocol'}), its clinical intent, phased titration schedule, synergy between active peptides, safety endpoints, and clinical monitoring.
+   - When topical cosmeceuticals are recommended (e.g. Colway Hair Strengthening Shampoo and Conditioner), explain how they synergize with the peptide protocol (e.g. Step 1 cleanses DHT-laden sebum and normalizes scalp pH to 4.5–5.5; Step 2 seals cuticles with native fish tropocollagen and hydrolyzed keratin to shield anagen growth).
+2. NEVER VOLUNTEER OR ASK IRRELEVANT RECONSTITUTION QUESTIONS:
+   - This is a complete multi-phase therapeutic protocol, NOT a single compound vial.
+   - Do NOT ask questions like "Would you like reconstitution instructions for this compound?" or provide generic dilution ratios unless the visitor specifically requests how to prepare a particular peptide vial.
+3. ABSOLUTELY NO COMMERCIAL PRICES:
+   - Public protocol documentation does NOT display commercial prices. Do NOT mention product prices or currency amounts. If asked about pricing or procurement, direct the visitor to submit an institutional inquiry via the official desk.
+4. CLINICAL RIGOR & MULTILINGUAL:
+   - Respond authoritatively, concisely, and clearly in the language used by the visitor (English or Spanish) using clean markdown formatting.
+
+${activeEntityContext}
+
+${publicPlatformKnowledge}
+`;
+      } else if (isProtocolsDirectory) {
         activeEntityContext = `CURRENT ACTIVE VIEW: CLINICAL PROTOCOLS & PEPTIDES DIRECTORY (78 STANDARDIZED BLUEPRINTS)
 - Total Protocols: 78 evidence-based clinical pathways
 - 10 Standardized Therapeutic Goals:

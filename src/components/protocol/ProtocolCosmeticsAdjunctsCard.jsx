@@ -55,7 +55,6 @@ export default function ProtocolCosmeticsAdjunctsCard({
     frequency: p.frequency || (idx === 0 
       ? (isEs ? '3–4× por semana, aplicado antes de la aplicación tópica de GHK-Cu' : '3–4× per week, applied immediately before GHK-Cu topical')
       : (isEs ? 'Tras cada lavado, dejar actuar 5–10 min antes de aclarar' : 'After every shampoo session, leave 5–10 min before cool rinse')),
-    price_usd: p.price_usd || (idx === 0 ? 29 : 32),
     synergy_score: p.synergy_score || (idx === 0 ? 94 : 88),
     supplier: p.supplier || 'Colway International',
     evidence_citations: p.evidence_citations || []
@@ -71,7 +70,6 @@ export default function ProtocolCosmeticsAdjunctsCard({
         ? 'Prepara el cuero cabelludo eliminando sebo con DHT, activando microcirculación y fijando un pH 4.5–5.5 ideal para absorción de péptidos.'
         : 'Prepares the scalp by removing DHT-laden sebum, activating microcirculation, and creating an optimal pH environment for peptide absorption.',
       frequency: isEs ? '3–4× por semana, aplicado antes de GHK-Cu' : '3–4× per week, applied before GHK-Cu topical if used',
-      price_usd: 29,
       synergy_score: 94,
       supplier: 'Colway International'
     },
@@ -86,7 +84,6 @@ export default function ProtocolCosmeticsAdjunctsCard({
         ? 'Sella la cutícula y refuerza el córtex. Evita la rotura mecánica durante la fase de rebrote del protocolo.'
         : 'Seals the cuticle and fills cortical micro-fractures after the shampoo phase. Reduces mechanical breakage during the regrowth phase.',
       frequency: isEs ? 'Tras cada champú, dejar 5–10 min' : 'After every shampoo session, leave 5–10 min before rinsing',
-      price_usd: 32,
       synergy_score: 88,
       supplier: 'Colway International'
     }
@@ -172,9 +169,6 @@ export default function ProtocolCosmeticsAdjunctsCard({
                     </div>
                     <div className="pca-product-name">{p.name}</div>
                     <div className="pca-product-tagline">{p.tagline}</div>
-                    {p.price_usd && (
-                      <div className="pca-product-price">USD ${p.price_usd.toFixed(2)}</div>
-                    )}
                   </div>
                 </div>
 
