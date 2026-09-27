@@ -1,22 +1,37 @@
 export const PRODUCT_CATEGORIES = [
-  { id: 'peptide',                   label: 'Peptides' },
-  { id: 'supplement',                label: 'Supplements' },
-  { id: 'hormone',                   label: 'Hormones' },
-  { id: 'raw_material',              label: 'Raw Materials & APIs' },
-  { id: 'excipient_vehicle',         label: 'Excipients & Vehicles' },
-  { id: 'medical_device_consumable', label: 'Consumables & Devices' },
-  { id: 'diagnostic_test',           label: 'Diagnostic Tests' },
-  { id: 'service',                   label: 'Services & Subscriptions' },
-  { id: 'skincare',                  label: 'Skincare & Topicals' },
-  { id: 'apparel',                   label: 'Apparel & Merch' },
+  { id: 'peptide',                   label: 'Peptides', icon: '💊' },
+  { id: 'raw_material',              label: 'Bulk APIs & Raw Materials', icon: '⚗️' },
+  { id: 'aesthetic_injectables',     label: 'Aesthetic Injectables', icon: '💉' },
+  { id: 'diagnostic_test',           label: 'Diagnostic Tests', icon: '🩸' },
+  { id: 'genomics_biomarkers',       label: 'Genomics & Biomarkers', icon: '🧬' },
+  { id: 'nutricosmetics',            label: 'Nutricosmetics', icon: '🌿' },
+  { id: 'cosmetics',                 label: 'Cosmeceuticals & Skincare', icon: '🧴' },
+  { id: 'clinical_supplies',         label: 'Clinical Supplies', icon: '🩺' },
+  { id: 'iv_drips',                  label: 'IV Drips & Protocols', icon: '💧' },
+  { id: 'corporate_services',        label: 'B2B Services', icon: '💼' },
+  { id: 'supplement',                label: 'Supplements', icon: '💎' },
+  { id: 'compounding_material',      label: 'Compounding Materials', icon: '🧪' },
+  { id: 'hormone',                   label: 'Hormones', icon: '⚡' },
 ];
+
+const CATEGORY_ALIASES = {
+  'api_raw_material': 'raw_material',
+  'api_raw_materials': 'raw_material',
+  'Aesthetic Injectables': 'aesthetic_injectables',
+  'skincare': 'cosmetics',
+  'service': 'corporate_services',
+  'logistics_service': 'corporate_services',
+  'medical_supplies': 'clinical_supplies',
+  'diagnostic': 'diagnostic_test',
+};
 
 export function getCategoryLabel(categoryId) {
   if (!categoryId) return 'Uncategorized';
-  const cat = PRODUCT_CATEGORIES.find(c => c.id === categoryId);
+  const resolvedId = CATEGORY_ALIASES[categoryId] || categoryId;
+  const cat = PRODUCT_CATEGORIES.find(c => c.id === resolvedId);
+  if (cat) return cat.label;
   // Fallback: convert snake_case → Title Case for any future IDs not yet in the list
-  if (!cat) return categoryId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  return cat.label;
+  return resolvedId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 export const CATEGORY_SUBCATEGORIES = {

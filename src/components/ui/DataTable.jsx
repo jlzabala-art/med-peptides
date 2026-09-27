@@ -88,7 +88,7 @@ export default function DataTable({
   getRowProps, // (row) => ({ style?: {}, className?: string })
   pagination = true,
   hidePagination = false,
-  alwaysShowPagination = false,
+  alwaysShowPagination = true,
 
   // Ask Atlas Action
   enableAskAtlas = true,
@@ -1379,8 +1379,7 @@ export default function DataTable({
       {/* Pagination Footer (Google Cloud Style) — automatically hidden when all items fit on 1 page */}
       {(() => {
         const totalCount = (totalItems != null && totalItems > 0) ? totalItems : sortedData.length;
-        const isSinglePage = totalCount <= activeRowsPerPage && !hasNextPage && !onNextPage && activePage === 1;
-        if (hidePagination || pagination === false || (isSinglePage && !alwaysShowPagination)) {
+        if (hidePagination || pagination === false) {
           return null;
         }
         return (
@@ -1419,7 +1418,7 @@ export default function DataTable({
                     outline: 'none',
                   }}
                 >
-                  {[25, 50, 100].map((val) => (
+                  {[10, 25, 50, 100].map((val) => (
                     <option key={`rpp-${val}`} value={val}>
                       {val}
                     </option>

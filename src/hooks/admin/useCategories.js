@@ -20,34 +20,34 @@ const LS_KEY = '__rg_categories_cache';
 // Module-level cache — survives component unmount/remount within the same session
 let _cache = { data: null, ts: 0 };
 
+function getInitialCategories() {
+  const now = Date.now();
+  if (_cache.data && (now - _cache.ts) < CACHE_TTL_MS) {
+    return _cache.data;
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && (now - parsed.ts) < CACHE_TTL_MS) {
+          _cache = { data: parsed.data, ts: parsed.ts };
+          return parsed.data;
+        }
+      }
+    } catch { /* corrupt cache — ignore */ }
+  }
+  return [];
+}
+
 export function useCategories() {
-  const [categories, setCategories] = useState(_cache.data || []);
-  const [loading, setLoading]       = useState(!_cache.data);
+  const [categories, setCategories] = useState(getInitialCategories);
+  const [loading, setLoading]       = useState(() => getInitialCategories().length === 0);
 
   useEffect(() => {
     const now = Date.now();
-
-    // Layer 1: in-memory (instant, 0 network)
     if (_cache.data && (now - _cache.ts) < CACHE_TTL_MS) {
-      setCategories(_cache.data);
-      setLoading(false);
       return;
-    }
-
-    // Layer 2: localStorage (survives page reload)
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && (now - parsed.ts) < CACHE_TTL_MS) {
-            _cache = { data: parsed.data, ts: parsed.ts };
-            setCategories(parsed.data);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (_) { /* corrupt cache — ignore */ }
     }
 
     // Layer 3: Firestore (cold fetch)
@@ -76,14 +76,62 @@ export function useCategories() {
     fetchCategories();
   }, []);
 
+  const CATEGORY_ALIASES = {
+    'api_raw_material': 'raw_material',
+    'api_raw_materials': 'raw_material',
+    'Aesthetic Injectables': 'aesthetic_injectables',
+    'skincare': 'cosmetics',
+    'service': 'corporate_services',
+    'logistics_service': 'corporate_services',
+    'medical_supplies': 'clinical_supplies',
+    'diagnostic': 'diagnostic_test',
+  };
+
+  const DEFAULT_CATEGORY_STYLES = {
+    peptide:               { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', icon: '💊' },
+    raw_material:          { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '⚗️' },
+    aesthetic_injectables: { bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd', icon: '💉' },
+    diagnostic_test:       { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', icon: '🩸' },
+    genomics_biomarkers:   { bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe', icon: '🧬' },
+    nutricosmetics:        { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '🌿' },
+    cosmetics:             { bg: '#f0fdfa', color: '#0d9488', border: '#5eead4', icon: '🧴' },
+    clinical_supplies:     { bg: '#f8fafc', color: '#475569', border: '#e2e8f0', icon: '🩺' },
+    iv_drips:              { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4', icon: '💧' },
+    corporate_services:    { bg: '#faf5ff', color: '#7e22ce', border: '#e9d5ff', icon: '💼' },
+    supplement:            { bg: '#fffbeb', color: '#b45309', border: '#fde68a', icon: '💎' },
+    compounding_material:  { bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8', icon: '🧪' },
+    hormone:               { bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', icon: '⚡' },
+  };
+
   /**
    * Resolve a category ID to its English display label.
-   * Returns the raw ID if no match found (safe fallback).
    */
   const getCategoryLabel = (id) => {
     if (!id) return '';
-    const cat = categories.find(c => c.id === id);
-    return cat?.labelEn || cat?.label || id;
+    const normId = CATEGORY_ALIASES[id] || id;
+    const cat = categories.find(c => c.id === normId || c.id === id);
+    if (cat?.labelEn || cat?.label) return cat.labelEn || cat.label;
+    return normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  /**
+   * Get semantic badge configuration (icon, colors, label)
+   */
+  const getCategoryConfig = (id) => {
+    const normId = CATEGORY_ALIASES[id] || id;
+    const cat = categories.find(c => c.id === normId || c.id === id);
+    const style = DEFAULT_CATEGORY_STYLES[normId] || {
+      bg: '#f8fafc', color: '#475569', border: '#e2e8f0', icon: cat?.icon || '📦'
+    };
+    return {
+      id: normId,
+      rawId: id,
+      label: cat?.labelEn || cat?.label || normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      icon: cat?.icon || style.icon,
+      bg: style.bg,
+      color: style.color,
+      border: style.border
+    };
   };
 
   /**
@@ -93,10 +141,12 @@ export function useCategories() {
   const toFilterOptions = (ids = []) =>
     ids
       .map(id => {
-        const cat = categories.find(c => c.id === id);
-        return cat
-          ? { label: cat.labelEn || cat.label, value: cat.id }
-          : { label: id, value: id }; // unknown ID: show as-is
+        const normId = CATEGORY_ALIASES[id] || id;
+        const cat = categories.find(c => c.id === normId || c.id === id);
+        return {
+          label: cat?.labelEn || cat?.label || normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          value: normId
+        };
       })
       .sort((a, b) => a.label.localeCompare(b.label));
 
@@ -107,7 +157,7 @@ export function useCategories() {
     icon:  c.icon,
   }));
 
-  return { categories, loading, getCategoryLabel, toFilterOptions, allOptions };
+  return { categories, loading, getCategoryLabel, getCategoryConfig, toFilterOptions, allOptions };
 }
 
 /** Invalidate cache — call after writing to the categories collection */

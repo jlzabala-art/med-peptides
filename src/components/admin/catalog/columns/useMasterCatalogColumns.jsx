@@ -7,7 +7,7 @@ import SearchableDropdown from '../../../ui/SearchableDropdown';
 import AppActionGroup from '../../../ui/AppActionGroup';
 import DataCompletenessBadge from '../DataCompletenessBadge';
 import ScientificHoverCard from '../ScientificHoverCard';
-import { getProductAvailableTypes } from '../../../../utils/productNormalizer';
+import { extractProductPresentation } from '../../../../utils/productNormalizer';
 import { PRESENTATION_LABELS } from '../../../../constants/presentationTypes';
 import { getGoalLabel } from '../../../../config/goals';
 import { useWorkspaceStore } from '../../../../stores/useWorkspaceStore';
@@ -33,6 +33,61 @@ import {
   Building2,
   Syringe
 } from 'lucide-react';
+
+const CATEGORY_STYLES = {
+  peptide:               { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', icon: '💊', defaultLabel: 'Peptides' },
+  raw_material:          { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '⚗️', defaultLabel: 'Bulk APIs & Raw Materials' },
+  aesthetic_injectables: { bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd', icon: '💉', defaultLabel: 'Aesthetic Injectables' },
+  diagnostic_test:       { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4', icon: '🩸', defaultLabel: 'Diagnostic Tests' },
+  genomics_biomarkers:   { bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe', icon: '🧬', defaultLabel: 'Genomics & Biomarkers' },
+  nutricosmetics:        { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '🌿', defaultLabel: 'Nutricosmetics' },
+  cosmetics:             { bg: '#f0fdfa', color: '#0d9488', border: '#5eead4', icon: '🧴', defaultLabel: 'Cosmeceuticals & Skincare' },
+  clinical_supplies:     { bg: '#f8fafc', color: '#475569', border: '#e2e8f0', icon: '🩺', defaultLabel: 'Clinical Supplies' },
+  iv_drips:              { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4', icon: '💧', defaultLabel: 'IV Drips & Protocols' },
+  corporate_services:    { bg: '#faf5ff', color: '#7e22ce', border: '#e9d5ff', icon: '💼', defaultLabel: 'B2B Services' },
+  supplement:            { bg: '#fffbeb', color: '#b45309', border: '#fde68a', icon: '💎', defaultLabel: 'Supplements' },
+  compounding_material:  { bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8', icon: '🧪', defaultLabel: 'Compounding Materials' },
+  hormone:               { bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', icon: '⚡', defaultLabel: 'Hormones' },
+};
+
+const CATEGORY_ALIASES = {
+  'api_raw_material': 'raw_material',
+  'api_raw_materials': 'raw_material',
+  'Aesthetic Injectables': 'aesthetic_injectables',
+  'skincare': 'cosmetics',
+  'service': 'corporate_services',
+  'logistics_service': 'corporate_services',
+  'medical_supplies': 'clinical_supplies',
+  'diagnostic': 'diagnostic_test',
+};
+
+function resolveCategoryBadge(rawCat, categoryOptions = []) {
+  if (!rawCat) {
+    return {
+      bg: '#f8fafc',
+      color: '#64748b',
+      border: '#e2e8f0',
+      icon: '📦',
+      label: 'Uncategorized'
+    };
+  }
+  const normId = CATEGORY_ALIASES[rawCat] || rawCat;
+  const opt = categoryOptions.find(o => o.value === normId || o.value === rawCat);
+  const style = CATEGORY_STYLES[normId] || {
+    bg: '#f8fafc',
+    color: '#475569',
+    border: '#e2e8f0',
+    icon: opt?.icon || '📦',
+    defaultLabel: normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  };
+  return {
+    bg: style.bg,
+    color: style.color,
+    border: style.border,
+    icon: opt?.icon || style.icon,
+    label: opt?.label || style.defaultLabel || normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  };
+}
 
 export function useMasterCatalogColumns({
   categoryOptions = [],
@@ -82,94 +137,84 @@ export function useMasterCatalogColumns({
             </ScientificHoverCard>
           }
           subtitle={
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '4px' }}>
-              {/* Tier 1: Category & Product Grade Badges */}
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                {/* Category Pill */}
-                <div style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  backgroundColor: '#f8fafc', 
-                  border: '1px solid #e2e8f0', 
-                  borderRadius: '5px', 
-                  padding: '1px 6px',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  color: '#334155'
-                }}>
-                  <InlineEditableCell 
-                    value={row.category || 'No Category'} 
-                    type="select" 
-                    options={categoryOptions}
-                    onSave={(v) => onParentFieldUpdate(row, 'category', v)} 
-                  />
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginTop: '3px' }}>
+              {/* 1. Single Interactive Category Badge (GCP Enterprise Style) */}
+              {(() => {
+                const catBadge = resolveCategoryBadge(row.category, categoryOptions);
+                return (
+                  <div style={{ 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    backgroundColor: catBadge.bg, 
+                    border: `1px solid ${catBadge.border}`, 
+                    borderRadius: '5px', 
+                    padding: '1px 6px',
+                    fontSize: '0.70rem',
+                    fontWeight: 700,
+                    color: catBadge.color,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                  }}>
+                    <InlineEditableCell 
+                      value={row.category || 'No Category'} 
+                      type="select" 
+                      options={categoryOptions}
+                      format={() => (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <span>{catBadge.icon}</span>
+                          <span>{catBadge.label}</span>
+                        </span>
+                      )}
+                      onSave={(v) => onParentFieldUpdate(row, 'category', v)} 
+                    />
+                  </div>
+                );
+              })()}
 
-                {/* Product Type Chips */}
-                {(() => {
-                  const types = getProductAvailableTypes(row);
-                  const TYPE_CONFIG = {
-                    finished_product:    { label: 'FINISHED',    icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
-                    iv_drip:             { label: 'IV DRIP',     icon: <Droplets size={11} strokeWidth={2.2} />,     bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4' },
-                    compounding:         { label: 'COMPOUNDING', icon: <FlaskConical size={11} strokeWidth={2.2} />, bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8' },
-                    raw_material:        { label: 'BULK API',    icon: <FlaskConical size={11} strokeWidth={2.2} />, bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
-                    corporate_services:  { label: 'B2B SERVICE', icon: <Building2 size={11} strokeWidth={2.2} />,    bg: '#f8fafc', color: '#0369a1', border: '#bae6fd' },
-                    clinical_supplies:   { label: 'CLINICAL',    icon: <Stethoscope size={11} strokeWidth={2.2} />,  bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
-                    diagnostic_test:     { label: 'DIAGNOSTIC',  icon: <Activity size={11} strokeWidth={2.2} />,     bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
-                    diagnostic:          { label: 'DIAGNOSTIC',  icon: <Activity size={11} strokeWidth={2.2} />,     bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
-                    aesthetic_injectables: { label: 'AESTHETIC', icon: <Syringe size={11} strokeWidth={2.2} />,      bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd' },
-                    'Aesthetic Injectables': { label: 'AESTHETIC', icon: <Syringe size={11} strokeWidth={2.2} />,      bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd' },
-                    cosmetics:           { label: 'COSMETICS',   icon: <Droplets size={11} strokeWidth={2.2} />,     bg: '#f0fdfa', color: '#0d9488', border: '#5eead4' },
-                    genomics_biomarkers: { label: 'GENOMICS',    icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
-                    service:             { label: 'SERVICE',     icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
-                    dual:                { label: 'DUAL',        icon: <Sparkles size={11} strokeWidth={2.2} />,     bg: 'linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)', color: '#6d28d9', border: '#ddd6fe' },
-                  };
+              <span style={{ color: '#cbd5e1', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
 
-                  const renderedLabels = new Set();
-                  const uniqueBadges = [];
+              {/* 2. Format & Variant Footprint (Clean Secondary Text) */}
+              {(() => {
+                const catLower = String(row.category || '').toLowerCase();
+                const isCorpService = catLower === 'corporate_services' || catLower === 'service' || row.type === 'service' || row.product_type === 'service' || row.isCorporateService || row.isService;
+                const variants = row.variants || [];
+                const n = variants.length || row.variantsCount || 0;
 
-                  for (const t of types) {
-                    const cfg = TYPE_CONFIG[t] || (
-                      String(t).includes('iv') || String(t).includes('drip') 
-                        ? TYPE_CONFIG.iv_drip 
-                        : (String(t).includes('corporate') ? TYPE_CONFIG.corporate_services : TYPE_CONFIG['finished_product'])
-                    );
-                    if (!renderedLabels.has(cfg.label)) {
-                      renderedLabels.add(cfg.label);
-                      uniqueBadges.push({ key: t, cfg });
-                    }
-                  }
-
+                if (isCorpService) {
                   return (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                      {uniqueBadges.map(({ key, cfg }) => {
-                        return (
-                          <span key={key} style={{
-                            fontSize: '0.68rem', fontWeight: 700,
-                            padding: '1.5px 7px', borderRadius: '5px',
-                            background: cfg.bg, color: cfg.color,
-                            border: `1px solid ${cfg.border}`,
-                            display: 'inline-flex', alignItems: 'center', gap: '4px',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                          }}>
-                            {cfg.icon}
-                            <span>{cfg.label}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
+                    <span style={{ fontSize: '0.73rem', color: '#64748b', fontWeight: 600 }}>
+                      💼 {n} {n === 1 ? 'Service Tier' : 'Service Tiers'}
+                    </span>
                   );
-                })()}
+                }
 
-                {/* Associated Programs & Genomic Priorities */}
-                {Array.isArray(row.programs) && row.programs.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                let formatStr = extractProductPresentation(row);
+                if (catLower === 'diagnostic_test' || catLower === 'diagnostic') {
+                  const firstPres = String(variants[0]?.presentation || variants[0]?.presentationName || '').toLowerCase();
+                  if (firstPres.includes('blood')) formatStr = 'Blood Test Kit';
+                  else if (firstPres.includes('dna') || firstPres.includes('swab')) formatStr = 'Genetic Swab Kit';
+                  else formatStr = 'Diagnostic Kit';
+                }
+
+                return (
+                  <span style={{ fontSize: '0.73rem', color: '#64748b', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontWeight: 600, color: '#334155' }}>{formatStr}</span>
+                    <span style={{ color: '#94a3b8' }}>({n} {n === 1 ? 'var' : 'vars'})</span>
+                  </span>
+                );
+              })()}
+
+              {/* 3. Associated Clinical / Genomic Program (Micro-badge) */}
+              {Array.isArray(row.programs) && row.programs.length > 0 && (
+                <>
+                  <span style={{ color: '#cbd5e1', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                     {row.programs.map((prog, pIdx) => {
                       const progSlug = prog.slug || prog.id || '';
                       let progShortName = prog.name ? prog.name.replace('Fagron Genomics | ', '') : 'Genomics';
                       if (progSlug === 'fagron-genomics-telotest') progShortName = 'TeloTest';
                       if (progSlug === 'fagron-genomics-trichotest') progShortName = 'TrichoTest';
                       if (progSlug === 'fagron-genomics-nutrigen') progShortName = 'NutriGen';
+                      if (progShortName.length > 20) progShortName = progShortName.slice(0, 18) + '…';
 
                       const pri = prog.priority || 'A';
                       const priColor = pri === 'A' ? '#15803d' : pri === 'B' ? '#b45309' : '#0369a1';
@@ -188,27 +233,26 @@ export function useMasterCatalogColumns({
                           style={{
                             fontSize: '0.67rem',
                             fontWeight: 700,
-                            padding: '1.5px 6px',
-                            borderRadius: '5px',
+                            padding: '1px 5px',
+                            borderRadius: '4px',
                             background: priBg,
                             color: priColor,
                             border: `1px solid ${priBorder}`,
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '3px',
                             cursor: onEditGenomicPriority ? 'pointer' : 'default',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-                            transition: 'all 0.15s ease'
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
                           }}
                           title={`Associated Program: ${prog.name || progShortName} (Priority ${pri}). Click to edit.`}
                         >
                           <span>🧬 {progShortName}</span>
                           <span style={{
-                            fontSize: '0.62rem',
+                            fontSize: '0.60rem',
                             backgroundColor: priColor,
                             color: '#ffffff',
-                            padding: '0 4px',
-                            borderRadius: '3px',
+                            padding: '0 3px',
+                            borderRadius: '2px',
                             fontWeight: 800
                           }}>
                             {pri}
@@ -217,167 +261,8 @@ export function useMasterCatalogColumns({
                       );
                     })}
                   </div>
-                )}
-              </div>
-
-                {/* Tier 2: Variants Count & Formats Footprint */}
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '5px' }}>
-                {(() => {
-                  const catLower = String(row.category || '').toLowerCase();
-                  const isCorpService = catLower === 'corporate_services' || catLower === 'service' || row.type === 'service' || row.product_type === 'service' || row.isCorporateService || row.isService;
-                  const n = row.variants?.length || row.variantsCount || 0;
-
-                  return (
-                    <span style={{ 
-                      color: isCorpService ? '#7e22ce' : 'var(--color-primary, #003666)', 
-                      fontWeight: 700, 
-                      fontSize: '0.74rem',
-                      display: 'inline-flex', 
-                      alignItems: 'center', 
-                      gap: '3px' 
-                    }}>
-                      <Layers size={12} strokeWidth={2.2} />
-                      {isCorpService ? `${n} Service Tier${n === 1 ? '' : 's'}` : `${n} Var${n === 1 ? '' : 's'}`}
-                    </span>
-                  );
-                })()}
-
-                {(() => {
-                  const variants = row.variants || [];
-                  if (variants.length === 0) return null;
-
-                  const catLower = String(row.category || '').toLowerCase();
-                  const isCorpService = catLower === 'corporate_services' || catLower === 'service' || row.type === 'service' || row.product_type === 'service' || row.isCorporateService || row.isService;
-                  
-                  // For corporate services, render service packages directly (never vials or sprays!)
-                  if (isCorpService) {
-                    return variants.map((v, vIdx) => {
-                      const label = v.presentationName || v.name || v.presentation || `Tier ${vIdx + 1}`;
-                      return (
-                        <span key={v.id || vIdx} style={{ 
-                          fontSize: '0.68rem', 
-                          fontWeight: 600, 
-                          padding: '1px 7px', 
-                          borderRadius: 4, 
-                          background: '#faf5ff', 
-                          color: '#7e22ce', 
-                          border: '1px solid #e9d5ff',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          💼 {label}
-                        </span>
-                      );
-                    });
-                  }
-
-                  const counts = {};
-                  const isRawType = getProductAvailableTypes(row).includes('raw_material');
-                  const isDiagnosticOrService = catLower === 'diagnostic' || catLower === 'service' || catLower === 'genetic_test' || catLower === 'diagnostic_test' || isCorpService;
-
-                  for (const v of variants) {
-                    const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();
-                    const isBulk = v.unitOfMeasure === 'g' || v.unitOfMeasure === 'kg' || v.supplierPricing?.unitOfMeasure === 'g' || pStr.includes('bulk') || pStr.includes('api') || pStr.includes('powder') || v.type === 'raw_material' || isRawType;
-                    const isPen = pStr.includes('pen') || pStr.includes('cartridge');
-                    const isSpray = pStr.includes('spray') || pStr.includes('nasal') || pStr.includes('drop');
-                    const isCapsule = pStr.includes('capsule') || pStr.includes('oral') || pStr.includes('tablet');
-                    const isDigital = pStr.includes('digital') || pStr.includes('subscription') || pStr.includes('saas') || catLower === 'service';
-                    const isDna = pStr.includes('dna') || pStr.includes('genetic') || pStr.includes('saliva') || pStr.includes('nutrigen');
-                    const isBlood = pStr.includes('blood') || pStr.includes('cortisol') || pStr.includes('serum');
-                    const isKit = pStr.includes('kit') || pStr.includes('bundle') || pStr.includes('box');
-
-                    let pres;
-                    if (isBulk) pres = 'bulk_powder_gram';
-                    else if (isPen) pres = 'pen';
-                    else if (isSpray) pres = 'spray';
-                    else if (isCapsule) pres = 'capsule';
-                    else if (isDigital) pres = 'digital';
-                    else if (isDna) pres = 'dna_test';
-                    else if (isBlood) pres = 'blood_test';
-                    else if (isKit || isDiagnosticOrService) pres = 'kit';
-                    else if (pStr.includes('vial') || pStr.includes('ampoule') || pStr.includes('lyophil')) pres = 'vial';
-                    else pres = 'vial';
-
-                    counts[pres] = (counts[pres] || 0) + 1;
-                  }
-
-                  const badges = [];
-                  const bulks = (counts.bulk_powder_gram || 0) + (counts.powder || 0) + (counts.raw_api || 0);
-                  if (bulks > 0) {
-                    badges.push(
-                      <span key="bulk" style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', borderRadius: 4, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>
-                        {bulks} Bulk API (g)
-                      </span>
-                    );
-                  }
-                  const pens = (counts.pen || 0) + (counts.cartridge || 0);
-                  if (pens > 0) {
-                    badges.push(
-                      <span key="pens" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#fffbeb', color: '#b45309', border: '1px solid #fef3c7' }}>
-                        {pens} Pen{pens > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-                  if (counts.vial && !isRawType && !isDiagnosticOrService) {
-                    badges.push(
-                      <span key="vials" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>
-                        {counts.vial} Vial{counts.vial > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-                  const sprays = (counts.spray || 0) + (counts.nasal_spray || 0) + (counts.sublingual_drops || 0);
-                  if (sprays > 0) {
-                    badges.push(
-                      <span key="sprays" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#f0fdfa', color: '#0f766e', border: '1px solid #ccfbf1' }}>
-                        {sprays} Spray{sprays > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-                  const orals = (counts.capsule || 0) + (counts.tablet || 0);
-                  if (orals > 0) {
-                    badges.push(
-                      <span key="orals" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#faf5ff', color: '#7e22ce', border: '1px solid #f3e8ff' }}>
-                        {orals} Oral{orals > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-                  if (counts.dna_test > 0) {
-                    badges.push(
-                      <span key="dna" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#ecfeff', color: '#0e7490', border: '1px solid #cffafe' }}>
-                        {counts.dna_test} DNA Kit{counts.dna_test > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-                  if (counts.blood_test > 0) {
-                    badges.push(
-                      <span key="blood" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
-                        {counts.blood_test} Blood Test{counts.blood_test > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-                  if (counts.digital > 0) {
-                    badges.push(
-                      <span key="digital" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#f5f3ff', color: '#6d28d9', border: '1px solid #ddd6fe' }}>
-                        {counts.digital > 1 ? `${counts.digital} Plans` : 'Digital Service'}
-                      </span>
-                    );
-                  }
-                  const kits = (counts.kit || 0) + (counts.bundle || 0) + (counts.box || 0) + (counts.combination_blend || 0);
-                  if (kits > 0 && !counts.dna_test && !counts.blood_test) {
-                    badges.push(
-                      <span key="kits" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
-                        {kits} Kit{kits > 1 ? 's' : ''}
-                      </span>
-                    );
-                  }
-
-                  if (badges.length === 0) return null;
-                  return (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap' }}>
-                      {badges}
-                    </div>
-                  );
-                })()}
-              </div>
+                </>
+              )}
             </div>
           }
         />
@@ -486,9 +371,9 @@ export function useMasterCatalogColumns({
         const isExplicitInStock = row.stockType === 'in_stock' && Number(row.totalStock) > 0 && !row.isDemand;
         const isLow = isExplicitInStock && Number(row.totalStock) < 10;
 
-        let currentOption = 'on_demand';
-        let badgeStatus = 'pending';
-        let badgeLabel = 'On Demand';
+        let currentOption;
+        let badgeStatus;
+        let badgeLabel;
 
         if (isInactive) {
           currentOption = 'inactive';

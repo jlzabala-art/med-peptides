@@ -28,6 +28,61 @@ import { CopyableId } from '../../../ui';
 import DataCompletenessBadge from '../DataCompletenessBadge';
 import AppActionGroup from '../../../ui/AppActionGroup';
 import CatalogVariantExpander from './CatalogVariantExpander';
+
+const CATEGORY_STYLES = {
+  peptide:               { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', icon: '💊', defaultLabel: 'Peptides' },
+  raw_material:          { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '⚗️', defaultLabel: 'Bulk APIs & Raw Materials' },
+  aesthetic_injectables: { bg: '#faf5ff', color: '#7c3aed', border: '#c4b5fd', icon: '💉', defaultLabel: 'Aesthetic Injectables' },
+  diagnostic_test:       { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4', icon: '🩸', defaultLabel: 'Diagnostic Tests' },
+  genomics_biomarkers:   { bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe', icon: '🧬', defaultLabel: 'Genomics & Biomarkers' },
+  nutricosmetics:        { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', icon: '🌿', defaultLabel: 'Nutricosmetics' },
+  cosmetics:             { bg: '#f0fdfa', color: '#0d9488', border: '#5eead4', icon: '🧴', defaultLabel: 'Cosmeceuticals & Skincare' },
+  clinical_supplies:     { bg: '#f8fafc', color: '#475569', border: '#e2e8f0', icon: '🩺', defaultLabel: 'Clinical Supplies' },
+  iv_drips:              { bg: '#f0fdfa', color: '#0f766e', border: '#99f6e4', icon: '💧', defaultLabel: 'IV Drips & Protocols' },
+  corporate_services:    { bg: '#faf5ff', color: '#7e22ce', border: '#e9d5ff', icon: '💼', defaultLabel: 'B2B Services' },
+  supplement:            { bg: '#fffbeb', color: '#b45309', border: '#fde68a', icon: '💎', defaultLabel: 'Supplements' },
+  compounding_material:  { bg: '#fdf2f8', color: '#be185d', border: '#fbcfe8', icon: '🧪', defaultLabel: 'Compounding Materials' },
+  hormone:               { bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', icon: '⚡', defaultLabel: 'Hormones' },
+};
+
+const CATEGORY_ALIASES = {
+  'api_raw_material': 'raw_material',
+  'api_raw_materials': 'raw_material',
+  'Aesthetic Injectables': 'aesthetic_injectables',
+  'skincare': 'cosmetics',
+  'service': 'corporate_services',
+  'logistics_service': 'corporate_services',
+  'medical_supplies': 'clinical_supplies',
+  'diagnostic': 'diagnostic_test',
+};
+
+function resolveCategoryBadge(rawCat, categoryOptions = []) {
+  if (!rawCat) {
+    return {
+      bg: '#f8fafc',
+      color: '#64748b',
+      border: '#e2e8f0',
+      icon: '📦',
+      label: 'Uncategorized'
+    };
+  }
+  const normId = CATEGORY_ALIASES[rawCat] || rawCat;
+  const opt = categoryOptions.find(o => o.value === normId || o.value === rawCat);
+  const style = CATEGORY_STYLES[normId] || {
+    bg: '#f8fafc',
+    color: '#475569',
+    border: '#e2e8f0',
+    icon: opt?.icon || '📦',
+    defaultLabel: normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  };
+  return {
+    bg: style.bg,
+    color: style.color,
+    border: style.border,
+    icon: opt?.icon || style.icon,
+    label: opt?.label || style.defaultLabel || normId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  };
+}
 import ProductDatasheetDrawer from './ProductDatasheetDrawer';
 import { getProductAvailableTypes } from '../../../../utils/productNormalizer';
 import { useWorkspaceStore } from '../../../../stores/useWorkspaceStore';
@@ -66,6 +121,8 @@ export default function CatalogMobileCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showDatasheet, setShowDatasheet] = useState(false);
+  const { can, role } = useRoleAccess();
+  const canArchive = can('archive:products') || can('delete:products') || role === 'admin';
 
   if (!row) return null;
 
@@ -101,9 +158,6 @@ export default function CatalogMobileCard({
 
   const programs = Array.isArray(row.programs) ? row.programs : [];
   const status = row.status || (row.isActive === false ? 'inactive' : 'active');
-
-  const { can, role } = useRoleAccess();
-  const canArchive = can('archive:products') || can('delete:products') || role === 'admin';
 
   // Handle adding a SPECIFIC VARIANT to active workspace
   const handleAddVariantToWorkspace = (v) => {
@@ -289,28 +343,42 @@ export default function CatalogMobileCard({
           marginTop: '2px'
         }}>
           {/* Category Pill */}
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '5px',
-            padding: '1px 6px',
-            fontSize: '0.70rem',
-            fontWeight: 600,
-            color: '#334155'
-          }}>
-            {onParentFieldUpdate && categoryOptions.length > 0 ? (
-              <InlineEditableCell 
-                value={row.category || 'No Category'} 
-                type="select" 
-                options={categoryOptions}
-                onSave={(v) => onParentFieldUpdate(row, 'category', v)} 
-              />
-            ) : (
-              row.category || 'Standard'
-            )}
-          </span>
+          {(() => {
+            const catBadge = resolveCategoryBadge(row.category, categoryOptions);
+            return (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: catBadge.bg,
+                border: `1px solid ${catBadge.border}`,
+                borderRadius: '5px',
+                padding: '1px 6px',
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                color: catBadge.color
+              }}>
+                {onParentFieldUpdate && categoryOptions.length > 0 ? (
+                  <InlineEditableCell 
+                    value={row.category || 'No Category'} 
+                    type="select" 
+                    options={categoryOptions}
+                    format={() => (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <span>{catBadge.icon}</span>
+                        <span>{catBadge.label}</span>
+                      </span>
+                    )}
+                    onSave={(v) => onParentFieldUpdate(row, 'category', v)} 
+                  />
+                ) : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                    <span>{catBadge.icon}</span>
+                    <span>{catBadge.label}</span>
+                  </span>
+                )}
+              </span>
+            );
+          })()}
 
           <span style={{ color: '#cbd5e1' }}>•</span>
 

@@ -285,11 +285,23 @@ export default function MasterCatalogTable({
     });
 
     if (filterCategory.length > 0) {
+      const CAT_ALIASES = {
+        'api_raw_material': 'raw_material',
+        'api_raw_materials': 'raw_material',
+        'aesthetic injectables': 'aesthetic_injectables',
+        'skincare': 'cosmetics',
+        'service': 'corporate_services',
+        'logistics_service': 'corporate_services',
+        'medical_supplies': 'clinical_supplies',
+        'diagnostic': 'diagnostic_test',
+      };
       rows = rows.filter(row => {
-        const cat = (row.category || row.categoryId || '').toLowerCase();
+        const rawCat = (row.category || row.categoryId || '').toLowerCase();
+        const cat = CAT_ALIASES[rawCat] || rawCat;
         return filterCategory.some(fc => {
           const fcLow = fc.toLowerCase();
-          return cat === fcLow || cat === fcLow.replace(/s$/, '') || cat + 's' === fcLow;
+          const normFc = CAT_ALIASES[fcLow] || fcLow;
+          return cat === normFc || cat === normFc.replace(/s$/, '') || cat + 's' === normFc;
         });
       });
     }

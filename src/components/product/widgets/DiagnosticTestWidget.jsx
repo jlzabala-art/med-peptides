@@ -17,6 +17,7 @@ import {
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { QRCodeSVG } from 'qrcode.react';
+import UniversalQrCard from '@/components/ui/UniversalQrCard';
 
 /**
  * DiagnosticTestWidget
@@ -167,80 +168,15 @@ export default function DiagnosticTestWidget({
         )}
       </div>
 
-      {/* ── CARD 2: QR VERIFICATION ── */}
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '10px',
-        border: '1px solid #e2e8f0',
-        padding: '0.85rem',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '0.75rem',
-          paddingBottom: '0.5rem',
-          borderBottom: '1px solid #f1f5f9'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <QrCode size={15} color="#003666" />
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'ACCESO PACIENTE / QR' : 'PATIENT ACCESS QR'}
-            </span>
-          </div>
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 6px', borderRadius: '4px' }}>
-            ENCRIPTADO
-          </span>
-        </div>
-
-        <div style={{
-          display: 'inline-block',
-          padding: '8px',
-          background: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-        }}>
-          <QRCodeSVG 
-            value={resolvedUrl}
-            size={95}
-            level="M"
-            includeMargin={false}
-          />
-        </div>
-
-        <p style={{ margin: '8px 0 10px 0', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.4 }}>
-          {isEs 
-            ? 'Instrucciones visuales de toma capilar en teléfono móvil.' 
-            : 'Scan for mobile capillary blood collection walkthrough.'}
-        </p>
-
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          style={{
-            width: '100%',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            background: copied ? '#f0fdf4' : '#f8fafc',
-            color: copied ? '#16a34a' : '#334155',
-            border: copied ? '1px solid #86efac' : '1px solid #cbd5e1',
-            cursor: 'pointer'
-          }}
-        >
-          {copied ? <Check size={13} /> : <Copy size={13} />}
-          <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Direct Link')}</span>
-        </button>
-      </div>
-
+      {/* ── CARD 2: QR VERIFICATION (Universal Standard with Enlarge QR Lightbox) ── */}
+      <UniversalQrCard
+        value={resolvedUrl}
+        title={isEs ? 'ACCESO PACIENTE / QR' : 'PATIENT ACCESS QR'}
+        subtitle={isEs ? 'Instrucciones visuales de toma capilar en teléfono móvil.' : 'Scan for mobile capillary blood collection walkthrough.'}
+        badge={isEs ? 'ENCRIPTADO' : 'ENCRYPTED'}
+        lang={lang}
+        size={95}
+      />
     </div>
   );
 }

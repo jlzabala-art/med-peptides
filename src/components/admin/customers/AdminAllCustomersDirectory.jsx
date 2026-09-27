@@ -333,49 +333,45 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
             >
               {meta.icon}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {row.name || row.companyName || 'Unnamed Account'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {row.name || row.companyName || 'Unnamed Account'}
+              </span>
+              <CopyableId value={row.id} iconOnly={true} />
+              {hasBooks && (
+                <span
+                  title={`Zoho Books Contact: ${row.zohoContactNumber || row.zohoContactId}`}
+                  style={{
+                    fontSize: '0.64rem',
+                    fontWeight: 700,
+                    backgroundColor: '#f0fdf4',
+                    color: '#15803d',
+                    border: '1px solid #bbf7d0',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Books ✓
                 </span>
-                {hasBooks && (
-                  <span
-                    title={`Zoho Books Contact: ${row.zohoContactNumber || row.zohoContactId}`}
-                    style={{
-                      fontSize: '0.64rem',
-                      fontWeight: 700,
-                      backgroundColor: '#f0fdf4',
-                      color: '#15803d',
-                      border: '1px solid #bbf7d0',
-                      padding: '1px 5px',
-                      borderRadius: '4px',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Books ✓
-                  </span>
-                )}
-                {hasBigin && (
-                  <span
-                    title="Synchronized with Zoho Bigin CRM"
-                    style={{
-                      fontSize: '0.64rem',
-                      fontWeight: 700,
-                      backgroundColor: '#eff6ff',
-                      color: '#1d4ed8',
-                      border: '1px solid #bfdbfe',
-                      padding: '1px 5px',
-                      borderRadius: '4px',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Bigin ✓
-                  </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
-                <CopyableId value={row.id} />
-              </div>
+              )}
+              {hasBigin && (
+                <span
+                  title="Synchronized with Zoho Bigin CRM"
+                  style={{
+                    fontSize: '0.64rem',
+                    fontWeight: 700,
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    border: '1px solid #bfdbfe',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Bigin ✓
+                </span>
+              )}
             </div>
           </div>
         );
@@ -649,6 +645,9 @@ export default function AdminAllCustomersDirectory({ onSyncSSOT, isSyncing = fal
           loading={loadingCustomers || loadingKpis}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
+          pagination={true}
+          alwaysShowPagination={true}
+          totalItems={filtered.length}
           expandableRender={(row) => (
             <CustomerSharedLinksCard
               customer={row}

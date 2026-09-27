@@ -40,6 +40,9 @@ const PUBLIC_FIELDS = [
   'goals', 'mechanisms', 'tags', 'primary_goal', 'target', 'targetSystem',
   'pharmacology', 'aiContent', 'isProfessional', 'requiresPrescription',
   'status', 'isActive', 'version', 'updatedAt',
+  'usage_steps', 'warnings', 'ingredients', 'technical_specs', 'application_protocol',
+  'formulation_type', 'clinical_indications', 'clinical_rationale', 'active_complexes',
+  'brand', 'supplier', 'target_pathway', 'standard'
 ];
 
 const VARIANT_PUBLIC_FIELDS = [
@@ -147,19 +150,23 @@ export async function GET(request, context) {
     const nameRaw = (name || '').toLowerCase();
     const presRaw = (product.presentation || product.format || '').toLowerCase();
 
-    const isDevice = /pen|device|needle|syringe|injector|accessory|consumable|bac water|supplies/i.test(catRaw) ||
+    const isCosmetic = /cosmetic|dermocosmetic|shampoo|conditioner|serum|cream|topical|hair|scalp|skincare/i.test(catRaw) ||
+                       /shampoo|conditioner|colway|atelo|collagen.*gel|topical/i.test(nameRaw) ||
+                       /hair\s*&\s*scalp/i.test(catRaw);
+
+    const isDevice = !isCosmetic && (/pen|device|needle|syringe|injector|accessory|consumable|bac water|supplies/i.test(catRaw) ||
                      /pen|device|needle|syringe|injector/i.test(nameRaw) ||
-                     /empty.?pen|injector/i.test(presRaw);
+                     /empty.?pen|injector/i.test(presRaw));
 
     const isPreFilledPen = isDevice && (/pre.?fill|peptide.?pen|cartridge/i.test(nameRaw) || /pre.?fill/i.test(presRaw) || /cartridge/i.test(presRaw));
 
-    const isDiagnostic = /diagnostic|genomic|dna|test|saliva|blood|biomarker|panel/i.test(catRaw) ||
-                         /test|dna|genomic|screen|biomarker/i.test(nameRaw);
+    const isDiagnostic = !isCosmetic && (/diagnostic|genomic|dna|test|saliva|blood|biomarker|panel/i.test(catRaw) ||
+                         /test|dna|genomic|screen|biomarker/i.test(nameRaw));
 
-    const isSmallMolecule = /small.?molecule|nootropic|longevity|metabolic|supplement|vitamin|capsule/i.test(catRaw) ||
-                            /nad\+|nmn|metformin|resveratrol|curcumin|melatonin|methylene/i.test(nameRaw);
+    const isSmallMolecule = !isCosmetic && (/small.?molecule|nootropic|longevity|metabolic|supplement|vitamin|capsule/i.test(catRaw) ||
+                            /nad\+|nmn|metformin|resveratrol|curcumin|melatonin|methylene/i.test(nameRaw));
 
-    const isPeptide = !isDevice && !isDiagnostic && !isSmallMolecule;
+    const isPeptide = !isDevice && !isDiagnostic && !isSmallMolecule && !isCosmetic;
 
     // ── Delivery Triad Format Resolution (vial, single_cartridge_pen, double_cartridge_pen) ──
     const searchParams = new URL(request.url).searchParams;
@@ -279,24 +286,32 @@ export async function GET(request, context) {
     // ── Header Box ──
     page.drawRectangle({ x: MRG, y: y - 68, width: CONTENT_W, height: 68, color: LIGHT_BG, borderColor: BORDER_CLR, borderWidth: 1 });
 
-    const catBadge = isDevice 
-      ? (isPreFilledPen ? 'COMP. PRE-FILLED PEN' : 'MEDICAL DEVICE')
-      : isDiagnostic
-        ? 'GENOMIC & DIAGNOSTIC'
-        : isSmallMolecule
-          ? 'SMALL MOLECULE API'
-          : selectedFormat === 'double_cartridge_pen'
-            ? 'PEPTIDE · DOUBLE CARTRIDGE (DUAL-CHAMBER)'
-            : selectedFormat === 'single_cartridge_pen'
-              ? 'PEPTIDE · SINGLE CARTRIDGE PEN (LIQUID)'
-              : 'PEPTIDE · LYOPHILIZED VIAL';
+    const catBadge = isCosmetic
+      ? 'COSMECEUTICAL · TOPICAL CARE'
+      : isDevice 
+        ? (isPreFilledPen ? 'COMP. PRE-FILLED PEN' : 'MEDICAL DEVICE')
+        : isDiagnostic
+          ? 'GENOMIC & DIAGNOSTIC'
+          : isSmallMolecule
+            ? 'SMALL MOLECULE API'
+            : selectedFormat === 'double_cartridge_pen'
+              ? 'PEPTIDE · DOUBLE CARTRIDGE (DUAL-CHAMBER)'
+              : selectedFormat === 'single_cartridge_pen'
+                ? 'PEPTIDE · SINGLE CARTRIDGE PEN (LIQUID)'
+                : 'PEPTIDE · LYOPHILIZED VIAL';
 
     const catW = fontB.widthOfTextAtSize(catBadge, 7) + 8;
     page.drawRectangle({ x: MRG + 12, y: y - 16, width: catW, height: 13, color: TEAL_COLOR, borderRadius: 3 });
     page.drawText(catBadge, { x: MRG + 16, y: y - 13, size: 7, font: fontB, color: rgb(1, 1, 1) });
 
     // Canonical Standard (No supplier purity!)
-    const standardBadge = isDevice ? (isPreFilledPen ? 'HS: 3004.90' : 'HS: 9018.31') : isDiagnostic ? 'CLIA / CE-IVD SPECIFICATION' : 'PHARMACEUTICAL GRADE';
+    const standardBadge = isCosmetic
+      ? 'EU REG. 1223/2009 · DERMATOLOGICALLY TESTED'
+      : isDevice 
+        ? (isPreFilledPen ? 'HS: 3004.90' : 'HS: 9018.31') 
+        : isDiagnostic 
+          ? 'CLIA / CE-IVD SPECIFICATION' 
+          : 'PHARMACEUTICAL GRADE';
     const stdW = fontB.widthOfTextAtSize(standardBadge, 7) + 8;
     page.drawRectangle({ x: RIGHT - stdW - 12, y: y - 16, width: stdW, height: 13, color: rgb(0.93, 0.95, 0.98), borderColor: rgb(0.75, 0.85, 0.95), borderWidth: 0.5 });
     page.drawText(standardBadge, { x: RIGHT - stdW - 8, y: y - 13, size: 7, font: fontB, color: BRAND_COLOR });
@@ -304,7 +319,12 @@ export async function GET(request, context) {
     page.drawText(trunc(name, 50), { x: MRG + 12, y: y - 36, size: 16, font: fontB, color: BRAND_COLOR });
 
     // Subheader Line
-    if (isDevice) {
+    if (isCosmetic) {
+      page.drawText('Formulation: ', { x: MRG + 12, y: y - 54, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
+      const fType = cleanPdfText(product.formulation_type || 'Cosmeceutical Scalp & Hair Care');
+      page.drawText(`${trunc(fType, 42)}    `, { x: MRG + 75, y: y - 54, size: 8, font, color: BRAND_COLOR });
+      page.drawText('Standard: CPNP Notified · ISO 22716 GMP', { x: MRG + 270, y: y - 54, size: 8, font, color: TEAL_COLOR });
+    } else if (isDevice) {
       page.drawText('Tariff Classification: ', { x: MRG + 12, y: y - 54, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
       const hsDesc = isPreFilledPen ? '3004.90 (Pre-filled Compounded Peptide Pen)' : '9018.31 (Pen-type Injection Device, Empty)';
       page.drawText(hsDesc, { x: MRG + 105, y: y - 54, size: 8, font, color: BRAND_COLOR });
@@ -396,6 +416,76 @@ export async function GET(request, context) {
         y -= 12;
       }
       y -= 10;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // ARCHETYPE 4: COSMECEUTICALS & DERMOCOSMETIC CARE
+    // ════════════════════════════════════════════════════════════
+    else if (isCosmetic) {
+      page.drawText('1. TRICHOLOGICAL MECHANISM & ACTIVE INGREDIENT PROFILE', { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
+      y -= 4;
+      page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
+      y -= 14;
+
+      const primaryTargetText = product.target_pathway || 'Follicular Microenvironment & Cuticular Keratin Matrix';
+      page.drawRectangle({ x: MRG, y: y - 18, width: CONTENT_W, height: 22, color: rgb(0.94, 0.98, 0.97), borderColor: rgb(0.7, 0.9, 0.85), borderWidth: 0.5 });
+      page.drawText('Primary Target:', { x: MRG + 8, y: y - 11, size: 8, font: fontB, color: TEAL_COLOR });
+      page.drawText(trunc(primaryTargetText, 80), { x: MRG + 85, y: y - 11, size: 8, font, color: rgb(0.1, 0.2, 0.25) });
+      y -= 26;
+
+      const cosmeticDesc = product.clinical_rationale || product.description || product.overview_summary;
+      if (cosmeticDesc) {
+        for (const line of wrapText(cosmeticDesc, 92).slice(0, 4)) {
+          page.drawText(line, { x: MRG, y, size: 8.2, font, color: rgb(0.2, 0.25, 0.3) });
+          y -= 12;
+        }
+        y -= 4;
+      }
+
+      // Render active complexes or key ingredients
+      const activeList = Array.isArray(product.active_complexes) && product.active_complexes.length > 0
+        ? product.active_complexes.map(a => `${a.name}: ${a.description}`)
+        : [
+            'Baicapil(TM) 2%: Stimulates follicular anagen phase (+60.6% hair loss reduction).',
+            'Native Soluble Collagen: Cuticular scaling alignment, shaft elasticity and cortex protection.',
+            'Caffeine & Zinc PCA: Microcirculation stimulation & 5a-reductase DHT inhibition.',
+            'Equisetum Arvense: Organic bio-silica reinforcing keratin disulfide bonds.'
+          ];
+      for (const act of activeList.slice(0, 4)) {
+        for (const al of wrapText(`-  ${act}`, 90)) {
+          page.drawText(al, { x: MRG, y, size: 8.2, font, color: rgb(0.25, 0.3, 0.35) });
+          y -= 12;
+        }
+      }
+      y -= 6;
+
+      // ── Section 2: Application Protocol & Trichological Guidelines ──
+      page.drawText('2. APPLICATION PROTOCOL & TRICHOLOGICAL USAGE GUIDELINES', { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
+      y -= 4;
+      page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
+      y -= 14;
+
+      const usageSteps = Array.isArray(product.usage_steps) && product.usage_steps.length > 0
+        ? product.usage_steps
+        : [
+            'Apply a generous amount to wet hair and scalp. Distribute evenly from roots to ends.',
+            'Gently massage scalp for 2-3 minutes using circular motions to activate microcirculation.',
+            'Leave on scalp for 3-5 minutes to maximize active compound penetration.',
+            'Rinse thoroughly with lukewarm water (<= 38C). Avoid hot water which disrupts the cuticle.',
+            'For optimal trichological results, use 3-4x per week for a minimum of 8 consecutive weeks.'
+          ];
+
+      for (const step of usageSteps.slice(0, 5)) {
+        for (const sl of wrapText(`-  ${step}`, 92)) {
+          page.drawText(sl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
+          y -= 11;
+        }
+      }
+      y -= 3;
+
+      page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
+      page.drawText('Store at 15C - 25C. Protect from freezing and direct sunlight. Keep container tightly closed.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
+      y -= 16;
     }
 
     // ════════════════════════════════════════════════════════════
@@ -519,10 +609,10 @@ export async function GET(request, context) {
 
       // Table Header
       page.drawRectangle({ x: MRG, y: y - 14, width: CONTENT_W, height: 16, color: LIGHT_BG, borderColor: BORDER_CLR, borderWidth: 0.5 });
-      page.drawText('Strength / Dose', { x: MRG + 8, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
+      page.drawText(isCosmetic ? 'Volume / Dose' : 'Strength / Dose', { x: MRG + 8, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
       page.drawText('Presentation Format', { x: MRG + 110, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
-      page.drawText('Reconstitution / Diluent', { x: MRG + 240, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
-      page.drawText('Purity / Quality Standard', { x: MRG + 390, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
+      page.drawText(isCosmetic ? 'Application Mode' : 'Reconstitution / Diluent', { x: MRG + 240, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
+      page.drawText(isCosmetic ? 'Regulatory & Safety Standard' : 'Purity / Quality Standard', { x: MRG + 390, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
       y -= 18;
 
       for (const v of variants.slice(0, 8)) {
@@ -530,12 +620,14 @@ export async function GET(request, context) {
           page = addPage();
           y = H - 76;
         }
-        const vDose = cleanPdfText(v.dosage || v.dose || 'Standard Dose');
-        const vPres = cleanPdfText(v.presentationName || v.presentation || v.format || 'Lyophilized Sterile Vial');
+        const vDose = cleanPdfText(v.dosage || v.dose || (isCosmetic ? '250 mL' : 'Standard Dose'));
+        const vPres = cleanPdfText(v.presentationName || v.presentation || v.format || (isCosmetic ? 'Cosmeceutical Bottle / Tube' : 'Lyophilized Sterile Vial'));
         const vPresLower = String(vPres || '').toLowerCase();
         
         let reconText = v.reconstitutionGuide;
-        if (vPresLower.includes('single') && (vPresLower.includes('pen') || vPresLower.includes('cartridge'))) {
+        if (isCosmetic) {
+          reconText = 'Topical Scalp & Hair (External)';
+        } else if (vPresLower.includes('single') && (vPresLower.includes('pen') || vPresLower.includes('cartridge'))) {
           reconText = 'Pre-filled Cartridge (Ready to use)';
         } else if (vPresLower.includes('double') || vPresLower.includes('dual')) {
           reconText = 'Dual-Chamber In-Device Bypass';
@@ -551,7 +643,7 @@ export async function GET(request, context) {
           reconText = reconText || '1.0 - 2.0 mL Bacteriostatic Water';
         }
         const vRecon = cleanPdfText(reconText);
-        const vPurity = cleanPdfText(v.purity || v.grade || '>= 99.0% (RP-HPLC Verified)');
+        const vPurity = cleanPdfText(isCosmetic ? 'EU Reg. 1223/2009 (CPNP)' : (v.purity || v.grade || '>= 99.0% (RP-HPLC Verified)'));
 
         page.drawText(trunc(vDose, 20), { x: MRG + 8, y, size: 7.2, font: fontB, color: DARK_GRAY });
         page.drawText(trunc(vPres, 26), { x: MRG + 110, y, size: 7.2, font, color: rgb(0.2, 0.25, 0.3) });
@@ -563,14 +655,16 @@ export async function GET(request, context) {
     }
 
     // ── Universal Contraindications & Warnings ──
-    page.drawText('CLINICAL PRECAUTIONS & REGULATORY WARNINGS', { x: MRG, y, size: 8.5, font: fontB, color: WARN_RED });
+    page.drawText(isCosmetic ? 'DERMATOLOGICAL PRECAUTIONS & USAGE WARNINGS' : 'CLINICAL PRECAUTIONS & REGULATORY WARNINGS', { x: MRG, y, size: 8.5, font: fontB, color: WARN_RED });
     y -= 4;
     page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: WARN_RED });
     y -= 14;
 
-    const warnText = isDevice 
-      ? 'Device intended exclusively for single-patient administration. Do not reuse single-use needles. Ensure aseptic technique during cartridge replacement.'
-      : 'Contraindicated in individuals with known hypersensitivity to active compound. Patients with active malignancy must obtain clinical oncology clearance prior to therapy. Not evaluated during pregnancy or lactation.';
+    const warnText = isCosmetic
+      ? 'For external cosmetic use only. Avoid contact with eyes; rinse immediately with clean water if contact occurs. Perform patch test 24h prior to first full application. Discontinue use if persistent erythema, pruritus or scalp irritation develops. Not for injection or oral ingestion. Keep out of reach of children under 3 years.'
+      : isDevice 
+        ? 'Device intended exclusively for single-patient administration. Do not reuse single-use needles. Ensure aseptic technique during cartridge replacement.'
+        : 'Contraindicated in individuals with known hypersensitivity to active compound. Patients with active malignancy must obtain clinical oncology clearance prior to therapy. Not evaluated during pregnancy or lactation.';
 
     const warnLines = wrapText(warnText, 92);
     const warnBoxH = warnLines.length * 11 + 14;
