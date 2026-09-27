@@ -248,6 +248,7 @@ export default function PublicInstitutionalInquiryDrawer({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [emailTouched, setEmailTouched] = useState(false);
+  const [organization, setOrganization] = useState('');
   const [detectedCountry, setDetectedCountry] = useState(() => getCachedDetectedCountry());
   const [phonePrefix, setPhonePrefix] = useState(() => {
     const cached = getCachedDetectedCountry();
