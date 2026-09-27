@@ -34,12 +34,7 @@ export default function ImmuneResilienceCalculator({ lang = 'en' }) {
 
   // ── Computation ──
   const results = useMemo(() => {
-    const w = Number(weight) || 75;
     const isAI = autoimmune === 'yes';
-
-    // TA-1 base dosing: 1.6 mg is the standard clinical vial dose (Zadaxin lineage)
-    // Frequency and duration vary by burden and protocol type
-    const burdenFactor = { low: 0.7, moderate: 1.0, high: 1.3, critical: 1.6 }[immuneBurden] ?? 1.0;
 
     // Standard TA-1 dose is 1.6 mg regardless of weight (it's a fixed clinical unit)
     const ta1Dose = 1.6; // mg SubQ — fixed (as per clinical standard)
@@ -89,7 +84,7 @@ export default function ImmuneResilienceCalculator({ lang = 'en' }) {
       nkTimeline,
       totalTA1Vials,
     };
-  }, [weight, immuneBurden, protocol, autoimmune]);
+  }, [immuneBurden, protocol, autoimmune]);
 
   const handleReset = () => {
     setWeight(75);
@@ -255,7 +250,7 @@ export default function ImmuneResilienceCalculator({ lang = 'en' }) {
           <div className="immune-calc__kpi-grid">
             <div className="immune-calc__kpi">
               <div className="immune-calc__kpi-label">TA-1 Dose</div>
-              <div className="immune-calc__kpi-value green">{results.ta1Dose} mg</div>
+              <div className="immune-calc__kpi-value blue">{results.ta1Dose} mg</div>
               <div className="immune-calc__kpi-unit">SubQ • {results.ta1FreqPerWeek}× week</div>
             </div>
             <div className="immune-calc__kpi">

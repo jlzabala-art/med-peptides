@@ -592,7 +592,7 @@ function QrModal({ isOpen, onClose, url, productName }) {
 export default function CosmeticsDetail({ product, region = 'US', isProfessional = false }) {
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
   const [lang] = useState('en');
-  const [inciFilter, setInciFilter] = useState('all');
+  const [inciFilter, setInciFilter] = useState('key_active');
   const [inciSearchQuery, setInciSearchQuery] = useState('');
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);

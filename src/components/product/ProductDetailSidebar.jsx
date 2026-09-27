@@ -44,7 +44,7 @@ export default function ProductDetailSidebar({
   isCosmeticProduct = false,
   isSolventProduct = false,
   isCorporateService = false,
-  hideFloatingTrigger = false
+  hideFloatingTrigger = true
 }) {
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');

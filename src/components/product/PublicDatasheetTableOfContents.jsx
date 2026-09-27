@@ -32,7 +32,7 @@ export default function PublicDatasheetTableOfContents({
   sections = [],
   lang = 'en',
   title = null,
-  hideFloatingTrigger = false,
+  hideFloatingTrigger = true,
   isBloodoSuite = false,
   currentProductSlug = '',
   associatedProtocols = [],

@@ -47,7 +47,7 @@ export default function ProtocolDetailSidebar({
   topicalAdjuncts = [],
   onOpenQrModal = null,
   onCopyLabRequisition = null,
-  hideFloatingTrigger = false,
+  hideFloatingTrigger = true,
   publicUrl = null
 }) {
   const isEs = lang === 'es';

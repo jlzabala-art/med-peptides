@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #14532d 100%);
+  background: linear-gradient(135deg, #071e3d 0%, #003666 60%, #1a73e8 100%);
   border-bottom: 1px solid rgba(148, 163, 184, 0.15);
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -32,13 +32,13 @@
 .immune-calc__icon-wrap {
   width: 34px;
   height: 34px;
-  background: rgba(52, 211, 153, 0.15);
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #34d399;
+  color: #ffffff;
   flex-shrink: 0;
 }
 
@@ -51,16 +51,16 @@
 
 .immune-calc__subtitle {
   font-size: 0.70rem;
-  color: #94a3b8;
+  color: #e2e8f0;
   font-weight: 500;
 }
 
 .immune-calc__badge {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #34d399;
-  background: rgba(52, 211, 153, 0.12);
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   padding: 0.2rem 0.6rem;
   letter-spacing: 0.04em;
@@ -133,8 +133,8 @@
 
 .immune-calc__select:focus,
 .immune-calc__input:focus {
-  border-color: #34d399;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
   background: #ffffff;
 }
 
@@ -143,9 +143,10 @@
   color: #94a3b8;
 }
 
-/* ── Results ── */
+/* ── Results (Google Cloud Dark Blue Surface) ── */
 .immune-calc__results {
-  background: linear-gradient(135deg, #0f172a 0%, #14532d 100%);
+  background: linear-gradient(135deg, #071e3d 0%, #002b4d 60%, #003666 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   padding: 1.1rem 1.25rem;
   display: flex;
@@ -156,7 +157,7 @@
 .immune-calc__results-title {
   font-size: 0.72rem;
   font-weight: 800;
-  color: #34d399;
+  color: #8ab4f8;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -190,17 +191,17 @@
   line-height: 1.1;
 }
 
-.immune-calc__kpi-value.green { color: #34d399; }
+.immune-calc__kpi-value.green { color: #8ab4f8; }
 .immune-calc__kpi-value.blue { color: #60a5fa; }
 .immune-calc__kpi-value.amber { color: #fbbf24; }
 
 .immune-calc__kpi-unit {
   font-size: 0.68rem;
-  color: #64748b;
+  color: #94a3b8;
   margin-top: 0.1rem;
 }
 
-/* ── Schedule Strip ── */
+/* ── Schedule Strip (Google Cloud Info Surface) ── */
 .immune-calc__schedule {
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -208,12 +209,12 @@
 }
 
 .immune-calc__schedule-header {
-  background: #f0fdf4;
-  border-bottom: 1px solid #d1fae5;
+  background: #f8fafd;
+  border-bottom: 1px solid #e8f0fe;
   padding: 0.75rem 1rem;
   font-size: 0.72rem;
   font-weight: 800;
-  color: #15803d;
+  color: #1a73e8;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   display: flex;
@@ -226,6 +227,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  background: #ffffff;
 }
 
 .immune-calc__schedule-row {
@@ -238,7 +240,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #34d399;
+  background: #1a73e8;
   margin-top: 5px;
   flex-shrink: 0;
 }
@@ -254,7 +256,7 @@
   font-weight: 700;
 }
 
-/* ── Footer ── */
+/* ── Footer Actions (Google Cloud Button Standard) ── */
 .immune-calc__footer {
   display: flex;
   align-items: center;
@@ -266,35 +268,38 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.76rem;
-  font-weight: 700;
+  padding: 0.5rem 1.1rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all 0.15s;
+  min-height: 36px;
+  transition: all 0.15s ease;
 }
 
 .immune-calc__btn--primary {
-  background: linear-gradient(135deg, #34d399, #059669);
+  background: #1a73e8;
   color: #ffffff;
+  box-shadow: 0 1px 2px rgba(26, 115, 232, 0.2);
 }
 
 .immune-calc__btn--primary:hover {
-  background: linear-gradient(135deg, #6ee7b7, #34d399);
+  background: #1557b0;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+  box-shadow: 0 2px 6px rgba(26, 115, 232, 0.35);
 }
 
 .immune-calc__btn--ghost {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
 }
 
 .immune-calc__btn--ghost:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #f8fafd;
+  border-color: #1a73e8;
+  color: #1a73e8;
 }
 
 .immune-calc__disclaimer {

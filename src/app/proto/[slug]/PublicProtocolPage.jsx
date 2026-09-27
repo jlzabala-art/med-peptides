@@ -230,7 +230,9 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
         localStorage.setItem('atlas_portal_lang', nextLang);
         localStorage.setItem('atlas_catalog_lang', nextLang);
         window.dispatchEvent(new CustomEvent('atlas_lang_change', { detail: nextLang }));
-      } catch {}
+      } catch (_e) {
+        // ignore storage errors
+      }
       const url = new URL(window.location.href);
       url.searchParams.set('lang', nextLang);
       window.history.replaceState({}, '', url.toString());
@@ -382,14 +384,10 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
     return generateDynamicWeeklySchedule(protocol, activeRoadmapPhase);
   }, [protocol, activeRoadmapPhase]);
 
-  // Auto-clamp active tab if compounds count changes
-  useEffect(() => {
-    if (activeReconTab >= reconData.length && reconData.length > 0) {
-      setActiveReconTab(0);
-    }
-  }, [reconData.length, activeReconTab]);
+  // Safe clamped active tab index for compounds reconstitution
+  const clampedReconTab = (activeReconTab >= reconData.length && reconData.length > 0) ? 0 : activeReconTab;
 
-  const currentRecon = reconData[activeReconTab] || reconData[0] || {
+  const currentRecon = reconData[clampedReconTab] || reconData[0] || {
     name: displayName || 'Therapeutic Compound',
     strength: '10 mg Vial',
     solvent: '2.0 mL BAC Water',
@@ -1099,6 +1097,7 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
             title={lang === 'es' ? 'Secciones del Protocolo' : 'Protocol Navigation'}
             protocol={protocol}
             slug={slug}
+            hideFloatingTrigger={true}
             similarProtocols={similarProtocols}
             topicalAdjuncts={protocol?.topical_adjuncts?.length > 0 ? protocol.topical_adjuncts : (isHairProtocol ? [
               {

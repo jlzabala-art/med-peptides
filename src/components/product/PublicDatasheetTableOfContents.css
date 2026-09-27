@@ -203,19 +203,9 @@
   color: #003666;
 }
 
-/* ── 2. MOBILE FLOATING TRIGGER BUTTON (< 1024px) ── */
+/* ── 2. MOBILE FLOATING TRIGGER BUTTON (Disabled: Sections live exclusively in PublicStickyActionBar) ── */
 .pds-mobile-toc-fab-container {
-  display: block;
-  position: fixed;
-  bottom: 84px; /* Sits just above PublicStickyActionBar */
-  left: 1rem;
-  z-index: 990;
-}
-
-@media (min-width: 1024px) {
-  .pds-mobile-toc-fab-container {
-    display: none;
-  }
+  display: none !important;
 }
 
 .pds-mobile-toc-fab {
