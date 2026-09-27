@@ -837,11 +837,11 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                 {[
-                  { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
-                  { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors and prevents premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
-                  { target: 'Tensile Strength', compound: 'Native Freshwater Fish Tropocollagen', mechanism: 'Intact Triple Helix ECM Scaffolding', outcome: 'Patented Polish freshwater fish tropocollagen (0% bovine) adheres to keratin fibrils, repairing cortical microfractures.', stat: '+24% Fiber Strength' },
-                  { target: 'Microvascular Flow', compound: 'L-Arginine & Micronized Diosmin', mechanism: 'eNOS Vasodilation & VEGF Signaling', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
-                  { target: 'Bio-Silica Fortification', compound: 'Equisetum Arvense & Keratin Hydrolysate', mechanism: 'Orthosilicic Acid / Cuticle Sealing', outcome: 'Supplies bioavailable silica for structural disulfide bonding in the cortex, reducing combing breakage.', stat: '−47% Combing Force' },
+                  { target: 'DHT Inhibition', compound: 'Scutellaria Baicalensis (Baicapil™ 2%)', mechanism: '5α-Reductase Blockade / Wnt Pathway', outcome: 'Suppresses follicular miniaturisation at dermal papilla and stimulates stem cell telogen-to-anagen transition.', stat: '−60.6% Hair Loss' },
+                  { target: 'Follicular Anchoring', compound: 'Phyllanthus Emblica (Kerascalp™)', mechanism: 'Collagen XVII Support / Melanogenesis', outcome: 'Strengthens dermal hair follicle anchors via Collagen XVII upregulation, preventing premature stem cell exhaustion and graying.', stat: '+5.6% Thickness' },
+                  { target: 'Tensile Strength', compound: 'Equisetum Bio-Silica & Phytokeratin', mechanism: 'Bioavailable Orthosilicic Acid & Cuticle Sealing', outcome: 'Supplies bio-silica and wheat protein amino peptides for cortical disulfide bonding, repairing microfractures.', stat: '+24% Fiber Strength' },
+                  { target: 'Microvascular Flow', compound: 'L-Arginine & Osmoprotective Betaine', mechanism: 'Nitric Oxide Vasodilation & Osmolyte Delivery', outcome: 'Enhances scalp microcirculation and oxygen-nutrient delivery to actively dividing anagen matrix cells.', stat: '+21% Density' },
+                  { target: 'Cuticular Sealing', compound: 'Hydrafeel® 3 (Polyglyceryl-3 PCA)', mechanism: 'Hydrophobic Moisture Barrier / Lipid Film', outcome: 'Repairs lipid bilayer of the hair fiber, locking moisture inside cortex while shielding against thermal and UV oxidation.', stat: '−47% Combing Force' },
                 ].map(item => (
                   <div
                     key={item.target}
@@ -900,7 +900,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
             {/* INCI DOSSIER */}
             <PublicSectionCard id="inci-dossier" icon={Microscope} category="INGREDIENT DOSSIER" title="Full INCI Composition & Pharmacopoeial Breakdown" badge={`${ingredients.length} Declared Ingredients`} badgeVariant="green">
               <p style={{ fontSize: '0.81rem', color: '#64748b', marginBottom: '0.85rem', lineHeight: 1.6 }}>
-                Official International Nomenclature of Cosmetic Ingredients (INCI) declaration complying with Article 19(1)(g) of EU Cosmetics Regulation 1223/2009. Listed in descending concentration order (w/w). Features <strong>Colway Patented Freshwater Fish Skin Tropocollagen</strong>, Baicapil™ (2%), and Kerascalp™.
+                Official International Nomenclature of Cosmetic Ingredients (INCI) declaration complying with Article 19(1)(g) of EU Cosmetics Regulation 1223/2009. Listed in descending concentration order (w/w). Features <strong>Baicapil™ (2%), Kerascalp™ (Amla), Hydrafeel® 3, and Field Horsetail Bio-Silica</strong>.
               </p>
 
               {/* Complete Raw INCI Copy Box (GCP Standard Copyable Format) */}
@@ -1347,7 +1347,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       {/* PERSISTENT GOOGLE CLOUD STICKY BOTTOM ACTION BAR */}
       <PublicStickyActionBar
         title={name}
-        subtitle={`${selectedVariant?.volume || '250 mL Bottle'} • Colway Native Collagen System • EU Reg. 1223/2009`}
+        subtitle={`${selectedVariant?.volume || '200 mL'} • Colway Hair Strengthening System • EU Reg. 1223/2009`}
         badge="Cosmeceutical Monograph"
         badgeType="default"
         inquireLabel="Inquire Product"
