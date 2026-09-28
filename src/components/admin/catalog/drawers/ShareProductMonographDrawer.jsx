@@ -230,21 +230,19 @@ export default function ShareProductMonographDrawer({
     }
   }, [availableStrengths, selectedStrengthId]);
 
-  if (!isOpen || !product) return null;
-
-  const productName = product.canonicalName || product.name || 'Clinical Product';
-  const slug = product.slug || product.id;
+  const productName = product?.canonicalName || product?.name || 'Clinical Product';
+  const slug = product?.slug || product?.id || '';
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
 
-  const catLowerSMD = (product.category || product.therapeutic_category || '').toLowerCase();
+  const catLowerSMD = (product?.category || product?.therapeutic_category || '').toLowerCase();
   const isProductCosmeticSMD = (
     catLowerSMD === 'cosmetics' ||
     catLowerSMD === 'hair cosmetics' ||
     catLowerSMD === 'cosmeceutical' ||
     catLowerSMD === 'aesthetic injectables' ||
     catLowerSMD === 'aesthetic injectable' ||
-    product.is_cosmetic === true ||
-    product.is_aesthetic_injectable === true
+    product?.is_cosmetic === true ||
+    product?.is_aesthetic_injectable === true
   );
 
   // Build reactive URL
@@ -292,6 +290,7 @@ export default function ShareProductMonographDrawer({
 
   // Centralized generation & Firestore audit registration
   const ensureTrackedUrl = useCallback(async (deliveryChannel = 'link') => {
+    if (!slug) return '';
     if (trackedShortUrl) return trackedShortUrl;
 
     try {
@@ -457,6 +456,8 @@ export default function ShareProductMonographDrawer({
   const handleOpenPreview = () => {
     window.open(effectiveShareUrl, '_blank', 'noopener,noreferrer');
   };
+
+  if (!isOpen || !product) return null;
 
   return (
     <StandardDrawer
