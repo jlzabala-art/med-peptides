@@ -5,16 +5,16 @@
  * Used identically across InteractiveReconstitutionGuide and MonographPreviewModal.
  */
 
-// ⚡ O(1) Pre-computed Lookups for standard catalog vial strengths
+// ⚡ O(1) Pre-computed Lookups for standard catalog vial strengths targeting ~50 UI (0.5 mL) sweet spot
 export const RECONSTITUTION_LOOKUP = Object.freeze({
   1:  { bacMl: 1.0, concMgMl: 1.0,  concStr: '1.0 mg/mL',  diluentStr: '1.0 mL BAC Water' },
   2:  { bacMl: 1.0, concMgMl: 2.0,  concStr: '2.0 mg/mL',  diluentStr: '1.0 mL BAC Water' },
-  5:  { bacMl: 2.0, concMgMl: 2.5,  concStr: '2.5 mg/mL',  diluentStr: '2.0 mL BAC Water' },
-  10: { bacMl: 2.0, concMgMl: 5.0,  concStr: '5.0 mg/mL',  diluentStr: '2.0 mL BAC Water' },
-  15: { bacMl: 3.0, concMgMl: 5.0,  concStr: '5.0 mg/mL',  diluentStr: '3.0 mL BAC Water' },
-  20: { bacMl: 3.0, concMgMl: 6.67, concStr: '6.7 mg/mL',  diluentStr: '3.0 mL BAC Water' },
-  30: { bacMl: 4.0, concMgMl: 7.5,  concStr: '7.5 mg/mL',  diluentStr: '4.0 mL BAC Water' },
-  40: { bacMl: 5.0, concMgMl: 8.0,  concStr: '8.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
+  5:  { bacMl: 1.0, concMgMl: 5.0,  concStr: '5.0 mg/mL',  diluentStr: '1.0 mL BAC Water' }, // 2.5 mg dose = 0.5 mL (50 UI)
+  10: { bacMl: 2.0, concMgMl: 5.0,  concStr: '5.0 mg/mL',  diluentStr: '2.0 mL BAC Water' }, // 2.5 mg dose = 0.5 mL (50 UI), 4 doses
+  15: { bacMl: 2.0, concMgMl: 7.5,  concStr: '7.5 mg/mL',  diluentStr: '2.0 mL BAC Water' }, // 3.75 mg dose = 0.5 mL (50 UI)
+  20: { bacMl: 2.0, concMgMl: 10.0, concStr: '10.0 mg/mL', diluentStr: '2.0 mL BAC Water' }, // 5.0 mg dose = 0.5 mL (50 UI), 4 doses
+  30: { bacMl: 2.0, concMgMl: 15.0, concStr: '15.0 mg/mL', diluentStr: '2.0 mL BAC Water' }, // 7.5 mg dose = 0.5 mL (50 UI), 4 doses
+  40: { bacMl: 2.0, concMgMl: 20.0, concStr: '20.0 mg/mL', diluentStr: '2.0 mL BAC Water' }, // 10.0 mg dose = 0.5 mL (50 UI), 4 doses
   50:   { bacMl: 5.0,  concMgMl: 10.0,  concStr: '10.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
   100:  { bacMl: 5.0,  concMgMl: 20.0,  concStr: '20.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },
   200:  { bacMl: 5.0,  concMgMl: 40.0,  concStr: '40.0 mg/mL',  diluentStr: '5.0 mL BAC Water' },

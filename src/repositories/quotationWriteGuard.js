@@ -158,6 +158,8 @@ export function validateQuotationWrite(inputData, isUpdate = false) {
         presentation: item.presentation || '',
         supplierId: item.supplierId ? String(item.supplierId) : '',
         supplierName: item.supplierName ? String(item.supplierName) : '',
+        warehouseId: item.warehouseId ? String(item.warehouseId) : '',
+        warehouseName: item.warehouseName ? String(item.warehouseName) : '',
         quantity: qty,
         unitPrice,
         supplierCost,

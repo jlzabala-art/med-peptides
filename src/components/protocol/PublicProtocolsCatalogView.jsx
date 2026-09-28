@@ -1141,6 +1141,52 @@ export default function PublicProtocolsCatalogView({ initialProtocols = [] }) {
                               </div>
                             )}
 
+                            {/* Google Cloud Style Phase Pipeline Stepper */}
+                            {Array.isArray(proto.phases) && proto.phases.length > 0 && (
+                              <div style={{
+                                margin: '8px 0 10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                overflowX: 'auto',
+                                paddingBottom: '2px',
+                                scrollbarWidth: 'none'
+                              }}>
+                                {proto.phases.map((ph, phIdx) => (
+                                  <React.Fragment key={ph.id || phIdx}>
+                                    <div style={{
+                                      flex: '1 1 0',
+                                      minWidth: '60px',
+                                      padding: '4px 6px',
+                                      background: phIdx === 0 ? '#eff6ff' : (phIdx === proto.phases.length - 1 ? '#f0fdf4' : '#f0fdfa'),
+                                      border: `1px solid ${phIdx === 0 ? '#bfdbfe' : (phIdx === proto.phases.length - 1 ? '#bbf7d0' : '#99f6e4')}`,
+                                      borderRadius: '6px',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '1px'
+                                    }}>
+                                      <span style={{
+                                        fontSize: '0.62rem',
+                                        fontWeight: 800,
+                                        color: phIdx === 0 ? '#1e40af' : (phIdx === proto.phases.length - 1 ? '#166534' : '#0f766e'),
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                      }}>
+                                        {ph.name || `Phase ${phIdx + 1}`}
+                                      </span>
+                                      <span style={{ fontSize: '0.58rem', color: '#64748b', fontWeight: 600 }}>
+                                        {ph.durationWeeks || 4}w · Wk {ph.startWeek || 1}–{ph.endWeek || (ph.durationWeeks || 4)}
+                                      </span>
+                                    </div>
+                                    {phIdx < proto.phases.length - 1 && (
+                                      <span style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, flexShrink: 0 }}>➔</span>
+                                    )}
+                                  </React.Fragment>
+                                ))}
+                              </div>
+                            )}
+
                             {/* Timeline Specs Strip */}
                             <div className="proto-card-specs">
                               <div className="proto-card-spec-item">

@@ -42,6 +42,7 @@ function syncFiltersToUrl(filters) {
     const set = (k, v, def) => v && v !== def ? params.set(k, v) : params.delete(k);
     set('q',     filters.searchQuery,  '');
     set('goals', filters.selectedGoals.join(','), '');
+    set('cat',   filters.selectedCategories ? filters.selectedCategories.join(',') : '', '');
     set('fmt',   filters.packagingMode, 'all');
     set('dose',  filters.dosageFilter,  'all');
     set('fda',   filters.fdaFilter,     'all');
@@ -271,6 +272,26 @@ export function useSharedCatalogState({
 
   const clearGoals = useCallback(() => {
     setSelectedGoals([]);
+  }, []);
+
+  // Multi-Category Support (Compounding & Wellness vs Clinical Peptides)
+  const [selectedCategories, setSelectedCategories] = useState(() => {
+    const raw = getUrlParam('cat', '');
+    return raw ? raw.split(',').filter(Boolean) : [];
+  });
+
+  const toggleCategory = useCallback((catId) => {
+    if (!catId || catId === 'all') {
+      setSelectedCategories([]);
+      return;
+    }
+    setSelectedCategories(prev =>
+      prev.includes(catId) ? prev.filter(c => c !== catId) : [...prev, catId]
+    );
+  }, []);
+
+  const clearCategories = useCallback(() => {
+    setSelectedCategories([]);
   }, []);
 
   // Alias for backward compatibility

@@ -32,7 +32,7 @@ export default function SharedCatalogKpiBar({
     {
       id: 'formulas',
       icon: FlaskConical,
-      title: isGlobalScope ? 'Global Formulations' : 'Active Formulations',
+      title: isGlobalScope ? 'Global Formulations' : (serverKpis?.formulasTitle || 'Active Formulations'),
       value: isGlobalScope
         ? `${globalCount}`
         : isFiltered
@@ -46,10 +46,10 @@ export default function SharedCatalogKpiBar({
       badgeColor: isGlobalScope ? '#0f766e' : isFiltered ? '#d97706' : '#0369a1',
       badgeBg: isGlobalScope ? '#ccfbf1' : isFiltered ? '#fef3c7' : '#e0f2fe',
       subtitle: isGlobalScope
-        ? 'Enterprise peptide repository'
+        ? 'Enterprise repository'
         : isFiltered
         ? 'Matching active search criteria'
-        : 'Lyophilized peptide formulations',
+        : (serverKpis?.formulasSubtitle || 'Lyophilized peptide formulations'),
       color: isGlobalScope ? '#0d9488' : '#0284c7',
       bg: isGlobalScope ? 'rgba(13, 148, 136, 0.07)' : 'rgba(2, 132, 199, 0.06)',
       border: isGlobalScope ? 'rgba(13, 148, 136, 0.22)' : 'rgba(2, 132, 199, 0.18)',
@@ -57,7 +57,7 @@ export default function SharedCatalogKpiBar({
     {
       id: 'purity',
       icon: ShieldCheck,
-      title: 'Analytical Purity',
+      title: serverKpis?.purityTitle || 'Analytical Purity',
       value: serverKpis?.purityValue || '≥99.2%',
       badge: serverKpis?.purityBadge || 'Dual HPLC',
       badgeColor: '#15803d',
@@ -70,7 +70,7 @@ export default function SharedCatalogKpiBar({
     {
       id: 'dispatch',
       icon: Zap,
-      title: 'Dispatch Readiness',
+      title: serverKpis?.dispatchTitle || 'Dispatch Readiness',
       value: serverKpis?.dispatchSlaValue || '24-48h',
       badge: serverKpis?.dispatchBadge || 'Ready Stock',
       badgeColor: '#1d4ed8',
@@ -83,7 +83,7 @@ export default function SharedCatalogKpiBar({
     {
       id: 'traceability',
       icon: FileCheck,
-      title: 'Batch Traceability',
+      title: serverKpis?.traceabilityTitle || 'Batch Traceability',
       value: serverKpis?.traceabilityValue || '100% CoA',
       badge: serverKpis?.traceabilityBadge || 'Full Trace',
       badgeColor: '#6d28d9',

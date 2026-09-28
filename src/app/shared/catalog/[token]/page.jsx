@@ -559,7 +559,51 @@ export default async function SharedCatalogPage({ params }) {
     }
   }
 
-  const serverKpis = {
+  const normCatFilter = String(catalogueFilter || '').toLowerCase().trim();
+  const isCompoundingCatalog = 
+    normCatFilter === 'magenta-compounding' ||
+    normCatFilter === 'compounding' ||
+    catalogMeta?.category === 'compounding' ||
+    (products.length > 0 && products.every(p => !String(p.category || '').toLowerCase().includes('peptide')));
+
+  if (!catalogMeta.title) {
+    if (normCatFilter === 'magenta-peptides') {
+      catalogMeta.title = 'Magenta Medical — Clinical Peptides Portfolio';
+    } else if (normCatFilter === 'magenta-compounding') {
+      catalogMeta.title = 'Magenta Medical — Compounding & Wellness Portfolio';
+    }
+  }
+
+  const serverKpis = isCompoundingCatalog ? {
+    // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
+    globalTotalProducts: metaFacets?.totals?.products || 430,
+    globalTotalVariants: metaFacets?.totals?.variants || 830,
+    globalActiveProducts: metaFacets?.totals?.activeProducts || 429,
+
+    // 2. Pre-calculated Catalog-slice Metrics
+    catalogTotalProducts: products.length,
+    catalogTotalVariants: totalCatalogVariants,
+    readyStockCount: readyStockVariants,
+    coaVerifiedCount,
+
+    // 3. Clinical & Compounding Benchmarks
+    isCompounding: true,
+    formulasTitle: 'Compounding Formulations',
+    formulasSubtitle: 'Pharmaceutical compounding & cosmeceuticals',
+    purityTitle: 'Pharmaceutical Grade',
+    purityValue: 'USP / Ph. Eur.',
+    purityBadge: 'API Monograph',
+    puritySubtitle: 'Pharmacopeial raw materials & vehicles',
+    dispatchTitle: 'Compounding SLA',
+    dispatchSlaValue: '24-48h',
+    dispatchBadge: 'Compounded to Order',
+    dispatchSubtitle: 'Cleanroom preparation & quality release',
+    traceabilityTitle: 'Delivery Systems',
+    traceabilityValue: 'TrichoSol™ & Lipoderm®',
+    traceabilityBadge: 'Advanced Vehicles',
+    traceabilitySubtitle: 'Transdermal & follicular delivery',
+    updatedAt: metaFacets?.updatedAt || new Date().toISOString()
+  } : {
     // 1. Authoritative Global Database Facets (from _meta/catalog_facets)
     globalTotalProducts: metaFacets?.totals?.products || 430,
     globalTotalVariants: metaFacets?.totals?.variants || 830,
@@ -572,14 +616,20 @@ export default async function SharedCatalogPage({ params }) {
     coaVerifiedCount,
 
     // 3. Clinical & Analytical Benchmarks (Institutional SLAs - STRICT zero cold chain)
+    isCompounding: false,
+    formulasTitle: 'Active Formulations',
+    formulasSubtitle: 'Lyophilized peptide formulations',
+    purityTitle: 'Analytical Purity',
     purityValue: '≥99.2%',
     purityBadge: 'Dual HPLC',
-    puritySubtitle: 'High-purity verified assay',
-    dispatchSlaValue: '24-48h',
-    dispatchBadge: 'Ready Stock',
-    dispatchSubtitle: 'Immediate warehouse fulfillment',
+    puritySubtitle: 'Dual-wavelength HPLC & MS',
+    dispatchTitle: 'Zero Cold-Chain',
+    dispatchSlaValue: 'Zero Cold-Chain',
+    dispatchBadge: 'Ambient Stable',
+    dispatchSubtitle: 'Lyophilized peptide cake',
+    traceabilityTitle: 'Batch Traceability',
     traceabilityValue: '100% CoA',
-    traceabilityBadge: 'Full Trace',
+    traceabilityBadge: 'Batch Trace',
     traceabilitySubtitle: 'Lot analysis & chromatography',
     updatedAt: metaFacets?.updatedAt || new Date().toISOString()
   };

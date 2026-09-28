@@ -102,14 +102,27 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
     const vCatBrand = String(v.catalogBrand || v.sourceCatalogue || v.source_catalogue || '').toLowerCase().trim();
     const pCatBrand = String(p.catalogBrand || p.sourceCatalogue || p.source_catalogue || '').toLowerCase().trim();
 
+    const isPeptide = String(p.category || '').toLowerCase().includes('peptide') ||
+                      p.productType === 'peptide' ||
+                      p.type === 'peptide' ||
+                      p.primaryType === 'peptide';
+
     if (vCatBrand) {
-      if (!vCatBrand.includes(normTargetCat)) {
+      if (normTargetCat === 'magenta-peptides') {
+        if (!vCatBrand.includes('magenta') || !isPeptide) return false;
+      } else if (normTargetCat === 'magenta-compounding') {
+        if (!vCatBrand.includes('magenta') || isPeptide) return false;
+      } else if (!vCatBrand.includes(normTargetCat)) {
         const isLotusEquiv = (normTargetCat === 'regenpept' && vCatBrand.includes('lotusland')) ||
                              (normTargetCat === 'lotusland' && vCatBrand.includes('regenpept'));
         if (!isLotusEquiv) return false;
       }
     } else if (pCatBrand) {
-      if (!pCatBrand.includes(normTargetCat)) {
+      if (normTargetCat === 'magenta-peptides') {
+        if (!pCatBrand.includes('magenta') || !isPeptide) return false;
+      } else if (normTargetCat === 'magenta-compounding') {
+        if (!pCatBrand.includes('magenta') || isPeptide) return false;
+      } else if (!pCatBrand.includes(normTargetCat)) {
         const isLotusEquiv = (normTargetCat === 'regenpept' && pCatBrand.includes('lotusland')) ||
                              (normTargetCat === 'lotusland' && pCatBrand.includes('regenpept'));
         if (!isLotusEquiv) return false;
@@ -124,6 +137,10 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
 
       if ((normTargetCat === 'regenpept' || normTargetCat === 'lotusland') && isLotus) {
         // Accept Lotusland as RegenPept
+      } else if (normTargetCat === 'magenta-peptides') {
+        if (!isMagenta || !isPeptide) return false;
+      } else if (normTargetCat === 'magenta-compounding') {
+        if (!isMagenta || isPeptide) return false;
       } else if (normTargetCat.includes('magenta') && isMagenta) {
         // Accept Magenta
       } else if (normTargetCat.includes('larimedical') && isLarimedical) {

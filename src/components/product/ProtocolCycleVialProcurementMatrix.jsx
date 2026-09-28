@@ -319,10 +319,13 @@ export default function ProtocolCycleVialProcurementMatrix({
           </div>
           <div className="pcvp-bc-pills">
             {Object.entries(basketSummary.vialStrengthCounts).map(([strength, qty]) => (
-              <span key={strength} className="pcvp-strength-pill font-mono">
-                {qty}× {strength}
+              <span key={strength} className="pcvp-strength-pill font-mono" style={{ background: '#003666', color: '#ffffff', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '0.74rem' }}>
+                {qty}× {strength} vial{qty > 1 ? 's' : ''}
               </span>
             ))}
+          </div>
+          <div className="pcvp-bc-subtext" style={{ marginTop: '4px', fontSize: '0.68rem', color: '#475569', fontWeight: 600 }}>
+            Exact count of each vial presentation needed
           </div>
         </div>
 
@@ -389,7 +392,7 @@ export default function ProtocolCycleVialProcurementMatrix({
                 <th style={{ width: '18%' }}>Duration (Adjustable)</th>
                 <th style={{ width: '17%' }}>Recommended Strength</th>
                 <th style={{ width: '14%' }}>Vials to Buy</th>
-                <th style={{ width: '16%', textAlign: 'right' }}>Calibrate</th>
+                <th style={{ width: '16%', textAlign: 'right' }}>Simulator</th>
               </tr>
             </thead>
             <tbody>
@@ -448,13 +451,13 @@ export default function ProtocolCycleVialProcurementMatrix({
                       )}
                     </td>
 
-                    {/* Column 4: Recommended Vial Strength */}
+                    {/* Column 4: Recommended Vial Strength (Calibrated to 50 UI / 0.5 mL) */}
                     <td>
                       <div className="pcvp-vial-strength font-mono">
                         {ph.recommendedVial}
                       </div>
-                      <div className="pcvp-vial-dilution font-mono">
-                        {ph.recommendedBacMl || 2.0} mL BAC → {ph.resultUnits || 50} UI
+                      <div className="pcvp-vial-dilution font-mono" style={{ color: '#0369a1', fontWeight: 600 }}>
+                        {ph.recommendedBacMl || 2.0} mL BAC → 50 UI (0.5 mL)
                       </div>
                     </td>
 
@@ -462,7 +465,7 @@ export default function ProtocolCycleVialProcurementMatrix({
                     <td>
                       <div className="pcvp-vial-qty-cell">
                         <span className="pcvp-qty-badge font-mono">
-                          {ph.vialsNeeded}× Vial{ph.vialsNeeded > 1 ? 's' : ''}
+                          {ph.vialsNeeded}× {ph.vMg} mg
                         </span>
                         {ph.isUspSterilitySplit && (
                           <span className="pcvp-usp-tag" title="USP <797> requires vial replacement at 28 days">
@@ -472,7 +475,7 @@ export default function ProtocolCycleVialProcurementMatrix({
                       </div>
                     </td>
 
-                    {/* Column 6: Action Button */}
+                    {/* Column 6: Action Button (Simulator / Active in Syringe) */}
                     <td style={{ textAlign: 'right' }}>
                       <button
                         type="button"
@@ -482,15 +485,16 @@ export default function ProtocolCycleVialProcurementMatrix({
                           }
                         }}
                         className={`pcvp-calib-btn ${ph.isCurrentActive ? 'btn-current' : ''}`}
+                        title={ph.isCurrentActive ? 'Currently active in syringe simulator below' : `Load ${ph.name} into syringe simulator`}
                       >
                         {ph.isCurrentActive ? (
                           <>
                             <Check size={12} />
-                            <span>Calibrated</span>
+                            <span>Active in Syringe</span>
                           </>
                         ) : (
                           <>
-                            <span>Select</span>
+                            <span>Simulate</span>
                             <ArrowRight size={12} />
                           </>
                         )}

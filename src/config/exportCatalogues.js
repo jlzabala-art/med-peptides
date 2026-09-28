@@ -19,16 +19,43 @@ export const EXPORT_CATALOGUES = [
     description: '104 variants portfolio (Peptides & Research Supplies)'
   },
   {
+    id: 'magenta-peptides',
+    supplierId: 'supplier-magenta',
+    brandName: 'Magenta Peptides (Clinical Peptides Portfolio)',
+    catalogueFilter: 'Magenta-Peptides',
+    catalogType: 'peptides',
+    flag: '🇦🇪',
+    defaultCurrency: 'AED',
+    warehouse: 'UAE Hub - Dubai',
+    defaultCostMarginAvailable: true,
+    variantCount: 251,
+    description: '251 variants clinical peptides portfolio (Pre-filled Pens, Refill Cartridges, SubQ Vials & Sprays)'
+  },
+  {
+    id: 'magenta-compounding',
+    supplierId: 'supplier-magenta',
+    brandName: 'Magenta Compounding & Wellness (Cosmeceuticals, BHRT & IVNT)',
+    catalogueFilter: 'Magenta-Compounding',
+    catalogType: 'compounding',
+    flag: '🇦🇪',
+    defaultCurrency: 'AED',
+    warehouse: 'UAE Hub - Dubai',
+    defaultCostMarginAvailable: true,
+    variantCount: 91,
+    description: '91 variants portfolio (Medical Cosmeceuticals, Scalp TrichoSol, BHRT & IV Drips)'
+  },
+  {
     id: 'magenta',
     supplierId: 'supplier-magenta',
-    brandName: 'Magenta Medical (Complete Compounding & Peptides)',
+    brandName: 'Magenta Medical (Complete Master Portfolio)',
     catalogueFilter: 'Magenta',
+    catalogType: 'all',
     flag: '🇦🇪',
     defaultCurrency: 'AED',
     warehouse: 'UAE Hub - Dubai',
     defaultCostMarginAvailable: true,
     variantCount: 366,
-    description: '366 variants portfolio (Pre-filled Pens, Refill Cartridges, Peptides, IV Drips & Sprays)'
+    description: 'Complete 366 variants vademecum (Peptides, Cosmeceuticals, BHRT, IVNT & Clinical Supplies)'
   },
   {
     id: 'larimedical',

@@ -198,7 +198,7 @@ export default function PublicUnifiedHeader({
   return (
     <>
       <header className={`public-unified-header ${isScrolled ? 'is-scrolled' : ''}`}>
-        {/* ── Line 1: Corporate Brand Identity & Account Masthead (Google Cloud Standard) ── */}
+        {/* ── Executive TopBar (Google Cloud Console Standard) ── */}
         <div className="puh-brand-row">
           <div className="puh-brand-row-inner">
             {/* Left: Brand Logo / Title */}
@@ -208,8 +208,65 @@ export default function PublicUnifiedHeader({
               </Link>
             </div>
 
-            {/* Right: Google Cloud Standard Account & Session Anchor */}
+            {/* Right: Unified Controls (Language + Tools + Auth) */}
             <div className="puh-account-group">
+              {/* Language Selector */}
+              <select
+                className="puh-lang-select"
+                value={lang}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                aria-label="Select Language"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.flag} {l.label}
+                  </option>
+                ))}
+              </select>
+
+              {/* Copy Canonical Link */}
+              <button
+                type="button"
+                className="puh-btn puh-btn-ghost hide-on-extra-narrow"
+                onClick={handleCopyLink}
+                title={isSpanish ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
+              >
+                {copied ? <Check size={14} style={{ color: '#4ade80' }} /> : <Copy size={14} />}
+                <span className="puh-btn-label">
+                  {copied
+                    ? (isSpanish ? 'Copiado' : 'Copied')
+                    : (isSpanish ? 'Copiar' : 'Copy')}
+                </span>
+              </button>
+
+              {/* Clinical AI Copilot Global Trigger */}
+              <button
+                type="button"
+                className="puh-btn puh-btn-ai hide-on-extra-narrow"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                }}
+                title={isSpanish ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas Clinical AI Research Copilot'}
+              >
+                <Sparkles size={14} />
+                <span className="puh-btn-label">{isSpanish ? 'Atlas AI' : 'Atlas AI'}</span>
+              </button>
+
+              {/* Institutional Inquiry Drawer Trigger (if enabled) */}
+              {!hideContactButton && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-contact hide-on-extra-narrow"
+                  onClick={handleContactClick}
+                  title={isSpanish ? 'Consulta Médica e Institucional (business@atlas-services.com)' : 'Contact Medical Affairs (business@atlas-services.com)'}
+                >
+                  <Mail size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>
+                </button>
+              )}
+
+              {/* Account / Auth */}
               {user ? (
                 <Link
                   href={getDashboardPath()}
@@ -242,69 +299,6 @@ export default function PublicUnifiedHeader({
                   </Link>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Line 2: Universal Contextual Action Toolbar ── */}
-        <div className="puh-actions-row">
-          <div className="puh-actions-row-inner">
-            <div className="puh-actions-group">
-              {/* Language Selector */}
-              <select
-                className="puh-lang-select"
-                value={lang}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                aria-label="Select Language"
-              >
-                {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.flag} {l.label}
-                  </option>
-                ))}
-              </select>
-
-              {/* Clinical AI Copilot Global Trigger */}
-              <button
-                type="button"
-                className="puh-btn puh-btn-ai"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
-                }}
-                title={isSpanish ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas Clinical AI Research Copilot'}
-              >
-                <Sparkles size={14} />
-                <span className="puh-btn-label">{isSpanish ? 'Clinical AI' : 'Clinical AI'}</span>
-              </button>
-
-              {/* Institutional Inquiry Drawer Trigger */}
-              {!hideContactButton && (
-                <button
-                  type="button"
-                  className="puh-btn puh-btn-contact"
-                  onClick={handleContactClick}
-                  title={isSpanish ? 'Consulta Médica e Institucional (business@atlas-services.com)' : 'Contact Medical Affairs (business@atlas-services.com)'}
-                >
-                  <Mail size={14} />
-                  <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>
-                </button>
-              )}
-
-              {/* Copy Canonical Link */}
-              <button
-                type="button"
-                className="puh-btn puh-btn-ghost"
-                onClick={handleCopyLink}
-                title={isSpanish ? 'Copiar enlace al portapapeles' : 'Copy link to clipboard'}
-              >
-                {copied ? <Check size={14} style={{ color: '#4ade80' }} /> : <Copy size={14} />}
-                <span className="puh-btn-label">
-                  {copied
-                    ? (isSpanish ? 'Copiado' : 'Copied')
-                    : (isSpanish ? 'Copiar Enlace' : 'Copy Link')}
-                </span>
-              </button>
             </div>
           </div>
         </div>

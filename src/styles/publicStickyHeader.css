@@ -584,6 +584,12 @@
   }
 }
 
+@media (max-width: 560px) {
+  .hide-on-extra-narrow {
+    display: none !important;
+  }
+}
+
 @media (max-width: 640px) {
   .puh-brand-row-inner {
     padding: 0.45rem 0.85rem;

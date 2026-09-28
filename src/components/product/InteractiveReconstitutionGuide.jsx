@@ -2693,43 +2693,63 @@ export default function InteractiveReconstitutionGuide({
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '12px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '1px',
+            background: '#e2e8f0',
+            border: '1px solid #cbd5e1',
+            borderRadius: '8px',
+            overflow: 'hidden'
           }}>
-            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            {/* Slot 1: Draw Per Injection */}
+            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Draw Per Injection
+              </span>
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666', fontFamily: 'monospace' }}>
+                {doseValue} {doseUnit}
               </div>
-              <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#003666', marginTop: '2px' }} className="font-mono">
-                {doseValue} {doseUnit} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>({syringeUnits.toFixed(1)} Units · {liquidVolumeMl.toFixed(2)} mL)</span>
-              </div>
+              <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>
+                {syringeUnits.toFixed(1)} Units · {liquidVolumeMl.toFixed(2)} mL
+              </span>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            {/* Slot 2: Vial Longevity */}
+            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Vial Longevity
+              </span>
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a', fontFamily: 'monospace' }}>
+                ~{totalDosesInVial} doses
               </div>
-              <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }} className="font-mono">
-                ~{totalDosesInVial} total doses
-              </div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                Full therapeutic doses/vial
+              </span>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+            {/* Slot 3: Route & Cadence */}
+            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Route &amp; Cadence
+              </span>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                Weekly SubQ
               </div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                Weekly Subcutaneous
-              </div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                Subcutaneous injection
+              </span>
             </div>
 
-            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                Storage Guard
+            {/* Slot 4: Storage Guard */}
+            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Storage (Post-Recon)
+              </span>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                ❄️ 2°C – 8°C
               </div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0284c7', marginTop: '2px' }}>
-                ❄️ 2°C – 8°C Refrigerator
-              </div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                Refrigerate • Protect from light
+              </span>
             </div>
           </div>
         </div>

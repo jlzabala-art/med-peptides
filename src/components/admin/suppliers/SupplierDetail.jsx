@@ -10,7 +10,7 @@ import { collection, collectionGroup, query, where, getDocs, limit } from 'fireb
 import { db } from '../../../firebase';
 import { resolveVariantPrice } from '../../../utils/resolvePrice';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
-
+import WarehouseComparisonTable from './WarehouseComparisonTable';
 
 function SupplierDocumentsTab({ supplierName, supplierId }) {
   const [docsList, setDocsList] = useState([]);
@@ -229,6 +229,51 @@ function SupplierDocumentsTab({ supplierName, supplierId }) {
   );
 }
 
+
+function WarehouseComparisonTab({ supplier }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function load() {
+      setLoading(true);
+      try {
+        const q = query(
+          collectionGroup(db, 'variants'),
+          where('supplierId', '==', supplier.id),
+          limit(200)
+        );
+        const snap = await getDocs(q);
+        if (isMounted) {
+          const prodMap = new Map();
+          snap.docs.forEach(d => {
+            const vData = d.data();
+            const pId = vData.productId || (d.ref.parent?.parent ? d.ref.parent.parent.id : d.id);
+            const pName = vData.productName || vData.name || 'Product';
+            if (!prodMap.has(pId)) {
+              prodMap.set(pId, { id: pId, canonicalName: pName, variants: [] });
+            }
+            prodMap.get(pId).variants.push({ id: d.id, ...vData });
+          });
+          setProducts(Array.from(prodMap.values()));
+        }
+      } catch (err) {
+        console.warn('Error loading warehouse variants:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { isMounted = false; };
+  }, [supplier?.id]);
+
+  if (loading) {
+    return <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>Loading warehouse comparisons...</div>;
+  }
+
+  return <WarehouseComparisonTable supplier={supplier} products={products} />;
+}
 
 function SupplierCatalogTab({ supplierId, supplierName }) {
   const [variants, setVariants] = useState([]);
@@ -764,6 +809,11 @@ export default function SupplierDetail({ w, onClose, onUpdate, initialVariantId 
                 </div>
               )
             },
+            ...(w.hasMultiWarehouse || w.id === 'supplier-lotusland' || (Array.isArray(w.warehouses) && w.warehouses.length > 0) ? [{
+              id: 'warehouses',
+              label: 'Warehouses (Compare Hubs)',
+              content: <WarehouseComparisonTab supplier={w} />
+            }] : []),
             {
               id: 'catalog',
               label: `Catalog (${w.variantsSupplied ?? '…'})`,

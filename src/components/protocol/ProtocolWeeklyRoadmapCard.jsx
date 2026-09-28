@@ -48,6 +48,35 @@ export default function ProtocolWeeklyRoadmapCard({
         )
       }
     >
+      {phases[activeRoadmapPhase] && (
+        <div style={{
+          marginBottom: '1rem',
+          padding: '0.75rem 1rem',
+          background: '#f0fdfa',
+          border: '1px solid #99f6e4',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f766e' }}>
+              {phases[activeRoadmapPhase].name} • ({phases[activeRoadmapPhase].durationWeeks || 4} {lang === 'es' ? 'Semanas' : 'Weeks'} · Wk {phases[activeRoadmapPhase].startWeek || 1}–{phases[activeRoadmapPhase].endWeek || (phases[activeRoadmapPhase].durationWeeks || 4)})
+            </span>
+            {phases[activeRoadmapPhase].transitionCriteria && (
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0369a1', background: '#e0f2fe', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px' }}>
+                ✓ {lang === 'es' ? 'Criterio de Progresión:' : 'Progression Criteria:'} {phases[activeRoadmapPhase].transitionCriteria}
+              </span>
+            )}
+          </div>
+          {phases[activeRoadmapPhase].objective && (
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#134e4a', lineHeight: 1.45 }}>
+              <strong>{lang === 'es' ? 'Objetivo Clínico:' : 'Clinical Objective:'}</strong> {phases[activeRoadmapPhase].objective}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="proto-roadmap-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', width: '100%' }}>
         {weeklySchedule.map((ws, idx) => {
           const isActiveAdmin = !ws.rest;
