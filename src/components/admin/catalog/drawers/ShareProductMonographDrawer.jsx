@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import StandardDrawer from '@/components/ui/StandardDrawer';
 import { 
   Share2, 
@@ -31,7 +31,8 @@ import { processProductVariants } from '@/utils/productVariantProcessing';
 import { SUPPORTED_LANGUAGES } from '@/utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
-import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
+import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
+import UniversalRecipientCombobox from '@/components/shared/UniversalRecipientCombobox';
 
 function WaIcon() {
   return (
@@ -49,6 +50,7 @@ export default function ShareProductMonographDrawer({
   initialSupplierKey = null,
   initialFormatId = null,
   initialStrengthId = null,
+  initialRecipient = null,
 }) {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
@@ -56,6 +58,11 @@ export default function ShareProductMonographDrawer({
   const [showMessagePreview, setShowMessagePreview] = useState(false);
   const [selectedLang, setSelectedLang] = useState('en');
   const [trackedShortUrl, setTrackedShortUrl] = useState(null);
+  const [isGeneratingTracked, setIsGeneratingTracked] = useState(false);
+
+  // Active workspace detection
+  const activeWorkspace = useWorkspaceStore((s) => s.workspaces?.[s.activeWorkspaceId]);
+  const workspaceTarget = activeWorkspace?.targetEntity;
 
   // Process hierarchy from variants
   const hierarchy = useMemo(() => {
@@ -83,6 +90,7 @@ export default function ShareProductMonographDrawer({
     email: '',
     phone: '',
     notes: '',
+    source: null,
   });
 
   // Reset tracked link when selection changes
@@ -97,7 +105,6 @@ export default function ShareProductMonographDrawer({
       setShowQr(false);
 
       if (initialSupplierKey) {
-        // Try finding matching supplier id in hierarchy
         const cleanTarget = String(initialSupplierKey).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
         const matched = suppliersList.find(s => {
           const sClean = String(s.id || s.name).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
@@ -110,8 +117,35 @@ export default function ShareProductMonographDrawer({
 
       setSelectedFormatId(initialFormatId || 'all');
       setSelectedStrengthId(initialStrengthId || 'all');
+
+      // ── Auto-bind recipient: Priority 1: initialRecipient prop; Priority 2: Active Workspace targetEntity ──
+      if (initialRecipient && (initialRecipient.name || initialRecipient.id)) {
+        setRecipientMode('concrete');
+        setRecipient({
+          type: initialRecipient.type || 'doctor',
+          id: initialRecipient.id || null,
+          name: initialRecipient.name || '',
+          company: initialRecipient.company || '',
+          email: initialRecipient.email || '',
+          phone: initialRecipient.phone || '',
+          notes: initialRecipient.notes || '',
+          source: 'prop',
+        });
+      } else if (workspaceTarget && (workspaceTarget.name || workspaceTarget.id || workspaceTarget.displayName)) {
+        setRecipientMode('concrete');
+        setRecipient({
+          type: workspaceTarget.type || 'doctor',
+          id: workspaceTarget.id || null,
+          name: workspaceTarget.name || workspaceTarget.displayName || '',
+          company: workspaceTarget.company || workspaceTarget.clinicName || '',
+          email: workspaceTarget.email || '',
+          phone: workspaceTarget.phone || '',
+          notes: workspaceTarget.notes || '',
+          source: 'workspace',
+        });
+      }
     }
-  }, [isOpen, initialSupplierKey, initialFormatId, initialStrengthId, suppliersList]);
+  }, [isOpen, initialSupplierKey, initialFormatId, initialStrengthId, initialRecipient, suppliersList, workspaceTarget]);
 
   // Helper to normalize supplier strings for robust matching
   const cleanSupplierKey = (val) => String(val || '').toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
@@ -254,7 +288,65 @@ export default function ShareProductMonographDrawer({
     toast.success('Configuration reset to full monograph scope');
   };
 
-  // Generate tailored WhatsApp text
+  // Centralized generation & Firestore audit registration
+  const ensureTrackedUrl = useCallback(async (deliveryChannel = 'link') => {
+    if (trackedShortUrl) return trackedShortUrl;
+
+    try {
+      setIsGeneratingTracked(true);
+      const res = await fetch('/api/short-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          dose: selectedStrengthId !== 'all' ? selectedStrengthId : null,
+          format: selectedFormatId !== 'all' ? selectedFormatId : null,
+          supplier: selectedSupplierId !== 'all' ? selectedSupplierId : null,
+          lang: selectedLang,
+          productName,
+          deliveryChannel,
+          recipient: recipientMode === 'concrete'
+            ? {
+                id: recipient.id || null,
+                name: recipient.name || 'Healthcare Practitioner',
+                company: recipient.company || '',
+                email: recipient.email || '',
+                phone: recipient.phone || '',
+                type: recipient.type || 'doctor',
+              }
+            : {
+                id: null,
+                name: 'Public Visitor',
+                type: 'generic',
+              },
+          targetUrl: shareUrl,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setTrackedShortUrl(data.shortUrl);
+        return data.shortUrl;
+      }
+    } catch (err) {
+      console.warn('Tracked link registration fallback:', err);
+    } finally {
+      setIsGeneratingTracked(false);
+    }
+    return shareUrl;
+  }, [trackedShortUrl, slug, selectedStrengthId, selectedFormatId, selectedSupplierId, selectedLang, productName, recipientMode, recipient, shareUrl]);
+
+  // Pre-generate short link in background when recipient is selected
+  useEffect(() => {
+    if (isOpen && recipientMode === 'concrete' && (recipient.name || recipient.id)) {
+      const timer = setTimeout(() => {
+        ensureTrackedUrl('link');
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, recipientMode, recipient.name, recipient.id, selectedSupplierId, selectedFormatId, selectedStrengthId, selectedLang, ensureTrackedUrl]);
+
+  // Generate tailored WhatsApp / Email text
   const isEs = selectedLang === 'es';
   const isPt = selectedLang === 'pt';
   const waIntro = isEs ? 'Ficha Técnica Clínica Oficial — ATLAS HEALTH' : isPt ? 'Ficha Técnica Clínica Oficial — ATLAS HEALTH' : 'Official Clinical Monograph — ATLAS HEALTH';
@@ -266,41 +358,46 @@ export default function ShareProductMonographDrawer({
 
   const effectiveShareUrl = trackedShortUrl || shareUrl;
 
-  let waLines = [
-    `*${waIntro}*`,
-    `📋 *${waCompound}:* ${productName}`,
-  ];
-  if (selectedSupplierId !== 'all') {
-    waLines.push(`🔬 *${waSource}:* ${activeSupplierName}`);
-  }
-  if (selectedFormatId !== 'all') {
-    waLines.push(`📦 *${waPres}:* ${activeFormatName}`);
-  }
-  if (selectedStrengthId !== 'all') {
-    waLines.push(`⚖️ *${waDose}:* ${activeStrengthName}`);
-  }
-  waLines.push('');
-  waLines.push(`${waAccess}`);
-  waLines.push(`${effectiveShareUrl}`);
+  const buildMessageText = (urlToUse) => {
+    let lines = [
+      `*${waIntro}*`,
+      `📋 *${waCompound}:* ${productName}`,
+    ];
+    if (selectedSupplierId !== 'all') {
+      lines.push(`🔬 *${waSource}:* ${activeSupplierName}`);
+    }
+    if (selectedFormatId !== 'all') {
+      lines.push(`📦 *${waPres}:* ${activeFormatName}`);
+    }
+    if (selectedStrengthId !== 'all') {
+      lines.push(`⚖️ *${waDose}:* ${activeStrengthName}`);
+    }
+    lines.push('');
+    lines.push(`${waAccess}`);
+    lines.push(`${urlToUse}`);
+    return lines.join('\n');
+  };
 
-  const waText = waLines.join('\n');
+  const currentWaText = buildMessageText(effectiveShareUrl);
   const cleanPhone = (recipient.phone || '').replace(/[^\d]/g, '');
-  const waUrl = cleanPhone
-    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`
-    : `https://wa.me/?text=${encodeURIComponent(waText)}`;
-  const mailUrl = `mailto:${encodeURIComponent(recipient.email || '')}?subject=${encodeURIComponent(`${waIntro} — ${productName}`)}&body=${encodeURIComponent(waText.replace(/\*/g, ''))}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(effectiveShareUrl)}`;
 
   const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
+  // ── Dispatch Handlers with Guaranteed Audit Registration ──
   const handleNativeShare = async () => {
+    const finalUrl = await ensureTrackedUrl('share');
+    const msg = buildMessageText(finalUrl);
     if (canShare) {
       try {
         await navigator.share({
           title: `${productName} — ATLAS HEALTH`,
-          text: waText,
-          url: effectiveShareUrl,
+          text: msg,
+          url: finalUrl,
         });
+        if (recipientMode === 'concrete' && recipient.name) {
+          toast.success(`Enlace registrado en el expediente de ${recipient.name} ✓`);
+        }
         return;
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -311,64 +408,52 @@ export default function ShareProductMonographDrawer({
     handleCopy();
   };
 
+  const handleWhatsAppShare = async (e) => {
+    if (e) e.preventDefault();
+    const finalUrl = await ensureTrackedUrl('whatsapp');
+    const msg = buildMessageText(finalUrl);
+    const targetPhone = (recipient.phone || '').replace(/[^\d]/g, '');
+    const waLink = targetPhone
+      ? `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+    if (recipientMode === 'concrete' && recipient.name) {
+      toast.success(`Enlace registrado en el expediente de ${recipient.name} ✓`);
+    }
+    window.open(waLink, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleEmailShare = async (e) => {
+    if (e) e.preventDefault();
+    const finalUrl = await ensureTrackedUrl('email');
+    const msg = buildMessageText(finalUrl);
+    const mailto = `mailto:${encodeURIComponent(recipient.email || '')}?subject=${encodeURIComponent(`${waIntro} — ${productName}`)}&body=${encodeURIComponent(msg.replace(/\*/g, ''))}`;
+
+    if (recipientMode === 'concrete' && recipient.name) {
+      toast.success(`Enlace registrado en el expediente de ${recipient.name} ✓`);
+    }
+    window.location.href = mailto;
+  };
+
   const handleCopy = async () => {
     try {
-      let urlToCopy = trackedShortUrl;
-
-      if (!urlToCopy) {
-        try {
-          const res = await fetch('/api/short-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              slug,
-              dose: selectedStrengthId !== 'all' ? selectedStrengthId : null,
-              format: selectedFormatId !== 'all' ? selectedFormatId : null,
-              supplier: selectedSupplierId !== 'all' ? selectedSupplierId : null,
-              lang: selectedLang,
-              productName,
-              recipient: recipientMode === 'concrete'
-                ? {
-                    id: recipient.id || null,
-                    name: recipient.name || 'Healthcare Practitioner',
-                    company: recipient.company || '',
-                    email: recipient.email || '',
-                    phone: recipient.phone || '',
-                    type: recipient.type || 'doctor',
-                  }
-                : {
-                    id: null,
-                    name: 'Public Visitor',
-                    type: 'generic',
-                  },
-              targetUrl: shareUrl,
-            }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            urlToCopy = data.shortUrl;
-            setTrackedShortUrl(data.shortUrl);
-          }
-        } catch {
-          urlToCopy = shareUrl;
-        }
-      }
-
-      const finalUrl = urlToCopy || shareUrl;
+      const finalUrl = await ensureTrackedUrl('link');
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(finalUrl);
       }
       triggerHaptic();
       setCopied(true);
-      toast.success(recipient.name ? `Tracked link copied for ${recipient.name} ✓` : 'Link copied to clipboard!');
+      toast.success(recipient.name 
+        ? `Enlace registrado y copiado para ${recipient.name} ✓` 
+        : 'Enlace copiado al portapapeles!');
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      toast.error('Could not copy link');
+      toast.error('No se pudo copiar el enlace');
     }
   };
 
   const handleOpenPreview = () => {
-    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    window.open(effectiveShareUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -431,7 +516,7 @@ export default function ShareProductMonographDrawer({
         </div>
       }
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
         {/* ── 1. Specification Scope (GCP Form Field Grid) ── */}
         <section style={{
@@ -477,7 +562,7 @@ export default function ShareProductMonographDrawer({
             )}
           </div>
 
-          {/* Responsive 2-Column Grid (Laptop: 2-col, Mobile: 1-col) */}
+          {/* Responsive 2-Column Grid */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -669,7 +754,7 @@ export default function ShareProductMonographDrawer({
           </div>
         </section>
 
-        {/* ── 2. Recipient Assignment & Profile Tracking (GCP Standard Card) ── */}
+        {/* ── 2. Recipient Assignment & Audit Logging (Universal Combobox, Zero-Cards) ── */}
         <section style={{
           background: '#ffffff',
           border: '1px solid #e2e8f0',
@@ -684,7 +769,7 @@ export default function ShareProductMonographDrawer({
                 <span>Recipient Assignment & Audit Logging</span>
               </h4>
               <p style={{ margin: '3px 0 0', fontSize: '0.72rem', color: '#64748b' }}>
-                Assign to a healthcare practitioner to automatically record dispatches and monitor read receipts.
+                Assign to a practitioner or partner to automatically log dispatches and receive read-receipt alerts.
               </p>
             </div>
 
@@ -737,23 +822,18 @@ export default function ShareProductMonographDrawer({
           </div>
 
           {recipientMode === 'concrete' ? (
-            <div style={{
-              padding: '12px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px'
-            }}>
-              <RecipientHierarchySelector
+            <div>
+              <UniversalRecipientCombobox
                 value={recipient}
                 onChange={(updated) => setRecipient(updated)}
-                showNotesField={false}
+                autoBoundWorkspaceEntity={workspaceTarget}
               />
-              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#059669' }}>
+              <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#059669' }}>
                 <CheckCircle2 size={13} color="#059669" />
                 <span>
                   {recipient.name 
-                    ? `Dispatch telemetry will be permanently logged under ${recipient.name}'s profile.`
-                    : 'Search and select a practitioner or enter custom contact information.'}
+                    ? `Dispatches across WhatsApp, Email, or Link are automatically audited under ${recipient.name}'s profile.`
+                    : 'Search across doctors, clinics, wholesalers, patients or confirm active workspace recipient.'}
                 </span>
               </div>
             </div>
@@ -771,7 +851,7 @@ export default function ShareProductMonographDrawer({
             }}>
               <Info size={15} color="#d97706" style={{ flexShrink: 0 }} />
               <div>
-                <strong>Generic Public Mode:</strong> Generates an unassigned link without profile attribution or recipient read-receipt logging.
+                <strong>Generic Public Mode:</strong> Generates an anonymous link without individual recipient tracking or read-receipt alerts.
               </div>
             </div>
           )}
@@ -908,7 +988,7 @@ export default function ShareProductMonographDrawer({
           )}
         </section>
 
-        {/* ── 4. Instant Dispatch Channels (Touch-friendly 44px min-height) ── */}
+        {/* ── 4. Instant Dispatch Channels (All Channels Guarantee Profile Audit Registration) ── */}
         <div>
           <span style={{ display: 'block', fontSize: '0.80rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
             Instant Dispatch Channels:
@@ -944,10 +1024,9 @@ export default function ShareProductMonographDrawer({
             )}
 
             {/* WhatsApp */}
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={handleWhatsAppShare}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -956,21 +1035,24 @@ export default function ShareProductMonographDrawer({
                 padding: '10px 14px',
                 background: '#25D366',
                 color: '#ffffff',
+                border: 'none',
                 borderRadius: '8px',
-                textDecoration: 'none',
                 fontSize: '0.82rem',
                 fontWeight: 700,
                 minHeight: '44px',
-                boxShadow: '0 2px 4px rgba(37, 211, 102, 0.2)'
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(37, 211, 102, 0.2)',
+                transition: 'opacity 0.15s ease'
               }}
             >
               <WaIcon />
               <span>WhatsApp</span>
-            </a>
+            </button>
 
             {/* Email */}
-            <a
-              href={mailUrl}
+            <button
+              type="button"
+              onClick={handleEmailShare}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -979,17 +1061,19 @@ export default function ShareProductMonographDrawer({
                 padding: '10px 14px',
                 background: '#0284c7',
                 color: '#ffffff',
+                border: 'none',
                 borderRadius: '8px',
-                textDecoration: 'none',
                 fontSize: '0.82rem',
                 fontWeight: 700,
                 minHeight: '44px',
-                boxShadow: '0 2px 4px rgba(2, 132, 199, 0.2)'
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(2, 132, 199, 0.2)',
+                transition: 'opacity 0.15s ease'
               }}
             >
               <Send size={15} />
               <span>Email</span>
-            </a>
+            </button>
           </div>
         </div>
 
@@ -1131,7 +1215,7 @@ export default function ShareProductMonographDrawer({
                   type="button"
                   onClick={() => {
                     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-                      navigator.clipboard.writeText(waText);
+                      navigator.clipboard.writeText(currentWaText);
                       toast.success('Message text copied to clipboard!');
                     }
                   }}
@@ -1163,7 +1247,7 @@ export default function ShareProductMonographDrawer({
                 padding: '10px 12px',
                 borderRadius: '8px'
               }}>
-                {waText}
+                {currentWaText}
               </pre>
             </div>
           )}

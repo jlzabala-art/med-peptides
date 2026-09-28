@@ -35,10 +35,41 @@ export async function GET(request) {
           flag: d.flag || d.country || null,
         };
       });
+    } else if (type === 'all') {
+      const [usersSnap, suppSnap] = await Promise.all([
+        adminDb.collection('users').limit(limitNum).get(),
+        adminDb.collection('suppliers').limit(15).get()
+      ]);
+      const userItems = usersSnap.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          name: d.displayName || d.name || d.fullName || d.email || 'Unnamed',
+          company: d.company || d.clinic || d.clinicName || '',
+          email: d.email || '',
+          phone: d.phone || d.phoneNumber || d.whatsapp || '',
+          type: d.role || 'doctor',
+          role: d.role || 'doctor',
+        };
+      });
+      const suppItems = suppSnap.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          name: d.name || d.displayName || d.companyName || doc.id,
+          company: d.companyName || d.name || '',
+          email: d.email || d.contactEmail || '',
+          phone: d.phone || d.whatsapp || '',
+          type: 'supplier',
+          role: 'supplier',
+          flag: d.flag || d.country || null,
+        };
+      });
+      items = [...userItems, ...suppItems];
     } else {
       // Query users collection by role
       let query = adminDb.collection('users');
-      if (type && type !== 'all' && type !== 'external') {
+      if (type && type !== 'external') {
         query = query.where('role', '==', type);
       }
       const snap = await query.limit(limitNum).get();
