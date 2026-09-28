@@ -38,7 +38,7 @@ export default function CosmeticsSidebarWidget({
       name: isEs ? 'Champú Fortalecedor' : 'Strengthening Shampoo',
       action: isEs ? 'Detox Cuero Cabelludo & Bloqueo DHT' : 'Scalp Detox & DHT Inhibition',
       actives: 'Diosmina Micronizada · Biotina · Hesperidina',
-      volume: '200 mL',
+      volume: '250 mL',
       dwell: isEs ? '3 min en cuero cabelludo' : '3 min scalp dwell',
       icon: '🧴',
       stepColor: '#2563eb'
@@ -49,7 +49,7 @@ export default function CosmeticsSidebarWidget({
       name: isEs ? 'Acondicionador Fortalecedor' : 'Strengthening Conditioner',
       action: isEs ? 'Reconstrucción de Córtex & Sellado Cuticular' : 'Cortex Repair & Cuticle Sealing',
       actives: 'Tropocolágeno Nativo · Queratina · Aceite de Argán',
-      volume: '200 mL',
+      volume: '250 mL',
       dwell: isEs ? '5–10 min saturación cutícula' : '5–10 min cuticle dwell',
       icon: '💧',
       stepColor: '#0d9488'

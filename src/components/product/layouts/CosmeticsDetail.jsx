@@ -1525,7 +1525,7 @@ export default function CosmeticsDetail({ product, region = 'US', isProfessional
       {/* PERSISTENT GOOGLE CLOUD STICKY BOTTOM ACTION BAR */}
       <PublicStickyActionBar
         title={name}
-        subtitle={`${selectedVariant?.volume || '200 mL'} • Colway Hair Strengthening System • EU Reg. 1223/2009`}
+        subtitle={`${volumeText} • Colway Hair Strengthening System • EU Reg. 1223/2009`}
         badge="Cosmeceutical Monograph"
         badgeType="default"
         inquireLabel="Inquire Product"
