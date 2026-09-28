@@ -30,6 +30,9 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
+import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -70,6 +73,9 @@ export default function PublicPrescriptionClient({ rx }) {
   const doctorAddress = rx.doctorOfficeAddress || 'Index Tower 5709, Dubai (+971 50 354 6123)';
   const doctorPhone = rx.doctorPhone || '+971 50 354 6123';
   const doctorLicense = rx.doctorLicense || 'DHA-00013060-006';
+
+  // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™)
+  const genomicsData = detectFagronGenomicsTest(rx);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
@@ -281,18 +287,20 @@ export default function PublicPrescriptionClient({ rx }) {
   // WhatsApp share message: clean English format by default
   const shareTextWhatsApp = encodeURIComponent(
     isEs
-      ? `*Atlas Health — Ficha Técnica y Posología Médica*\n` +
+      ? `*Atlas Services — Ficha Técnica y Posología Médica*\n` +
         `📋 *Prescripción:* ${rxId}\n` +
         `👤 *Paciente:* ${patientName}${patientAlias}\n` +
         `🩺 *Médica Prescriptora:* ${doctorName}\n` +
         `🧪 *Fórmula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% en TrichoSol™ (3x 100ml)\n` +
+        (genomicsData ? `🧬 *Guía Genómica:* Formulada según recomendaciones de ${genomicsData.test.shortName}.\n` : '') +
         `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
         `🔗 *Ver Ficha Digital Completa & Verificación:* ${publicUrl}`
-      : `*Med-Peptides — Official Clinical Prescription & Posology*\n` +
+      : `*Atlas Services — Official Clinical Prescription & Posology*\n` +
         `📋 *Prescription Ref:* ${rxId}\n` +
         `👤 *Patient:* ${patientName}${patientAlias}\n` +
         `🩺 *Prescribing Physician:* ${doctorName} (${clinic})\n` +
         `🧪 *Formula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)\n` +
+        (genomicsData ? `🧬 *Genomics Guidance:* Formulated based on ${genomicsData.test.shortName} recommendations.\n` : '') +
         `🕒 *Dosage:* 1.0 ml topical daily at bedtime to dry scalp. Leave on overnight.\n\n` +
         `🔗 *Verified Clinical Record & Dosage Guide:* ${publicUrl}`
   );
@@ -315,6 +323,19 @@ export default function PublicPrescriptionClient({ rx }) {
         copyUrl={publicUrl}
         shortUrl={publicUrl}
         loginRedirect={publicUrl}
+        inquiryContextType="prescription"
+        inquiryEntity={{
+          name: `Prescription ${rxId}`,
+          rxId,
+          code: rxId,
+          patientName,
+          doctorName,
+          clinic,
+          formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
+          dosage: '1.0 ml Once Daily at Night on Dry Scalp',
+          category: 'prescription',
+          genomicsTest: genomicsData?.test?.shortName || null
+        }}
         breadcrumb={[
           { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
           { label: isEs ? 'Prescripciones Médicas' : 'Verified Prescriptions' },
@@ -322,6 +343,7 @@ export default function PublicPrescriptionClient({ rx }) {
         ]}
         anchorTabs={[
           { id: 'formula-card', label: isEs ? 'Fórmula' : 'Formula & Actives' },
+          ...(genomicsData ? [{ id: 'genomics-card', label: isEs ? 'Guía Genómica' : 'Genomics Guidance' }] : []),
           { id: 'posology-card', label: isEs ? 'Posología' : 'Posology Protocol' },
           { id: 'milestones-card', label: isEs ? 'Evolución' : 'Clinical Milestones' },
           { id: 'qr-card', label: isEs ? 'Verificación QR' : 'QR Verification' },
@@ -512,6 +534,14 @@ export default function PublicPrescriptionClient({ rx }) {
             ))}
           </div>
         </div>
+
+        {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
+        {genomicsData && (
+          <GenomicsPrescriptionGuidanceCard
+            genomicsData={genomicsData}
+            lang={lang}
+          />
+        )}
 
         {/* ── Enhanced Posology & Step-by-Step Guide ───────────────────────────────── */}
         <div id="posology-card" style={{
@@ -955,7 +985,7 @@ export default function PublicPrescriptionClient({ rx }) {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', marginTop: '2rem' }}>
-          Med-Peptides Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
+          Atlas Services Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
         </div>
       </div>
 
@@ -1057,6 +1087,26 @@ export default function PublicPrescriptionClient({ rx }) {
           onClose={() => setPreviewDoc(null)}
         />
       )}
+
+      {/* ── Prescription Dedicated Clinical AI Research Copilot ── */}
+      <PublicAtlasAIDrawer
+        contextType="prescription"
+        contextAnchor={{
+          name: `Prescription ${rxId}`,
+          rxId,
+          code: rxId,
+          doctorName,
+          clinic,
+          patientName,
+          formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
+          dosage: '1.0 ml Once Daily at Night on Dry Scalp',
+          category: 'prescription',
+          genomicsTest: genomicsData?.test?.shortName || null,
+          slug: rxId.toLowerCase()
+        }}
+        storageKey={`rx_${rxId}`}
+        lang={lang}
+      />
     </div>
   );
 }

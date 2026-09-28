@@ -19,6 +19,7 @@ import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
 import PublicProviderCTA from './public/PublicProviderCTA';
+import BrandLogo from '../common/BrandLogo';
 import '../../styles/publicStickyHeader.css';
 
 export const SUPPORTED_LANGUAGES = [
@@ -202,8 +203,8 @@ export default function PublicUnifiedHeader({
           <div className="puh-tier1-inner">
             {/* Left: Brand Logo / Title */}
             <div className="puh-brand-group">
-              <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Med-Peptides Clinical Intelligence">
-                <span className="puh-brand-title">Med-Peptides</span>
+              <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Atlas Services Clinical & Healthcare Intelligence">
+                <BrandLogo variant="light" size="compact" />
               </Link>
             </div>
 
@@ -244,7 +245,7 @@ export default function PublicUnifiedHeader({
                   type="button"
                   className="puh-btn puh-btn-contact"
                   onClick={handleContactClick}
-                  title={isSpanish ? 'Consulta Médica e Institucional (business@med-peptides.com)' : 'Contact Medical Affairs (business@med-peptides.com)'}
+                  title={isSpanish ? 'Consulta Médica e Institucional (business@atlas-services.com)' : 'Contact Medical Affairs (business@atlas-services.com)'}
                 >
                   <Mail size={14} />
                   <span className="puh-btn-label">{isSpanish ? 'Contacto' : 'Contact'}</span>

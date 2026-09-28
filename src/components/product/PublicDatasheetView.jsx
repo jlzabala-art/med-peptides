@@ -270,7 +270,7 @@ export default function PublicDatasheetView({
       `• Storage: 2°C – 8°C Refrigerated (Do Not Freeze) · 28-Day Stability\n\n` +
       (protocolsList ? `*ASSOCIATED CLINICAL BLUEPRINTS:*\n${protocolsList}\n\n` : '') +
       `Official Verification: https://med-peptides.com/p/${slug}\n` +
-      `_Atlas Scientific & Clinical Sourcing · SSOT Standard_`;
+      `_Atlas Services · SSOT Clinical Intelligence Standard_`;
 
     let success = false;
     if (navigator?.clipboard?.writeText) {
@@ -2844,7 +2844,7 @@ export default function PublicDatasheetView({
           } : isCompoundingService ? {
             service: 'European Pharmaceutical Compounding & Custom Formulation',
             pharmacyStandards: 'EU Ph. Eur. & GMP Certified European Compounding Laboratory',
-            orderChannels: 'Dedicated Mobile Application or Direct Email to kasia@mediluxeme.com / business@med-peptides.com',
+            orderChannels: 'Dedicated Mobile Application or Direct Email to kasia@mediluxeme.com / business@atlas-services.com',
             turnaroundTime: '5 to 7 working days from European compounding facility to destination',
             invoicingFlexibility: 'Clinic Wholesale Price (if clinic pays) vs Recommended Patient Price RRP (if patient pays directly)',
             destinationFlexibility: 'Shipped directly to Clinic or dropshipped to Patient home address with validated cold-chain',

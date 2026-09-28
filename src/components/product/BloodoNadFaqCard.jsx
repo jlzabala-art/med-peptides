@@ -341,7 +341,7 @@ export default function BloodoNadFaqCard({ product, lang = 'en' }) {
 • Chronic Medications: Maintain prescribed therapies; report all active agents on requisition.
 • Physical Activity: Avoid exhaustive exercise for 24 hours preceding collection.`;
 
-    const footer = `Med-Peptides Clinical Intelligence • LifeLab1 (Vilnius, Lithuania) / CE-IVDR Certified`;
+    const footer = `Atlas Services Clinical Intelligence • LifeLab1 (Vilnius, Lithuania) / CE-IVDR Certified`;
     const fullText = `${headerTitle}\n\n${intentSection}\n\n${prepSection}\n\n${footer}`;
 
     try {

@@ -810,9 +810,17 @@ export default function PublicAtlasAIDrawer({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <ShieldCheck size={11} color="#16a34a" />
-            <span>Dual-Stage RP-HPLC & LC-MS Verified</span>
+            <span>
+              {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                ? 'DHA Licensed Physician & Compounding Dispensary'
+                : 'Dual-Stage RP-HPLC & LC-MS Verified'}
+            </span>
           </div>
-          <span>Analytical Grade Standard</span>
+          <span>
+            {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+              ? 'Verified Medical Prescription'
+              : 'Analytical Grade Standard'}
+          </span>
         </div>
       </div>
     );
@@ -1003,7 +1011,11 @@ export default function PublicAtlasAIDrawer({
                 </div>
               </div>
               <div style={{ flexShrink: 0 }}>
-                {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
+                {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription' ? (
+                  <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#16a34a', backgroundColor: '#f0fdf4', padding: '2px 7px', borderRadius: '4px', border: '1px solid #bbf7d0', whiteSpace: 'nowrap' }}>
+                    DHA Validated Rx
+                  </span>
+                ) : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
                   <span style={{ fontSize: '0.67rem', fontWeight: 700, color: '#0d9488', backgroundColor: '#f0fdfa', padding: '2px 7px', borderRadius: '4px', border: '1px solid #ccfbf1', whiteSpace: 'nowrap' }}>
                     EU Reg. 1223/2009
                   </span>
@@ -1113,7 +1125,9 @@ export default function PublicAtlasAIDrawer({
                       <Sparkles size={22} />
                     </div>
                     <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
-                      {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
+                      {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                        ? (lang === 'es' ? 'Copiloto IA de Prescripción y Posología' : 'Prescription & Posology AI Copilot')
+                        : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
                         ? 'Dermocosmetic & INCI Research Copilot'
                         : contextType === 'diagnostic_test'
                         ? 'Diagnostic Laboratory & Biomarker AI Copilot'
@@ -1124,7 +1138,11 @@ export default function PublicAtlasAIDrawer({
                         : 'Dedicated Technical Research Assistant'}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
-                      {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
+                      {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
+                        ? (lang === 'es'
+                            ? 'Consulte dudas sobre los principios activos, vehículo TrichoSol™, aplicación nocturna de 1.0 ml, pauta en caso de olvido o evolución esperada a 90 días.'
+                            : 'Ask questions regarding formula actives, TrichoSol™ vehicle, nocturnal application protocols, missed dose instructions, or 90-day progress milestones.')
+                        : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
                         ? 'Ask questions regarding INCI active mechanisms, penetration kinetics, clinical scalp/skin protocols, or dermocosmetic safety.'
                         : contextType === 'diagnostic_test'
                         ? 'Ask questions regarding capillary blood spot collection, sample transit stability, reference ranges, laboratory analytical methods, or clinical protocol matching.'
@@ -1253,7 +1271,15 @@ export default function PublicAtlasAIDrawer({
                     </span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
+                    {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription' ? (
+                      <>
+                        <div><strong>Prescription Identifier:</strong> {contextAnchor?.rxId || 'Official Verified Rx'}</div>
+                        <div><strong>Prescribing Physician:</strong> {contextAnchor?.doctorName || 'Dr. Hanieh Erdmann'} (Lic. DHA-00013060-006)</div>
+                        <div><strong>Compounding Vehicle:</strong> TrichoSol™ Lipid Carrier (Free of Propylene Glycol & Aggressive Alcohols)</div>
+                        <div><strong>Prescribed Formula:</strong> {contextAnchor?.formula || 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% (3x 100ml)'}</div>
+                        <div><strong>Posology:</strong> {contextAnchor?.dosage || '1.0 ml Once Daily at Night on Dry Scalp'}</div>
+                      </>
+                    ) : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair') ? (
                       <>
                         <div><strong>Regulatory Standard:</strong> European Cosmetic Regulation (EC) No 1223/2009</div>
                         <div><strong>Formulation Quality:</strong> Professional Dermocosmetic Grade (Bio-Active INCI)</div>

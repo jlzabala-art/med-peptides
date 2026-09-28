@@ -229,7 +229,7 @@ export default function PeptidePublicationsSection({ product, lang = 'en' }) {
         <div className="pds-pub-disclaimer">
           <ShieldCheck size={14} color="#64748b" style={{ flexShrink: 0 }} />
           <span>
-            Scientific citations are indexed from the National Library of Medicine (NLM / PubMed). Med-Peptides maintains complete editorial and academic neutrality. Publications are presented for educational and analytical reference.
+            Scientific citations are indexed from the National Library of Medicine (NLM / PubMed). Atlas Services maintains complete editorial and academic neutrality. Publications are presented for educational and analytical reference.
           </span>
         </div>
       </div>

@@ -8,6 +8,24 @@
  */
 
 export const COMPOUND_INQUIRIES_REGISTRY = {
+  // ── Official Prescription Dossier & Compounding Posology (Fagron Genomics Guided) ──
+  prescription: {
+    en: [
+      'How are Latanoprost and 17-α-Estradiol dosages personalized based on the Fagron Genomics TrichoTest™ report?',
+      'Why is TrichoSol™ lipid carrier superior to standard alcohol/propylene glycol solutions according to genetic guidelines?',
+      'How does 17-α-Estradiol modulate local 5-alpha reductase without systemic hormonal absorption?',
+      'What should the patient do if a nightly 1.0 ml application is accidentally missed?',
+      'What clinical milestones and shedding reduction are expected across the first 90 days?'
+    ],
+    es: [
+      '¿Cómo se seleccionaron las dosis de Latanoprost y 17-α-Estradiol según el informe Fagron Genomics TrichoTest™?',
+      '¿Por qué el vehículo lipídico TrichoSol™ es superior a las soluciones alcohólicas según la práctica farmacogenómica?',
+      '¿Cómo modula el 17-α-Estradiol la 5-alfa reductasa local sin absorción hormonal sistémica?',
+      '¿Qué pauta debe seguir el paciente si olvida una aplicación nocturna de 1.0 ml?',
+      '¿Qué hitos clínicos y reducción de caída se esperan durante los primeros 90 días?'
+    ]
+  },
+
   // ── NAD+ (Parenteral Lyophilized) ──
   nad: {
     en: [
@@ -631,6 +649,19 @@ export function getSuggestedInquiriesForProduct(contextAnchor, contextType = 'mo
     ];
   }
 
+  // 0. Prescription Context
+  if (
+    contextType === 'prescription' ||
+    contextAnchor?.rxId ||
+    contextAnchor?.prescriptionNumber ||
+    contextAnchor?.category === 'prescription'
+  ) {
+    const pack = COMPOUND_INQUIRIES_REGISTRY.prescription;
+    if (pack) {
+      return isEs ? pack.es : pack.en;
+    }
+  }
+
   // 1. If contextType is 'protocol'
   if (contextType === 'protocol') {
     if (isEs) {
@@ -753,7 +784,69 @@ export function getContextualAndPopularSuggestions({
   // 3. Define Contextual Topic Clusters
   let contextualCandidates = [];
 
-  if (contextType === 'diagnostic_test') {
+  if (contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription') {
+    if (turnContext.includes('genom') || turnContext.includes('fagron') || turnContext.includes('trichotest') || turnContext.includes('dna') || turnContext.includes('gene') || turnContext.includes('snp') || turnContext.includes('test')) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Informe Fagron TrichoTest™' : 'Fagron TrichoTest™ Report',
+          query: isEs ? '¿Cómo se seleccionaron las dosis de Latanoprost y 17-α-Estradiol según el informe Fagron Genomics TrichoTest™?' : 'How are Latanoprost and 17-α-Estradiol dosages personalized based on the Fagron Genomics TrichoTest™ report?'
+        },
+        {
+          label: isEs ? 'Vehículo TrichoSol™ y ADN' : 'TrichoSol™ Genetic Rationale',
+          query: isEs ? '¿Por qué el informe genético recomienda el vehículo TrichoSol™ libre de alcohol frente a excipientes clásicos?' : 'Why does the genetic report recommend TrichoSol™ alcohol-free vehicle over conventional excipients?'
+        },
+        {
+          label: isEs ? 'Variación de 48 SNPs' : '48 SNPs Pathway Mapping',
+          query: isEs ? '¿Qué rutas de los 48 SNPs analizados en TrichoTest™ justifican la combinación de prostaglandinas y antiandrógenos?' : 'Which pathways among the 48 SNPs analyzed in TrichoTest™ justify combining prostaglandins and antiandrogens?'
+        }
+      ];
+    } else if (turnContext.includes('latano') || turnContext.includes('estradi') || turnContext.includes('active') || turnContext.includes('formula') || turnContext.includes('tricho') || turnContext.includes('vehicle') || turnContext.includes('lipid')) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Activos y TrichoSol™' : 'Actives & TrichoSol™ Vehicle',
+          query: isEs ? '¿Cómo mejora el vehículo lipídico TrichoSol™ la absorción folicular de Latanoprost y 17-α-Estradiol?' : 'How does TrichoSol™ lipid vehicle enhance follicular uptake of Latanoprost and 17-α-Estradiol?'
+        },
+        {
+          label: isEs ? 'Mecanismo 17-α-Estradiol' : '17-α-Estradiol Mechanism',
+          query: isEs ? '¿Por qué se prescribe 17-α-Estradiol tópico frente a 5-alpha reductasa sin efectos sistémicos?' : 'Why is topical 17-α-Estradiol prescribed to inhibit 5-alpha reductase without systemic feminization?'
+        },
+        {
+          label: isEs ? 'Latanoprost Folicular' : 'Latanoprost Anagen Trigger',
+          query: isEs ? '¿Qué evidencia clínica avala el Latanoprost al 0.005% para prolongar la fase anágena capilar?' : 'What clinical evidence supports Latanoprost 0.005% in prolonging follicle anagen growth phase?'
+        }
+      ];
+    } else if (turnContext.includes('miss') || turnContext.includes('olvid') || turnContext.includes('daily') || turnContext.includes('night') || turnContext.includes('apply') || turnContext.includes('schedule') || turnContext.includes('posolog') || turnContext.includes('wash')) {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Dosis Olvidada' : 'Missed Dose Protocol',
+          query: isEs ? '¿Qué se debe hacer si se olvida una aplicación nocturna de 1.0 ml?' : 'What is the clinical protocol if a nightly 1.0 ml application is missed?'
+        },
+        {
+          label: isEs ? 'Aplicación Nocturna' : 'Nightly Application Rationale',
+          query: isEs ? '¿Por qué la posología prescribe aplicar 1.0 ml exclusivamente por la noche sobre cuero cabelludo seco?' : 'Why is posology strictly specified for 1.0 ml nightly application on dry scalp?'
+        },
+        {
+          label: isEs ? 'Lavado y Tiempos' : 'Post-Application Wash Window',
+          query: isEs ? '¿Cuántas horas mínimas debe permanecer la loción en el cuero cabelludo antes de lavarse el pelo?' : 'How many hours must the compound remain on the scalp before showering or washing?'
+        }
+      ];
+    } else {
+      contextualCandidates = [
+        {
+          label: isEs ? 'Evolución a 90 Días' : '90-Day Expected Timeline',
+          query: isEs ? '¿Qué hitos y cronograma de evolución clínica capilar se esperan durante los primeros 90 días?' : 'What clinical milestones and shedding/growth timeline are expected across the first 90 days?'
+        },
+        {
+          label: isEs ? 'Autenticidad y DHA' : 'DHA Validation & Pharmacy',
+          query: isEs ? '¿Cómo se verifica la autenticidad de la prescripción y la licencia médica DHA del facultativo?' : 'How is prescription authenticity and prescribing physician DHA credential validated?'
+        },
+        {
+          label: isEs ? 'Renovación y Envío' : 'Cycle Refill Logistics',
+          query: isEs ? '¿Cómo se gestiona el refill de los siguientes 3 frascos al completar el ciclo de 90 días?' : 'How is the cycle refill of the next 3x 100ml bottles processed upon finishing this 90-day phase?'
+        }
+      ];
+    }
+  } else if (contextType === 'diagnostic_test') {
     if (turnContext.includes('range') || turnContext.includes('reference') || turnContext.includes('umol') || turnContext.includes('deplet') || turnContext.includes('optimal') || turnContext.includes('level') || turnContext.includes('50') || turnContext.includes('20') || turnContext.includes('30')) {
       contextualCandidates = [
         {

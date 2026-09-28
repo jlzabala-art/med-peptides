@@ -104,7 +104,7 @@ export async function generateMetadata({ params }) {
       title: `Clinical Prescription #${code} — ${patientName}`,
       description,
       url: `${BASE_URL}/rx/${code}`,
-      siteName: 'Med-Peptides Clinical Intelligence',
+      siteName: 'Atlas Services Clinical Intelligence',
       type: 'article',
       images: [
         {

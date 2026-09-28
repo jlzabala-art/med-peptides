@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   Loader2,
   Clock,
-  Sparkles
+  Sparkles,
+  Dna
 } from 'lucide-react';
 import { useAlgoliaSearch } from '@/hooks/data/useAlgoliaSearch';
 import { triggerHaptic } from '@/utils/haptics';
@@ -61,8 +62,59 @@ const INQUIRY_TOPICS_PEPTIDES = [
     labelEn: 'General Institutional Inquiry',
     labelEs: 'Consulta Institucional General',
     icon: Mail,
-    placeholderEn: 'How can the Med-Peptides medical & scientific affairs desk assist your practice?',
-    placeholderEs: '¿En qué puede asistirle el equipo médico y científico de Med-Peptides?'
+    placeholderEn: 'How can the Atlas Services medical & scientific affairs desk assist your practice?',
+    placeholderEs: '¿En qué puede asistirle el equipo médico y científico de Atlas Services?'
+  }
+];
+
+const INQUIRY_TOPICS_PRESCRIPTION = [
+  {
+    id: 'genomics_correlation',
+    labelEn: 'Fagron Genomics TrichoTest™ & DNA Correlation',
+    labelEs: 'Correlación de Fagron Genomics TrichoTest™ & ADN',
+    icon: Dna,
+    placeholderEn: 'Inquire about how your genetic test results determined the active ingredients, dosages, or vehicle in this prescription...',
+    placeholderEs: 'Consulte cómo su informe genético determinó los principios activos, dosificaciones o vehículo de esta prescripción...'
+  },
+  {
+    id: 'rx_verification',
+    labelEn: 'Prescription & DHA Physician Credential Verification',
+    labelEs: 'Verificación de Prescripción y Credenciales DHA del Médico',
+    icon: ShieldCheck,
+    placeholderEn: 'Inquire about prescription authenticity, issuing medical license (DHA-00013060-006), or practitioner verification...',
+    placeholderEs: 'Consulte sobre autenticidad de la prescripción, licencia médica emisora (DHA-00013060-006) o validación del facultativo...'
+  },
+  {
+    id: 'compounding_formulation',
+    labelEn: 'Compounding Formulation, Actives & TrichoSol™ Vehicle',
+    labelEs: 'Fórmula Magistral, Principios Activos y Vehículo TrichoSol™',
+    icon: FlaskConical,
+    placeholderEn: 'Ask regarding Latanoprost 0.005%, 17-α-Estradiol 0.05%, TrichoSol™ lipid carrier, alcohol-free tolerability, or excipients...',
+    placeholderEs: 'Consulte sobre Latanoprost 0.005%, 17-α-Estradiol 0.05%, vehículo lipídico TrichoSol™, tolerancia sin alcohol o excipientes...'
+  },
+  {
+    id: 'posology_schedule',
+    labelEn: 'Posology Protocol, Application Window & Nightly Routine',
+    labelEs: 'Pauta Posológica, Horario de Aplicación y Rutina Nocturna',
+    icon: Clock,
+    placeholderEn: 'Inquire about the 1.0 ml nightly application protocol, dry scalp requirements, missed dose instructions, or washing times...',
+    placeholderEs: 'Consulte sobre la pauta de 1.0 ml nocturno, aplicación en cuero cabelludo seco, dosis olvidada o tiempos de lavado...'
+  },
+  {
+    id: 'cycle_refill',
+    labelEn: 'Prescription Cycle Refill & Dispensary Logistics',
+    labelEs: 'Renovación de Ciclo de Prescripción y Envío de Farmacia',
+    icon: Building2,
+    placeholderEn: 'Inquire about dispensing remaining 3x 100ml units, international express cold-chain delivery, or cycle renewal...',
+    placeholderEs: 'Consulte sobre la dispensación de las unidades restantes (3x 100ml), envío con mensajería o renovación del ciclo...'
+  },
+  {
+    id: 'prescribing_physician',
+    labelEn: 'Direct Consultation with Prescribing Clinic Team',
+    labelEs: 'Consulta Directa con el Equipo Médico de la Clínica',
+    icon: Mail,
+    placeholderEn: 'Submit clinical evolution questions directly to Dr. Hanieh Erdmann and the Mediluxe Health Solutions clinical team...',
+    placeholderEs: 'Envíe sus consultas de evolución clínica directamente a la Dra. Hanieh Erdmann y al equipo médico de Mediluxe Health Solutions...'
   }
 ];
 
@@ -155,8 +207,8 @@ const INQUIRY_TOPICS_BLOODO = [
 export default function PublicInstitutionalInquiryDrawer({
   isOpen = false,
   onClose,
-  contextType = 'general', // 'product' | 'protocol' | 'catalog' | 'protocols_directory' | 'general'
-  initialEntity = null,    // { name, slug, code, strength, category, supplier }
+  contextType = 'general', // 'product' | 'protocol' | 'catalog' | 'protocols_directory' | 'prescription' | 'general'
+  initialEntity = null,    // { name, slug, code, strength, category, supplier, rxId }
   lang = 'en'
 }) {
   const brandType = useMemo(() => {
@@ -165,6 +217,15 @@ export default function PublicInstitutionalInquiryDrawer({
     const rawName = String(initialEntity?.name || '').toLowerCase();
     const rawSlug = String(initialEntity?.slug || '').toLowerCase();
 
+    if (
+      contextType === 'prescription' ||
+      rawCat.includes('prescription') ||
+      rawSupplier.includes('prescription') ||
+      initialEntity?.rxId ||
+      initialEntity?.prescriptionNumber
+    ) {
+      return 'prescription';
+    }
     if (
       rawCat.includes('cosmetic') ||
       rawCat.includes('hair') ||
@@ -189,12 +250,14 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [initialEntity, contextType]);
 
   const activeTopics = useMemo(() => {
+    if (brandType === 'prescription') return INQUIRY_TOPICS_PRESCRIPTION;
     if (brandType === 'colway') return INQUIRY_TOPICS_COLWAY;
     if (brandType === 'bloodo') return INQUIRY_TOPICS_BLOODO;
     return INQUIRY_TOPICS_PEPTIDES;
   }, [brandType]);
 
   const [topic, setTopic] = useState(() => {
+    if (brandType === 'prescription') return initialEntity?.genomicsTest ? 'genomics_correlation' : 'rx_verification';
     if (brandType === 'colway') return 'salon_wholesale';
     if (brandType === 'bloodo') return 'clinic_b2b';
     if (contextType === 'product') return 'coa_specs';
@@ -205,11 +268,14 @@ export default function PublicInstitutionalInquiryDrawer({
 
   useEffect(() => {
     if (!activeTopics.some(t => t.id === topic)) {
-      setTopic(activeTopics[0]?.id || 'general_inquiry');
+      setTopic(activeTopics[0]?.id || (brandType === 'prescription' ? (initialEntity?.genomicsTest ? 'genomics_correlation' : 'rx_verification') : 'general_inquiry'));
     }
-  }, [activeTopics, topic]);
+  }, [activeTopics, topic, brandType, initialEntity]);
 
   const drawerHeaderTitle = useMemo(() => {
+    if (brandType === 'prescription') {
+      return lang === 'es' ? 'Consulta de Prescripción y Protocolo Médico' : 'Prescription & Medical Protocol Inquiry';
+    }
     if (brandType === 'colway') {
       return lang === 'es' ? 'Consulta Dermocosmética y Salones' : 'Cosmeceutical & Salon Inquiry';
     }
@@ -220,6 +286,11 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [brandType, lang]);
 
   const drawerHeaderSubtitle = useMemo(() => {
+    if (brandType === 'prescription') {
+      return lang === 'es'
+        ? 'Mesa Oficial de Asuntos Clínicos • Atlas Services & Clínica Prescriptora'
+        : 'Official Clinical Affairs Desk • Atlas Services & Prescribing Clinic';
+    }
     if (brandType === 'colway') {
       return lang === 'es' ? 'Mesa Oficial Colway • Cosmética Clínica y Tricología' : 'Official Colway Clinical & Trichology Desk';
     }
@@ -230,6 +301,11 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [brandType, lang]);
 
   const successDesc = useMemo(() => {
+    if (brandType === 'prescription') {
+      return lang === 'es'
+        ? 'Su consulta médica ha sido remitida con acuse de recibo al equipo clínico de la prescripción y a Atlas Services. Un enlace facultativo se pondrá en contacto en un plazo máximo de 24 horas laborables.'
+        : 'Your medical inquiry has been securely routed to the prescription clinical team and Atlas Services Medical Affairs. A clinical liaison will follow up within 24 business hours.';
+    }
     if (brandType === 'colway') {
       return lang === 'es'
         ? 'Su mensaje ha sido remitido a la Mesa Clínica y Estética de Colway. Un especialista en dermocosmética se pondrá en contacto en un plazo máximo de 24 horas laborables.'
@@ -241,8 +317,8 @@ export default function PublicInstitutionalInquiryDrawer({
         : 'Your inquiry has been securely routed to the Bloodo Diagnostic Affairs Desk. A laboratory specialist will follow up within 24 business hours.';
     }
     return lang === 'es'
-      ? 'Su mensaje ha sido remitido con acuse de recibo a la Mesa Científica Oficial de Med-Peptides. Un enlace médico colegiado se pondrá en contacto en un plazo máximo de 24 horas laborables.'
-      : 'Your inquiry has been securely routed to the Med-Peptides Official Medical & Scientific Affairs Desk. A medical liaison will follow up within 24 business hours.';
+      ? 'Su mensaje ha sido remitido con acuse de recibo a la Mesa Científica Oficial de Atlas Services. Un enlace médico colegiado se pondrá en contacto en un plazo máximo de 24 horas laborables.'
+      : 'Your inquiry has been securely routed to the Atlas Services Official Medical & Scientific Affairs Desk. A medical liaison will follow up within 24 business hours.';
   }, [brandType, lang]);
 
   const { 
@@ -378,10 +454,10 @@ export default function PublicInstitutionalInquiryDrawer({
       message || '(Inquiry text)',
       '',
       `Source Page: ${typeof window !== 'undefined' ? window.location.href : ''}`,
-      'Sent via Med-Peptides Institutional Portal'
+      'Sent via Atlas Services Institutional Portal'
     ].filter(Boolean).join('\n');
 
-    return `mailto:business@med-peptides.com?subject=${subject}&body=${encodeURIComponent(bodyLines)}`;
+    return `mailto:business@atlas-services.com?subject=${subject}&body=${encodeURIComponent(bodyLines)}`;
   }, [name, organization, email, phonePrefix, phoneNumber, activeTopicObj, attachedEntity, message]);
 
   const handleSubmit = async (e) => {
@@ -431,8 +507,8 @@ export default function PublicInstitutionalInquiryDrawer({
         triggerHaptic('success');
         toast.success(
           lang === 'es'
-            ? 'Consulta enviada a business@med-peptides.com. Le responderemos en breve.'
-            : 'Inquiry submitted to business@med-peptides.com. Medical affairs will respond shortly.'
+            ? 'Consulta enviada a business@atlas-services.com. Le responderemos en breve.'
+            : 'Inquiry submitted to business@atlas-services.com. Medical affairs will respond shortly.'
         );
       } else {
         throw new Error(data.error || 'Submission error');

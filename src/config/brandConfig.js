@@ -5,10 +5,10 @@
  */
 
 export const BRAND_CONFIG = {
-  name: 'Med-Peptides',
-  shortCode: 'MP',
-  domain: 'med-peptides.com',
-  supportEmail: 'business@med-peptides.com',
+  name: 'Atlas Services',
+  shortCode: 'AS',
+  domain: 'atlas-services.com',
+  supportEmail: 'business@atlas-services.com',
   defaultPurity: '≥ 99.0%'
 };
 

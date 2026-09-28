@@ -211,7 +211,7 @@ const PUBLIC_STYLES = `
     .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
 
     [data-public-mode]::before {
-      content: "Atlas Health — Clinical Product Information Sheet — For Authorized Medical & Research Use Only";
+      content: "Atlas Services — Clinical Product Information Sheet — For Authorized Medical & Research Use Only";
       display: block;
       font-family: system-ui, sans-serif;
       font-size: 9pt;
