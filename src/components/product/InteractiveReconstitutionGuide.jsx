@@ -18,9 +18,11 @@ import {
   ExternalLink,
   ChevronDown,
   FileText,
-  Layers
+  Layers,
+  Syringe
 } from '@/lib/icons';
 import ClinicalHandlingProtocolStepper from './ClinicalHandlingProtocolStepper';
+import ProtocolCycleVialProcurementMatrix from './ProtocolCycleVialProcurementMatrix';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
@@ -2432,155 +2434,292 @@ export default function InteractiveReconstitutionGuide({
                 </div>
               </div>
             )}
-          </div>
-
-
-          {/* ── Realistic Interactive U-100 Syringe Graphic ── */}
-          <div className="irg-syringe-stage" aria-label={`Insulin syringe displaying ${syringeUnits.toFixed(1)} units`}>
-            
-            <div className="irg-syringe-container">
-              {/* Needle tip */}
-              <div className="irg-syringe-needle">
-                <div className="irg-needle-steel" />
-                <div className="irg-needle-hub" />
+            {/* Clinical Reconstitution Specifications & Hardware Card */}
+            <div className="irg-reconstitution-specs-card">
+              <div className="irg-specs-header">
+                <div className="irg-specs-title">
+                  <Droplets size={15} color="#0284c7" />
+                  <span>{lang === 'es' ? 'Parámetros de Reconstitución & Hardware Aceptado' : 'Reconstitution Parameters & Aseptic Hardware'}</span>
+                </div>
+                <span className="irg-specs-badge">USP &lt;797&gt; Compounding</span>
               </div>
 
-              {/* Syringe Glass Barrel */}
-              <div className="irg-syringe-barrel">
-                
-                {/* Fluid column */}
-                <div 
-                  className={`irg-syringe-liquid ${isOverSyringe ? 'overfill' : ''}`}
-                  style={{ width: `${fillPct}%` }}
-                >
-                  <div className="irg-liquid-meniscus" />
-                  <div className="irg-liquid-gloss" />
-                </div>
-
-                {/* Rubber Plunger Stopper that slides dynamically */}
-                <div 
-                  className="irg-syringe-stopper"
-                  style={{ left: `${fillPct}%` }}
-                >
-                  <div className="irg-stopper-rubber" />
-                  <div className="irg-stopper-shaft" />
-                </div>
-
-                {/* Laser Graduations (0 to 100 U) */}
-                <div className="irg-syringe-ticks" aria-hidden="true">
-                  {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(tick => (
-                    <div 
-                      key={tick} 
-                      className={`irg-tick-mark ${tick % 50 === 0 ? 'major' : tick % 10 === 0 ? 'medium' : ''}`}
-                      style={{ left: `${tick}%` }}
-                    >
-                      <div className="irg-tick-line" />
-                      <span className="irg-tick-num font-mono">{tick}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Active Alignment Callout Arrow with dynamic safe clamping */}
-                {syringeUnits > 0 && (
-                  <div 
-                    className="irg-syringe-pointer"
-                    style={{ 
-                      left: `${fillPct}%`,
-                      transform: fillPct > 80 ? 'translateX(-95%)' : fillPct < 15 ? 'translateX(-5%)' : 'translateX(-50%)'
-                    }}
-                  >
-                    <div className="irg-pointer-pill font-mono">
-                      {isOverSyringe ? (
-                        <span>▲ 100 U max ({liquidVolumeMl.toFixed(2)} mL total)</span>
-                      ) : (
-                        <span>▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)</span>
-                      )}
-                    </div>
+              <div className="irg-specs-grid">
+                <div className="irg-spec-item">
+                  <div className="irg-spec-label">{lang === 'es' ? 'Solvente Recomendado' : 'Recommended Solvent'}</div>
+                  <div className="irg-spec-val">
+                    {dynamicSolventText || (lang === 'es' ? 'Agua Bacteriostática (BAC 0.9%)' : 'Bacteriostatic Water (BAC 0.9%)')}
                   </div>
-                )}
+                  <div className="irg-spec-desc font-mono">
+                    {safeBacMl.toFixed(1)} mL → {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
+                  </div>
+                </div>
+
+                <div className="irg-spec-item">
+                  <div className="irg-spec-label">{lang === 'es' ? 'Aguja de Reconstitución' : 'Reconstitution Needle'}</div>
+                  <div className="irg-spec-val">21G – 23G × 1.5" (38 mm)</div>
+                  <div className="irg-spec-desc">
+                    {lang === 'es' ? 'Previene daño al tapón (coring) y alivia el vacío del vial' : 'Prevents stopper coring & normalizes vacuum pressure'}
+                  </div>
+                </div>
+
+                <div className="irg-spec-item">
+                  <div className="irg-spec-label">{lang === 'es' ? 'Aguja de Inyección' : 'Administration Needle'}</div>
+                  <div className="irg-spec-val">31G × 5/16" (8 mm) Ultra-Fine</div>
+                  <div className="irg-spec-desc">
+                    {lang === 'es' ? 'Inyección subcutánea prácticamente indolora' : 'Virtually painless subcutaneous administration'}
+                  </div>
+                </div>
+
+                <div className="irg-spec-item">
+                  <div className="irg-spec-label">{lang === 'es' ? 'Caducidad & Conservación' : 'BUD & Cold-Chain Storage'}</div>
+                  <div className="irg-spec-val font-mono">❄️ 2°C – 8°C · 28 {lang === 'es' ? 'Días' : 'Days'}</div>
+                  <div className="irg-spec-desc">
+                    {lang === 'es' ? 'Refrigerar protegido de la luz. No congelar post-disolución' : 'Keep refrigerated & dark. Do not freeze post-reconstitution'}
+                  </div>
+                </div>
               </div>
 
-              {/* Syringe Finger Flange & Plunger Thumb Cap */}
-              <div className="irg-syringe-flange">
-                <div className="irg-flange-lip" />
+              <div className="irg-specs-technique-tip">
+                💡 <strong>Reconstitution Technique:</strong> Direct the diluent stream gently along the interior glass wall, never directly onto the lyophilized powder cake. Roll slowly between palms without shaking vigorously to preserve tertiary peptide chains intact.
               </div>
             </div>
 
-            <div className="irg-syringe-caption">
-              <ShieldCheck size={13} color="#0284c7" />
-              <span>{t.syringeModelSpec || 'U-100 Insulin Syringe (1.0 mL = 100 Units · 1 Unit = 0.01 mL)'}</span>
-            </div>
           </div>
 
-          {/* 📊 Clinical Administration & Vial Yield Matrix (Balances Right Column on Laptop) */}
-          <div className="irg-admin-yield-console" style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '14px 16px',
-            marginTop: '12px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
-          }}>
+        </div>
+
+        {/* ── Protocol Cycle Vial Procurement & Sizing Matrix (Full-Width Span) ── */}
+        <div style={{ gridColumn: '1 / -1', width: '100%' }}>
+          <ProtocolCycleVialProcurementMatrix
+            strategy={fullStrategy}
+            product={product}
+            currentDoseMg={doseMg}
+            currentVialMg={safeVialMg}
+            onCalibratePhase={(ph) => {
+              triggerHaptic('selection');
+              setDoseValue(ph.doseMg);
+              setDoseUnit('mg');
+              if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
+              if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
+              notifier.info(`Calibrated to ${ph.name}: ${ph.doseMg} mg · ${ph.recommendedVialMg || 10} mg vial`);
+            }}
+            lang="en"
+          />
+        </div>
+
+        {/* ── Realistic Interactive U-100 Syringe Graphic (Dedicated Full-Width Line) ── */}
+        <div 
+          className="irg-syringe-stage-row" 
+          style={{ gridColumn: '1 / -1', width: '100%' }}
+          aria-label={`Insulin syringe displaying ${syringeUnits.toFixed(1)} units`}
+        >
+          <div className="irg-syringe-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                backgroundColor: '#003666',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <Syringe size={17} />
+              </span>
+              <div>
+                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Precision U-100 Syringe Visual Calibration
+                </div>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                  Full-scale visual calibration for standard U-100 insulin syringes (100 Units = 1.0 mL)
+                </div>
+              </div>
+            </div>
+
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '10px',
-              borderBottom: '1px solid #f1f5f9',
-              paddingBottom: '8px'
+              gap: '8px',
+              background: '#f0f9ff',
+              border: '1.5px solid #bae6fd',
+              borderRadius: '8px',
+              padding: '6px 14px'
             }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FlaskConical size={14} color="#0284c7" />
-                {lang === 'es' ? 'Rendimiento Clínico y Posología' : 'Clinical Yield & Administration Profile'}
+              <span style={{ fontSize: '0.76rem', color: '#0369a1', fontWeight: 600 }}>
+                Target Dose: <strong>{doseValue} {doseUnit}</strong> →
               </span>
-              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 6px', borderRadius: '4px' }}>
-                {safeVialMg} mg / {safeBacMl.toFixed(1)} mL
+              <span style={{
+                fontSize: '1.15rem',
+                fontWeight: 900,
+                color: isOverSyringe ? '#d97706' : '#003666',
+                fontFamily: 'monospace'
+              }}>
+                {syringeUnits.toFixed(1)} <small style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7' }}>Units</small>
+              </span>
+              <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
+                ({liquidVolumeMl.toFixed(2)} mL)
               </span>
             </div>
+          </div>
+          
+          <div className="irg-syringe-container">
+            {/* Needle tip */}
+            <div className="irg-syringe-needle">
+              <div className="irg-needle-steel" />
+              <div className="irg-needle-hub" />
+            </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '10px'
-            }}>
-              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                  {lang === 'es' ? 'Carga por Inyección' : 'Draw Per Injection'}
-                </div>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666', marginTop: '2px' }} className="font-mono">
-                  {doseValue} {doseUnit} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>({syringeUnits.toFixed(1)} UI)</span>
-                </div>
+            {/* Syringe Glass Barrel */}
+            <div className="irg-syringe-barrel">
+              
+              {/* Fluid column */}
+              <div 
+                className={`irg-syringe-liquid ${isOverSyringe ? 'overfill' : ''}`}
+                style={{ width: `${fillPct}%` }}
+              >
+                <div className="irg-liquid-meniscus" />
+                <div className="irg-liquid-gloss" />
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                  {lang === 'es' ? 'Rendimiento del Vial' : 'Vial Longevity'}
-                </div>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }} className="font-mono">
-                  ~{totalDosesInVial} {lang === 'es' ? 'dosis totales' : 'total doses'}
-                </div>
+              {/* Rubber Plunger Stopper that slides dynamically */}
+              <div 
+                className="irg-syringe-stopper"
+                style={{ left: `${fillPct}%` }}
+              >
+                <div className="irg-stopper-rubber" />
+                <div className="irg-stopper-shaft" />
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                  {lang === 'es' ? 'Vía & Frecuencia' : 'Route & Cadence'}
-                </div>
-                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                  {lang === 'es' ? 'Subcutánea Semanal' : 'Weekly Subcutaneous'}
-                </div>
+              {/* Laser Graduations (0 to 100 U with major, medium and minor ticks) */}
+              <div className="irg-syringe-ticks" aria-hidden="true">
+                {Array.from({ length: 51 }, (_, i) => i * 2).map(tick => {
+                  const isMajor = tick % 10 === 0;
+                  const isMid = tick % 5 === 0 && !isMajor;
+                  return (
+                    <div 
+                      key={tick} 
+                      className={`irg-tick-mark ${isMajor ? 'major' : isMid ? 'medium' : 'minor'}`}
+                      style={{ left: `${tick}%` }}
+                    >
+                      <div className="irg-tick-line" />
+                      {isMajor && <span className="irg-tick-num font-mono">{tick}</span>}
+                    </div>
+                  );
+                })}
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                  {lang === 'es' ? 'Conservación' : 'Storage Guard'}
+              {/* Active Alignment Callout Arrow with dynamic safe clamping */}
+              {syringeUnits > 0 && (
+                <div 
+                  className="irg-syringe-pointer"
+                  style={{ 
+                    left: `${fillPct}%`,
+                    transform: fillPct > 80 ? 'translateX(-95%)' : fillPct < 15 ? 'translateX(-5%)' : 'translateX(-50%)'
+                  }}
+                >
+                  <div className="irg-pointer-pill font-mono">
+                    {isOverSyringe ? (
+                      <span>▲ 100 U max ({liquidVolumeMl.toFixed(2)} mL total)</span>
+                    ) : (
+                      <span>▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)</span>
+                    )}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0284c7', marginTop: '2px' }}>
-                  ❄️ 2°C – 8°C Refrigerator
-                </div>
-              </div>
+              )}
+            </div>
+
+            {/* Syringe Finger Flange & Plunger Thumb Cap */}
+            <div className="irg-syringe-flange">
+              <div className="irg-flange-lip" />
             </div>
           </div>
 
+          <div className="irg-syringe-caption" style={{ marginTop: '1.25rem', width: '100%', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck size={14} color="#0284c7" />
+              <span>{t.syringeModelSpec || 'U-100 Insulin Syringe (1.0 mL = 100 Units · 1 Unit = 0.01 mL)'}</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: 600 }}>
+              ℹ️ Align front face of black rubber stopper with target graduation mark for precision dosing
+            </div>
+          </div>
+        </div>
+
+        {/* 📊 Clinical Administration & Vial Yield Matrix (Full-Width Span) */}
+        <div 
+          className="irg-admin-yield-console" 
+          style={{
+            gridColumn: '1 / -1',
+            width: '100%',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '14px 18px',
+            marginTop: '0',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '10px',
+            borderBottom: '1px solid #f1f5f9',
+            paddingBottom: '8px'
+          }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <FlaskConical size={14} color="#0284c7" />
+              Clinical Administration &amp; Posology Profile
+            </span>
+            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 8px', borderRadius: '4px' }}>
+              {safeVialMg} mg / {safeBacMl.toFixed(1)} mL ({concentrationMgMl.toFixed(2)} mg/mL)
+            </span>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px'
+          }}>
+            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                Draw Per Injection
+              </div>
+              <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#003666', marginTop: '2px' }} className="font-mono">
+                {doseValue} {doseUnit} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>({syringeUnits.toFixed(1)} Units · {liquidVolumeMl.toFixed(2)} mL)</span>
+              </div>
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                Vial Longevity
+              </div>
+              <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }} className="font-mono">
+                ~{totalDosesInVial} total doses
+              </div>
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                Route &amp; Cadence
+              </div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                Weekly Subcutaneous
+              </div>
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                Storage Guard
+              </div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0284c7', marginTop: '2px' }}>
+                ❄️ 2°C – 8°C Refrigerator
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

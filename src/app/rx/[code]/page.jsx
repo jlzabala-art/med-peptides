@@ -87,36 +87,39 @@ export async function generateMetadata({ params }) {
   const code = resolvedParams?.code || '';
   const rx = await getPrescriptionData(code);
 
-  const title = rx 
-    ? `Prescripción Médica Verificada #${code} | ${rx.clinic || 'Bedaya Polyclinic'}`
-    : `Prescripción Médica #${code} | Verificación Oficial`;
+  const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
+  const doctor = rx?.doctorName || 'Consultant Specialist';
+  const clinic = rx?.clinic || 'Mediluxe Health Solutions (Dubai, UAE)';
 
-  const patientName = rx?.patient?.name || rx?.patientName || 'Paciente';
-  const doctor = rx?.doctorName || 'Médica Especialista';
-  const description = `Ficha técnica oficial y posología para ${patientName}, emitida por ${doctor} (${rx?.clinic || 'Bedaya Polyclinic Dubai'}). Verificación clínica digital.`;
+  const title = rx 
+    ? `Verified Prescription #${code} | ${clinic}`
+    : `Verified Prescription #${code} | Official Clinical Record`;
+
+  const description = `Official verified medical prescription & dosing protocol for ${patientName}, issued by ${doctor} (${clinic}). Verified digital health record.`;
 
   return {
     title,
     description,
     openGraph: {
-      title,
+      title: `Clinical Prescription #${code} — ${patientName}`,
       description,
       url: `${BASE_URL}/rx/${code}`,
-      siteName: 'Atlas Clinical Network & Bedaya Polyclinic',
+      siteName: 'Med-Peptides Clinical Intelligence',
       type: 'article',
       images: [
         {
-          url: `${BASE_URL}/og-catalog.png`,
+          url: `${BASE_URL}/og-preview.png`,
           width: 1200,
           height: 630,
-          alt: title
+          alt: `Prescription #${code} — ${patientName}`
         }
       ]
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: `Clinical Prescription #${code} — ${patientName}`,
       description,
+      images: [`${BASE_URL}/og-preview.png`]
     },
     robots: { index: false, follow: true }
   };

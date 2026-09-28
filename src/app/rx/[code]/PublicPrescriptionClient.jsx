@@ -29,20 +29,44 @@ import {
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
+
+// Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
+const PUBLIC_RX_STYLES = `
+  header.site-header,
+  nav.site-nav,
+  .cart-icon-wrapper,
+  .cart-drawer,
+  .auth-buttons,
+  .region-bar,
+  .guest-mode-banner,
+  .price-transparency-section,
+  .compare-tray,
+  .bottom-tab-bar,
+  [class*="CompareBar"],
+  [class*="GuestMode"],
+  [class*="RegionBar"],
+  [class*="PriceTransparency"] {
+    display: none !important;
+  }
+`;
 
 export default function PublicPrescriptionClient({ rx }) {
+  const [lang, setLang] = useState('en');
   const [copied, setCopied] = useState(false);
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeDocTab, setActiveDocTab] = useState(0);
 
+  const isEs = lang === 'es';
+
   const rxId = rx.id || rx.prescriptionNumber || 'RX-PRESCRIPTION';
   const posology = rx.structuredPosology || {};
   const patient = rx.patient || {};
-  const patientName = patient.name || rx.patientName || 'Paciente';
+  const patientName = patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
-  const doctorName = rx.doctorName || 'Dra. Hanieh Erdmann';
-  const clinic = rx.clinic || 'Bedaya Polyclinic L.L.C.';
+  const doctorName = rx.doctorName || 'Dr. Hanieh Erdmann';
+  const clinic = rx.clinic || 'Mediluxe Health Solutions (Dubai, UAE)';
   const doctorAddress = rx.doctorOfficeAddress || 'Index Tower 5709, Dubai (+971 50 354 6123)';
   const doctorPhone = rx.doctorPhone || '+971 50 354 6123';
   const doctorLicense = rx.doctorLicense || 'DHA-00013060-006';
@@ -50,7 +74,8 @@ export default function PublicPrescriptionClient({ rx }) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
 
-  const steps = posology.applicationSteps || [
+  // Localized clinical steps (English default)
+  const steps = isEs ? (posology.applicationSteps || [
     {
       step: 1,
       title: 'Preparación del Cuero Cabelludo',
@@ -87,9 +112,47 @@ export default function PublicPrescriptionClient({ rx }) {
       timing: 'A la mañana siguiente',
       instruction: 'Lavar el cabello a la mañana siguiente con un champú neutro suave (pH 5.5 sin sulfatos agresivos).'
     }
+  ]) : [
+    {
+      step: 1,
+      title: 'Scalp Preparation',
+      timing: '21:30 - 22:00 (Bedtime)',
+      instruction: 'Ensure the scalp is completely clean and dry before application. Do not apply on damp hair to prevent dilution of the TrichoSol™ lipid carrier. Part hair every 1-2 cm across areas of reduced density.'
+    },
+    {
+      step: 2,
+      title: 'Precision Dosing (1.0 ml)',
+      timing: 'Exact Daily Dose',
+      instruction: 'Draw exactly 1.0 ml using the calibrated pipette. Doses beyond 1.0 ml saturate follicular receptors without delivering additional clinical efficacy.'
+    },
+    {
+      step: 3,
+      title: 'Targeted Droplet Root Contact',
+      timing: 'Direct Dermal Contact',
+      instruction: 'Apply droplets directly onto the scalp surface (avoiding hair shafts), distributing evenly across targeted follicular zones.'
+    },
+    {
+      step: 4,
+      title: 'Microcirculation Stimulation',
+      timing: '60 - 90 Seconds',
+      instruction: 'Perform gentle circular fingertip massage to stimulate vascular capillary perfusion and optimize liposomal transdermal penetration.'
+    },
+    {
+      step: 5,
+      title: 'Nighttime Absorption Window',
+      timing: '6 to 8 Continuous Hours',
+      instruction: 'Leave formula on throughout nighttime rest. Allow to air-dry without direct hairdryer heat. Wash hands thoroughly with soap and water after application.'
+    },
+    {
+      step: 6,
+      title: 'Morning Hygiene Protocol',
+      timing: 'Following Morning',
+      instruction: 'Cleanse hair the following morning using a gentle physiological shampoo (pH 5.5, free of harsh aggressive sulfates).'
+    }
   ];
 
-  const timeline = posology.timeline || [
+  // Localized clinical milestones (English default)
+  const timeline = isEs ? (posology.timeline || [
     {
       phase: 'Semanas 1 - 3',
       title: 'Fase de Adaptación & Estabilización',
@@ -108,9 +171,29 @@ export default function PublicPrescriptionClient({ rx }) {
       badge: 'Mes 3',
       description: 'Incremento del calibre folicular y mayor cobertura visual. Finalización de los 3 frascos (300 ml). Revisión clínica con la Dra. Hanieh Erdmann.'
     }
+  ]) : [
+    {
+      phase: 'Weeks 1 - 3',
+      title: 'Adaptation & Follicular Stabilization',
+      badge: 'Month 1',
+      description: 'Cessation of active telogen shedding. Potential transient physiological shedding as miniaturized telogen hairs make way for synchronized anagen emergence.'
+    },
+    {
+      phase: 'Weeks 4 - 8',
+      title: 'Anagen Activation & Cellular Proliferation',
+      badge: 'Month 2',
+      description: 'Dermal papilla reactivation via IGrantine-F1™ and androgenic pathway control by 17-α-Estradiol. Marked reduction of hairs shed during washing.'
+    },
+    {
+      phase: 'Weeks 9 - 12',
+      title: 'Shaft Thickening, Density & Consolidation',
+      badge: 'Month 3',
+      description: 'Measurable caliber increase in hair shafts and visible density coverage. Completion of the 3-bottle course (300 ml). Follow-up clinical review with Dr. Hanieh Erdmann.'
+    }
   ];
 
-  const actives = posology.activesSynergy || [
+  // Localized active ingredients (English default)
+  const actives = isEs ? (posology.activesSynergy || [
     {
       name: 'Latanoprost Fagron 0.005%',
       role: 'Análogo de Prostaglandina F2α',
@@ -131,6 +214,27 @@ export default function PublicPrescriptionClient({ rx }) {
       role: 'Vehículo Lipídico Patentado',
       action: 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación o dermatitis y maximiza la biodisponibilidad folicular.'
     }
+  ]) : [
+    {
+      name: 'Latanoprost Fagron 0.005%',
+      role: 'Prostaglandin F2α Analogue',
+      action: 'Prolongs the duration of the anagen growth cycle and reactivates dormant miniaturized hair follicles.'
+    },
+    {
+      name: '17-α-Estradiol 0.05%',
+      role: 'Follicular Estrogen Modulator',
+      action: 'Locally inhibits the 5-alpha reductase enzyme and activates aromatase without detectable systemic hormone absorption.'
+    },
+    {
+      name: 'IGrantine-F1™ 0.5%',
+      role: 'Biomimetic Peptide Complex',
+      action: 'Stimulates the canonical Wnt/β-Catenin signaling pathway and synthesizes Vascular Endothelial Growth Factor (VEGF) in dermal papillae.'
+    },
+    {
+      name: 'TrichoSol™ (Fagron)',
+      role: 'Patented Liposomal Vehicle',
+      action: '100% alcohol and propylene glycol-free formulation. Prevents contact dermatitis and maximizes targeted follicular bioavailability.'
+    }
   ];
 
   const docs = rx.documents || rx.attachedDocuments || [];
@@ -140,10 +244,10 @@ export default function PublicPrescriptionClient({ rx }) {
       await navigator.clipboard.writeText(publicUrl);
       triggerHaptic('copy');
       setCopied(true);
-      toast.success('Enlace oficial copiado ✓');
+      toast.success(isEs ? 'Enlace oficial copiado ✓' : 'Official prescription link copied ✓');
       setTimeout(() => setCopied(false), 2200);
     } catch {
-      toast.error('No se pudo copiar el enlace');
+      toast.error(isEs ? 'No se pudo copiar el enlace' : 'Failed to copy link');
     }
   };
 
@@ -168,20 +272,29 @@ export default function PublicPrescriptionClient({ rx }) {
         downloadLink.click();
       };
       img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-      toast.success('Código QR descargado ✓');
+      toast.success(isEs ? 'Código QR descargado ✓' : 'QR Code downloaded ✓');
     } catch (err) {
       console.warn('[PublicPrescriptionClient] Download error:', err);
     }
   };
 
+  // WhatsApp share message: clean English format by default
   const shareTextWhatsApp = encodeURIComponent(
-    `*Atlas Health — Ficha Técnica y Posología Médica*\n` +
-    `📋 *Prescripción:* ${rxId}\n` +
-    `👤 *Paciente:* ${patientName}${patientAlias}\n` +
-    `🩺 *Médica Prescriptora:* ${doctorName}\n` +
-    `🧪 *Fórmula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% en TrichoSol™ (3x 100ml)\n` +
-    `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
-    `🔗 *Ver Ficha Digital Completa & Verificación:* ${publicUrl}`
+    isEs
+      ? `*Atlas Health — Ficha Técnica y Posología Médica*\n` +
+        `📋 *Prescripción:* ${rxId}\n` +
+        `👤 *Paciente:* ${patientName}${patientAlias}\n` +
+        `🩺 *Médica Prescriptora:* ${doctorName}\n` +
+        `🧪 *Fórmula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% en TrichoSol™ (3x 100ml)\n` +
+        `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
+        `🔗 *Ver Ficha Digital Completa & Verificación:* ${publicUrl}`
+      : `*Med-Peptides — Official Clinical Prescription & Posology*\n` +
+        `📋 *Prescription Ref:* ${rxId}\n` +
+        `👤 *Patient:* ${patientName}${patientAlias}\n` +
+        `🩺 *Prescribing Physician:* ${doctorName} (${clinic})\n` +
+        `🧪 *Formula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)\n` +
+        `🕒 *Dosage:* 1.0 ml topical daily at bedtime to dry scalp. Leave on overnight.\n\n` +
+        `🔗 *Verified Clinical Record & Dosage Guide:* ${publicUrl}`
   );
 
   return (
@@ -192,6 +305,30 @@ export default function PublicPrescriptionClient({ rx }) {
       fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       paddingBottom: '4rem'
     }}>
+      <style dangerouslySetInnerHTML={{ __html: PUBLIC_RX_STYLES }} />
+
+      {/* ── Public Unified Header (GCP Standard with Login, Lang, Clinical AI) ───── */}
+      <PublicUnifiedHeader 
+        track="protocols"
+        lang={lang}
+        onLangChange={(newLang) => setLang(newLang)}
+        copyUrl={publicUrl}
+        shortUrl={publicUrl}
+        loginRedirect={publicUrl}
+        breadcrumb={[
+          { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
+          { label: isEs ? 'Prescripciones Médicas' : 'Verified Prescriptions' },
+          { label: rxId }
+        ]}
+        anchorTabs={[
+          { id: 'formula-card', label: isEs ? 'Fórmula' : 'Formula & Actives' },
+          { id: 'posology-card', label: isEs ? 'Posología' : 'Posology Protocol' },
+          { id: 'milestones-card', label: isEs ? 'Evolución' : 'Clinical Milestones' },
+          { id: 'qr-card', label: isEs ? 'Verificación QR' : 'QR Verification' },
+          ...(docs.length > 0 ? [{ id: 'docs-card', label: isEs ? 'Documentos' : 'Attached Records' }] : [])
+        ]}
+      />
+
       {/* ── Top Clinical Verification Bar ───────────────────────────────────────── */}
       <div style={{
         background: '#003666',
@@ -207,9 +344,13 @@ export default function PublicPrescriptionClient({ rx }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ShieldCheck size={16} color="#4ade80" />
-          <span>Ficha Técnica Oficial Verificada & Dossier Clínico Digital</span>
+          <span>
+            {isEs 
+              ? 'Ficha Técnica Oficial Verificada & Dossier Clínico Digital'
+              : 'Official Verified Clinical Specification & Digital Medical Dossier'}
+          </span>
           <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ color: '#bae6fd' }}>{clinic} (Dubai, UAE)</span>
+          <span style={{ color: '#bae6fd' }}>{clinic}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <span style={{ color: '#93c5fd' }}>Ref: {rxId}</span>
@@ -222,7 +363,7 @@ export default function PublicPrescriptionClient({ rx }) {
             fontSize: '0.7rem',
             fontWeight: 700
           }}>
-            Activa & Dispensada ✓
+            {isEs ? 'Activa & Dispensada ✓' : 'Active & Dispensed ✓'}
           </span>
         </div>
       </div>
@@ -264,7 +405,7 @@ export default function PublicPrescriptionClient({ rx }) {
                   {doctorName}
                 </h1>
                 <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  {rx.doctorTitle || 'Physician Consultant Dermatology'} · Lic. {doctorLicense}
+                  {rx.doctorTitle || (isEs ? 'Médica Consultora Dermatología' : 'Physician Consultant Dermatology')} · Lic. {doctorLicense}
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
                   📍 {doctorAddress}
@@ -281,7 +422,7 @@ export default function PublicPrescriptionClient({ rx }) {
               minWidth: 260
             }}>
               <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Paciente Registrado
+                {isEs ? 'Paciente Registrado' : 'Registered Patient'}
               </div>
               <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                 {patientName} {patientAlias}
@@ -289,7 +430,7 @@ export default function PublicPrescriptionClient({ rx }) {
               <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', display: 'flex', gap: '0.75rem' }}>
                 <span>PIN: <strong>{patient.pin || '11774'}</strong></span>
                 <span>·</span>
-                <span>F. Nac: <strong>{patient.dob || '15/06/1984'}</strong></span>
+                <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob || '15/06/1984'}</strong></span>
               </div>
               <div style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '4px', fontWeight: 600 }}>
                 {patient.maskedPhone || '+971 54 *** **80'}
@@ -299,7 +440,7 @@ export default function PublicPrescriptionClient({ rx }) {
         </div>
 
         {/* ── Active Formula & Ingredients Card ───────────────────────────────────── */}
-        <div style={{
+        <div id="formula-card" style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
@@ -323,20 +464,22 @@ export default function PublicPrescriptionClient({ rx }) {
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  Fórmula Magistral Personalizada en TrichoSol™
+                  {isEs ? 'Fórmula Magistral Personalizada en TrichoSol™' : 'Custom Compounded Formula in TrichoSol™'}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  Recomendada tras Análisis Genético & Tricológico Fagron TrichoTest
+                  {isEs 
+                    ? 'Recomendada tras Análisis Genético & Tricológico Fagron TrichoTest'
+                    : 'Recommended Following Fagron TrichoTest Genetic & Trichological Assessment'}
                 </p>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                N3 = 3 Meses (3x 100ml)
+                {isEs ? 'N3 = 3 Meses (3x 100ml)' : 'N3 = 3-Month Cycle (3x 100ml)'}
               </span>
               <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                Vehículo Sin Alcohol
+                {isEs ? 'Vehículo Sin Alcohol' : 'Alcohol-Free Lipid Vehicle'}
               </span>
             </div>
           </div>
@@ -371,7 +514,7 @@ export default function PublicPrescriptionClient({ rx }) {
         </div>
 
         {/* ── Enhanced Posology & Step-by-Step Guide ───────────────────────────────── */}
-        <div style={{
+        <div id="posology-card" style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
@@ -395,10 +538,10 @@ export default function PublicPrescriptionClient({ rx }) {
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  Protocolo de Posología & Guía de Aplicación
+                  {isEs ? 'Protocolo de Posología & Guía de Aplicación' : 'Posology Protocol & Administration Guide'}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  Instrucciones detalladas de administración diaria para el paciente
+                  {isEs ? 'Instrucciones detalladas de administración diaria para el paciente' : 'Detailed daily patient administration instructions'}
                 </p>
               </div>
             </div>
@@ -412,7 +555,7 @@ export default function PublicPrescriptionClient({ rx }) {
               fontSize: '0.8rem',
               fontWeight: 800
             }}>
-              1.0 ml Nocturno Diario
+              {isEs ? '1.0 ml Nocturno Diario' : '1.0 ml Nightly Daily'}
             </div>
           </div>
 
@@ -472,7 +615,7 @@ export default function PublicPrescriptionClient({ rx }) {
           marginBottom: '1.5rem'
         }}>
           {/* Biological Milestones */}
-          <div style={{
+          <div id="milestones-card" style={{
             background: '#ffffff',
             borderRadius: '16px',
             border: '1px solid #e2e8f0',
@@ -482,7 +625,7 @@ export default function PublicPrescriptionClient({ rx }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
               <Activity size={20} color="#0d9488" />
               <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Evolución & Cronograma de Resultados (90 Días)
+                {isEs ? 'Evolución & Cronograma de Resultados (90 Días)' : 'Clinical Evolution & Results Timeline (90 Days)'}
               </h4>
             </div>
 
@@ -514,7 +657,7 @@ export default function PublicPrescriptionClient({ rx }) {
           </div>
 
           {/* QR Code & Direct WhatsApp Share */}
-          <div style={{
+          <div id="qr-card" style={{
             background: '#ffffff',
             borderRadius: '16px',
             border: '1px solid #e2e8f0',
@@ -530,11 +673,13 @@ export default function PublicPrescriptionClient({ rx }) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
                 <ShieldCheck size={18} color="#16a34a" />
                 <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Código QR & Enlace de Paciente
+                  {isEs ? 'Código QR & Enlace de Paciente' : 'QR Code & Patient Access Portal'}
                 </h4>
               </div>
               <p style={{ margin: '0 0 1.25rem', fontSize: '0.78rem', color: '#64748b' }}>
-                Escanee con su móvil para acceder inmediatamente a este expediente y las recetas firmadas
+                {isEs 
+                  ? 'Escanee con su móvil para acceder inmediatamente a este expediente y las recetas firmadas'
+                  : 'Scan with your smartphone camera to access this verified clinical record and digital prescription'}
               </p>
             </div>
 
@@ -550,7 +695,7 @@ export default function PublicPrescriptionClient({ rx }) {
                 cursor: 'pointer',
                 position: 'relative'
               }}
-              title="Click para ampliar el código QR"
+              title={isEs ? 'Click para ampliar el código QR' : 'Click to enlarge QR code'}
             >
               <QRCodeSVG 
                 id={`public-qr-${rxId}`}
@@ -594,7 +739,7 @@ export default function PublicPrescriptionClient({ rx }) {
                   }}
                 >
                   {copied ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
-                  <span>{copied ? 'Copiado' : 'Copiar URL'}</span>
+                  <span>{copied ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar URL' : 'Copy URL')}</span>
                 </button>
 
                 <button
@@ -616,7 +761,7 @@ export default function PublicPrescriptionClient({ rx }) {
                   }}
                 >
                   <Download size={14} />
-                  <span>Bajar QR</span>
+                  <span>{isEs ? 'Bajar QR' : 'Save QR'}</span>
                 </button>
               </div>
 
@@ -642,7 +787,7 @@ export default function PublicPrescriptionClient({ rx }) {
                 }}
               >
                 <Share2 size={16} />
-                <span>Compartir por WhatsApp</span>
+                <span>{isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}</span>
               </a>
             </div>
           </div>
@@ -650,7 +795,7 @@ export default function PublicPrescriptionClient({ rx }) {
 
         {/* ── Official Attached Documents Tabs & Preview ──────────────────────────── */}
         {docs.length > 0 && (
-          <div style={{
+          <div id="docs-card" style={{
             background: '#ffffff',
             borderRadius: '16px',
             border: '1px solid #e2e8f0',
@@ -674,10 +819,10 @@ export default function PublicPrescriptionClient({ rx }) {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                    Documentos Oficiales Adjuntos ({docs.length})
+                    {isEs ? `Documentos Oficiales Adjuntos (${docs.length})` : `Official Attached Clinical Documents (${docs.length})`}
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                    Previsualización de la receta médica oficial y la ficha de formulación Fagron
+                    {isEs ? 'Previsualización de la receta médica oficial y la ficha de formulación Fagron' : 'Preview official signed prescription pad and Fagron compounding records'}
                   </p>
                 </div>
               </div>
@@ -700,7 +845,9 @@ export default function PublicPrescriptionClient({ rx }) {
                       cursor: 'pointer'
                     }}
                   >
-                    {d.category === 'signed_rx' ? '📄 Receta Bedaya Pad' : '🖼️ Plantilla Fagron'}
+                    {d.category === 'signed_rx' 
+                      ? (isEs ? '📄 Receta Bedaya Pad' : '📄 Bedaya Signed Pad') 
+                      : (isEs ? '🖼️ Plantilla Fagron' : '🖼️ Fagron Formulation')}
                   </button>
                 ))}
               </div>
@@ -723,7 +870,7 @@ export default function PublicPrescriptionClient({ rx }) {
                       {docs[activeDocTab].title || docs[activeDocTab].name}
                     </h4>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
-                      {docs[activeDocTab].uploadedBy || 'Documento clínico verificado'}
+                      {docs[activeDocTab].uploadedBy || (isEs ? 'Documento clínico verificado' : 'Verified clinical document')}
                     </p>
                   </div>
 
@@ -746,7 +893,7 @@ export default function PublicPrescriptionClient({ rx }) {
                       }}
                     >
                       <Maximize2 size={13} />
-                      <span>Pantalla Completa</span>
+                      <span>{isEs ? 'Pantalla Completa' : 'Full Screen'}</span>
                     </button>
 
                     {docs[activeDocTab].url && (
@@ -770,7 +917,7 @@ export default function PublicPrescriptionClient({ rx }) {
                         }}
                       >
                         <Download size={13} />
-                        <span>Descargar</span>
+                        <span>{isEs ? 'Descargar' : 'Download'}</span>
                       </a>
                     )}
                   </div>
@@ -808,7 +955,7 @@ export default function PublicPrescriptionClient({ rx }) {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', marginTop: '2rem' }}>
-          Atlas Health Medical Protocol Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
+          Med-Peptides Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
         </div>
       </div>
 
@@ -841,7 +988,7 @@ export default function PublicPrescriptionClient({ rx }) {
             }}
           >
             <h3 style={{ margin: '0 0 0.5rem', color: '#0f172a', fontWeight: 800, fontSize: '1.1rem' }}>
-              Código QR de Prescripción
+              {isEs ? 'Código QR de Prescripción' : 'Prescription QR Code'}
             </h3>
             <p style={{ margin: '0 0 1.5rem', color: '#64748b', fontSize: '0.8rem' }}>
               {rxId} · {patientName}
@@ -879,7 +1026,7 @@ export default function PublicPrescriptionClient({ rx }) {
                   cursor: 'pointer'
                 }}
               >
-                Descargar PNG
+                {isEs ? 'Descargar PNG' : 'Download PNG'}
               </button>
               <button
                 type="button"
@@ -895,7 +1042,7 @@ export default function PublicPrescriptionClient({ rx }) {
                   cursor: 'pointer'
                 }}
               >
-                Cerrar
+                {isEs ? 'Cerrar' : 'Close'}
               </button>
             </div>
           </div>

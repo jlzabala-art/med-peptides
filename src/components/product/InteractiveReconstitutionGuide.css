@@ -819,17 +819,127 @@
   color: #1e40af;
 }
 
-/* ── Realistic Interactive U-100 Syringe Stage ── */
-/* ── Realistic Interactive U-100 Syringe Stage (Material 3 / Clinical Precision) ── */
-.irg-syringe-stage {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
+/* ── Reconstitution Clinical Hardware & Parameters Specs Card ── */
+.irg-reconstitution-specs-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: 12px;
-  padding: 2.25rem 1.25rem 1.5rem 1.25rem;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.irg-specs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.65rem;
+}
+
+.irg-specs-title {
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.irg-specs-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.irg-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+@media (max-width: 640px) {
+  .irg-specs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.irg-spec-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.irg-spec-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.irg-spec-val {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #003666;
+}
+
+.irg-spec-desc {
+  font-size: 0.70rem;
+  color: #475569;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.irg-specs-technique-tip {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.73rem;
+  color: #1e40af;
+  line-height: 1.45;
+}
+
+/* ── Realistic Interactive U-100 Syringe Stage (Dedicated Full-Width Line) ── */
+.irg-syringe-stage-row,
+.irg-syringe-stage {
+  grid-column: 1 / -1;
+  width: 100%;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem 1.5rem 1.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.irg-syringe-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .irg-syringe-container {
@@ -837,7 +947,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 480px;
+  max-width: 860px;
   height: 90px;
 }
 
@@ -959,13 +1069,18 @@
 
 .irg-tick-line {
   width: 1px;
-  height: 10px;
-  background: #64748b;
+  height: 6px;
+  background: #cbd5e1;
+}
+
+.irg-tick-mark.minor .irg-tick-line {
+  height: 6px;
+  background: #cbd5e1;
 }
 
 .irg-tick-mark.medium .irg-tick-line {
-  height: 14px;
-  background: #334155;
+  height: 12px;
+  background: #475569;
 }
 
 .irg-tick-mark.major .irg-tick-line {
@@ -1368,11 +1483,20 @@
     gap: 0.5rem;
   }
 
-  /* Optimize syringe ticks on narrow mobile screens (show only 0, 20, 40, 60, 80, 100) */
+  /* Optimize syringe ticks on narrow mobile screens (hide minor & medium ticks for high legibility) */
+  .irg-tick-mark.minor {
+    display: none;
+  }
+
+  .irg-tick-mark.medium {
+    display: none;
+  }
+
   .irg-tick-mark:not(.major):not([style*="left: 20%"]):not([style*="left: 40%"]):not([style*="left: 60%"]):not([style*="left: 80%"]) .irg-tick-num {
     display: none;
   }
 
+  .irg-syringe-stage-row,
   .irg-syringe-stage,
   .irg-pen-stage {
     touch-action: pan-y;

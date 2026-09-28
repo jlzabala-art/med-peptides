@@ -228,6 +228,32 @@ export async function POST(req) {
           console.warn('[POST /api/short-url] Could not write to user shared_datasheets:', userErr.message);
         }
       }
+
+      // 5. Index in recipient_public_pages for dedicated recipient public dossier querying
+      if (recipientData.id || recipientData.email || recipientData.name) {
+        try {
+          const recipientKey = recipientData.id || (recipientData.email ? recipientData.email.replace(/[^a-zA-Z0-9]/g, '_') : 'guest');
+          await adminDb.collection('recipient_public_pages').doc(`${recipientKey}_${code}`).set({
+            recipientId: recipientData.id || null,
+            recipientEmail: recipientData.email || null,
+            recipientName: recipientData.name || 'Valued Partner',
+            recipientType: recipientData.type || 'wholesaler',
+            code,
+            shortUrl,
+            targetUrl: cleanTargetUrl,
+            slug: slug || '',
+            productName: variantData.productName,
+            dose: variantData.dose,
+            format: variantData.format,
+            supplier: variantData.supplier,
+            channel: deliveryChannel,
+            status: 'active',
+            createdAt: now,
+          });
+        } catch (rErr) {
+          console.warn('[POST /api/short-url] Could not write to recipient_public_pages:', rErr.message);
+        }
+      }
     }
 
     return NextResponse.json({

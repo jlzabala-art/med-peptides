@@ -281,11 +281,13 @@ export default function ShareProductMonographDrawer({
   const hasActiveFilters = selectedSupplierId !== 'all' || selectedFormatId !== 'all' || selectedStrengthId !== 'all' || selectedLang !== 'en';
 
   const handleResetFilters = () => {
+    if (!hasActiveFilters) return;
     setSelectedSupplierId('all');
     setSelectedFormatId('all');
     setSelectedStrengthId('all');
     setSelectedLang('en');
-    toast.success('Configuration reset to full monograph scope');
+    setTrackedShortUrl(null);
+    toast.success('Scope parameters reset to default');
   };
 
   // Centralized generation & Firestore audit registration
@@ -463,33 +465,64 @@ export default function ShareProductMonographDrawer({
     <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
-      title="Share Clinical Monograph"
-      subtitle={`Configure specification scope & dispatch tracked links for ${productName}`}
+      title="Clinical Monograph Dispatch & Tracking Console"
+      subtitle={`Configure source parameters, assign recipient audit tracking, and print thermal labels for ${productName}`}
       width="clamp(460px, 52vw, 740px)"
       zIndex={100065}
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
-          <button
-            type="button"
-            onClick={handleOpenPreview}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '9px 14px',
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '8px',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              color: '#334155',
-              cursor: 'pointer',
-              minHeight: '40px'
-            }}
-          >
-            <ExternalLink size={14} />
-            <span>Open Preview</span>
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={handleOpenPreview}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                color: '#334155',
+                cursor: 'pointer',
+                minHeight: '40px',
+                transition: 'all 0.15s ease'
+              }}
+              title="Open public monograph preview in a new tab"
+            >
+              <ExternalLink size={14} />
+              <span>Open Preview</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const printUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&supplier=${encodeURIComponent(selectedSupplierId !== 'all' ? selectedSupplierId : (product?.supplierId || 'supplier-lotusland'))}&dose=${encodeURIComponent(selectedStrengthId !== 'all' ? selectedStrengthId : '10 mg')}&targetUrl=${encodeURIComponent(effectiveShareUrl)}`;
+                window.open(printUrl, '_blank', 'noopener,noreferrer');
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                color: '#003666',
+                cursor: 'pointer',
+                minHeight: '40px',
+                transition: 'all 0.15s ease'
+              }}
+              title="Print 38x90 mm thermal roll label with exact QR code for this configured scope"
+            >
+              <Printer size={14} color="#0284c7" />
+              <span>Print Thermal Label</span>
+            </button>
+          </div>
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
@@ -540,29 +573,30 @@ export default function ShareProductMonographDrawer({
               </p>
             </div>
 
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: '#f1f5f9',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
-                  padding: '4px 8px',
-                  fontSize: '0.70rem',
-                  fontWeight: 600,
-                  color: '#475569',
-                  cursor: 'pointer'
-                }}
-                title="Reset all filters to default full monograph"
-              >
-                <RotateCcw size={12} />
-                <span>Reset Scope</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: hasActiveFilters ? '#ffffff' : '#f8fafc',
+                border: `1px solid ${hasActiveFilters ? '#cbd5e1' : '#e2e8f0'}`,
+                borderRadius: '6px',
+                padding: '4px 9px',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                color: hasActiveFilters ? '#1e293b' : '#94a3b8',
+                cursor: hasActiveFilters ? 'pointer' : 'default',
+                opacity: hasActiveFilters ? 1 : 0.6,
+                transition: 'all 0.15s ease'
+              }}
+              title={hasActiveFilters ? "Reset all parameters to default monograph scope" : "Parameters are already at default values"}
+            >
+              <RotateCcw size={12} />
+              <span>Reset to Defaults</span>
+            </button>
           </div>
 
           {/* Responsive 2-Column Grid */}
@@ -1129,7 +1163,7 @@ export default function ShareProductMonographDrawer({
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
                 <a
-                  href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${queryString ? `&${queryString}` : ''}`}
+                  href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&supplier=${encodeURIComponent(selectedSupplierId !== 'all' ? selectedSupplierId : (product?.supplierId || 'supplier-lotusland'))}&dose=${encodeURIComponent(selectedStrengthId !== 'all' ? selectedStrengthId : '10 mg')}&targetUrl=${encodeURIComponent(effectiveShareUrl)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -1153,7 +1187,7 @@ export default function ShareProductMonographDrawer({
                 </a>
 
                 <a
-                  href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client${queryString ? `&${queryString}` : ''}`}
+                  href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&supplier=${encodeURIComponent(selectedSupplierId !== 'all' ? selectedSupplierId : (product?.supplierId || 'supplier-lotusland'))}&dose=${encodeURIComponent(selectedStrengthId !== 'all' ? selectedStrengthId : '10 mg')}&targetUrl=${encodeURIComponent(effectiveShareUrl)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

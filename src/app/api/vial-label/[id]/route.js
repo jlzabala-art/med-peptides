@@ -596,7 +596,7 @@ export async function GET(request, { params }) {
     }
 
     // Resolve target shared URL for the QR code — guaranteed to point to exact variant
-    const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
+    const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl') || searchParams.get('targetUrl');
     let targetShareUrl = explicitUrl;
     if (targetShareUrl) {
       if (targetShareUrl.startsWith('/')) {
