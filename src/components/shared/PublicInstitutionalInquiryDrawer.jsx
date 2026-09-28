@@ -77,12 +77,12 @@ const INQUIRY_TOPICS_PRESCRIPTION = [
     placeholderEs: 'Consulte cómo su informe genético determinó los principios activos, dosificaciones o vehículo de esta prescripción...'
   },
   {
-    id: 'rx_verification',
-    labelEn: 'Prescription & DHA Physician Credential Verification',
-    labelEs: 'Verificación de Prescripción y Credenciales DHA del Médico',
+    id: 'rx_details',
+    labelEn: 'Prescription Details & Treatment Protocol Support',
+    labelEs: 'Detalles de la Prescripción y Soporte del Tratamiento',
     icon: ShieldCheck,
-    placeholderEn: 'Inquire about prescription authenticity, issuing medical license (DHA-00013060-006), or practitioner verification...',
-    placeholderEs: 'Consulte sobre autenticidad de la prescripción, licencia médica emisora (DHA-00013060-006) o validación del facultativo...'
+    placeholderEn: 'Inquire about prescription specifics, active compound ratios, or treatment guidelines...',
+    placeholderEs: 'Consulte sobre especificaciones de la prescripción, proporciones de activos o pauta del tratamiento...'
   },
   {
     id: 'compounding_formulation',
@@ -105,7 +105,7 @@ const INQUIRY_TOPICS_PRESCRIPTION = [
     labelEn: 'Prescription Cycle Refill & Dispensary Logistics',
     labelEs: 'Renovación de Ciclo de Prescripción y Envío de Farmacia',
     icon: Building2,
-    placeholderEn: 'Inquire about dispensing remaining 3x 100ml units, international express cold-chain delivery, or cycle renewal...',
+    placeholderEn: 'Inquire about dispensing remaining 3x 100ml units, international express delivery, or cycle renewal...',
     placeholderEs: 'Consulte sobre la dispensación de las unidades restantes (3x 100ml), envío con mensajería o renovación del ciclo...'
   },
   {
@@ -113,8 +113,8 @@ const INQUIRY_TOPICS_PRESCRIPTION = [
     labelEn: 'Direct Consultation with Prescribing Clinic Team',
     labelEs: 'Consulta Directa con el Equipo Médico de la Clínica',
     icon: Mail,
-    placeholderEn: 'Submit clinical evolution questions directly to Dr. Hanieh Erdmann and the Mediluxe Health Solutions clinical team...',
-    placeholderEs: 'Envíe sus consultas de evolución clínica directamente a la Dra. Hanieh Erdmann y al equipo médico de Mediluxe Health Solutions...'
+    placeholderEn: 'Submit clinical evolution questions directly to Dr. Hanieh Erdmann and the clinical medical team...',
+    placeholderEs: 'Envíe sus consultas de evolución clínica directamente a la Dra. Hanieh Erdmann y al equipo médico de la clínica...'
   }
 ];
 

@@ -35,6 +35,7 @@ import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
+import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import '@/styles/publicDesignSystem.css';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
@@ -63,6 +64,7 @@ export default function PublicPrescriptionClient({ rx }) {
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeDocTab, setActiveDocTab] = useState(0);
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
 
   const isEs = lang === 'es';
 
@@ -1296,12 +1298,8 @@ export default function PublicPrescriptionClient({ rx }) {
         subtitle={`${patientName} • ${doctorName}`}
         badge={isEs ? 'Prescripción Médica' : 'Medical Prescription'}
         badgeType="protocol"
-        inquireLabel={isEs ? 'Consultar con IA' : 'Consult with AI'}
-        onInquire={() => {
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('open-atlas-ai-drawer'));
-          }
-        }}
+        inquireLabel={isEs ? 'Consultar Prescripción' : 'Inquire Prescription'}
+        onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
         showSections={true}
         sectionsCount={tocSections.length}
@@ -1309,6 +1307,25 @@ export default function PublicPrescriptionClient({ rx }) {
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('open-rx-sections'));
           }
+        }}
+        lang={lang}
+      />
+
+      {/* Context-Aware Prescription Clinical Inquiry Drawer */}
+      <PublicInstitutionalInquiryDrawer
+        isOpen={isInquiryDrawerOpen}
+        onClose={() => setIsInquiryDrawerOpen(false)}
+        contextType="prescription"
+        initialEntity={{
+          name: `Prescription ${rxId} — ${patientName}`,
+          rxId,
+          code: rxId,
+          patientName,
+          doctorName,
+          clinic,
+          formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
+          dosage: '1.0 ml Once Daily at Night on Dry Scalp',
+          category: 'Prescription Dossier'
         }}
         lang={lang}
       />
