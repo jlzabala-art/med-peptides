@@ -279,22 +279,6 @@ export default function GenomicsPrescriptionGuidanceCard({
               ? 'Práctica clínica avalada por consorcios internacionales de farmacogenómica.' 
               : 'Clinical practice aligned with international pharmacogenomic guidelines.'}
           </div>
-          <a
-            href={test.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#0284c7',
-              fontWeight: 700,
-              textDecoration: 'none'
-            }}
-          >
-            <span>{isEs ? 'Ver Metodología en Fagron Genomics' : 'View Methodology at Fagron Genomics'}</span>
-            <ExternalLink size={12} />
-          </a>
         </div>
 
       </div>

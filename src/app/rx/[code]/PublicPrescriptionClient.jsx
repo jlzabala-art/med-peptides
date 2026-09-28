@@ -35,7 +35,6 @@ import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
-import PosologyInfographicCard from '@/components/prescription/PosologyInfographicCard';
 import '@/styles/publicDesignSystem.css';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
@@ -101,36 +100,42 @@ export default function PublicPrescriptionClient({ rx }) {
       step: 1,
       title: 'Preparación del Cuero Cabelludo',
       timing: '21:30 - 22:00 (Noche)',
-      instruction: 'Asegurarse de que el cuero cabelludo esté completamente limpio y seco. No aplicar sobre cabello húmedo para evitar la dilución del vehículo lipídico TrichoSol™. Separar el cabello en rayas cada 1-2 cm sobre las áreas con menor densidad.'
+      badge: 'Cuero Cabelludo Seco',
+      instruction: 'Asegurarse de que el cuero cabelludo esté completamente limpio y seco antes de la aplicación. No aplicar sobre cabello húmedo para evitar la dilución del vehículo lipídico TrichoSol™. Separar el cabello en rayas cada 1-2 cm sobre las áreas con menor densidad.'
     },
     {
       step: 2,
-      title: 'Dosificación de Precisión (1.0 ml)',
+      title: 'Dosificación de Precisión & Calibración',
       timing: 'Dosis Diaria Exacta',
+      badge: 'Pipeta Graduada 1.0 mL',
       instruction: 'Extraer exactamente 1.0 ml con la pipeta graduada. Dosis superiores saturan los receptores foliculares sin aportar beneficio clínico adicional.'
     },
     {
       step: 3,
       title: 'Aplicación Gota a Gota en Raíz',
-      timing: 'Contacto Dérmico',
-      instruction: 'Depositar las gotas directamente en contacto con la piel del cuero cabelludo (no sobre el tallo del cabello), distribuyendo uniformemente.'
+      timing: 'Contacto Dérmico Directo',
+      badge: 'Piel Capilar (No Tallo)',
+      instruction: 'Depositar las gotas directamente en contacto con la piel del cuero cabelludo (evitando los tallos del cabello), distribuyendo uniformemente en coronilla, zona frontal y sienes.'
     },
     {
       step: 4,
-      title: 'Masaje de Microcirculación',
+      title: 'Masaje de Microcirculación & Perfusión',
       timing: '60 - 90 Segundos',
-      instruction: 'Efectuar un masaje circular suave con la yema de los dedos para activar el flujo vascular y optimizar la penetración transdérmica liposomal.'
+      badge: 'Activación Vascular',
+      instruction: 'Efectuar un masaje circular suave con la yema de los dedos para activar el flujo vascular capilar y optimizar la penetración transdérmica liposomal.'
     },
     {
       step: 5,
-      title: 'Tiempo de Acción Nocturno',
+      title: 'Tiempo de Absorción Liposomal Nocturno',
       timing: '6 a 8 Horas Continuas',
-      instruction: 'Dejar actuar durante el descanso nocturno. Dejar secar al aire sin usar calor directo de secador. Lavar las manos con agua y jabón tras aplicar.'
+      badge: 'Secado al Aire (Sin Calor)',
+      instruction: 'Dejar actuar la fórmula durante el descanso nocturno. Permitir el secado natural al aire sin usar calor directo de secador. No aclarar para asegurar la captación celular. Lavar las manos con agua y jabón tras aplicar.'
     },
     {
       step: 6,
-      title: 'Higiene Matutina',
-      timing: 'A la mañana siguiente',
+      title: 'Protocolo de Higiene Matutina',
+      timing: 'A la Mañana Siguiente',
+      badge: 'Champú Fisiológico pH 5.5',
       instruction: 'Lavar el cabello a la mañana siguiente con un champú neutro suave (pH 5.5 sin sulfatos agresivos).'
     }
   ]) : [
@@ -138,36 +143,42 @@ export default function PublicPrescriptionClient({ rx }) {
       step: 1,
       title: 'Scalp Preparation',
       timing: '21:30 - 22:00 (Bedtime)',
+      badge: 'Dry Scalp Only',
       instruction: 'Ensure the scalp is completely clean and dry before application. Do not apply on damp hair to prevent dilution of the TrichoSol™ lipid carrier. Part hair every 1-2 cm across areas of reduced density.'
     },
     {
       step: 2,
-      title: 'Precision Dosing (1.0 ml)',
+      title: 'Precision Dosing & Dropper Calibration',
       timing: 'Exact Daily Dose',
-      instruction: 'Draw exactly 1.0 ml using the calibrated pipette. Doses beyond 1.0 ml saturate follicular receptors without delivering additional clinical efficacy.'
+      badge: '1.0 mL Calibrated Mark',
+      instruction: 'Draw exactly 1.0 mL using the calibrated dropper pipette. Doses beyond 1.0 mL saturate follicular receptors without delivering additional clinical efficacy.'
     },
     {
       step: 3,
       title: 'Targeted Droplet Root Contact',
       timing: 'Direct Dermal Contact',
-      instruction: 'Apply droplets directly onto the scalp surface (avoiding hair shafts), distributing evenly across targeted follicular zones.'
+      badge: 'Root Skin Surface',
+      instruction: 'Apply droplets directly onto the scalp skin surface (avoiding hair shafts), distributing evenly across targeted follicular zones (crown, frontal hairline, and temporal areas).'
     },
     {
       step: 4,
-      title: 'Microcirculation Stimulation',
+      title: 'Microcirculation Perfusion Massage',
       timing: '60 - 90 Seconds',
-      instruction: 'Perform gentle circular fingertip massage to stimulate vascular capillary perfusion and optimize liposomal transdermal penetration.'
+      badge: 'Capillary Perfusion',
+      instruction: 'Perform gentle circular fingertip massage for 60 to 90 seconds to stimulate vascular capillary perfusion and optimize liposomal transdermal penetration.'
     },
     {
       step: 5,
-      title: 'Nighttime Absorption Window',
+      title: 'Nighttime Liposomal Absorption Window',
       timing: '6 to 8 Continuous Hours',
-      instruction: 'Leave formula on throughout nighttime rest. Allow to air-dry without direct hairdryer heat. Wash hands thoroughly with soap and water after application.'
+      badge: 'Overnight Air-Dry',
+      instruction: 'Leave formula on throughout nighttime rest. Allow to air-dry naturally without direct hairdryer heat. Do not rinse overnight to ensure complete intracellular uptake. Wash hands thoroughly with soap and water after application.'
     },
     {
       step: 6,
       title: 'Morning Hygiene Protocol',
       timing: 'Following Morning',
+      badge: 'pH 5.5 Gentle Cleanse',
       instruction: 'Cleanse hair the following morning using a gentle physiological shampoo (pH 5.5, free of harsh aggressive sulfates).'
     }
   ];
@@ -653,62 +664,143 @@ export default function PublicPrescriptionClient({ rx }) {
             </div>
           </div>
 
-          {/* Visual Clinical Posology Infographic Card */}
-          <div style={{ marginBottom: '1.25rem' }}>
-            <PosologyInfographicCard 
-              doseMl={1.0}
-              timing={isEs ? 'Nocturno (21:30 - 22:00)' : 'Nightly (21:30 - 22:00)'}
-              carrier="TrichoSol™ Liposomal Phytocomplex"
-              cycleDuration={isEs ? '90 Días (3 Frascos de 100 mL)' : '90 Days (3x 100 mL Bottles)'}
-              lang={lang}
-            />
-          </div>
-
-          {/* Steps Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            {steps.map((st, sIdx) => (
+          {/* Unified Clinical Posology Pathway (100% Full-Width Rows, Zero Empty Spaces) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%', marginBottom: '1.25rem' }}>
+            {steps.map((st) => (
               <div 
-                key={sIdx}
+                key={st.step}
                 style={{
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
+                  borderLeft: '4px solid #0284c7',
                   borderRadius: '12px',
-                  padding: '1rem',
+                  padding: '1.15rem 1.35rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.45rem',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  gap: '0.55rem',
+                  width: '100%',
+                  boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)',
+                  boxSizing: 'border-box'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: '50%',
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {st.step}
+                {/* Header row: Step number circle + Title on left, timing & key badges on right */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {st.step}
+                    </div>
+                    <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                      {st.title}
+                    </span>
                   </div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '2px 8px', borderRadius: '6px' }}>
-                    {st.timing}
-                  </span>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: '#0369a1',
+                      background: '#e0f2fe',
+                      padding: '3px 10px',
+                      borderRadius: '6px',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {st.timing}
+                    </span>
+                    {st.badge && (
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#047857',
+                        background: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        padding: '3px 10px',
+                        borderRadius: '6px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {st.badge}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
-                  {st.title}
-                </div>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
+                {/* Instruction full-width text */}
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.82rem',
+                  color: '#334155',
+                  lineHeight: 1.6,
+                  paddingLeft: '36px'
+                }}>
                   {st.instruction}
                 </p>
               </div>
             ))}
+          </div>
+
+          {/* Vehicle Formulation Specifications Banner (100% Full-Width) */}
+          <div style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+            border: '1px solid #bbf7d0',
+            borderRadius: '12px',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            width: '100%',
+            boxSizing: 'border-box'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{
+                width: 32,
+                height: 32,
+                borderRadius: '8px',
+                background: '#047857',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <Sparkles size={16} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#064e3b' }}>
+                  {isEs ? 'Vehículo Liposomal TrichoSol™ Patentado (Fagron)' : 'Patented TrichoSol™ Liposomal Phytocomplex Vehicle (Fagron)'}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: '#047857' }}>
+                  {isEs 
+                    ? '100% Libre de alcohol y propilenglicol · Cero residuo graso · Óptima tolerancia cutánea'
+                    : '100% Alcohol-free & propylene glycol-free · Non-greasy finish · Superior scalp tolerance & intracellular uptake'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #86efac',
+              color: '#15803d',
+              padding: '4px 12px',
+              borderRadius: '8px',
+              fontSize: '0.76rem',
+              fontWeight: 800,
+              whiteSpace: 'nowrap'
+            }}>
+              {isEs ? 'Ciclo Completo: 90 Días (3x 100 mL)' : 'Full Cycle: 90 Days (3x 100 mL)'}
+            </div>
           </div>
         </div>
 
