@@ -19,10 +19,15 @@ export const dynamic = 'force-dynamic';
  * Prefix reflects recipient type for instant identification (e.g. wh-3f9b2a1c).
  */
 function generateUniqueCode(recipientType = 'wholesaler') {
-  const prefix = recipientType === 'wholesaler' || recipientType === 'wholeseller' 
+  const t = String(recipientType).toLowerCase();
+  const prefix = t.includes('whole')
     ? 'wh' 
-    : recipientType === 'doctor' 
+    : t.includes('doc') || t.includes('clinic')
     ? 'dr' 
+    : t.includes('patient') || t.includes('client')
+    ? 'pt'
+    : t.includes('gen') || t.includes('public')
+    ? 'gen'
     : 'ds';
   const rand = crypto.randomBytes(4).toString('hex');
   return `${prefix}-${rand}`;
@@ -171,6 +176,10 @@ export async function POST(req) {
             recipientEmail: recipientData.email || null,
             recipientPhone: recipientData.phone || null,
             recipientType: recipientData.type || 'wholesaler',
+            productName: variantData.productName,
+            dose: variantData.dose,
+            format: variantData.format,
+            supplier: variantData.supplier,
             targetUrl: cleanTargetUrl,
             shortUrl,
             channel: deliveryChannel,
@@ -182,6 +191,41 @@ export async function POST(req) {
           });
         } catch (linkErr) {
           console.warn('[POST /api/short-url] Could not mirror to shared_catalog_links:', linkErr.message);
+        }
+      }
+
+      // 4. Save directly into user profile subcollection users/{userId}/shared_datasheets
+      if (recipientData.id) {
+        try {
+          await adminDb.collection('users').doc(recipientData.id).collection('shared_datasheets').doc(code).set({
+            code,
+            shortUrl,
+            targetUrl: cleanTargetUrl,
+            slug: slug || '',
+            productName: variantData.productName,
+            dose: variantData.dose,
+            format: variantData.format,
+            supplier: variantData.supplier,
+            batch: variantData.batch,
+            deliveryChannel,
+            status: 'sent',
+            readStatus: 'unread',
+            viewCount: 0,
+            firstViewedAt: null,
+            lastViewedAt: null,
+            inquirySubmitted: false,
+            newsletterSubscribed: false,
+            sharedBy: sharedByData,
+            createdAt: now,
+          });
+
+          await adminDb.collection('users').doc(recipientData.id).set({
+            lastDatasheetSentAt: now,
+            lastDatasheetCode: code,
+            lastDatasheetProduct: variantData.productName,
+          }, { merge: true });
+        } catch (userErr) {
+          console.warn('[POST /api/short-url] Could not write to user shared_datasheets:', userErr.message);
         }
       }
     }

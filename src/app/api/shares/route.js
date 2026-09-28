@@ -228,6 +228,7 @@ export async function POST(request) {
         catalogCode: shareCode,
         catalogType: isProto ? 'protocols' : (assetType === 'catalog' || assetType === 'catalog_pdf' ? 'products' : assetType),
         assetType,
+        assetTitle,
         recipientUserId: recipient.id || null,
         recipientName: recipient.name || 'Valued Partner',
         recipientEmail: recipient.email || null,
@@ -237,11 +238,39 @@ export async function POST(request) {
         shortUrl,
         channel: deliveryChannel,
         status: 'sent',
+        readStatus: 'unread',
         visitsCount: 0,
         createdAt: new Date().toISOString(),
       });
     } catch (linkErr) {
       console.warn('[POST /api/shares] Could not mirror to shared_catalog_links:', linkErr.message);
+    }
+
+    // Mirror into recipient user profile subcollection
+    if (recipient.id) {
+      try {
+        const subcoll = isProto ? 'shared_protocols' : 'shared_assets';
+        await adminDb.collection('users').doc(recipient.id).collection(subcoll).doc(shareCode).set({
+          shareCode,
+          shortUrl,
+          assetType,
+          assetTitle,
+          targetUrl: shareUrl || (isProto ? '/proto' : '/catalog'),
+          deliveryChannel,
+          status: 'sent',
+          readStatus: 'unread',
+          viewCount: 0,
+          createdAt: new Date().toISOString(),
+        });
+
+        await adminDb.collection('users').doc(recipient.id).set({
+          lastAssetSharedAt: new Date().toISOString(),
+          lastAssetSharedTitle: assetTitle,
+          lastSharedCode: shareCode,
+        }, { merge: true });
+      } catch (userErr) {
+        console.warn('[POST /api/shares] Could not write to user subcollection:', userErr.message);
+      }
     }
 
     return NextResponse.json({

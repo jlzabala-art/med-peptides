@@ -87,6 +87,41 @@ export async function POST(request) {
           console.warn('[syncInquiryToZohoBigin] Background sync warning:', err.message);
         });
 
+        // Attribute inquiry and newsletter conversion to tracked datasheet short link & user profile
+        const trackingCode = body.trackingCode || body.shortCode || body.tc || body.code || '';
+        if (trackingCode) {
+          try {
+            const shortSnap = await adminDb.collection('datasheet_short_links').doc(trackingCode).get();
+            if (shortSnap.exists) {
+              const shortData = shortSnap.data();
+              const updatePayload = {
+                inquirySubmitted: true,
+                inquiryId,
+                newsletterSubscribed: Boolean(body.subscribeNewsletter),
+                lastInquiryAt: new Date().toISOString()
+              };
+              await adminDb.collection('datasheet_short_links').doc(trackingCode).update(updatePayload);
+              await adminDb.collection('shared_records').doc(trackingCode).update(updatePayload).catch(() => {});
+              await adminDb.collection('shared_catalog_links').doc(trackingCode).update({
+                status: 'engaged',
+                inquirySubmitted: true,
+                inquiryId,
+                lastInquiryAt: new Date().toISOString()
+              }).catch(() => {});
+
+              if (shortData.recipient?.id) {
+                await adminDb.collection('users').doc(shortData.recipient.id).collection('shared_datasheets').doc(trackingCode).update(updatePayload).catch(() => {});
+                await adminDb.collection('users').doc(shortData.recipient.id).set({
+                  lastInquiryAt: new Date().toISOString(),
+                  newsletterSubscribed: Boolean(body.subscribeNewsletter),
+                }, { merge: true }).catch(() => {});
+              }
+            }
+          } catch (trackErr) {
+            console.warn('[api/portal/inquiry] Failed to attribute inquiry to shortCode:', trackErr.message);
+          }
+        }
+
         return NextResponse.json({
           success: true,
           inquiryId,

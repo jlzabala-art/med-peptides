@@ -39,7 +39,7 @@ import InlineEditableCell from '../../ui/InlineEditableCell';
 import SupplierAgreementCard from './cards/SupplierAgreementCard';
 import ZohoReconcilerCard from './cards/ZohoReconcilerCard';
 import SupplierQuotationDetailDrawer from '../quotations/SupplierQuotationDetailDrawer';
-import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
+import VariantShareDatasheetDrawer from './drawers/VariantShareDatasheetDrawer';
 import BulkApiYieldCalculator from './widgets/BulkApiYieldCalculator';
 
 /**
@@ -524,7 +524,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           )}
         </div>
 
-        {/* Row 2: Unified Action Family — [ Datasheet ] [ Share Web ] [ Labels ▾ ] */}
+        {/* Row 2: Unified Action Family — [ Ficha Técnica & Compartir ] [ Labels ▾ ] */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -534,38 +534,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           backgroundColor: '#f8fafc',
           borderTop: '1px solid #e2e8f0',
         }}>
-          {/* 1. Datasheet Action */}
-          <a
-            href={canonicalMonographPath}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              minHeight: '32px',
-              padding: '0 11px',
-              fontSize: '0.74rem',
-              fontWeight: 650,
-              color: '#003666',
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-              whiteSpace: 'nowrap'
-            }}
-            title={`Open Live Technical Datasheet for ${variant?.dosage || '10mg'} (Batch ${currentVialCode})`}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
-          >
-            <FileText size={13} color="#0284c7" />
-            <span>Datasheet</span>
-            <ExternalLink size={10} color="#94a3b8" />
-          </a>
-
-          {/* 2. Share Web Action (Consistent with Datasheet, no green) */}
+          {/* Unified Action: Ficha Técnica & Compartir */}
           <button
             type="button"
             onClick={() => setShareDrawerOpen(true)}
@@ -574,7 +543,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               alignItems: 'center',
               gap: '6px',
               minHeight: '32px',
-              padding: '0 11px',
+              padding: '0 12px',
               fontSize: '0.74rem',
               fontWeight: 650,
               color: '#003666',
@@ -586,13 +555,13 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
               whiteSpace: 'nowrap'
             }}
-            title={`Share Datasheet & Labels for ${selectedProduct?.name || 'Peptide'} (${currentVialCode})`}
+            title={`Ficha Técnica y Compartir con Destinatario — ${variant?.dosage || '10mg'} (${currentVialCode})`}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
           >
-            <Share2 size={13} color="#0284c7" />
-            <span>Share Web</span>
-            <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 600 }}>• Public</span>
+            <FileText size={13} color="#0284c7" />
+            <span>Ficha Técnica & Compartir</span>
+            <ExternalLink size={10} color="#94a3b8" />
           </button>
 
           {/* 3. Download Labels Action Dropdown (Consistent with family) */}
@@ -1048,25 +1017,13 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
         />
       )}
 
-      {/* Universal Share Drawer for Monograph & Labels */}
-      <UniversalShareDrawer
+      {/* Unified Variant Datasheet & Share Drawer (2-Stage Locked Variant + Recipient Assignment) */}
+      <VariantShareDatasheetDrawer
         isOpen={shareDrawerOpen}
         onClose={() => setShareDrawerOpen(false)}
-        docUrl={absoluteMonographUrl || canonicalMonographPath}
-        docType="monograph"
-        itemName={`${selectedProduct?.name || 'Peptide'} - ${variant?.dosage || ''} (${currentVialCode})`}
-        assetMeta={{
-          vialCode: currentVialCode,
-          productId: selectedProduct?.id || productSlug,
-          productName: selectedProduct?.name,
-          variantId: variant?.id,
-          dosage: variant?.dosage || variant?.dose,
-          supplier: variant?.supplierId || variant?.supplier,
-          clientLabelUrl,
-          shippingLabelUrl,
-          sheetLabelUrl,
-          monographUrl: canonicalMonographPath
-        }}
+        variant={variant}
+        selectedProduct={selectedProduct}
+        currentVialCode={currentVialCode}
       />
 
       {/* ── 3D Matrix / QR Code Traceability Modal ── */}

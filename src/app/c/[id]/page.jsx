@@ -87,19 +87,65 @@ export default async function ShortCatalogRoute({ params }) {
         const d = snap.data();
         const isProto = d.catalogType === 'protocols' || d.assetType === 'protocols_catalog' || String(id).startsWith('PR-');
 
-        // Track visit asynchronously
+        const now = new Date().toISOString();
+        const visitsCount = (d.visitsCount || 0) + 1;
+
+        // Track visit asynchronously across all collections
         try {
           await snap.ref.update({
-            visitsCount: (d.visitsCount || 0) + 1,
-            lastVisitedAt: new Date().toISOString(),
+            visitsCount,
+            lastVisitedAt: now,
+            readStatus: 'read',
             status: d.status === 'sent' ? 'viewed' : (d.status || 'viewed')
           });
+
+          // Mirror to central shared_records
+          adminDb.collection('shared_records').doc(id).update({
+            status: 'read',
+            readStatus: 'read',
+            viewCount: visitsCount,
+            lastViewedAt: now
+          }).catch(() => {});
+
+          // Mirror to recipient user profile subcollection
+          if (d.recipientUserId) {
+            const subcoll = isProto ? 'shared_protocols' : 'shared_assets';
+            adminDb.collection('users').doc(d.recipientUserId).collection(subcoll).doc(id).update({
+              status: 'read',
+              readStatus: 'read',
+              viewCount: visitsCount,
+              lastViewedAt: now
+            }).catch(() => {});
+          }
+
+          // Emit proactive read notification to Admin / Commercial desk on first view
+          if (!d.lastVisitedAt && adminDb) {
+            const recipientName = d.recipientName || 'Un cliente';
+            const docTitle = d.assetTitle || (isProto ? 'el catálogo de protocolos clínicos' : 'el catálogo comercial');
+
+            adminDb.collection('notifications').add({
+              title: 'Confirmación de Lectura',
+              message: `${recipientName} ha abierto ${docTitle}.`,
+              type: 'read_receipt',
+              link: `/c/${id}`,
+              targetRoles: ['admin', 'account_manager'],
+              read: false,
+              createdAt: now,
+              metadata: {
+                id,
+                recipientUserId: d.recipientUserId || null,
+                docTitle,
+              }
+            }).catch(err => console.warn('[ReadNotification /c] Note:', err.message));
+          }
         } catch (updateErr) {
           console.warn('[ShortCatalogRoute] Could not update visit count:', updateErr.message);
         }
 
         if (isProto) {
-          const targetUrl = d.targetUrl || '/proto';
+          const rawTarget = d.targetUrl || '/proto';
+          const sep = rawTarget.includes('?') ? '&' : '?';
+          const targetUrl = `${rawTarget}${sep}tc=${encodeURIComponent(id)}`;
           redirect(targetUrl);
         }
       }

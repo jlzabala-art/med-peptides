@@ -174,6 +174,42 @@ export default async function ShortDatasheetPage({ params }) {
             lastViewedAt: now,
             lastVisitedAt: now
           }).catch(() => {});
+
+          // 4. Update recipient user profile subcollection if registered
+          if (data.recipient?.id) {
+            adminDb.collection('users').doc(data.recipient.id).collection('shared_datasheets').doc(code).update({
+              status: 'read',
+              readStatus: 'read',
+              viewCount,
+              firstViewedAt: data.firstViewedAt || now,
+              lastViewedAt: now,
+            }).catch(() => {});
+          }
+
+          // 5. Emit proactive read notification to Admin / Commercial desk on first view
+          if (!data.firstViewedAt) {
+            const recipientName = data.recipient?.name || 'Un cliente';
+            const recipientOrg = data.recipient?.company ? ` (${data.recipient.company})` : '';
+            const compoundName = data.variant?.productName || data.productName || data.slug || 'la ficha técnica';
+            const doseText = data.variant?.dose || data.dose ? ` ${data.variant?.dose || data.dose}` : '';
+
+            adminDb.collection('notifications').add({
+              title: 'Confirmación de Lectura',
+              message: `${recipientName}${recipientOrg} ha abierto la ficha técnica de ${compoundName}${doseText}.`,
+              type: 'read_receipt',
+              link: `/d/${code}`,
+              targetRoles: ['admin', 'account_manager'],
+              read: false,
+              createdAt: now,
+              metadata: {
+                code,
+                recipientId: data.recipient?.id || null,
+                recipientType: data.recipient?.type || 'client',
+                compound: compoundName,
+                dose: doseText.trim(),
+              }
+            }).catch(err => console.warn('[ReadNotification /d] Note:', err.message));
+          }
         }
       }
     } catch (err) {
@@ -246,6 +282,12 @@ export default async function ShortDatasheetPage({ params }) {
     );
   }
 
+  let effectiveRedirectUrl = targetUrl;
+  if (code && targetUrl) {
+    const sep = targetUrl.includes('?') ? '&' : '?';
+    effectiveRedirectUrl = `${targetUrl}${sep}tc=${encodeURIComponent(code)}`;
+  }
+
   // Redirect instantly to the complete target URL for regular browser visitors
-  redirect(targetUrl);
+  redirect(effectiveRedirectUrl);
 }

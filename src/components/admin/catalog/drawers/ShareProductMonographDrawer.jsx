@@ -18,12 +18,20 @@ import {
   ShieldCheck,
   Send,
   FileText,
-  FileDown
+  FileDown,
+  User,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Link2,
+  Printer,
+  RotateCcw
 } from '@/lib/icons';
 import { processProductVariants } from '@/utils/productVariantProcessing';
 import { SUPPORTED_LANGUAGES } from '@/utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
+import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
 
 function WaIcon() {
   return (
@@ -44,6 +52,8 @@ export default function ShareProductMonographDrawer({
 }) {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [showThermalSection, setShowThermalSection] = useState(false);
+  const [showMessagePreview, setShowMessagePreview] = useState(false);
   const [selectedLang, setSelectedLang] = useState('en');
   const [trackedShortUrl, setTrackedShortUrl] = useState(null);
 
@@ -56,8 +66,7 @@ export default function ShareProductMonographDrawer({
   }, [product?.variants]);
 
   const suppliersList = useMemo(() => {
-    const list = [...(hierarchy.suppliers || [])];
-    return list;
+    return [...(hierarchy.suppliers || [])];
   }, [hierarchy.suppliers]);
 
   // Selected state
@@ -65,10 +74,21 @@ export default function ShareProductMonographDrawer({
   const [selectedFormatId, setSelectedFormatId] = useState('all');
   const [selectedStrengthId, setSelectedStrengthId] = useState('all');
 
+  const [recipientMode, setRecipientMode] = useState('concrete'); // 'concrete' | 'generic'
+  const [recipient, setRecipient] = useState({
+    type: 'doctor',
+    id: null,
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    notes: '',
+  });
+
   // Reset tracked link when selection changes
   useEffect(() => {
     setTrackedShortUrl(null);
-  }, [selectedSupplierId, selectedFormatId, selectedStrengthId, selectedLang]);
+  }, [selectedSupplierId, selectedFormatId, selectedStrengthId, selectedLang, recipientMode, recipient.id, recipient.type, recipient.name]);
 
   // Initialize or reset when drawer opens
   useEffect(() => {
@@ -108,6 +128,17 @@ export default function ShareProductMonographDrawer({
     });
   }, [product?.variants, selectedSupplierId]);
 
+  // Supplier variant counts for display
+  const supplierCounts = useMemo(() => {
+    if (!product?.variants || !Array.isArray(product.variants)) return {};
+    const map = {};
+    product.variants.forEach(v => {
+      const key = cleanSupplierKey(v.supplierId || v.supplier || v.supplierName || '');
+      map[key] = (map[key] || 0) + 1;
+    });
+    return map;
+  }, [product?.variants]);
+
   // Available formats based on selected supplier
   const availableFormats = useMemo(() => {
     if (selectedSupplierId === 'all') {
@@ -120,6 +151,17 @@ export default function ShareProductMonographDrawer({
     });
     return (hierarchy.formats || []).filter(f => suppFormatIds.has(f.id));
   }, [selectedSupplierId, supplierVariants, hierarchy.formats]);
+
+  // Format counts
+  const formatCounts = useMemo(() => {
+    const map = {};
+    supplierVariants.forEach(v => {
+      const rawFormat = v.formatId || v.format || v.presentation || 'vial';
+      const fId = rawFormat.toLowerCase().replace(/\s+/g, '_');
+      map[fId] = (map[fId] || 0) + 1;
+    });
+    return map;
+  }, [supplierVariants]);
 
   // Available strengths based on BOTH selected supplier AND selected format
   const availableStrengths = useMemo(() => {
@@ -172,7 +214,6 @@ export default function ShareProductMonographDrawer({
   // Build reactive URL
   const queryParams = new URLSearchParams();
   if (!isProductCosmeticSMD) {
-    // Clinical params only for peptides & diagnostics
     if (selectedSupplierId && selectedSupplierId !== 'all') {
       queryParams.set('supplier', selectedSupplierId);
     }
@@ -183,7 +224,6 @@ export default function ShareProductMonographDrawer({
       queryParams.set('dose', selectedStrengthId);
     }
   }
-  // Lang applies to all product types
   if (selectedLang && selectedLang !== 'en') {
     queryParams.set('lang', selectedLang);
   }
@@ -203,6 +243,17 @@ export default function ShareProductMonographDrawer({
   const activeStrengthObj = availableStrengths.find(s => s.id === selectedStrengthId);
   const activeStrengthName = selectedStrengthId === 'all' ? 'All Strengths' : (activeStrengthObj?.name || selectedStrengthId);
 
+  // Check if non-default filters are active
+  const hasActiveFilters = selectedSupplierId !== 'all' || selectedFormatId !== 'all' || selectedStrengthId !== 'all' || selectedLang !== 'en';
+
+  const handleResetFilters = () => {
+    setSelectedSupplierId('all');
+    setSelectedFormatId('all');
+    setSelectedStrengthId('all');
+    setSelectedLang('en');
+    toast.success('Configuration reset to full monograph scope');
+  };
+
   // Generate tailored WhatsApp text
   const isEs = selectedLang === 'es';
   const isPt = selectedLang === 'pt';
@@ -212,6 +263,8 @@ export default function ShareProductMonographDrawer({
   const waPres = isEs ? 'Presentación' : isPt ? 'Apresentação' : 'Presentation';
   const waDose = isEs ? 'Concentración' : isPt ? 'Concentração' : 'Strength';
   const waAccess = isEs ? 'Acceso a especificaciones analíticas y protocolo:' : isPt ? 'Acesse as especificações analíticas e protocolo:' : 'Access analytical specifications & clinical protocol:';
+
+  const effectiveShareUrl = trackedShortUrl || shareUrl;
 
   let waLines = [
     `*${waIntro}*`,
@@ -228,12 +281,15 @@ export default function ShareProductMonographDrawer({
   }
   waLines.push('');
   waLines.push(`${waAccess}`);
-  waLines.push(`${shareUrl}`);
+  waLines.push(`${effectiveShareUrl}`);
 
   const waText = waLines.join('\n');
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(waText)}`;
-  const mailUrl = `mailto:?subject=${encodeURIComponent(`${waIntro} — ${productName}`)}&body=${encodeURIComponent(waText.replace(/\*/g, ''))}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}`;
+  const cleanPhone = (recipient.phone || '').replace(/[^\d]/g, '');
+  const waUrl = cleanPhone
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`
+    : `https://wa.me/?text=${encodeURIComponent(waText)}`;
+  const mailUrl = `mailto:${encodeURIComponent(recipient.email || '')}?subject=${encodeURIComponent(`${waIntro} — ${productName}`)}&body=${encodeURIComponent(waText.replace(/\*/g, ''))}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(effectiveShareUrl)}`;
 
   const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
@@ -243,7 +299,7 @@ export default function ShareProductMonographDrawer({
         await navigator.share({
           title: `${productName} — ATLAS HEALTH`,
           text: waText,
-          url: shareUrl,
+          url: effectiveShareUrl,
         });
         return;
       } catch (err) {
@@ -271,7 +327,20 @@ export default function ShareProductMonographDrawer({
               supplier: selectedSupplierId !== 'all' ? selectedSupplierId : null,
               lang: selectedLang,
               productName,
-              recipient: { type: 'wholesaler', name: 'Partner / Client' },
+              recipient: recipientMode === 'concrete'
+                ? {
+                    id: recipient.id || null,
+                    name: recipient.name || 'Healthcare Practitioner',
+                    company: recipient.company || '',
+                    email: recipient.email || '',
+                    phone: recipient.phone || '',
+                    type: recipient.type || 'doctor',
+                  }
+                : {
+                    id: null,
+                    name: 'Public Visitor',
+                    type: 'generic',
+                  },
               targetUrl: shareUrl,
             }),
           });
@@ -291,7 +360,7 @@ export default function ShareProductMonographDrawer({
       }
       triggerHaptic();
       setCopied(true);
-      toast.success('Tracked unique link copied to clipboard!');
+      toast.success(recipient.name ? `Tracked link copied for ${recipient.name} ✓` : 'Link copied to clipboard!');
       setTimeout(() => setCopied(false), 3000);
     } catch {
       toast.error('Could not copy link');
@@ -307,8 +376,8 @@ export default function ShareProductMonographDrawer({
       isOpen={isOpen}
       onClose={onClose}
       title="Share Clinical Monograph"
-      subtitle={`Configure & generate tailored links for ${productName}`}
-      width="clamp(440px, 48vw, 680px)"
+      subtitle={`Configure specification scope & dispatch tracked links for ${productName}`}
+      width="clamp(460px, 52vw, 740px)"
       zIndex={100065}
       footer={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
@@ -319,14 +388,15 @@ export default function ShareProductMonographDrawer({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 14px',
-              background: '#f8fafc',
+              padding: '9px 14px',
+              background: '#ffffff',
               border: '1px solid #cbd5e1',
               borderRadius: '8px',
               fontSize: '0.82rem',
               fontWeight: 600,
               color: '#334155',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              minHeight: '40px'
             }}
           >
             <ExternalLink size={14} />
@@ -349,224 +419,407 @@ export default function ShareProductMonographDrawer({
                 fontSize: '0.84rem',
                 fontWeight: 700,
                 cursor: 'pointer',
+                minHeight: '40px',
+                boxShadow: '0 1px 3px rgba(0, 54, 102, 0.2)',
                 transition: 'background 0.2s ease'
               }}
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
-              <span>{copied ? 'Copied!' : 'Copy Link'}</span>
+              <span>{copied ? 'Copied to Clipboard!' : 'Copy Tracked Link'}</span>
             </button>
           </div>
         </div>
       }
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
         
-        {/* ── 1. Supplier / Laboratory Selector ── */}
-        <div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-            <Building2 size={15} color="#003666" />
-            <span>Manufacturing Laboratory / Supplier:</span>
-          </label>
+        {/* ── 1. Specification Scope (GCP Form Field Grid) ── */}
+        <section style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          padding: '16px 18px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Layers size={16} color="#003666" />
+                <span>Monograph Specification Parameters</span>
+              </h4>
+              <p style={{ margin: '3px 0 0', fontSize: '0.72rem', color: '#64748b' }}>
+                Filter which sources, presentation formats, or specific dosages are locked into the generated link.
+              </p>
+            </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={() => setSelectedSupplierId('all')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '0.78rem',
-                fontWeight: selectedSupplierId === 'all' ? 700 : 500,
-                background: selectedSupplierId === 'all' ? '#003666' : '#ffffff',
-                color: selectedSupplierId === 'all' ? '#ffffff' : '#334155',
-                border: selectedSupplierId === 'all' ? '1px solid #003666' : '1px solid #cbd5e1',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              🌐 All Verified Sources (Multi-Supplier)
-            </button>
-
-            {suppliersList.map(s => {
-              const isSelected = selectedSupplierId === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setSelectedSupplierId(s.id)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: isSelected ? 700 : 500,
-                    background: isSelected ? '#003666' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#334155',
-                    border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {s.name}
-                </button>
-              );
-            })}
-          </div>
-          <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#64748b' }}>
-            {selectedSupplierId === 'all' 
-              ? 'Multi-supplier mode: Recipient can browse all verified laboratories.'
-              : `Locked mode: Recipient strictly views ${activeSupplierName} with zero references to other sources.`}
-          </p>
-        </div>
-
-        {/* ── 2. Presentation Format Selector ── */}
-        <div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-            <Layers size={15} color="#003666" />
-            <span>Target Presentation Format:</span>
-          </label>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={() => setSelectedFormatId('all')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '0.78rem',
-                fontWeight: selectedFormatId === 'all' ? 700 : 500,
-                background: selectedFormatId === 'all' ? '#0369a1' : '#ffffff',
-                color: selectedFormatId === 'all' ? '#ffffff' : '#334155',
-                border: selectedFormatId === 'all' ? '1px solid #0369a1' : '1px solid #cbd5e1',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              All Formats Available
-            </button>
-
-            {availableFormats.map(fmt => {
-              const isSelected = selectedFormatId === fmt.id;
-              const isPen = fmt.id.includes('pen');
-              const isCart = fmt.id.includes('cartridge');
-              const isSpray = fmt.id.includes('spray');
-              const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet');
-              const icon = isPen ? '🖊️' : isCart ? '💉' : isSpray ? '💨' : isOral ? '💊' : '🧪';
-
-              return (
-                <button
-                  key={fmt.id}
-                  type="button"
-                  onClick={() => setSelectedFormatId(fmt.id)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: isSelected ? 700 : 500,
-                    background: isSelected ? '#0369a1' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#334155',
-                    border: isSelected ? '1px solid #0369a1' : '1px solid #cbd5e1',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {icon} {fmt.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── 3. Strength / Dosage Selector ── */}
-        {availableStrengths.length > 0 && (
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-              <Activity size={15} color="#003666" />
-              <span>Target Dose / Strength:</span>
-            </label>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {hasActiveFilters && (
               <button
                 type="button"
-                onClick={() => setSelectedStrengthId('all')}
+                onClick={handleResetFilters}
                 style={{
-                  padding: '5px 10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
                   borderRadius: '6px',
-                  fontSize: '0.75rem',
-                  fontWeight: selectedStrengthId === 'all' ? 700 : 500,
-                  background: selectedStrengthId === 'all' ? '#0f766e' : '#ffffff',
-                  color: selectedStrengthId === 'all' ? '#ffffff' : '#334155',
-                  border: selectedStrengthId === 'all' ? '1px solid #0f766e' : '1px solid #cbd5e1',
+                  padding: '4px 8px',
+                  fontSize: '0.70rem',
+                  fontWeight: 600,
+                  color: '#475569',
                   cursor: 'pointer'
                 }}
+                title="Reset all filters to default full monograph"
               >
-                All Strengths
+                <RotateCcw size={12} />
+                <span>Reset Scope</span>
               </button>
-
-              {availableStrengths.map(st => {
-                const isSelected = selectedStrengthId === st.id;
-                return (
-                  <button
-                    key={st.id}
-                    type="button"
-                    onClick={() => setSelectedStrengthId(st.id)}
-                    style={{
-                      padding: '5px 10px',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: isSelected ? 700 : 500,
-                      background: isSelected ? '#0f766e' : '#ffffff',
-                      color: isSelected ? '#ffffff' : '#334155',
-                      border: isSelected ? '1px solid #0f766e' : '1px solid #cbd5e1',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {st.name}
-                  </button>
-                );
-              })}
-            </div>
+            )}
           </div>
-        )}
 
-        {/* ── 4. Language Selector ── */}
-        <div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-            <Globe size={15} color="#003666" />
-            <span>Monograph Language:</span>
-          </label>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {SUPPORTED_LANGUAGES.map(l => {
-              const isSelected = selectedLang === l.code;
-              return (
-                <button
-                  key={l.code}
-                  type="button"
-                  onClick={() => setSelectedLang(l.code)}
+          {/* Responsive 2-Column Grid (Laptop: 2-col, Mobile: 1-col) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '14px 16px'
+          }}>
+            {/* Field: Manufacturing Laboratory */}
+            <div>
+              <label 
+                htmlFor="gcp-share-supplier"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '6px' }}
+              >
+                <Building2 size={14} color="#003666" />
+                <span>Manufacturing Laboratory:</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  id="gcp-share-supplier"
+                  value={selectedSupplierId}
+                  onChange={(e) => setSelectedSupplierId(e.target.value)}
                   style={{
-                    padding: '5px 10px',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
-                    fontWeight: isSelected ? 700 : 500,
-                    background: isSelected ? '#4338ca' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#334155',
-                    border: isSelected ? '1px solid #4338ca' : '1px solid #cbd5e1',
-                    cursor: 'pointer'
+                    width: '100%',
+                    padding: '8px 28px 8px 10px',
+                    fontSize: '0.82rem',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    minHeight: '42px',
+                    cursor: 'pointer',
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
                   }}
                 >
-                  {l.flag} {l.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                  <option value="all">🌐 All Verified Sources (Multi-Supplier View)</option>
+                  {suppliersList.map(s => {
+                    const cleanKey = cleanSupplierKey(s.id || s.name);
+                    const count = supplierCounts[cleanKey] || 0;
+                    return (
+                      <option key={s.id} value={s.id}>
+                        {s.name} {count > 0 ? `(${count} variant${count === 1 ? '' : 's'})` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+                <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.70rem', color: selectedSupplierId === 'all' ? '#64748b' : '#0369a1', lineHeight: 1.3 }}>
+                {selectedSupplierId === 'all'
+                  ? 'Recipient can compare all certified manufacturers.'
+                  : `🔒 Locked mode: Recipient strictly views ${activeSupplierName}.`}
+              </p>
+            </div>
 
-        {/* ── 5. Real-Time Generated URL Box ── */}
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px' }}>
+            {/* Field: Target Presentation Format */}
+            <div>
+              <label 
+                htmlFor="gcp-share-format"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '6px' }}
+              >
+                <Layers size={14} color="#003666" />
+                <span>Presentation Format:</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  id="gcp-share-format"
+                  value={selectedFormatId}
+                  onChange={(e) => setSelectedFormatId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 28px 8px 10px',
+                    fontSize: '0.82rem',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    minHeight: '42px',
+                    cursor: 'pointer',
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  <option value="all">📦 All Formats Available</option>
+                  {availableFormats.map(fmt => {
+                    const count = formatCounts[fmt.id] || 0;
+                    return (
+                      <option key={fmt.id} value={fmt.id}>
+                        {fmt.name} {count > 0 ? `(${count})` : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+                <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.3 }}>
+                {selectedFormatId === 'all'
+                  ? 'Allows recipient to toggle between vials, cartridges, or pens.'
+                  : `Locked format: ${activeFormatName}.`}
+              </p>
+            </div>
+
+            {/* Field: Target Dose / Strength */}
+            <div>
+              <label 
+                htmlFor="gcp-share-dose"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '6px' }}
+              >
+                <Activity size={14} color="#003666" />
+                <span>Target Strength / Dosage:</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  id="gcp-share-dose"
+                  value={selectedStrengthId}
+                  onChange={(e) => setSelectedStrengthId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 28px 8px 10px',
+                    fontSize: '0.82rem',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    minHeight: '42px',
+                    cursor: 'pointer',
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  <option value="all">⚖️ All Strengths Available</option>
+                  {availableStrengths.map(st => (
+                    <option key={st.id} value={st.id}>
+                      {st.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.3 }}>
+                {selectedStrengthId === 'all'
+                  ? 'All certified dosage tiers listed.'
+                  : `Deep-links directly to ${activeStrengthName}.`}
+              </p>
+            </div>
+
+            {/* Field: Monograph Language */}
+            <div>
+              <label 
+                htmlFor="gcp-share-lang"
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '6px' }}
+              >
+                <Globe size={14} color="#003666" />
+                <span>Monograph Language:</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  id="gcp-share-lang"
+                  value={selectedLang}
+                  onChange={(e) => setSelectedLang(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 28px 8px 10px',
+                    fontSize: '0.82rem',
+                    color: '#0f172a',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    minHeight: '42px',
+                    cursor: 'pointer',
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  {SUPPORTED_LANGUAGES.map(l => (
+                    <option key={l.code} value={l.code}>
+                      {l.flag} {l.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.3 }}>
+                Clinical descriptions and protocols render in {SUPPORTED_LANGUAGES.find(l => l.code === selectedLang)?.label || 'English'}.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 2. Recipient Assignment & Profile Tracking (GCP Standard Card) ── */}
+        <section style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          padding: '16px 18px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={16} color="#003666" />
+                <span>Recipient Assignment & Audit Logging</span>
+              </h4>
+              <p style={{ margin: '3px 0 0', fontSize: '0.72rem', color: '#64748b' }}>
+                Assign to a healthcare practitioner to automatically record dispatches and monitor read receipts.
+              </p>
+            </div>
+
+            {/* GCP Segmented Switcher */}
+            <div style={{
+              display: 'inline-flex',
+              backgroundColor: '#f1f5f9',
+              padding: '3px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              gap: '2px'
+            }}>
+              <button
+                type="button"
+                onClick={() => setRecipientMode('concrete')}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '0.72rem',
+                  fontWeight: recipientMode === 'concrete' ? 700 : 500,
+                  backgroundColor: recipientMode === 'concrete' ? '#ffffff' : 'transparent',
+                  color: recipientMode === 'concrete' ? '#0f172a' : '#64748b',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: recipientMode === 'concrete' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                👤 Specific Practitioner
+              </button>
+              <button
+                type="button"
+                onClick={() => setRecipientMode('generic')}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '0.72rem',
+                  fontWeight: recipientMode === 'generic' ? 700 : 500,
+                  backgroundColor: recipientMode === 'generic' ? '#ffffff' : 'transparent',
+                  color: recipientMode === 'generic' ? '#0f172a' : '#64748b',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: recipientMode === 'generic' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                🌐 Generic Public Link
+              </button>
+            </div>
+          </div>
+
+          {recipientMode === 'concrete' ? (
+            <div style={{
+              padding: '12px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px'
+            }}>
+              <RecipientHierarchySelector
+                value={recipient}
+                onChange={(updated) => setRecipient(updated)}
+                showNotesField={false}
+              />
+              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#059669' }}>
+                <CheckCircle2 size={13} color="#059669" />
+                <span>
+                  {recipient.name 
+                    ? `Dispatch telemetry will be permanently logged under ${recipient.name}'s profile.`
+                    : 'Search and select a practitioner or enter custom contact information.'}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              padding: '10px 14px',
+              backgroundColor: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderRadius: '8px',
+              fontSize: '0.74rem',
+              color: '#92400e',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <Info size={15} color="#d97706" style={{ flexShrink: 0 }} />
+              <div>
+                <strong>Generic Public Mode:</strong> Generates an unassigned link without profile attribution or recipient read-receipt logging.
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ── 3. Generated Monograph Link (GCP Terminal Style) ── */}
+        <section style={{
+          background: '#f8fafc',
+          border: '1px solid #cbd5e1',
+          borderRadius: '12px',
+          padding: '16px 18px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-              Generated Public Monograph URL
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Generated Monograph Link
+              </span>
+              {recipientMode === 'concrete' && recipient.name ? (
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  backgroundColor: '#dcfce7',
+                  color: '#166534',
+                  border: '1px solid #bbf7d0',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <CheckCircle2 size={11} /> Tracked for {recipient.name}
+                </span>
+              ) : (
+                <span style={{
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  Public Direct
+                </span>
+              )}
+            </div>
+
             <button
               type="button"
               onClick={() => setShowQr(!showQr)}
@@ -574,7 +827,7 @@ export default function ShareProductMonographDrawer({
                 background: 'none',
                 border: 'none',
                 color: '#0284c7',
-                fontSize: '0.75rem',
+                fontSize: '0.74rem',
                 fontWeight: 600,
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -582,25 +835,27 @@ export default function ShareProductMonographDrawer({
                 cursor: 'pointer'
               }}
             >
-              <QrCode size={13} /> {showQr ? 'Hide QR' : 'View QR'}
+              <QrCode size={13} /> {showQr ? 'Hide QR Code' : 'View QR Code'}
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
             <input
               type="text"
               readOnly
-              value={shareUrl}
+              value={effectiveShareUrl}
               onClick={(e) => e.target.select()}
               style={{
                 flex: 1,
-                padding: '8px 12px',
-                fontSize: '0.8rem',
+                padding: '9px 12px',
+                fontSize: '0.80rem',
                 borderRadius: '8px',
                 border: '1px solid #cbd5e1',
                 background: '#ffffff',
-                fontFamily: 'monospace',
-                color: '#0f172a'
+                fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                color: '#0f172a',
+                minHeight: '42px',
+                textOverflow: 'ellipsis'
               }}
             />
             <button
@@ -609,15 +864,18 @@ export default function ShareProductMonographDrawer({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '8px 12px',
+                gap: '6px',
+                padding: '0 16px',
                 background: copied ? '#16a34a' : '#003666',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                cursor: 'pointer'
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                minHeight: '42px',
+                whiteSpace: 'nowrap',
+                transition: 'background 0.15s ease'
               }}
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -627,27 +885,37 @@ export default function ShareProductMonographDrawer({
 
           {/* QR Code Collapsible */}
           {showQr && (
-            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px', background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+            <div style={{
+              marginTop: '14px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '16px',
+              background: '#ffffff',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+            }}>
               <img 
                 src={qrUrl} 
                 alt={`QR code for ${productName}`} 
                 style={{ width: '180px', height: '180px', borderRadius: '4px' }} 
               />
-              <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '6px' }}>
-                Scan to open directly on any device
+              <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '8px', fontWeight: 500 }}>
+                Point any mobile camera to test the recipient view immediately
               </span>
             </div>
           )}
-        </div>
+        </section>
 
-        {/* ── 6. Instant Sharing Channels ── */}
+        {/* ── 4. Instant Dispatch Channels (Touch-friendly 44px min-height) ── */}
         <div>
-          <span style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-            Instant Clinical Dispatch:
+          <span style={{ display: 'block', fontSize: '0.80rem', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+            Instant Dispatch Channels:
           </span>
 
-          <div style={{ display: 'grid', gridTemplateColumns: canShare ? 'repeat(auto-fit, minmax(110px, 1fr))' : '1fr 1fr', gap: '8px' }}>
-            {/* Native Share (Device apps) */}
+          <div style={{ display: 'grid', gridTemplateColumns: canShare ? 'repeat(auto-fit, minmax(130px, 1fr))' : '1fr 1fr', gap: '10px' }}>
+            {/* Native Share */}
             {canShare && (
               <button
                 type="button"
@@ -657,16 +925,17 @@ export default function ShareProductMonographDrawer({
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
-                  padding: '10px 12px',
+                  padding: '10px 14px',
                   background: '#003666',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '10px',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  fontSize: '0.84rem',
+                  fontSize: '0.82rem',
                   fontWeight: 700,
-                  boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
-                  transition: 'all 0.15s ease'
+                  minHeight: '44px',
+                  boxShadow: '0 2px 4px rgba(0, 54, 102, 0.2)',
+                  transition: 'background 0.15s ease'
                 }}
               >
                 <Share2 size={15} />
@@ -687,11 +956,12 @@ export default function ShareProductMonographDrawer({
                 padding: '10px 14px',
                 background: '#25D366',
                 color: '#ffffff',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 textDecoration: 'none',
-                fontSize: '0.84rem',
+                fontSize: '0.82rem',
                 fontWeight: 700,
-                boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
+                minHeight: '44px',
+                boxShadow: '0 2px 4px rgba(37, 211, 102, 0.2)'
               }}
             >
               <WaIcon />
@@ -709,11 +979,12 @@ export default function ShareProductMonographDrawer({
                 padding: '10px 14px',
                 background: '#0284c7',
                 color: '#ffffff',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 textDecoration: 'none',
-                fontSize: '0.84rem',
+                fontSize: '0.82rem',
                 fontWeight: 700,
-                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)'
+                minHeight: '44px',
+                boxShadow: '0 2px 4px rgba(2, 132, 199, 0.2)'
               }}
             >
               <Send size={15} />
@@ -722,89 +993,180 @@ export default function ShareProductMonographDrawer({
           </div>
         </div>
 
-        {/* ── 7. Physical Thermal Vial Labels (38x90 mm) ── */}
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <FileDown size={15} color="#003666" />
-              <span>Physical Thermal Labels (38x90 mm):</span>
-            </span>
-            <span style={{ fontSize: '0.68rem', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
-              QR opens this shared link
-            </span>
-          </div>
-          <p style={{ margin: '0 0 10px', fontSize: '0.73rem', color: '#64748b', lineHeight: 1.4 }}>
-            Direct PDF generation for thermal label printers. The square QR code opens this exact shared monograph view upon scan.
-          </p>
+        {/* ── 5. Warehouse & Physical Thermal Labels (Secondary Collapsible Accordion) ── */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          overflow: 'hidden'
+        }}>
+          <button
+            type="button"
+            onClick={() => setShowThermalSection(!showThermalSection)}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#f8fafc',
+              border: 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Printer size={15} color="#003666" />
+              <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#1e293b' }}>
+                Physical Thermal Labels & Printing (38x90 mm)
+              </span>
+              <span style={{
+                fontSize: '0.66rem',
+                color: '#64748b',
+                background: '#e2e8f0',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                fontWeight: 600
+              }}>
+                Warehouse Tool
+              </span>
+            </div>
+            {showThermalSection ? <ChevronUp size={15} color="#64748b" /> : <ChevronDown size={15} color="#64748b" />}
+          </button>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-            {/* Shipping Label (Discreet) */}
-            <a
-              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${queryString ? `&${queryString}` : ''}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '9px 12px',
-                background: '#f8fafc',
-                color: '#003666',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <QrCode size={14} />
-              <span>Shipping Label</span>
-            </a>
+          {showThermalSection && (
+            <div style={{ padding: '14px', borderTop: '1px solid #e2e8f0' }}>
+              <p style={{ margin: '0 0 12px', fontSize: '0.73rem', color: '#64748b', lineHeight: 1.4 }}>
+                Instant PDF generation for 38x90 mm thermal roll printers. The embedded QR code directly loads this customized monograph link.
+              </p>
 
-            {/* Client Label (Full Specs) */}
-            <a
-              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client${queryString ? `&${queryString}` : ''}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                padding: '9px 12px',
-                background: '#f0fdfa',
-                color: '#0d9488',
-                border: '1px solid #99f6e4',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <FileText size={14} />
-              <span>Client Label</span>
-            </a>
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+                <a
+                  href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${queryString ? `&${queryString}` : ''}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    background: '#f8fafc',
+                    color: '#003666',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    minHeight: '40px'
+                  }}
+                >
+                  <QrCode size={13} />
+                  <span>Shipping Label</span>
+                </a>
+
+                <a
+                  href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client${queryString ? `&${queryString}` : ''}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    background: '#f0fdfa',
+                    color: '#0d9488',
+                    border: '1px solid #99f6e4',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    minHeight: '40px'
+                  }}
+                >
+                  <FileText size={13} />
+                  <span>Client Label (Full Specs)</span>
+                </a>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ── 7. Message Preview Box ── */}
-        <div style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
-          <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#64748b', marginBottom: '6px', textTransform: 'uppercase' }}>
-            Clinical Message Preview ({selectedLang.toUpperCase()})
-          </span>
-          <pre style={{
-            margin: 0,
-            fontSize: '0.76rem',
-            whiteSpace: 'pre-wrap',
-            fontFamily: 'inherit',
-            color: '#334155',
-            lineHeight: 1.45
-          }}>
-            {waText}
-          </pre>
+        {/* ── 6. Clinical Message Preview (Collapsible Accordion) ── */}
+        <div style={{
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          overflow: 'hidden'
+        }}>
+          <button
+            type="button"
+            onClick={() => setShowMessagePreview(!showMessagePreview)}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#f8fafc',
+              border: 'none',
+              cursor: 'pointer',
+              textAlign: 'left'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={15} color="#003666" />
+              <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#1e293b' }}>
+                Clinical Message Template ({selectedLang.toUpperCase()})
+              </span>
+            </div>
+            {showMessagePreview ? <ChevronUp size={15} color="#64748b" /> : <ChevronDown size={15} color="#64748b" />}
+          </button>
+
+          {showMessagePreview && (
+            <div style={{ padding: '14px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+                      navigator.clipboard.writeText(waText);
+                      toast.success('Message text copied to clipboard!');
+                    }
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '3px 8px',
+                    fontSize: '0.70rem',
+                    fontWeight: 600,
+                    color: '#334155',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Copy size={11} /> Copy Text
+                </button>
+              </div>
+              <pre style={{
+                margin: 0,
+                fontSize: '0.76rem',
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'inherit',
+                color: '#334155',
+                lineHeight: 1.45,
+                background: '#f1f5f9',
+                padding: '10px 12px',
+                borderRadius: '8px'
+              }}>
+                {waText}
+              </pre>
+            </div>
+          )}
         </div>
 
       </div>

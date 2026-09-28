@@ -365,6 +365,12 @@ export default function PublicInstitutionalInquiryDrawer({
 
     const formattedPhone = phoneNumber.trim() ? `${phonePrefix} ${phoneNumber.trim()}` : '';
 
+    let trackingCode = '';
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      trackingCode = urlParams.get('tc') || urlParams.get('code') || urlParams.get('sid') || '';
+    }
+
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/portal/inquiry', {
@@ -380,6 +386,7 @@ export default function PublicInstitutionalInquiryDrawer({
           contextType,
           attachedEntity,
           subscribeNewsletter,
+          trackingCode,
           sourceUrl: typeof window !== 'undefined' ? window.location.href : ''
         })
       });

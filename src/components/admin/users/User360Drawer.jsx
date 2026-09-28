@@ -729,17 +729,52 @@ export default function User360Drawer({
                           backgroundColor: '#ffffff',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '0.4rem'
+                          gap: '0.45rem'
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                             <CopyableId value={link.catalogId || link.id} />
                             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
-                              {link.catalogueFilter || (link.supplierId ? link.supplierId.replace(/^supplier-/, '') : 'General')}
+                              {link.assetType === 'variant_datasheet' || link.catalogType === 'variant_datasheet'
+                                ? `📄 Ficha: ${link.productName || 'Compound'} ${link.dose || ''}`.trim()
+                                : link.assetType === 'protocol' || link.catalogType === 'protocols'
+                                ? `🩺 Protocolo: ${link.assetTitle || link.catalogId}`
+                                : `📦 Catálogo: ${link.catalogueFilter || (link.supplierId ? link.supplierId.replace(/^supplier-/, '') : 'General')}`}
                             </span>
                           </div>
-                          <StatusBadge status={link.status || 'sent'} />
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {(link.visitsCount > 0 || link.readStatus === 'read' || link.status === 'read' || link.status === 'viewed') ? (
+                              <span style={{
+                                fontSize: '0.66rem',
+                                fontWeight: 700,
+                                color: '#166534',
+                                backgroundColor: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}>
+                                <Check size={10} color="#16a34a" /> Leído ({link.visitsCount || 1})
+                              </span>
+                            ) : (
+                              <span style={{
+                                fontSize: '0.66rem',
+                                fontWeight: 600,
+                                color: '#92400e',
+                                backgroundColor: '#fffbeb',
+                                border: '1px solid #fde68a',
+                                padding: '1px 6px',
+                                borderRadius: '4px'
+                              }}>
+                                Pendiente ⏳
+                              </span>
+                            )}
+                            <StatusBadge status={link.status || 'sent'} />
+                          </div>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
@@ -765,7 +800,7 @@ export default function User360Drawer({
                           </div>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', marginTop: '0.2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
                           <button
                             type="button"
                             onClick={() => {
@@ -787,6 +822,38 @@ export default function User360Drawer({
                           >
                             <Copy size={12} /> Copiar Link
                           </button>
+
+                          {formData.phone && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const cleanPhone = formData.phone.replace(/[^\d]/g, '');
+                                const docLabel = (link.assetType === 'variant_datasheet' || link.catalogType === 'variant_datasheet')
+                                  ? `la ficha técnica de ${link.productName || 'este compuesto'}`
+                                  : (link.assetType === 'protocol' || link.catalogType === 'protocols')
+                                  ? `el protocolo clínico solicitado`
+                                  : `el catálogo oficial actualizado`;
+                                const msg = `Hola ${formData.displayName || 'Doctor / Partner'}, te comparto el enlace a ${docLabel}:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición.`;
+                                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                              }}
+                              style={{
+                                padding: '0.3rem 0.6rem',
+                                backgroundColor: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                borderRadius: '6px',
+                                fontSize: '0.72rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.2rem',
+                                color: '#166534',
+                                fontWeight: 600
+                              }}
+                            >
+                              <Send size={11} /> Reenviar WhatsApp
+                            </button>
+                          )}
+
                           <a
                             href={shortUrl}
                             target="_blank"
@@ -805,7 +872,12 @@ export default function User360Drawer({
                               fontWeight: 600
                             }}
                           >
-                            <ExternalLink size={12} /> Ver Catálogo
+                            <ExternalLink size={12} />
+                            {(link.assetType === 'variant_datasheet' || link.catalogType === 'variant_datasheet')
+                              ? 'Ver Ficha Técnica'
+                              : (link.assetType === 'protocol' || link.catalogType === 'protocols')
+                              ? 'Ver Protocolo'
+                              : 'Ver Catálogo'}
                           </a>
                         </div>
                       </div>
