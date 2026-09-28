@@ -10,7 +10,12 @@ export default function AtlasHealthLogo({
   className = '',
   style = {},
   animate = false,
+  variant = 'dark',
 }) {
+  const isLight = variant === 'light' || variant === 'white';
+  const outerStroke = isLight ? '#FFFFFF' : '#003666';
+  const dotColor = isLight ? '#FFFFFF' : '#003666';
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -22,10 +27,10 @@ export default function AtlasHealthLogo({
       aria-label="Atlas Health"
       role="img"
     >
-      {/* Outer A strokes — navy */}
+      {/* Outer A strokes — navy or white for light variant */}
       <path
         d="M10 40 L24 8 L38 40"
-        stroke="#003666"
+        stroke={outerStroke}
         strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -51,7 +56,7 @@ export default function AtlasHealthLogo({
         )}
       </path>
       {/* Subtle dot at apex */}
-      <circle cx="24" cy="8" r="2" fill="#003666" opacity="0.6" />
+      <circle cx="24" cy="8" r="2" fill={dotColor} opacity={isLight ? 0.8 : 0.6} />
     </svg>
   );
 }

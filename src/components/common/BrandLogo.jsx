@@ -16,7 +16,7 @@ export default function BrandLogo({ variant = 'dark', showText = true, size = 'd
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: gap, ...style }}>
-      <AtlasHealthLogo size={iconSize} />
+      <AtlasHealthLogo size={iconSize} variant={isLight ? 'light' : 'dark'} />
       
       {showText && (
         <span style={{ 
@@ -25,9 +25,9 @@ export default function BrandLogo({ variant = 'dark', showText = true, size = 'd
           lineHeight: 1,
           display: 'flex',
           alignItems: 'center',
-          gap: '4px'
+          gap: '5px'
         }}>
-          <span style={{ fontWeight: 800, color: primaryColor, fontSize }}>Atlas</span>
+          <span style={{ fontWeight: 800, color: primaryColor, fontSize }}>Atlas Health</span>
           <span style={{ fontWeight: 600, color: secondaryColor, fontSize }}>Services</span>
         </span>
       )}

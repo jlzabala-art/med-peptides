@@ -198,17 +198,20 @@ export default function PublicUnifiedHeader({
   return (
     <>
       <header className={`public-unified-header ${isScrolled ? 'is-scrolled' : ''}`}>
-        {/* ── Line 1: Universal Executive Bar ── */}
-        <div className="puh-tier1">
-          <div className="puh-tier1-inner">
-            {/* Left: Brand Logo / Title */}
+        {/* ── Line 1: Corporate Brand Identity (Atlas Health Services) ── */}
+        <div className="puh-brand-row">
+          <div className="puh-brand-row-inner">
             <div className="puh-brand-group">
-              <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Atlas Services Clinical & Healthcare Intelligence">
+              <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Atlas Health Services Clinical & Healthcare Intelligence">
                 <BrandLogo variant="light" size="compact" />
               </Link>
             </div>
+          </div>
+        </div>
 
-            {/* Right: Global Actions (Lang, Contact, Copy, Sign In) */}
+        {/* ── Line 2: Universal Action Toolbar ── */}
+        <div className="puh-actions-row">
+          <div className="puh-actions-row-inner">
             <div className="puh-actions-group">
               {/* Language Selector */}
               <select
@@ -223,7 +226,6 @@ export default function PublicUnifiedHeader({
                   </option>
                 ))}
               </select>
-
 
               {/* Clinical AI Copilot Global Trigger */}
               <button
