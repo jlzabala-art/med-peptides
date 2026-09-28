@@ -1,0 +1,2335 @@
+{
+  "phase1": [
+    {
+      "name": "AOD-9604",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "3.6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 440.0,
+          "refill_price_aed": 340.0
+        },
+        {
+          "dose": "15 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1700.0,
+          "refill_price_aed": 1600.0
+        }
+      ]
+    },
+    {
+      "name": "BPC-157",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 405.0,
+          "refill_price_aed": 305.0
+        },
+        {
+          "dose": "15 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 850.0,
+          "refill_price_aed": 750.0
+        }
+      ]
+    },
+    {
+      "name": "BPC-157 + TB-4",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "6 mg / 9 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 670.0,
+          "refill_price_aed": 570.0
+        }
+      ]
+    },
+    {
+      "name": "BPC-157 + TB-500",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "6 mg / 9 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 670.0,
+          "refill_price_aed": 570.0
+        },
+        {
+          "dose": "15 mg / 22.5 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1350.0,
+          "refill_price_aed": 1250.0
+        }
+      ]
+    },
+    {
+      "name": "CJC-1295 No DAC",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "3 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 440.0,
+          "refill_price_aed": 340.0
+        }
+      ]
+    },
+    {
+      "name": "CJC-1295 + Ipamorelin",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "3 mg / 6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 610.0,
+          "refill_price_aed": 510.0
+        },
+        {
+          "dose": "6 mg / 6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 700.0,
+          "refill_price_aed": 600.0
+        }
+      ]
+    },
+    {
+      "name": "CJC-1295 + Ipamorelin + DSIP",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "3 mg / 6 mg / 6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1995.0,
+          "refill_price_aed": 1895.0
+        }
+      ]
+    },
+    {
+      "name": "DSIP",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "2 mg",
+          "volume": "2 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 500.0,
+          "refill_price_aed": 400.0
+        }
+      ]
+    },
+    {
+      "name": "Epithalon",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 740.0,
+          "refill_price_aed": 640.0
+        },
+        {
+          "dose": "100 mg",
+          "volume": "2 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 2100.0,
+          "refill_price_aed": 2000.0
+        }
+      ]
+    },
+    {
+      "name": "GHK-Cu",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 405.0,
+          "refill_price_aed": 305.0
+        },
+        {
+          "dose": "60 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 690.0,
+          "refill_price_aed": 590.0
+        }
+      ]
+    },
+    {
+      "name": "GLOW Triple Peptide",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "BPC-157 6 mg + TB-500 9 mg + GHK-Cu 30 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1150.0,
+          "refill_price_aed": 1050.0
+        }
+      ]
+    },
+    {
+      "name": "IGF-1 LR3",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "300 mcg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 395.0,
+          "refill_price_aed": 295.0
+        }
+      ]
+    },
+    {
+      "name": "Ipamorelin",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 450.0,
+          "refill_price_aed": 350.0
+        }
+      ]
+    },
+    {
+      "name": "Kisspeptin-10",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "3 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 625.0,
+          "refill_price_aed": 525.0
+        }
+      ]
+    },
+    {
+      "name": "KLOW Peptide without GHK",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "BPC-157 6 mg + TB-500 6 mg + KPV 6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1150.0,
+          "refill_price_aed": 1050.0
+        }
+      ]
+    },
+    {
+      "name": "KLOW Peptide with GHK",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "BPC-157 6 mg + TB-500 6 mg + GHK-Cu 30 mg + KPV 6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1895.0,
+          "refill_price_aed": 1795.0
+        }
+      ]
+    },
+    {
+      "name": "KPV",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "10 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 650.0,
+          "refill_price_aed": 550.0
+        }
+      ]
+    },
+    {
+      "name": "Melanotan II",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "6 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 500.0,
+          "refill_price_aed": 400.0
+        }
+      ]
+    },
+    {
+      "name": "MOTS-c",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1250.0,
+          "refill_price_aed": 1150.0
+        },
+        {
+          "dose": "40 mg",
+          "volume": "2 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1350.0,
+          "refill_price_aed": 1250.0
+        },
+        {
+          "dose": "60 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 2150.0,
+          "refill_price_aed": 2050.0
+        }
+      ]
+    },
+    {
+      "name": "PT-141",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "20 mg",
+          "volume": "2 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 500.0,
+          "refill_price_aed": 400.0
+        }
+      ]
+    },
+    {
+      "name": "Selank",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "7.5 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 660.0,
+          "refill_price_aed": 560.0
+        }
+      ]
+    },
+    {
+      "name": "Semax",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "9 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 775.0,
+          "refill_price_aed": 675.0
+        }
+      ]
+    },
+    {
+      "name": "Sermorelin",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "3 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 550.0,
+          "refill_price_aed": 450.0
+        }
+      ]
+    },
+    {
+      "name": "Thymosin Alpha-1",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "9 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 480.0,
+          "refill_price_aed": 380.0
+        }
+      ]
+    },
+    {
+      "name": "Thymosin Beta-4",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "9 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 475.0,
+          "refill_price_aed": 375.0
+        },
+        {
+          "dose": "45 mg",
+          "volume": "2.25 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1700.0,
+          "refill_price_aed": 1600.0
+        }
+      ]
+    },
+    {
+      "name": "TB-500",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "9 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 475.0,
+          "refill_price_aed": 375.0
+        },
+        {
+          "dose": "45 mg",
+          "volume": "2.25 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1700.0,
+          "refill_price_aed": 1600.0
+        }
+      ]
+    },
+    {
+      "name": "Tesamorelin",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1850.0,
+          "refill_price_aed": 1750.0
+        }
+      ]
+    },
+    {
+      "name": "hCG",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "5,000 IU",
+          "volume": "2 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 550.0,
+          "refill_price_aed": 450.0
+        }
+      ]
+    },
+    {
+      "name": "NAD+",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "750 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 750.0,
+          "refill_price_aed": 650.0
+        },
+        {
+          "dose": "1050 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 950.0,
+          "refill_price_aed": 850.0
+        }
+      ]
+    },
+    {
+      "name": "MGF",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "2.4 mg",
+          "volume": "2.4 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 790.0,
+          "refill_price_aed": 690.0
+        }
+      ]
+    },
+    {
+      "name": "SS-31",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "10 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 790.0,
+          "refill_price_aed": 690.0
+        },
+        {
+          "dose": "50 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 2400.0,
+          "refill_price_aed": 2300.0
+        }
+      ]
+    },
+    {
+      "name": "Humanin",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 2900.0,
+          "refill_price_aed": 2800.0
+        }
+      ]
+    },
+    {
+      "name": "Fat Loss Peptide",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "62.5 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 850.0,
+          "refill_price_aed": 750.0
+        }
+      ]
+    },
+    {
+      "name": "Advance Fat Loss",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "15 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1500.0,
+          "refill_price_aed": 1400.0
+        },
+        {
+          "dose": "40 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1900.0,
+          "refill_price_aed": 1800.0
+        }
+      ]
+    },
+    {
+      "name": "Amylix",
+      "category": "Peptides - Injectable",
+      "variants": [
+        {
+          "dose": "7.5 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1300.0,
+          "refill_price_aed": 1200.0
+        },
+        {
+          "dose": "12 mg",
+          "volume": "3 mL",
+          "format": "pen",
+          "formatName": "Pre-Filled Pen",
+          "clinic_price_aed": 1500.0,
+          "refill_price_aed": 1400.0
+        }
+      ]
+    },
+    {
+      "name": "Selank Nasal Spray",
+      "canonicalName": "Selank",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "4 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 495.0
+        },
+        {
+          "dose": "30 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 495.0
+        },
+        {
+          "dose": "75 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 990.0
+        }
+      ]
+    },
+    {
+      "name": "Semax Nasal Spray",
+      "canonicalName": "Semax",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "4 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 495.0
+        },
+        {
+          "dose": "30 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 495.0
+        },
+        {
+          "dose": "75 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 990.0
+        }
+      ]
+    },
+    {
+      "name": "Semax + Selank",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "15 mg + 15 mg",
+          "volume": "4 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 550.0
+        },
+        {
+          "dose": "15 mg + 15 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 550.0
+        },
+        {
+          "dose": "30 mg + 30 mg",
+          "volume": "4 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 850.0
+        },
+        {
+          "dose": "30 mg + 30 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 850.0
+        },
+        {
+          "dose": "37.5 mg + 37.5 mg (75 mg)",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 990.0
+        }
+      ]
+    },
+    {
+      "name": "Semax + Oxytocin",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "10 mg + 1,000 IU",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 450.0
+        }
+      ]
+    },
+    {
+      "name": "PT-141 Nasal Spray",
+      "canonicalName": "PT-141",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "10 mg",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 510.0
+        }
+      ]
+    },
+    {
+      "name": "PT-141 + Pyridoxine",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "5 mg + 25 mg",
+          "volume": "3 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 350.0
+        }
+      ]
+    },
+    {
+      "name": "PT-141 + Oxytocin (Standard)",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "7.5 mg + 300 IU",
+          "volume": "3 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 550.0
+        }
+      ]
+    },
+    {
+      "name": "PT-141 + Oxytocin (Advanced High Strength)",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "15 mg + 600 IU",
+          "volume": "3 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 690.0
+        }
+      ]
+    },
+    {
+      "name": "NAD+ Nasal Spray",
+      "canonicalName": "NAD+",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "1000 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 750.0
+        },
+        {
+          "dose": "1500 mg",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 995.0
+        }
+      ]
+    },
+    {
+      "name": "Oxytocin Nasal Spray",
+      "canonicalName": "Oxytocin",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "5-15 IU/puff",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 245.0
+        },
+        {
+          "dose": "20-35 IU/puff",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 360.0
+        },
+        {
+          "dose": "40 IU/puff",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 450.0
+        },
+        {
+          "dose": "50 IU/puff",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 540.0
+        }
+      ]
+    },
+    {
+      "name": "Kisspeptin Nasal Spray",
+      "canonicalName": "Kisspeptin-10",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "10 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 950.0
+        }
+      ]
+    },
+    {
+      "name": "EDTA + Xylitol Nasal Spray",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "75 mg",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 250.0
+        }
+      ]
+    },
+    {
+      "name": "DSIP Nasal Spray",
+      "canonicalName": "DSIP",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "15 mg",
+          "volume": "15 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 630.0
+        }
+      ]
+    },
+    {
+      "name": "Epithalon Nasal Spray",
+      "canonicalName": "Epithalon",
+      "category": "Peptides - Nasal Spray",
+      "variants": [
+        {
+          "dose": "30 mg",
+          "volume": "10 mL",
+          "format": "nasal_spray",
+          "formatName": "Nasal Spray",
+          "clinic_price_aed": 640.0
+        }
+      ]
+    },
+    {
+      "name": "BPC-157 Oral Capsules",
+      "canonicalName": "BPC-157",
+      "category": "Peptides - Oral",
+      "variants": [
+        {
+          "dose": "200 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 369.0
+        },
+        {
+          "dose": "500 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 495.0
+        }
+      ]
+    },
+    {
+      "name": "Dihexa",
+      "category": "Peptides - Oral",
+      "variants": [
+        {
+          "dose": "2.5 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 500.0
+        },
+        {
+          "dose": "5 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 920.0
+        },
+        {
+          "dose": "10 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 1800.0
+        },
+        {
+          "dose": "20 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 2700.0
+        }
+      ]
+    },
+    {
+      "name": "KPV Oral Capsules",
+      "canonicalName": "KPV",
+      "category": "Peptides - Oral",
+      "variants": [
+        {
+          "dose": "250 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 295.0
+        },
+        {
+          "dose": "500 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 495.0
+        }
+      ]
+    },
+    {
+      "name": "Peptide Golden GUT Support",
+      "category": "Peptides - Oral",
+      "description": "BPC-157 500mcg + KPV 500mcg + Curcumin 200mg + L-Glutamine 250mg",
+      "variants": [
+        {
+          "dose": "500mcg/500mcg/200mg/250mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 549.0
+        }
+      ]
+    },
+    {
+      "name": "SLU-PP-332",
+      "category": "Peptides - Oral",
+      "variants": [
+        {
+          "dose": "250 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 200.0
+        },
+        {
+          "dose": "500 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 350.0
+        },
+        {
+          "dose": "1000 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 675.0
+        }
+      ]
+    },
+    {
+      "name": "Enclomiphene",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "6.25 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 390.0
+        },
+        {
+          "dose": "12.5 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 575.0
+        },
+        {
+          "dose": "25 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 990.0
+        }
+      ]
+    }
+  ],
+  "phase2": [
+    {
+      "name": "Hydroquinone + Hydrocortisone + Tretinoin Cream",
+      "canonicalName": "Kligman Formulation Tri-Luma Compound",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "HQ 8% + HC 2% + Tretinoin 0.025%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 130.0,
+          "patient_price_aed": 260.0
+        },
+        {
+          "dose": "HQ 4% + HC 2% + Tretinoin 0.025%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        }
+      ]
+    },
+    {
+      "name": "Tranexamic Acid + GigaWhite + Niacinamide Cream",
+      "canonicalName": "Tranexamic Multi-Action Depigmenting Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "TXA 5% + GigaWhite + Niacinamide",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        }
+      ]
+    },
+    {
+      "name": "GLOW Whitening Cream",
+      "canonicalName": "GLOW Whitening Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Glutathione 5% + TXA 5% + Niacinamide",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        }
+      ]
+    },
+    {
+      "name": "Tretinoin Topical Cream",
+      "canonicalName": "Tretinoin",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "0.01%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        },
+        {
+          "dose": "0.05%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 120.0,
+          "patient_price_aed": 240.0
+        }
+      ]
+    },
+    {
+      "name": "Tretinoin Maintenance Cream",
+      "canonicalName": "Tretinoin Multi-Brightening Maintenance Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Tretinoin + GigaWhite + Kojic Acid + Niacinamide",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        }
+      ]
+    },
+    {
+      "name": "Under Eye Brightening Cream",
+      "canonicalName": "Clinical Under Eye Complex",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "HQ + Caffeine + Niacinamide",
+          "volume": "15 mL",
+          "format": "cream",
+          "formatName": "Under Eye Cream",
+          "clinic_price_aed": 110.0,
+          "patient_price_aed": 220.0
+        },
+        {
+          "dose": "Vitamin K + Caffeine + Niacinamide",
+          "volume": "15 mL",
+          "format": "cream",
+          "formatName": "Under Eye Cream",
+          "clinic_price_aed": 110.0,
+          "patient_price_aed": 220.0
+        }
+      ]
+    },
+    {
+      "name": "Clinical Lips Rejuvenation Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Niacinamide + Lactic + Glycolic + Argan",
+          "volume": "10 mL",
+          "format": "cream",
+          "formatName": "Lip Cream",
+          "clinic_price_aed": 90.0,
+          "patient_price_aed": 180.0
+        },
+        {
+          "dose": "Niacinamide + Lactic + Glycolic + Argan",
+          "volume": "15 mL",
+          "format": "cream",
+          "formatName": "Lip Cream",
+          "clinic_price_aed": 135.0,
+          "patient_price_aed": 270.0
+        }
+      ]
+    },
+    {
+      "name": "Intimate Depigmenting Body Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Urea 10% + HQ 4% + Kojic + Lactic + Niacinamide",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Body Cream",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        },
+        {
+          "dose": "Urea 10% + HQ 4% + Kojic + Lactic + Niacinamide",
+          "volume": "50 mL",
+          "format": "cream",
+          "formatName": "Body Cream",
+          "clinic_price_aed": 175.0,
+          "patient_price_aed": 350.0
+        }
+      ]
+    },
+    {
+      "name": "Glowing & Hydrating Vitamin C Day Serum",
+      "canonicalName": "Ascorbic Acid Multi-Strength Antioxidant Serum",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Ascorbic Acid 5% + HA 1% + Dexpanthenol 5%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Day Serum",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        },
+        {
+          "dose": "Ascorbic Acid 5% + HA 1% + Dexpanthenol 5%",
+          "volume": "50 mL",
+          "format": "serum",
+          "formatName": "Day Serum",
+          "clinic_price_aed": 175.0,
+          "patient_price_aed": 350.0
+        },
+        {
+          "dose": "Ascorbic Acid 15% + HA 1.5% + Dexpanthenol 5%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Day Serum",
+          "clinic_price_aed": 135.0,
+          "patient_price_aed": 270.0
+        },
+        {
+          "dose": "Ascorbic Acid 15% + HA 1.5% + Dexpanthenol 5%",
+          "volume": "50 mL",
+          "format": "serum",
+          "formatName": "Day Serum",
+          "clinic_price_aed": 185.0,
+          "patient_price_aed": 370.0
+        },
+        {
+          "dose": "Ascorbic Acid 20% + HA 2% + Dexpanthenol 5%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Day Serum",
+          "clinic_price_aed": 145.0,
+          "patient_price_aed": 290.0
+        },
+        {
+          "dose": "Ascorbic Acid 20% + HA 2% + Dexpanthenol 5%",
+          "volume": "50 mL",
+          "format": "serum",
+          "formatName": "Day Serum",
+          "clinic_price_aed": 195.0,
+          "patient_price_aed": 390.0
+        }
+      ]
+    },
+    {
+      "name": "Ageless Argireline & GHK-Cu Serum",
+      "canonicalName": "Argireline & GHK-Cu Bio-Botox Serum",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "HA 1.5% + Argireline 10% + GHK-Cu 0.5%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Topical Serum",
+          "clinic_price_aed": 150.0,
+          "patient_price_aed": 300.0
+        }
+      ]
+    },
+    {
+      "name": "GHK-Cu Ageless Cream",
+      "canonicalName": "GHK-Cu Copper Peptide Regenerative Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "GHK-Cu 0.5%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Ageless Cream",
+          "clinic_price_aed": 105.0,
+          "patient_price_aed": 210.0
+        },
+        {
+          "dose": "GHK-Cu 1%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Ageless Cream",
+          "clinic_price_aed": 115.0,
+          "patient_price_aed": 230.0
+        },
+        {
+          "dose": "GHK-Cu 2%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Ageless Cream",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        }
+      ]
+    },
+    {
+      "name": "GHK-Cu Topical Serum",
+      "canonicalName": "GHK-Cu High-Potency Dermal Serum",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "GHK-Cu 2%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Topical Serum",
+          "clinic_price_aed": 130.0,
+          "patient_price_aed": 260.0
+        },
+        {
+          "dose": "GHK-Cu 4%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Topical Serum",
+          "clinic_price_aed": 160.0,
+          "patient_price_aed": 320.0
+        }
+      ]
+    },
+    {
+      "name": "Clinical Acne Compound Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Clindamycin 2% + Salicylic 1% + Azelaic Acid",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Acne Cream",
+          "clinic_price_aed": 75.0,
+          "patient_price_aed": 150.0
+        },
+        {
+          "dose": "Clindamycin 1% + Salicylic 1% + Tretinoin 0.025%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Acne Cream",
+          "clinic_price_aed": 75.0,
+          "patient_price_aed": 150.0
+        }
+      ]
+    },
+    {
+      "name": "Rejuvex Anti-Aging Night Renewal Cream",
+      "canonicalName": "Rejuvex NAD+ & Copper Peptide Renewal Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "NAD+ 5% + GHK-Cu 0.05% + HA 2% + TXA 2%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Night Cream",
+          "clinic_price_aed": 225.0,
+          "patient_price_aed": 450.0
+        },
+        {
+          "dose": "NAD+ 10% + GHK-Cu 0.2% + HA 2% + Vit E 2%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Night Cream",
+          "clinic_price_aed": 235.0,
+          "patient_price_aed": 470.0
+        },
+        {
+          "dose": "NAD+ 10% + GHK-Cu 0.2% + HA 2% + Vit E 2%",
+          "volume": "50 mL",
+          "format": "cream",
+          "formatName": "Night Cream",
+          "clinic_price_aed": 300.0,
+          "patient_price_aed": 600.0
+        }
+      ]
+    },
+    {
+      "name": "Rosacea Compound Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Metronidazole 1% + Niacinamide 4%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Rosacea Cream",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        },
+        {
+          "dose": "Metronidazole 2% + Niacinamide 4%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Rosacea Cream",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        }
+      ]
+    },
+    {
+      "name": "Post-Laser & Scar Silicone Gel",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Functional Medical Grade Silicone Gel",
+          "volume": "30 mL",
+          "format": "gel",
+          "formatName": "Post-Laser Gel",
+          "clinic_price_aed": 195.0,
+          "patient_price_aed": 390.0
+        },
+        {
+          "dose": "Functional Medical Grade Silicone Gel",
+          "volume": "50 mL",
+          "format": "gel",
+          "formatName": "Post-Laser Gel",
+          "clinic_price_aed": 295.0,
+          "patient_price_aed": 590.0
+        }
+      ]
+    },
+    {
+      "name": "Dexpanthenol & Vitamin E Barrier Repair Cream",
+      "category": "Dermatology & Cosmeceuticals",
+      "variants": [
+        {
+          "dose": "Dexpanthenol + Vitamin E Repair",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Repair Cream",
+          "clinic_price_aed": 170.0,
+          "patient_price_aed": 340.0
+        },
+        {
+          "dose": "Dexpanthenol + Vitamin E Repair",
+          "volume": "50 mL",
+          "format": "cream",
+          "formatName": "Repair Cream",
+          "clinic_price_aed": 195.0,
+          "patient_price_aed": 390.0
+        }
+      ]
+    },
+    {
+      "name": "Lidocaine Professional Topical Anesthetic Cream",
+      "canonicalName": "Lidocaine Anesthetic Cream",
+      "category": "Clinical Supplies & Topicals",
+      "variants": [
+        {
+          "dose": "10%",
+          "pack_size": "100 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 90.0,
+          "patient_price_aed": 180.0
+        },
+        {
+          "dose": "10%",
+          "pack_size": "250 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 170.0,
+          "patient_price_aed": 340.0
+        },
+        {
+          "dose": "10%",
+          "pack_size": "500 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 330.0,
+          "patient_price_aed": 660.0
+        },
+        {
+          "dose": "10.56%",
+          "pack_size": "100 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 90.0,
+          "patient_price_aed": 180.0
+        },
+        {
+          "dose": "10.56%",
+          "pack_size": "250 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 170.0,
+          "patient_price_aed": 340.0
+        },
+        {
+          "dose": "10.56%",
+          "pack_size": "500 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 330.0,
+          "patient_price_aed": 660.0
+        },
+        {
+          "dose": "30%",
+          "pack_size": "100 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 105.0,
+          "patient_price_aed": 210.0
+        },
+        {
+          "dose": "30%",
+          "pack_size": "250 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 205.0,
+          "patient_price_aed": 410.0
+        },
+        {
+          "dose": "30%",
+          "pack_size": "500 g",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 390.0,
+          "patient_price_aed": 780.0
+        }
+      ]
+    },
+    {
+      "name": "BLT 30% (Benzocaine/Lidocaine/Tetracaine) Professional Gel",
+      "canonicalName": "BLT Anesthetic Compound (20/6/4)",
+      "category": "Clinical Supplies & Topicals",
+      "variants": [
+        {
+          "dose": "BLT 30% (20/6/4)",
+          "pack_size": "100 g",
+          "format": "gel",
+          "formatName": "Anesthetic Gel",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        },
+        {
+          "dose": "BLT 30% (20/6/4)",
+          "pack_size": "250 g",
+          "format": "gel",
+          "formatName": "Anesthetic Gel",
+          "clinic_price_aed": 240.0,
+          "patient_price_aed": 480.0
+        },
+        {
+          "dose": "BLT 30% (20/6/4)",
+          "pack_size": "500 g",
+          "format": "gel",
+          "formatName": "Anesthetic Gel",
+          "clinic_price_aed": 470.0,
+          "patient_price_aed": 940.0
+        }
+      ]
+    },
+    {
+      "name": "Hydroquinone + Tretinoin Peel Off Mask",
+      "canonicalName": "HQ & Tretinoin Chemical Peel Mask",
+      "category": "Clinical Supplies & Topicals",
+      "variants": [
+        {
+          "dose": "HQ 2% + Tretinoin 2%",
+          "volume": "10 mL",
+          "format": "mask",
+          "formatName": "Peel-Off Mask",
+          "clinic_price_aed": 150.0,
+          "patient_price_aed": 300.0
+        },
+        {
+          "dose": "HQ 5% + Tretinoin 5%",
+          "volume": "10 mL",
+          "format": "mask",
+          "formatName": "Peel-Off Mask",
+          "clinic_price_aed": 200.0,
+          "patient_price_aed": 400.0
+        },
+        {
+          "dose": "HQ 10% + Tretinoin 10%",
+          "volume": "10 mL",
+          "format": "mask",
+          "formatName": "Peel-Off Mask",
+          "clinic_price_aed": 250.0,
+          "patient_price_aed": 500.0
+        }
+      ]
+    }
+  ],
+  "phase3": [
+    {
+      "name": "Minoxidil + Finasteride + Tretinoin Hair Serum",
+      "canonicalName": "Minoxidil Complex Hair Regrowth Serum",
+      "category": "Trichology & Hair Care",
+      "variants": [
+        {
+          "dose": "Minoxidil 5% + Finasteride 0.1% + Tretinoin 0.01%",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Hair Serum",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Minoxidil 5% + Finasteride 0.1% + Tretinoin 0.01%",
+          "volume": "50 mL",
+          "format": "serum",
+          "formatName": "Hair Serum",
+          "clinic_price_aed": 210.0,
+          "patient_price_aed": 420.0
+        },
+        {
+          "dose": "Minoxidil 5% + Finasteride 0.01% + Tretinoin 0.01% + Zn + Biotin + Caffeine",
+          "volume": "30 mL",
+          "format": "serum",
+          "formatName": "Hair Serum",
+          "clinic_price_aed": 220.0,
+          "patient_price_aed": 440.0
+        },
+        {
+          "dose": "Minoxidil 5% + Finasteride 0.01% + Tretinoin 0.01% + Zn + Biotin + Caffeine",
+          "volume": "50 mL",
+          "format": "serum",
+          "formatName": "Hair Serum",
+          "clinic_price_aed": 245.0,
+          "patient_price_aed": 490.0
+        }
+      ]
+    },
+    {
+      "name": "Minoxidil + Finasteride Topical Hair Cream",
+      "canonicalName": "Minoxidil & Finasteride Scalp Cream",
+      "category": "Trichology & Hair Care",
+      "variants": [
+        {
+          "dose": "Minoxidil 5% + Finasteride 2%",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Hair Cream",
+          "clinic_price_aed": 160.0,
+          "patient_price_aed": 320.0
+        }
+      ]
+    },
+    {
+      "name": "Minoxidil + Finasteride Oral Capsules",
+      "canonicalName": "Oral Minoxidil & Finasteride Complex",
+      "category": "Trichology & Hair Care",
+      "variants": [
+        {
+          "dose": "Minoxidil 5 mg + Finasteride 1 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 130.0,
+          "patient_price_aed": 260.0
+        }
+      ]
+    },
+    {
+      "name": "GHK-Cu Hair Regrowth Foam",
+      "canonicalName": "GHK-Cu Copper Peptide Hair Foam",
+      "category": "Trichology & Hair Care",
+      "variants": [
+        {
+          "dose": "GHK-Cu 0.5%",
+          "volume": "50 mL",
+          "format": "foam",
+          "formatName": "Topical Foam",
+          "clinic_price_aed": 245.0,
+          "patient_price_aed": 490.0
+        }
+      ]
+    },
+    {
+      "name": "Tretinoin Scalp Solution",
+      "canonicalName": "Tretinoin Trichology Solution",
+      "category": "Trichology & Hair Care",
+      "variants": [
+        {
+          "dose": "Tretinoin 0.01%",
+          "volume": "30 mL",
+          "format": "solution",
+          "formatName": "Scalp Solution",
+          "clinic_price_aed": 75.0,
+          "patient_price_aed": 150.0
+        },
+        {
+          "dose": "Tretinoin 0.01%",
+          "volume": "50 mL",
+          "format": "solution",
+          "formatName": "Scalp Solution",
+          "clinic_price_aed": 95.0,
+          "patient_price_aed": 190.0
+        },
+        {
+          "dose": "Tretinoin 0.05%",
+          "volume": "30 mL",
+          "format": "solution",
+          "formatName": "Scalp Solution",
+          "clinic_price_aed": 80.0,
+          "patient_price_aed": 160.0
+        },
+        {
+          "dose": "Tretinoin 0.05%",
+          "volume": "50 mL",
+          "format": "solution",
+          "formatName": "Scalp Solution",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 200.0
+        }
+      ]
+    },
+    {
+      "name": "Betamethasone + Salicylic Acid Scalp Solution",
+      "canonicalName": "Anti-Inflammatory Scalp Solution",
+      "category": "Trichology & Hair Care",
+      "variants": [
+        {
+          "dose": "Betamethasone 0.05% + Salicylic Acid",
+          "volume": "30 mL",
+          "format": "solution",
+          "formatName": "Scalp Solution",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        },
+        {
+          "dose": "Betamethasone 0.05% + Salicylic Acid",
+          "volume": "50 mL",
+          "format": "solution",
+          "formatName": "Scalp Solution",
+          "clinic_price_aed": 140.0,
+          "patient_price_aed": 280.0
+        }
+      ]
+    },
+    {
+      "name": "NAD+ IV Infusion Vial",
+      "canonicalName": "NAD+ IV Infusion",
+      "category": "IVNT & Infusion Therapy",
+      "variants": [
+        {
+          "dose": "100 mg",
+          "volume": "10 mL",
+          "format": "iv_vial",
+          "formatName": "IV Infusion Vial",
+          "clinic_price_aed": 100.0,
+          "patient_price_aed": 150.0
+        },
+        {
+          "dose": "250 mg",
+          "volume": "10 mL",
+          "format": "iv_vial",
+          "formatName": "IV Infusion Vial",
+          "clinic_price_aed": 200.0,
+          "patient_price_aed": 300.0
+        },
+        {
+          "dose": "500 mg",
+          "volume": "10 mL",
+          "format": "iv_vial",
+          "formatName": "IV Infusion Vial",
+          "clinic_price_aed": 350.0,
+          "patient_price_aed": 500.0
+        },
+        {
+          "dose": "750 mg",
+          "volume": "10 mL",
+          "format": "iv_vial",
+          "formatName": "IV Infusion Vial",
+          "clinic_price_aed": 750.0,
+          "patient_price_aed": 1200.0
+        }
+      ]
+    },
+    {
+      "name": "Methylene Blue IV Vial",
+      "canonicalName": "Methylene Blue Pharmaceutical Grade",
+      "category": "IVNT & Infusion Therapy",
+      "variants": [
+        {
+          "dose": "100 mg",
+          "volume": "10 mL",
+          "format": "iv_vial",
+          "formatName": "IV Infusion Vial",
+          "clinic_price_aed": 170.0,
+          "patient_price_aed": 300.0
+        }
+      ]
+    },
+    {
+      "name": "BioBlend Standard IV Drip Cocktails",
+      "canonicalName": "Standard Micronutrient IV Infusion",
+      "category": "IVNT & Infusion Therapy",
+      "variants": [
+        {
+          "dose": "Energy Drip Cocktail",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Energy Drip Cocktail",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Radiant Skin Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Radiant Skin Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Immune Boost Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Immune Boost Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Detoxification Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Detoxification Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Fat Burning Metabolic Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Fat Burning Metabolic Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Glow Anti-Aging Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Glow Anti-Aging Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Brain Power Neuro Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Brain Power Neuro Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "Athletic Recovery Drip",
+          "volume": "25 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 180.0,
+          "patient_price_aed": 360.0
+        },
+        {
+          "dose": "Athletic Recovery Drip",
+          "volume": "50 mL",
+          "format": "iv_bag_blend",
+          "formatName": "IV Infusion Blend",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        }
+      ]
+    }
+  ],
+  "phase4": [
+    {
+      "name": "Bi-Est (Estriol & Estradiol)",
+      "canonicalName": "Bi-Est Bioidentical Estrogen",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "0.50 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 235.0,
+          "patient_price_aed": 470.0
+        },
+        {
+          "dose": "1.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 240.0,
+          "patient_price_aed": 480.0
+        },
+        {
+          "dose": "2.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 250.0,
+          "patient_price_aed": 500.0
+        },
+        {
+          "dose": "3.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 262.0,
+          "patient_price_aed": 524.0
+        },
+        {
+          "dose": "5.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 284.0,
+          "patient_price_aed": 568.0
+        }
+      ]
+    },
+    {
+      "name": "Estriol (E3)",
+      "canonicalName": "Estriol",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "0.50 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 207.0,
+          "patient_price_aed": 414.0
+        },
+        {
+          "dose": "1.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 212.0,
+          "patient_price_aed": 424.0
+        },
+        {
+          "dose": "2.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 221.0,
+          "patient_price_aed": 442.0
+        },
+        {
+          "dose": "4.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 239.0,
+          "patient_price_aed": 478.0
+        }
+      ]
+    },
+    {
+      "name": "Estradiol (E2)",
+      "canonicalName": "Estradiol",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "0.25 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 200.0,
+          "patient_price_aed": 400.0
+        },
+        {
+          "dose": "0.50 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 205.0,
+          "patient_price_aed": 410.0
+        },
+        {
+          "dose": "1.00 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 215.0,
+          "patient_price_aed": 430.0
+        }
+      ]
+    },
+    {
+      "name": "DHEA",
+      "canonicalName": "DHEA",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "10 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 95.0,
+          "patient_price_aed": 190.0
+        },
+        {
+          "dose": "25 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 105.0,
+          "patient_price_aed": 210.0
+        },
+        {
+          "dose": "50 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 115.0,
+          "patient_price_aed": 230.0
+        },
+        {
+          "dose": "100 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 135.0,
+          "patient_price_aed": 270.0
+        }
+      ]
+    },
+    {
+      "name": "Hydrocortisone",
+      "canonicalName": "Hydrocortisone Bioidentical",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "5 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 120.0,
+          "patient_price_aed": 240.0
+        },
+        {
+          "dose": "10 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        },
+        {
+          "dose": "20 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 130.0,
+          "patient_price_aed": 260.0
+        }
+      ]
+    },
+    {
+      "name": "Liothyronine (T3)",
+      "canonicalName": "Liothyronine Sodium (T3)",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "5 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 95.0,
+          "patient_price_aed": 190.0
+        },
+        {
+          "dose": "10 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 104.0,
+          "patient_price_aed": 208.0
+        },
+        {
+          "dose": "25 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 117.0,
+          "patient_price_aed": 234.0
+        }
+      ]
+    },
+    {
+      "name": "Levothyroxine (T4)",
+      "canonicalName": "Levothyroxine (T4)",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "50 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 72.0,
+          "patient_price_aed": 144.0
+        },
+        {
+          "dose": "100 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 74.0,
+          "patient_price_aed": 148.0
+        },
+        {
+          "dose": "150 mcg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 76.0,
+          "patient_price_aed": 152.0
+        }
+      ]
+    },
+    {
+      "name": "Low Dose Naltrexone (LDN)",
+      "canonicalName": "Naltrexone HCl",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "1.5 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 110.0,
+          "patient_price_aed": 220.0
+        },
+        {
+          "dose": "3 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 120.0,
+          "patient_price_aed": 240.0
+        },
+        {
+          "dose": "4.5 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 130.0,
+          "patient_price_aed": 260.0
+        },
+        {
+          "dose": "1.5 mg",
+          "pack_size": "30 sublingual tabs",
+          "format": "sublingual",
+          "formatName": "Sublingual Tab",
+          "clinic_price_aed": 127.5,
+          "patient_price_aed": 255.0
+        },
+        {
+          "dose": "3 mg",
+          "pack_size": "30 sublingual tabs",
+          "format": "sublingual",
+          "formatName": "Sublingual Tab",
+          "clinic_price_aed": 160.5,
+          "patient_price_aed": 321.0
+        },
+        {
+          "dose": "4.5 mg",
+          "pack_size": "30 sublingual tabs",
+          "format": "sublingual",
+          "formatName": "Sublingual Tab",
+          "clinic_price_aed": 193.5,
+          "patient_price_aed": 387.0
+        }
+      ]
+    },
+    {
+      "name": "Pregnenolone",
+      "canonicalName": "Pregnenolone",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "25 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 110.0,
+          "patient_price_aed": 220.0
+        },
+        {
+          "dose": "50 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 125.0,
+          "patient_price_aed": 250.0
+        },
+        {
+          "dose": "100 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 145.0,
+          "patient_price_aed": 290.0
+        }
+      ]
+    },
+    {
+      "name": "Progesterone Bioidentical",
+      "canonicalName": "Progesterone Micronized",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "50 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 232.0,
+          "patient_price_aed": 464.0
+        },
+        {
+          "dose": "100 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 248.0,
+          "patient_price_aed": 496.0
+        },
+        {
+          "dose": "200 mg",
+          "pack_size": "30 capsules",
+          "format": "capsule",
+          "formatName": "Oral Capsule",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "50 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 232.0,
+          "patient_price_aed": 464.0
+        },
+        {
+          "dose": "100 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 248.0,
+          "patient_price_aed": 496.0
+        }
+      ]
+    },
+    {
+      "name": "Testosterone Bioidentical Cream",
+      "canonicalName": "Testosterone Micronized",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "10 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream (Topi-CLICK)",
+          "clinic_price_aed": 240.0,
+          "patient_price_aed": 480.0
+        },
+        {
+          "dose": "50 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream (Topi-CLICK)",
+          "clinic_price_aed": 280.0,
+          "patient_price_aed": 560.0
+        },
+        {
+          "dose": "100 mg/mL",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream (Topi-CLICK)",
+          "clinic_price_aed": 330.0,
+          "patient_price_aed": 660.0
+        }
+      ]
+    },
+    {
+      "name": "4-Hormones Bioidentical Synergy",
+      "canonicalName": "Bi-Est + Progesterone + Testosterone + DHEA",
+      "category": "BHRT & Endocrinology",
+      "variants": [
+        {
+          "dose": "Custom Quad-Hormone Synergy",
+          "volume": "30 mL",
+          "format": "cream",
+          "formatName": "Topical Cream",
+          "clinic_price_aed": 420.0,
+          "patient_price_aed": 840.0
+        }
+      ]
+    }
+  ]
+}
