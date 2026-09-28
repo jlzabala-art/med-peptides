@@ -981,17 +981,6 @@ export default function PublicPrescriptionClient({ rx }) {
               }}>
                 <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
                 <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
-                <span style={{
-                  background: 'rgba(34, 197, 94, 0.15)',
-                  color: '#16a34a',
-                  border: '1px solid rgba(34, 197, 94, 0.35)',
-                  padding: '1px 8px',
-                  borderRadius: '9999px',
-                  fontSize: '0.68rem',
-                  fontWeight: 700
-                }}>
-                  {isEs ? 'Activa & Dispensada ✓' : 'Active & Dispensed ✓'}
-                </span>
               </div>
               <div style={{ color: '#94a3b8', fontSize: '0.72rem' }}>
                 Atlas Services Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
