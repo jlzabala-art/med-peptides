@@ -25,7 +25,8 @@ import {
   Maximize2,
   Sparkles,
   Award,
-  Phone
+  Phone,
+  Printer
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -508,6 +509,35 @@ export default function PublicPrescriptionClient({ rx }) {
                   <div style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '4px', fontWeight: 600 }}>
                     {patient.maskedPhone || '+971 54 *** **80'}
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      window.print();
+                    }}
+                    className="rx-print-btn"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '0.42rem 0.8rem',
+                      borderRadius: '8px',
+                      background: '#ffffff',
+                      color: '#0f172a',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      marginTop: '8px',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
+                  >
+                    <Printer size={13} color="#003666" />
+                    <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
+                  </button>
                 </div>
               </div>
             </div>

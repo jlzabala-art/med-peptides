@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { adminDb } from '@/lib/firebaseAdmin';
 import PublicPrescriptionClient from './PublicPrescriptionClient';
@@ -20,7 +20,8 @@ export function invalidateRxCache(code) {
   }
 }
 
-async function getPrescriptionData(code) {
+// ⚡ Per-Request React Server Component memoization
+const getPrescriptionData = cache(async (code) => {
   if (!adminDb || !code) return null;
   const cleanCode = decodeURIComponent(code).trim().toUpperCase();
 
@@ -84,7 +85,7 @@ async function getPrescriptionData(code) {
   });
 
   return result;
-}
+});
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;

@@ -151,9 +151,25 @@ function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPer
   return { unitPrice, tier10UnitPrice, kitTotalPrice };
 }
 
-// ── F-D: Cached Firestore fetch (TTL = 10 min, keyed by supplierId + category) ─
+// ⚡ Golden Rule #2: Layer 1 In-Memory RAM Cache (TTL: 10 minutes)
+const CATALOG_RAM_CACHE = new Map();
+const CATALOG_CACHE_TTL_MS = 10 * 60 * 1000;
+
+export function invalidateSharedCatalogCache(key = null) {
+  if (key) {
+    CATALOG_RAM_CACHE.delete(key);
+  } else {
+    CATALOG_RAM_CACHE.clear();
+  }
+}
 
 async function fetchCatalogData(supplierId, category, catalogueFilter) {
+  const cacheKey = `${Array.isArray(supplierId) ? supplierId.join(',') : supplierId || 'all'}_${category || 'all'}_${catalogueFilter || 'all'}`;
+  const cached = CATALOG_RAM_CACHE.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
   let productsQuery = adminDb.collection('products')
     .where('status', 'in', ['active', 'published', 'out of stock']);
 
@@ -203,11 +219,18 @@ async function fetchCatalogData(supplierId, category, catalogueFilter) {
     })
   );
 
-  return {
+  const result = {
     productDocs: productsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })),
     variantsByProduct,
     protoDocs: protosSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
   };
+
+  CATALOG_RAM_CACHE.set(cacheKey, {
+    data: result,
+    expiresAt: Date.now() + CATALOG_CACHE_TTL_MS
+  });
+
+  return result;
 }
 
 // ── Page Component ─────────────────────────────────────────────────────────────

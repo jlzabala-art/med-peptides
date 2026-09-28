@@ -602,3 +602,91 @@
     grid-column: span 2;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   CLINICAL PRINT STYLESHEET (@media print)
+   Standards for High-Fidelity A4 Clinical Dossier Printing & PDF Archiving
+   ══════════════════════════════════════════════════════════════════════════════ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 14mm 14mm;
+  }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Hide interactive, floating, sticky, and screen-only controls */
+  header,
+  nav,
+  .public-sticky-header,
+  .pds-sidebar-desktop,
+  .pds-sticky-bottom-bar,
+  .pds-mobile-drawer-overlay,
+  .rx-print-btn,
+  .whatsapp-share-btn,
+  [class*="PublicStickyActionBar"],
+  [class*="PublicAtlasAIDrawer"],
+  [class*="PublicInstitutionalInquiryDrawer"],
+  [class*="DocumentPreviewModal"],
+  .hot-toast-container,
+  div[role="status"],
+  button {
+    display: none !important;
+  }
+
+  /* Full-width container layout */
+  .pds-content-with-sidebar,
+  .pds-main-column {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Clean print borders & zero shadows */
+  .rx-card {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    margin-bottom: 12pt !important;
+    padding: 12pt !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Prevent page breaks inside clinical rows and milestone items */
+  .rx-api-item,
+  .rx-posology-row,
+  .rx-milestone-item,
+  .rx-doctor-col,
+  .rx-patient-box {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure text contrast on paper */
+  .rx-doctor-name {
+    color: #003666 !important;
+  }
+
+  .rx-doctor-avatar {
+    background: #003666 !important;
+    color: #ffffff !important;
+  }
+
+  .rx-patient-box {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+}

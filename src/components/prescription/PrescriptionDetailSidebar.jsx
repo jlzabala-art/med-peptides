@@ -18,7 +18,8 @@ import {
   Clock,
   Calendar,
   Layers,
-  ArrowUp
+  ArrowUp,
+  Printer
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import '@/components/product/PublicDatasheetTableOfContents.css';
@@ -279,9 +280,37 @@ export default function PrescriptionDetailSidebar({
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>
             {rxId}
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px', marginBottom: '0.5rem' }}>
             {isEs ? 'Acceso móvil confidencial del paciente' : 'Confidential mobile access for registered patient'}
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              window.print();
+            }}
+            className="rx-print-btn"
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '0.55rem',
+              borderRadius: '8px',
+              background: '#f8fafc',
+              color: '#003666',
+              border: '1px solid #cbd5e1',
+              fontWeight: 700,
+              fontSize: '0.76rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Printer size={13} color="#003666" />
+            <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
+          </button>
         </div>
 
       </div>
