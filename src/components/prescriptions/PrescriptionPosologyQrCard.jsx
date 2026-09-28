@@ -225,6 +225,90 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
           </div>
         </div>
 
+        {/* ── 15-Day Automated Refill Alert Banner ─────────────────────────────────── */}
+        <div style={{
+          background: 'linear-gradient(135deg, #f0fdf4, #eff6ff)',
+          border: '1px solid #bae6fd',
+          borderRadius: '10px',
+          padding: '0.85rem 1rem',
+          marginBottom: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>⏰</span>
+              <div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>
+                  Alerta Preventiva de Reposición (15 Días Antes de Agotar Producto)
+                </span>
+                <span style={{ display: 'inline-block', marginLeft: '6px', fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px', background: '#dcfce7', color: '#15803d' }}>
+                  ✓ ACTIVA & PROGRAMADA
+                </span>
+              </div>
+            </div>
+            
+            <button
+              type="button"
+              onClick={async () => {
+                triggerHaptic('impact');
+                const tId = toast.loading('Enviando alerta de prueba...');
+                try {
+                  const res = await fetch('/api/prescriptions/refill-alerts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prescriptionId: rxId, action: 'trigger' })
+                  });
+                  const json = await res.json();
+                  if (json.success) {
+                    toast.success('Alerta enviada al Médico y Administrador ✓', { id: tId });
+                  } else {
+                    toast.error(json.error || 'Error al emitir alerta', { id: tId });
+                  }
+                } catch (err) {
+                  toast.error(err.message, { id: tId });
+                }
+              }}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #0284c7',
+                color: '#0284c7',
+                borderRadius: '6px',
+                padding: '3px 10px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>🔔</span>
+              <span>Probar / Notificar Ahora</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.5rem', fontSize: '0.75rem', marginTop: '2px' }}>
+            <div style={{ background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Inicio Tratamiento</div>
+              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>15 Sep 2026</div>
+            </div>
+            <div style={{ background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Duración Total</div>
+              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>90 Días (3 Frascos)</div>
+            </div>
+            <div style={{ background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Fin Estimado</div>
+              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>14 Dic 2026</div>
+            </div>
+            <div style={{ background: '#fef3c7', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: '0.66rem', color: '#92400e', fontWeight: 800, textTransform: 'uppercase' }}>🔔 Disparo Alerta (-15d)</div>
+              <div style={{ fontWeight: 800, color: '#b45309', marginTop: '1px' }}>29 Nov 2026</div>
+            </div>
+          </div>
+        </div>
+
         {/* Step-by-Step Interactive Guide */}
         <div style={{
           display: 'grid',

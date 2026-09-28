@@ -267,6 +267,38 @@ export const getPrescriptionColumns = (options = {}) => {
           || rx.dateIssued
           || '—';
 
+        const alert = rx.refillAlert || {};
+        const alertDateStr = rx.refillAlertDate || alert.alertDate;
+        const exhaustionDateStr = rx.exhaustionDate || alert.exhaustionDate;
+        const alertStatus = rx.refillAlertStatus || alert.status;
+
+        let refillBadge = null;
+        if (alertDateStr || exhaustionDateStr) {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const isExhausted = exhaustionDateStr && todayStr >= exhaustionDateStr;
+          const isDue = alertDateStr && todayStr >= alertDateStr;
+
+          if (isExhausted) {
+            refillBadge = (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: 700, color: '#dc2626', background: '#fee2e2', padding: '1px 6px', borderRadius: '4px', marginTop: '2px', width: 'fit-content' }}>
+                🔴 Agotado
+              </span>
+            );
+          } else if (isDue || alertStatus === 'active') {
+            refillBadge = (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: 700, color: '#d97706', background: '#fef3c7', padding: '1px 6px', borderRadius: '4px', marginTop: '2px', width: 'fit-content' }}>
+                ⚠️ Reposición Debida
+              </span>
+            );
+          } else {
+            refillBadge = (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: 600, color: '#0284c7', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', marginTop: '2px', width: 'fit-content' }} title={`Alerta preventiva programada 15 días antes: ${alertDateStr}`}>
+                ⏰ Refill: {alertDateStr ? formatAnyDate(alertDateStr) : 'Prog.'} (-15d)
+              </span>
+            );
+          }
+        }
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', fontSize: '0.8rem' }}>
             <div style={{ color: '#334155', fontWeight: 600 }}>{date}</div>
@@ -275,6 +307,7 @@ export const getPrescriptionColumns = (options = {}) => {
                 <span style={{ color: '#94a3b8' }}>→ F/U:</span> {followUp}
               </div>
             )}
+            {refillBadge}
           </div>
         );
       },

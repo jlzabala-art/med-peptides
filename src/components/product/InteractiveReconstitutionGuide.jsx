@@ -26,6 +26,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
 import { getReconstitutionBaseline, parseMgFromPresentation } from '../../utils/reconstitutionBaseline';
 import { resolveClinicalCompoundDose } from '../../utils/clinicalDosingEngine';
+import { getPhaseVialStrategy } from '../../services/protocol_finder_2_0_protocols_bundle/ScientificStandards';
 
 // ── Static preset arrays — defined outside component to avoid re-allocation ───
 const BAC_PRESETS = Object.freeze([1.0, 2.0, 2.5, 3.0, 5.0]);
@@ -210,6 +211,7 @@ export default function InteractiveReconstitutionGuide({
   const [doseUnit, setDoseUnit] = useState(() => baselineState.baseUnit);
   const [doseValue, setDoseValue] = useState(() => baselineState.baseDose);
   const [selectedPhaseId, setSelectedPhaseId] = useState(null);
+  const [showFullStrategyTable, setShowFullStrategyTable] = useState(false);
 
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
@@ -284,6 +286,17 @@ export default function InteractiveReconstitutionGuide({
       isUnderMeasured: units > 0 && units < 5
     };
   }, [vialMg, bacWaterMl, doseUnit, doseValue]);
+
+  // ── Clinical Phase-by-Phase Vial Strategy ─────────────────────────────────
+  const phaseVialAdvice = useMemo(() => {
+    const pIdentifier = product?.name || product?.slug || product?.id;
+    return getPhaseVialStrategy(pIdentifier, doseMg);
+  }, [product, doseMg]);
+
+  const fullStrategy = useMemo(() => {
+    const pIdentifier = product?.name || product?.slug || product?.id;
+    return getPhaseVialStrategy(pIdentifier);
+  }, [product]);
 
   // ── Dynamic Reconstitution Solvent Step Text ──────────────────────────────
   const dynamicSolventText = useMemo(() => {
@@ -619,6 +632,19 @@ export default function InteractiveReconstitutionGuide({
     setDoseUnit(phase.unit);
     setDoseValue(phase.dose);
     updateUrlParams(phase.id, phase.dose, phase.unit);
+
+    // Auto-ergonomics: If this phase requires a higher dose vial to prevent syringe overflow (>100 UI)
+    const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
+    const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
+    if (advice && advice.recommendedVialMg > vialMg) {
+      setVialMg(advice.recommendedVialMg);
+      setBacWaterMl(advice.recommendedBacMl);
+      notifier.info(
+        lang === 'es'
+          ? `⚡ Vial optimizado a ${advice.recommendedVialMg} mg para ${phase.phaseLabel || phase.name} (${advice.resultUnits} UI en 1 pinchazo)`
+          : `⚡ Vial optimized to ${advice.recommendedVialMg} mg for ${phase.phaseLabel || phase.name} (${advice.resultUnits} Units single draw)`
+      );
+    }
   };
 
   const handleSelectCustom = () => {
@@ -1897,6 +1923,27 @@ export default function InteractiveReconstitutionGuide({
                       <span className="irg-pc-badge">{phase.badge}</span>
                     </div>
                     <div className="irg-pc-title">{phase.name}</div>
+                    {(() => {
+                      const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
+                      const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
+                      if (!advice) return null;
+                      return (
+                        <div style={{
+                          display: 'inline-block',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          background: '#f0fdf4',
+                          color: '#15803d',
+                          border: '1px solid #bbf7d0',
+                          width: 'fit-content',
+                          marginTop: '2px'
+                        }}>
+                          Vial: {advice.recommendedVialMg} mg
+                        </div>
+                      );
+                    })()}
                     <div className="irg-pc-dose-row">
                       <span className="irg-pc-num font-mono">{phase.dose}</span>
                       <span className="irg-pc-unit">{phase.unit}</span>
@@ -2116,8 +2163,140 @@ export default function InteractiveReconstitutionGuide({
               </div>
             </div>
 
-            {/* Informative Guidance on Multi-Syringe Volumetric Bounds */}
-            {isOverSyringe ? (
+            {/* Clinical Phase-by-Phase Vial Strategy & Ergonomics Alert */}
+            {phaseVialAdvice?.matchedPhase && (isOverSyringe || safeVialMg < phaseVialAdvice.matchedPhase.recommendedVialMg || (doseMg >= 7.5 && safeVialMg <= 10)) ? (
+              <div 
+                className="irg-alert-clinical-phase"
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #fde68a',
+                  borderLeft: '4px solid #d97706',
+                  borderRadius: '10px',
+                  padding: '0.85rem 1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.65rem',
+                  boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <ShieldAlert size={17} color="#d97706" />
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#92400e' }}>
+                      {lang === 'es' ? 'Recomendación Clínica de Viales por Fase (USP <797>)' : 'Clinical Phase-Specific Vial Strategy (USP <797>)'}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#fef3c7', color: '#b45309' }}>
+                    {phaseVialAdvice.matchedPhase.name}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: '0.78rem', color: '#78350f', lineHeight: 1.45 }}>
+                  {isOverSyringe ? (
+                    lang === 'es'
+                      ? `⚠️ El vial actual (${safeVialMg} mg) desborda la jeringa U-100 a ${liquidVolumeMl.toFixed(2)} mL (${syringeUnits.toFixed(0)} UI), forzando 2 pinchazos semanales, dolor dérmico y reflujo.`
+                      : `⚠️ Current vial (${safeVialMg} mg) overflows U-100 syringe to ${liquidVolumeMl.toFixed(2)} mL (${syringeUnits.toFixed(0)} Units), forcing 2 separate weekly injections and leakage risk.`
+                  ) : (
+                    lang === 'es'
+                      ? `ℹ️ Para esta fase de ${doseValue} ${doseUnit}, el vial actual de ${safeVialMg} mg rinde pocas dosis (~${totalDosesInVial}) o tiene volumen subóptimo.`
+                      : `ℹ️ For this target dose of ${doseValue} ${doseUnit}, current ${safeVialMg} mg vial yields few doses (~${totalDosesInVial}).`
+                  )}
+                </div>
+
+                {/* Recommended vs Avoid badges */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem' }}>
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '0.5rem 0.65rem' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>
+                      {lang === 'es' ? '✅ Vial Recomendado a Comprar' : '✅ Recommended Vial to Purchase'}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#14532d', marginTop: '2px' }}>
+                      {phaseVialAdvice.matchedPhase.recommendedVial}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#15803d', marginTop: '3px' }}>
+                      {phaseVialAdvice.matchedPhase.rationale}
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '0.5rem 0.65rem' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase' }}>
+                      {lang === 'es' ? '❌ Desaconsejado Comprar' : '❌ Avoid Purchasing'}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#7f1d1d', marginTop: '2px' }}>
+                      {phaseVialAdvice.matchedPhase.avoidVials}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#b91c1c', marginTop: '3px' }}>
+                      {phaseVialAdvice.matchedPhase.whyAvoid}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 1-Click Action to Calibrate to 50 UI Sweet Spot */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginTop: '2px' }}>
+                  <div style={{ fontSize: '0.72rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontWeight: 700, color: '#0369a1' }}>💉 Sweet Spot Clínico:</span>
+                    <span>{phaseVialAdvice.matchedPhase.resultUnits} UI (0.50 mL) · 1 solo pinchazo indoloro (31G)</span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('impact');
+                        setVialMg(phaseVialAdvice.matchedPhase.recommendedVialMg);
+                        setBacWaterMl(phaseVialAdvice.matchedPhase.recommendedBacMl);
+                        notifier.info(
+                          lang === 'es'
+                            ? `Vial calibrado a ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg — Inyección calibrada a ${phaseVialAdvice.matchedPhase.resultUnits} UI (0.50 mL)`
+                            : `Vial calibrated to ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg — Draw calibrated to ${phaseVialAdvice.matchedPhase.resultUnits} Units (0.50 mL)`
+                        );
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '5px 12px',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <span>⚡</span>
+                      <span>
+                        {lang === 'es'
+                          ? `Calibrar con Vial de ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg (50 UI)`
+                          : `Calibrate with ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg Vial (50 UI)`}
+                      </span>
+                    </button>
+
+                    {fullStrategy?.phases && (
+                      <button
+                        type="button"
+                        onClick={() => setShowFullStrategyTable(!showFullStrategyTable)}
+                        style={{
+                          background: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          color: '#334155',
+                          borderRadius: '6px',
+                          padding: '5px 10px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {showFullStrategyTable
+                          ? (lang === 'es' ? 'Ocultar Guía' : 'Hide Guide')
+                          : (lang === 'es' ? '📋 Ver Todas las Fases' : '📋 View All Phases')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : isOverSyringe ? (
               <div className="irg-alert irg-alert-warning" role="alert" style={{ background: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }}>
                 <AlertTriangle size={16} color="#d97706" />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -2153,8 +2332,108 @@ export default function InteractiveReconstitutionGuide({
                 <Info size={16} />
                 <span>{t.tipSmallVolume || 'ℹ Small draw volume (< 5 Units). Consider adding more BAC water for easier and more precise visual measurement.'}</span>
               </div>
+            ) : fullStrategy?.phases ? (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowFullStrategyTable(!showFullStrategyTable)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#0284c7',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {showFullStrategyTable
+                    ? (lang === 'es' ? 'Ocultar Guía de Compra de Viales' : 'Hide Vial Purchase Guide')
+                    : (lang === 'es' ? '💡 Guía de Compra de Viales por Fases' : '💡 Phase-by-Phase Vial Purchasing Guide')}
+                </button>
+              </div>
             ) : null}
+
+            {/* Complete Phase-by-Phase Purchasing Guide Table */}
+            {showFullStrategyTable && fullStrategy?.phases && (
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                padding: '0.85rem',
+                marginTop: '0.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                fontSize: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  <span style={{ fontWeight: 800, color: '#0f172a' }}>
+                    {lang === 'es' ? `📋 Guía de Compra de Viales por Fase — ${fullStrategy.name}` : `📋 Phase-by-Phase Vial Purchasing Guide — ${fullStrategy.name}`}
+                  </span>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{fullStrategy.indication}</span>
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.72rem' }}>
+                    <thead>
+                      <tr style={{ background: '#f1f5f9', color: '#475569' }}>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? 'Fase del Tratamiento' : 'Phase'}</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? 'Dosis' : 'Dose'}</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? '✅ Vial Recomendado a Comprar' : '✅ Buy Vial'}</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? '❌ Desaconsejado' : '❌ Avoid'}</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1' }}>{lang === 'es' ? 'Dilución & UI' : 'Dilution & UI'}</th>
+                        <th style={{ padding: '6px 8px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>{lang === 'es' ? 'Acción' : 'Action'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {fullStrategy.phases.map((ph, pIdx) => {
+                        const isCurrent = Math.abs(ph.doseMg - doseMg) <= 0.05;
+                        return (
+                          <tr key={pIdx} style={{ background: isCurrent ? '#eff6ff' : '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '6px 8px', fontWeight: isCurrent ? 800 : 600, color: isCurrent ? '#1e40af' : '#0f172a' }}>
+                              {ph.name}
+                              {isCurrent && <span style={{ marginLeft: '4px', fontSize: '0.65rem', background: '#dbeafe', color: '#1e40af', padding: '1px 5px', borderRadius: '3px' }}>Activa</span>}
+                            </td>
+                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', fontWeight: 700 }}>{ph.targetDose}</td>
+                            <td style={{ padding: '6px 8px', color: '#15803d', fontWeight: 700 }}>{ph.recommendedVial}</td>
+                            <td style={{ padding: '6px 8px', color: '#b91c1c' }}>{ph.avoidVials}</td>
+                            <td style={{ padding: '6px 8px', color: '#475569' }}>{ph.recommendedBacMl} mL BAC → <strong>{ph.resultUnits} UI</strong> ({ph.volumeMl} mL)</td>
+                            <td style={{ padding: '6px 8px', textAlign: 'right' }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('selection');
+                                  setDoseValue(ph.doseMg);
+                                  setDoseUnit('mg');
+                                  setVialMg(ph.recommendedVialMg);
+                                  setBacWaterMl(ph.recommendedBacMl);
+                                  notifier.info(`Fase seleccionada: ${ph.name} — Vial ${ph.recommendedVialMg} mg`);
+                                }}
+                                style={{
+                                  background: isCurrent ? '#0284c7' : '#e2e8f0',
+                                  color: isCurrent ? '#ffffff' : '#334155',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  padding: '2px 8px',
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {isCurrent ? (lang === 'es' ? 'Calibrado' : 'Active') : (lang === 'es' ? 'Seleccionar' : 'Select')}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
+
 
           {/* ── Realistic Interactive U-100 Syringe Graphic ── */}
           <div className="irg-syringe-stage" aria-label={`Insulin syringe displaying ${syringeUnits.toFixed(1)} units`}>

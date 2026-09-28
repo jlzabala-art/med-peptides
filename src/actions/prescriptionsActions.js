@@ -249,4 +249,143 @@ export async function updatePrescriptionStatusAction({ prescriptionId, newStatus
   }
 }
 
+/**
+ * Configures and schedules the 15-day product exhaustion alert for a prescription.
+ */
+export async function scheduleRefillAlertAction({
+  prescriptionId,
+  daysBefore = 15,
+  courseDurationDays = null,
+  startDate = null,
+  notifyDoctor = true,
+  notifyPatient = true
+}) {
+  try {
+    if (!adminDb) throw new Error("Firebase Admin not initialized.");
+    const rxRef = adminDb.collection('prescriptions').doc(prescriptionId);
+    const snap = await rxRef.get();
+    if (!snap.exists) throw new Error(`Prescription ${prescriptionId} not found.`);
+
+    const rx = snap.data();
+
+    // Resolve start date
+    let start = startDate ? new Date(startDate) : null;
+    if (!start || isNaN(start.getTime())) {
+      const rawStart = rx.treatmentStartDate || rx.treatmentStarted || rx.dateIssued || rx.createdAt;
+      if (rawStart?._seconds) start = new Date(rawStart._seconds * 1000);
+      else if (rawStart) start = new Date(rawStart);
+      else start = new Date();
+    }
+
+    // Resolve course duration days (default 90)
+    const duration = courseDurationDays || rx.treatmentDaysTotal || rx.courseDurationDays || 90;
+
+    // Exhaustion Date: start + duration days
+    const exhaustionDate = new Date(start.getTime() + duration * 24 * 60 * 60 * 1000);
+
+    // Alert Date: exhaustionDate - daysBefore (15 days)
+    const alertDate = new Date(exhaustionDate.getTime() - daysBefore * 24 * 60 * 60 * 1000);
+
+    const today = new Date();
+    const isDue = today >= alertDate && today < exhaustionDate;
+    const isExhausted = today >= exhaustionDate;
+    const alertStatus = isExhausted ? 'exhausted' : isDue ? 'active' : 'scheduled';
+
+    const patientName = rx.patient?.name || rx.patientName || 'Patient';
+    const doctorName = rx.doctorName || 'Prescribing Doctor';
+    const formattedExhaustion = exhaustionDate.toISOString().split('T')[0];
+    const formattedAlert = alertDate.toISOString().split('T')[0];
+
+    const message = `⚠️ Alerta de Reposición (15 días restantes): El tratamiento de ${patientName} finaliza el ${formattedExhaustion}. Iniciar gestión de reposición / refill.`;
+
+    const refillAlertPayload = {
+      daysBefore,
+      courseDurationDays: duration,
+      treatmentStartDate: start.toISOString().split('T')[0],
+      exhaustionDate: formattedExhaustion,
+      alertDate: formattedAlert,
+      status: alertStatus,
+      message,
+      notifyDoctor,
+      notifyPatient,
+      patientPhone: rx.patient?.phone || rx.patientPhone || null,
+      doctorPhone: rx.doctorPhone || null,
+      updatedAt: new Date().toISOString()
+    };
+
+    await rxRef.update({
+      refillAlert: refillAlertPayload,
+      refillAlertDate: formattedAlert,
+      refillAlertStatus: alertStatus,
+      exhaustionDate: formattedExhaustion,
+      treatmentDaysTotal: duration,
+      nextRefillDue: formattedAlert
+    });
+
+    // If currently due or active, create persistent notification
+    if (isDue || isExhausted) {
+      await adminDb.collection('notifications').add({
+        message,
+        type: 'prescription_refill',
+        prescriptionId,
+        patientName,
+        doctorName,
+        targetRoles: ['doctor', 'admin'],
+        link: `/admin/prescriptions?id=${prescriptionId}`,
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    return {
+      success: true,
+      refillAlert: refillAlertPayload
+    };
+  } catch (err) {
+    logger.error("scheduleRefillAlertAction error", err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Manually trigger or test the 15-day refill alert for a prescription.
+ */
+export async function triggerPrescriptionRefillAlertAction(prescriptionId) {
+  try {
+    if (!adminDb) throw new Error("Firebase Admin not initialized.");
+    const rxRef = adminDb.collection('prescriptions').doc(prescriptionId);
+    const snap = await rxRef.get();
+    if (!snap.exists) throw new Error(`Prescription ${prescriptionId} not found.`);
+
+    const rx = snap.data();
+    const alert = rx.refillAlert || {};
+    const patientName = rx.patient?.name || rx.patientName || 'Patient';
+    const exhaustionDate = alert.exhaustionDate || rx.exhaustionDate || 'en 15 días';
+    const message = `⚠️ Alerta de Reposición Activa (15 días restantes): El tratamiento de ${patientName} finaliza el ${exhaustionDate}. Proceder a emitir nueva receta o reorden.`;
+
+    await adminDb.collection('notifications').add({
+      message,
+      type: 'prescription_refill',
+      prescriptionId,
+      patientName,
+      doctorName: rx.doctorName || 'Doctor',
+      targetRoles: ['doctor', 'admin'],
+      link: `/admin/prescriptions?id=${prescriptionId}`,
+      read: false,
+      createdAt: new Date().toISOString()
+    });
+
+    await rxRef.update({
+      'refillAlert.lastTriggeredAt': new Date().toISOString(),
+      'refillAlert.status': 'active'
+    });
+
+    return { success: true, message: 'Alerta de reposición enviada con éxito' };
+  } catch (err) {
+    logger.error("triggerPrescriptionRefillAlertAction error", err);
+    return { success: false, error: err.message };
+  }
+}
+
+
 
