@@ -31,8 +31,11 @@ import toast from 'react-hot-toast';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
+import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
+import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
+import '@/styles/publicDesignSystem.css';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -69,13 +72,24 @@ export default function PublicPrescriptionClient({ rx }) {
   const patientName = patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
   const doctorName = rx.doctorName || 'Dr. Hanieh Erdmann';
-  const clinic = rx.clinic || 'Mediluxe Health Solutions (Dubai, UAE)';
+  const clinic = rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : 'DHA Licensed Clinical Practice';
+  const doctorSpecialty = rx.doctorTitle || (isEs ? 'Médica Consultora Dermatología' : 'Physician Consultant Dermatology');
   const doctorAddress = rx.doctorOfficeAddress || 'Index Tower 5709, Dubai (+971 50 354 6123)';
   const doctorPhone = rx.doctorPhone || '+971 50 354 6123';
   const doctorLicense = rx.doctorLicense || 'DHA-00013060-006';
 
   // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™)
   const genomicsData = detectFagronGenomicsTest(rx);
+  const docs = rx.documents || rx.attachedDocuments || [];
+
+  const tocSections = [
+    { id: 'formula-card', label: isEs ? 'Fórmula Magistral' : 'Compounded Formula' },
+    ...(genomicsData ? [{ id: 'genomics-card', label: isEs ? 'Guía Genómica' : 'Genomics Guidance' }] : []),
+    { id: 'posology-card', label: isEs ? 'Pauta de Posología' : 'Posology Protocol' },
+    { id: 'milestones-card', label: isEs ? 'Evolución Clínica' : 'Clinical Milestones' },
+    { id: 'qr-card', label: isEs ? 'Verificación QR' : 'QR Verification' },
+    ...(docs.length > 0 ? [{ id: 'docs-card', label: isEs ? 'Documentos' : 'Attached Records' }] : [])
+  ];
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
@@ -243,8 +257,6 @@ export default function PublicPrescriptionClient({ rx }) {
     }
   ];
 
-  const docs = rx.documents || rx.attachedDocuments || [];
-
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(publicUrl);
@@ -323,6 +335,7 @@ export default function PublicPrescriptionClient({ rx }) {
         copyUrl={publicUrl}
         shortUrl={publicUrl}
         loginRedirect={publicUrl}
+        hideTier2={true}
         inquiryContextType="prescription"
         inquiryEntity={{
           name: `Prescription ${rxId}`,
@@ -341,125 +354,85 @@ export default function PublicPrescriptionClient({ rx }) {
           { label: isEs ? 'Prescripciones Médicas' : 'Verified Prescriptions' },
           { label: rxId }
         ]}
-        anchorTabs={[
-          { id: 'formula-card', label: isEs ? 'Fórmula' : 'Formula & Actives' },
-          ...(genomicsData ? [{ id: 'genomics-card', label: isEs ? 'Guía Genómica' : 'Genomics Guidance' }] : []),
-          { id: 'posology-card', label: isEs ? 'Posología' : 'Posology Protocol' },
-          { id: 'milestones-card', label: isEs ? 'Evolución' : 'Clinical Milestones' },
-          { id: 'qr-card', label: isEs ? 'Verificación QR' : 'QR Verification' },
-          ...(docs.length > 0 ? [{ id: 'docs-card', label: isEs ? 'Documentos' : 'Attached Records' }] : [])
-        ]}
       />
 
-      {/* ── Top Clinical Verification Bar ───────────────────────────────────────── */}
-      <div style={{
-        background: '#003666',
-        color: '#ffffff',
-        padding: '0.65rem 1.5rem',
-        fontSize: '0.78rem',
-        fontWeight: 600,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '0.5rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ShieldCheck size={16} color="#4ade80" />
-          <span>
-            {isEs 
-              ? 'Ficha Técnica Oficial Verificada & Dossier Clínico Digital'
-              : 'Official Verified Clinical Specification & Digital Medical Dossier'}
-          </span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ color: '#bae6fd' }}>{clinic}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ color: '#93c5fd' }}>Ref: {rxId}</span>
-          <span style={{
-            background: 'rgba(74, 222, 128, 0.2)',
-            color: '#4ade80',
-            border: '1px solid rgba(74, 222, 128, 0.4)',
-            padding: '2px 8px',
-            borderRadius: '10px',
-            fontSize: '0.7rem',
-            fontWeight: 700
-          }}>
-            {isEs ? 'Activa & Dispensada ✓' : 'Active & Dispensed ✓'}
-          </span>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '1.5rem 1rem' }}>
-        
-        {/* ── Master Header Card ─────────────────────────────────────────────────── */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          padding: '1.75rem',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '1.5rem 1rem' }}>
+        <div className="pds-content-with-sidebar">
+          <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
-            {/* Clinic & Doctor Info */}
-            <div style={{ display: 'flex', gap: '1rem', minWidth: 280 }}>
-              <div style={{
-                width: 56,
-                height: 56,
-                borderRadius: '14px',
-                background: 'linear-gradient(135deg, #003666, #0284c7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                flexShrink: 0,
-                boxShadow: '0 4px 12px rgba(0, 54, 102, 0.2)'
-              }}>
-                <Stethoscope size={28} />
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {clinic}
-                </div>
-                <h1 style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
-                  {doctorName}
-                </h1>
-                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  {rx.doctorTitle || (isEs ? 'Médica Consultora Dermatología' : 'Physician Consultant Dermatology')} · Lic. {doctorLicense}
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-                  📍 {doctorAddress}
-                </div>
-              </div>
-            </div>
-
-            {/* Patient Card & Verification */}
+            {/* ── Master Header Card ─────────────────────────────────────────────────── */}
             <div style={{
-              background: '#f8fafc',
+              background: '#ffffff',
+              borderRadius: '16px',
               border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '1rem 1.25rem',
-              minWidth: 260
+              padding: '1.75rem',
+              boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
+              marginBottom: '0.25rem'
             }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {isEs ? 'Paciente Registrado' : 'Registered Patient'}
-              </div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                {patientName} {patientAlias}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', display: 'flex', gap: '0.75rem' }}>
-                <span>PIN: <strong>{patient.pin || '11774'}</strong></span>
-                <span>·</span>
-                <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob || '15/06/1984'}</strong></span>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '4px', fontWeight: 600 }}>
-                {patient.maskedPhone || '+971 54 *** **80'}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
+                
+                {/* Prescribing Doctor Clinical Prominence */}
+                <div style={{ display: 'flex', gap: '1rem', minWidth: 280 }}>
+                  <div style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #003666, #0284c7)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(0, 54, 102, 0.2)'
+                  }}>
+                    <Stethoscope size={28} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed'}
+                    </div>
+                    <h1 style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
+                      {doctorName}
+                    </h1>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      {doctorSpecialty} · Lic. {doctorLicense}
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
+                      📍 {doctorAddress}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Patient Card & Verification */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '1rem 1.25rem',
+                  minWidth: 260
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', gap: '8px' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Paciente Registrado' : 'Registered Patient'}
+                    </div>
+                    <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: '#0369a1', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                      Ref: {rxId}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    {patientName} {patientAlias}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', display: 'flex', gap: '0.75rem' }}>
+                    <span>PIN: <strong>{patient.pin || '11774'}</strong></span>
+                    <span>·</span>
+                    <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob || '15/06/1984'}</strong></span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '4px', fontWeight: 600 }}>
+                    {patient.maskedPhone || '+971 54 *** **80'}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
         {/* ── Active Formula & Ingredients Card ───────────────────────────────────── */}
         <div id="formula-card" style={{
@@ -983,11 +956,87 @@ export default function PublicPrescriptionClient({ rx }) {
           </div>
         )}
 
-        {/* Footer */}
-        <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', marginTop: '2rem' }}>
-          Atlas Services Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
+            {/* Standardized Institutional Footer with Reference */}
+            <footer style={{
+              marginTop: '2.5rem',
+              borderTop: '1px solid #e2e8f0',
+              paddingTop: '1.5rem',
+              paddingBottom: '2.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.65rem',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                padding: '4px 14px',
+                borderRadius: '9999px',
+                fontSize: '0.76rem'
+              }}>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Ref:</span>
+                <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
+                <span style={{
+                  background: 'rgba(34, 197, 94, 0.15)',
+                  color: '#16a34a',
+                  border: '1px solid rgba(34, 197, 94, 0.35)',
+                  padding: '1px 8px',
+                  borderRadius: '9999px',
+                  fontSize: '0.68rem',
+                  fontWeight: 700
+                }}>
+                  {isEs ? 'Activa & Dispensada ✓' : 'Active & Dispensed ✓'}
+                </span>
+              </div>
+              <div style={{ color: '#94a3b8', fontSize: '0.72rem' }}>
+                Atlas Services Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
+              </div>
+            </footer>
+          </div>
+
+          {/* Persistent Sticky Prescription Sidebar (Desktop Sticky + Mobile Drawer) */}
+          <PrescriptionDetailSidebar
+            sections={tocSections}
+            rxId={rxId}
+            doctorName={doctorName}
+            doctorTitle={doctorSpecialty}
+            doctorLicense={doctorLicense}
+            doctorOffice={doctorAddress}
+            doctorPhone={doctorPhone}
+            publicUrl={publicUrl}
+            onOpenPdf={handleDownloadQrPng}
+            lang={lang}
+          />
         </div>
       </div>
+
+      {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
+      <PublicStickyActionBar
+        title={`Rx: ${rxId}`}
+        subtitle={`${patientName} • ${doctorName}`}
+        badge={isEs ? 'Prescripción Médica' : 'Medical Prescription'}
+        badgeType="protocol"
+        inquireLabel={isEs ? 'Consultar con IA' : 'Consult with AI'}
+        onInquire={() => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('open-atlas-ai-drawer'));
+          }
+        }}
+        showClinicalAI={true}
+        showSections={true}
+        sectionsCount={tocSections.length}
+        onOpenSections={() => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('open-rx-sections'));
+          }
+        }}
+        lang={lang}
+      />
 
       {/* Lightbox QR Modal */}
       {showQrModal && (
@@ -1105,6 +1154,7 @@ export default function PublicPrescriptionClient({ rx }) {
           slug: rxId.toLowerCase()
         }}
         storageKey={`rx_${rxId}`}
+        hideFloatingTrigger={true}
         lang={lang}
       />
     </div>

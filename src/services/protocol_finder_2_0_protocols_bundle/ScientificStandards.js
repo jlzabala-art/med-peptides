@@ -82,38 +82,38 @@ export const PHASE_VIAL_STRATEGIES = {
     phases: [
       {
         phaseId: 'initiation',
-        name: 'Fase 1: Iniciación (Mes 1)',
-        targetDose: '2.5 mg / semana',
+        name: 'Phase 1: Initiation (Month 1)',
+        targetDose: '2.5 mg / week',
         doseMg: 2.5,
-        recommendedVial: '10 mg o 15 mg',
+        recommendedVial: '10 mg or 15 mg',
         recommendedVialMg: 10,
         recommendedBacMl: 2.0,
         resultConcentration: '5 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 30 mg o 60 mg (Riesgo de degradación antes de consumir)',
-        rationale: 'Un vial de 10 mg dura exactamente 4 semanas a 2.5 mg. Diluido con 2 mL BAC rinde 50 UI/inyección.',
-        whyAvoid: 'Comprar 60 mg para 2.5 mg implicaría usar el mismo vial durante 6 meses, violando el límite de 28 días de esterilidad (USP <797>).'
+        avoidVials: '30 mg or 60 mg Vials (Degradation risk prior to consumption)',
+        rationale: 'A 10 mg vial lasts exactly 4 weeks at 2.5 mg. Diluted with 2 mL BAC yields 50 Units/injection.',
+        whyAvoid: 'Purchasing 60 mg for a 2.5 mg dose would require using the same vial for 6 months, violating the 28-day sterility limit (USP <797>).'
       },
       {
         phaseId: 'escalation_step_1',
-        name: 'Fase 2: Escalamiento 1 (Mes 2)',
-        targetDose: '5 mg / semana',
+        name: 'Phase 2: Escalation Step 1 (Month 2)',
+        targetDose: '5 mg / week',
         doseMg: 5.0,
-        recommendedVial: '10 mg o 20 mg',
+        recommendedVial: '10 mg or 20 mg',
         recommendedVialMg: 10,
         recommendedBacMl: 1.0,
         resultConcentration: '10 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 5 mg (duran solo 1 semana)',
-        rationale: 'Vial de 10 mg con 1.0 mL BAC permite inyecciones de 50 UI (2 semanas por vial) o vial de 20 mg (4 semanas por vial).',
-        whyAvoid: 'Viales de 5 mg obligan a comprar 4 viales al mes y múltiples punciones.'
+        avoidVials: '5 mg Vials (Lasts only 1 week)',
+        rationale: 'A 10 mg vial with 1.0 mL BAC yields 50 Units injections (2 weeks per vial), or a 20 mg vial (4 weeks per vial).',
+        whyAvoid: '5 mg vials require purchasing 4 separate vials per month and multiple punctures.'
       },
       {
         phaseId: 'escalation_step_2',
-        name: 'Fase 3: Escalamiento 2 (Mes 3)',
-        targetDose: '7.5 mg / semana',
+        name: 'Phase 3: Escalation Step 2 (Month 3)',
+        targetDose: '7.5 mg / week',
         doseMg: 7.5,
         recommendedVial: '30 mg',
         recommendedVialMg: 30,
@@ -121,39 +121,39 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '15 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 10 mg (Rinde solo 1.3 dosis, genera desecho de producto)',
-        rationale: 'Vial de 30 mg con 2 mL BAC rinde exactamente 4 dosis semanales de 7.5 mg a 50 UI (1 mes exacto de tratamiento).',
-        whyAvoid: 'Con 10 mg sobra 2.5 mg por vial que suele desecharse o requiere mezclar viales.'
+        avoidVials: '10 mg Vials (Yields only 1.3 doses, causing medication waste)',
+        rationale: 'A 30 mg vial with 2 mL BAC yields exactly 4 weekly doses of 7.5 mg at 50 Units (exactly 1 month of treatment).',
+        whyAvoid: 'With 10 mg, 2.5 mg remains unused per vial or requires pooling vials.'
       },
       {
         phaseId: 'escalation_step_3',
-        name: 'Fase 4: Escalamiento 3 (Mes 4)',
-        targetDose: '10 mg / semana',
+        name: 'Phase 4: Escalation Step 3 (Month 4)',
+        targetDose: '10 mg / week',
         doseMg: 10.0,
-        recommendedVial: '30 mg o 40 mg',
+        recommendedVial: '30 mg or 40 mg',
         recommendedVialMg: 30,
         recommendedBacMl: 1.5,
         resultConcentration: '20 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 10 mg (1 vial = 1 sola dosis, coste y desperdicio elevado)',
-        rationale: 'Vial de 30 mg o 40 mg permite suministro continuo mensual con 50 UI por inyección.',
-        whyAvoid: 'Un vial de 10 mg por semana obliga a comprar 4 kits y manipular 4 viales distintos al mes.'
+        avoidVials: '10 mg Vials (1 vial = single dose, high packaging cost and waste)',
+        rationale: 'A 30 mg or 40 mg vial provides continuous monthly supply at 50 Units per injection.',
+        whyAvoid: 'A 10 mg vial per week requires ordering 4 kits and handling 4 separate vials monthly.'
       },
       {
         phaseId: 'maintenance',
-        name: 'Fase 5: Mantenimiento Máximo (Mes 5+)',
-        targetDose: '15 mg / semana',
+        name: 'Phase 5: Maximum Maintenance (Month 5+)',
+        targetDose: '15 mg / week',
         doseMg: 15.0,
-        recommendedVial: '60 mg (1 mes completo) o 30 mg (2 semanas)',
+        recommendedVial: '60 mg (1 full month) or 30 mg (2 weeks)',
         recommendedVialMg: 60,
         recommendedBacMl: 2.0,
         resultConcentration: '30 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: '❌ PROHIBIDO vial de 10 mg (Desborda a 150 UI = 1.5 mL, exige 2 pinchazos por semana)',
-        rationale: 'Vial de 60 mg con 2.0 mL BAC proporciona exactamente 4 semanas completas a 15 mg/semana en 50 UI con 1 solo pinchazo indoloro.',
-        whyAvoid: 'Un vial de 10 mg no alcanza para 1 dosis (0.6 dosis), obliga a mezclar dos viales y dar 2 pinchazos de 75 UI semanales.'
+        avoidVials: '❌ DO NOT purchase 10 mg vials (Overflows to 150 Units = 1.5 mL, requiring 2 injections weekly)',
+        rationale: 'A 60 mg vial with 2.0 mL BAC provides exactly 4 full weeks at 15 mg/week at 50 Units in a single painless injection.',
+        whyAvoid: 'A 10 mg vial does not cover a single dose (0.6 doses), forcing vial pooling and two separate 75 Units injections weekly.'
       }
     ]
   },
@@ -163,38 +163,38 @@ export const PHASE_VIAL_STRATEGIES = {
     phases: [
       {
         phaseId: 'initiation',
-        name: 'Fase 1: Iniciación (Mes 1)',
-        targetDose: '0.25 mg / semana',
+        name: 'Phase 1: Initiation (Month 1)',
+        targetDose: '0.25 mg / week',
         doseMg: 0.25,
-        recommendedVial: '2 mg o 3 mg',
+        recommendedVial: '2 mg or 3 mg',
         recommendedVialMg: 2,
         recommendedBacMl: 2.0,
         resultConcentration: '1 mg / mL',
         resultUnits: 25,
         volumeMl: 0.25,
-        avoidVials: 'Viales de 10 mg (Se degrada antes de terminar las semanas recomendadas)',
-        rationale: 'Vial de 2 mg con 2 mL BAC rinde para las primeras 4 semanas a 0.25 mg + 2 semanas a 0.5 mg sin caducar.',
-        whyAvoid: 'Un vial de 10 mg a 0.25 mg tardaría 40 semanas en gastarse, sobrepasando los 28 días de esterilidad (USP <797>).'
+        avoidVials: '10 mg Vials (Risk of degradation prior to completing recommended weeks)',
+        rationale: 'A 2 mg vial with 2 mL BAC covers the first 4 weeks at 0.25 mg + 2 weeks at 0.5 mg without expiration.',
+        whyAvoid: 'A 10 mg vial at 0.25 mg would take 40 weeks to consume, violating the 28-day sterility limit (USP <797>).'
       },
       {
         phaseId: 'escalation_step_1',
-        name: 'Fase 2: Escalamiento 1 (Mes 2)',
-        targetDose: '0.50 mg / semana',
+        name: 'Phase 2: Escalation Step 1 (Month 2)',
+        targetDose: '0.50 mg / week',
         doseMg: 0.5,
-        recommendedVial: '2 mg o 5 mg',
+        recommendedVial: '2 mg or 5 mg',
         recommendedVialMg: 5,
         recommendedBacMl: 2.0,
         resultConcentration: '2.5 mg / mL',
         resultUnits: 20,
         volumeMl: 0.2,
-        avoidVials: 'Viales de 10 mg',
-        rationale: 'Vial de 5 mg con 2 mL BAC rinde 10 dosis de 0.5 mg (20 UI por inyección).',
-        whyAvoid: 'Viales gigantes pierden estabilidad biológica.'
+        avoidVials: '10 mg Vials',
+        rationale: 'A 5 mg vial with 2 mL BAC yields 10 doses of 0.5 mg (20 Units per injection).',
+        whyAvoid: 'Oversized vials lose biological stability.'
       },
       {
         phaseId: 'escalation_step_2',
-        name: 'Fase 3: Escalamiento 2 (Mes 3)',
-        targetDose: '1.0 mg / semana',
+        name: 'Phase 3: Escalation Step 2 (Month 3)',
+        targetDose: '1.0 mg / week',
         doseMg: 1.0,
         recommendedVial: '5 mg',
         recommendedVialMg: 5,
@@ -202,14 +202,14 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '2.5 mg / mL',
         resultUnits: 40,
         volumeMl: 0.4,
-        avoidVials: 'Viales de 2 mg (duran solo 2 semanas)',
-        rationale: 'Vial de 5 mg = 5 dosis de 1.0 mg (1 mes + 1 semana) a 40 UI exactas.',
-        whyAvoid: 'Viales de 2 mg aumentan los costes de envío y packaging innecesariamente.'
+        avoidVials: '2 mg Vials (Lasts only 2 weeks)',
+        rationale: 'A 5 mg vial = 5 doses of 1.0 mg (1 month + 1 week) at exactly 40 Units.',
+        whyAvoid: '2 mg vials unnecessarily increase shipping and packaging overhead.'
       },
       {
         phaseId: 'maintenance',
-        name: 'Fase 4 & 5: Dosis Objetivo / Mantenimiento (1.7 - 2.4 mg)',
-        targetDose: '2.4 mg / semana',
+        name: 'Phase 4 & 5: Target Maintenance Dose (1.7 - 2.4 mg)',
+        targetDose: '2.4 mg / week',
         doseMg: 2.4,
         recommendedVial: '10 mg',
         recommendedVialMg: 10,
@@ -217,9 +217,9 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '5 mg / mL',
         resultUnits: 48,
         volumeMl: 0.48,
-        avoidVials: '❌ NO comprar viales de 2 mg o 3 mg (duran menos de 1 dosis)',
-        rationale: 'Vial de 10 mg con 2.0 mL BAC rinde exactamente 4 dosis completas de 2.4 mg (48 UI = 0.48 mL en 1 solo pinchazo).',
-        whyAvoid: 'Un vial de 2 mg ni siquiera cubre 1 inyección de 2.4 mg.'
+        avoidVials: '❌ DO NOT buy 2 mg or 3 mg vials (Lasts less than 1 single dose)',
+        rationale: 'A 10 mg vial with 2.0 mL BAC yields exactly 4 complete doses of 2.4 mg (48 Units = 0.48 mL in 1 painless injection).',
+        whyAvoid: 'A 2 mg vial does not even cover a single 2.4 mg injection.'
       }
     ]
   },
@@ -229,63 +229,63 @@ export const PHASE_VIAL_STRATEGIES = {
     phases: [
       {
         phaseId: 'initiation',
-        name: 'Fase 1: Iniciación (Semanas 1-4)',
-        targetDose: '2.0 mg / semana',
+        name: 'Phase 1: Initiation (Weeks 1-4)',
+        targetDose: '2.0 mg / week',
         doseMg: 2.0,
-        recommendedVial: '5 mg o 10 mg',
+        recommendedVial: '5 mg or 10 mg',
         recommendedVialMg: 10,
         recommendedBacMl: 2.0,
         resultConcentration: '5 mg / mL',
         resultUnits: 40,
         volumeMl: 0.4,
-        avoidVials: 'Viales de 30 mg o 40 mg',
-        rationale: 'Vial de 10 mg rinde 5 dosis de 2.0 mg (1 mes de iniciación) a 40 UI.',
-        whyAvoid: 'Sobredimensionar el vial en fase 1 provoca degradación.'
+        avoidVials: '30 mg or 40 mg Vials',
+        rationale: 'A 10 mg vial yields 5 doses of 2.0 mg (1 full initiation month) at 40 Units.',
+        whyAvoid: 'Oversizing the vial during phase 1 leads to peptide degradation.'
       },
       {
         phaseId: 'escalation_step_1',
-        name: 'Fase 2: Escalamiento (Semanas 5-8)',
-        targetDose: '4.0 mg / semana',
+        name: 'Phase 2: Escalation (Weeks 5-8)',
+        targetDose: '4.0 mg / week',
         doseMg: 4.0,
-        recommendedVial: '10 mg o 20 mg',
+        recommendedVial: '10 mg or 20 mg',
         recommendedVialMg: 20,
         recommendedBacMl: 2.0,
         resultConcentration: '10 mg / mL',
         resultUnits: 40,
         volumeMl: 0.4,
-        avoidVials: 'Viales de 5 mg (solo duran 1 semana)',
-        rationale: 'Vial de 20 mg cubre 5 semanas de escalamiento a 40 UI por inyección.',
-        whyAvoid: 'Viales de 5 mg generan costes desproporcionados.'
+        avoidVials: '5 mg Vials (Lasts only 1 week)',
+        rationale: 'A 20 mg vial covers 5 weeks of escalation at 40 Units per injection.',
+        whyAvoid: '5 mg vials create disproportionate purchasing overhead.'
       },
       {
         phaseId: 'escalation_step_2',
-        name: 'Fase 3: Aceleración Metabólica (Semanas 9-12)',
-        targetDose: '8.0 mg / semana',
+        name: 'Phase 3: Metabolic Acceleration (Weeks 9-12)',
+        targetDose: '8.0 mg / week',
         doseMg: 8.0,
-        recommendedVial: '30 mg o 40 mg',
+        recommendedVial: '30 mg or 40 mg',
         recommendedVialMg: 40,
         recommendedBacMl: 2.0,
         resultConcentration: '20 mg / mL',
         resultUnits: 40,
         volumeMl: 0.4,
-        avoidVials: 'Viales de 10 mg (Rinde solo 1.2 dosis)',
-        rationale: 'Vial de 40 mg rinde 5 dosis de 8 mg a 40 UI con concentración óptima.',
-        whyAvoid: 'Con 10 mg sobran 2 mg inutilizables o se requieren 2 viales.'
+        avoidVials: '10 mg Vials (Yields only 1.2 doses)',
+        rationale: 'A 40 mg vial yields 5 doses of 8 mg at 40 Units with optimal concentration.',
+        whyAvoid: 'With 10 mg, 2 mg is wasted or requires 2 separate vials.'
       },
       {
         phaseId: 'maintenance',
-        name: 'Fase 4: Máxima Intensidad / Mantenimiento (Semanas 13+)',
-        targetDose: '12.0 mg / semana',
+        name: 'Phase 4: Maximum Intensity / Maintenance (Weeks 13+)',
+        targetDose: '12.0 mg / week',
         doseMg: 12.0,
-        recommendedVial: '60 mg o 40 mg',
+        recommendedVial: '60 mg or 40 mg',
         recommendedVialMg: 60,
         recommendedBacMl: 2.5,
         resultConcentration: '24 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: '❌ PROHIBIDO vial de 10 mg o 20 mg (Obliga a inyectar más de 120 UI o múltiples viales)',
-        rationale: 'Vial de 60 mg con 2.5 mL BAC permite 5 dosis de 12 mg a 50 UI (1 solo pinchazo de 0.5 mL).',
-        whyAvoid: 'Un vial de 10 mg no contiene la dosis de una sola semana.'
+        avoidVials: '❌ DO NOT use 10 mg or 20 mg vials (Forces injection > 120 Units or multiple vials)',
+        rationale: 'A 60 mg vial with 2.5 mL BAC allows 5 doses of 12 mg at 50 Units (1 single injection of 0.5 mL).',
+        whyAvoid: 'A 10 mg vial does not contain even a single week’s therapeutic dose.'
       }
     ]
   },
@@ -295,8 +295,8 @@ export const PHASE_VIAL_STRATEGIES = {
     phases: [
       {
         phaseId: 'initiation',
-        name: 'Fase 1: Activación Mitocondrial',
-        targetDose: '5 mg (2x a 3x por semana)',
+        name: 'Phase 1: Mitochondrial Activation',
+        targetDose: '5 mg (2x to 3x per week)',
         doseMg: 5.0,
         recommendedVial: '10 mg',
         recommendedVialMg: 10,
@@ -304,24 +304,24 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '5 mg / mL',
         resultUnits: 100,
         volumeMl: 1.0,
-        avoidVials: 'Viales de 40 mg si la pauta es espaciada',
-        rationale: 'Vial de 10 mg permite 2 aplicaciones exactas de 5 mg en la misma semana.',
-        whyAvoid: 'MOTS-c es sensible a la oxidación; viales de 10 mg minimizan tiempo reconstituido.'
+        avoidVials: '40 mg Vials if dosing schedule is spaced',
+        rationale: 'A 10 mg vial allows exactly 2 applications of 5 mg in the same week.',
+        whyAvoid: 'MOTS-c is sensitive to oxidation; 10 mg vials minimize reconstituted storage duration.'
       },
       {
         phaseId: 'escalation_maintenance',
-        name: 'Fase 2: Intensificación & Pauta de Carga',
-        targetDose: '10 mg por administración',
+        name: 'Phase 2: Intensification & Loading Protocol',
+        targetDose: '10 mg per administration',
         doseMg: 10.0,
-        recommendedVial: '20 mg o 25 mg',
+        recommendedVial: '20 mg or 25 mg',
         recommendedVialMg: 20,
         recommendedBacMl: 1.0,
         resultConcentration: '20 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: '❌ NO comprar viales de 5 mg (Obliga a reconstituir 2 viales para una sola inyección)',
-        rationale: 'Vial de 20 mg diluido con 1.0 mL BAC permite dosis de 10 mg en solo 50 UI (0.50 mL).',
-        whyAvoid: 'Con viales de 5 mg, el paciente debe pinchar dos viales distintos para cada inyección.'
+        avoidVials: '❌ DO NOT buy 5 mg vials (Forces reconstituting 2 vials for a single injection)',
+        rationale: 'A 20 mg vial diluted with 1.0 mL BAC yields 10 mg doses in just 50 Units (0.50 mL).',
+        whyAvoid: 'With 5 mg vials, the patient must puncture two separate vials for every injection.'
       }
     ]
   },
@@ -331,8 +331,8 @@ export const PHASE_VIAL_STRATEGIES = {
     phases: [
       {
         phaseId: 'loading',
-        name: 'Fase de Carga (Semanas 1-4)',
-        targetDose: '2.5 mg - 5.0 mg (2x por semana = 5-10 mg/sem)',
+        name: 'Loading Phase (Weeks 1-4)',
+        targetDose: '2.5 mg - 5.0 mg (2x per week = 5-10 mg/wk)',
         doseMg: 2.5,
         recommendedVial: '10 mg',
         recommendedVialMg: 10,
@@ -340,35 +340,35 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '5 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 2 mg (No alcanzan para 1 sola dosis de carga de 2.5 mg)',
-        rationale: 'Vial de 10 mg con 2.0 mL BAC rinde exactamente 4 inyecciones de 2.5 mg a 50 UI (2 semanas completas de carga).',
-        whyAvoid: 'Un vial de 2 mg deja al paciente con déficit de 0.5 mg en cada inyección.'
+        avoidVials: '2 mg Vials (Does not cover even 1 loading dose of 2.5 mg)',
+        rationale: 'A 10 mg vial with 2.0 mL BAC yields exactly 4 injections of 2.5 mg at 50 Units (2 full weeks of loading).',
+        whyAvoid: 'A 2 mg vial leaves the patient short by 0.5 mg for each injection.'
       },
       {
         phaseId: 'maintenance',
-        name: 'Fase de Mantenimiento (Semanas 5+)',
-        targetDose: '2.0 mg (1x por semana)',
+        name: 'Maintenance Phase (Weeks 5+)',
+        targetDose: '2.0 mg (1x per week)',
         doseMg: 2.0,
-        recommendedVial: '5 mg o 10 mg',
+        recommendedVial: '5 mg or 10 mg',
         recommendedVialMg: 10,
         recommendedBacMl: 2.5,
         resultConcentration: '4 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 2 mg si se busca eficiencia económica',
-        rationale: 'Vial de 10 mg rinde 5 semanas de mantenimiento con dosis exactas de 50 UI.',
-        whyAvoid: 'Comprar 1 vial de 2 mg cada semana multiplica costes de packaging.'
+        avoidVials: '2 mg Vials (Higher economic and packaging overhead)',
+        rationale: 'A 10 mg vial yields 5 weeks of maintenance at exact 50 Units doses.',
+        whyAvoid: 'Buying 1 vial of 2 mg weekly multiplies packaging and shipping costs.'
       }
     ]
   },
   'ghk-cu': {
     name: 'GHK-Cu',
-    indication: 'Remodelación de Tejido, Colágeno y Cicatrización',
+    indication: 'Tissue Remodeling, Collagen & Wound Healing',
     phases: [
       {
         phaseId: 'priming',
-        name: 'Fase 1: Preparación Dérmica / Microdosis',
-        targetDose: '2 mg / día (5 días/semana)',
+        name: 'Phase 1: Dermal Priming / Microdosing',
+        targetDose: '2 mg / day (5 days/week)',
         doseMg: 2.0,
         recommendedVial: '50 mg',
         recommendedVialMg: 50,
@@ -376,24 +376,24 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '20 mg / mL',
         resultUnits: 10,
         volumeMl: 0.1,
-        avoidVials: 'Viales de 10 mg (Duran solo 5 días)',
-        rationale: 'Vial de 50 mg rinde 25 dosis (5 semanas de lunes a viernes).',
-        whyAvoid: 'Viales de 10 mg se agotan en 1 semana laboral.'
+        avoidVials: '10 mg Vials (Lasts only 5 days)',
+        rationale: 'A 50 mg vial yields 25 doses (5 weeks of Monday-Friday regimen).',
+        whyAvoid: '10 mg vials deplete within 1 work week.'
       },
       {
         phaseId: 'remodeling',
-        name: 'Fase 2: Remodelación Activa & Consolidación',
-        targetDose: '5 mg / día (5 días/semana = 25 mg/sem)',
+        name: 'Phase 2: Active Remodeling & Consolidation',
+        targetDose: '5 mg / day (5 days/week = 25 mg/wk)',
         doseMg: 5.0,
-        recommendedVial: '100 mg (o 50 mg)',
+        recommendedVial: '100 mg (or 50 mg)',
         recommendedVialMg: 100,
         recommendedBacMl: 5.0,
         resultConcentration: '20 mg / mL',
         resultUnits: 25,
         volumeMl: 0.25,
-        avoidVials: '❌ NO comprar viales de 10 mg o 20 mg (se acaban en 2-4 días)',
-        rationale: 'A 25 mg/semana, un vial de 100 mg cubre exactamente 1 mes completo (4 semanas de remodelación).',
-        whyAvoid: 'Exigiría comprar 10 viales de 10 mg al mes.'
+        avoidVials: '❌ DO NOT buy 10 mg or 20 mg vials (Depleted in 2-4 days)',
+        rationale: 'At 25 mg/week, a 100 mg vial covers exactly 1 full month (4 remodeling weeks).',
+        whyAvoid: 'Would require purchasing 10 separate 10 mg vials per month.'
       }
     ]
   },
@@ -403,29 +403,29 @@ export const PHASE_VIAL_STRATEGIES = {
     phases: [
       {
         phaseId: 'therapeutic',
-        name: 'Fase Terapéutica Diaria',
-        targetDose: '20 mg a 40 mg diarios',
+        name: 'Daily Therapeutic Phase',
+        targetDose: '20 mg to 40 mg daily',
         doseMg: 40.0,
-        recommendedVial: '50 mg o 100 mg',
+        recommendedVial: '50 mg or 100 mg',
         recommendedVialMg: 100,
         recommendedBacMl: 2.5,
         resultConcentration: '40 mg / mL',
         resultUnits: 100,
         volumeMl: 1.0,
-        avoidVials: '❌ TOTALMENTE PROHIBIDO viales de 10 mg (Un vial no alcanza ni para medio día)',
-        rationale: 'Para protocolos de 40 mg diarios, los viales de 100 mg proporcionan 2.5 días por vial con concentraciones de 40 mg/mL.',
-        whyAvoid: 'Con viales de 10 mg se necesitarían 4 viales DIARIOS (120 viales al mes).'
+        avoidVials: '❌ STRICTLY AVOID 10 mg vials (One vial does not even cover half a day)',
+        rationale: 'For 40 mg daily regimens, 100 mg vials provide 2.5 days per vial at 40 mg/mL concentrations.',
+        whyAvoid: 'With 10 mg vials, 4 vials would be required DAILY (120 vials per month).'
       }
     ]
   },
   'nad-plus': {
-    name: 'NAD+ (Nicotinamida Adenina Dinucleótido)',
+    name: 'NAD+ (Nicotinamide Adenine Dinucleotide)',
     indication: 'Cellular Redox & Sirtuin Activation',
     phases: [
       {
         phaseId: 'subcutaneous_titration',
-        name: 'Fase 1: Titulación Subcutánea',
-        targetDose: '50 mg - 100 mg (2x a 3x por semana)',
+        name: 'Phase 1: Subcutaneous Titration',
+        targetDose: '50 mg - 100 mg (2x to 3x per week)',
         doseMg: 100.0,
         recommendedVial: '500 mg',
         recommendedVialMg: 500,
@@ -433,13 +433,13 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '200 mg / mL',
         resultUnits: 50,
         volumeMl: 0.5,
-        avoidVials: 'Viales de 100 mg o concentraciones bajas que requieran > 1 mL subcutáneo',
-        rationale: 'El NAD+ arde si se inyecta en volúmenes altos. A 200 mg/mL, 100 mg son solo 50 UI (0.50 mL).',
-        whyAvoid: 'Inyectar más de 0.5 mL de NAD+ causa ardor local agudo.'
+        avoidVials: '100 mg Vials or low concentrations requiring > 1 mL SubQ',
+        rationale: 'NAD+ causes local burning when injected at high volumes. At 200 mg/mL, 100 mg is only 50 Units (0.50 mL).',
+        whyAvoid: 'Injecting more than 0.5 mL of NAD+ causes acute localized stinging.'
       },
       {
         phaseId: 'high_dose_protocol',
-        name: 'Fase 2: Protocolo Intensivo de Optimización',
+        name: 'Phase 2: Intensive Optimization Protocol',
         targetDose: '150 mg - 250 mg',
         doseMg: 200.0,
         recommendedVial: '1000 mg',
@@ -448,9 +448,9 @@ export const PHASE_VIAL_STRATEGIES = {
         resultConcentration: '200 mg / mL',
         resultUnits: 100,
         volumeMl: 1.0,
-        avoidVials: 'Viales de 500 mg para administración bisemanal',
-        rationale: 'Vial de 1000 mg cubre 5 dosis de 200 mg.',
-        whyAvoid: 'Los viales pequeños obligan a frecuentes reconstituciones y mayor degradación.'
+        avoidVials: '500 mg Vials for bi-weekly schedules',
+        rationale: 'A 1000 mg vial covers 5 doses of 200 mg.',
+        whyAvoid: 'Small vials require frequent reconstitutions and increase risk of degradation.'
       }
     ]
   }
