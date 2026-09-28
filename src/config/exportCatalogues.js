@@ -21,14 +21,14 @@ export const EXPORT_CATALOGUES = [
   {
     id: 'magenta',
     supplierId: 'supplier-magenta',
-    brandName: 'Magenta Medical (Pens & Sprays)',
-    catalogueFilter: null,
+    brandName: 'Magenta Medical (Complete Compounding & Peptides)',
+    catalogueFilter: 'Magenta',
     flag: '🇦🇪',
     defaultCurrency: 'AED',
     warehouse: 'UAE Hub - Dubai',
     defaultCostMarginAvailable: true,
-    variantCount: 101,
-    description: '101 variants portfolio (Pre-filled Pens, 3 mL Refill Cartridges & Nasal Sprays)'
+    variantCount: 366,
+    description: '366 variants portfolio (Pre-filled Pens, Refill Cartridges, Peptides, IV Drips & Sprays)'
   },
   {
     id: 'larimedical',

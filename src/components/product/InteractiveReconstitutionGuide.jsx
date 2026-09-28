@@ -2451,35 +2451,43 @@ export default function InteractiveReconstitutionGuide({
               <div className="irg-specs-grid">
                 <div className="irg-spec-item">
                   <div className="irg-spec-label">{lang === 'es' ? 'Solvente Recomendado' : 'Recommended Solvent'}</div>
-                  <div className="irg-spec-val">
-                    {dynamicSolventText || (lang === 'es' ? 'Agua Bacteriostática (BAC 0.9%)' : 'Bacteriostatic Water (BAC 0.9%)')}
-                  </div>
-                  <div className="irg-spec-desc font-mono">
-                    {safeBacMl.toFixed(1)} mL → {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
+                  <div className="irg-spec-content">
+                    <div className="irg-spec-val">
+                      {dynamicSolventText || (lang === 'es' ? 'Agua Bacteriostática (BAC 0.9%)' : 'Bacteriostatic Water (BAC 0.9%)')}
+                    </div>
+                    <div className="irg-spec-desc font-mono">
+                      {safeBacMl.toFixed(1)} mL → {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
+                    </div>
                   </div>
                 </div>
 
                 <div className="irg-spec-item">
                   <div className="irg-spec-label">{lang === 'es' ? 'Aguja de Reconstitución' : 'Reconstitution Needle'}</div>
-                  <div className="irg-spec-val">21G – 23G × 1.5" (38 mm)</div>
-                  <div className="irg-spec-desc">
-                    {lang === 'es' ? 'Previene daño al tapón (coring) y alivia el vacío del vial' : 'Prevents stopper coring & normalizes vacuum pressure'}
+                  <div className="irg-spec-content">
+                    <div className="irg-spec-val">21G – 23G × 1.5" (38 mm)</div>
+                    <div className="irg-spec-desc">
+                      {lang === 'es' ? 'Previene daño al tapón (coring) y alivia el vacío del vial' : 'Prevents stopper coring & normalizes vacuum pressure'}
+                    </div>
                   </div>
                 </div>
 
                 <div className="irg-spec-item">
                   <div className="irg-spec-label">{lang === 'es' ? 'Aguja de Inyección' : 'Administration Needle'}</div>
-                  <div className="irg-spec-val">31G × 5/16" (8 mm) Ultra-Fine</div>
-                  <div className="irg-spec-desc">
-                    {lang === 'es' ? 'Inyección subcutánea prácticamente indolora' : 'Virtually painless subcutaneous administration'}
+                  <div className="irg-spec-content">
+                    <div className="irg-spec-val">31G × 5/16" (8 mm) Ultra-Fine</div>
+                    <div className="irg-spec-desc">
+                      {lang === 'es' ? 'Inyección subcutánea prácticamente indolora' : 'Virtually painless subcutaneous administration'}
+                    </div>
                   </div>
                 </div>
 
                 <div className="irg-spec-item">
                   <div className="irg-spec-label">{lang === 'es' ? 'Caducidad & Conservación' : 'BUD & Cold-Chain Storage'}</div>
-                  <div className="irg-spec-val font-mono">❄️ 2°C – 8°C · 28 {lang === 'es' ? 'Días' : 'Days'}</div>
-                  <div className="irg-spec-desc">
-                    {lang === 'es' ? 'Refrigerar protegido de la luz. No congelar post-disolución' : 'Keep refrigerated & dark. Do not freeze post-reconstitution'}
+                  <div className="irg-spec-content">
+                    <div className="irg-spec-val font-mono">❄️ 2°C – 8°C · 28 {lang === 'es' ? 'Días' : 'Days'}</div>
+                    <div className="irg-spec-desc">
+                      {lang === 'es' ? 'Refrigerar protegido de la luz. No congelar post-disolución' : 'Keep refrigerated & dark. Do not freeze post-reconstitution'}
+                    </div>
                   </div>
                 </div>
               </div>

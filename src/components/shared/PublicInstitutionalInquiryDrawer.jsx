@@ -22,7 +22,6 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import InternationalPhoneInput from '@/components/ui/InternationalPhoneInput';
 import { getCachedDetectedCountry, getDetectedCountry } from '@/utils/geoIp';
-import { useActiveWorkspaceBinding } from '@/hooks/useActiveWorkspaceBinding';
 
 const INQUIRY_TOPICS_PEPTIDES = [
   {
@@ -321,14 +320,6 @@ export default function PublicInstitutionalInquiryDrawer({
       : 'Your inquiry has been securely routed to the Atlas Services Official Medical & Scientific Affairs Desk. A medical liaison will follow up within 24 business hours.';
   }, [brandType, lang]);
 
-  const { 
-    workspaceRecipient, 
-    workspaceItems, 
-    matchingItem 
-  } = useActiveWorkspaceBinding({
-    productId: initialEntity?.slug || initialEntity?.id || null,
-  });
-
   const [attachedEntity, setAttachedEntity] = useState(initialEntity);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -359,30 +350,12 @@ export default function PublicInstitutionalInquiryDrawer({
     return () => { isMounted = false; };
   }, [phoneNumber]);
 
-  // Auto-bind from active workspace if available
+  // Keep form inputs clean and empty on public pages — no workspace pollution
   useEffect(() => {
-    if (isOpen) {
-      if (workspaceRecipient) {
-        if (!name && workspaceRecipient.name) setName(workspaceRecipient.name);
-        if (!email && workspaceRecipient.email) setEmail(workspaceRecipient.email);
-        if (!organization && workspaceRecipient.company) setOrganization(workspaceRecipient.company);
-        if (!phoneNumber && workspaceRecipient.phone) setPhoneNumber(workspaceRecipient.phone);
-      }
-      if (!initialEntity) {
-        const itemToAttach = matchingItem || (workspaceItems && workspaceItems.length > 0 ? workspaceItems[0] : null);
-        if (itemToAttach) {
-          setAttachedEntity({
-            name: itemToAttach.name || itemToAttach.canonicalName || 'Compound',
-            slug: itemToAttach.productId || itemToAttach.slug || itemToAttach.id,
-            code: itemToAttach.vialCode || itemToAttach.id,
-            strength: itemToAttach.dose || itemToAttach.dosage,
-            category: itemToAttach.category || 'peptides',
-            supplier: itemToAttach.supplier || itemToAttach.supplierName,
-          });
-        }
-      }
+    if (isOpen && initialEntity) {
+      setAttachedEntity(initialEntity);
     }
-  }, [isOpen, workspaceRecipient, workspaceItems, matchingItem, initialEntity]);
+  }, [isOpen, initialEntity]);
 
   const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const isEmailValid = useMemo(() => {

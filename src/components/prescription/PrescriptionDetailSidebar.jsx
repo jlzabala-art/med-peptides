@@ -126,11 +126,6 @@ export default function PrescriptionDetailSidebar({
       <div 
         className="pds-sidebar-desktop"
         style={{
-          position: 'sticky',
-          top: '80px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
           width: '100%'
         }}
       >

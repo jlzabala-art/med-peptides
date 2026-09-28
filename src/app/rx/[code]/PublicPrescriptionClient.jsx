@@ -24,7 +24,8 @@ import {
   Info,
   Maximize2,
   Sparkles,
-  Award
+  Award,
+  Phone
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -37,6 +38,7 @@ import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import '@/styles/publicDesignSystem.css';
+import './publicPrescriptionMobile.css';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -363,7 +365,7 @@ export default function PublicPrescriptionClient({ rx }) {
         (genomicsData ? `🧬 *Guía Genómica:* Formulada según recomendaciones de ${genomicsData.test.shortName}.\n` : '') +
         `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
         `🔗 *Ver Ficha y Posología Digital:* ${publicUrl}`
-      : `*Atlas Services — Official Clinical Prescription & Posology*\n` +
+      : `*Atlas Services — Medical Prescription & Posology Regimen*\n` +
         `📋 *Prescription Ref:* ${rxId}\n` +
         `👤 *Patient:* ${patientName}${patientAlias}\n` +
         `🩺 *Prescribing Physician:* ${doctorName} (${clinic})\n` +
@@ -417,7 +419,7 @@ export default function PublicPrescriptionClient({ rx }) {
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
             {/* ── Master Header Card ─────────────────────────────────────────────────── */}
-            <div style={{
+            <div className="rx-card" style={{
               background: '#ffffff',
               borderRadius: '16px',
               border: '1px solid #e2e8f0',
@@ -425,11 +427,11 @@ export default function PublicPrescriptionClient({ rx }) {
               boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
               marginBottom: '0.25rem'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
+              <div className="rx-master-header-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
                 
                 {/* Prescribing Doctor Clinical Prominence */}
-                <div style={{ display: 'flex', gap: '1rem', minWidth: 280 }}>
-                  <div style={{
+                <div className="rx-doctor-col" style={{ display: 'flex', gap: '1rem', minWidth: 280 }}>
+                  <div className="rx-doctor-avatar" style={{
                     width: 56,
                     height: 56,
                     borderRadius: '14px',
@@ -443,14 +445,14 @@ export default function PublicPrescriptionClient({ rx }) {
                   }}>
                     <Stethoscope size={28} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="rx-doctor-meta">
+                    <div className="rx-doctor-badge" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       {isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed'}
                     </div>
-                    <h1 style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h1 className="rx-doctor-name" style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
                       {doctorName}
                     </h1>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    <div className="rx-doctor-sub" style={{ fontSize: '0.8rem', color: '#64748b' }}>
                       {doctorSpecialty} · Lic. {doctorLicense}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
@@ -459,8 +461,8 @@ export default function PublicPrescriptionClient({ rx }) {
                   </div>
                 </div>
 
-                {/* Patient Card & Verification */}
-                <div style={{
+                {/* Patient Identity Card */}
+                <div className="rx-patient-box" style={{
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
                   borderRadius: '12px',
@@ -471,11 +473,31 @@ export default function PublicPrescriptionClient({ rx }) {
                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       {isEs ? 'Paciente Registrado' : 'Registered Patient'}
                     </div>
-                    <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: '#0369a1', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                    <span 
+                      onClick={() => {
+                        navigator.clipboard?.writeText(rxId);
+                        toast.success(isEs ? 'Referencia copiada ✓' : 'Reference copied ✓');
+                      }}
+                      style={{ 
+                        fontSize: '0.68rem', 
+                        fontFamily: 'monospace', 
+                        color: '#0369a1', 
+                        background: '#e0f2fe', 
+                        padding: '2px 7px', 
+                        borderRadius: '4px', 
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}
+                      title={isEs ? 'Copiar referencia' : 'Copy reference'}
+                    >
                       Ref: {rxId}
+                      <Copy size={11} />
                     </span>
                   </div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                  <div className="rx-patient-name" style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                     {patientName} {patientAlias}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', display: 'flex', gap: '0.75rem' }}>
@@ -807,7 +829,7 @@ export default function PublicPrescriptionClient({ rx }) {
         </div>
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
-        <div id="milestones-card" style={{
+        <div id="milestones-card" className="rx-card" style={{
           background: '#ffffff',
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
@@ -852,32 +874,52 @@ export default function PublicPrescriptionClient({ rx }) {
             </span>
           </div>
 
-          {/* 3 Milestone Cards Grid (Month 1, Month 2, Month 3 perfectly centered and aligned) */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '1rem'
+          {/* Sequential Milestone Cards (Full-Width GCP Modular Flow, One Below the Other) */}
+          <div className="rx-milestones-list" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.85rem',
+            width: '100%'
           }}>
             {timeline.map((tm, idx) => (
               <div 
                 key={idx}
+                className="rx-milestone-item"
                 style={{
-                  background: '#f0fdfa',
-                  border: '1px solid #ccfbf1',
-                  borderTop: '3px solid #0d9488',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderLeft: '4px solid #0d9488',
                   borderRadius: '12px',
-                  padding: '1.15rem 1.25rem',
+                  padding: '1.15rem 1.35rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.6rem',
-                  boxShadow: '0 2px 8px rgba(13, 148, 136, 0.05)'
+                  gap: '0.55rem',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.02)',
+                  boxSizing: 'border-box',
+                  width: '100%',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {tm.phase}
-                  </span>
-                  <span style={{ 
+                <div className="rx-milestone-top" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', width: '100%' }}>
+                  <div className="rx-milestone-title-wrap" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem' }}>
+                    <span className="rx-milestone-phase-badge" style={{ 
+                      fontSize: '0.72rem', 
+                      fontWeight: 800, 
+                      color: '#0f766e', 
+                      background: '#ccfbf1', 
+                      border: '1px solid #99f6e4', 
+                      padding: '2px 8px', 
+                      borderRadius: '6px', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '0.04em' 
+                    }}>
+                      {tm.phase}
+                    </span>
+                    <span className="rx-milestone-title" style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
+                      {tm.title}
+                    </span>
+                  </div>
+                  <span className="rx-milestone-month-badge" style={{ 
                     fontSize: '0.72rem', 
                     fontWeight: 800, 
                     color: '#ffffff', 
@@ -896,11 +938,7 @@ export default function PublicPrescriptionClient({ rx }) {
                   </span>
                 </div>
 
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>
-                  {tm.title}
-                </div>
-
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#134e4a', lineHeight: 1.55 }}>
+                <p className="rx-milestone-desc" style={{ margin: 0, fontSize: '0.82rem', color: '#334155', lineHeight: 1.6 }}>
                   {tm.description}
                 </p>
               </div>

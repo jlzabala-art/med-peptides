@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { usePathname } from 'next/navigation';
 import { useWorkspaceStore, useShallow } from '../../../stores/useWorkspaceStore';
 import { useDrawer } from '../../../context/DrawerContext';
 import {
@@ -319,7 +320,28 @@ export default function WorkspaceDrawer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDrawerOpen, items.length, isDoctor, activeWs?.intent]);
 
-  if (!mounted || !isDrawerOpen || !activeWs) return null;
+  const pathname = usePathname() || '';
+  const isPublicRoute = 
+    pathname === '/' ||
+    pathname.startsWith('/rx/') ||
+    pathname.startsWith('/d/') ||
+    pathname.startsWith('/p/') ||
+    pathname.startsWith('/proto/') ||
+    pathname.startsWith('/protocol/') ||
+    pathname.startsWith('/product/') ||
+    pathname.startsWith('/quotation/') ||
+    pathname.startsWith('/shared/') ||
+    pathname.startsWith('/c/') ||
+    pathname.startsWith('/what-are-peptides') ||
+    pathname.startsWith('/blog') ||
+    pathname.startsWith('/faq') ||
+    pathname.startsWith('/about') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/session-ended') ||
+    pathname.startsWith('/verify/');
+
+  if (!mounted || !isDrawerOpen || !activeWs || isPublicRoute) return null;
 
   const workspacePrescriptions = items.map((it, idx) => ({
     id: `WS-${(it.productId || it.id || idx).toString().slice(0, 8)}`,

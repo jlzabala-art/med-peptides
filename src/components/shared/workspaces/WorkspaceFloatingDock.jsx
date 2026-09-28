@@ -52,6 +52,8 @@ export default function WorkspaceFloatingDock() {
   // Check if current route is a public or unauthenticated page
   const isPublicRoute = 
     pathname === '/' ||
+    pathname.startsWith('/rx/') ||
+    pathname.startsWith('/d/') ||
     pathname.startsWith('/p/') ||
     pathname.startsWith('/proto/') ||
     pathname.startsWith('/protocol/') ||

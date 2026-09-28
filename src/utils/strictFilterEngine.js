@@ -116,10 +116,22 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
       }
     } else {
       // Neither variant nor product has an explicit catalogue brand
-      // When filtering for RegenPept or Lotusland, treat Lotusland items as matching the RegenPept catalogue
-      const isLotus = String(v.supplier || v.supplierName || v.supplierId || p.supplierId || '').toLowerCase().includes('lotus');
+      const vSupplierStr = String(v.supplier || v.supplierName || v.supplierId || p.supplierId || (Array.isArray(p.supplierIds) ? p.supplierIds.join(' ') : '')).toLowerCase();
+      const isLotus = vSupplierStr.includes('lotus');
+      const isMagenta = vSupplierStr.includes('magenta');
+      const isLarimedical = vSupplierStr.includes('larimedical');
+      const isEuropeptides = vSupplierStr.includes('europeptides');
+
       if ((normTargetCat === 'regenpept' || normTargetCat === 'lotusland') && isLotus) {
-        // Accept
+        // Accept Lotusland as RegenPept
+      } else if (normTargetCat.includes('magenta') && isMagenta) {
+        // Accept Magenta
+      } else if (normTargetCat.includes('larimedical') && isLarimedical) {
+        // Accept Larimedical
+      } else if (normTargetCat.includes('europeptides') && isEuropeptides) {
+        // Accept EuroPeptides
+      } else if (vSupplierStr.includes(normTargetCat)) {
+        // Generic match on supplier string
       } else {
         return false;
       }

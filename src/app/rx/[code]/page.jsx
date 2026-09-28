@@ -68,6 +68,10 @@ async function getPrescriptionData(code) {
     cleanRx.patient.maskedPhone = p.length > 6 ? `${p.slice(0, 5)} *** **${p.slice(-2)}` : 'Confidential';
   }
 
+  if (cleanRx.clinic && cleanRx.clinic.toLowerCase().includes('mediluxe')) {
+    cleanRx.clinic = 'Atlas Services Clinical Care';
+  }
+
   const result = {
     ...cleanRx,
     verifiedAt: new Date().toISOString(),
@@ -89,37 +93,47 @@ export async function generateMetadata({ params }) {
 
   const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
   const doctor = rx?.doctorName || 'Consultant Specialist';
-  const clinic = rx?.clinic || 'Mediluxe Health Solutions (Dubai, UAE)';
+  let clinic = rx?.clinic || 'Atlas Services Clinical Care';
+  if (clinic.toLowerCase().includes('mediluxe')) {
+    clinic = 'Atlas Services Clinical Care';
+  }
 
   const title = rx 
-    ? `Verified Prescription #${code} | ${clinic}`
-    : `Verified Prescription #${code} | Official Clinical Record`;
+    ? `Medical Prescription #${code} | ${clinic}`
+    : `Medical Prescription #${code} | Clinical Dossier`;
 
-  const description = `Official verified medical prescription & dosing protocol for ${patientName}, issued by ${doctor} (${clinic}). Verified digital health record.`;
+  const description = `Medical prescription and personalized dosing protocol for ${patientName}, issued by ${doctor} (${clinic}). Digital healthcare dossier.`;
+
+  const ogLogoUrl = `${BASE_URL}/atlas-health-logo.png`;
 
   return {
     title,
     description,
     openGraph: {
-      title: `Clinical Prescription #${code} — ${patientName}`,
+      title: `Medical Prescription #${code} — ${patientName}`,
       description,
       url: `${BASE_URL}/rx/${code}`,
-      siteName: 'Atlas Services Clinical Intelligence',
+      siteName: 'Atlas Services Healthcare',
       type: 'article',
       images: [
         {
-          url: `${BASE_URL}/og-preview.png`,
-          width: 1200,
-          height: 630,
-          alt: `Prescription #${code} — ${patientName}`
+          url: ogLogoUrl,
+          width: 400,
+          height: 400,
+          alt: 'Atlas Services Healthcare'
         }
       ]
     },
     twitter: {
-      card: 'summary_large_image',
-      title: `Clinical Prescription #${code} — ${patientName}`,
+      card: 'summary',
+      title: `Medical Prescription #${code} — ${patientName}`,
       description,
-      images: [`${BASE_URL}/og-preview.png`]
+      images: [ogLogoUrl]
+    },
+    other: {
+      'whatsapp:title': `Medical Prescription #${code} — ${patientName}`,
+      'whatsapp:description': description,
+      'whatsapp:image': ogLogoUrl
     },
     robots: { index: false, follow: true }
   };

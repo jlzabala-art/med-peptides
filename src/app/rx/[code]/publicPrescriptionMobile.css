@@ -1,0 +1,604 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   GOOGLE CLOUD UX STANDARDS — PUBLIC PRESCRIPTION DOSSIER (MOBILE-FIRST)
+   Targeted for Patients on iOS Safari, Android Chrome & Compact Viewports
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Master Card Containers ─────────────────────────────────────────────────── */
+.pds-sidebar-desktop {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .pds-sidebar-desktop {
+    display: flex !important;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: sticky;
+    top: 80px;
+    width: 100%;
+  }
+}
+
+.rx-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem 1.65rem;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+  margin-bottom: 1.25rem;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rx-card:hover {
+  border-color: #cbd5e1;
+}
+
+/* ── Master Header Layout ───────────────────────────────────────────────────── */
+.rx-master-header-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.rx-doctor-col {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.rx-doctor-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #003666, #0284c7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.2);
+}
+
+.rx-doctor-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rx-doctor-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0284c7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rx-doctor-name {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.rx-doctor-sub {
+  font-size: 0.80rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.rx-doctor-contact-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.rx-doctor-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 3px 9px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.rx-doctor-contact-link:hover {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* ── Patient Identity Card (GCP Resource Standard) ─────────────────────────── */
+.rx-patient-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  flex: 1 1 300px;
+  min-width: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
+}
+
+.rx-patient-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.rx-patient-label {
+  font-size: 0.70rem;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rx-patient-ref-chip {
+  font-size: 0.72rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s ease;
+}
+
+.rx-patient-ref-chip:hover {
+  background: #bae6fd;
+}
+
+.rx-patient-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.rx-patient-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.rx-patient-meta-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rx-patient-meta-key {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rx-patient-meta-val {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Formula Card & API Items ──────────────────────────────────────────────── */
+.rx-formula-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.rx-formula-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.rx-formula-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+}
+
+.rx-formula-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rx-api-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #0284c7;
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.60rem;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.rx-api-item.vehicle {
+  background: #f8fafc;
+  border-left-color: #64748b;
+}
+
+.rx-api-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rx-api-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rx-api-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: #e0f2fe;
+  color: #0369a1;
+  letter-spacing: 0.04em;
+}
+
+.rx-api-tag.vehicle {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.rx-api-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.rx-api-dose-badge {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.rx-api-sub {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.rx-api-desc {
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.rx-api-rationale {
+  font-size: 0.74rem;
+  color: #047857;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.4;
+}
+
+/* ── Posology Pathway ──────────────────────────────────────────────────────── */
+.rx-posology-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.rx-posology-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25);
+}
+
+.rx-posology-row {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #0284c7;
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.02);
+}
+
+.rx-posology-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.rx-step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Biological Milestones & Evolution (GCP Full-Width Sequential Flow) ────── */
+.rx-milestones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.rx-milestone-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #0d9488;
+  border-radius: 12px;
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+  box-sizing: border-box;
+  width: 100%;
+  transition: all 0.15s ease;
+}
+
+.rx-milestone-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.08);
+}
+
+.rx-milestone-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.rx-milestone-title-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.rx-milestone-phase-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f766e;
+  background: #ccfbf1;
+  border: 1px solid #99f6e4;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rx-milestone-title {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.rx-milestone-month-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: #0d9488;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(13, 148, 136, 0.25);
+}
+
+.rx-milestone-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   MOBILE VIEWPORT ADAPTATIONS (Google Cloud Console Clean Mobile UX)
+   ══════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .rx-card {
+    padding: 1.15rem 1rem !important;
+    border-radius: 14px !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .rx-master-header-grid {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .rx-doctor-col {
+    width: 100%;
+    flex: 1 1 100%;
+    gap: 0.75rem;
+  }
+
+  .rx-doctor-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .rx-doctor-name {
+    font-size: 1.20rem !important;
+  }
+
+  .rx-patient-box {
+    width: 100%;
+    flex: 1 1 100%;
+    padding: 1rem !important;
+    border-radius: 12px !important;
+  }
+
+  .rx-patient-name {
+    font-size: 1.05rem !important;
+  }
+
+  .rx-patient-meta-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    padding-top: 6px !important;
+  }
+
+  .rx-patient-meta-val {
+    font-size: 0.74rem !important;
+  }
+
+  .rx-formula-header {
+    margin-bottom: 1rem !important;
+  }
+
+  .rx-formula-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .rx-api-item {
+    padding: 1rem !important;
+    border-radius: 10px !important;
+  }
+
+  .rx-api-name {
+    font-size: 0.98rem !important;
+  }
+
+  .rx-api-dose-badge {
+    font-size: 0.74rem !important;
+  }
+
+  .rx-posology-row {
+    padding: 1rem !important;
+    border-radius: 10px !important;
+  }
+
+  .rx-posology-instruction {
+    padding-left: 0 !important;
+    font-size: 0.80rem !important;
+  }
+
+  .rx-milestone-item {
+    padding: 1rem !important;
+    border-radius: 10px !important;
+  }
+
+  .rx-milestone-title {
+    font-size: 0.90rem !important;
+  }
+
+  .rx-milestone-desc {
+    font-size: 0.78rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .rx-patient-meta-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .rx-patient-meta-cell:last-child {
+    grid-column: span 2;
+  }
+}
