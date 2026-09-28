@@ -198,18 +198,55 @@ export default function PublicUnifiedHeader({
   return (
     <>
       <header className={`public-unified-header ${isScrolled ? 'is-scrolled' : ''}`}>
-        {/* ── Line 1: Corporate Brand Identity (Atlas Health Services) ── */}
+        {/* ── Line 1: Corporate Brand Identity & Account Masthead (Google Cloud Standard) ── */}
         <div className="puh-brand-row">
           <div className="puh-brand-row-inner">
+            {/* Left: Brand Logo / Title */}
             <div className="puh-brand-group">
               <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Atlas Health Services Clinical & Healthcare Intelligence">
                 <BrandLogo variant="light" size="compact" />
               </Link>
             </div>
+
+            {/* Right: Google Cloud Standard Account & Session Anchor */}
+            <div className="puh-account-group">
+              {user ? (
+                <Link
+                  href={getDashboardPath()}
+                  className="puh-btn puh-btn-console"
+                  title={isSpanish ? 'Acceso a mi Panel Profesional' : 'Access Practitioner Dashboard'}
+                >
+                  <span className="puh-user-status-dot" aria-hidden="true" />
+                  <span className="puh-user-avatar">
+                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                  </span>
+                  <span className="puh-auth-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
+                </Link>
+              ) : (
+                <div className="puh-auth-actions" style={{ display: 'inline-flex', gap: '0.4rem', alignItems: 'center' }}>
+                  <Link
+                    href={`/login?tab=login${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
+                    className="puh-btn puh-btn-signin"
+                    title={isSpanish ? 'Iniciar sesión' : 'Sign In'}
+                  >
+                    <LogIn size={13} className="puh-btn-icon" />
+                    <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
+                  </Link>
+                  <Link
+                    href={`/login?tab=register${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
+                    className="puh-btn puh-btn-signup"
+                    title={isSpanish ? 'Registrarse en la plataforma médica' : 'Register for clinical practitioner portal'}
+                  >
+                    <UserPlus size={13} className="puh-btn-icon" />
+                    <span className="puh-auth-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* ── Line 2: Universal Action Toolbar ── */}
+        {/* ── Line 2: Universal Contextual Action Toolbar ── */}
         <div className="puh-actions-row">
           <div className="puh-actions-row-inner">
             <div className="puh-actions-group">
@@ -268,40 +305,6 @@ export default function PublicUnifiedHeader({
                     : (isSpanish ? 'Copiar Enlace' : 'Copy Link')}
                 </span>
               </button>
-
-              {/* Google Cloud Standard Auth CTAs (Sign In, Sign Up, or Practitioner Console) */}
-              {user ? (
-                <Link
-                  href={getDashboardPath()}
-                  className="puh-btn puh-btn-console"
-                  title={isSpanish ? 'Acceso a mi Panel Profesional' : 'Access Practitioner Dashboard'}
-                >
-                  <span className="puh-user-status-dot" aria-hidden="true" />
-                  <span className="puh-user-avatar">
-                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
-                  </span>
-                  <span className="puh-auth-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href={`/login?tab=login${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
-                    className="puh-btn puh-btn-signin"
-                    title={isSpanish ? 'Iniciar sesión' : 'Sign In'}
-                  >
-                    <LogIn size={13} className="puh-btn-icon" />
-                    <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
-                  </Link>
-                  <Link
-                    href={`/login?tab=register${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
-                    className="puh-btn puh-btn-signup"
-                    title={isSpanish ? 'Registrarse en la plataforma médica' : 'Register for clinical practitioner portal'}
-                  >
-                    <UserPlus size={13} className="puh-btn-icon" />
-                    <span className="puh-auth-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
-                  </Link>
-                </>
-              )}
             </div>
           </div>
         </div>

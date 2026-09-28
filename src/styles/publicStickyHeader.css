@@ -56,8 +56,16 @@
   padding: 0.55rem 1.25rem;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   transition: padding 0.2s ease;
+}
+
+.puh-account-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 /* ── Line 2: Universal Action Toolbar ────────────────────────────── */
@@ -579,7 +587,8 @@
 @media (max-width: 640px) {
   .puh-brand-row-inner {
     padding: 0.45rem 0.85rem;
-    justify-content: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
 
   .puh-actions-row-inner {
@@ -595,8 +604,10 @@
   }
 
   .puh-actions-group {
-    width: max-content;
+    display: flex;
+    align-items: center;
     gap: 0.40rem;
+    width: auto;
   }
 
   .puh-tier1-inner {
