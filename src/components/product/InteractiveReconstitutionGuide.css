@@ -84,19 +84,12 @@
   }
 }
 
-/* ── 2. Workspace 2-Column Grid (Laptop & Desktop Balanced Standard) ── */
+/* ── 2. Workspace Layout (Full-Width Sequential GCP Modular Flow) ── */
 .irg-workspace {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  align-items: stretch;
-}
-
-@media (max-width: 1024px) {
-  .irg-workspace {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
+  width: 100%;
 }
 
 /* ── Left Column: Controls ── */
@@ -249,17 +242,18 @@
   margin-top: 2px;
 }
 
-/* Clinical Phase Selector Cards (Dynamic Columns: 2 to 5+ phases + Custom) */
+/* Clinical Phase Selector Cards (Desktop/Laptop: 3 columns x 2 rows; Tablet/Mobile: 2 columns) */
 .irg-phase-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
   margin-bottom: 0.85rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .irg-phase-cards-grid {
-    gap: 0.45rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
 }
 
@@ -864,11 +858,17 @@
 
 .irg-specs-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.65rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
+  .irg-specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
   .irg-specs-grid {
     grid-template-columns: 1fr;
   }

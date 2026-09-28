@@ -35,6 +35,7 @@ import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
+import PosologyInfographicCard from '@/components/prescription/PosologyInfographicCard';
 import '@/styles/publicDesignSystem.css';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
@@ -87,7 +88,7 @@ export default function PublicPrescriptionClient({ rx }) {
     ...(genomicsData ? [{ id: 'genomics-card', label: isEs ? 'Guía Genómica' : 'Genomics Guidance' }] : []),
     { id: 'posology-card', label: isEs ? 'Pauta de Posología' : 'Posology Protocol' },
     { id: 'milestones-card', label: isEs ? 'Evolución Clínica' : 'Clinical Milestones' },
-    { id: 'qr-card', label: isEs ? 'Verificación QR' : 'QR Verification' },
+    { id: 'qr-card', label: isEs ? 'Portal del Paciente' : 'Patient Mobile Portal' },
     ...(docs.length > 0 ? [{ id: 'docs-card', label: isEs ? 'Documentos' : 'Attached Records' }] : [])
   ];
 
@@ -212,48 +213,90 @@ export default function PublicPrescriptionClient({ rx }) {
     }
   ];
 
-  // Localized active ingredients (English default)
-  const actives = isEs ? (posology.activesSynergy || [
+  // Clinical Prescription APIs & Compounded Formulation (One API per line standard)
+  const prescriptionApis = isEs ? [
     {
-      name: 'Latanoprost Fagron 0.005%',
+      id: 'api-1',
+      tag: 'API 1',
+      name: 'Latanoprost Fagron',
+      dosage: '0.005% (50 mcg/mL)',
       role: 'Análogo de Prostaglandina F2α',
-      action: 'Prolonga la duración de la fase anágena de crecimiento y reactiva folículos miniaturizados en reposo telógeno.'
+      indication: 'Inductor Folicular de Fase Anágena',
+      action: 'Prolonga la duración de la fase anágena de crecimiento y reactiva folículos miniaturizados en reposo telógeno.',
+      rationale: 'Recomendación TrichoTest: Alta afinidad y respuesta del receptor folicular PGF2α.'
     },
     {
-      name: '17-α-Estradiol 0.05%',
+      id: 'api-2',
+      tag: 'API 2',
+      name: '17-α-Estradiol',
+      dosage: '0.05% (500 mcg/mL)',
       role: 'Modulador Estrogénico Folicular',
-      action: 'Inhibe localmente la enzima 5-alfa reductasa y activa la aromatasa sin absorción hormonal sistémica detectable.'
+      indication: 'Inhibidor Tópico de 5α-Reductasa',
+      action: 'Inhibe localmente la enzima 5-alfa reductasa y activa la aromatasa sin absorción hormonal sistémica detectable.',
+      rationale: 'Recomendación TrichoTest: Control de la conversión de testosterona a DHT en la papila dérmica.'
     },
     {
-      name: 'IGrantine-F1™ 0.5%',
+      id: 'api-3',
+      tag: 'API 3',
+      name: 'IGrantine-F1™',
+      dosage: '0.5% (5 mg/mL)',
       role: 'Complejo de Péptidos Biomiméticos',
-      action: 'Estimula la vía Wnt/β-Catenina y la síntesis de factores de crecimiento endotelial (VEGF) en la papila dérmica.'
+      indication: 'Señalización Wnt/β-Catenina & VEGF',
+      action: 'Estimula la vía canónica Wnt/β-Catenina y la síntesis de factor de crecimiento endotelial vascular (VEGF) en la papila dérmica.',
+      rationale: 'Optimización de microcirculación capilar y proliferación de queratinocitos matriciales.'
     },
     {
+      id: 'veh-1',
+      tag: 'VEHÍCULO',
+      isVehicle: true,
       name: 'TrichoSol™ (Fagron)',
-      role: 'Vehículo Lipídico Patentado',
-      action: 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación o dermatitis y maximiza la biodisponibilidad folicular.'
+      dosage: 'c.s.p. 100 mL',
+      role: 'Vehículo Liposomal Hidrofílico Patentado',
+      indication: 'Base Lipídica 100% Libre de Alcohol',
+      action: 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación o dermatitis y maximiza la biodisponibilidad y penetración transdérmica folicular.',
+      rationale: 'Vehículo biocompatible de liberación sostenida patentado por Fagron.'
     }
-  ]) : [
+  ] : [
     {
-      name: 'Latanoprost Fagron 0.005%',
+      id: 'api-1',
+      tag: 'API 1',
+      name: 'Latanoprost Fagron',
+      dosage: '0.005% (50 mcg/mL)',
       role: 'Prostaglandin F2α Analogue',
-      action: 'Prolongs the duration of the anagen growth cycle and reactivates dormant miniaturized hair follicles.'
+      indication: 'Follicular Anagen Phase Inducer',
+      action: 'Prolongs the duration of the anagen growth cycle and reactivates dormant miniaturized hair follicles into active protein synthesis.',
+      rationale: 'Fagron TrichoTest Correlation: High PGF2α follicular receptor responsiveness.'
     },
     {
-      name: '17-α-Estradiol 0.05%',
+      id: 'api-2',
+      tag: 'API 2',
+      name: '17-α-Estradiol',
+      dosage: '0.05% (500 mcg/mL)',
       role: 'Follicular Estrogen Modulator',
-      action: 'Locally inhibits the 5-alpha reductase enzyme and activates aromatase without detectable systemic hormone absorption.'
+      indication: 'Local 5α-Reductase Inhibitor',
+      action: 'Locally inhibits the 5-alpha reductase enzyme and activates aromatase without detectable systemic hormone absorption.',
+      rationale: 'Fagron TrichoTest Correlation: Targeted reduction of testosterone-to-DHT conversion in dermal papilla.'
     },
     {
-      name: 'IGrantine-F1™ 0.5%',
+      id: 'api-3',
+      tag: 'API 3',
+      name: 'IGrantine-F1™',
+      dosage: '0.5% (5 mg/mL)',
       role: 'Biomimetic Peptide Complex',
-      action: 'Stimulates the canonical Wnt/β-Catenin signaling pathway and synthesizes Vascular Endothelial Growth Factor (VEGF) in dermal papillae.'
+      indication: 'Wnt/β-Catenin Signaling & VEGF Synthesis',
+      action: 'Stimulates the canonical Wnt/β-Catenin signaling pathway and synthesizes Vascular Endothelial Growth Factor (VEGF) in dermal papillae.',
+      rationale: 'Follicular micro-vascularization and matrix keratinocyte proliferation.'
     },
     {
+      id: 'veh-1',
+      tag: 'VEHICLE',
+      isVehicle: true,
       name: 'TrichoSol™ (Fagron)',
+      dosage: 'q.s. 100 mL',
       role: 'Patented Liposomal Vehicle',
-      action: '100% alcohol and propylene glycol-free formulation. Prevents contact dermatitis and maximizes targeted follicular bioavailability.'
+      indication: '100% Alcohol & Propylene Glycol-Free',
+      action: '100% alcohol and propylene glycol-free hydrophilic lipid carrier. Prevents contact dermatitis and maximizes targeted follicular bioavailability.',
+      rationale: 'Patented Fagron phytocomplex carrier engineered for continuous follicular uptake.'
     }
   ];
 
@@ -306,7 +349,7 @@ export default function PublicPrescriptionClient({ rx }) {
         `🧪 *Fórmula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% en TrichoSol™ (3x 100ml)\n` +
         (genomicsData ? `🧬 *Guía Genómica:* Formulada según recomendaciones de ${genomicsData.test.shortName}.\n` : '') +
         `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
-        `🔗 *Ver Ficha Digital Completa & Verificación:* ${publicUrl}`
+        `🔗 *Ver Ficha y Posología Digital:* ${publicUrl}`
       : `*Atlas Services — Official Clinical Prescription & Posology*\n` +
         `📋 *Prescription Ref:* ${rxId}\n` +
         `👤 *Patient:* ${patientName}${patientAlias}\n` +
@@ -314,7 +357,7 @@ export default function PublicPrescriptionClient({ rx }) {
         `🧪 *Formula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)\n` +
         (genomicsData ? `🧬 *Genomics Guidance:* Formulated based on ${genomicsData.test.shortName} recommendations.\n` : '') +
         `🕒 *Dosage:* 1.0 ml topical daily at bedtime to dry scalp. Leave on overnight.\n\n` +
-        `🔗 *Verified Clinical Record & Dosage Guide:* ${publicUrl}`
+        `🔗 *Digital Prescription & Dosage Regimen:* ${publicUrl}`
   );
 
   return (
@@ -351,7 +394,7 @@ export default function PublicPrescriptionClient({ rx }) {
         }}
         breadcrumb={[
           { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
-          { label: isEs ? 'Prescripciones Médicas' : 'Verified Prescriptions' },
+          { label: isEs ? 'Prescripciones Médicas' : 'Prescription Dossier' },
           { label: rxId }
         ]}
       />
@@ -479,30 +522,78 @@ export default function PublicPrescriptionClient({ rx }) {
             </div>
           </div>
 
-          {/* Actives Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '1rem' }}>
-            {actives.map((act, idx) => (
+          {/* Active Pharmaceutical Ingredients — One API per line standard */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {prescriptionApis.map((api) => (
               <div 
-                key={idx}
+                key={api.id}
                 style={{
-                  background: '#f8fafc',
+                  background: api.isVehicle ? '#f8fafc' : '#ffffff',
                   border: '1px solid #e2e8f0',
+                  borderLeft: api.isVehicle ? '4px solid #64748b' : '4px solid #0284c7',
                   borderRadius: '12px',
-                  padding: '1rem',
+                  padding: '1.1rem 1.25rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.35rem'
+                  gap: '0.55rem',
+                  boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)'
                 }}
               >
-                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
-                  {act.role}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                    <span style={{ 
+                      fontSize: '0.68rem', 
+                      fontWeight: 800, 
+                      textTransform: 'uppercase', 
+                      padding: '3px 8px', 
+                      borderRadius: '4px', 
+                      background: api.isVehicle ? '#e2e8f0' : '#e0f2fe', 
+                      color: api.isVehicle ? '#334155' : '#0369a1' 
+                    }}>
+                      {api.tag}
+                    </span>
+                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                      {api.name}
+                    </span>
+                    <span style={{ 
+                      fontSize: '0.78rem', 
+                      fontWeight: 800, 
+                      color: '#0284c7', 
+                      background: '#f0f9ff', 
+                      border: '1px solid #bae6fd', 
+                      padding: '2px 8px', 
+                      borderRadius: '6px', 
+                      fontFamily: 'monospace' 
+                    }}>
+                      {api.dosage}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                    {api.role} · <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.indication}</span>
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                  {act.name}
+
+                <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: 1.55 }}>
+                  {api.action}
                 </div>
-                <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.45 }}>
-                  {act.action}
-                </p>
+
+                {api.rationale && (
+                  <div style={{ 
+                    fontSize: '0.72rem', 
+                    color: '#047857', 
+                    background: '#f0fdf4', 
+                    border: '1px solid #bbf7d0', 
+                    borderRadius: '6px', 
+                    padding: '4px 10px', 
+                    display: 'inline-flex', 
+                    alignItems: 'center', 
+                    gap: '6px', 
+                    width: 'fit-content' 
+                  }}>
+                    <span>🧬</span>
+                    <span>{api.rationale}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -562,6 +653,17 @@ export default function PublicPrescriptionClient({ rx }) {
             </div>
           </div>
 
+          {/* Visual Clinical Posology Infographic Card */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <PosologyInfographicCard 
+              doseMl={1.0}
+              timing={isEs ? 'Nocturno (21:30 - 22:00)' : 'Nightly (21:30 - 22:00)'}
+              carrier="TrichoSol™ Liposomal Phytocomplex"
+              cycleDuration={isEs ? '90 Días (3 Frascos de 100 mL)' : '90 Days (3x 100 mL Bottles)'}
+              lang={lang}
+            />
+          </div>
+
           {/* Steps Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
             {steps.map((st, sIdx) => (
@@ -610,82 +712,168 @@ export default function PublicPrescriptionClient({ rx }) {
           </div>
         </div>
 
-        {/* ── Timeline & QR Sharing Split ─────────────────────────────────────────── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '1.5rem',
+        {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
+        <div id="milestones-card" style={{
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
           marginBottom: '1.5rem'
         }}>
-          {/* Biological Milestones */}
-          <div id="milestones-card" style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            padding: '1.5rem',
-            boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-              <Activity size={20} color="#0d9488" />
-              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Evolución & Cronograma de Resultados (90 Días)' : 'Clinical Evolution & Results Timeline (90 Days)'}
-              </h4>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div style={{
+                width: 38,
+                height: 38,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #0d9488, #0f766e)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff'
+              }}>
+                <Activity size={20} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                  {isEs ? 'Evolución Clínica & Cronograma de Resultados' : 'Clinical Evolution & Results Timeline'}
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                  {isEs ? 'Hitos biológicos esperados durante el ciclo de tratamiento de 90 días' : 'Expected biological milestones across the 90-day treatment cycle'}
+                </p>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {timeline.map((tm, idx) => (
-                <div 
-                  key={idx}
-                  style={{
-                    background: '#f0fdfa',
-                    border: '1px solid #ccfbf1',
-                    borderRadius: '10px',
-                    padding: '0.85rem 1rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f766e' }}>
-                      {tm.phase} — {tm.title}
-                    </span>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#ffffff', background: '#0d9488', padding: '1px 6px', borderRadius: '4px' }}>
-                      {tm.badge}
-                    </span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#134e4a', lineHeight: 1.45 }}>
-                    {tm.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <span style={{ 
+              background: '#f0fdfa', 
+              color: '#0f766e', 
+              border: '1px solid #99f6e4', 
+              padding: '4px 12px', 
+              borderRadius: '8px', 
+              fontSize: '0.78rem', 
+              fontWeight: 800 
+            }}>
+              {isEs ? 'Ciclo Completo: 90 Días' : 'Full Cycle: 90 Days'}
+            </span>
           </div>
 
-          {/* QR Code & Direct WhatsApp Share */}
-          <div id="qr-card" style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            padding: '1.5rem',
-            boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            justifyContent: 'space-between'
+          {/* 3 Milestone Cards Grid (Month 1, Month 2, Month 3 perfectly centered and aligned) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '1rem'
           }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
-                <ShieldCheck size={18} color="#16a34a" />
-                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {isEs ? 'Código QR & Enlace de Paciente' : 'QR Code & Patient Access Portal'}
-                </h4>
+            {timeline.map((tm, idx) => (
+              <div 
+                key={idx}
+                style={{
+                  background: '#f0fdfa',
+                  border: '1px solid #ccfbf1',
+                  borderTop: '3px solid #0d9488',
+                  borderRadius: '12px',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.6rem',
+                  boxShadow: '0 2px 8px rgba(13, 148, 136, 0.05)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {tm.phase}
+                  </span>
+                  <span style={{ 
+                    fontSize: '0.72rem', 
+                    fontWeight: 800, 
+                    color: '#ffffff', 
+                    background: '#0d9488', 
+                    padding: '4px 10px', 
+                    borderRadius: '6px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    lineHeight: 1,
+                    boxShadow: '0 1px 3px rgba(13, 148, 136, 0.25)'
+                  }}>
+                    {tm.badge}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.35 }}>
+                  {tm.title}
+                </div>
+
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#134e4a', lineHeight: 1.55 }}>
+                  {tm.description}
+                </p>
               </div>
-              <p style={{ margin: '0 0 1.25rem', fontSize: '0.78rem', color: '#64748b' }}>
-                {isEs 
-                  ? 'Escanee con su móvil para acceder inmediatamente a este expediente y las recetas firmadas'
-                  : 'Scan with your smartphone camera to access this verified clinical record and digital prescription'}
-              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Patient Mobile Access Portal (Private Patient Dossier) ──────────────── */}
+        <div id="qr-card" style={{
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div style={{
+                width: 38,
+                height: 38,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff'
+              }}>
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                  {isEs ? 'Portal de Acceso Móvil del Paciente' : 'Patient Mobile Access Portal'}
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                  {isEs 
+                    ? 'Acceda confidencialmente a su pauta posológica personalizada y guía de administración' 
+                    : 'Confidential mobile access to your personalized posology regimen and daily administration guide'}
+                </p>
+              </div>
             </div>
 
+            <span style={{ 
+              background: '#e0f2fe', 
+              color: '#0369a1', 
+              border: '1px solid #bae6fd', 
+              padding: '4px 12px', 
+              borderRadius: '8px', 
+              fontSize: '0.78rem', 
+              fontWeight: 800,
+              fontFamily: 'monospace'
+            }}>
+              Ref: {rxId}
+            </span>
+          </div>
+
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            gap: '2.5rem', 
+            flexWrap: 'wrap',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '1.75rem'
+          }}>
             {/* Interactive QR Code */}
             <div 
               onClick={() => setShowQrModal(true)}
@@ -696,7 +884,8 @@ export default function PublicPrescriptionClient({ rx }) {
                 border: '2px solid #e2e8f0',
                 boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
                 cursor: 'pointer',
-                position: 'relative'
+                position: 'relative',
+                flexShrink: 0
               }}
               title={isEs ? 'Click para ampliar el código QR' : 'Click to enlarge QR code'}
             >
@@ -720,8 +909,14 @@ export default function PublicPrescriptionClient({ rx }) {
               </div>
             </div>
 
-            {/* Share Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', marginTop: '1.25rem' }}>
+            {/* Action Buttons & Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minWidth: 260, maxWidth: 420 }}>
+              <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.55 }}>
+                {isEs 
+                  ? 'Guarde o comparta este acceso para consultar la pauta médica diaria desde cualquier smartphone sin necesidad de instalar aplicaciones.' 
+                  : 'Bookmark or share this access link to review your daily posology protocol and trichological progress anytime from any mobile device.'}
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <button
                   type="button"
@@ -730,8 +925,8 @@ export default function PublicPrescriptionClient({ rx }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '4px',
-                    padding: '0.6rem',
+                    gap: '6px',
+                    padding: '0.65rem',
                     borderRadius: '8px',
                     background: copied ? '#f0fdf4' : '#ffffff',
                     border: `1px solid ${copied ? '#86efac' : '#cbd5e1'}`,
@@ -752,8 +947,8 @@ export default function PublicPrescriptionClient({ rx }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '4px',
-                    padding: '0.6rem',
+                    gap: '6px',
+                    padding: '0.65rem',
                     borderRadius: '8px',
                     background: '#ffffff',
                     border: '1px solid #cbd5e1',
@@ -778,18 +973,17 @@ export default function PublicPrescriptionClient({ rx }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
-                  padding: '0.7rem 1.25rem',
-                  borderRadius: '10px',
-                  background: '#25D366',
+                  padding: '0.65rem',
+                  borderRadius: '8px',
+                  background: '#25d366',
                   color: '#ffffff',
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   fontWeight: 800,
                   textDecoration: 'none',
-                  boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
-                  transition: 'opacity 0.15s'
+                  boxShadow: '0 2px 8px rgba(37, 211, 102, 0.25)'
                 }}
               >
-                <Share2 size={16} />
+                <Share2 size={14} />
                 <span>{isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}</span>
               </a>
             </div>
@@ -873,7 +1067,7 @@ export default function PublicPrescriptionClient({ rx }) {
                       {docs[activeDocTab].title || docs[activeDocTab].name}
                     </h4>
                     <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
-                      {docs[activeDocTab].uploadedBy || (isEs ? 'Documento clínico verificado' : 'Verified clinical document')}
+                      {docs[activeDocTab].uploadedBy || (isEs ? 'Expediente médico confidencial' : 'Confidential clinical record')}
                     </p>
                   </div>
 
@@ -983,7 +1177,7 @@ export default function PublicPrescriptionClient({ rx }) {
                 <span style={{ color: '#0f172a', fontWeight: 800, fontFamily: 'monospace' }}>{rxId}</span>
               </div>
               <div style={{ color: '#94a3b8', fontSize: '0.72rem' }}>
-                Atlas Services Clinical Intelligence Platform · Confidential Medical Prescription Verification · DHA Regulated L.L.C.
+                Atlas Services Clinical Intelligence Platform · Confidential Patient Prescription Dossier
               </div>
             </footer>
           </div>

@@ -2235,8 +2235,12 @@ export default function InteractiveReconstitutionGuide({
                 {/* 1-Click Action to Calibrate to 50 UI Sweet Spot */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginTop: '2px' }}>
                   <div style={{ fontSize: '0.72rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontWeight: 700, color: '#0369a1' }}>💉 Sweet Spot Clínico:</span>
-                    <span>{phaseVialAdvice.matchedPhase.resultUnits} UI (0.50 mL) · 1 solo pinchazo indoloro (31G)</span>
+                    <span style={{ fontWeight: 700, color: '#0369a1' }}>
+                      {lang === 'es' ? '💉 Sweet Spot Clínico:' : '💉 Clinical Sweet Spot:'}
+                    </span>
+                    <span>
+                      {phaseVialAdvice.matchedPhase.resultUnits} {lang === 'es' ? 'UI' : 'Units'} (0.50 mL) · {lang === 'es' ? '1 solo pinchazo indoloro (31G)' : '1 single painless micro-injection (31G)'}
+                    </span>
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
@@ -2270,8 +2274,8 @@ export default function InteractiveReconstitutionGuide({
                       <span>⚡</span>
                       <span>
                         {lang === 'es'
-                          ? `Calibrar con Vial de ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg (50 UI)`
-                          : `Calibrate with ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg Vial (50 UI)`}
+                          ? `Calibrar con Vial de ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg (${phaseVialAdvice.matchedPhase.resultUnits} UI)`
+                          : `Calibrate with ${phaseVialAdvice.matchedPhase.recommendedVialMg} mg Vial (${phaseVialAdvice.matchedPhase.resultUnits} Units)`}
                       </span>
                     </button>
 

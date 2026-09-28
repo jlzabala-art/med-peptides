@@ -243,38 +243,9 @@ export default function PrescriptionDetailSidebar({
               📍 {doctorOffice}
             </div>
           </div>
-
-          {onOpenPdf && (
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('impact');
-                onOpenPdf();
-              }}
-              style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, #003666, #0284c7)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                fontSize: '0.78rem',
-                fontWeight: 750,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)'
-              }}
-            >
-              <Download size={14} />
-              <span>{isEs ? 'Ver Receta Médica Oficial (PDF)' : 'View Prescription PDF'}</span>
-            </button>
-          )}
         </div>
 
-        {/* Widget 3: Mobile Verification QR */}
+        {/* Widget 3: Patient Mobile Access QR */}
         <div style={{
           background: '#ffffff',
           borderRadius: '14px',
@@ -285,10 +256,10 @@ export default function PrescriptionDetailSidebar({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
             <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'VERIFICACIÓN CLÍNICA' : 'CLINICAL VERIFICATION'}
+              {isEs ? 'ACCESO PACIENTE' : 'PATIENT ACCESS'}
             </span>
             <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px' }}>
-              SSOT 2026
+              {isEs ? 'CONFIDENCIAL' : 'CONFIDENTIAL'}
             </span>
           </div>
 
@@ -314,7 +285,7 @@ export default function PrescriptionDetailSidebar({
             {rxId}
           </div>
           <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px' }}>
-            {isEs ? 'Escanee para auditoría digital en tiempo real' : 'Scan for real-time digital DHA audit'}
+            {isEs ? 'Acceso móvil confidencial del paciente' : 'Confidential mobile access for registered patient'}
           </div>
         </div>
 
