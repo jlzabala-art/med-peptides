@@ -31,7 +31,7 @@ import { processProductVariants } from '@/utils/productVariantProcessing';
 import { SUPPORTED_LANGUAGES } from '@/utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
-import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
+import { useActiveWorkspaceBinding } from '@/hooks/useActiveWorkspaceBinding';
 import UniversalRecipientCombobox from '@/components/shared/UniversalRecipientCombobox';
 
 function WaIcon() {
@@ -60,9 +60,15 @@ export default function ShareProductMonographDrawer({
   const [trackedShortUrl, setTrackedShortUrl] = useState(null);
   const [isGeneratingTracked, setIsGeneratingTracked] = useState(false);
 
-  // Active workspace detection
-  const activeWorkspace = useWorkspaceStore((s) => s.workspaces?.[s.activeWorkspaceId]);
-  const workspaceTarget = activeWorkspace?.targetEntity;
+  // Active workspace contextual binding (both recipient and items matching this product)
+  const {
+    workspaceRecipient,
+    preferredSupplierId,
+    preferredFormatId,
+    preferredStrengthId,
+    matchingItem,
+    workspaceName,
+  } = useActiveWorkspaceBinding({ productId: product?.slug || product?.id });
 
   // Process hierarchy from variants
   const hierarchy = useMemo(() => {
@@ -104,21 +110,26 @@ export default function ShareProductMonographDrawer({
       setCopied(false);
       setShowQr(false);
 
-      if (initialSupplierKey) {
-        const cleanTarget = String(initialSupplierKey).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
+      // 1. Supplier: Prop > Workspace matching item > 'all'
+      const targetSupplier = initialSupplierKey || preferredSupplierId;
+      if (targetSupplier) {
+        const cleanTarget = String(targetSupplier).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
         const matched = suppliersList.find(s => {
           const sClean = String(s.id || s.name).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
           return sClean === cleanTarget || sClean.includes(cleanTarget) || cleanTarget.includes(sClean);
         });
-        setSelectedSupplierId(matched ? matched.id : initialSupplierKey);
+        setSelectedSupplierId(matched ? matched.id : targetSupplier);
       } else {
         setSelectedSupplierId('all');
       }
 
-      setSelectedFormatId(initialFormatId || 'all');
-      setSelectedStrengthId(initialStrengthId || 'all');
+      // 2. Format: Prop > Workspace matching item > 'all'
+      setSelectedFormatId(initialFormatId || preferredFormatId || 'all');
 
-      // ── Auto-bind recipient: Priority 1: initialRecipient prop; Priority 2: Active Workspace targetEntity ──
+      // 3. Strength: Prop > Workspace matching item > 'all'
+      setSelectedStrengthId(initialStrengthId || preferredStrengthId || 'all');
+
+      // 4. Auto-bind recipient: Priority 1: initialRecipient prop; Priority 2: Active Workspace targetEntity
       if (initialRecipient && (initialRecipient.name || initialRecipient.id)) {
         setRecipientMode('concrete');
         setRecipient({
@@ -131,21 +142,12 @@ export default function ShareProductMonographDrawer({
           notes: initialRecipient.notes || '',
           source: 'prop',
         });
-      } else if (workspaceTarget && (workspaceTarget.name || workspaceTarget.id || workspaceTarget.displayName)) {
+      } else if (workspaceRecipient) {
         setRecipientMode('concrete');
-        setRecipient({
-          type: workspaceTarget.type || 'doctor',
-          id: workspaceTarget.id || null,
-          name: workspaceTarget.name || workspaceTarget.displayName || '',
-          company: workspaceTarget.company || workspaceTarget.clinicName || '',
-          email: workspaceTarget.email || '',
-          phone: workspaceTarget.phone || '',
-          notes: workspaceTarget.notes || '',
-          source: 'workspace',
-        });
+        setRecipient(workspaceRecipient);
       }
     }
-  }, [isOpen, initialSupplierKey, initialFormatId, initialStrengthId, initialRecipient, suppliersList, workspaceTarget]);
+  }, [isOpen, initialSupplierKey, initialFormatId, initialStrengthId, initialRecipient, suppliersList, workspaceRecipient, preferredSupplierId, preferredFormatId, preferredStrengthId]);
 
   // Helper to normalize supplier strings for robust matching
   const cleanSupplierKey = (val) => String(val || '').toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
@@ -826,7 +828,7 @@ export default function ShareProductMonographDrawer({
               <UniversalRecipientCombobox
                 value={recipient}
                 onChange={(updated) => setRecipient(updated)}
-                autoBoundWorkspaceEntity={workspaceTarget}
+                autoBoundWorkspaceEntity={workspaceRecipient}
               />
               <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#059669' }}>
                 <CheckCircle2 size={13} color="#059669" />

@@ -36,9 +36,10 @@ export async function GET(request) {
         };
       });
     } else if (type === 'all') {
-      const [usersSnap, suppSnap] = await Promise.all([
+      const [usersSnap, suppSnap, patSnap] = await Promise.all([
         adminDb.collection('users').limit(limitNum).get(),
-        adminDb.collection('suppliers').limit(15).get()
+        adminDb.collection('suppliers').limit(15).get(),
+        adminDb.collection('patients').limit(25).get()
       ]);
       const userItems = usersSnap.docs.map(doc => {
         const d = doc.data();
@@ -65,7 +66,55 @@ export async function GET(request) {
           flag: d.flag || d.country || null,
         };
       });
-      items = [...userItems, ...suppItems];
+      const patItems = patSnap.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          name: d.name || d.fullName || 'Patient',
+          alias: d.alias || d.whatsappName || '',
+          company: d.clinicName || d.clinic || (d.physician ? `Dr. ${d.physician}` : ''),
+          email: d.email || '',
+          phone: d.phone || d.mobile || d.whatsapp || '',
+          type: 'patient',
+          role: 'patient',
+          physicianId: d.physicianId || d.doctorId || null,
+          physicianName: d.physician || d.doctorName || null,
+        };
+      });
+      items = [...userItems, ...patItems, ...suppItems];
+    } else if (type === 'patient') {
+      const [usersSnap, patSnap] = await Promise.all([
+        adminDb.collection('users').where('role', '==', 'patient').limit(limitNum).get(),
+        adminDb.collection('patients').limit(limitNum).get(),
+      ]);
+      const userItems = usersSnap.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          name: d.displayName || d.name || d.fullName || 'Patient',
+          company: d.company || d.clinic || '',
+          email: d.email || '',
+          phone: d.phone || d.whatsapp || '',
+          type: 'patient',
+          role: 'patient',
+        };
+      });
+      const patItems = patSnap.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          name: d.name || d.fullName || 'Patient',
+          alias: d.alias || d.whatsappName || '',
+          company: d.clinicName || d.clinic || (d.physician ? `Dr. ${d.physician}` : ''),
+          email: d.email || '',
+          phone: d.phone || d.mobile || d.whatsapp || '',
+          type: 'patient',
+          role: 'patient',
+          physicianId: d.physicianId || d.doctorId || null,
+          physicianName: d.physician || d.doctorName || null,
+        };
+      });
+      items = [...userItems, ...patItems];
     } else {
       // Query users collection by role
       let query = adminDb.collection('users');
@@ -89,11 +138,14 @@ export async function GET(request) {
 
     // Filter in-memory by query if provided
     if (q) {
+      const cleanDigitsQ = q.replace(/\D/g, '');
       items = items.filter(item => 
         (item.name || '').toLowerCase().includes(q) ||
+        (item.alias || '').toLowerCase().includes(q) ||
         (item.company || '').toLowerCase().includes(q) ||
         (item.email || '').toLowerCase().includes(q) ||
-        (item.phone || '').includes(q)
+        (item.phone || '').includes(q) ||
+        (cleanDigitsQ.length >= 3 && (item.phone || '').replace(/\D/g, '').includes(cleanDigitsQ))
       );
     }
 

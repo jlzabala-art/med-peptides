@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import StandardDrawer from '@/components/ui/StandardDrawer';
-import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
+import UniversalRecipientCombobox from '@/components/shared/UniversalRecipientCombobox';
+import { useActiveWorkspaceBinding } from '@/hooks/useActiveWorkspaceBinding';
 import { QRCodeSVG } from 'qrcode.react';
 import notifier from '@/services/NotificationService';
 import { 
@@ -39,8 +40,8 @@ import {
  *   - Language selector (EN, ES, PT)
  * 
  * Stage 2: Recipient Assignment (Mandatory primary flow)
- *   - Concrete Recipient (Doctor, Wholesaler, Patient) via CRM directory lookup
- *   - Secondary option: Generic / Anonymous Public Link
+ *   - Inherits recipient automatically from Active Workspace
+ *   - UniversalRecipientCombobox (42px compact GCP search) replaces bulky card selectors
  * 
  * Output:
  *   - Unique, tracked short URL (/d/[code]) bound to recipient and variant
@@ -55,22 +56,32 @@ export default function VariantShareDatasheetDrawer({
   variant = {},
   selectedProduct = {},
   currentVialCode = '',
+  initialRecipient = null,
 }) {
+  const productSlug = selectedProduct?.slug || selectedProduct?.id || '';
+  const { workspaceRecipient, hasRecipient } = useActiveWorkspaceBinding({
+    productId: productSlug,
+  });
+
   const [recipientMode, setRecipientMode] = useState('concrete'); // 'concrete' | 'generic'
   const [selectedLang, setSelectedLang] = useState('en');
   const [copiedLink, setCopiedLink] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Recipient state
-  const [recipient, setRecipient] = useState({
-    type: 'doctor',
-    id: null,
-    name: '',
-    company: '',
-    email: '',
-    phone: '',
-    notes: '',
+  // Recipient state - Priority: initialRecipient > workspaceRecipient > fallback
+  const [recipient, setRecipient] = useState(() => {
+    if (initialRecipient) return initialRecipient;
+    if (workspaceRecipient) return workspaceRecipient;
+    return {
+      type: 'doctor',
+      id: null,
+      name: '',
+      company: '',
+      email: '',
+      phone: '',
+      notes: '',
+    };
   });
 
   // Tracked short link state
@@ -78,7 +89,6 @@ export default function VariantShareDatasheetDrawer({
   const [generatedCode, setGeneratedCode] = useState('');
   const [isSavedInUserProfile, setIsSavedInUserProfile] = useState(false);
 
-  const productSlug = selectedProduct?.slug || selectedProduct?.id || '';
   const productName = selectedProduct?.canonicalName || selectedProduct?.name || 'Peptide Compound';
   const dose = variant?.dosage || variant?.dose || '';
   const supplierName = variant?.supplierName || variant?.supplier || selectedProduct?.supplier || 'Standard';
@@ -86,6 +96,17 @@ export default function VariantShareDatasheetDrawer({
   const vialCode = currentVialCode || variant?.vialCode || variant?.id || 'BATCH-STD';
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+
+  // Auto-bind recipient on open if not already customized
+  useEffect(() => {
+    if (isOpen) {
+      if (initialRecipient) {
+        setRecipient(initialRecipient);
+      } else if (!recipient.name && !recipient.id && workspaceRecipient) {
+        setRecipient(workspaceRecipient);
+      }
+    }
+  }, [isOpen, initialRecipient, workspaceRecipient, recipient.name, recipient.id]);
 
   // Canonical target URL for live web preview
   const liveTargetUrl = useMemo(() => {
@@ -112,8 +133,8 @@ export default function VariantShareDatasheetDrawer({
     }
   }, [isOpen, recipientMode, recipient.id, recipient.type, recipient.name, recipient.phone, recipient.email, selectedLang]);
 
-  const generateShortUrl = async () => {
-    if (!productSlug) return;
+  const generateShortUrl = async (channel = 'web_share') => {
+    if (!productSlug) return liveTargetUrl;
     setIsGenerating(true);
 
     try {
@@ -157,7 +178,7 @@ export default function VariantShareDatasheetDrawer({
             supplier: supplierName,
             batch: vialCode,
           },
-          deliveryChannel: 'web_share',
+          deliveryChannel: channel,
           notes: recipient.notes || '',
         }),
       });
@@ -167,13 +188,16 @@ export default function VariantShareDatasheetDrawer({
         setGeneratedShortUrl(data.shortUrl);
         setGeneratedCode(data.code);
         setIsSavedInUserProfile(Boolean(payloadRecipient.id));
+        return data.shortUrl;
       } else {
         // Fallback to live URL if short-url service fails
         setGeneratedShortUrl(liveTargetUrl);
+        return liveTargetUrl;
       }
     } catch (err) {
       console.warn('Failed to generate tracked short URL:', err);
       setGeneratedShortUrl(liveTargetUrl);
+      return liveTargetUrl;
     } finally {
       setIsGenerating(false);
     }
@@ -182,14 +206,15 @@ export default function VariantShareDatasheetDrawer({
   const effectiveUrl = generatedShortUrl || liveTargetUrl;
 
   const handleCopy = async () => {
-    if (!effectiveUrl) return;
-    await navigator.clipboard.writeText(effectiveUrl);
+    const finalUrl = generatedShortUrl || await generateShortUrl('copy_link');
+    await navigator.clipboard.writeText(finalUrl);
     setCopiedLink(true);
     notifier.success('Enlace corto copiado al portapapeles ✓');
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
-  const composeWhatsAppMessage = () => {
+  const composeWhatsAppMessage = (urlToUse) => {
+    const url = urlToUse || effectiveUrl;
     const isEs = selectedLang === 'es';
     const isPt = selectedLang === 'pt';
     const recipientGreeting = recipient.name 
@@ -209,11 +234,12 @@ export default function VariantShareDatasheetDrawer({
       ? '\n\nFico à disposição para qualquer dúvida ou pedido.'
       : '\n\nPlease feel free to contact us for dosing inquiries or supply orders.';
 
-    return `${recipientGreeting}${intro}${batchText}\n\n🔗 ${effectiveUrl}${footer}`;
+    return `${recipientGreeting}${intro}${batchText}\n\n🔗 ${url}${footer}`;
   };
 
-  const handleShareWhatsApp = () => {
-    const msg = composeWhatsAppMessage();
+  const handleShareWhatsApp = async () => {
+    const finalUrl = generatedShortUrl || await generateShortUrl('whatsapp');
+    const msg = composeWhatsAppMessage(finalUrl);
     const cleanPhone = (recipient.phone || '').replace(/[^\d]/g, '');
     const waUrl = cleanPhone 
       ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
@@ -222,9 +248,10 @@ export default function VariantShareDatasheetDrawer({
     notifier.success('WhatsApp abierto con enlace corto personalizado ✓');
   };
 
-  const handleShareEmail = () => {
+  const handleShareEmail = async () => {
+    const finalUrl = generatedShortUrl || await generateShortUrl('email');
     const subject = `ATLAS HEALTH — Ficha Técnica Oficial: ${productName} ${dose}`;
-    const body = composeWhatsAppMessage();
+    const body = composeWhatsAppMessage(finalUrl);
     const to = recipient.email || '';
     const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailto, '_blank');
@@ -471,10 +498,11 @@ export default function VariantShareDatasheetDrawer({
                   Seleccione un médico, mayorista o paciente registrado para generar un <strong>enlace corto único</strong> y registrar el envío en su perfil de usuario:
                 </div>
 
-                <RecipientHierarchySelector
+                <UniversalRecipientCombobox
                   value={recipient}
                   onChange={(updated) => setRecipient(updated)}
-                  showNotesField={false}
+                  allowedTypes={['doctor', 'patient', 'wholeseller', 'clinic']}
+                  workspaceId={workspaceRecipient?.workspaceId}
                 />
               </div>
             ) : (

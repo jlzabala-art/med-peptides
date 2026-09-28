@@ -222,9 +222,9 @@ export default function DocumentsTab({ rx, onUpdateRx }) {
   const [previewDoc, setPreviewDoc] = useState(null); // { url, name }
   const unsubRef = useRef(null);
   const timeoutRef = useRef(null);
-  const [docs, setDocs] = useState(rx?.documents || rx?.attachments || []);
+  const [docs, setDocs] = useState(rx?.documents || rx?.attachedDocuments || rx?.attachments || []);
 
-  useEffect(() => { setDocs(rx?.documents || rx?.attachments || []); }, [rx?.id]);
+  useEffect(() => { setDocs(rx?.documents || rx?.attachedDocuments || rx?.attachments || []); }, [rx?.id, rx?.documents, rx?.attachedDocuments]);
 
   useEffect(() => {
     return () => {

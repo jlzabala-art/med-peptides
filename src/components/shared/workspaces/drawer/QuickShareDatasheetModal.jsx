@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import StandardDrawer from '@/components/ui/StandardDrawer';
-import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
+import UniversalRecipientCombobox from '@/components/shared/UniversalRecipientCombobox';
+import { useActiveWorkspaceBinding } from '@/hooks/useActiveWorkspaceBinding';
 import { QRCodeSVG } from 'qrcode.react';
 import notifier from '@/services/NotificationService';
 import toast from 'react-hot-toast';
@@ -28,8 +29,9 @@ import {
  * QuickShareDatasheetModal
  * ─────────────────────────────────────────────────────────────────────────────
  * Converted to StandardDrawer conforming to GCP standards and AGENTS.md rules:
- * - Dynamic products from Firestore API (replaces legacy hardcoded compounds).
- * - Full Recipient Hierarchy Selector (Doctor, Wholesaler, Patient, Client).
+ * - Automatically inherits active workspace recipient and items.
+ * - Dynamic products from Firestore API fallback when workspace has no items.
+ * - UniversalRecipientCombobox (42px compact GCP search) replaces bulky card selectors.
  * - Issues tracked short URL (/d/[code]) bound to the recipient.
  * - Records dispatch into users/{userId}/shared_datasheets subcollection.
  * - Real-time telemetry, read receipts, and CRM sync.
@@ -42,6 +44,16 @@ export default function QuickShareDatasheetModal({
   activeWs = null,
   initialRecipient = null,
 }) {
+  const { 
+    workspaceRecipient, 
+    workspaceItems, 
+    hasRecipient: hasWsRecipient, 
+    activeWorkspace 
+  } = useActiveWorkspaceBinding();
+
+  // If item is not passed as prop, prioritize the first item of the active workspace
+  const effectiveInitialItem = item || (workspaceItems.length > 0 ? workspaceItems[0] : null);
+
   const [products, setProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [selectedProductIdx, setSelectedProductIdx] = useState(0);
@@ -50,14 +62,18 @@ export default function QuickShareDatasheetModal({
   const [selectedLang, setSelectedLang] = useState('en');
 
   const [recipientMode, setRecipientMode] = useState('concrete'); // 'concrete' | 'generic'
-  const [recipient, setRecipient] = useState({
-    type: 'wholeseller',
-    id: null,
-    name: '',
-    company: '',
-    email: '',
-    phone: '',
-    notes: '',
+  const [recipient, setRecipient] = useState(() => {
+    if (initialRecipient) return initialRecipient;
+    if (workspaceRecipient) return workspaceRecipient;
+    return {
+      type: 'doctor',
+      id: null,
+      name: '',
+      company: '',
+      email: '',
+      phone: '',
+      notes: '',
+    };
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -65,9 +81,9 @@ export default function QuickShareDatasheetModal({
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
 
-  // Load dynamic catalog products if item is not preselected
+  // Load dynamic catalog products if item is not preselected and no workspace items
   useEffect(() => {
-    if (isOpen && !item) {
+    if (isOpen && !effectiveInitialItem) {
       setIsLoadingProducts(true);
       fetch('/api/catalog/summary?limit=30')
         .then((res) => res.json())
@@ -88,9 +104,9 @@ export default function QuickShareDatasheetModal({
         })
         .finally(() => setIsLoadingProducts(false));
     }
-  }, [isOpen, item]);
+  }, [isOpen, effectiveInitialItem]);
 
-  // Initialize recipient from initialRecipient or activeWs
+  // Initialize recipient from initialRecipient or workspaceRecipient
   useEffect(() => {
     if (isOpen) {
       setGeneratedLink(null);
@@ -99,49 +115,29 @@ export default function QuickShareDatasheetModal({
 
       if (initialRecipient) {
         setRecipientMode('concrete');
-        setRecipient({
-          type: initialRecipient.role || initialRecipient.type || 'wholeseller',
-          id: initialRecipient.id || null,
-          name: initialRecipient.name || initialRecipient.companyName || initialRecipient.fullName || '',
-          company: initialRecipient.company || initialRecipient.clinicName || '',
-          email: initialRecipient.email || initialRecipient.contactEmail || '',
-          phone: initialRecipient.phone || initialRecipient.whatsapp || '',
-          notes: '',
-        });
-      } else if (activeWs?.targetEntity) {
-        const target = activeWs.targetEntity;
-        const targetRole = target.role === 'wholesaler' || target.type === 'wholeseller' || activeWs?.type === 'wholesaler'
-          ? 'wholeseller'
-          : 'doctor';
+        setRecipient(initialRecipient);
+      } else if (workspaceRecipient) {
         setRecipientMode('concrete');
-        setRecipient({
-          type: targetRole,
-          id: target.id || null,
-          name: target.name || target.displayName || target.companyName || '',
-          company: target.company || '',
-          email: target.email || '',
-          phone: target.phone || '',
-          notes: '',
-        });
+        setRecipient(workspaceRecipient);
       }
     }
-  }, [isOpen, activeWs, initialRecipient]);
+  }, [isOpen, initialRecipient, workspaceRecipient]);
 
   // Current product resolution
-  const currentProduct = item || products[selectedProductIdx] || null;
+  const currentProduct = effectiveInitialItem || products[selectedProductIdx] || null;
   const currentVariants = currentProduct?.variants || [];
   const itemName = currentProduct?.canonicalName || currentProduct?.name || currentProduct?.displayName || 'Clinical Compound';
   const itemSlug = currentProduct?.slug || currentProduct?.id || '';
-  const itemDose = item?.dosage || item?.dose || selectedDose || currentVariants[0]?.dosage || currentVariants[0]?.dose || '';
-  const itemFormat = item?.format || item?.presentation || selectedFormat || currentVariants[0]?.format || 'vial';
-  const itemSupplier = item?.supplier || item?.supplierName || currentProduct?.supplier || currentProduct?.supplierName || 'Standard';
+  const itemDose = effectiveInitialItem?.dosage || effectiveInitialItem?.dose || selectedDose || currentVariants[0]?.dosage || currentVariants[0]?.dose || '';
+  const itemFormat = effectiveInitialItem?.format || effectiveInitialItem?.presentation || selectedFormat || currentVariants[0]?.format || 'vial';
+  const itemSupplier = effectiveInitialItem?.supplier || effectiveInitialItem?.supplierName || currentProduct?.supplier || currentProduct?.supplierName || 'Standard';
 
   // Available doses and formats for selected dynamic product
   const availableDoses = Array.from(new Set(currentVariants.map(v => v.dosage || v.dose).filter(Boolean)));
   const availableFormats = Array.from(new Set(currentVariants.map(v => v.format || v.presentation).filter(Boolean)));
 
-  const handleGenerateLink = async () => {
-    if (!itemSlug) return;
+  const handleGenerateLink = async (channel = 'workspace_share') => {
+    if (!itemSlug) return '';
     setIsGenerating(true);
     try {
       const payloadRecipient = recipientMode === 'concrete'
@@ -151,7 +147,7 @@ export default function QuickShareDatasheetModal({
             company: recipient.company || '',
             email: recipient.email || '',
             phone: recipient.phone || '',
-            type: recipient.type || 'wholeseller',
+            type: recipient.type || 'doctor',
           }
         : {
             id: null,
@@ -177,7 +173,7 @@ export default function QuickShareDatasheetModal({
             format: itemFormat,
             supplier: itemSupplier,
           },
-          deliveryChannel: 'workspace_share',
+          deliveryChannel: channel,
           notes: recipient.notes || '',
         }),
       });
@@ -195,9 +191,11 @@ export default function QuickShareDatasheetModal({
         toast.success(payloadRecipient.name ? `Enlace corto generado y copiado para ${payloadRecipient.name} ✓` : 'Enlace generado y copiado al portapapeles ✓');
         setTimeout(() => setCopied(false), 2500);
       }
+      return data.shortUrl;
     } catch (err) {
       console.error('[QuickShareDatasheetModal] Error:', err);
       notifier.error(`Error: ${err.message}`);
+      return '';
     } finally {
       setIsGenerating(false);
     }
@@ -206,15 +204,17 @@ export default function QuickShareDatasheetModal({
   const effectiveShortUrl = generatedLink?.shortUrl || '';
 
   const handleCopy = async () => {
-    if (effectiveShortUrl && navigator.clipboard) {
-      await navigator.clipboard.writeText(effectiveShortUrl);
+    const url = effectiveShortUrl || await handleGenerateLink('copy_link');
+    if (url && navigator.clipboard) {
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       toast.success('Enlace corto copiado al portapapeles ✓');
       setTimeout(() => setCopied(false), 2500);
     }
   };
 
-  const composeWhatsAppMessage = () => {
+  const composeWhatsAppMessage = (urlToUse) => {
+    const url = urlToUse || effectiveShortUrl;
     const isEs = selectedLang === 'es';
     const isPt = selectedLang === 'pt';
     const cleanRecipientName = recipient.name || (isEs ? 'Estimado cliente' : 'Valued Partner');
@@ -224,12 +224,13 @@ export default function QuickShareDatasheetModal({
       ? `*Ficha Técnica Oficial — ATLAS HEALTH*\n📋 *Composto:* ${itemName} (${itemDose} ${itemFormat})\nDestinatário: ${cleanRecipientName}\n\nAcesse as especificações analíticas e monografia verificada:`
       : `*Official Technical Datasheet — ATLAS HEALTH*\n📋 *Compound:* ${itemName} (${itemDose} ${itemFormat})\nRecipient: ${cleanRecipientName}\n\nAccess verified analytical specifications and monograph:`;
 
-    return `${header}\n${effectiveShortUrl}`;
+    return `${header}\n${url}`;
   };
 
-  const handleShareWhatsApp = () => {
-    if (!effectiveShortUrl) return;
-    const msg = composeWhatsAppMessage();
+  const handleShareWhatsApp = async () => {
+    const url = effectiveShortUrl || await handleGenerateLink('whatsapp');
+    if (!url) return;
+    const msg = composeWhatsAppMessage(url);
     const cleanPhone = (recipient.phone || '').replace(/[^0-9]/g, '');
     const waUrl = cleanPhone 
       ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
@@ -237,10 +238,11 @@ export default function QuickShareDatasheetModal({
     window.open(waUrl, '_blank');
   };
 
-  const handleShareEmail = () => {
-    if (!effectiveShortUrl) return;
+  const handleShareEmail = async () => {
+    const url = effectiveShortUrl || await handleGenerateLink('email');
+    if (!url) return;
     const subject = `ATLAS HEALTH — Ficha Técnica Oficial: ${itemName} ${itemDose}`;
-    const body = composeWhatsAppMessage();
+    const body = composeWhatsAppMessage(url);
     const mailto = `mailto:${encodeURIComponent(recipient.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailto, '_blank');
   };
@@ -486,10 +488,11 @@ export default function QuickShareDatasheetModal({
 
           <div style={{ padding: '0.85rem' }}>
             {recipientMode === 'concrete' ? (
-              <RecipientHierarchySelector
+              <UniversalRecipientCombobox
                 value={recipient}
                 onChange={(upd) => setRecipient(upd)}
-                showNotesField={false}
+                allowedTypes={['doctor', 'patient', 'wholeseller', 'clinic']}
+                workspaceId={workspaceRecipient?.workspaceId}
               />
             ) : (
               <div style={{

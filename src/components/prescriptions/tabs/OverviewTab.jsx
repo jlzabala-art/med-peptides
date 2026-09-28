@@ -3,6 +3,7 @@ import { User, ArrowUpRight, Stethoscope, Edit, Save, X, Building2, UserCheck, S
 import { updatePrescription, fetchCareTeamUsers } from '../../../services/prescriptionsService';
 import notifier from '../../../services/NotificationService';
 import { toast } from 'react-hot-toast';
+import PrescriptionPosologyQrCard from '../PrescriptionPosologyQrCard';
 
 const TOP_DOCTORS = [
   { name: 'Dr. Anitathurasini Rajoo', title: 'Trichology & Peptide Therapy' },
@@ -629,6 +630,11 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
             </p>
           </div>
         )}
+      </div>
+
+      {/* ── Advanced Posology & QR Sharing Suite ── */}
+      <div style={{ gridColumn: '1 / -1' }}>
+        <PrescriptionPosologyQrCard rx={rx} />
       </div>
     </div>
   );
