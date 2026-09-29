@@ -255,6 +255,8 @@ export default function InteractiveReconstitutionGuide({
       setDoseValue(p1.dose);
       setSelectedPhaseId(null);
     }
+    // Note: do NOT reset selectedPhaseId here when dose is within bounds —
+    // it was intentionally set by the user's Simulate click.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vialMg, bacWaterMl, product]);
 
@@ -2553,9 +2555,8 @@ export default function InteractiveReconstitutionGuide({
                                 type="button"
                                 onClick={() => {
                                   triggerHaptic('selection');
-                                  const willChangeVial = !!ph.recommendedVialMg;
-                                  const willChangeBac = !!ph.recommendedBacMl;
-                                  isCalibratingRef.current = (willChangeVial ? 1 : 0) + (willChangeBac ? 1 : 0);
+                                  // Always guard 2 re-renders to cover both vialMg + bacWaterMl useEffect triggers
+                                  isCalibratingRef.current = 2;
                                   setDoseValue(ph.doseMg);
                                   setDoseUnit('mg');
                                   if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
@@ -2962,10 +2963,8 @@ export default function InteractiveReconstitutionGuide({
               triggerHaptic('selection');
               const targetVial = ph.recommendedVialMg || safeVialMg;
               const targetBac = ph.recommendedBacMl || safeBacMl;
-              const willChangeVial = targetVial !== safeVialMg;
-              const willChangeBac = targetBac !== safeBacMl;
-              // Block safety resets for each vial/bac setState that will trigger the useEffect
-              isCalibratingRef.current = (willChangeVial ? 1 : 0) + (willChangeBac ? 1 : 0);
+              // Always set to 2 to guard both potential re-renders (vialMg + bacWaterMl useEffect fires)
+              isCalibratingRef.current = 2;
               setVialMg(targetVial);
               setBacWaterMl(targetBac);
               setDoseUnit('mg');
