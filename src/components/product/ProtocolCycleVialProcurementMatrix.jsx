@@ -14,10 +14,12 @@ import {
   Info, 
   SlidersHorizontal,
   Layers,
-  ArrowRight
+  ArrowRight,
+  FileText
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
+import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
 import './ProtocolCycleVialProcurementMatrix.css';
 
 /**
@@ -244,6 +246,82 @@ export default function ProtocolCycleVialProcurementMatrix({
       setTimeout(() => setCopied(false), 3000);
     }).catch(() => {
       notifier.error('Failed to copy to clipboard');
+    });
+  };
+
+  // 1-Click Commercial Bridge: Add Calculated Protocol Cycle to Active Workspace / Quotation
+  const handleAddToQuotation = () => {
+    triggerHaptic('success');
+    const { addItem, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
+
+    // 1. Add required active peptide vials by strength
+    Object.entries(basketSummary.vialStrengthCounts).forEach(([str, qty]) => {
+      addItem({
+        id: `${product?.id || 'compound'}-${str.replace(/\s+/g, '-').toLowerCase()}`,
+        productId: product?.id,
+        canonicalName: `${effectiveStrategy.name} (${str} Vial)`,
+        dosage: str,
+        quantity: qty,
+        unitPrice: 65,
+        supplierCost: 35,
+        supplierName: 'Lotusland Limited',
+        supplierId: 'supplier-lotusland',
+        warehouseId: 'europe',
+        warehouseName: 'Europe Warehouse (Poland Hub)'
+      }, activeWorkspaceId);
+    });
+
+    // 2. Add required Bacteriostatic Water
+    if (basketSummary.bacVialsNeeded > 0) {
+      addItem({
+        id: 'ancillary-bac-water-10ml',
+        productId: 'bac-water-10ml',
+        canonicalName: 'Bacteriostatic Water 10 mL (0.9% Benzyl Alcohol USP)',
+        dosage: '10 mL',
+        quantity: basketSummary.bacVialsNeeded,
+        unitPrice: 15,
+        supplierCost: 5,
+        supplierName: 'Lotusland Limited',
+        supplierId: 'supplier-lotusland',
+        warehouseId: 'europe',
+        warehouseName: 'Europe Warehouse (Poland Hub)'
+      }, activeWorkspaceId);
+    }
+
+    setDrawerOpen(true);
+    notifier.success(`Protocol cycle (${basketSummary.totalVials} vials + BAC water) added to quotation!`);
+  };
+
+  // 1-Click: Share Patient Administration & Protocol Card (WhatsApp & Print Ready)
+  const [patientCardCopied, setPatientCardCopied] = useState(false);
+  const handleSharePatientCard = () => {
+    triggerHaptic('selection');
+    const activePh = activePhasesToDisplay[0] || calculatedPhases[0];
+    const text = [
+      `📋 *PATIENT ADMINISTRATION & RECONSTITUTION PROTOCOL*`,
+      `Compound: *${effectiveStrategy.name}*`,
+      `Protocol Duration: ${basketSummary.totalWeeks} Weeks`,
+      ``,
+      `💉 *CURRENT TITRATION STEP (${activePh.name}):*`,
+      `• Target Weekly Dose: *${activePh.targetDose}*`,
+      `• Recommended Vial: ${activePh.recommendedVial}`,
+      `• Reconstitution Diluent: *${activePh.recommendedBacMl || 2.0} mL Bacteriostatic Water*`,
+      `• Volume to Draw: *50 Units (0.50 mL)* — Half of a U-100 syringe 🎯`,
+      ``,
+      `❄️ *COLD-CHAIN & STERILITY RULES:*`,
+      `• Store reconstituted vial in refrigerator at 2°C – 8°C. Protect from light.`,
+      `• USP <797> Expiration: Discard punctured vial 28 days post-reconstitution.`,
+      `• Inject subcutaneously once weekly into abdomen or thigh.`,
+      ``,
+      `Powered by Atlas Health Services • Clinical Healthcare Intelligence`
+    ].join('\n');
+
+    navigator.clipboard.writeText(text).then(() => {
+      setPatientCardCopied(true);
+      notifier.success('Patient Protocol Card copied! Ready to paste into WhatsApp or print.');
+      setTimeout(() => setPatientCardCopied(false), 3000);
+    }).catch(() => {
+      notifier.error('Failed to copy Patient Card');
     });
   };
 
@@ -518,10 +596,32 @@ export default function ProtocolCycleVialProcurementMatrix({
         </div>
 
         <div className="pcvp-footer-actions">
+          {/* Action 1: Patient Protocol Fact Sheet (WhatsApp / Print) */}
+          <button
+            type="button"
+            onClick={handleSharePatientCard}
+            className="pcvp-patient-card-btn"
+            title="Copy patient administration guidelines for WhatsApp or clinical printout"
+          >
+            {patientCardCopied ? (
+              <>
+                <Check size={14} color="#16a34a" />
+                <span>Patient Card Copied!</span>
+              </>
+            ) : (
+              <>
+                <FileText size={14} />
+                <span>Patient Protocol Card</span>
+              </>
+            )}
+          </button>
+
+          {/* Action 2: Technical Procurement Copy */}
           <button
             type="button"
             onClick={handleCopyRequisition}
             className="pcvp-copy-btn"
+            title="Copy technical procurement breakdown"
           >
             {copied ? (
               <>
@@ -534,6 +634,17 @@ export default function ProtocolCycleVialProcurementMatrix({
                 <span>Copy Procurement List</span>
               </>
             )}
+          </button>
+
+          {/* Action 3: 1-Click B2B Workspace Quotation / Order */}
+          <button
+            type="button"
+            onClick={handleAddToQuotation}
+            className="pcvp-primary-action-btn"
+            title="Add full titration cycle and ancillaries to active quotation / order"
+          >
+            <ShoppingCart size={14} />
+            <span>Order / Quote Cycle ({basketSummary.totalVials} Vials)</span>
           </button>
         </div>
       </div>

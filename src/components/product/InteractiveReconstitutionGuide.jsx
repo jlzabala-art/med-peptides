@@ -23,6 +23,7 @@ import {
 } from '@/lib/icons';
 import ClinicalHandlingProtocolStepper from './ClinicalHandlingProtocolStepper';
 import ProtocolCycleVialProcurementMatrix from './ProtocolCycleVialProcurementMatrix';
+import VialReconstitutionLabelModal from './VialReconstitutionLabelModal';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { getTranslations } from '../../utils/productTranslations';
@@ -214,6 +215,7 @@ export default function InteractiveReconstitutionGuide({
   const [doseValue, setDoseValue] = useState(() => baselineState.baseDose);
   const [selectedPhaseId, setSelectedPhaseId] = useState(null);
   const [showFullStrategyTable, setShowFullStrategyTable] = useState(false);
+  const [showVialLabelModal, setShowVialLabelModal] = useState(false);
 
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
@@ -2623,6 +2625,42 @@ export default function InteractiveReconstitutionGuide({
                 })}
               </div>
 
+              {/* Sweet Spot 50 UI / 0.5 mL Golden Standard Guideline */}
+              <div 
+                className="irg-sweet-spot-guide"
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: 0,
+                  bottom: 0,
+                  width: '2px',
+                  background: 'repeating-linear-gradient(to bottom, #0284c7, #0284c7 4px, transparent 4px, transparent 8px)',
+                  zIndex: 4,
+                  pointerEvents: 'none'
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: '-22px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: '#e0f2fe',
+                  border: '1px solid #7dd3fc',
+                  color: '#0369a1',
+                  fontSize: '0.62rem',
+                  fontWeight: 800,
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px'
+                }}>
+                  🎯 50 UI Sweet Spot (0.5 mL)
+                </div>
+              </div>
+
               {/* Active Alignment Callout Arrow with dynamic safe clamping */}
               {syringeUnits > 0 && (
                 <div 
@@ -2636,7 +2674,10 @@ export default function InteractiveReconstitutionGuide({
                     {isOverSyringe ? (
                       <span>▲ 100 U max ({liquidVolumeMl.toFixed(2)} mL total)</span>
                     ) : (
-                      <span>▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)</span>
+                      <span>
+                        ▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)
+                        {Math.abs(syringeUnits - 50) <= 2 && ' 🎯 Optimal'}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -2655,7 +2696,7 @@ export default function InteractiveReconstitutionGuide({
               <span>{t.syringeModelSpec || 'U-100 Insulin Syringe (1.0 mL = 100 Units · 1 Unit = 0.01 mL)'}</span>
             </div>
             <div style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: 600 }}>
-              ℹ️ Align front face of black rubber stopper with target graduation mark for precision dosing
+              🎯 Calibrated to 50 UI (0.50 mL — half syringe) for optimal patient comfort and zero tissue distension
             </div>
           </div>
         </div>
@@ -2686,9 +2727,35 @@ export default function InteractiveReconstitutionGuide({
               <FlaskConical size={14} color="#0284c7" />
               Clinical Administration &amp; Posology Profile
             </span>
-            <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 8px', borderRadius: '4px' }}>
-              {safeVialMg} mg / {safeBacMl.toFixed(1)} mL ({concentrationMgMl.toFixed(2)} mg/mL)
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#0d9488', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '2px 8px', borderRadius: '4px' }}>
+                {safeVialMg} mg / {safeBacMl.toFixed(1)} mL ({concentrationMgMl.toFixed(2)} mg/mL)
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setShowVialLabelModal(true);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.70rem',
+                  fontWeight: 700,
+                  color: '#003666',
+                  background: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                  padding: '2px 8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                title="Generate printable USP <797> compliant multi-dose vial expiration sticker"
+              >
+                🏷️ Print Vial Label
+              </button>
+            </div>
           </div>
 
           <div style={{
@@ -2777,6 +2844,20 @@ export default function InteractiveReconstitutionGuide({
           <strong>Mandatory Prescriber Directive:</strong> The licensed attending physician holds sole medical and legal responsibility for determining, calibrating, and prescribing the final therapeutic dosage, titration cadence, reconstitution diluent volume, and volumetric administration tailored to individual patient clinical requirements and biomarker profiles. This module does not constitute automated prescribing instructions or direct patient self-administration guidance.
         </p>
       </div>
+
+      {/* ── USP <797> Reconstituted Vial Label Modal ── */}
+      <VialReconstitutionLabelModal
+        isOpen={showVialLabelModal}
+        onClose={() => setShowVialLabelModal(false)}
+        product={product}
+        vialMg={safeVialMg}
+        bacWaterMl={safeBacMl}
+        doseValue={doseValue}
+        doseUnit={doseUnit}
+        syringeUnits={syringeUnits}
+        liquidVolumeMl={liquidVolumeMl}
+        concentrationMgMl={concentrationMgMl}
+      />
     </div>
   );
 }
