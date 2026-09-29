@@ -15,7 +15,7 @@ export default function BrandLogo({ variant = 'dark', showText = true, size = 'd
   const gap = size === 'compact' ? '0.45rem' : '0.65rem';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: gap, ...style }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: gap, whiteSpace: 'nowrap', flexShrink: 0, ...style }}>
       <AtlasHealthLogo size={iconSize} variant={isLight ? 'light' : 'dark'} />
       
       {showText && (
@@ -23,12 +23,14 @@ export default function BrandLogo({ variant = 'dark', showText = true, size = 'd
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
           letterSpacing: '-0.02em',
           lineHeight: 1,
-          display: 'flex',
+          display: 'inline-flex',
           alignItems: 'center',
-          gap: '5px'
+          gap: '5px',
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}>
-          <span style={{ fontWeight: 800, color: primaryColor, fontSize }}>Atlas Health</span>
-          <span style={{ fontWeight: 600, color: secondaryColor, fontSize }}>Services</span>
+          <span style={{ fontWeight: 800, color: primaryColor, fontSize, whiteSpace: 'nowrap' }}>Atlas Health</span>
+          <span style={{ fontWeight: 600, color: secondaryColor, fontSize, whiteSpace: 'nowrap' }}>Services</span>
         </span>
       )}
     </div>

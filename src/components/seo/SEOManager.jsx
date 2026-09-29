@@ -100,7 +100,7 @@ const SEOManager = ({
     updateMetaTag('og:image', image);
     updateMetaTag('og:url', url);
     updateMetaTag('og:type', type);
-    updateMetaTag('og:site_name', 'Atlas Health');
+    updateMetaTag('og:site_name', 'Atlas Health Services');
 
     // 3. Twitter Card Tags
     updateMetaTag('twitter:card', 'summary_large_image', 'name');

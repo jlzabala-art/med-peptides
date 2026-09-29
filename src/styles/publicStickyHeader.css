@@ -125,12 +125,16 @@
   align-items: center;
   gap: 0.85rem;
   min-width: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .puh-brand-link {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .puh-brand-title {

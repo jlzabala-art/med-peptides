@@ -291,7 +291,7 @@ export async function generateMetadata({ params, searchParams }) {
       title: pageTitle,
       description: pageDesc,
       url: canonicalUrl,
-      siteName: isCosmetic ? 'Colway Clinical Care' : 'Clinical Reference Library',
+      siteName: isCosmetic ? 'Colway Clinical Care' : 'Atlas Health Services',
       images: [
         {
           url: previewImageUrl,

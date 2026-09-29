@@ -2503,25 +2503,6 @@ export default function InteractiveReconstitutionGuide({
 
         </div>
 
-        {/* ── Protocol Cycle Vial Procurement & Sizing Matrix (Full-Width Span) ── */}
-        <div style={{ gridColumn: '1 / -1', width: '100%' }}>
-          <ProtocolCycleVialProcurementMatrix
-            strategy={fullStrategy}
-            product={product}
-            currentDoseMg={doseMg}
-            currentVialMg={safeVialMg}
-            onCalibratePhase={(ph) => {
-              triggerHaptic('selection');
-              setDoseValue(ph.doseMg);
-              setDoseUnit('mg');
-              if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
-              if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
-              notifier.info(`Calibrated to ${ph.name}: ${ph.doseMg} mg · ${ph.recommendedVialMg || 10} mg vial`);
-            }}
-            lang="en"
-          />
-        </div>
-
         {/* ── Realistic Interactive U-100 Syringe Graphic (Dedicated Full-Width Line) ── */}
         <div 
           className="irg-syringe-stage-row" 
@@ -2780,45 +2761,64 @@ export default function InteractiveReconstitutionGuide({
               </span>
             </div>
 
-            {/* Slot 2: Vial Longevity */}
+            {/* Slot 2: Frequency & Target Window */}
+            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Frequency &amp; Cadence
+              </span>
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                {doseFrequency || 'Weekly (q7d)'}
+              </div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                {administrationTiming || 'Morning / Fasted'}
+              </span>
+            </div>
+
+            {/* Slot 3: Doses Per Single Vial */}
+            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Vial Yield (Doses)
+              </span>
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0d9488', fontFamily: 'monospace' }}>
+                {safeDosesPerVial} {safeDosesPerVial === 1 ? 'dose' : 'doses'}
+              </div>
+              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                Per single {safeVialMg} mg vial
+              </span>
+            </div>
+
+            {/* Slot 4: Duration / Supply Period */}
             <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 Vial Longevity
               </span>
-              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a', fontFamily: 'monospace' }}>
-                ~{totalDosesInVial} doses
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0369a1', fontFamily: 'monospace' }}>
+                {safeDaysDuration} {safeDaysDuration === 1 ? 'day' : 'days'}
               </div>
               <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                Full therapeutic doses/vial
-              </span>
-            </div>
-
-            {/* Slot 3: Route & Cadence */}
-            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Route &amp; Cadence
-              </span>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                Weekly SubQ
-              </div>
-              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                Subcutaneous injection
-              </span>
-            </div>
-
-            {/* Slot 4: Storage Guard */}
-            <div style={{ background: '#ffffff', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <span style={{ fontSize: '0.67rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Storage (Post-Recon)
-              </span>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                ❄️ 2°C – 8°C
-              </div>
-              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                Refrigerate • Protect from light
+                {safeWeeksDuration} week supply
               </span>
             </div>
           </div>
+        </div>
+
+        {/* ── Protocol Cycle Vial Procurement & Sizing Matrix (Full-Width Span) ── */}
+        <div style={{ gridColumn: '1 / -1', width: '100%' }}>
+          <ProtocolCycleVialProcurementMatrix
+            strategy={fullStrategy}
+            product={product}
+            currentDoseMg={doseMg}
+            currentVialMg={safeVialMg}
+            onCalibratePhase={(ph) => {
+              triggerHaptic('selection');
+              setDoseValue(ph.doseMg);
+              setDoseUnit('mg');
+              if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
+              if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
+              notifier.info(`Calibrated to ${ph.name}: ${ph.doseMg} mg · ${ph.recommendedVialMg || 10} mg vial`);
+            }}
+            lang="en"
+          />
         </div>
 
       </div>

@@ -8,33 +8,29 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams?.id;
 
-  let title = 'Clinical Protocol Specification • Shared Access';
-  let description = 'Standardized clinical protocol guidelines, dosing schedules, and titration timelines for certified medical practitioners.';
-  let ogImage = `${BASE_URL}/og-catalog.png`;
+  let title = 'Clinical Protocol Specification • Atlas Health Services';
+  let description = 'Standardized clinical protocol specification, dosing schedules, titration phases, and administration parameters for medical reference. Atlas Health Services.';
+  let ogImage = `${BASE_URL}/atlas-health-logo.png`;
 
   if (adminDb && id) {
     try {
       const snap = await adminDb.collection('protocols').doc(id).get();
       if (snap.exists) {
         const d = snap.data();
-        title = `${d.name || d.title || 'Clinical Protocol'} — Clinical Protocol Guide`;
-        description = (d.summary || d.description || d.clinicalRationale || description).slice(0, 160);
+        const pName = d.name || d.title || 'Clinical Protocol';
+        title = `${pName} — Clinical Protocol | Atlas Health Services`;
         
-        // Map protocol goal/category to high-res clinical image
-        const goal = String(d.goal || d.category || '').toLowerCase();
-        if (goal.includes('fat') || goal.includes('metabolic') || goal.includes('weight')) {
-          ogImage = `${BASE_URL}/images/clinical/goal_metabolic.jpg`;
-        } else if (goal.includes('longevity') || goal.includes('aging')) {
-          ogImage = `${BASE_URL}/images/clinical/goal_longevity.jpg`;
-        } else if (goal.includes('recovery') || goal.includes('tissue') || goal.includes('joint')) {
-          ogImage = `${BASE_URL}/images/clinical/goal_recovery.jpg`;
-        } else if (goal.includes('cognit') || goal.includes('neuro') || goal.includes('brain')) {
-          ogImage = `${BASE_URL}/images/clinical/goal_cognition.jpg`;
-        } else if (goal.includes('immune')) {
-          ogImage = `${BASE_URL}/images/clinical/goal_immunity.jpg`;
-        } else if (goal.includes('hormon') || goal.includes('growth')) {
-          ogImage = `${BASE_URL}/images/clinical/goal_hormonal.jpg`;
+        // Neutral, objective clinical description without marketing buzzwords
+        const rawSummary = d.summary || d.description || d.clinicalRationale;
+        if (rawSummary && rawSummary.length > 20) {
+          const cleanSummary = rawSummary.replace(/^[#*\s]+/, '').replace(/[*_]/g, '').trim();
+          description = cleanSummary.slice(0, 155) + (cleanSummary.length > 155 ? '...' : '');
+        } else {
+          description = `Standardized clinical protocol specification for ${pName}: titration phases, dosing schedules, and administration parameters. Atlas Health Services.`;
         }
+        
+        // Always provide official Atlas Health Services logo for crisp WhatsApp preview
+        ogImage = `${BASE_URL}/atlas-health-logo.png`;
       }
     } catch (e) {
       console.warn('[shared/protocol/generateMetadata] Error:', e.message);
@@ -50,15 +46,15 @@ export async function generateMetadata({ params }) {
       title,
       description,
       type: 'article',
-      siteName: 'Med-Peptides Clinical Directory',
+      siteName: 'Atlas Health Services',
       url: `${BASE_URL}/shared/protocol/${id}`,
       images: [
         {
           url: ogImage,
-          width: 1200,
-          height: 630,
+          width: 1024,
+          height: 1024,
           type: isPng ? 'image/png' : 'image/jpeg',
-          alt: title
+          alt: 'Atlas Health Services — Clinical Protocol Specification'
         }
       ]
     },
@@ -72,9 +68,9 @@ export async function generateMetadata({ params }) {
       'og:image': ogImage,
       'og:image:secure_url': ogImage,
       'og:image:type': isPng ? 'image/png' : 'image/jpeg',
-      'og:image:width': '1200',
-      'og:image:height': '630',
-      'og:image:alt': title
+      'og:image:width': '1024',
+      'og:image:height': '1024',
+      'og:image:alt': 'Atlas Health Services — Clinical Protocol Specification'
     }
   };
 }

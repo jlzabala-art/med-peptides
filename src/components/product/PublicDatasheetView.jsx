@@ -967,8 +967,8 @@ export default function PublicDatasheetView({
     // Default therapeutic peptide monograph
     return [
       { id: 'overview', label: lang === 'es' ? 'Perfil Farmacológico' : 'Pharmacological Profile', icon: FileText },
-      { id: 'presentations-matrix', label: lang === 'es' ? 'Lotes y Presentaciones' : 'Batch & Presentations', icon: Layers },
       { id: 'reconstitution-section', label: isPenOrCart ? (lang === 'es' ? 'Calibración de Dial' : 'Pen Dial Titration') : isSprayFormat ? (lang === 'es' ? 'Dosimetría Intranasal' : 'Intranasal Dosimetry') : (lang === 'es' ? 'Guía de Reconstitución' : 'Reconstitution Guide'), icon: Droplets },
+      { id: 'presentations-matrix', label: lang === 'es' ? 'Lotes y Presentaciones' : 'Batch & Presentations', icon: Layers },
       { id: 'specs-section', label: lang === 'es' ? 'Certificado de Análisis (CoA)' : 'Certificate of Analysis', icon: ShieldCheck },
       ...(!isSolventProduct ? [
         { id: 'publications-section', label: lang === 'es' ? 'Ensayos y Literatura' : 'Scientific Literature', icon: FileText },
