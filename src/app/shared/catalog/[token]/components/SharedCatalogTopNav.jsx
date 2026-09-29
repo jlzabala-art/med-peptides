@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Building2,
@@ -9,15 +9,18 @@ import {
   LogOut,
   Mail,
   LogIn,
-  UserPlus,
+  ChevronDown,
+  User,
+  LayoutDashboard,
 } from 'lucide-react';
 import { SHIPPING_DESTINATIONS } from '../../../../../hooks/data/useSharedCatalogState';
+import '@/styles/publicStickyHeader.css';
 
 /**
  * SharedCatalogTopNav — Sandboxed institutional topbar matching Google Cloud UX standards.
  * Supports:
  *  - Neutral, compact destination selector (no upfront freight cost in header)
- *  - Standardized Sign In & Sign Up buttons identical to PublicDatasheetView / PublicUnifiedHeader
+ *  - Standardized GCP Unified Auth Pill (Single Sign In CTA when unauth, Avatar Dropdown when auth)
  *  - Currency & Language dropdowns
  *  - Contact & Cart indicators
  */
@@ -46,6 +49,21 @@ export default function SharedCatalogTopNav({
 }) {
   const isSpanish = lang === 'es';
 
+  const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
+  const authDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (authDropdownRef.current && !authDropdownRef.current.contains(e.target)) {
+        setAuthDropdownOpen(false);
+      }
+    }
+    if (authDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [authDropdownOpen]);
+
   const getDashboardPath = () => {
     if (activeRole === 'admin') return '/admin';
     if (activeRole === 'doctor' || activeRole === 'medical_director') return '/doctor';
@@ -55,13 +73,16 @@ export default function SharedCatalogTopNav({
     return '/patient';
   };
 
+  const userInitial = (user?.displayName || user?.email || 'U').charAt(0).toUpperCase();
+  const userShortName = user?.displayName ? user.displayName.split(' ')[0] : (isSpanish ? 'Mi Consola' : 'Console');
+
   return (
     <header className="institutional-topbar">
       <div className="topbar-inner">
         {/* Brand & Badge Group */}
         <div className="topbar-brand">
-          <Link href="/" className="topbar-brand-title" style={{ textDecoration: 'none', color: '#ffffff' }}>
-            Med-Peptides
+          <Link href="/" className="topbar-brand-title" style={{ textDecoration: 'none', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>Atlas Health Services</span>
           </Link>
           <span className="topbar-brand-divider" aria-hidden="true" />
           <span className="topbar-badge-pill">
@@ -143,54 +164,62 @@ export default function SharedCatalogTopNav({
             )}
           </div>
 
-          {/* Google Cloud Standard Auth CTAs (Sign In & Sign Up) */}
+          {/* GCP-Style Morphing Auth Pill (Single button changes state) */}
           <div className="topbar-row-access">
-            {isAuthenticated ? (
-              <div className="topbar-auth-inner">
-                <Link
-                  href={getDashboardPath()}
-                  className="puh-btn puh-btn-console"
-                  title={isSpanish ? 'Acceso a mi Panel Profesional' : 'Access Practitioner Dashboard'}
-                >
-                  <span className="puh-user-status-dot" aria-hidden="true" />
-                  <span className="puh-user-avatar">
-                    {(user?.displayName || user?.email || 'U').charAt(0).toUpperCase()}
-                  </span>
-                  <span className="puh-auth-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
-                </Link>
+            {isAuthenticated && user ? (
+              <div className="puh-auth-user-wrapper" ref={authDropdownRef}>
                 <button
                   type="button"
-                  onClick={async () => {
-                    try {
-                      await logout();
-                    } catch (e) {
-                      console.error('Sign out error:', e);
-                    }
-                  }}
-                  className="puh-btn puh-btn-ghost"
-                  style={{ padding: '0 8px', height: '32px' }}
-                  title={`Sign Out (${user?.email || 'Provider'})`}
+                  className="puh-btn-auth-user"
+                  onClick={() => setAuthDropdownOpen(!authDropdownOpen)}
+                  aria-expanded={authDropdownOpen}
+                  aria-haspopup="true"
+                  title={user?.email || 'User Account'}
                 >
-                  <LogOut size={13} color="#f87171" />
+                  <span className="puh-user-status-dot" aria-hidden="true" />
+                  <span className="puh-user-avatar">{userInitial}</span>
+                  <span className="puh-auth-label">{userShortName}</span>
+                  <ChevronDown size={11} className={`puh-chevron ${authDropdownOpen ? 'open' : ''}`} />
                 </button>
+
+                {authDropdownOpen && (
+                  <div className="puh-auth-dropdown" role="menu">
+                    <div className="puh-auth-dropdown-header">
+                      <span className="puh-dropdown-email">{user?.email}</span>
+                    </div>
+                    <Link href={getDashboardPath()} className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
+                      <LayoutDashboard size={13} />
+                      <span>{isSpanish ? 'Mi Consola' : 'Console'}</span>
+                    </Link>
+                    <Link href="/account" className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
+                      <User size={13} />
+                      <span>{isSpanish ? 'Mi Cuenta' : 'Account'}</span>
+                    </Link>
+                    <div className="puh-auth-dropdown-divider" />
+                    <button
+                      type="button"
+                      className="puh-auth-dropdown-item puh-auth-dropdown-item--danger"
+                      onClick={async () => {
+                        setAuthDropdownOpen(false);
+                        try { await logout(); } catch (e) { console.error('Sign out error:', e); }
+                      }}
+                      role="menuitem"
+                    >
+                      <LogOut size={13} />
+                      <span>{isSpanish ? 'Cerrar Sesión' : 'Sign Out'}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="topbar-auth-inner">
                 <Link
                   href="/login?tab=login"
                   className="puh-btn puh-btn-signin"
-                  title={isSpanish ? 'Iniciar sesión' : 'Sign In'}
+                  title={isSpanish ? 'Iniciar sesión o registrarse' : 'Sign in or create account'}
                 >
                   <LogIn size={13} className="puh-btn-icon" />
                   <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
-                </Link>
-                <Link
-                  href="/login?tab=register"
-                  className="puh-btn puh-btn-signup"
-                  title={isSpanish ? 'Registrarse en la plataforma médica' : 'Register for clinical practitioner portal'}
-                >
-                  <UserPlus size={13} className="puh-btn-icon" />
-                  <span className="puh-auth-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
                 </Link>
               </div>
             )}

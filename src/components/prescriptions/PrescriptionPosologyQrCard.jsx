@@ -151,16 +151,35 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
 
   const patientName = rx.patient?.name || rx.patientName || 'Paciente';
   const patientAlias = rx.patientAlias || rx.patient?.alias ? ` (~${rx.patientAlias || rx.patient?.alias})` : '';
-  const doctorName = rx.doctorName || 'Dra. Hanieh Erdmann';
+  const doctorName = rx.doctorName || rx.doctor?.name || 'Dra. Hanieh Erdmann';
+
+  // Dynamic formula & posology extraction
+  const rawItems = rx.items || rx.compounds || [];
+  let formulaText = rx.formulaName || rx.title || '';
+  if (rawItems.length > 0) {
+    const activeItems = rawItems
+      .filter(i => i.itemType !== 'vehicle_base' && i.itemType !== 'consumable')
+      .map(i => {
+        const conc = i.concentration || i.dosage || '';
+        return `${i.name}${conc && !i.name.includes(conc) ? ` ${conc}` : ''}`;
+      });
+    const vehicle = rawItems.find(i => i.itemType === 'vehicle_base');
+    const activeStr = activeItems.length > 0 ? activeItems.join(' + ') : rawItems.map(i => i.name).join(' + ');
+    formulaText = vehicle ? `${activeStr} en ${vehicle.name}` : activeStr;
+    if (rx.structuredPosology?.packLabel) {
+      formulaText += ` (${rx.structuredPosology.packLabel})`;
+    }
+  }
+  const posologyText = rx.structuredPosology?.summary || rx.posology || rx.dosageSchedule || 'Aplicar según pauta médica indicada.';
 
   const shareTextWhatsApp = encodeURIComponent(
     `*Atlas Health — Ficha Técnica y Posología Médica*\n` +
     `📋 *Prescripción:* ${rxId}\n` +
     `👤 *Paciente:* ${patientName}${patientAlias}\n` +
     `🩺 *Médica Prescriptora:* ${doctorName}\n` +
-    `🧪 *Fórmula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% en TrichoSol™ (3x 100ml)\n` +
-    `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
-    `🔗 *Ver Ficha Digital Completa & Verificación:* ${publicUrl}`
+    `🧪 *Fórmula:* ${formulaText}\n` +
+    `🕒 *Posología:* ${posologyText}\n\n` +
+    `🔗 *Ver Ficha Digital Completa & Verificación:*\n${publicUrl}`
   );
 
   return (

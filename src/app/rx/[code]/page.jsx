@@ -92,47 +92,85 @@ export async function generateMetadata({ params }) {
   const code = resolvedParams?.code || '';
   const rx = await getPrescriptionData(code);
 
-  const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
-  const doctor = rx?.doctorName || 'Consultant Specialist';
-  let clinic = rx?.clinic || 'Atlas Services Clinical Care';
-  if (clinic.toLowerCase().includes('mediluxe')) {
-    clinic = 'Atlas Services Clinical Care';
+  const patientName = rx?.patient?.name || rx?.patientName || 'Paciente';
+  const doctor = rx?.doctorName || rx?.doctor?.name || 'Dra. Hanieh Erdmann';
+  let clinic = rx?.clinic || 'Atlas Health Services';
+  if (clinic.toLowerCase().includes('mediluxe') || clinic.toLowerCase().includes('bedaya')) {
+    clinic = 'Atlas Health Services';
   }
 
-  const title = rx 
-    ? `Medical Prescription #${code} | ${clinic}`
-    : `Medical Prescription #${code} | Clinical Dossier`;
+  // 1. Build dynamic quick explanation for WhatsApp
+  let formulaSummary = '';
+  const rawItems = rx?.items || rx?.compounds || [];
+  if (rawItems.length > 0) {
+    const activeItems = rawItems
+      .filter(i => i.itemType !== 'vehicle_base' && i.itemType !== 'consumable')
+      .map(i => {
+        const conc = i.concentration || i.dosage || '';
+        return `${i.name}${conc && !i.name.includes(conc) ? ` ${conc}` : ''}`;
+      });
+    const vehicle = rawItems.find(i => i.itemType === 'vehicle_base');
+    const activeStr = activeItems.length > 0 ? activeItems.join(' + ') : rawItems.map(i => i.name).join(' + ');
+    formulaSummary = vehicle ? `${activeStr} en ${vehicle.name}` : activeStr;
+  } else if (rx?.formulaName || rx?.title) {
+    formulaSummary = rx.formulaName || rx.title;
+  }
 
-  const description = `Medical prescription and personalized dosing protocol for ${patientName}, issued by ${doctor} (${clinic}). Digital healthcare dossier.`;
+  const posologySummary = rx?.structuredPosology?.summary || rx?.posology || rx?.dosageSchedule || '';
+  const packSummary = rx?.structuredPosology?.packLabel || '';
 
-  const ogLogoUrl = `${BASE_URL}/atlas-health-logo.png`;
+  let description = '';
+  if (formulaSummary) {
+    description = `Fórmula: ${formulaSummary}${packSummary ? ` (${packSummary})` : ''}. `;
+    if (posologySummary) {
+      description += `Posología: ${posologySummary}. `;
+    }
+    description += `Prescrita por ${doctor} • Atlas Health Services.`;
+  } else {
+    description = `Ficha técnica y pauta posológica oficial para ${patientName}. Prescrita por ${doctor} (${clinic}). Atlas Health Services.`;
+  }
+
+  // Clamped to WhatsApp's optimal preview length
+  if (description.length > 200) {
+    description = description.slice(0, 197).trim() + '...';
+  }
+
+  const title = `Prescripción Médica #${code} • Atlas Health Services`;
+  const ogLogoUrl = `${BASE_URL}/atlas-health-logo-wa.png`;
 
   return {
     title,
     description,
     openGraph: {
-      title: `Medical Prescription #${code} — ${patientName}`,
+      title,
       description,
       url: `${BASE_URL}/rx/${code}`,
-      siteName: 'Atlas Services Healthcare',
+      siteName: 'Atlas Health Services',
       type: 'article',
       images: [
         {
           url: ogLogoUrl,
           width: 400,
           height: 400,
-          alt: 'Atlas Services Healthcare'
+          type: 'image/png',
+          alt: 'Atlas Health Services'
         }
       ]
     },
     twitter: {
       card: 'summary',
-      title: `Medical Prescription #${code} — ${patientName}`,
+      title,
       description,
       images: [ogLogoUrl]
     },
     other: {
-      'whatsapp:title': `Medical Prescription #${code} — ${patientName}`,
+      'og:image': ogLogoUrl,
+      'og:image:secure_url': ogLogoUrl,
+      'og:image:type': 'image/png',
+      'og:image:width': '400',
+      'og:image:height': '400',
+      'og:image:alt': 'Atlas Health Services',
+      'whatsapp:title': title,
       'whatsapp:description': description,
       'whatsapp:image': ogLogoUrl
     },
