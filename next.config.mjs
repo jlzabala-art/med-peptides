@@ -24,36 +24,29 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'firebase', 'firebase-admin', 'framer-motion', 'date-fns', 'lodash'],
-    // ── Reduce Cloud Function bundle: exclude heavy admin-only packages
-    // from the output file tracing for public routes.
-    // These are only needed in /admin/*, /doctor/*, /wholesaler/* routes.
-    outputFileTracingExcludes: {
-      '/p/[slug]': [
-        'typescript',
-        'pdf-lib',
-        'jspdf',
-        'libphonenumber-js',
-        '@algolia',
-        'es-toolkit',
-        'core-js',
-        'web-streams-polyfill',
-        'recharts',
-      ],
-      '/proto/**': [
-        'typescript', 'pdf-lib', 'jspdf', 'libphonenumber-js',
-        '@algolia', 'es-toolkit', 'core-js', 'web-streams-polyfill',
-      ],
-      '/what-are-peptides': [
-        'typescript', 'pdf-lib', 'jspdf', 'recharts',
-      ],
-    },
   },
+
   allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.1.47', '192.168.1.*'],
   output: "standalone",
 
+  // ── Bundle size optimization: exclude heavy pure-frontend packages from
+  // Cloud Function tracing for public routes (safe — firebase-admin NOT excluded).
+  outputFileTracingExcludes: {
+    '/p/[slug]': [
+      'typescript', 'pdf-lib', 'jspdf', 'libphonenumber-js',
+      '@algolia', 'es-toolkit', 'core-js', 'web-streams-polyfill', 'recharts',
+    ],
+    '/proto/**': [
+      'typescript', 'pdf-lib', 'jspdf', 'libphonenumber-js',
+      '@algolia', 'es-toolkit', 'core-js', 'web-streams-polyfill',
+    ],
+    '/what-are-peptides': [
+      'typescript', 'pdf-lib', 'jspdf', 'recharts',
+    ],
+  },
 
-  // serverExternalPackages intentionally removed — google-gax and firebase-admin
-  // sub-packages must be bundled by Next.js for GCP Cloud Function runtime compatibility.
+  // google-gax and firebase-admin sub-packages must be bundled by Next.js
+  // for GCP Cloud Function runtime compatibility — NOT in serverExternalPackages.
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
