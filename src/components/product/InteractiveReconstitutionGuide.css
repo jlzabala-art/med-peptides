@@ -1956,3 +1956,121 @@
 }
 
 
+
+/* ═══════════════════════════════════════════════════════════
+   CLINICAL PATHWAY — 4-Step Stepper Layout
+   Desktop: 4 columns side-by-side with connector line
+   Mobile: stacked vertically, numbered badges stay visible
+   ═══════════════════════════════════════════════════════════ */
+
+.irg-pathway-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  position: relative;
+}
+
+/* Horizontal connector line between steps on desktop */
+.irg-pathway-steps::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: calc(12.5% + 4px);
+  right: calc(12.5% + 4px);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(2,132,199,0.5) 0%, rgba(56,189,248,0.2) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.irg-pathway-step {
+  background: rgba(0, 20, 40, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.irg-pathway-step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.12);
+  background: rgba(0, 30, 60, 0.5);
+}
+
+.irg-pathway-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
+}
+
+.irg-pathway-step-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #7dd3fc;
+}
+
+.irg-pathway-step-body {
+  padding: 10px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Tablet: 2x2 grid ── */
+@media (max-width: 900px) {
+  .irg-pathway-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .irg-pathway-steps::before {
+    display: none;
+  }
+}
+
+/* ── Mobile: single column, stacked ── */
+@media (max-width: 560px) {
+  .irg-pathway-steps {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .irg-pathway-step {
+    border-radius: 8px;
+  }
+
+  .irg-pathway-step-header {
+    padding: 8px 10px 6px;
+  }
+
+  .irg-pathway-step-body {
+    padding: 8px 10px;
+  }
+
+  /* On mobile, steps are a vertical stepper with left-side accent */
+  .irg-pathway-step::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #0284c7, rgba(2,132,199,0.2));
+    border-radius: 3px 0 0 3px;
+  }
+}

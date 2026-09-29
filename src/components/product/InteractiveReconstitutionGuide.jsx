@@ -1700,282 +1700,268 @@ export default function InteractiveReconstitutionGuide({
       {/* ── 2. Target Dose & Precision Syringe Calibration Workspace ── */}
       <div className="irg-workspace">
         
-        {/* 📋 Prominent Clinical Reference Protocol Hero Banner (Full-Width Span) */}
-        {(activeSelectedProtocol || primaryProtocol) && (
-          <div style={{
-            gridColumn: '1 / -1',
-            background: 'linear-gradient(135deg, #001e36 0%, #00335e 100%)',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            marginBottom: '20px',
-            border: '1px solid rgba(56, 189, 248, 0.35)',
-            boxShadow: '0 4px 16px rgba(0, 30, 54, 0.4)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px'
-          }}>
-            {/* Header: Label, Badges & Explore Link Button */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '12px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '8px',
-                  background: 'rgba(56, 189, 248, 0.18)',
-                  color: '#38bdf8',
-                  border: '1px solid rgba(56, 189, 248, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Activity size={20} />
-                </div>
-                <div>
+        {/* ── CLINICAL PATHWAY: 4-Step Linear Flow ── */}
+        {(activeSelectedProtocol || primaryProtocol) && (() => {
+          const proto = activeSelectedProtocol || primaryProtocol;
+          const phases = clinicalPhases || [];
+          const isEs = lang === 'es';
+          return (
+            <div style={{ gridColumn: '1 / -1', marginBottom: '20px' }}>
+
+              {/* ── Section Header ── */}
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                flexWrap: 'wrap', gap: '8px', marginBottom: '14px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    color: '#7dd3fc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    flexWrap: 'wrap'
+                    width: '30px', height: '30px', borderRadius: '7px',
+                    background: 'rgba(56,189,248,0.15)', border: '1px solid rgba(56,189,248,0.3)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8', flexShrink: 0
                   }}>
-                    <span>{lang === 'es' ? 'VÍA CLÍNICA DE REFERENCIA & DOSIMETRÍA OPERATIVA' : 'STANDARDIZED CLINICAL PATHWAY REFERENCE'}</span>
-                    <span style={{ background: 'rgba(56, 189, 248, 0.25)', color: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>
-                      {activeSelectedProtocol.duration || '8 Weeks'}
-                    </span>
-                    {activeSelectedProtocol.phasesCount && (
-                      <span style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>
-                        {activeSelectedProtocol.phasesCount} {lang === 'es' ? 'Fases' : 'Phases'}
-                      </span>
-                    )}
+                    <Activity size={16} />
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-                    {lang === 'es'
-                      ? 'Resumen dosimétrico interactivo antes de consultar la guía clínica completa'
-                      : 'Interactive dosimetric summary before exploring full clinical blueprint'}
+                  <div>
+                    <div style={{
+                      fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.08em',
+                      textTransform: 'uppercase', color: '#7dd3fc', display: 'flex',
+                      alignItems: 'center', gap: '6px', flexWrap: 'wrap'
+                    }}>
+                      <span>{isEs ? 'VÍA CLÍNICA INTERACTIVA' : 'CLINICAL PATHWAY'}</span>
+                      {proto.duration && <span style={{ background: 'rgba(56,189,248,0.2)', color: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontSize: '0.62rem' }}>{proto.duration}</span>}
+                      {proto.phasesCount && <span style={{ background: 'rgba(255,255,255,0.12)', color: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontSize: '0.62rem' }}>{proto.phasesCount} {isEs ? 'fases' : 'phases'}</span>}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
+                      {isEs ? 'Sigue los 4 pasos para configurar y administrar tu dosis' : 'Follow 4 steps to configure and administer your dose'}
+                    </div>
                   </div>
+                </div>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <a href="/proto" target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: '0.7rem', color: '#64748b', textDecoration: 'none', padding: '4px 10px', borderRadius: '6px', border: '1px solid #334155', background: 'transparent', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Layers size={12} />{isEs ? 'Todos los protocolos ↗' : 'All protocols ↗'}
+                  </a>
+                  <a href={`/proto/${proto.slug || proto.id}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: '0.7rem', color: '#38bdf8', textDecoration: 'none', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(56,189,248,0.4)', background: 'rgba(56,189,248,0.08)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <FileText size={12} />{isEs ? 'Ver protocolo completo ↗' : 'Full protocol ↗'}
+                  </a>
                 </div>
               </div>
 
-              <div className="irg-proto-actions-bar">
-                <a
-                  href="/proto"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="irg-proto-btn-secondary"
-                  title={lang === 'es' ? 'Explorar el catálogo clínico con los 50+ protocolos' : 'Browse comprehensive clinical protocol directory (50+)'}
-                >
-                  <Layers size={14} />
-                  <span>{lang === 'es' ? 'Directorio de Protocolos (50+) ↗' : 'All Protocols Directory (50+) ↗'}</span>
-                </a>
+              {/* ── 4-Step Cards ── */}
+              <div className="irg-pathway-steps">
 
-                <a
-                  href={`/proto/${activeSelectedProtocol.slug || activeSelectedProtocol.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="irg-proto-btn-primary"
-                  title={lang === 'es' ? 'Ver pauta clínica completa, fases y dosificación de este protocolo' : 'View full clinical protocol roadmap, phases & dosing'}
-                >
-                  <FileText size={14} />
-                  <span>{lang === 'es' ? 'Ver Protocolo Completo ↗' : 'View Full Protocol ↗'}</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Protocol Switcher / Dropdown Selector (Institutional GCP Standard) */}
-            <div style={{
-              background: 'rgba(0, 17, 34, 0.55)',
-              border: '1px solid rgba(56, 189, 248, 0.25)',
-              borderRadius: '8px',
-              padding: '12px 14px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                <label
-                  htmlFor="irg-protocol-dropdown"
-                  style={{
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    color: '#7dd3fc',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <Sparkles size={13} color="#38bdf8" />
-                  {lang === 'es' ? 'Protocolo Clínico Activo:' : 'Active Clinical Protocol:'}
-                </label>
-                {associatedProtocols && associatedProtocols.length > 1 && (
-                  <span style={{ fontSize: '0.70rem', color: '#94a3b8', fontWeight: 600 }}>
-                    {associatedProtocols.length} {lang === 'es' ? 'vías disponibles para este compuesto' : 'pathways available for this compound'}
-                  </span>
-                )}
-              </div>
-
-              <div style={{ position: 'relative', width: '100%' }}>
-                {/* Visual Auto-Wrapping Clinical Trigger Container */}
-                <div
-                  style={{
-                    width: '100%',
-                    backgroundColor: '#002544',
-                    color: '#ffffff',
-                    padding: '10px 42px 10px 14px',
-                    borderRadius: '8px',
-                    border: '1px solid #0284c7',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px',
-                    pointerEvents: 'none'
-                  }}
-                >
-                  <div style={{
-                    fontSize: '0.94rem',
-                    fontWeight: 700,
-                    lineHeight: 1.35,
-                    color: '#ffffff',
-                    wordBreak: 'break-word',
-                    whiteSpace: 'normal',
-                    textAlign: 'left'
-                  }}>
-                    {activeSelectedProtocol.name}
+                {/* ── STEP 1: Select Protocol ── */}
+                <div className="irg-pathway-step">
+                  <div className="irg-pathway-step-header">
+                    <div className="irg-pathway-step-num">1</div>
+                    <div className="irg-pathway-step-label">{isEs ? 'Protocolo' : 'Protocol'}</div>
                   </div>
-                  <div style={{
-                    fontSize: '0.74rem',
-                    color: '#38bdf8',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    flexWrap: 'wrap'
-                  }}>
-                    <span>{activeSelectedProtocol.duration || '8 Weeks'}</span>
-                    <span>•</span>
-                    <span>{activeSelectedProtocol.phasesCount || (activeSelectedProtocol.phases ? activeSelectedProtocol.phases.length : 3)} {lang === 'es' ? 'fases clínicas' : 'clinical phases'}</span>
-                    {activeSelectedProtocol.isPrimary && (
-                      <span style={{ background: 'rgba(56, 189, 248, 0.25)', color: '#7dd3fc', padding: '1px 5px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700 }}>
-                        ★ {lang === 'es' ? 'Principal' : 'Primary'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Dropdown Chevron Icon */}
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  color: '#38bdf8',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <ChevronDown size={18} />
-                </div>
-
-                {/* Accessible Full-Surface Select Overlay for Native Mobile Wheel & Accessibility */}
-                <select
-                  id="irg-protocol-dropdown"
-                  value={activeSelectedProtocol.id || activeSelectedProtocol.slug}
-                  onChange={(e) => handleProtocolChange(e.target.value)}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    opacity: 0,
-                    cursor: 'pointer',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    zIndex: 2
-                  }}
-                  aria-label={lang === 'es' ? 'Seleccionar Protocolo Clínico' : 'Select Clinical Protocol'}
-                >
-                  {(associatedProtocols && associatedProtocols.length > 0 ? associatedProtocols : [primaryProtocol]).filter(Boolean).map(proto => {
-                    const dur = proto.duration || '8 Weeks';
-                    const phCount = proto.phasesCount || (proto.phases ? proto.phases.length : 3);
-                    const isFlag = proto.isPrimary ? ' ★' : '';
-                    return (
-                      <option
-                        key={proto.id || proto.slug}
+                  <div className="irg-pathway-step-body">
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Selecciona el protocolo a seguir' : 'Select the protocol to follow'}
+                    </div>
+                    {/* Protocol Selector */}
+                    <div style={{ position: 'relative' }}>
+                      <div style={{
+                        background: '#002544', border: '1px solid #0284c7', borderRadius: '8px',
+                        padding: '10px 38px 10px 12px', cursor: 'pointer', pointerEvents: 'none'
+                      }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.3 }}>{proto.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#38bdf8', marginTop: '2px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span>{proto.duration || '8 Weeks'}</span>
+                          <span style={{ opacity: 0.5 }}>•</span>
+                          <span>{proto.phasesCount || phases.length} {isEs ? 'fases' : 'phases'}</span>
+                          {proto.isPrimary && <span style={{ background: 'rgba(56,189,248,0.2)', color: '#7dd3fc', padding: '0px 5px', borderRadius: '4px', fontSize: '0.65rem' }}>★ {isEs ? 'Principal' : 'Primary'}</span>}
+                        </div>
+                      </div>
+                      <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#38bdf8', pointerEvents: 'none' }}>
+                        <ChevronDown size={16} />
+                      </div>
+                      <select
+                        id="irg-protocol-dropdown"
                         value={proto.id || proto.slug}
-                        style={{ backgroundColor: '#001e36', color: '#ffffff', padding: '8px' }}
+                        onChange={(e) => handleProtocolChange(e.target.value)}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 2 }}
+                        aria-label={isEs ? 'Seleccionar Protocolo' : 'Select Protocol'}
                       >
-                        {proto.name} ({dur} · {phCount} {lang === 'es' ? 'fases' : 'phases'}){isFlag}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              {/* Protocol summary description & action links */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginTop: '6px' }}>
-                {activeSelectedProtocol.description && (
-                  <p style={{ margin: 0, fontSize: '0.80rem', color: '#bae6fd', lineHeight: 1.45, opacity: 0.9, flex: '1 1 300px' }}>
-                    {activeSelectedProtocol.description}
-                  </p>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flexShrink: 0 }}>
-                  {activeSelectedProtocol.duration && (
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#e0f2fe',
-                      background: 'rgba(56, 189, 248, 0.2)',
-                      border: '1px solid rgba(56, 189, 248, 0.35)',
-                      borderRadius: '6px',
-                      padding: '2px 8px'
-                    }}>
-                      {activeSelectedProtocol.duration}
-                    </span>
-                  )}
-                  {activeSelectedProtocol.phasesCount && (
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#e0f2fe',
-                      background: 'rgba(255, 255, 255, 0.12)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '6px',
-                      padding: '2px 8px'
-                    }}>
-                      {activeSelectedProtocol.phasesCount} {lang === 'es' ? 'Fases' : 'Phases'}
-                    </span>
-                  )}
-                  {(activeSelectedProtocol.route || activeSelectedProtocol.administration_route) && (
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#93c5fd',
-                      background: 'rgba(147, 197, 253, 0.15)',
-                      border: '1px solid rgba(147, 197, 253, 0.3)',
-                      borderRadius: '6px',
-                      padding: '2px 8px'
-                    }}>
-                      {activeSelectedProtocol.route || activeSelectedProtocol.administration_route}
-                    </span>
-                  )}
+                        {(associatedProtocols && associatedProtocols.length > 0 ? associatedProtocols : [proto]).filter(Boolean).map(p => (
+                          <option key={p.id || p.slug} value={p.id || p.slug} style={{ background: '#001e36', color: '#fff' }}>
+                            {p.name} ({p.duration || '8 Weeks'} · {p.phasesCount || 3} {isEs ? 'fases' : 'phases'}){p.isPrimary ? ' ★' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {proto.description && (
+                      <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.45 }}>{proto.description}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {/* ── STEP 2: Protocol Phases ── */}
+                <div className="irg-pathway-step">
+                  <div className="irg-pathway-step-header">
+                    <div className="irg-pathway-step-num">2</div>
+                    <div className="irg-pathway-step-label">{isEs ? 'Fases' : 'Phases'}</div>
+                  </div>
+                  <div className="irg-pathway-step-body">
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Selecciona la fase activa' : 'Select your active phase'}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {phases.map((phase, idx) => {
+                        const isActive = activePhaseId === phase.id;
+                        const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
+                        const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
+                        return (
+                          <button
+                            key={phase.id}
+                            type="button"
+                            onClick={() => handleSelectPhase(phase)}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '10px',
+                              padding: '8px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
+                              background: isActive ? 'linear-gradient(90deg, #003666 0%, #004d8c 100%)' : 'rgba(255,255,255,0.03)',
+                              boxShadow: isActive ? '0 0 0 2px #0284c7' : '0 0 0 1px rgba(255,255,255,0.08)'
+                            }}
+                          >
+                            <div style={{
+                              width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0,
+                              background: isActive ? '#0284c7' : 'rgba(255,255,255,0.08)',
+                              color: isActive ? '#fff' : '#64748b',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: '0.68rem', fontWeight: 800
+                            }}>{phase.phaseNum || idx + 1}</div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: isActive ? '#e0f2fe' : '#94a3b8', lineHeight: 1.2 }}>
+                                {phase.name}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: isActive ? '#38bdf8' : '#475569', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '1px' }}>
+                                <span className="font-mono" style={{ fontWeight: 700 }}>{phase.dose} {phase.unit}</span>
+                                {phase.timing && <><span style={{ opacity: 0.4 }}>•</span><span>{phase.timing}</span></>}
+                              </div>
+                            </div>
+                            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                              {advice && (
+                                <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: isActive ? 'rgba(0,200,100,0.15)' : '#f0fdf4', color: isActive ? '#4ade80' : '#15803d', border: isActive ? '1px solid rgba(74,222,128,0.3)' : '1px solid #bbf7d0' }}>
+                                  {advice.recommendedVialMg} mg
+                                </span>
+                              )}
+                              {isActive && <span style={{ fontSize: '0.6rem', color: '#4ade80', fontWeight: 700 }}>✓ ACTIVE</span>}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── STEP 3: Vials to Buy ── */}
+                <div className="irg-pathway-step">
+                  <div className="irg-pathway-step-header">
+                    <div className="irg-pathway-step-num">3</div>
+                    <div className="irg-pathway-step-label">{isEs ? 'Viales' : 'Vials'}</div>
+                  </div>
+                  <div className="irg-pathway-step-body">
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Qué comprar para este protocolo' : 'What to buy for this protocol'}
+                    </div>
+                    {fullStrategy?.phases?.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {fullStrategy.phases.map((ph, i) => {
+                          const isCurrentPhase = Math.abs(ph.doseMg - doseMg) <= 0.05;
+                          return (
+                            <div key={i} style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              gap: '8px', padding: '7px 10px', borderRadius: '7px',
+                              background: isCurrentPhase ? 'rgba(2,132,199,0.1)' : 'rgba(255,255,255,0.03)',
+                              border: isCurrentPhase ? '1px solid rgba(2,132,199,0.3)' : '1px solid rgba(255,255,255,0.06)'
+                            }}>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: isCurrentPhase ? '#e0f2fe' : '#94a3b8', lineHeight: 1.2 }}>{ph.name}</div>
+                                <div style={{ fontSize: '0.67rem', color: '#475569', marginTop: '1px' }} className="font-mono">{ph.doseMg} mg/wk · {ph.recommendedVialMg} mg vial</div>
+                              </div>
+                              <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: isCurrentPhase ? '#38bdf8' : '#64748b' }} className="font-mono">
+                                  {ph.vialsNeeded || 1}× {ph.recommendedVialMg} mg
+                                </div>
+                                <div style={{ fontSize: '0.62rem', color: '#475569' }}>{ph.resultUnits || 50} UI · {ph.volumeMl || 0.5} mL</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div style={{ padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e0f2fe' }} className="font-mono">
+                          {safeVialMg} mg {isEs ? 'vial' : 'vial'}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+                          {safeBacMl.toFixed(1)} mL BAC · {Math.round(concentrationMcgMl).toLocaleString()} mcg/mL
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── STEP 4: Reconstitution ── */}
+                <div className="irg-pathway-step">
+                  <div className="irg-pathway-step-header">
+                    <div className="irg-pathway-step-num">4</div>
+                    <div className="irg-pathway-step-label">{isEs ? 'Preparar' : 'Prepare'}</div>
+                  </div>
+                  <div className="irg-pathway-step-body">
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {isEs ? 'Cómo reconstituir tu dosis' : 'How to reconstitute your dose'}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {[
+                        {
+                          num: '①', label: isEs ? 'Reconstituir' : 'Reconstitute',
+                          text: isEs
+                            ? <><strong>{safeVialMg} mg</strong> + <strong>{safeBacMl.toFixed(1)} mL</strong> BAC</>
+                            : <><strong>{safeVialMg} mg</strong> + <strong>{safeBacMl.toFixed(1)} mL</strong> BAC</>
+                        },
+                        {
+                          num: '②', label: isEs ? 'Cargar' : 'Draw', highlight: true,
+                          text: activePhase && activePhaseId !== 'custom'
+                            ? <><strong>{activePhase.syringeUnits} UI</strong> ({activePhase.volumeMl} mL) en U-100</>
+                            : <><strong>{syringeUnits.toFixed(0)} UI</strong> ({liquidVolumeMl.toFixed(2)} mL) {isEs ? 'en U-100' : 'in U-100'}</>
+                        },
+                        {
+                          num: '③', label: isEs ? 'Rendimiento' : 'Yield',
+                          text: <><strong>{totalDosesInVial} {isEs ? 'dosis' : 'doses'}</strong> / {isEs ? 'vial' : 'vial'} · {concentrationMgMl.toFixed(2)} mg/mL</>
+                        }
+                      ].map(step => (
+                        <div key={step.num} style={{
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                          padding: '8px 10px', borderRadius: '8px',
+                          background: step.highlight ? 'rgba(2,132,199,0.12)' : 'rgba(255,255,255,0.03)',
+                          border: step.highlight ? '1px solid rgba(2,132,199,0.3)' : '1px solid rgba(255,255,255,0.07)'
+                        }}>
+                          <div style={{
+                            width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
+                            background: step.highlight ? '#0284c7' : 'rgba(255,255,255,0.08)',
+                            color: step.highlight ? '#fff' : '#64748b',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '0.7rem', fontWeight: 800
+                          }}>{step.num}</div>
+                          <div>
+                            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b', fontWeight: 700, lineHeight: 1 }}>{step.label}</div>
+                            <div style={{ fontSize: '0.78rem', color: step.highlight ? '#e0f2fe' : '#94a3b8', marginTop: '2px', lineHeight: 1.3 }}>{step.text}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+              </div>{/* end irg-pathway-steps */}
             </div>
-          </div>
-        )}
+          );
+        })()}
+
+
 
         {/* Left Column: Target Dose Selector & Step Stepper */}
         <div className="irg-controls-panel">
