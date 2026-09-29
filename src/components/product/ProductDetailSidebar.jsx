@@ -16,6 +16,8 @@ import PeptideVialWidget from './widgets/PeptideVialWidget';
 import DiagnosticTestWidget from './widgets/DiagnosticTestWidget';
 import SolventReconWidget from './widgets/SolventReconWidget';
 import CorporateServiceWidget from './widgets/CorporateServiceWidget';
+import FdaApprovedPeptidesNetworkWidget from './FdaApprovedPeptidesNetworkWidget';
+import { isFdaApprovedPeptide } from '@/data/fdaPeptidesRegistry';
 import './PublicDatasheetTableOfContents.css';
 
 /**
@@ -49,6 +51,11 @@ export default function ProductDetailSidebar({
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Check if current peptide is FDA Approved (e.g. Tirzepatide, Semaglutide, etc.)
+  const isCurrentFdaApproved = useMemo(() => {
+    return isFdaApprovedPeptide(product || slug);
+  }, [product, slug]);
 
   // Filter sections that actually exist in the current DOM
   const availableSections = useMemo(() => {
@@ -250,6 +257,15 @@ export default function ProductDetailSidebar({
 
       {/* ── Dynamic Category-Specific Specialized Widget ── */}
       {renderContextualWidget()}
+
+      {/* ── FDA-Approved Peptides Cross-Reference Network ── */}
+      {isCurrentFdaApproved && (
+        <FdaApprovedPeptidesNetworkWidget
+          currentSlug={slug}
+          currentProduct={product}
+          lang={lang}
+        />
+      )}
 
       {/* Associated Clinical Protocols (if applicable and not already in widgets) */}
       {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (

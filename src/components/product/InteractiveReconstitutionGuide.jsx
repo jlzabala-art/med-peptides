@@ -89,7 +89,8 @@ export default function InteractiveReconstitutionGuide({
   supplierName = '',
   lang = 'en',
   primaryProtocol = null,
-  associatedProtocols = []
+  associatedProtocols = [],
+  initialPhase = null
 }) {
   const t = getTranslations(lang);
 
@@ -345,8 +346,8 @@ export default function InteractiveReconstitutionGuide({
     const vMg = safeVialMg;
     const conc = concentrationMgMl > 0 ? concentrationMgMl : (vMg / (safeBacMl || 2.0));
 
-    // Helper to safely format phase objects with exact UI and doses calculation
-    const createPhase = (id, dose, unit, pLabel, name, title, badge) => {
+    // Helper to safely format phase objects with exact UI, timing and doses calculation
+    const createPhase = (id, dose, unit, pLabel, name, title, badge, timing = '', phaseNum = 1) => {
       const dMg = unit === 'mcg' ? dose / 1000 : dose;
       const vol = conc > 0 ? dMg / conc : 0;
       const units = Math.round(vol * 100);
@@ -356,9 +357,14 @@ export default function InteractiveReconstitutionGuide({
         dose,
         unit,
         phaseLabel: pLabel,
+        phaseNum,
         name,
         title,
         badge,
+        timing,
+        volMl: vol.toFixed(2),
+        syringeUnits: units,
+        dosesPerVial: doses,
         subtitle: `${units} UI (${vol.toFixed(2)} mL) · ~${doses} ${lang === 'es' ? 'dosis' : 'doses'}`
       };
     };
@@ -380,6 +386,7 @@ export default function InteractiveReconstitutionGuide({
         const extracted = extractDoseFromProtocolPhase(p, idx, protocolPhases.length, product, vMg);
         const d = extracted.dose;
         const u = extracted.unit;
+        const timing = p.duration || p.timing || p.timeline || (lang === 'es' ? `Etapa ${numLabel}` : `Stage ${numLabel}`);
         return createPhase(
           p.id || `phase_proto_${idx + 1}`,
           d,
@@ -387,7 +394,9 @@ export default function InteractiveReconstitutionGuide({
           phaseLabel,
           phaseName,
           `${phaseLabel}: ${phaseName}`,
-          `${d} ${u}`
+          `${d} ${u}`,
+          timing,
+          numLabel
         );
       });
     }
@@ -400,10 +409,10 @@ export default function InteractiveReconstitutionGuide({
       const p4Dose = vMg >= 10 ? 2.40 : 1.70;
 
       return [
-        createPhase('phase_sema_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', '0.25 mg'),
-        createPhase('phase_sema_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', '0.50 mg'),
-        createPhase('phase_sema_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', '1.00 mg'),
-        createPhase('phase_sema_p4', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`)
+        createPhase('phase_sema_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', '0.25 mg', lang === 'es' ? 'Semanas 1–4' : 'Weeks 1–4', 1),
+        createPhase('phase_sema_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', '0.50 mg', lang === 'es' ? 'Semanas 5–8' : 'Weeks 5–8', 2),
+        createPhase('phase_sema_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', '1.00 mg', lang === 'es' ? 'Semanas 9–12' : 'Weeks 9–12', 3),
+        createPhase('phase_sema_p4', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`, lang === 'es' ? 'Semana 13+' : 'Week 13+', 4)
       ];
     }
 
@@ -415,10 +424,10 @@ export default function InteractiveReconstitutionGuide({
       const p4Dose = vMg <= 10 ? 10.0 : 15.0;
 
       return [
-        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', '2.5 mg'),
-        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', '5.0 mg'),
-        createPhase('phase_tirz_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', '7.5 mg'),
-        createPhase('phase_tirz_p4', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`)
+        createPhase('phase_tirz_p1', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', '2.5 mg', lang === 'es' ? 'Semanas 1–4' : 'Weeks 1–4', 1),
+        createPhase('phase_tirz_p2', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', '5.0 mg', lang === 'es' ? 'Semanas 5–8' : 'Weeks 5–8', 2),
+        createPhase('phase_tirz_p3', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', '7.5 mg', lang === 'es' ? 'Semanas 9–12' : 'Weeks 9–12', 3),
+        createPhase('phase_tirz_p4', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`, lang === 'es' ? 'Semana 13+' : 'Week 13+', 4)
       ];
     }
 
@@ -430,10 +439,10 @@ export default function InteractiveReconstitutionGuide({
       const p4Dose = vMg <= 10 ? 6.0 : 9.0;
 
       return [
-        createPhase('phase_met_initiation', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', `${p1Dose} mg`),
-        createPhase('phase_met_titration', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', `${p2Dose} mg`),
-        createPhase('phase_met_escalation', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', `${p3Dose} mg`),
-        createPhase('phase_met_target', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`)
+        createPhase('phase_met_initiation', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Iniciación' : 'Initiation', lang === 'es' ? 'Fase 1: Iniciación' : 'Phase 1: Initiation', `${p1Dose} mg`, lang === 'es' ? 'Semanas 1–4' : 'Weeks 1–4', 1),
+        createPhase('phase_met_titration', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 2: Titulación' : 'Phase 2: Titration', `${p2Dose} mg`, lang === 'es' ? 'Semanas 5–8' : 'Weeks 5–8', 2),
+        createPhase('phase_met_escalation', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Escalada' : 'Escalation', lang === 'es' ? 'Fase 3: Escalada' : 'Phase 3: Escalation', `${p3Dose} mg`, lang === 'es' ? 'Semanas 9–12' : 'Weeks 9–12', 3),
+        createPhase('phase_met_target', p4Dose, 'mg', lang === 'es' ? 'FASE 4' : 'PHASE 4', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 4: Dosis Óptima' : 'Phase 4: Target Dose', `${p4Dose} mg`, lang === 'es' ? 'Semana 13+' : 'Week 13+', 4)
       ];
     }
 
@@ -444,27 +453,27 @@ export default function InteractiveReconstitutionGuide({
       const p3Dose = vMg <= 5 ? 2.5 : 3.0;
 
       return [
-        createPhase('phase_tb_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
-        createPhase('phase_tb_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
-        createPhase('phase_tb_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', `${p3Dose} mg`)
+        createPhase('phase_tb_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`, lang === 'es' ? 'Semanas 1–2' : 'Weeks 1–2', 1),
+        createPhase('phase_tb_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`, lang === 'es' ? 'Semanas 3–6' : 'Weeks 3–6', 2),
+        createPhase('phase_tb_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', `${p3Dose} mg`, lang === 'es' ? 'Semana 7+' : 'Week 7+', 3)
       ];
     }
 
     // 5. GHK-Cu (1.0 mg -> 2.0 mg -> 3.0 mg)
     if (pName.includes('ghk')) {
       return [
-        createPhase('phase_ghk_p1', 1.0, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '1.0 mg'),
-        createPhase('phase_ghk_p2', 2.0, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '2.0 mg'),
-        createPhase('phase_ghk_p3', 3.0, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', '3.0 mg')
+        createPhase('phase_ghk_p1', 1.0, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '1.0 mg', lang === 'es' ? 'Semanas 1–2' : 'Weeks 1–2', 1),
+        createPhase('phase_ghk_p2', 2.0, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '2.0 mg', lang === 'es' ? 'Semanas 3–6' : 'Weeks 3–6', 2),
+        createPhase('phase_ghk_p3', 3.0, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', '3.0 mg', lang === 'es' ? 'Semana 7+' : 'Week 7+', 3)
       ];
     }
 
     // 6. PT-141 & Tesamorelin (1.0 mg -> 1.5 mg -> 2.0 mg)
     if (pName.includes('pt-141') || pName.includes('bremelanotide') || pName.includes('tesamorelin')) {
       return [
-        createPhase('phase_pt_p1', 1.0, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '1.0 mg'),
-        createPhase('phase_pt_p2', 1.5, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '1.5 mg'),
-        createPhase('phase_pt_p3', 2.0, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', '2.0 mg')
+        createPhase('phase_pt_p1', 1.0, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', '1.0 mg', lang === 'es' ? 'Semana 1' : 'Week 1', 1),
+        createPhase('phase_pt_p2', 1.5, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', '1.5 mg', lang === 'es' ? 'Semanas 2–4' : 'Weeks 2–4', 2),
+        createPhase('phase_pt_p3', 2.0, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', '2.0 mg', lang === 'es' ? 'Semana 5+' : 'Week 5+', 3)
       ];
     }
 
@@ -569,6 +578,8 @@ export default function InteractiveReconstitutionGuide({
       subtitle: `${syringeUnits.toFixed(0)} UI (${liquidVolumeMl.toFixed(2)} mL) · ~${totalDosesInVial} ${lang === 'es' ? 'dosis' : 'doses'}`
     };
   }, [clinicalPhases, activePhaseId, doseValue, doseUnit, syringeUnits, liquidVolumeMl, totalDosesInVial, lang]);
+
+  const activePhase = activePhaseObj;
 
   // Detect whether active parameters differ from official monograph protocol (declared after activePhaseId to avoid TDZ)
   const isModifiedFromBaseline = useMemo(() => {
@@ -710,11 +721,31 @@ export default function InteractiveReconstitutionGuide({
       const params = new URLSearchParams(window.location.search);
       const urlPhase = params.get('phase');
       const urlTargetDose = params.get('targetDose') || params.get('injectionDose') || params.get('drawDose');
-      if (urlPhase && clinicalPhases.length > 0) {
-        if (urlPhase === 'custom') {
+      const targetParam = urlPhase || initialPhase;
+      if (targetParam && clinicalPhases.length > 0) {
+        if (targetParam === 'custom') {
           setSelectedPhaseId('custom');
         } else {
-          const matched = clinicalPhases.find(p => p.id === urlPhase || p.id.endsWith(urlPhase));
+          const cleanQ = targetParam.trim().toLowerCase();
+          const matched = clinicalPhases.find(p => {
+            if (p.id === targetParam || p.id.endsWith(targetParam)) return true;
+            if (cleanQ === 'phase_1' || cleanQ === 'phase-1' || cleanQ === 'fase_1' || cleanQ === 'fase-1' || cleanQ === '1') {
+              return p.phaseNum === 1 || p.id.includes('p1') || p.id.includes('phase_1');
+            }
+            if (cleanQ === 'phase_2' || cleanQ === 'phase-2' || cleanQ === 'fase_2' || cleanQ === 'fase-2' || cleanQ === '2') {
+              return p.phaseNum === 2 || p.id.includes('p2') || p.id.includes('phase_2');
+            }
+            if (cleanQ === 'phase_3' || cleanQ === 'phase-3' || cleanQ === 'fase_3' || cleanQ === 'fase-3' || cleanQ === '3') {
+              return p.phaseNum === 3 || p.id.includes('p3') || p.id.includes('phase_3');
+            }
+            if (cleanQ === 'phase_4' || cleanQ === 'phase-4' || cleanQ === 'fase_4' || cleanQ === 'fase-4' || cleanQ === '4') {
+              return p.phaseNum === 4 || p.id.includes('p4') || p.id.includes('phase_4');
+            }
+            if (cleanQ === 'phase_5' || cleanQ === 'phase-5' || cleanQ === 'fase_5' || cleanQ === 'fase-5' || cleanQ === '5') {
+              return p.phaseNum === 5 || p.id.includes('p5') || p.id.includes('phase_5');
+            }
+            return false;
+          });
           if (matched) {
             setSelectedPhaseId(matched.id);
             setDoseUnit(matched.unit);
@@ -1958,7 +1989,7 @@ export default function InteractiveReconstitutionGuide({
 
             {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Auto-fit Columns + Custom) */}
             <div className="irg-phase-cards-grid">
-              {clinicalPhases.map(phase => {
+              {clinicalPhases.map((phase, idx) => {
                 const isActive = activePhaseId === phase.id;
                 return (
                   <button
@@ -1969,10 +2000,18 @@ export default function InteractiveReconstitutionGuide({
                     title={`${phase.phaseLabel}: ${phase.name} — ${phase.dose} ${phase.unit} (${phase.subtitle})`}
                   >
                     <div className="irg-pc-header">
-                      <span className="irg-pc-overline">{phase.phaseLabel}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span className="irg-pc-num-circle">{phase.phaseNum || idx + 1}</span>
+                        <span className="irg-pc-overline">{phase.phaseLabel}</span>
+                      </div>
                       <span className="irg-pc-badge">{phase.badge}</span>
                     </div>
                     <div className="irg-pc-title">{phase.name}</div>
+                    {phase.timing && (
+                      <div className="irg-pc-timing-badge">
+                        ⏱️ {phase.timing}
+                      </div>
+                    )}
                     {(() => {
                       const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
                       const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
@@ -1997,6 +2036,11 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-pc-dose-row">
                       <span className="irg-pc-num font-mono">{phase.dose}</span>
                       <span className="irg-pc-unit">{phase.unit}</span>
+                    </div>
+                    <div className="irg-pc-quick-reconstitution">
+                      <span>💉 <strong>{phase.syringeUnits} UI</strong></span>
+                      <span style={{ opacity: 0.5 }}>•</span>
+                      <span>{phase.injectionsPerVial} {lang === 'es' ? 'dosis' : 'doses'}</span>
                     </div>
                     <div className="irg-pc-status">
                       {isActive ? (
@@ -2034,6 +2078,57 @@ export default function InteractiveReconstitutionGuide({
                 </div>
               </button>
             </div>
+
+            {/* 📋 Reconstitution & Syringe Protocol Box for Active Phase */}
+            {activePhase && activePhaseId !== 'custom' && (
+              <div className="irg-active-phase-reconstitution-box">
+                <div className="irg-ap-recon-header">
+                  <div className="irg-ap-recon-title-wrap">
+                    <span className="irg-ap-num-tag">
+                      {lang === 'es' ? `FASE ${activePhase.phaseNum || 1}` : `PHASE ${activePhase.phaseNum || 1}`}
+                    </span>
+                    <h4 className="irg-ap-name">
+                      {activePhase.name} — {activePhase.dose} {activePhase.unit}
+                    </h4>
+                    {activePhase.timing && (
+                      <span className="irg-ap-timing">({activePhase.timing})</span>
+                    )}
+                  </div>
+                  <div className="irg-ap-recon-badge">
+                    <span>{lang === 'es' ? 'Concentración' : 'Concentration'}: <strong>{finalConcentration.toFixed(2)} mg/mL</strong></span>
+                  </div>
+                </div>
+
+                <div className="irg-ap-recon-steps-grid">
+                  <div className="irg-ap-step-card">
+                    <div className="irg-ap-step-num">① {lang === 'es' ? 'Reconstitución' : 'Reconstitution'}</div>
+                    <div className="irg-ap-step-desc">
+                      {lang === 'es'
+                        ? <>Disolver vial de <strong>{effectiveVialMg} mg</strong> con <strong>{diluentMl} mL</strong> de agua bacteriostática (BAC).</>
+                        : <>Dissolve <strong>{effectiveVialMg} mg</strong> vial with <strong>{diluentMl} mL</strong> bacteriostatic water (BAC).</>}
+                    </div>
+                  </div>
+
+                  <div className="irg-ap-step-card highlight">
+                    <div className="irg-ap-step-num">② {lang === 'es' ? 'Carga Jeringa U-100' : 'U-100 Syringe Draw'}</div>
+                    <div className="irg-ap-step-desc">
+                      {lang === 'es'
+                        ? <>Cargar exactamente <strong>{activePhase.syringeUnits || Math.round(calibratedUnits * 10) / 10} UI</strong> (={activePhase.volumeMl || calculatedVolumeMl.toFixed(2)} mL) en jeringa U-100.</>
+                        : <>Draw exactly <strong>{activePhase.syringeUnits || Math.round(calibratedUnits * 10) / 10} UI</strong> (={activePhase.volumeMl || calculatedVolumeMl.toFixed(2)} mL) in U-100 syringe.</>}
+                    </div>
+                  </div>
+
+                  <div className="irg-ap-step-card">
+                    <div className="irg-ap-step-num">③ {lang === 'es' ? 'Rendimiento Clínico' : 'Clinical Yield'}</div>
+                    <div className="irg-ap-step-desc">
+                      {lang === 'es'
+                        ? <>Rinde para <strong>{activePhase.injectionsPerVial || Math.floor(effectiveVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} dosis</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} semanas`} de tratamiento).</>
+                        : <>Yields <strong>{activePhase.injectionsPerVial || Math.floor(effectiveVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} doses</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} weeks`} treatment).</>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card */}
             <div className="irg-mobile-phase-container">

@@ -438,6 +438,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const initialStrength = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
   const initialLang = resolvedSearchParams?.lang || null;
   const initialBatch = resolvedSearchParams?.batch || resolvedSearchParams?.vialCode || null;
+  const initialPhase = resolvedSearchParams?.phase || null;
   const product = await getPublicProduct(slug, supplierFilter);
 
   if (!product) {
@@ -523,6 +524,7 @@ export default async function PublicProductRoute({ params, searchParams }) {
         initialStrength={initialStrength}
         initialLang={initialLang}
         initialBatch={initialBatch}
+        initialPhase={initialPhase}
         associatedProtocols={associatedProtocols}
       />
     </>

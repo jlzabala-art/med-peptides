@@ -96,6 +96,7 @@ export default function PublicDatasheetView({
   initialStrength = null,
   initialLang = null,
   initialBatch = null,
+  initialPhase = null,
   associatedProtocols = []
 }) {
   const [lang, setLang] = useState(() => {
@@ -2449,6 +2450,7 @@ export default function PublicDatasheetView({
                     lang={lang}
                     primaryProtocol={primaryProtocol}
                     associatedProtocols={associatedProtocols}
+                    initialPhase={initialPhase}
                   />
                 </div>
               </>

@@ -1,0 +1,227 @@
+/* FdaApprovedPeptidesNetworkWidget.css 
+ * Google Cloud Console compliant clinical navigation widget
+ * Interconnecting all FDA-approved bioactive peptides into a mini-portal
+ */
+
+.fda-net-widget {
+  margin-top: 1rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.fda-net-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+}
+
+.fda-net-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fda-net-icon {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.fda-net-title {
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #1e293b;
+  text-transform: uppercase;
+}
+
+.fda-net-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fda-net-intro {
+  font-size: 0.70rem;
+  line-height: 1.35;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+  padding: 0 1px;
+}
+
+.fda-net-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Individual Item Link / Card */
+.fda-net-item {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 0.5rem;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.fda-net-item:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.08);
+  transform: translateX(3px);
+}
+
+/* Current Active Item in Datasheet */
+.fda-net-item.is-current {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border: 1.5px solid #22c55e;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.12);
+  cursor: default;
+}
+
+.fda-net-item.is-current:hover {
+  transform: none;
+}
+
+.fda-net-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.fda-net-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 1px;
+}
+
+.fda-net-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.fda-net-item-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fda-net-item.is-current .fda-net-item-name {
+  color: #15803d;
+}
+
+.fda-net-current-tag {
+  font-size: 0.60rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: #16a34a;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.fda-net-status-pill {
+  font-size: 0.60rem;
+  font-weight: 700;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fda-net-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.fda-net-brands {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.fda-net-mech-tag {
+  font-size: 0.60rem;
+  font-weight: 700;
+  padding: 0.5px 5px;
+  border-radius: 3px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.fda-net-indication {
+  font-size: 0.65rem;
+  line-height: 1.25;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.fda-net-item-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #94a3b8;
+  padding-left: 2px;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.fda-net-item:hover .fda-net-item-right {
+  color: #16a34a;
+  transform: translateX(2px);
+}
+
+.fda-net-item.is-current .fda-net-item-right {
+  color: #16a34a;
+}
+
+/* Footer note */
+.fda-net-footer {
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+}
+
+.fda-net-footer-text {
+  font-size: 0.63rem;
+  line-height: 1.35;
+  color: #64748b;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}

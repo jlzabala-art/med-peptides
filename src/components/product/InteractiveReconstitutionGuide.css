@@ -1748,3 +1748,211 @@
   }
 }
 
+/* ── Numbered Phase Styling & Quick Reconstitution Hints ── */
+.irg-pc-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.irg-pc-num-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1a73e8;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(26, 115, 232, 0.3);
+}
+
+.irg-phase-card:not(.active) .irg-pc-num-circle {
+  background: #e2e8f0;
+  color: #334155;
+  box-shadow: none;
+}
+
+.irg-phase-card.custom .irg-pc-num-circle {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.irg-pc-timing-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.irg-phase-card.active .irg-pc-timing-badge {
+  color: #1e40af;
+  background: #dbeafe;
+}
+
+.irg-pc-per-week {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.irg-pc-quick-reconstitution {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 5px;
+  padding: 4px 6px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.68rem;
+}
+
+.irg-phase-card.active .irg-pc-quick-reconstitution {
+  background: #ffffff;
+  border-color: #bfdbfe;
+}
+
+.irg-pc-qr-units {
+  color: #0369a1;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.irg-pc-qr-doses {
+  color: #64748b;
+  font-size: 0.64rem;
+}
+
+/* ── Active Phase Reconstitution Clinical Box ── */
+.irg-active-phase-reconstitution-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #1a73e8;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.irg-apb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.irg-apb-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.irg-apb-num-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1a73e8;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.irg-apb-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.irg-apb-timing-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.irg-apb-dose-pill {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  background: #dbeafe;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+}
+
+.irg-apb-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+@media (max-width: 640px) {
+  .irg-apb-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.irg-apb-step-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.irg-apb-step-card.highlight {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.irg-apb-step-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #1a73e8;
+  margin-bottom: 3px;
+}
+
+.irg-apb-step-desc {
+  font-size: 0.74rem;
+  color: #334155;
+  line-height: 1.35;
+  margin: 0 0 4px 0;
+}
+
+.irg-apb-step-meta {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 2px 5px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.irg-apb-step-card.highlight .irg-apb-step-meta {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+

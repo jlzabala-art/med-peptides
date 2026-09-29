@@ -262,6 +262,69 @@ export const FDA_REGISTRY = {
       accent: '#16a34a'
     }
   },
+  'pt-141': {
+    slug: 'pt-141-bremelanotide',
+    canonicalName: 'PT-141 (Bremelanotide)',
+    casNumber: '189691-06-3',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'FDA Approved (Bremelanotide / Vyleesi)',
+    shortBadge: 'FDA Approved ✓',
+    shortCode: 'FDA',
+    rulingDate: 'FDA Approved (June 2019)',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'Approved Melanocortin Receptor Agonist',
+    summary: 'Bremelanotide (PT-141) is an FDA-approved melanocortin receptor agonist indicated for hypoactive sexual desire disorder (HSDD).',
+    legalNotice: 'Approved under NDA 210583 (Vyleesi) for clinical prescription use.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '✅',
+      accent: '#16a34a'
+    }
+  },
+  'bremelanotide': {
+    slug: 'pt-141-bremelanotide',
+    canonicalName: 'Bremelanotide (PT-141)',
+    casNumber: '189691-06-3',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'FDA Approved (Bremelanotide / Vyleesi)',
+    shortBadge: 'FDA Approved ✓',
+    shortCode: 'FDA',
+    rulingDate: 'FDA Approved (June 2019)',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'Approved Melanocortin Receptor Agonist',
+    summary: 'Bremelanotide (PT-141) is an FDA-approved melanocortin receptor agonist indicated for hypoactive sexual desire disorder (HSDD).',
+    legalNotice: 'Approved under NDA 210583 (Vyleesi) for clinical prescription use.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '✅',
+      accent: '#16a34a'
+    }
+  },
+  'pt-141-bremelanotide': {
+    slug: 'pt-141-bremelanotide',
+    canonicalName: 'PT-141 (Bremelanotide)',
+    casNumber: '189691-06-3',
+    status: FDA_STATUS_TYPES.FDA_APPROVED,
+    badgeLabel: 'FDA Approved (Bremelanotide / Vyleesi)',
+    shortBadge: 'FDA Approved ✓',
+    shortCode: 'FDA',
+    rulingDate: 'FDA Approved (June 2019)',
+    advisoryBody: 'U.S. FDA CDER',
+    voteResult: 'Approved Melanocortin Receptor Agonist',
+    summary: 'Bremelanotide (PT-141) is an FDA-approved melanocortin receptor agonist indicated for hypoactive sexual desire disorder (HSDD).',
+    legalNotice: 'Approved under NDA 210583 (Vyleesi) for clinical prescription use.',
+    colorScheme: {
+      bg: '#f0fdf4',
+      border: '#86efac',
+      text: '#15803d',
+      icon: '✅',
+      accent: '#16a34a'
+    }
+  },
 
   // ── 3. Investigational Phase Peptides (Clinical Trials) ──
   'retatrutide': {
@@ -620,6 +683,8 @@ export function getFdaPeptideStatus(productOrSlug) {
   if (cleanStr.includes('bacteriostatic') || cleanStr.includes('bacwater') || cleanStr === 'bac') {
     return FDA_REGISTRY['bacteriostatic-water'];
   }
+  if (cleanStr.includes('liraglutide')) return FDA_REGISTRY['liraglutide'];
+  if (cleanStr.includes('pt141') || cleanStr.includes('bremelanotide')) return FDA_REGISTRY['pt-141'];
   if (cleanStr.includes('semaglutide')) return FDA_REGISTRY['semaglutide'];
   if (cleanStr.includes('tirzepatide')) return FDA_REGISTRY['tirzepatide'];
   if (cleanStr.includes('retatrutide')) return FDA_REGISTRY['retatrutide'];
@@ -660,3 +725,119 @@ export function getFdaPeptideStatus(productOrSlug) {
     }
   };
 }
+
+/**
+ * Canonical network of peptides with formal FDA approval.
+ * When viewing any peptide in this network, cross-reference links
+ * are displayed in the sidebar to form an interconnected clinical portal.
+ */
+export const FDA_APPROVED_PEPTIDES_NETWORK = [
+  {
+    slug: 'tirzepatide',
+    name: 'Tirzepatide',
+    brandNames: 'Mounjaro® / Zepbound®',
+    pharmacology: 'Dual GIP / GLP-1 RA',
+    fdaApprovalYear: '2022 / 2023',
+    indication: {
+      en: 'Type 2 Diabetes & Chronic Weight Management',
+      es: 'Diabetes Tipo 2 y Control de Peso Crónico'
+    },
+    dosageForms: 'Subcutaneous (weekly)',
+    mechanismTag: 'Dual GIP + GLP-1',
+    color: '#0284c7'
+  },
+  {
+    slug: 'semaglutide',
+    name: 'Semaglutide',
+    brandNames: 'Ozempic® / Wegovy® / Rybelsus®',
+    pharmacology: 'GLP-1 Receptor Agonist',
+    fdaApprovalYear: '2017 / 2021',
+    indication: {
+      en: 'Type 2 Diabetes, CV Risk Reduction & Obesity',
+      es: 'Diabetes Tipo 2, Riesgo CV y Manejo de Obesidad'
+    },
+    dosageForms: 'Subcutaneous (weekly) / Oral',
+    mechanismTag: 'GLP-1 RA',
+    color: '#0d9488'
+  },
+  {
+    slug: 'liraglutide',
+    name: 'Liraglutide',
+    brandNames: 'Victoza® / Saxenda®',
+    pharmacology: 'GLP-1 Receptor Agonist',
+    fdaApprovalYear: '2010 / 2014',
+    indication: {
+      en: 'Type 2 Diabetes & Daily Weight Management',
+      es: 'Diabetes Tipo 2 y Control Ponderal Diario'
+    },
+    dosageForms: 'Subcutaneous (daily)',
+    mechanismTag: 'GLP-1 RA',
+    color: '#0891b2'
+  },
+  {
+    slug: 'tesamorelin',
+    name: 'Tesamorelin',
+    brandNames: 'Egrifta® / Egrifta SV®',
+    pharmacology: 'GHRH(1-44) Analogue',
+    fdaApprovalYear: '2010',
+    indication: {
+      en: 'Visceral Adipose Tissue in Lipodystrophy',
+      es: 'Adiposidad Visceral en Lipodistrofia'
+    },
+    dosageForms: 'Subcutaneous (daily)',
+    mechanismTag: 'GHRH Analogue',
+    color: '#7c3aed'
+  },
+  {
+    slug: 'pt-141-bremelanotide',
+    aliases: ['pt-141', 'bremelanotide'],
+    name: 'PT-141 (Bremelanotide)',
+    brandNames: 'Vyleesi®',
+    pharmacology: 'Melanocortin Receptor Agonist (MC4R)',
+    fdaApprovalYear: '2019',
+    indication: {
+      en: 'Hypoactive Sexual Desire Disorder (HSDD)',
+      es: 'Trastorno del Deseo Sexual Hipoactivo (TDSH)'
+    },
+    dosageForms: 'Subcutaneous auto-injector',
+    mechanismTag: 'MC4R Agonist',
+    color: '#e11d48'
+  },
+  {
+    slug: 'sermorelin',
+    name: 'Sermorelin',
+    brandNames: 'Geref®',
+    pharmacology: 'GHRH(1-29) Acetate',
+    fdaApprovalYear: '1997',
+    indication: {
+      en: 'Pituitary GH Secretagogue & Evaluation',
+      es: 'Estimulación Hipofisaria y Secreción de GH'
+    },
+    dosageForms: 'Subcutaneous (daily)',
+    mechanismTag: 'GHRH Secretagogue',
+    color: '#4f46e5'
+  }
+];
+
+export function isFdaApprovedPeptide(productOrSlug) {
+  if (!productOrSlug) return false;
+  const statusObj = getFdaPeptideStatus(productOrSlug);
+  if (statusObj?.status === FDA_STATUS_TYPES.FDA_APPROVED) return true;
+  
+  const raw = (typeof productOrSlug === 'string'
+    ? productOrSlug
+    : (productOrSlug?.slug || productOrSlug?.name || productOrSlug?.id || '')
+  ).toLowerCase().trim();
+
+  return FDA_APPROVED_PEPTIDES_NETWORK.some(p => 
+    p.slug === raw || 
+    (p.aliases && p.aliases.includes(raw)) ||
+    raw.includes(p.slug) ||
+    p.name.toLowerCase().includes(raw)
+  );
+}
+
+export function getFdaApprovedPeptidesNetwork() {
+  return FDA_APPROVED_PEPTIDES_NETWORK;
+}
+
