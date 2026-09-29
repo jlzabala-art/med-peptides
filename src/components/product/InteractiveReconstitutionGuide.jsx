@@ -2095,7 +2095,7 @@ export default function InteractiveReconstitutionGuide({
                     )}
                   </div>
                   <div className="irg-ap-recon-badge">
-                    <span>{lang === 'es' ? 'Concentración' : 'Concentration'}: <strong>{finalConcentration.toFixed(2)} mg/mL</strong></span>
+                    <span>{lang === 'es' ? 'Concentración' : 'Concentration'}: <strong>{concentrationMgMl.toFixed(2)} mg/mL</strong></span>
                   </div>
                 </div>
 
