@@ -218,7 +218,9 @@ export default function InteractiveReconstitutionGuide({
   const [showVialLabelModal, setShowVialLabelModal] = useState(false);
 
   // Ref flag to prevent dose reset race condition when calibrating a phase
-  const isCalibratingRef = useRef(false);
+  // Counter: set to N before a programmatic calibration that triggers N setState calls.
+  // The safety useEffect decrements it each time it fires, blocking resets until it reaches 0.
+  const isCalibratingRef = useRef(0);
 
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
@@ -231,25 +233,29 @@ export default function InteractiveReconstitutionGuide({
     }
   }, [initialVialMg, baselineState]);
 
-  // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded
+  // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded.
+  // NOTE: doseValue / doseUnit intentionally excluded from deps — this guard only fires when
+  // the VIAL or BAC changes (e.g. user picks a different vial size manually).
+  // Programmatic calibrations set isCalibratingRef to the number of expected re-renders to skip.
   useEffect(() => {
-    // If a phase was just calibrated programmatically, skip automatic reset
-    if (isCalibratingRef.current) {
-      isCalibratingRef.current = false;
+    if (isCalibratingRef.current > 0) {
+      isCalibratingRef.current -= 1;
       return;
     }
 
+    // Only run safety check when vial/bac change triggers a potential overflow
     const conc = vialMg > 0 && bacWaterMl > 0 ? vialMg / bacWaterMl : 1;
-    const reqVol = doseUnit === 'mcg' ? (doseValue / 1000) / conc : doseValue / conc;
+    const reqVol = doseUnit === 'mcg' ? (parseFloat(doseValue) / 1000) / conc : parseFloat(doseValue) / conc;
     const units = reqVol * 100;
 
-    if (units > 100 || (doseUnit === 'mg' && doseValue > vialMg)) {
+    if (units > 100 || (doseUnit === 'mg' && parseFloat(doseValue) > vialMg)) {
       const p1 = getClinicalPhase1Dose(product, vialMg);
       setDoseUnit(p1.unit);
       setDoseValue(p1.dose);
       setSelectedPhaseId(null);
     }
-  }, [vialMg, bacWaterMl, doseUnit, doseValue, product]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vialMg, bacWaterMl, product]);
 
   // ── Precision Pharmacokinetic Calculations ─────────────────────────────────
   const {
@@ -640,17 +646,22 @@ export default function InteractiveReconstitutionGuide({
   };
 
   const handleSelectPhase = (phase) => {
-    isCalibratingRef.current = true;
     triggerHaptic('selection');
+
+    const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
+    const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
+    const needsVialChange = advice && advice.recommendedVialMg > vialMg;
+
+    // Count how many setState changes will trigger the safety useEffect (only vialMg/bacWaterMl changes fire it).
+    // Each vial-related setState triggers one re-run; dose/unit/phaseId changes do NOT (excluded from deps).
+    isCalibratingRef.current = needsVialChange ? 2 : 0; // setVialMg + setBacWaterMl = 2 potential re-runs
+
     setSelectedPhaseId(phase.id);
     setDoseUnit(phase.unit);
     setDoseValue(phase.dose);
     updateUrlParams(phase.id, phase.dose, phase.unit);
 
-    // Auto-ergonomics: If this phase requires a higher dose vial to prevent syringe overflow (>100 UI)
-    const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
-    const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
-    if (advice && advice.recommendedVialMg > vialMg) {
+    if (needsVialChange) {
       setVialMg(advice.recommendedVialMg);
       setBacWaterMl(advice.recommendedBacMl);
       notifier.info(
@@ -2446,8 +2457,10 @@ export default function InteractiveReconstitutionGuide({
                               <button
                                 type="button"
                                 onClick={() => {
-                                  isCalibratingRef.current = true;
                                   triggerHaptic('selection');
+                                  const willChangeVial = !!ph.recommendedVialMg;
+                                  const willChangeBac = !!ph.recommendedBacMl;
+                                  isCalibratingRef.current = (willChangeVial ? 1 : 0) + (willChangeBac ? 1 : 0);
                                   setDoseValue(ph.doseMg);
                                   setDoseUnit('mg');
                                   if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
@@ -2851,10 +2864,13 @@ export default function InteractiveReconstitutionGuide({
             currentDoseMg={doseMg}
             currentVialMg={safeVialMg}
             onCalibratePhase={(ph) => {
-              isCalibratingRef.current = true;
               triggerHaptic('selection');
               const targetVial = ph.recommendedVialMg || safeVialMg;
               const targetBac = ph.recommendedBacMl || safeBacMl;
+              const willChangeVial = targetVial !== safeVialMg;
+              const willChangeBac = targetBac !== safeBacMl;
+              // Block safety resets for each vial/bac setState that will trigger the useEffect
+              isCalibratingRef.current = (willChangeVial ? 1 : 0) + (willChangeBac ? 1 : 0);
               setVialMg(targetVial);
               setBacWaterMl(targetBac);
               setDoseUnit('mg');
