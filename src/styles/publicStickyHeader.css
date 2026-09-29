@@ -365,6 +365,100 @@
   border-color: rgba(56, 189, 248, 0.70);
 }
 
+/* ── GCP Auth Pill — Authenticated State ─── */
+.puh-auth-pill-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.puh-auth-pill--open {
+  background: rgba(2, 132, 199, 0.30) !important;
+  border-color: rgba(56, 189, 248, 0.70) !important;
+}
+
+.puh-pill-chevron {
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.puh-pill-chevron--up {
+  transform: rotate(180deg);
+}
+
+/* ── GCP-style Dropdown Menu ─── */
+.puh-auth-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 210px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.30);
+  z-index: 2000;
+  overflow: hidden;
+  animation: puh-dropdown-in 0.15s ease;
+}
+
+@keyframes puh-dropdown-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.puh-auth-dropdown-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.puh-dropdown-email {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 190px;
+}
+
+.puh-auth-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+  text-align: left;
+}
+
+.puh-auth-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.puh-auth-dropdown-item--danger {
+  color: rgba(252, 165, 165, 0.85);
+}
+
+.puh-auth-dropdown-item--danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.puh-auth-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 3px 0;
+}
+
 .puh-user-status-dot {
   width: 7px;
   height: 7px;
@@ -388,6 +482,7 @@
   justify-content: center;
   flex-shrink: 0;
 }
+
 
 /* ── Line 2: Contextual Navigation & Value Strip ─────────────────── */
 .puh-tier2,

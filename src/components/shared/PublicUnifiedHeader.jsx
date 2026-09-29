@@ -13,7 +13,7 @@ import {
   Activity,
   FileText
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, UserPlus } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -63,7 +63,9 @@ export default function PublicUnifiedHeader({
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeAnchor, setActiveAnchor] = useState(controlledActiveAnchorId || anchorTabs[0]?.id || '');
+  const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
   const tabsContainerRef = useRef(null);
+  const authDropdownRef = useRef(null);
 
   // Sync controlled anchor ID if passed
   useEffect(() => {
@@ -71,6 +73,17 @@ export default function PublicUnifiedHeader({
       setActiveAnchor(controlledActiveAnchorId);
     }
   }, [controlledActiveAnchorId]);
+
+  // Close auth dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (authDropdownRef.current && !authDropdownRef.current.contains(e.target)) {
+        setAuthDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // Scroll listener for sticky compression & scrollspy
   useEffect(() => {
@@ -266,38 +279,63 @@ export default function PublicUnifiedHeader({
                 </button>
               )}
 
-              {/* Account / Auth */}
+              {/* GCP-Standard Single Auth Element — morphs by authentication state */}
               {user ? (
-                <Link
-                  href={getDashboardPath()}
-                  className="puh-btn puh-btn-console"
-                  title={isSpanish ? 'Acceso a mi Panel Profesional' : 'Access Practitioner Dashboard'}
-                >
-                  <span className="puh-user-status-dot" aria-hidden="true" />
-                  <span className="puh-user-avatar">
-                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
-                  </span>
-                  <span className="puh-auth-label">{isSpanish ? 'Mi Consola' : 'Console'}</span>
-                </Link>
-              ) : (
-                <div className="puh-auth-actions" style={{ display: 'inline-flex', gap: '0.4rem', alignItems: 'center' }}>
-                  <Link
-                    href={`/login?tab=login${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
-                    className="puh-btn puh-btn-signin"
-                    title={isSpanish ? 'Iniciar sesión' : 'Sign In'}
+                <div className="puh-auth-pill-wrapper" ref={authDropdownRef}>
+                  <button
+                    type="button"
+                    className={`puh-btn puh-btn-console puh-auth-pill${authDropdownOpen ? ' puh-auth-pill--open' : ''}`}
+                    onClick={() => setAuthDropdownOpen(v => !v)}
+                    aria-haspopup="true"
+                    aria-expanded={authDropdownOpen}
                   >
-                    <LogIn size={13} className="puh-btn-icon" />
-                    <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
-                  </Link>
-                  <Link
-                    href={`/login?tab=register${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
-                    className="puh-btn puh-btn-signup"
-                    title={isSpanish ? 'Registrarse en la plataforma médica' : 'Register for clinical practitioner portal'}
-                  >
-                    <UserPlus size={13} className="puh-btn-icon" />
-                    <span className="puh-auth-label">{isSpanish ? 'Registrarse' : 'Sign Up'}</span>
-                  </Link>
+                    <span className="puh-user-status-dot" aria-hidden="true" />
+                    <span className="puh-user-avatar">
+                      {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                    </span>
+                    <span className="puh-auth-label">
+                      {user.displayName?.split(' ')[0] || user.email?.split('@')[0] || (isSpanish ? 'Cuenta' : 'Account')}
+                    </span>
+                    <ChevronDown size={11} className={`puh-pill-chevron${authDropdownOpen ? ' puh-pill-chevron--up' : ''}`} />
+                  </button>
+                  {authDropdownOpen && (
+                    <div className="puh-auth-dropdown" role="menu">
+                      <div className="puh-auth-dropdown-header">
+                        <span className="puh-dropdown-email">{user.email}</span>
+                      </div>
+                      <Link href={getDashboardPath()} className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
+                        <LayoutDashboard size={13} />
+                        <span>{isSpanish ? 'Mi Consola' : 'Console'}</span>
+                      </Link>
+                      <Link href="/account" className="puh-auth-dropdown-item" onClick={() => setAuthDropdownOpen(false)} role="menuitem">
+                        <User size={13} />
+                        <span>{isSpanish ? 'Mi Cuenta' : 'Account'}</span>
+                      </Link>
+                      <div className="puh-auth-dropdown-divider" />
+                      <button
+                        type="button"
+                        className="puh-auth-dropdown-item puh-auth-dropdown-item--danger"
+                        onClick={async () => {
+                          setAuthDropdownOpen(false);
+                          try { const { getAuth, signOut } = await import('firebase/auth'); await signOut(getAuth()); } catch {}
+                        }}
+                        role="menuitem"
+                      >
+                        <LogOut size={13} />
+                        <span>{isSpanish ? 'Cerrar Sesión' : 'Sign Out'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <Link
+                  href={`/login?tab=login${loginRedirect ? `&redirect=${encodeURIComponent(loginRedirect)}` : ''}`}
+                  className="puh-btn puh-btn-signin"
+                  title={isSpanish ? 'Iniciar sesión o registrarse' : 'Sign in or create account'}
+                >
+                  <LogIn size={13} className="puh-btn-icon" />
+                  <span className="puh-auth-label">{isSpanish ? 'Iniciar Sesión' : 'Sign In'}</span>
+                </Link>
               )}
             </div>
           </div>
