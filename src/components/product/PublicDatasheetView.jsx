@@ -2851,6 +2851,19 @@ export default function PublicDatasheetView({
             <p className="pds-footer-meta">
               Document Ref: PDS-{slug.toUpperCase()}-2026 • Rev {versionInfo.version} • {lang === 'es' ? 'Actualizado:' : 'Updated:'} {versionInfo.updatedAtDate} • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
             </p>
+            {isStrictlyLotusland && (
+              <p style={{ marginTop: '6px', fontSize: '0.6rem', color: '#94a3b8', opacity: 0.55, lineHeight: 1.4 }}>
+                {lang === 'es' ? 'Fabricación externalizada: ' : 'Contract manufacturer: '}
+                <a
+                  href="https://drive.google.com/file/d/1GbqhKnRbBgNcvH5E87iYFmmaurnVQnAv/view"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: '2px' }}
+                >
+                  Hotide Biotech — Quality Methodology &amp; U.S. Regulatory Compliance
+                </a>
+              </p>
+            )}
           </div>
         </footer>
           </div>
