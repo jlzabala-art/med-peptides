@@ -1487,6 +1487,31 @@ export default function InteractiveReconstitutionGuide({
   }
 
   // ── Standard Lyophilized Vial & Syringe Reconstitution View ─────────────────
+
+  // ── Derived Posology & Vial-Yield variables (used in Clinical Administration Profile grid) ──
+  const safeDosesPerVial = totalDosesInVial > 0 ? Math.floor(totalDosesInVial) : 0;
+
+  // Infer dosing frequency from product name / protocol
+  const _productName = (product?.name || product?.slug || '').toLowerCase();
+  const _isWeekly = _productName.includes('tirzepatide') || _productName.includes('semaglutide') || _productName.includes('glp');
+  const _isDaily = !_isWeekly && (
+    _productName.includes('bpc') || _productName.includes('tb500') || _productName.includes('ghk') ||
+    _productName.includes('peptide') || _productName.includes('igf')
+  );
+  const doseFrequency = activeSelectedProtocol?.dosing_frequency
+    || activeSelectedProtocol?.administration_frequency
+    || (activeSelectedProtocol?.phases?.[0]?.administration_frequency)
+    || (_isWeekly ? 'Weekly (q7d)' : _isDaily ? 'Daily (q24h)' : 'Per protocol');
+  const administrationTiming = activeSelectedProtocol?.administration_timing
+    || (_isWeekly ? 'Morning / Fasted' : _isDaily ? 'Morning or Bedtime' : 'Per physician guidance');
+
+  // Vial supply duration: how many days / weeks does one vial last at current dose
+  const _daysPerVial = (safeDosesPerVial > 0 && doseMg > 0)
+    ? (_isWeekly ? safeDosesPerVial * 7 : safeDosesPerVial)
+    : 0;
+  const safeDaysDuration = Math.round(_daysPerVial) || 0;
+  const safeWeeksDuration = safeDaysDuration > 0 ? +(safeDaysDuration / 7).toFixed(1) : 0;
+
   return (
     <div className="irg-wrapper">
       {/* ── Subtitle / Instructions ── */}
