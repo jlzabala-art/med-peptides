@@ -61,6 +61,7 @@ import BloodoClinicalAdvantageCard from './BloodoClinicalAdvantageCard';
 import EternaGeneticTechnicalSpecs from './EternaGeneticTechnicalSpecs';
 import IvDripTechnicalSpecs from './IvDripTechnicalSpecs';
 import FdaRegulatoryBadge from './FdaRegulatoryBadge';
+import { FDA_APPROVED_PEPTIDES_NETWORK } from '@/data/fdaPeptidesRegistry';
 import PeptidePublicationsSection from './PeptidePublicationsSection';
 import PeptideContraindicationsSection from './PeptideContraindicationsSection';
 import UaeCompanySetupTechnicalSpecs from './UaeCompanySetupTechnicalSpecs';
@@ -242,6 +243,36 @@ export default function PublicDatasheetView({
   };
 
   const [copiedMonograph, setCopiedMonograph] = useState(false);
+
+  // Resolve commercial brand names (FDA Approved reference products)
+  const resolvedCommercialNames = useMemo(() => {
+    if (Array.isArray(product?.commercialNames) && product.commercialNames.length > 0) {
+      return product.commercialNames;
+    }
+    if (typeof product?.commercialNames === 'string' && product.commercialNames.trim()) {
+      return [product.commercialNames.trim()];
+    }
+    if (Array.isArray(product?.commercialProducts) && product.commercialProducts.length > 0) {
+      return product.commercialProducts.map(cp => cp.brandName || cp.name).filter(Boolean);
+    }
+    const targetSlug = (slug || product?.slug || product?.id || '').toLowerCase().trim();
+    const netItem = FDA_APPROVED_PEPTIDES_NETWORK.find(p => 
+      p.slug === targetSlug || 
+      (p.aliases && p.aliases.includes(targetSlug)) ||
+      (product?.name && p.name.toLowerCase().includes(product.name.toLowerCase()))
+    );
+    if (netItem?.brandNames) {
+      return netItem.brandNames.split('/').map(s => s.trim());
+    }
+    return [];
+  }, [product, slug]);
+
+  const resolvedCommercialProducts = useMemo(() => {
+    if (Array.isArray(product?.commercialProducts) && product.commercialProducts.length > 0) {
+      return product.commercialProducts;
+    }
+    return [];
+  }, [product]);
 
   const handleCopyMonographSpecs = async () => {
     const isEs = lang === 'es';
@@ -1492,6 +1523,25 @@ export default function PublicDatasheetView({
           title={name}
           description={
             <>
+              {/* 🏛️ FDA Commercial Reference Brands Strip (Laptop & Mobile Responsive) */}
+              {resolvedCommercialNames.length > 0 && (
+                <div className="pds-commercial-brands-strip">
+                  <div className="pds-cbs-label">
+                    <span className="pds-cbs-icon">🏛️</span>
+                    <span>{lang === 'es' ? 'Medicamentos Comerciales de Referencia (FDA):' : 'FDA Commercial Reference Brands:'}</span>
+                  </div>
+                  <div className="pds-cbs-chips">
+                    {resolvedCommercialNames.map((brand, idx) => (
+                      <span key={idx} className="pds-cbs-chip">
+                        <span className="pds-cbs-chip-dot" />
+                        <strong className="pds-cbs-chip-name">{brand}</strong>
+                        <span className="pds-cbs-chip-tag">FDA Approved</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <span style={{ display: 'block', fontSize: '0.96rem', color: '#475569', marginBottom: '0.45rem' }}>
                 <strong style={{ color: '#0f172a' }}>
                   {isCorporateService
@@ -1568,29 +1618,85 @@ export default function PublicDatasheetView({
               )}
             </>
           }
-          meta={description && (
-            <div className="pds-description-card" style={{ marginTop: '0.85rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <h2 className="pds-section-heading" style={{ margin: 0 }}>
-                  {isCorporateService
-                    ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
-                    : isDiagnosticKit 
-                      ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
-                      : (t.pharmacologicalOverview || 'Pharmacological Overview')}
-                </h2>
-                {isTranslating ? (
-                  <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-                    <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
-                  </span>
-                ) : lang !== 'en' && (
-                  <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                    <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
-                  </span>
-                )}
-              </div>
-              <p className="pds-description-body">{description}</p>
-            </div>
-          )}
+          meta={
+            <>
+              {/* 🏛️ FDA Approved Commercial Formulations Detail Card (Laptop & Mobile) */}
+              {resolvedCommercialProducts.length > 0 && (
+                <div className="pds-commercial-products-card">
+                  <div className="pds-cpc-header">
+                    <div className="pds-cpc-title-wrap">
+                      <ShieldCheck size={16} color="#16a34a" />
+                      <h3 className="pds-cpc-title">
+                        {lang === 'es' ? 'Fármacos Comerciales Aprobados por FDA (Especialidades de Referencia)' : 'FDA-Approved Commercial Products (Reference Formulations)'}
+                      </h3>
+                    </div>
+                    <span className="pds-cpc-badge">
+                      {resolvedCommercialProducts.length} {lang === 'es' ? 'Especialidades Registradas' : 'Registered Brands'}
+                    </span>
+                  </div>
+
+                  <div className="pds-cpc-grid">
+                    {resolvedCommercialProducts.map((cp, idx) => (
+                      <div key={idx} className="pds-cpc-item">
+                        <div className="pds-cpc-item-top">
+                          <span className="pds-cpc-item-brand">{cp.brandName}</span>
+                          {cp.fdaApprovalYear && (
+                            <span className="pds-cpc-item-year">FDA {cp.fdaApprovalYear}</span>
+                          )}
+                        </div>
+
+                        {cp.sponsor && (
+                          <div className="pds-cpc-item-sponsor">
+                            🏢 {cp.sponsor}
+                          </div>
+                        )}
+
+                        {cp.primaryIndication && (
+                          <div className="pds-cpc-item-indication">
+                            <strong>{lang === 'es' ? 'Indicación FDA:' : 'FDA Indication:'}</strong> {cp.primaryIndication}
+                          </div>
+                        )}
+
+                        <div className="pds-cpc-item-meta">
+                          {cp.route && <span>💉 {cp.route}</span>}
+                          {cp.dosageForms && (
+                            <>
+                              <span style={{ opacity: 0.4 }}>•</span>
+                              <span>📦 {cp.dosageForms}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {description && (
+                <div className="pds-description-card" style={{ marginTop: '0.85rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h2 className="pds-section-heading" style={{ margin: 0 }}>
+                      {isCorporateService
+                        ? (lang === 'es' ? 'Resumen Ejecutivo y Estructura Legal' : 'Executive Legal & Operational Overview')
+                        : isDiagnosticKit 
+                          ? (lang === 'es' ? 'Descripción Clínica del Biomarcador y Utilidad' : 'Clinical Biomarker Overview & Diagnostic Utility') 
+                          : (t.pharmacologicalOverview || 'Pharmacological Overview')}
+                    </h2>
+                    {isTranslating ? (
+                      <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                        <Sparkles size={13} className="spin" /> {lang === 'es' ? 'Traduciendo...' : (t.translating || 'Translating…')}
+                      </span>
+                    ) : lang !== 'en' && (
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <Sparkles size={11} color="#0284c7" /> {lang === 'es' ? 'Traducción Asistida' : 'Verified Translation'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="pds-description-body">{description}</p>
+                </div>
+              )}
+            </>
+          }
           desktopSecondary={
             diagnosticHeroImage ? (
               <div 

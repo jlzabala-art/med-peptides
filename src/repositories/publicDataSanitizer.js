@@ -44,7 +44,8 @@ export const PRODUCT_PUBLIC_WHITELIST = [
   'ingredients', 'technical_specs', 'application_protocol', 'associated_protocols',
   'clinical_indications', 'synergistic_products', 'product_positioning', 'post_transplant_protocol',
   'paired_product', 'inci_complete', 'usage_steps', 'standard',
-  'is_cosmetic', 'is_aesthetic', 'is_aesthetic_injectable'
+  'is_cosmetic', 'is_aesthetic', 'is_aesthetic_injectable',
+  'commercialNames', 'commercialProducts', 'brandNames', 'tradeNames', 'commercial_names'
 ];
 
 
