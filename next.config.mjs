@@ -29,24 +29,10 @@ const nextConfig = {
   allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.1.47', '192.168.1.*'],
   output: "standalone",
 
-  // ── Bundle size optimization: exclude heavy pure-frontend packages from
-  // Cloud Function tracing for public routes (safe — firebase-admin NOT excluded).
-  outputFileTracingExcludes: {
-    '/p/[slug]': [
-      'typescript', 'pdf-lib', 'jspdf', 'libphonenumber-js',
-      '@algolia', 'es-toolkit', 'core-js', 'web-streams-polyfill', 'recharts',
-    ],
-    '/proto/**': [
-      'typescript', 'pdf-lib', 'jspdf', 'libphonenumber-js',
-      '@algolia', 'es-toolkit', 'core-js', 'web-streams-polyfill',
-    ],
-    '/what-are-peptides': [
-      'typescript', 'pdf-lib', 'jspdf', 'recharts',
-    ],
-  },
+  // NOTE: outputFileTracingExcludes removed — firebase-tools esbuild (v0.28 vs ^0.19)
+  // cannot parse the nested object and crashes the Cloud Function deploy.
+  // Re-apply bundle optimization via a firebase-tools-compatible method.
 
-  // google-gax and firebase-admin sub-packages must be bundled by Next.js
-  // for GCP Cloud Function runtime compatibility — NOT in serverExternalPackages.
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
