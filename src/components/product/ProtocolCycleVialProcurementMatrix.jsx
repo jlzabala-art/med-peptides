@@ -15,11 +15,14 @@ import {
   SlidersHorizontal,
   Layers,
   ArrowRight,
-  FileText
+  FileText,
+  Lock,
+  LogIn
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { triggerHaptic } from '@/utils/haptics';
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
+import { useAuth } from '@/context/AuthContext';
 import './ProtocolCycleVialProcurementMatrix.css';
 
 /**
@@ -43,6 +46,8 @@ export default function ProtocolCycleVialProcurementMatrix({
 }) {
   const [scope, setScope] = useState('cycle'); // 'cycle' | 'phase'
   const [copied, setCopied] = useState(false);
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
 
   // Initialize phase weeks state (defaults to 4 weeks per phase)
   const defaultWeeksMap = useMemo(() => {
@@ -251,6 +256,13 @@ export default function ProtocolCycleVialProcurementMatrix({
 
   // 1-Click Commercial Bridge: Add Calculated Protocol Cycle to Active Workspace / Quotation
   const handleAddToQuotation = () => {
+    if (!isAuthenticated) {
+      triggerHaptic('warning');
+      // Redirect to login with returnTo so user lands back here after auth
+      const returnTo = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : '';
+      window.location.href = `/login?returnTo=${returnTo}&intent=order`;
+      return;
+    }
     triggerHaptic('success');
     const { addItem, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
 
@@ -636,16 +648,67 @@ export default function ProtocolCycleVialProcurementMatrix({
             )}
           </button>
 
-          {/* Action 3: 1-Click B2B Workspace Quotation / Order */}
-          <button
-            type="button"
-            onClick={handleAddToQuotation}
-            className="pcvp-primary-action-btn"
-            title="Add full titration cycle and ancillaries to active quotation / order"
-          >
-            <ShoppingCart size={14} />
-            <span>Order / Quote Cycle ({basketSummary.totalVials} Vials)</span>
-          </button>
+          {/* Action 3: 1-Click B2B Workspace Quotation / Order — requires auth */}
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleAddToQuotation}
+              className="pcvp-primary-action-btn"
+              title="Add full titration cycle and ancillaries to your active workspace quotation"
+            >
+              <ShoppingCart size={14} />
+              <span>Order / Quote Cycle ({basketSummary.totalVials} Vials)</span>
+            </button>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {/* Locked state — elegant premium treatment */}
+              <button
+                type="button"
+                onClick={handleAddToQuotation}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  padding: '8px 14px', borderRadius: '8px', border: '1px solid rgba(2,132,199,0.35)',
+                  background: 'rgba(2,132,199,0.07)', color: '#64748b',
+                  fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer',
+                  position: 'relative', overflow: 'hidden', transition: 'all 0.15s'
+                }}
+                title="Sign in to add this protocol cycle to your workspace"
+              >
+                <Lock size={13} style={{ flexShrink: 0, color: '#94a3b8' }} />
+                <span style={{ color: '#475569' }}>Order / Quote Cycle ({basketSummary.totalVials} Vials)</span>
+                <span style={{
+                  marginLeft: 'auto', fontSize: '0.65rem', fontWeight: 800,
+                  color: '#0284c7', background: '#eff6ff', border: '1px solid #bfdbfe',
+                  padding: '1px 6px', borderRadius: '4px', whiteSpace: 'nowrap'
+                }}>Sign in required</span>
+              </button>
+              {/* Inline auth nudge */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '8px 10px', borderRadius: '7px',
+                background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
+                border: '1px solid #bae6fd'
+              }}>
+                <LogIn size={13} style={{ flexShrink: 0, color: '#0284c7' }} />
+                <span style={{ fontSize: '0.72rem', color: '#0369a1', lineHeight: 1.3 }}>
+                  {lang === 'es'
+                    ? 'Inicia sesión para añadir este ciclo a tu espacio de trabajo.'
+                    : 'Sign in to load this protocol cycle into your workspace.'}
+                </span>
+                <a
+                  href={`/login?returnTo=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}&intent=order`}
+                  style={{
+                    marginLeft: 'auto', flexShrink: 0, fontSize: '0.72rem', fontWeight: 800,
+                    color: '#ffffff', background: '#0284c7', border: 'none',
+                    padding: '4px 10px', borderRadius: '6px', textDecoration: 'none',
+                    whiteSpace: 'nowrap', boxShadow: '0 1px 3px rgba(2,132,199,0.35)'
+                  }}
+                >
+                  {lang === 'es' ? 'Iniciar sesión →' : 'Sign in →'}
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
