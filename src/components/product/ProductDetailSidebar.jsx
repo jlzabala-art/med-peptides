@@ -18,6 +18,7 @@ import SolventReconWidget from './widgets/SolventReconWidget';
 import CorporateServiceWidget from './widgets/CorporateServiceWidget';
 import FdaApprovedPeptidesNetworkWidget from './FdaApprovedPeptidesNetworkWidget';
 import { isFdaApprovedPeptide } from '@/data/fdaPeptidesRegistry';
+import { QRCodeSVG } from 'qrcode.react';
 import './PublicDatasheetTableOfContents.css';
 
 /**
@@ -258,6 +259,14 @@ export default function ProductDetailSidebar({
       {/* ── Dynamic Category-Specific Specialized Widget ── */}
       {renderContextualWidget()}
 
+      {/* ── Associated Clinical Protocols (FIRST — clinical context before network) ── */}
+      {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
+        <AssociatedProtocolsSidebarWidget
+          protocols={associatedProtocols}
+          lang={lang}
+        />
+      )}
+
       {/* ── FDA-Approved Peptides Cross-Reference Network ── */}
       {isCurrentFdaApproved && (
         <FdaApprovedPeptidesNetworkWidget
@@ -267,13 +276,48 @@ export default function ProductDetailSidebar({
         />
       )}
 
-      {/* Associated Clinical Protocols (if applicable and not already in widgets) */}
-      {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
-        <AssociatedProtocolsSidebarWidget
-          protocols={associatedProtocols}
-          lang={lang}
-        />
-      )}
+      {/* ── QR Code — Direct monograph link for print / clinical handout ── */}
+      {slug && (() => {
+        const pageUrl = `https://med-peptides.com/p/${slug}`;
+        return (
+          <div style={{
+            margin: '12px 0 4px',
+            padding: '12px 14px',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', alignSelf: 'flex-start' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', color: '#64748b', textTransform: 'uppercase' }}>
+                {isEs ? '📲 Monografía Digital' : '📲 Digital Monograph'}
+              </span>
+            </div>
+            <a
+              href={pageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={isEs ? 'Abrir ficha técnica digital' : 'Open digital datasheet'}
+              style={{ display: 'block', lineHeight: 0, borderRadius: '6px', overflow: 'hidden' }}
+            >
+              <QRCodeSVG
+                value={pageUrl}
+                size={120}
+                bgColor="#ffffff"
+                fgColor="#003666"
+                level="M"
+                style={{ display: 'block' }}
+              />
+            </a>
+            <p style={{ fontSize: '0.6rem', color: '#94a3b8', textAlign: 'center', margin: 0, lineHeight: 1.3 }}>
+              med-peptides.com/p/{slug}
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Quick Back to Top Action */}
       <div className="pds-toc-footer">
