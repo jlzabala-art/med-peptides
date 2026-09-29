@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import './InteractiveReconstitutionGuide.css';
 import { 
@@ -217,6 +217,9 @@ export default function InteractiveReconstitutionGuide({
   const [showFullStrategyTable, setShowFullStrategyTable] = useState(false);
   const [showVialLabelModal, setShowVialLabelModal] = useState(false);
 
+  // Ref flag to prevent dose reset race condition when calibrating a phase
+  const isCalibratingRef = useRef(false);
+
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
     if (initialVialMg && initialVialMg > 0) {
@@ -230,6 +233,12 @@ export default function InteractiveReconstitutionGuide({
 
   // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded
   useEffect(() => {
+    // If a phase was just calibrated programmatically, skip automatic reset
+    if (isCalibratingRef.current) {
+      isCalibratingRef.current = false;
+      return;
+    }
+
     const conc = vialMg > 0 && bacWaterMl > 0 ? vialMg / bacWaterMl : 1;
     const reqVol = doseUnit === 'mcg' ? (doseValue / 1000) / conc : doseValue / conc;
     const units = reqVol * 100;
@@ -240,7 +249,7 @@ export default function InteractiveReconstitutionGuide({
       setDoseValue(p1.dose);
       setSelectedPhaseId(null);
     }
-  }, [vialMg, bacWaterMl, doseUnit, product]);
+  }, [vialMg, bacWaterMl, doseUnit, doseValue, product]);
 
   // ── Precision Pharmacokinetic Calculations ─────────────────────────────────
   const {
@@ -631,6 +640,7 @@ export default function InteractiveReconstitutionGuide({
   };
 
   const handleSelectPhase = (phase) => {
+    isCalibratingRef.current = true;
     triggerHaptic('selection');
     setSelectedPhaseId(phase.id);
     setDoseUnit(phase.unit);
@@ -2411,12 +2421,17 @@ export default function InteractiveReconstitutionGuide({
                               <button
                                 type="button"
                                 onClick={() => {
+                                  isCalibratingRef.current = true;
                                   triggerHaptic('selection');
                                   setDoseValue(ph.doseMg);
                                   setDoseUnit('mg');
-                                  setVialMg(ph.recommendedVialMg);
-                                  setBacWaterMl(ph.recommendedBacMl);
-                                  notifier.info(`Fase seleccionada: ${ph.name} — Vial ${ph.recommendedVialMg} mg`);
+                                  if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
+                                  if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
+                                  if (ph.phaseId) {
+                                    setSelectedPhaseId(ph.phaseId);
+                                    updateUrlParams(ph.phaseId, ph.doseMg, 'mg');
+                                  }
+                                  notifier.info(`Fase seleccionada: ${ph.name} — Vial ${ph.recommendedVialMg || 10} mg`);
                                 }}
                                 style={{
                                   background: isCurrent ? '#0284c7' : '#e2e8f0',
@@ -2505,8 +2520,9 @@ export default function InteractiveReconstitutionGuide({
 
         {/* ── Realistic Interactive U-100 Syringe Graphic (Dedicated Full-Width Line) ── */}
         <div 
+          id="irg-syringe-section"
           className="irg-syringe-stage-row" 
-          style={{ gridColumn: '1 / -1', width: '100%' }}
+          style={{ gridColumn: '1 / -1', width: '100%', scrollMarginTop: '100px' }}
           aria-label={`Insulin syringe displaying ${syringeUnits.toFixed(1)} units`}
         >
           <div className="irg-syringe-header">
@@ -2810,12 +2826,27 @@ export default function InteractiveReconstitutionGuide({
             currentDoseMg={doseMg}
             currentVialMg={safeVialMg}
             onCalibratePhase={(ph) => {
+              isCalibratingRef.current = true;
               triggerHaptic('selection');
-              setDoseValue(ph.doseMg);
+              const targetVial = ph.recommendedVialMg || safeVialMg;
+              const targetBac = ph.recommendedBacMl || safeBacMl;
+              setVialMg(targetVial);
+              setBacWaterMl(targetBac);
               setDoseUnit('mg');
-              if (ph.recommendedVialMg) setVialMg(ph.recommendedVialMg);
-              if (ph.recommendedBacMl) setBacWaterMl(ph.recommendedBacMl);
-              notifier.info(`Calibrated to ${ph.name}: ${ph.doseMg} mg · ${ph.recommendedVialMg || 10} mg vial`);
+              setDoseValue(ph.doseMg);
+              if (ph.phaseId) {
+                setSelectedPhaseId(ph.phaseId);
+                updateUrlParams(ph.phaseId, ph.doseMg, 'mg');
+              }
+              notifier.info(
+                lang === 'es'
+                  ? `⚡ Calibrado a ${ph.name}: ${ph.doseMg} mg en vial de ${targetVial} mg (${ph.resultUnits || 50} UI)`
+                  : `⚡ Calibrated to ${ph.name}: ${ph.doseMg} mg · ${targetVial} mg vial (${ph.resultUnits || 50} UI)`
+              );
+              const syringeEl = document.getElementById('irg-syringe-section');
+              if (syringeEl) {
+                syringeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
             }}
             lang="en"
           />

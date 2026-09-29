@@ -488,20 +488,22 @@ export default function ProductRegulatoryWarningsSection({
       id="regulatory-warnings" 
       className="pds-section-card"
       style={{
-        border: '1px solid #fecaca',
-        background: 'linear-gradient(180deg, #ffffff 0%, #fef2f2 100%)',
-        borderRadius: '12px',
+        border: '1px solid #fee2e2',
+        borderLeft: '4px solid #dc2626',
+        background: '#ffffff',
+        borderRadius: '10px',
         overflow: 'hidden',
         marginBottom: '2rem',
-        boxShadow: '0 4px 16px rgba(220, 38, 38, 0.05)'
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)'
       }}
     >
+      {/* ── GCP Section Header ── */}
       <div 
         className="pds-section-header" 
         style={{ 
-          background: 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)',
-          padding: '1.25rem 1.5rem',
-          color: '#ffffff',
+          background: '#fef2f2',
+          borderBottom: '1px solid #fee2e2',
+          padding: '1rem 1.5rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -511,22 +513,22 @@ export default function ProductRegulatoryWarningsSection({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            width: 38,
-            height: 38,
-            borderRadius: '10px',
-            background: 'rgba(255, 255, 255, 0.15)',
+            width: 36,
+            height: 36,
+            borderRadius: '8px',
+            background: '#fee2e2',
+            border: '1px solid #fecaca',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(4px)'
+            justifyContent: 'center'
           }}>
-            <ShieldAlert size={22} color="#fca5a5" />
+            <ShieldAlert size={20} color="#dc2626" />
           </div>
           <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#fecaca', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.67rem', fontWeight: 800, color: '#991b1b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               {isEs ? 'GOBERNANZA CLÍNICA & MARCO DE DISPENSACIÓN MÉDICA' : 'CLINICAL GOVERNANCE & MEDICAL DISPENSING FRAMEWORK'}
             </div>
-            <h3 style={{ margin: '2px 0 0 0', fontSize: '1.05rem', fontWeight: 800, color: '#ffffff' }}>
+            <h3 style={{ margin: '2px 0 0 0', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
               {isEs ? 'Estándar Analítico Farmacopeico & Supervisión Médica' : 'Pharmacopeial Grade Standard & Prescriber Governance'}
             </h3>
           </div>
@@ -535,86 +537,112 @@ export default function ProductRegulatoryWarningsSection({
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          background: 'rgba(255, 255, 255, 0.12)',
-          border: '1px solid rgba(254, 202, 202, 0.3)',
+          background: '#ffffff',
+          border: '1px solid #fca5a5',
           borderRadius: '99px',
           padding: '4px 12px',
           fontSize: '0.72rem',
           fontWeight: 700,
-          color: '#fee2e2'
+          color: '#b91c1c'
         }}>
-          <ShieldAlert size={13} color="#fca5a5" />
+          <ShieldAlert size={13} color="#dc2626" />
           <span>{isEs ? 'Revisión Facultativa Obligatoria' : 'Prescriber Review Required'}</span>
         </div>
       </div>
 
-      <div style={{ padding: '1.5rem' }}>
-        <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.86rem', color: '#7f1d1d', lineHeight: 1.6, fontWeight: 500 }}>
+      {/* ── Top Lead Directive Callout Bar ── */}
+      <div style={{
+        padding: '0.75rem 1.5rem',
+        background: '#fffdfa',
+        borderBottom: '1px solid #fef3c7',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        color: '#92400e',
+        fontSize: '0.82rem',
+        lineHeight: 1.5
+      }}>
+        <Info size={16} color="#d97706" style={{ flexShrink: 0 }} />
+        <span>
           {isEs 
             ? 'Compuesto polipeptídico de alta pureza analítica destinado a protocolos clínicos dirigidos por profesionales médicos facultativos e investigación biofarmacéutica. No destinado a automedicación.'
             : 'Biologically active polypeptide intended for physician-directed protocol implementation and clinical research. Strictly not formulated for unguided self-medication.'}
-        </p>
+        </span>
+      </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-          {/* Warning 1: Prescriber Supervision */}
-          <div style={{ background: '#ffffff', border: '1px solid #fee2e2', borderRadius: '10px', padding: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+      {/* ── GCP 4-Column Balanced Property Ribbon ── */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', 
+        gap: '1px',
+        background: '#f1f5f9'
+      }}>
+        {/* Column 1: Prescriber Supervision */}
+        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <ShieldAlert size={16} color="#dc2626" />
-              <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Prescripción & Supervisión Médica' : 'Prescription & Medical Oversight'}
-              </h4>
             </div>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
-              {isEs 
-                ? 'La administración, ajuste de dosis y seguimiento clínico deben realizarse bajo la supervisión de un médico o especialista colegiado tras evaluación de marcadores de base.'
-                : 'Administration, dosing titration, and clinical monitoring must be conducted under the direct supervision of a licensed physician following baseline lab workup.'}
-            </p>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              {isEs ? 'Prescripción & Supervisión' : 'Prescription & Oversight'}
+            </h4>
           </div>
+          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            {isEs 
+              ? 'La administración, ajuste de dosis y seguimiento clínico deben realizarse bajo la supervisión de un médico o especialista colegiado tras evaluación de marcadores de base.'
+              : 'Administration, dosing titration, and clinical monitoring must be conducted under the direct supervision of a licensed physician following baseline lab workup.'}
+          </p>
+        </div>
 
-          {/* Warning 2: Cold Chain & Asepsis */}
-          <div style={{ background: '#ffffff', border: '1px solid #fee2e2', borderRadius: '10px', padding: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <Thermometer size={16} color="#dc2626" />
-              <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Reconstitución Aséptica & Cadena 2–8°C' : 'Aseptic Reconstitution & 2–8°C Chain'}
-              </h4>
+        {/* Column 2: Cold Chain & Asepsis */}
+        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Thermometer size={16} color="#0284c7" />
             </div>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
-              {isEs 
-                ? 'Reconstituir con solvente bacteriostático estéril en condiciones higiénicas estrictas. Mantener en refrigeración constante (2°C–8°C) y consumir antes de 28–30 días.'
-                : 'Reconstitute using sterile bacteriostatic solvent under strict hygienic technique. Maintain constant cold-chain refrigeration (2°C–8°C) and consume within 28–30 days.'}
-            </p>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              {isEs ? 'Reconstitución & Cadena 2–8°C' : 'Reconstitution & 2–8°C'}
+            </h4>
           </div>
+          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            {isEs 
+              ? 'Reconstituir con solvente bacteriostático estéril en condiciones higiénicas estrictas. Mantener en refrigeración constante (2°C–8°C) y consumir antes de 28–30 días.'
+              : 'Reconstitute using sterile bacteriostatic solvent under strict hygienic technique. Maintain constant cold-chain refrigeration (2°C–8°C) and consume within 28–30 days.'}
+          </p>
+        </div>
 
-          {/* Warning 3: Key Contraindications */}
-          <div style={{ background: '#ffffff', border: '1px solid #fee2e2', borderRadius: '10px', padding: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <AlertTriangle size={16} color="#dc2626" />
-              <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Contraindicaciones Mayores' : 'Major Contraindications'}
-              </h4>
+        {/* Column 3: Key Contraindications */}
+        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AlertTriangle size={16} color="#d97706" />
             </div>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
-              {isEs 
-                ? 'Contraindicado en neoplasias activas o antecedentes oncológicos dependientes de receptores, embarazo, lactancia o insuficiencia hepática/renal severa no compensada.'
-                : 'Contraindicated in active malignancy, receptor-dependent oncological history, pregnancy, lactation, or severe uncompensated hepatic/renal dysfunction.'}
-            </p>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              {isEs ? 'Contraindicaciones Mayores' : 'Major Contraindications'}
+            </h4>
           </div>
+          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            {isEs 
+              ? 'Contraindicado en neoplasias activas o antecedentes oncológicos dependientes de receptores, embarazo, lactancia o insuficiencia hepática/renal severa no compensada.'
+              : 'Contraindicated in active malignancy, receptor-dependent oncological history, pregnancy, lactation, or severe uncompensated hepatic/renal dysfunction.'}
+          </p>
+        </div>
 
-          {/* Warning 4: Batch Release Verification */}
-          <div style={{ background: '#ffffff', border: '1px solid #fee2e2', borderRadius: '10px', padding: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <Beaker size={16} color="#dc2626" />
-              <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Verificación Analítica de Lote' : 'Batch Release Analytical Verification'}
-              </h4>
+        {/* Column 4: Batch Release Verification */}
+        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Beaker size={16} color="#059669" />
             </div>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
-              {isEs 
-                ? 'Pureza certificada ≥ 99.0% por RP-HPLC de doble columna y masa molecular comprobada por LC-MS con control estricto de endotoxinas (<0.25 EU/mg) por {supplierName}.'
-                : 'Certified ≥ 99.0% purity via dual-column RP-HPLC with LC-MS identity confirmation and strict endotoxin control (<0.25 EU/mg) sourced through {supplierName}.'}
-            </p>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              {isEs ? 'Control Analítico de Lote' : 'Batch Release QC'}
+            </h4>
           </div>
+          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            {isEs 
+              ? `Pureza certificada ≥ 99.0% por RP-HPLC de doble columna y masa molecular comprobada por LC-MS con control de endotoxinas (<0.25 EU/mg) por ${supplierName || 'laboratorio clínico certificado'}.`
+              : `Certified ≥ 99.0% purity via dual-column RP-HPLC with LC-MS identity confirmation and strict endotoxin control (<0.25 EU/mg) sourced through ${supplierName || 'certified clinical laboratory'}.`}
+          </p>
         </div>
       </div>
     </section>
