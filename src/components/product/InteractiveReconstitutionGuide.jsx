@@ -2104,8 +2104,8 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-ap-step-num">① {lang === 'es' ? 'Reconstitución' : 'Reconstitution'}</div>
                     <div className="irg-ap-step-desc">
                       {lang === 'es'
-                        ? <>Disolver vial de <strong>{effectiveVialMg} mg</strong> con <strong>{diluentMl} mL</strong> de agua bacteriostática (BAC).</>
-                        : <>Dissolve <strong>{effectiveVialMg} mg</strong> vial with <strong>{diluentMl} mL</strong> bacteriostatic water (BAC).</>}
+                        ? <>Disolver vial de <strong>{safeVialMg} mg</strong> con <strong>{safeBacMl.toFixed(1)} mL</strong> de agua bacteriostática (BAC).</>
+                        : <>Dissolve <strong>{safeVialMg} mg</strong> vial with <strong>{safeBacMl.toFixed(1)} mL</strong> bacteriostatic water (BAC).</>}
                     </div>
                   </div>
 
@@ -2113,8 +2113,8 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-ap-step-num">② {lang === 'es' ? 'Carga Jeringa U-100' : 'U-100 Syringe Draw'}</div>
                     <div className="irg-ap-step-desc">
                       {lang === 'es'
-                        ? <>Cargar exactamente <strong>{activePhase.syringeUnits || Math.round(calibratedUnits * 10) / 10} UI</strong> (={activePhase.volumeMl || calculatedVolumeMl.toFixed(2)} mL) en jeringa U-100.</>
-                        : <>Draw exactly <strong>{activePhase.syringeUnits || Math.round(calibratedUnits * 10) / 10} UI</strong> (={activePhase.volumeMl || calculatedVolumeMl.toFixed(2)} mL) in U-100 syringe.</>}
+                        ? <>Cargar exactamente <strong>{activePhase.syringeUnits} UI</strong> (={activePhase.volumeMl} mL) en jeringa U-100.</>
+                        : <>Draw exactly <strong>{activePhase.syringeUnits} UI</strong> (={activePhase.volumeMl} mL) in U-100 syringe.</>}
                     </div>
                   </div>
 
@@ -2122,8 +2122,8 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-ap-step-num">③ {lang === 'es' ? 'Rendimiento Clínico' : 'Clinical Yield'}</div>
                     <div className="irg-ap-step-desc">
                       {lang === 'es'
-                        ? <>Rinde para <strong>{activePhase.injectionsPerVial || Math.floor(effectiveVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} dosis</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} semanas`} de tratamiento).</>
-                        : <>Yields <strong>{activePhase.injectionsPerVial || Math.floor(effectiveVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} doses</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} weeks`} treatment).</>}
+                        ? <>Rinde para <strong>{activePhase.injectionsPerVial || Math.floor(safeVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} dosis</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} semanas`} de tratamiento).</>
+                        : <>Yields <strong>{activePhase.injectionsPerVial || Math.floor(safeVialMg / (activePhase.unit === 'mcg' ? activePhase.dose / 1000 : activePhase.dose))} doses</strong> ({activePhase.timing || `${activePhase.injectionsPerVial || 4} weeks`} treatment).</>}
                     </div>
                   </div>
                 </div>
