@@ -24,9 +24,46 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'firebase', 'firebase-admin', 'framer-motion', 'date-fns', 'lodash'],
+    // ── Reduce Cloud Function bundle: exclude heavy admin-only packages
+    // from the output file tracing for public routes.
+    // These are only needed in /admin/*, /doctor/*, /wholesaler/* routes.
+    outputFileTracingExcludes: {
+      '/p/[slug]': [
+        'typescript',
+        'pdf-lib',
+        'jspdf',
+        'libphonenumber-js',
+        '@algolia',
+        'es-toolkit',
+        'core-js',
+        'web-streams-polyfill',
+        '@babel',
+        'google-gax',
+        '@google-cloud',
+        'recharts',
+      ],
+      '/proto/**': [
+        'typescript', 'pdf-lib', 'jspdf', 'libphonenumber-js',
+        '@algolia', 'es-toolkit', 'core-js', 'web-streams-polyfill',
+      ],
+      '/what-are-peptides': [
+        'typescript', 'pdf-lib', 'jspdf', 'recharts',
+      ],
+    },
   },
   allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.1.47', '192.168.1.*'],
   output: "standalone",
+
+  // ── Keep these packages as externals in the Cloud Function
+  // (pure Node.js packages — no React components, safe to not bundle)
+  serverExternalPackages: [
+    'typescript',
+    'pdf-lib',
+    'jspdf',
+    'libphonenumber-js',
+    'google-gax',
+    '@google-cloud/storage',
+  ],
 
   webpack: (config, { isServer }) => {
     if (!isServer) {

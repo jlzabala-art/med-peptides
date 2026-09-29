@@ -9,8 +9,9 @@ import PublicDatasheetView from '../../../components/product/PublicDatasheetView
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
+export const revalidate = 3600; // ISR: regenerate at most every 60 min
+export const dynamicParams = true; // Allow slugs not in generateStaticParams
+
 
 const BASE_URL = 'https://med-peptides.com';
 
