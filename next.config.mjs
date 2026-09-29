@@ -37,9 +37,6 @@ const nextConfig = {
         'es-toolkit',
         'core-js',
         'web-streams-polyfill',
-        '@babel',
-        'google-gax',
-        '@google-cloud',
         'recharts',
       ],
       '/proto/**': [
@@ -54,16 +51,9 @@ const nextConfig = {
   allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.1.47', '192.168.1.*'],
   output: "standalone",
 
-  // ── Keep these packages as externals in the Cloud Function
-  // (pure Node.js packages — no React components, safe to not bundle)
-  serverExternalPackages: [
-    'typescript',
-    'pdf-lib',
-    'jspdf',
-    'libphonenumber-js',
-    'google-gax',
-    '@google-cloud/storage',
-  ],
+
+  // serverExternalPackages intentionally removed — google-gax and firebase-admin
+  // sub-packages must be bundled by Next.js for GCP Cloud Function runtime compatibility.
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
