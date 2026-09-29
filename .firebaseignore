@@ -1,0 +1,36 @@
+# ── Source code (no necesario en el deploy) ──
+src/
+functions-ai/node_modules/
+functions-cron/node_modules/
+functions-finance/node_modules/
+functions-triggers/node_modules/
+functions/node_modules/
+
+# ── Dev / test artifacts ──
+**/__tests__/
+**/*.test.*
+**/*.spec.*
+**/.storybook/
+**/coverage/
+**/.turbo/
+
+# ── Docs y assets de dev ──
+docs/
+*.md
+!README.md
+
+# ── Next.js build cache (solo se sube .next/standalone) ──
+.next/cache/
+.next/trace
+
+# ── Acumulación histórica de firebase ──
+.firebase/
+
+# ── IDE / OS ──
+.DS_Store
+*.log
+.env*.local
+.env.development
+
+# ── Herramientas locales ──
+node_modules/.cache/

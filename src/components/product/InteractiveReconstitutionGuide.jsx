@@ -215,6 +215,7 @@ export default function InteractiveReconstitutionGuide({
   const [doseUnit, setDoseUnit] = useState(() => baselineState.baseUnit);
   const [doseValue, setDoseValue] = useState(() => baselineState.baseDose);
   const [selectedPhaseId, setSelectedPhaseId] = useState(null);
+  const [activeStep, setActiveStep] = useState(1); // 1=Protocol, 2=Phases, 3=Vials, 4=Reconstitute
   const [showFullStrategyTable, setShowFullStrategyTable] = useState(false);
   const [showVialLabelModal, setShowVialLabelModal] = useState(false);
 
@@ -1748,215 +1749,329 @@ export default function InteractiveReconstitutionGuide({
                 </div>
               </div>
 
-              {/* ── 4-Step Cards ── */}
-              <div className="irg-pathway-steps">
+              {/* ── GCP Wizard: 4-Step Progressive Disclosure ── */}
+              <div className="irg-wizard-root">
 
-                {/* ── STEP 1: Select Protocol ── */}
-                <div className="irg-pathway-step">
-                  <div className="irg-pathway-step-header">
-                    <div className="irg-pathway-step-num">1</div>
-                    <div className="irg-pathway-step-label">{isEs ? 'Protocolo' : 'Protocol'}</div>
-                  </div>
-                  <div className="irg-pathway-step-body">
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isEs ? 'Selecciona el protocolo a seguir' : 'Select the protocol to follow'}
-                    </div>
-                    {/* Protocol Selector */}
-                    <div style={{ position: 'relative' }}>
-                      <div style={{
-                        background: '#002544', border: '1px solid #0284c7', borderRadius: '8px',
-                        padding: '10px 38px 10px 12px', cursor: 'pointer', pointerEvents: 'none'
-                      }}>
-                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.3 }}>{proto.name}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#38bdf8', marginTop: '2px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                          <span>{proto.duration || '8 Weeks'}</span>
-                          <span style={{ opacity: 0.5 }}>•</span>
-                          <span>{proto.phasesCount || phases.length} {isEs ? 'fases' : 'phases'}</span>
-                          {proto.isPrimary && <span style={{ background: 'rgba(56,189,248,0.2)', color: '#7dd3fc', padding: '0px 5px', borderRadius: '4px', fontSize: '0.65rem' }}>★ {isEs ? 'Principal' : 'Primary'}</span>}
-                        </div>
-                      </div>
-                      <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#38bdf8', pointerEvents: 'none' }}>
-                        <ChevronDown size={16} />
-                      </div>
-                      <select
-                        id="irg-protocol-dropdown"
-                        value={proto.id || proto.slug}
-                        onChange={(e) => handleProtocolChange(e.target.value)}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 2 }}
-                        aria-label={isEs ? 'Seleccionar Protocolo' : 'Select Protocol'}
-                      >
-                        {(associatedProtocols && associatedProtocols.length > 0 ? associatedProtocols : [proto]).filter(Boolean).map(p => (
-                          <option key={p.id || p.slug} value={p.id || p.slug} style={{ background: '#001e36', color: '#fff' }}>
-                            {p.name} ({p.duration || '8 Weeks'} · {p.phasesCount || 3} {isEs ? 'fases' : 'phases'}){p.isPrimary ? ' ★' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {proto.description && (
-                      <p style={{ margin: '8px 0 0', fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.45 }}>{proto.description}</p>
-                    )}
-                  </div>
+                {/* ─── Stepper bar ─── */}
+                <div className="irg-wizard-stepper" role="list" aria-label="Clinical pathway steps">
+                  {[
+                    { n: 1, label: isEs ? 'Protocolo' : 'Protocol' },
+                    { n: 2, label: isEs ? 'Fases' : 'Phases' },
+                    { n: 3, label: isEs ? 'Viales' : 'Vials' },
+                    { n: 4, label: isEs ? 'Preparar' : 'Prepare' }
+                  ].map(({ n, label }, i) => {
+                    const done = n < activeStep;
+                    const cur  = n === activeStep;
+                    return (
+                      <React.Fragment key={n}>
+                        {i > 0 && <div className={`irg-ws-connector ${done ? 'done' : ''}`} />}
+                        <button
+                          type="button"
+                          role="listitem"
+                          aria-current={cur ? 'step' : undefined}
+                          onClick={() => setActiveStep(n)}
+                          className={`irg-ws-step ${done ? 'done' : ''} ${cur ? 'active' : ''}`}
+                        >
+                          <div className="irg-ws-circle">{done ? '✓' : n}</div>
+                          <span className="irg-ws-label">{label}</span>
+                        </button>
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
 
-                {/* ── STEP 2: Protocol Phases ── */}
-                <div className="irg-pathway-step">
-                  <div className="irg-pathway-step-header">
-                    <div className="irg-pathway-step-num">2</div>
-                    <div className="irg-pathway-step-label">{isEs ? 'Fases' : 'Phases'}</div>
-                  </div>
-                  <div className="irg-pathway-step-body">
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isEs ? 'Selecciona la fase activa' : 'Select your active phase'}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {phases.map((phase, idx) => {
-                        const isActive = activePhaseId === phase.id;
-                        const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
-                        const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
-                        return (
-                          <button
-                            key={phase.id}
-                            type="button"
-                            onClick={() => handleSelectPhase(phase)}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: '10px',
-                              padding: '8px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
-                              background: isActive ? 'linear-gradient(90deg, #003666 0%, #004d8c 100%)' : 'rgba(255,255,255,0.03)',
-                              boxShadow: isActive ? '0 0 0 2px #0284c7' : '0 0 0 1px rgba(255,255,255,0.08)'
-                            }}
-                          >
-                            <div style={{
-                              width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0,
-                              background: isActive ? '#0284c7' : 'rgba(255,255,255,0.08)',
-                              color: isActive ? '#fff' : '#64748b',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: '0.68rem', fontWeight: 800
-                            }}>{phase.phaseNum || idx + 1}</div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: isActive ? '#e0f2fe' : '#94a3b8', lineHeight: 1.2 }}>
-                                {phase.name}
-                              </div>
-                              <div style={{ fontSize: '0.68rem', color: isActive ? '#38bdf8' : '#475569', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '1px' }}>
-                                <span className="font-mono" style={{ fontWeight: 700 }}>{phase.dose} {phase.unit}</span>
-                                {phase.timing && <><span style={{ opacity: 0.4 }}>•</span><span>{phase.timing}</span></>}
-                              </div>
-                            </div>
-                            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-                              {advice && (
-                                <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: '4px', background: isActive ? 'rgba(0,200,100,0.15)' : '#f0fdf4', color: isActive ? '#4ade80' : '#15803d', border: isActive ? '1px solid rgba(74,222,128,0.3)' : '1px solid #bbf7d0' }}>
-                                  {advice.recommendedVialMg} mg
-                                </span>
-                              )}
-                              {isActive && <span style={{ fontSize: '0.6rem', color: '#4ade80', fontWeight: 700 }}>✓ ACTIVE</span>}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                {/* ─── Two-column body: content + summary ─── */}
+                <div className="irg-wizard-body">
 
-                {/* ── STEP 3: Vials to Buy ── */}
-                <div className="irg-pathway-step">
-                  <div className="irg-pathway-step-header">
-                    <div className="irg-pathway-step-num">3</div>
-                    <div className="irg-pathway-step-label">{isEs ? 'Viales' : 'Vials'}</div>
-                  </div>
-                  <div className="irg-pathway-step-body">
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isEs ? 'Qué comprar para este protocolo' : 'What to buy for this protocol'}
-                    </div>
-                    {fullStrategy?.phases?.length > 0 ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {fullStrategy.phases.map((ph, i) => {
-                          const isCurrentPhase = Math.abs(ph.doseMg - doseMg) <= 0.05;
-                          return (
-                            <div key={i} style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              gap: '8px', padding: '7px 10px', borderRadius: '7px',
-                              background: isCurrentPhase ? 'rgba(2,132,199,0.1)' : 'rgba(255,255,255,0.03)',
-                              border: isCurrentPhase ? '1px solid rgba(2,132,199,0.3)' : '1px solid rgba(255,255,255,0.06)'
-                            }}>
-                              <div style={{ minWidth: 0 }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: isCurrentPhase ? '#e0f2fe' : '#94a3b8', lineHeight: 1.2 }}>{ph.name}</div>
-                                <div style={{ fontSize: '0.67rem', color: '#475569', marginTop: '1px' }} className="font-mono">{ph.doseMg} mg/wk · {ph.recommendedVialMg} mg vial</div>
-                              </div>
-                              <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: isCurrentPhase ? '#38bdf8' : '#64748b' }} className="font-mono">
-                                  {ph.vialsNeeded || 1}× {ph.recommendedVialMg} mg
-                                </div>
-                                <div style={{ fontSize: '0.62rem', color: '#475569' }}>{ph.resultUnits || 50} UI · {ph.volumeMl || 0.5} mL</div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div style={{ padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e0f2fe' }} className="font-mono">
-                          {safeVialMg} mg {isEs ? 'vial' : 'vial'}
-                        </div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
-                          {safeBacMl.toFixed(1)} mL BAC · {Math.round(concentrationMcgMl).toLocaleString()} mcg/mL
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  {/* ─── MAIN CONTENT PANEL ─── */}
+                  <div className="irg-wizard-content">
 
-                {/* ── STEP 4: Reconstitution ── */}
-                <div className="irg-pathway-step">
-                  <div className="irg-pathway-step-header">
-                    <div className="irg-pathway-step-num">4</div>
-                    <div className="irg-pathway-step-label">{isEs ? 'Preparar' : 'Prepare'}</div>
-                  </div>
-                  <div className="irg-pathway-step-body">
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isEs ? 'Cómo reconstituir tu dosis' : 'How to reconstitute your dose'}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      {[
-                        {
-                          num: '①', label: isEs ? 'Reconstituir' : 'Reconstitute',
-                          text: isEs
-                            ? <><strong>{safeVialMg} mg</strong> + <strong>{safeBacMl.toFixed(1)} mL</strong> BAC</>
-                            : <><strong>{safeVialMg} mg</strong> + <strong>{safeBacMl.toFixed(1)} mL</strong> BAC</>
-                        },
-                        {
-                          num: '②', label: isEs ? 'Cargar' : 'Draw', highlight: true,
-                          text: activePhase && activePhaseId !== 'custom'
-                            ? <><strong>{activePhase.syringeUnits} UI</strong> ({activePhase.volumeMl} mL) en U-100</>
-                            : <><strong>{syringeUnits.toFixed(0)} UI</strong> ({liquidVolumeMl.toFixed(2)} mL) {isEs ? 'en U-100' : 'in U-100'}</>
-                        },
-                        {
-                          num: '③', label: isEs ? 'Rendimiento' : 'Yield',
-                          text: <><strong>{totalDosesInVial} {isEs ? 'dosis' : 'doses'}</strong> / {isEs ? 'vial' : 'vial'} · {concentrationMgMl.toFixed(2)} mg/mL</>
-                        }
-                      ].map(step => (
-                        <div key={step.num} style={{
-                          display: 'flex', alignItems: 'center', gap: '8px',
-                          padding: '8px 10px', borderRadius: '8px',
-                          background: step.highlight ? 'rgba(2,132,199,0.12)' : 'rgba(255,255,255,0.03)',
-                          border: step.highlight ? '1px solid rgba(2,132,199,0.3)' : '1px solid rgba(255,255,255,0.07)'
-                        }}>
-                          <div style={{
-                            width: '22px', height: '22px', borderRadius: '50%', flexShrink: 0,
-                            background: step.highlight ? '#0284c7' : 'rgba(255,255,255,0.08)',
-                            color: step.highlight ? '#fff' : '#64748b',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '0.7rem', fontWeight: 800
-                          }}>{step.num}</div>
+                    {/* STEP 1 — Protocol */}
+                    {activeStep === 1 && (
+                      <div className="irg-wstep-panel">
+                        <div className="irg-wstep-heading">
+                          <span className="irg-wstep-num">1</span>
                           <div>
-                            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b', fontWeight: 700, lineHeight: 1 }}>{step.label}</div>
-                            <div style={{ fontSize: '0.78rem', color: step.highlight ? '#e0f2fe' : '#94a3b8', marginTop: '2px', lineHeight: 1.3 }}>{step.text}</div>
+                            <div className="irg-wstep-title">{isEs ? 'Selecciona el protocolo' : 'Select Protocol'}</div>
+                            <div className="irg-wstep-sub">{isEs ? 'Elige el plan de tratamiento para este péptido' : 'Choose the treatment plan for this peptide'}</div>
                           </div>
                         </div>
-                      ))}
+                        <div className="irg-wstep-rows">
+                          {(associatedProtocols && associatedProtocols.length > 0 ? associatedProtocols : [proto]).filter(Boolean).map(p => {
+                            const isSel = (p.id || p.slug) === (proto.id || proto.slug);
+                            return (
+                              <button
+                                key={p.id || p.slug}
+                                type="button"
+                                onClick={() => { handleProtocolChange(p.id || p.slug); }}
+                                className={`irg-wrow ${isSel ? 'selected' : ''}`}
+                              >
+                                <div className="irg-wrow-radio">
+                                  <div className={`irg-wrow-dot ${isSel ? 'filled' : ''}`} />
+                                </div>
+                                <div className="irg-wrow-body">
+                                  <div className="irg-wrow-name">
+                                    {p.name}
+                                    {p.isPrimary && <span className="irg-wrow-primary-tag">★ Primary</span>}
+                                  </div>
+                                  <div className="irg-wrow-meta">
+                                    <span>{p.duration || '8 Weeks'}</span>
+                                    <span className="irg-wrow-dot-sep">·</span>
+                                    <span>{p.phasesCount || phases.length} {isEs ? 'fases' : 'phases'}</span>
+                                    {p.category && <><span className="irg-wrow-dot-sep">·</span><span>{p.category}</span></>}
+                                  </div>
+                                  {p.description && <div className="irg-wrow-desc">{p.description}</div>}
+                                </div>
+                                {isSel && <div className="irg-wrow-check">✓</div>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STEP 2 — Phases */}
+                    {activeStep === 2 && (
+                      <div className="irg-wstep-panel">
+                        <div className="irg-wstep-heading">
+                          <span className="irg-wstep-num">2</span>
+                          <div>
+                            <div className="irg-wstep-title">{isEs ? 'Selecciona la fase activa' : 'Select Active Phase'}</div>
+                            <div className="irg-wstep-sub">{proto.name} · {proto.duration || ''}</div>
+                          </div>
+                        </div>
+                        <div className="irg-wstep-rows">
+                          {phases.map((phase, idx) => {
+                            const isPhSel = activePhaseId === phase.id;
+                            const dMg = phase.unit === 'mcg' ? phase.dose / 1000 : phase.dose;
+                            const advice = fullStrategy?.phases?.find(ph => Math.abs(ph.doseMg - dMg) <= 0.05);
+                            return (
+                              <button
+                                key={phase.id}
+                                type="button"
+                                onClick={() => handleSelectPhase(phase)}
+                                className={`irg-wrow ${isPhSel ? 'selected' : ''}`}
+                              >
+                                <div className="irg-wrow-radio">
+                                  <div className={`irg-wrow-dot ${isPhSel ? 'filled' : ''}`} />
+                                </div>
+                                <div className="irg-wrow-body">
+                                  <div className="irg-wrow-name">
+                                    {phase.name}
+                                    {isPhSel && <span className="irg-wrow-active-tag">✓ {isEs ? 'Activa' : 'Active'}</span>}
+                                  </div>
+                                  <div className="irg-wrow-meta">
+                                    <span className="irg-wrow-dose-badge">{phase.dose} {phase.unit}</span>
+                                    {phase.timing && <><span className="irg-wrow-dot-sep">·</span><span>{phase.timing}</span></>}
+                                    {advice && <><span className="irg-wrow-dot-sep">·</span><span className="irg-wrow-vial-badge">Vial: {advice.recommendedVialMg} mg</span></>}
+                                  </div>
+                                </div>
+                                <div className="irg-wrow-phase-num">{phase.phaseNum || idx + 1}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STEP 3 — Vials to Buy */}
+                    {activeStep === 3 && (
+                      <div className="irg-wstep-panel">
+                        <div className="irg-wstep-heading">
+                          <span className="irg-wstep-num">3</span>
+                          <div>
+                            <div className="irg-wstep-title">{isEs ? 'Viales a comprar' : 'Vials to Procure'}</div>
+                            <div className="irg-wstep-sub">{isEs ? 'Lista de viales para el ciclo completo' : 'Procurement list for the full cycle'}</div>
+                          </div>
+                        </div>
+                        <div className="irg-wstep-procurement">
+                          {fullStrategy?.phases?.length > 0 ? (
+                            <>
+                              <div className="irg-wstep-table-header">
+                                <span>{isEs ? 'Fase' : 'Phase'}</span>
+                                <span>{isEs ? 'Dosis' : 'Dose'}</span>
+                                <span>{isEs ? 'Vial' : 'Vial'}</span>
+                                <span>{isEs ? 'Cant.' : 'Qty'}</span>
+                              </div>
+                              {fullStrategy.phases.map((ph, i) => {
+                                const isCur = Math.abs(ph.doseMg - doseMg) <= 0.05;
+                                return (
+                                  <div key={i} className={`irg-wstep-table-row ${isCur ? 'current' : ''}`}>
+                                    <span className="irg-wrow-name">{ph.name}</span>
+                                    <span className="irg-wrow-dose-badge">{ph.doseMg} mg</span>
+                                    <span className="irg-wrow-vial-badge">{ph.recommendedVialMg} mg</span>
+                                    <span className="irg-wrow-qty">{ph.vialsNeeded || 1}×</span>
+                                  </div>
+                                );
+                              })}
+                              <div className="irg-wstep-total-row">
+                                <span>{isEs ? 'Total viales' : 'Total vials'}:</span>
+                                <strong>{fullStrategy.phases.reduce((acc, ph) => acc + (ph.vialsNeeded || 1), 0)} {isEs ? 'viales' : 'vials'}</strong>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="irg-wrow">
+                              <div className="irg-wrow-body">
+                                <div className="irg-wrow-name">{safeVialMg} mg vial</div>
+                                <div className="irg-wrow-meta">{safeBacMl.toFixed(1)} mL BAC · {concentrationMgMl.toFixed(2)} mg/mL</div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STEP 4 — Reconstitution */}
+                    {activeStep === 4 && (
+                      <div className="irg-wstep-panel">
+                        <div className="irg-wstep-heading">
+                          <span className="irg-wstep-num">4</span>
+                          <div>
+                            <div className="irg-wstep-title">{isEs ? 'Reconstitución' : 'Reconstitution'}</div>
+                            <div className="irg-wstep-sub">{isEs ? 'Preparación del vial paso a paso' : 'Step-by-step vial preparation'}</div>
+                          </div>
+                        </div>
+                        <div className="irg-wstep-rows">
+                          {[
+                            {
+                              num: '①',
+                              label: isEs ? 'Reconstituir' : 'Reconstitute',
+                              highlight: false,
+                              text: isEs
+                                ? <><strong>{safeVialMg} mg</strong> + <strong>{safeBacMl.toFixed(1)} mL</strong> BAC. Inyectar lentamente a 45° por la pared del vial.</>
+                                : <><strong>{safeVialMg} mg</strong> + <strong>{safeBacMl.toFixed(1)} mL</strong> BAC Water. Inject slowly down glass wall at 45°.</>
+                            },
+                            {
+                              num: '②',
+                              label: isEs ? 'Concentración' : 'Concentration',
+                              highlight: false,
+                              text: <><strong>{concentrationMgMl.toFixed(2)} mg/mL</strong> · {Math.round(concentrationMcgMl).toLocaleString()} mcg/mL</>
+                            },
+                            {
+                              num: '③',
+                              label: isEs ? 'Extraer en U-100' : 'Draw in U-100 Syringe',
+                              highlight: true,
+                              text: activePhase && activePhaseId !== 'custom'
+                                ? <><strong>{activePhase.syringeUnits} UI</strong> ({activePhase.volMl} mL) {isEs ? 'para' : 'for'} {activePhase.dose} {activePhase.unit}</>
+                                : <><strong>{syringeUnits.toFixed(0)} UI</strong> ({liquidVolumeMl.toFixed(2)} mL) {isEs ? 'para' : 'for'} {doseValue} {doseUnit}</>
+                            },
+                            {
+                              num: '④',
+                              label: isEs ? 'Rendimiento por vial' : 'Vial Yield',
+                              highlight: false,
+                              text: <><strong>{safeDosesPerVial} {isEs ? 'dosis' : 'doses'}</strong> / {isEs ? 'vial' : 'vial'} · {doseFrequency}</>
+                            }
+                          ].map(step => (
+                            <div key={step.num} className={`irg-wrecon-row ${step.highlight ? 'highlight' : ''}`}>
+                              <div className="irg-wrecon-num">{step.num}</div>
+                              <div className="irg-wrecon-body">
+                                <div className="irg-wrecon-label">{step.label}</div>
+                                <div className="irg-wrecon-text">{step.text}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="irg-wstep-note">
+                          {isEs ? '↓ Ajusta los parámetros y visualiza en la jeringa U-100 debajo' : '↓ Adjust parameters and visualize on the U-100 syringe below'}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>{/* end irg-wizard-content */}
+
+                  {/* ─── SUMMARY PANEL (sticky on desktop) ─── */}
+                  <div className="irg-wizard-summary">
+                    <div className="irg-wsum-title">{isEs ? 'Resumen del Ciclo' : 'Cycle Summary'}</div>
+                    <div className="irg-wsum-rows">
+                      <div className={`irg-wsum-row ${activeStep >= 1 ? 'done' : ''}`}>
+                        <div className="irg-wsum-icon">{activeStep > 1 ? '✓' : '●'}</div>
+                        <div className="irg-wsum-body">
+                          <div className="irg-wsum-label">{isEs ? 'Protocolo' : 'Protocol'}</div>
+                          <div className="irg-wsum-val">{proto.name}</div>
+                          <div className="irg-wsum-meta">{proto.duration} · {proto.phasesCount || phases.length} {isEs ? 'fases' : 'phases'}</div>
+                        </div>
+                      </div>
+                      <div className={`irg-wsum-row ${activePhaseId ? 'done' : 'pending'}`}>
+                        <div className="irg-wsum-icon">{activePhase && activePhaseId !== 'custom' ? '✓' : '○'}</div>
+                        <div className="irg-wsum-body">
+                          <div className="irg-wsum-label">{isEs ? 'Fase' : 'Phase'}</div>
+                          <div className="irg-wsum-val">{activePhase?.name || '—'}</div>
+                          <div className="irg-wsum-meta">{activePhase ? `${activePhase.dose} ${activePhase.unit} · ${activePhase.timing || ''}` : isEs ? 'Selecciona una fase' : 'Select a phase'}</div>
+                        </div>
+                      </div>
+                      <div className={`irg-wsum-row ${activeStep >= 3 ? 'done' : 'pending'}`}>
+                        <div className="irg-wsum-icon">○</div>
+                        <div className="irg-wsum-body">
+                          <div className="irg-wsum-label">{isEs ? 'Viales' : 'Vials'}</div>
+                          <div className="irg-wsum-val">
+                            {fullStrategy?.phases?.length > 0
+                              ? `${fullStrategy.phases.reduce((a, p) => a + (p.vialsNeeded || 1), 0)} ${isEs ? 'viales' : 'vials'}`
+                              : `${safeVialMg} mg vial`}
+                          </div>
+                          <div className="irg-wsum-meta">{safeVialMg} mg · {safeBacMl.toFixed(1)} mL BAC</div>
+                        </div>
+                      </div>
+                      <div className={`irg-wsum-row ${activeStep >= 4 ? 'done' : 'pending'}`}>
+                        <div className="irg-wsum-icon">○</div>
+                        <div className="irg-wsum-body">
+                          <div className="irg-wsum-label">{isEs ? 'Reconstitución' : 'Reconstitution'}</div>
+                          <div className="irg-wsum-val">{safeVialMg} mg + {safeBacMl.toFixed(1)} mL BAC</div>
+                          <div className="irg-wsum-meta">{syringeUnits.toFixed(0)} UI · {safeDosesPerVial} {isEs ? 'dosis/vial' : 'doses/vial'}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="irg-wsum-footer">
+                      <div className="irg-wsum-stat">
+                        <span>{isEs ? 'Frecuencia' : 'Frequency'}:</span>
+                        <strong>{doseFrequency}</strong>
+                      </div>
+                      <div className="irg-wsum-stat">
+                        <span>{isEs ? 'Dosis/vial' : 'Doses/vial'}:</span>
+                        <strong>{safeDosesPerVial}</strong>
+                      </div>
                     </div>
                   </div>
+
+                </div>{/* end irg-wizard-body */}
+
+                {/* ─── Bottom Navigation Bar ─── */}
+                <div className="irg-wizard-nav">
+                  <button
+                    type="button"
+                    className="irg-wnav-back"
+                    onClick={() => setActiveStep(s => Math.max(1, s - 1))}
+                    disabled={activeStep === 1}
+                  >
+                    ← {isEs ? 'Anterior' : 'Back'}
+                  </button>
+                  <div className="irg-wnav-dots">
+                    {[1,2,3,4].map(n => (
+                      <button key={n} type="button" onClick={() => setActiveStep(n)}
+                        className={`irg-wnav-dot ${n === activeStep ? 'active' : ''}`}
+                      />
+                    ))}
+                  </div>
+                  {activeStep < 4 ? (
+                    <button
+                      type="button"
+                      className="irg-wnav-next"
+                      onClick={() => setActiveStep(s => Math.min(4, s + 1))}
+                    >
+                      {isEs ? 'Continuar' : 'Continue'} →
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="irg-wnav-next done"
+                      onClick={() => { const el = document.getElementById('irg-syringe-section'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }}
+                    >
+                      {isEs ? 'Ver Jeringa ↓' : 'View Syringe ↓'}
+                    </button>
+                  )}
                 </div>
 
-              </div>{/* end irg-pathway-steps */}
+
+              </div>{/* end irg-wizard-root */}
             </div>
           );
         })()}

@@ -5,7 +5,9 @@
     "frameworksBackend": {
       "memory": "1GiB",
       "timeoutSeconds": 60,
-      "maxInstances": 20
+      "maxInstances": 20,
+      "minInstances": 1,
+      "concurrency": 80
     },
     "ignore": [
       "firebase.json",
