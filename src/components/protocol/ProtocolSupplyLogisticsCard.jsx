@@ -76,76 +76,51 @@ export default function ProtocolSupplyLogisticsCard({
       }
     >
       {/* ── Top KPI Metrics Strip (Google Cloud Resource Metrics Standard) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-        gap: '0.75rem',
-        marginBottom: '1.25rem'
-      }}>
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem'
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+      <div className="proto-logistics-kpi-grid">
+        <div className="proto-kpi-card">
+          <div className="proto-kpi-title">
             {isEs ? 'Total Viales API' : 'Total API Vials'}
           </div>
-          <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#0284c7', marginTop: '2px' }}>
+          <div className="proto-kpi-value" style={{ color: '#0284c7' }}>
             {supplySummary.totalVials}
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+          <div className="proto-kpi-sub">
             {displayDuration}
           </div>
         </div>
 
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem'
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        <div className="proto-kpi-card">
+          <div className="proto-kpi-title">
             {isEs ? 'Micro-Inyecciones' : 'Micro Injections'}
           </div>
-          <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#0d9488', marginTop: '2px' }}>
+          <div className="proto-kpi-value" style={{ color: '#0d9488' }}>
             {supplySummary.totalInjections || supplySummary.syringes}
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+          <div className="proto-kpi-sub">
             {isEs ? 'Subcutáneas (SubQ)' : 'Subcutaneous SubQ'}
           </div>
         </div>
 
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem'
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        <div className="proto-kpi-card">
+          <div className="proto-kpi-title">
             {isEs ? 'Solvente Reconst.' : 'BAC Reconstitution'}
           </div>
-          <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#7c3aed', marginTop: '2px' }}>
+          <div className="proto-kpi-value" style={{ color: '#7c3aed' }}>
             {supplySummary.bacVials}x 10 mL
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+          <div className="proto-kpi-sub">
             {isEs ? 'USP 0.9% Benzyl Alc.' : 'USP 0.9% Preserved'}
           </div>
         </div>
 
-        <div style={{
-          background: '#f8fafc',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem'
-        }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+        <div className="proto-kpi-card">
+          <div className="proto-kpi-title">
             {isEs ? 'Estabilidad Acuosa' : 'Aqueous Stability'}
           </div>
-          <div style={{ fontSize: '1.30rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+          <div className="proto-kpi-value" style={{ color: '#0f172a' }}>
             28 {isEs ? 'Días' : 'Days'}
           </div>
-          <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+          <div className="proto-kpi-sub">
             2°C – 8°C (No Congelar)
           </div>
         </div>

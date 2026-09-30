@@ -204,32 +204,43 @@ export default function ProtocolCosmeticsAdjunctsCard({
             ))}
           </div>
 
-          {/* ── Deep Clinical Rationale Accordion (Attractive Scientific Dossier) ── */}
+          {/* ── Deep Clinical Rationale Accordion (Google Cloud UX Standard) ── */}
           <div className="pca-clinical-dossier-box">
             <button
               type="button"
-              className="pca-clinical-dossier-toggle"
+              className={`pca-clinical-dossier-toggle ${showClinicalDossier ? 'is-open' : ''}`}
               onClick={() => setShowClinicalDossier(v => !v)}
+              aria-expanded={showClinicalDossier}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <BookOpen size={15} style={{ color: '#0d9488' }} />
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs 
-                    ? 'Justificación Clínica y Farmacodinámica de la Sinergia (Atlas Clinical Engine)' 
-                    : 'Clinical Rationale & Pharmacodynamic Synergy Blueprint (Atlas Clinical Engine)'}
-                </span>
-                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '2px 8px', borderRadius: '99px' }}>
-                  {isEs ? '8 Citas Científicas' : '8 Peer-Reviewed Citations'}
-                </span>
+              <div className="pca-dossier-toggle-left">
+                <div className="pca-dossier-toggle-icon">
+                  <BookOpen size={16} />
+                </div>
+                <div className="pca-dossier-toggle-text">
+                  <div className="pca-dossier-title-line">
+                    <span className="pca-dossier-title">
+                      {isEs 
+                        ? 'Justificación Clínica y Farmacodinámica de la Sinergia' 
+                        : 'Clinical Rationale & Pharmacodynamic Synergy Blueprint'}
+                    </span>
+                    <span className="pca-dossier-badge">
+                      {isEs ? '8 Citas Científicas' : '8 Peer-Reviewed Citations'}
+                    </span>
+                  </div>
+                  <span className="pca-dossier-subtitle">
+                    {isEs
+                      ? 'Atlas Clinical Engine · Bioequivalencia y evidencia mecanística'
+                      : 'Atlas Clinical Engine · Dual-compartment bioequivalence & evidence'}
+                  </span>
+                </div>
               </div>
-              <ChevronDown
-                size={16}
-                style={{
-                  color: '#64748b',
-                  transform: showClinicalDossier ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease'
-                }}
-              />
+
+              <div className="pca-dossier-toggle-right">
+                <ChevronDown
+                  size={18}
+                  className={`pca-dossier-chevron ${showClinicalDossier ? 'is-open' : ''}`}
+                />
+              </div>
             </button>
 
             {showClinicalDossier && (

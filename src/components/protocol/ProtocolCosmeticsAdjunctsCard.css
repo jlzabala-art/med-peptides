@@ -279,6 +279,119 @@
   border-color: #0d9488;
 }
 
+/* ── Deep Clinical Rationale Accordion (Google Cloud UX Standard) ── */
+.pca-clinical-dossier-box {
+  margin-top: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.pca-clinical-dossier-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border: none;
+  border-left: 3px solid #0d9488;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.pca-clinical-dossier-toggle:hover {
+  background: #f1f5f9;
+}
+
+.pca-clinical-dossier-toggle.is-open {
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pca-dossier-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.pca-dossier-toggle-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  color: #0d9488;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pca-dossier-toggle-text {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pca-dossier-title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pca-dossier-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.pca-dossier-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0f766e;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  padding: 0.12rem 0.5rem;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.pca-dossier-subtitle {
+  font-size: 0.7rem;
+  color: #64748b;
+  line-height: 1.25;
+}
+
+.pca-dossier-toggle-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.pca-dossier-chevron {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #64748b;
+}
+
+.pca-dossier-chevron.is-open {
+  transform: rotate(180deg);
+  color: #0d9488;
+}
+
 /* ── System summary footer ── */
 .pca-system-summary {
   display: flex;
@@ -309,5 +422,34 @@
   .pca-header {
     flex-wrap: wrap;
     gap: 8px;
+  }
+
+  .pca-clinical-dossier-toggle {
+    padding: 0.65rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .pca-dossier-toggle-left {
+    gap: 0.55rem;
+  }
+
+  .pca-dossier-toggle-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
+
+  .pca-dossier-title {
+    font-size: 0.80rem;
+    line-height: 1.25;
+  }
+
+  .pca-dossier-subtitle {
+    font-size: 0.68rem;
+  }
+
+  .pca-dossier-badge {
+    font-size: 0.62rem;
+    padding: 0.1rem 0.4rem;
   }
 }

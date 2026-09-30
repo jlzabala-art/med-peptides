@@ -361,24 +361,41 @@ export default function ProductDetailSidebar({
         </div>
       )}
 
-      {/* 3. MOBILE SLIDE-IN DRAWER (< 1024px) */}
+      {/* 3. MOBILE SLIDE-IN DRAWER / BOTTOM SHEET (< 1024px) ── Google Cloud Console UX Standard */}
       {isMobileDrawerOpen && (
         <div 
-          className="pds-mobile-toc-overlay"
+          className="pds-mobile-toc-backdrop"
           onClick={() => setIsMobileDrawerOpen(false)}
+          role="presentation"
         >
           <div 
             className="pds-mobile-toc-drawer"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
+            aria-label={isEs ? 'Índice de contenido' : 'Table of contents'}
           >
-            <div className="pds-mobile-toc-drawer-header">
-              <div className="pds-mobile-toc-drawer-header-left">
-                <List size={16} className="pds-drawer-header-icon" />
-                <span className="pds-drawer-header-title">
-                  {isEs ? 'ÍNDICE DEL DOCUMENTO' : 'TABLE OF CONTENTS'}
-                </span>
+            {/* Google Cloud UX Mobile Drag Handle */}
+            <div className="pds-drawer-drag-handle" />
+
+            <div className="pds-drawer-header">
+              <div className="pds-drawer-title-group">
+                <div className="pds-drawer-icon-box">
+                  <List size={18} className="pds-drawer-icon" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <h4 className="pds-drawer-title">
+                      {isEs ? 'Índice del Documento' : 'Table of Contents'}
+                    </h4>
+                    <span className="pds-toc-progress-pill">
+                      {currentProgress}/{availableSections.length}
+                    </span>
+                  </div>
+                  <span className="pds-drawer-subtitle">
+                    {isEs ? 'Navegación rápida por apartados' : 'Jump directly to any section'}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
@@ -387,14 +404,122 @@ export default function ProductDetailSidebar({
                   triggerHaptic('light');
                   setIsMobileDrawerOpen(false);
                 }}
-                aria-label="Close"
+                aria-label={isEs ? 'Cerrar' : 'Close'}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="pds-drawer-content-scrollable">
-              {sidebarContent}
+            {/* Currently Viewing Banner */}
+            {activeLabel && (
+              <div className="pds-drawer-current-banner">
+                <span className="pds-current-label">
+                  {isEs ? 'Sección activa actual:' : 'Currently reading:'}
+                </span>
+                <strong className="pds-current-title">{activeLabel}</strong>
+              </div>
+            )}
+
+            <div className="pds-drawer-body">
+              <ul className="pds-drawer-list">
+                {availableSections.map((sec, idx) => {
+                  const isActive = activeId === sec.id;
+                  const IconComponent = sec.icon;
+
+                  return (
+                    <li key={sec.id} className="pds-drawer-item">
+                      <button
+                        type="button"
+                        className={`pds-drawer-btn ${isActive ? 'is-active' : ''}`}
+                        onClick={(e) => scrollToSection(e, sec.id)}
+                      >
+                        <div className="pds-drawer-btn-left">
+                          <span className={`pds-drawer-step ${isActive ? 'is-active' : ''}`}>
+                            {idx + 1}
+                          </span>
+                          {IconComponent && (
+                            <IconComponent size={16} className="pds-drawer-item-icon" />
+                          )}
+                          <span className="pds-drawer-item-text">{sec.label}</span>
+                        </div>
+                        {isActive ? (
+                          <span className="pds-drawer-active-tag">
+                            {isEs ? 'Actual' : 'Active'}
+                          </span>
+                        ) : (
+                          <ChevronRight size={15} className="pds-drawer-arrow" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* Product Type Specific Widget */}
+              {renderProductTypeWidget()}
+
+              {/* Associated Clinical Protocols */}
+              {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (
+                <AssociatedProtocolsSidebarWidget
+                  protocols={associatedProtocols}
+                  lang={lang}
+                />
+              )}
+
+              {/* FDA-Approved Peptides Cross-Reference Network */}
+              {isCurrentFdaApproved && (
+                <FdaApprovedPeptidesNetworkWidget
+                  currentSlug={slug}
+                  currentProduct={product}
+                  lang={lang}
+                />
+              )}
+
+              {/* Digital Monograph Link */}
+              {slug && (
+                <div style={{
+                  padding: '12px 14px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: '#64748b', textTransform: 'uppercase' }}>
+                    {isEs ? '📲 Monografía Digital' : '📲 Digital Monograph'}
+                  </span>
+                  <a
+                    href={`https://med-peptides.com/p/${slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'block', lineHeight: 0, borderRadius: '6px', overflow: 'hidden' }}
+                  >
+                    <QRCodeSVG
+                      value={`https://med-peptides.com/p/${slug}`}
+                      size={110}
+                      bgColor="#ffffff"
+                      fgColor="#003666"
+                      level="M"
+                    />
+                  </a>
+                  <p style={{ fontSize: '0.62rem', color: '#94a3b8', textAlign: 'center', margin: 0 }}>
+                    med-peptides.com/p/{slug}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="pds-drawer-footer">
+              <button
+                type="button"
+                className="pds-drawer-top-action"
+                onClick={scrollToTop}
+              >
+                <ArrowUp size={14} />
+                <span>{isEs ? 'Volver al Inicio del Documento' : 'Back to Top of Document'}</span>
+              </button>
             </div>
           </div>
         </div>

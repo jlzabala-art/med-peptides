@@ -541,16 +541,61 @@
   }
   
   .pds-section-header {
-    padding: 0.95rem 1.15rem;
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.5rem !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+  }
+  
+  .pds-section-header-left {
+    flex: 1 !important;
+    min-width: 0 !important;
+    gap: 0.55rem !important;
+    align-items: flex-start !important;
   }
   
   .pds-section-header-shield {
-    width: 36px;
-    height: 36px;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    margin-top: 2px !important;
+  }
+
+  .pds-section-header-titles {
+    flex: 1 !important;
+    min-width: 0 !important;
+    gap: 0.15rem !important;
+  }
+
+  .pds-section-header-category {
+    font-size: 0.65rem !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .pds-section-badge {
+    font-size: 0.60rem !important;
+    padding: 0.1rem 0.4rem !important;
+  }
+
+  .pds-section-header-title {
+    font-size: 0.88rem !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+  }
+
+  .pds-section-header-right {
+    flex-shrink: 0 !important;
+    margin-top: 2px !important;
+  }
+
+  .pds-section-header-right button {
+    padding: 4px 8px !important;
+    font-size: 0.70rem !important;
+    border-radius: 5px !important;
   }
   
   .pds-section-card-body {
-    padding: 1.15rem;
+    padding: 0.85rem !important;
   }
 }
 
@@ -1101,4 +1146,138 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Protocol Logistics KPI Grid (Google Cloud Resource Metrics Standard) ── */
+.proto-logistics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.proto-kpi-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.15s ease;
+}
+
+.proto-kpi-card:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.proto-kpi-title {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.proto-kpi-value {
+  font-size: 1.15rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  margin: 3px 0 2px 0;
+  line-height: 1.2;
+}
+
+.proto-kpi-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+@media (max-width: 640px) {
+  .proto-logistics-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .proto-kpi-card {
+    padding: 8px 10px;
+  }
+  .proto-kpi-value {
+    font-size: 1.02rem;
+  }
+}
+
+/* ── Protocol Biomarker Executive Card (GCP Calibration Standard) ── */
+.proto-biomarker-executive-card {
+  margin-bottom: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.proto-biomarker-executive-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.proto-biomarker-executive-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.proto-biomarker-executive-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.proto-biomarker-executive-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #003666;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.proto-biomarker-executive-btn:hover {
+  background: #002244;
+}
+
+@media (max-width: 640px) {
+  .proto-biomarker-executive-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .proto-biomarker-executive-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 

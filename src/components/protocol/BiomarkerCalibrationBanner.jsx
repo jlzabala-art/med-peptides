@@ -93,46 +93,27 @@ export default function BiomarkerCalibrationBanner({
   // If NOT calibrated and NOT expanded, show the executive GCP Calibration Bar
   if (!calibrationDisplay && !isExpanded) {
     return (
-      <div
-        className="proto-biomarker-calibration-banner"
-        style={{
-          borderLeftColor: '#0284c7',
-          background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
-          padding: '1.1rem 1.4rem'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0, flex: 1 }}>
-            <div
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
-                background: '#e0f2fe',
-                color: '#0284c7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}
-            >
-              <Activity size={20} />
+      <div className="proto-biomarker-executive-card">
+        <div className="proto-biomarker-executive-inner">
+          <div className="proto-biomarker-executive-info">
+            <div className="proto-biomarker-executive-icon">
+              <Activity size={18} />
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#0284c7', letterSpacing: '0.05em' }}>
+            <div className="proto-biomarker-executive-text">
+              <div className="proto-biomarker-executive-meta">
+                <span className="proto-biomarker-executive-tag">
                   {isEs ? 'CALIBRACIÓN CLÍNICA DE PRECISIÓN DISPONIBLE' : 'PRECISION BIOMARKER CALIBRATION AVAILABLE'}
                 </span>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#475569', background: '#e2e8f0', padding: '1px 6px', borderRadius: '4px' }}>
+                <span className="proto-biomarker-executive-provider">
                   Bloodo DBS™ · LifeLab1 (EU)
                 </span>
               </div>
-              <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: '#0f172a' }}>
+              <h4 className="proto-biomarker-executive-title">
                 {isEs
                   ? `Calibrar pauta según ${detectedBiomarker.nameEs}`
                   : `Calibrate protocol dosing to patient's ${detectedBiomarker.nameEn}`}
               </h4>
-              <p style={{ margin: '2px 0 0 0', fontSize: '0.76rem', color: '#64748b' }}>
+              <p className="proto-biomarker-executive-desc">
                 {isEs
                   ? 'Ajuste dinámico de titulación semanal, vía parenteral vs subcutánea y ventanas de control capilar según analítica real.'
                   : 'Dynamic adjustment of titration velocity, delivery modality, and lab re-test milestones to match patient biomarkers.'}
@@ -140,25 +121,11 @@ export default function BiomarkerCalibrationBanner({
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexShrink: 0 }}>
+          <div className="proto-biomarker-executive-action">
             <button
               type="button"
               onClick={() => setIsExpanded(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '0.55rem 1rem',
-                borderRadius: '6px',
-                border: '1px solid #0284c7',
-                background: '#0284c7',
-                color: '#ffffff',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 1px 3px rgba(2, 132, 199, 0.25)',
-                transition: 'all 0.15s ease'
-              }}
+              className="proto-biomarker-executive-btn"
             >
               <Sliders size={14} />
               <span>{isEs ? 'Calibrar con Analítica de Sangre' : 'Calibrate with Blood Test'}</span>

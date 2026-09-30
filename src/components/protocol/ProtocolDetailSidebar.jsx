@@ -471,24 +471,42 @@ export default function ProtocolDetailSidebar({
         </div>
       )}
 
-      {/* Mobile Drawer Slide-In (< 1024px) */}
+      {/* Mobile Bottom-Sheet Drawer (< 1024px) ── Google Cloud Console UX Standard */}
       {isMobileDrawerOpen && (
         <div 
-          className="pds-mobile-toc-overlay"
+          className="pds-mobile-toc-backdrop"
           onClick={() => setIsMobileDrawerOpen(false)}
+          role="presentation"
         >
           <div 
             className="pds-mobile-toc-drawer"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
+            aria-label={isEs ? 'Secciones del protocolo' : 'Protocol sections'}
           >
-            <div className="pds-mobile-toc-drawer-header">
-              <div className="pds-mobile-toc-drawer-header-left">
-                <List size={16} className="pds-drawer-header-icon" />
-                <span className="pds-drawer-header-title">
-                  {isEs ? 'SECCIONES DEL PROTOCOLO' : 'PROTOCOL SECTIONS'}
-                </span>
+            {/* Google Cloud UX Mobile Drag Handle */}
+            <div className="pds-drawer-drag-handle" />
+
+            {/* Header */}
+            <div className="pds-drawer-header">
+              <div className="pds-drawer-title-group">
+                <div className="pds-drawer-icon-box">
+                  <List size={18} className="pds-drawer-icon" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <h4 className="pds-drawer-title">
+                      {isEs ? 'Secciones del Protocolo' : 'Protocol Navigation'}
+                    </h4>
+                    <span className="pds-toc-progress-pill">
+                      {currentProgress}/{availableSections.length}
+                    </span>
+                  </div>
+                  <span className="pds-drawer-subtitle">
+                    {isEs ? 'Navegación clínica directa' : 'Rapid clinical outline navigation'}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
@@ -497,14 +515,235 @@ export default function ProtocolDetailSidebar({
                   triggerHaptic('light');
                   setIsMobileDrawerOpen(false);
                 }}
-                aria-label="Close"
+                aria-label={isEs ? 'Cerrar' : 'Close'}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="pds-drawer-content-scrollable">
-              {sidebarContent}
+            {/* Active Section Banner */}
+            {activeLabel && (
+              <div className="pds-drawer-current-banner">
+                <span className="pds-current-label">
+                  {isEs ? 'Sección activa actual:' : 'Currently reading:'}
+                </span>
+                <strong className="pds-current-title">{activeLabel}</strong>
+              </div>
+            )}
+
+            {/* Scrollable Body */}
+            <div className="pds-drawer-body">
+              {/* Section Buttons */}
+              <ul className="pds-drawer-list">
+                {availableSections.map((sec, idx) => {
+                  const isActive = activeId === sec.id;
+                  const IconComponent = sec.icon;
+
+                  return (
+                    <li key={sec.id} className="pds-drawer-item">
+                      <button
+                        type="button"
+                        className={`pds-drawer-btn ${isActive ? 'is-active' : ''}`}
+                        onClick={(e) => scrollToSection(e, sec.id)}
+                      >
+                        <div className="pds-drawer-btn-left">
+                          <span className={`pds-drawer-step ${isActive ? 'is-active' : ''}`}>
+                            {idx + 1}
+                          </span>
+                          {IconComponent && (
+                            <IconComponent size={16} className="pds-drawer-item-icon" />
+                          )}
+                          <span className="pds-drawer-item-text">{sec.label}</span>
+                        </div>
+                        {isActive ? (
+                          <span className="pds-drawer-active-tag">
+                            {isEs ? 'Actual' : 'Active'}
+                          </span>
+                        ) : (
+                          <ChevronRight size={15} className="pds-drawer-arrow" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* Quick Clinical Actions */}
+              <div className="pds-drawer-actions-card">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'ACCIONES CLÍNICAS' : 'CLINICAL ACTIONS'}
+                  </span>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#003666', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 5px', borderRadius: '3px' }}>
+                    DOC
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handlePrintBlueprint}
+                  disabled={pdfStatus !== 'idle'}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    background: pdfStatus === 'success'
+                      ? 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)'
+                      : pdfStatus !== 'idle'
+                      ? 'linear-gradient(135deg, #334155 0%, #475569 100%)'
+                      : 'linear-gradient(135deg, #003666 0%, #0284c7 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: pdfStatus !== 'idle' ? 'wait' : 'pointer',
+                    boxShadow: '0 1px 3px rgba(0,54,102,0.15)',
+                    minHeight: '40px'
+                  }}
+                >
+                  {pdfStatus === 'generating' && (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>{isEs ? 'Generando Blueprint...' : 'Generating Blueprint...'}</span>
+                    </>
+                  )}
+                  {pdfStatus === 'downloading' && (
+                    <>
+                      <Download size={14} className="animate-bounce" />
+                      <span>{isEs ? 'Descargando PDF...' : 'Downloading PDF...'}</span>
+                    </>
+                  )}
+                  {pdfStatus === 'success' && (
+                    <>
+                      <Check size={14} />
+                      <span>{isEs ? '¡Blueprint Descargado ✓!' : 'Blueprint Downloaded ✓!'}</span>
+                    </>
+                  )}
+                  {pdfStatus === 'idle' && (
+                    <>
+                      <Printer size={14} />
+                      <span>{isEs ? 'Imprimir / Exportar Blueprint' : 'Print / Export Blueprint'}</span>
+                    </>
+                  )}
+                </button>
+
+                {onOpenQrModal && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setIsMobileDrawerOpen(false);
+                      onOpenQrModal();
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '8px 12px',
+                      background: '#ffffff',
+                      color: '#003666',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      minHeight: '40px'
+                    }}
+                  >
+                    <QrCode size={14} color="#0284c7" />
+                    <span>{isEs ? 'Abrir Código QR Móvil' : 'Open Mobile QR Dialog'}</span>
+                  </button>
+                )}
+
+                {onCopyLabRequisition && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      onCopyLabRequisition();
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '8px 12px',
+                      background: '#ffffff',
+                      color: '#334155',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      minHeight: '40px'
+                    }}
+                  >
+                    <ClipboardList size={14} color="#64748b" />
+                    <span>{isEs ? 'Copiar Petición de Lab' : 'Copy Lab Order'}</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    background: copiedUrl ? '#f0fdf4' : '#ffffff',
+                    color: copiedUrl ? '#16a34a' : '#475569',
+                    border: copiedUrl ? '1px solid #86efac' : '1px solid #cbd5e1',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    minHeight: '40px'
+                  }}
+                >
+                  {copiedUrl ? <Check size={14} /> : <Copy size={14} />}
+                  <span>{copiedUrl ? (isEs ? 'Enlace Copiado ✓' : 'Link Copied ✓') : (isEs ? 'Copiar Enlace Directo' : 'Copy Direct Link')}</span>
+                </button>
+              </div>
+
+              {/* Topical Adjuncts */}
+              {Array.isArray(topicalAdjuncts) && topicalAdjuncts.length > 0 && (
+                <ProtocolTopicalAdjunctsSidebarWidget
+                  adjuncts={topicalAdjuncts}
+                  lang={lang}
+                />
+              )}
+
+              {/* Similar Protocols */}
+              {Array.isArray(similarProtocols) && similarProtocols.length > 0 && (
+                <SimilarProtocolsSidebarWidget
+                  protocols={similarProtocols}
+                  lang={lang}
+                  currentSlug={slug}
+                />
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="pds-drawer-footer">
+              <button
+                type="button"
+                className="pds-drawer-top-action"
+                onClick={scrollToTop}
+              >
+                <ArrowUp size={14} />
+                <span>{isEs ? 'Volver al Inicio del Protocolo' : 'Back to Top of Protocol'}</span>
+              </button>
             </div>
           </div>
         </div>
