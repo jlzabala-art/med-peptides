@@ -242,10 +242,12 @@ function ensureRootGcloudIgnore() {
   fs.writeFileSync(rootIgnorePath, content, 'utf8');
 }
 
-// Step 4: Purge root .next/cache and .next/dev before staging so firebase-tools does not copy 2+ GB into Cloud Functions
+// Step 4: Purge root dev artifacts and stale staging.
+// In CI environments, preserve root .next/cache so actions/cache can save it for incremental builds.
 function purgeNextCache() {
+  const isCI = Boolean(process.env.CI);
   const pathsToPurge = [
-    { p: path.resolve('.next/cache'), label: 'compiler cache (.next/cache)' },
+    ...(isCI ? [] : [{ p: path.resolve('.next/cache'), label: 'compiler cache (.next/cache)' }]),
     { p: path.resolve('.next/dev'), label: 'development cache (.next/dev)' },
     { p: path.resolve('.next/diagnostics'), label: 'build diagnostics (.next/diagnostics)' },
     { p: path.resolve('.firebase'), label: 'stale staging directory (.firebase)' },
