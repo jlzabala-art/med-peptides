@@ -965,10 +965,11 @@ export default function ProtocolWorkspaceTab({
             )}
 
             <a
-              href={activeProtocol.slug ? `/proto/${activeProtocol.slug}` : `/proto/${product.slug || 'protocol'}`}
+              href={activeProtocol?.slug ? `/proto/${activeProtocol.slug}` : (activeProtocol?.id ? `/proto/${activeProtocol.id}` : `/proto/${product.slug || 'protocol'}`)}
               target="_blank"
               rel="noopener noreferrer"
               className="pds-protocol-summary-link-btn"
+              title={`Open full clinical protocol page for ${sanitizeProtocolTitle(activeProtocol?.name, canonicalName)}`}
             >
               <span>Full Protocol Page</span>
               <ExternalLink size={12} />
