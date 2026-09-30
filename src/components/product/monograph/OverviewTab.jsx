@@ -132,7 +132,7 @@ export default function OverviewTab({
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="pds-clinical-identity-grid">
           <div>
             <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '2px' }}>
               Generic / Non-Proprietary Name
@@ -275,41 +275,30 @@ export default function OverviewTab({
           </span>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '0.85rem',
-          marginBottom: '1.25rem'
-        }}>
+        {/* Balanced 2x2 Grid (Desktop) and 1-Column (Mobile) */}
+        <div className="pds-clinical-considerations-grid">
           {clinicalConsiderations.map((item, idx) => {
             const Icon = item.icon;
             return (
-              <div
-                key={idx}
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px'
-                }}
-              >
+              <div key={idx} className="pds-consideration-card">
                 <div style={{
-                  background: '#e0f2fe',
-                  padding: '6px',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  padding: '7px',
                   borderRadius: '6px',
-                  marginTop: '2px',
+                  marginTop: '1px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  <Icon size={16} color="#0284c7" />
+                  <Icon size={16} color="#003666" />
                 </div>
-                <div>
-                  <div style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b', marginBottom: '2px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.06em', marginBottom: '3px' }}>
                     {item.label}
                   </div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 750, color: '#0f172a', lineHeight: 1.45 }}>
                     {item.value}
                   </div>
                 </div>

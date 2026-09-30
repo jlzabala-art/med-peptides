@@ -260,3 +260,49 @@
     font-size: 0.74rem;
   }
 }
+
+/* ── 8. Clinical Considerations & Identity Balanced Grids (GCP Standard) ── */
+.pds-clinical-identity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pds-clinical-considerations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.pds-consideration-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #003666;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.pds-consideration-card:hover {
+  border-color: #cbd5e1;
+  border-left-color: #0284c7;
+  box-shadow: 0 3px 8px rgba(0, 54, 102, 0.08);
+}
+
+@media (max-width: 767px) {
+  .pds-clinical-considerations-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .pds-consideration-card {
+    padding: 12px 14px !important;
+  }
+}
