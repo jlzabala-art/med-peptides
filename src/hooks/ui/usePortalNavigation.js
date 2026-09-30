@@ -82,7 +82,7 @@ export function usePortalNavigation() {
         items: [
           { id: 'patients', label: 'Patients (CRM)', icon: Users, path: '/medical/patients', active: isActive('/medical/patients') },
           { id: 'prescriptions', label: 'Prescriptions', icon: ClipboardList, path: '/medical/prescriptions', active: isActive('/medical/prescriptions') },
-          { id: 'atlas', label: 'Clinical AI (Atlas)', icon: Brain, path: '/medical/atlas', active: isActive('/medical/atlas') },
+          { id: 'atlas', label: 'Atlas AI', icon: Brain, path: '/medical/atlas', active: isActive('/medical/atlas') },
           { id: 'calendar', label: 'Calendar', icon: Calendar, path: '/medical/calendar', active: isActive('/medical/calendar') },
         ],
       },

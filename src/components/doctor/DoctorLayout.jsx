@@ -314,7 +314,7 @@ export default function PhysicianLayout({
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(139,92,246,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(139,92,246,0.3)'; }}
             >
-              <Bot size={14} /> Consult Clinical AI
+              <Bot size={14} /> Consult Atlas AI
             </button>
           </div>
 

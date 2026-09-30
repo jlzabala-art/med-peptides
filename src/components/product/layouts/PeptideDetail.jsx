@@ -1119,7 +1119,7 @@ export default function PeptideDetail({
                     initialPrompt: richPrompt,
                     autoSend: true,
                     clearHistory: true,
-                    displayText: `Clinical AI: ${activeProduct.name}`
+                    displayText: `Atlas AI: ${activeProduct.name}`
                   });
                 }}
                 onMouseEnter={e => {

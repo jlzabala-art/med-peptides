@@ -384,7 +384,7 @@ const getContextConfig = (pathname) => {
       actions: [
         {
           id: 'open_ai_copilot',
-          label: 'Ask Clinical AI',
+          label: 'Ask Atlas AI',
           icon: <Bot size={16} color="#1a73e8" />,
           bg: '#e8f0fe',
         },

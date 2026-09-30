@@ -157,12 +157,12 @@ export default function PublicStickyActionBar({
               type="button"
               onClick={handleOpenAI}
               className="public-sticky-action-bar__ai-btn"
-              title="Open Clinical AI Research Copilot"
-              aria-label="Clinical AI Copilot"
+              title="Open Atlas AI Research Copilot"
+              aria-label="Atlas AI Copilot"
             >
               <Sparkles size={15} className="public-sticky-action-bar__sparkle-icon" />
-              <span className="public-sticky-action-bar__ai-label-full">Clinical AI</span>
-              <span className="public-sticky-action-bar__ai-label-short">AI</span>
+              <span className="public-sticky-action-bar__ai-label-full">Atlas AI</span>
+              <span className="public-sticky-action-bar__ai-label-short">Atlas</span>
               <span className="public-sticky-action-bar__quota-pill">
                 {quota.remaining}/{quota.limit}
               </span>

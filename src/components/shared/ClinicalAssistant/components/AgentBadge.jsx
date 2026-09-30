@@ -20,7 +20,7 @@ const AGENT_REGISTRY = {
     border: 'rgba(16,185,129,0.18)',
   },
   AgentDoctor: {
-    label:  'Clinical AI',
+    label:  'Atlas AI',
     icon:   '🏥',
     color:  '#0ea5e9',
     bg:     'rgba(14,165,233,0.08)',

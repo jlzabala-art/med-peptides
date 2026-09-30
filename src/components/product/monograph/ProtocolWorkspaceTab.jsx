@@ -135,6 +135,112 @@ function sanitizeProtocolTitle(rawName = '', canonicalCompound = '') {
   return cleaned || rawName;
 }
 
+function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
+  const phases = Array.isArray(p.phases) && p.phases.length > 0
+    ? p.phases
+    : (Array.isArray(p.phase_blueprints) ? p.phase_blueprints : []);
+
+  let extractedDoseMg = null;
+  let extractedFreqPerWeek = null;
+  let extractedFreqDesc = '';
+  let extractedRoute = p.route || 'Subcutaneous';
+  let totalWeeks = 0;
+
+  const mappedPhases = phases.map((ph, idx) => {
+    const drug = Array.isArray(ph.drugs) && ph.drugs.length > 0 ? ph.drugs[0] : null;
+    const doseLogic = drug?.dose_logic || {};
+    const phaseWeeks = Number(ph.durationWeeks || ph.default_duration_weeks || ph.duration) || 4;
+    totalWeeks += phaseWeeks;
+
+    let phaseDose = null;
+    if (ph.doseMg) phaseDose = parseFloat(ph.doseMg);
+    else if (ph.dose) {
+      const match = String(ph.dose).match(/([\d.]+)/);
+      if (match) phaseDose = parseFloat(match[1]);
+    } else if (drug?.dose) {
+      const match = String(drug.dose).match(/([\d.]+)/);
+      if (match) phaseDose = parseFloat(match[1]);
+    } else if (doseLogic.starting_weekly_dose) {
+      phaseDose = parseFloat(doseLogic.starting_weekly_dose);
+    } else if (doseLogic.dose_per_administration) {
+      phaseDose = parseFloat(doseLogic.dose_per_administration);
+    }
+
+    let phaseFreq = ph.frequency || drug?.frequency || doseLogic.administration_frequency || '';
+    if (/once|weekly|1x/i.test(phaseFreq)) {
+      if (extractedFreqPerWeek === null) extractedFreqPerWeek = 1;
+      phaseFreq = 'Once weekly';
+    } else if (/2x|twice/i.test(phaseFreq)) {
+      if (extractedFreqPerWeek === null) extractedFreqPerWeek = 2;
+      phaseFreq = '2x per week';
+    } else if (/daily|qd|every day/i.test(phaseFreq)) {
+      if (extractedFreqPerWeek === null) extractedFreqPerWeek = 7;
+      phaseFreq = 'Daily';
+    }
+
+    if (phaseDose && extractedDoseMg === null) {
+      extractedDoseMg = phaseDose;
+      extractedFreqDesc = phaseFreq;
+    }
+
+    return {
+      phaseIndex: idx + 1,
+      title: ph.phase_title || ph.phaseLabel || ph.name || `Phase ${idx + 1}`,
+      weeks: `Weeks ${totalWeeks - phaseWeeks + 1}–${totalWeeks}`,
+      doseMg: phaseDose || 2.5,
+      frequency: phaseFreq || 'Once weekly'
+    };
+  });
+
+  const compoundLower = String(canonicalCompound || p.name || '').toLowerCase();
+  if (!extractedDoseMg) {
+    if (p.defaultDoseMg) extractedDoseMg = parseFloat(p.defaultDoseMg);
+    else if (compoundLower.includes('tirzepatide')) extractedDoseMg = 2.5;
+    else if (compoundLower.includes('semaglutide')) extractedDoseMg = 0.25;
+    else if (compoundLower.includes('retatrutide')) extractedDoseMg = 2.0;
+    else if (compoundLower.includes('bpc-157') || compoundLower.includes('bpc157')) extractedDoseMg = 0.25;
+    else if (compoundLower.includes('ghk-cu') || compoundLower.includes('ghk')) extractedDoseMg = 2.0;
+    else extractedDoseMg = 1.25;
+  }
+
+  if (!extractedFreqPerWeek) {
+    if (compoundLower.includes('tirzepatide') || compoundLower.includes('semaglutide') || compoundLower.includes('retatrutide')) {
+      extractedFreqPerWeek = 1;
+      extractedFreqDesc = 'Once weekly subcutaneous injection';
+    } else if (compoundLower.includes('pt-141') || compoundLower.includes('bremelanotide')) {
+      extractedFreqPerWeek = 2;
+      extractedFreqDesc = 'As needed (1–2x per week, 45 min prior)';
+    } else {
+      extractedFreqPerWeek = 1;
+      extractedFreqDesc = 'Weekly';
+    }
+  }
+
+  const finalDurationWeeks = totalWeeks > 0 ? totalWeeks : (Number(p.durationWeeks) || parseInt(p.duration, 10) || 12);
+  let cleanedObjective = p.description || p.clinicalRationale || p.summary || 'Clinical administration protocol.';
+  if (finalDurationWeeks > 8 && cleanedObjective.includes('8-week')) {
+    cleanedObjective = cleanedObjective.replace(/\b8-week\b/gi, `${finalDurationWeeks}-week`);
+  }
+
+  return {
+    durationWeeks: finalDurationWeeks,
+    defaultDoseMg: extractedDoseMg,
+    defaultDosesPerWeek: extractedFreqPerWeek,
+    frequencyDescription: extractedFreqDesc,
+    route: extractedRoute,
+    phases: mappedPhases.length > 0 ? mappedPhases : [
+      {
+        phaseIndex: 1,
+        title: 'Phase 1: Initiation Titration',
+        weeks: `Weeks 1–${finalDurationWeeks}`,
+        doseMg: extractedDoseMg,
+        frequency: extractedFreqDesc || 'Once weekly'
+      }
+    ],
+    objective: cleanedObjective
+  };
+}
+
 export default function ProtocolWorkspaceTab({
   product = {},
   associatedProtocols = [],
@@ -149,40 +255,27 @@ export default function ProtocolWorkspaceTab({
   // Normalize protocols list: use provided or fallback to canonical PT-141 protocols
   const availableProtocols = useMemo(() => {
     if (Array.isArray(associatedProtocols) && associatedProtocols.length > 0) {
-      // Map Firestore/Repository protocols into canonical structure
-      return associatedProtocols.map(p => ({
-        id: p.id || p.slug,
-        slug: p.slug || p.id,
-        name: p.name || p.title || 'Clinical Protocol',
-        durationWeeks: p.durationWeeks || (parseInt(p.duration, 10) || 4),
-        difficulty: p.difficulty || p.difficulty_level || 'Clinical',
-        category: p.category || 'Sexual Health',
-        objective: p.description || p.clinicalRationale || p.summary || 'Clinical administration protocol.',
-        route: 'Subcutaneous',
-        defaultDoseMg: 1.25,
-        defaultDosesPerWeek: 2,
-        frequencyDescription: 'As needed (1–2x per week, 45 min prior)',
-        phases: Array.isArray(p.phases) && p.phases.length > 0
-          ? p.phases.map((ph, idx) => ({
-              phaseIndex: idx + 1,
-              title: ph.name || ph.phaseLabel || `Phase ${idx + 1}`,
-              weeks: `Weeks ${idx * 4 + 1}–${(idx + 1) * 4}`,
-              doseMg: parseFloat(ph.dose) || 1.25,
-              frequency: ph.frequency || '1–2x per week'
-            }))
-          : [
-              {
-                phaseIndex: 1,
-                title: 'Phase 1: Clinical Administration',
-                weeks: `Weeks 1–${p.durationWeeks || 4}`,
-                doseMg: 1.25,
-                frequency: '1–2x per week'
-              }
-            ]
-      }));
+      // Map Firestore/Repository protocols into canonical structure using extractProtocolClinicalSpecs
+      return associatedProtocols.map(p => {
+        const specs = extractProtocolClinicalSpecs(p, canonicalName);
+        return {
+          id: p.id || p.slug,
+          slug: p.slug || p.id,
+          name: p.name || p.title || 'Clinical Protocol',
+          durationWeeks: specs.durationWeeks,
+          difficulty: p.difficulty || p.difficulty_level || 'Clinical',
+          category: p.category || (specs.defaultDosesPerWeek === 1 ? 'Weight Management' : 'Clinical Protocol'),
+          objective: specs.objective,
+          route: specs.route,
+          defaultDoseMg: specs.defaultDoseMg,
+          defaultDosesPerWeek: specs.defaultDosesPerWeek,
+          frequencyDescription: specs.frequencyDescription,
+          phases: specs.phases
+        };
+      });
     }
     return CANONICAL_PT141_PROTOCOLS;
-  }, [associatedProtocols]);
+  }, [associatedProtocols, canonicalName]);
 
   // ── Selected Protocol State ──
   const [selectedProtocolId, setSelectedProtocolId] = useState(
@@ -557,7 +650,7 @@ export default function ProtocolWorkspaceTab({
                       <Clock size={10} /> {proto.durationWeeks} Wks
                     </span>
                     <span className="pds-gcp-meta-pill dose">
-                      • {proto.defaultDoseMg || 1.25} mg
+                      • {proto.defaultDoseMg || proto.phases?.[0]?.doseMg || 2.5} mg
                     </span>
                     <span className="pds-gcp-meta-pill">
                       • {proto.difficulty || 'Clinical'}
@@ -1983,13 +2076,13 @@ export default function ProtocolWorkspaceTab({
                             <Clock size={12} /> {proto.durationWeeks} Weeks
                           </span>
                           <span style={{ fontWeight: 700, color: '#166534', background: '#f0fdf4', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
-                            {proto.defaultDoseMg || 1.25} mg / dose
+                            {proto.defaultDoseMg || proto.phases?.[0]?.doseMg || 2.5} mg / dose
                           </span>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <a
-                            href={proto.slug ? `/protocol/${proto.slug}` : `/protocol/${product.slug || 'protocol'}`}
+                            href={proto.slug ? `/proto/${proto.slug}` : `/proto/${product.slug || 'protocol'}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{

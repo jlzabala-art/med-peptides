@@ -375,7 +375,7 @@ export default function BiomarkerCalibrationBanner({
             className="pbc-btn-ai"
           >
             <Sparkles size={13} />
-            <span>{isEs ? 'Consultar con Clinical AI' : 'Inquire with Clinical AI'}</span>
+            <span>{isEs ? 'Consultar con Atlas AI' : 'Inquire with Atlas AI'}</span>
           </button>
         </div>
       </div>

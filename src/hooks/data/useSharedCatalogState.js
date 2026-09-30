@@ -676,7 +676,7 @@ export function useSharedCatalogState({
         };
       })
       .filter(p => (p.variants && p.variants.length > 0));
-  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter, algoliaMatchProductIds]);
+  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter, fdaFilter, algoliaMatchProductIds]);
 
   const filteredProtocols = useMemo(() => {
     return protocols.filter(proto => {

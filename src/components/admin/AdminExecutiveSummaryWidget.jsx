@@ -488,7 +488,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
             className={`${styles.actionBtn} ${styles.askAtlasBtn}`}
             onClick={() => {
               const isDoctor = ['doctor', 'medical_director'].includes(activeRole);
-              const label = isDoctor ? 'Ask Clinical AI' : activeRole === 'patient' ? 'Ask Personal AI' : 'Ask Atlas AI';
+              const label = 'Ask Atlas AI';
               window.dispatchEvent(new CustomEvent('open-clinical-ai', {
                 detail: {
                   role: activeRole,
@@ -503,13 +503,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
               }));
             }}
           >
-            {['doctor', 'medical_director'].includes(activeRole) 
-              ? 'Ask Clinical AI (DOCTOR)' 
-              : activeRole === 'patient' 
-              ? 'Ask Personal AI (PATIENT)' 
-              : activeRole === 'wholesaler' || activeRole === 'supplier' 
-              ? 'Ask Wholesale AI (SUPPLY)' 
-              : 'Ask Atlas AI (ADMIN)'}
+            {`Ask Atlas AI (${activeRole.toUpperCase()})`}
           </button>
         </div>
       </div>

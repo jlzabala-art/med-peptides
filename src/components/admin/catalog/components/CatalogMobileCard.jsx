@@ -195,11 +195,11 @@ export default function CatalogMobileCard({
     {
       type: 'sparkles',
       icon: Bot,
-      label: 'Consult Atlas Clinical AI',
+      label: 'Consult Atlas AI',
       onClick: () => {
         openProductAI(row, {
           initialPrompt: `Provide comprehensive clinical overview, dosage guidelines, variants/supplier analysis, and contraindications for ${name}. Role: ${role || 'doctor'}.`,
-          displayText: `Clinical AI: ${name}`
+          displayText: `Atlas AI: ${name}`
         });
       }
     },

@@ -78,11 +78,11 @@ export default function ChatHeader({
             : isProductContext && activeProductName
               ? `🔬 ${activeProductName}`
               : isProductContext
-                ? '🔬 ClinicalAI — Product Intelligence'
+                ? '🔬 Atlas AI — Product Intelligence'
                 : isCatalogContext
                   ? '🧬 Catalog & Peptide Intelligence'
                   : isDoctorRole
-                    ? '🩺 Clinical AI Copilot (Doctor)'
+                    ? '🩺 Atlas AI Copilot (Doctor)'
                     : contextMode === 'admin'
                       ? 'Atlas AI (Admin)'
                       : 'Atlas AI';
