@@ -1435,6 +1435,14 @@ export default function PublicDatasheetView({
           effectiveBatch={effectiveBatchCode}
           associatedProtocols={associatedProtocols}
           baseUrl={baseUrl}
+          supplierName={supplierName}
+          activeFormat={activeFormat}
+          selectedStrength={selectedStrength}
+          availableFormats={availableFormats}
+          sortedStrengths={sortedStrengths}
+          dynamicPublicUrl={dynamicPublicUrl}
+          versionInfo={versionInfo}
+          labelQueryString={labelQueryString}
         />
       ) : (
         <PublicPageShell>

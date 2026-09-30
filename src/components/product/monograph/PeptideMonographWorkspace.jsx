@@ -35,17 +35,30 @@ export default function PeptideMonographWorkspace({
   slug = 'pt-141',
   effectiveBatch = 'AS-LOT-PT05-2609',
   associatedProtocols = [],
-  onAddToCart
+  onAddToCart,
+  baseUrl,
+  supplierName,
+  activeFormat,
+  selectedStrength,
+  availableFormats = [],
+  sortedStrengths = [],
+  dynamicPublicUrl,
+  versionInfo,
+  labelQueryString
 }) {
   const searchParams = useSearchParams();
 
-  // Tab State with URL query synchronization
-  const initialTab = searchParams?.get('tab') || 'overview';
-  const [activeTab, setActiveTab] = useState(
-    ['overview', 'protocols', 'preparation', 'quality', 'references'].includes(initialTab)
-      ? initialTab
-      : 'overview'
-  );
+  // Always start with Module 1 ('overview') open by default as requested
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // DOM Refs for mobile accordions to auto-scroll into view when opened
+  const moduleRefs = {
+    overview: React.useRef(null),
+    protocols: React.useRef(null),
+    preparation: React.useRef(null),
+    quality: React.useRef(null),
+    references: React.useRef(null)
+  };
 
   // Modals state
   const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
@@ -55,14 +68,27 @@ export default function PeptideMonographWorkspace({
   // Active Protocol Context (reactive sync across top strip & calculations)
   const [protocolContext, setProtocolContext] = useState(null);
 
-  // Sync tab changes with URL query string without full page reload
+  // Sync tab changes with URL query string and scroll smoothly to the active module
   const handleTabChange = (tabId) => {
     triggerHaptic('selection');
     setActiveTab(tabId);
     if (typeof window !== 'undefined' && window.history?.replaceState) {
       const url = new URL(window.location.href);
-      url.searchParams.set('tab', tabId);
+      if (tabId) {
+        url.searchParams.set('tab', tabId);
+      } else {
+        url.searchParams.delete('tab');
+      }
       window.history.replaceState(null, '', url.toString());
+    }
+
+    if (tabId) {
+      setTimeout(() => {
+        const el = moduleRefs[tabId]?.current;
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
   };
 
@@ -178,19 +204,9 @@ export default function PeptideMonographWorkspace({
 
       {/* ── MOBILE LAYOUT (<1024px): Master Clinical Accordion (ZERO HORIZONTAL SCROLL) ── */}
       <div className="pds-mobile-accordion-wrapper">
-        {/* Context Strip in Mobile */}
-        <PeptideMonographTopStrip
-          activeTab={activeTab}
-          product={product}
-          slug={slug}
-          effectiveBatch={effectiveBatch}
-          protocolContext={protocolContext}
-          onOpenCoaModal={() => setIsCoaModalOpen(true)}
-        />
-
         <div className="pds-mobile-accordion-stack">
           {/* Section 1: Overview */}
-          <div className={`pds-mobile-accordion-item ${activeTab === 'overview' ? 'is-open' : 'is-closed'}`}>
+          <div ref={moduleRefs.overview} className={`pds-mobile-accordion-item ${activeTab === 'overview' ? 'is-open' : 'is-closed'}`}>
             <div
               className="pds-mobile-accordion-header"
               onClick={() => {
@@ -217,7 +233,7 @@ export default function PeptideMonographWorkspace({
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <span style={{ fontSize: '0.64rem', fontWeight: 800, color: activeTab === 'overview' ? '#003666' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Módulo 1
+                    Module 1
                   </span>
                   <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'overview' ? '#003666' : '#1e293b' }}>
                     Clinical Overview & Identity
@@ -250,7 +266,7 @@ export default function PeptideMonographWorkspace({
           </div>
 
           {/* Section 2: Protocols */}
-          <div className={`pds-mobile-accordion-item ${activeTab === 'protocols' ? 'is-open' : 'is-closed'}`}>
+          <div ref={moduleRefs.protocols} className={`pds-mobile-accordion-item ${activeTab === 'protocols' ? 'is-open' : 'is-closed'}`}>
             <div
               className="pds-mobile-accordion-header"
               onClick={() => {
@@ -278,10 +294,10 @@ export default function PeptideMonographWorkspace({
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontSize: '0.64rem', fontWeight: 800, color: activeTab === 'protocols' ? '#003666' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Módulo 2
+                      Module 2
                     </span>
                     <span style={{ fontSize: '0.64rem', fontWeight: 800, background: '#e0f2fe', color: '#0369a1', padding: '1px 6px', borderRadius: '10px' }}>
-                      {associatedProtocols?.length || 3} disponibles
+                      {associatedProtocols?.length || 3} available
                     </span>
                   </div>
                   <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'protocols' ? '#003666' : '#1e293b' }}>
@@ -318,7 +334,7 @@ export default function PeptideMonographWorkspace({
           </div>
 
           {/* Section 3: Preparation & Administration */}
-          <div className={`pds-mobile-accordion-item ${activeTab === 'preparation' ? 'is-open' : 'is-closed'}`}>
+          <div ref={moduleRefs.preparation} className={`pds-mobile-accordion-item ${activeTab === 'preparation' ? 'is-open' : 'is-closed'}`}>
             <div
               className="pds-mobile-accordion-header"
               onClick={() => {
@@ -345,7 +361,7 @@ export default function PeptideMonographWorkspace({
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <span style={{ fontSize: '0.64rem', fontWeight: 800, color: activeTab === 'preparation' ? '#003666' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Módulo 3
+                    Module 3
                   </span>
                   <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'preparation' ? '#003666' : '#1e293b' }}>
                     Preparation & Administration Guide
@@ -379,7 +395,7 @@ export default function PeptideMonographWorkspace({
           </div>
 
           {/* Section 4: Quality & Batch */}
-          <div className={`pds-mobile-accordion-item ${activeTab === 'quality' ? 'is-open' : 'is-closed'}`}>
+          <div ref={moduleRefs.quality} className={`pds-mobile-accordion-item ${activeTab === 'quality' ? 'is-open' : 'is-closed'}`}>
             <div
               className="pds-mobile-accordion-header"
               onClick={() => {
@@ -406,7 +422,7 @@ export default function PeptideMonographWorkspace({
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <span style={{ fontSize: '0.64rem', fontWeight: 800, color: activeTab === 'quality' ? '#003666' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Módulo 4
+                    Module 4
                   </span>
                   <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'quality' ? '#003666' : '#1e293b' }}>
                     Quality, HPLC & Verified Batch
@@ -441,7 +457,7 @@ export default function PeptideMonographWorkspace({
           </div>
 
           {/* Section 5: References */}
-          <div className={`pds-mobile-accordion-item ${activeTab === 'references' ? 'is-open' : 'is-closed'}`}>
+          <div ref={moduleRefs.references} className={`pds-mobile-accordion-item ${activeTab === 'references' ? 'is-open' : 'is-closed'}`}>
             <div
               className="pds-mobile-accordion-header"
               onClick={() => {
@@ -468,7 +484,7 @@ export default function PeptideMonographWorkspace({
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <span style={{ fontSize: '0.64rem', fontWeight: 800, color: activeTab === 'references' ? '#003666' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Módulo 5
+                    Module 5
                   </span>
                   <h3 style={{ margin: '1px 0 0 0', fontSize: '0.88rem', fontWeight: 800, color: activeTab === 'references' ? '#003666' : '#1e293b' }}>
                     References, Evidence & Literature
@@ -520,6 +536,16 @@ export default function PeptideMonographWorkspace({
         slug={slug}
         isOpen={isPreviewModalOpen}
         onClose={() => setIsPreviewModalOpen(false)}
+        supplierName={supplierName || product?.supplierName || 'Atlas Services'}
+        activeFormat={activeFormat}
+        selectedStrength={selectedStrength}
+        availableFormats={availableFormats}
+        sortedStrengths={sortedStrengths}
+        dynamicPublicUrl={dynamicPublicUrl || (typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://med-peptides.com/p/${slug}`)}
+        initialBatch={effectiveBatch}
+        version={versionInfo?.version}
+        updatedAtDate={versionInfo?.updatedAtDate}
+        labelQueryString={labelQueryString}
       />
     </div>
   );

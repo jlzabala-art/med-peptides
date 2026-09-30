@@ -256,7 +256,7 @@ export default function ProtocolWorkspaceTab({
   const handleAddRequirementsToCart = () => {
     if (!user) {
       triggerHaptic('warning');
-      toast.error('Debes iniciar sesión para solicitar cotizaciones o tramitar suministros.');
+      toast.error('Sign in required: Please log in to request quotations or order supplies.');
       const redirectUrl = typeof window !== 'undefined' ? window.location.pathname : '/';
       router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
       return;
@@ -272,7 +272,7 @@ export default function ProtocolWorkspaceTab({
         price: v.strength === 5 ? 24.00 : v.strength === 10 ? 38.00 : 65.00
       }, v.count);
     });
-    toast.success(`Añadido ${procCalc.procurementSummary} a la cotización / carrito ✓`);
+    toast.success(`Added ${procCalc.procurementSummary} to quotation / order ✓`);
   };
 
   // Notify parent component of current active protocol context
@@ -412,18 +412,9 @@ export default function ProtocolWorkspaceTab({
       </aside>
 
       {/* ── MAIN WORKSPACE AREA ── */}
-      <main style={{
-        background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '1.25rem 1.5rem',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.25rem'
-      }}>
+      <main className="pds-protocol-main-workspace">
         {/* Workspace Title & Current Protocol Context */}
-        <div style={{
+        <div className="pds-protocol-header-row" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -474,32 +465,13 @@ export default function ProtocolWorkspaceTab({
         </div>
 
         {/* ── Official Protocol Page Link & Executive Summary Notice (GCP Standard) ── */}
-        <div style={{
-          background: '#f0f9ff',
-          border: '1px solid #bae6fd',
-          borderRadius: '8px',
-          padding: '10px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
-            <div style={{
-              width: '24px',
-              height: '24px',
-              borderRadius: '6px',
-              background: '#e0f2fe',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
+        <div className="pds-protocol-summary-banner">
+          <div className="pds-protocol-summary-content">
+            <div className="pds-protocol-summary-icon">
               <Info size={14} color="#0369a1" />
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#0369a1', lineHeight: 1.45 }}>
-              <strong style={{ color: '#003666' }}>Resumen Clínico Ejecutivo:</strong> Este módulo es un calculador de titulación rápida y requerimiento de viales. La guía clínica completa con fases, biomarcadores y literatura está disponible en la página oficial del protocolo.
+            <div className="pds-protocol-summary-text">
+              <strong style={{ color: '#003666' }}>Executive Clinical Summary:</strong> This module is a rapid titration and vial requirement calculator. The complete clinical guide with phases, biomarkers, and literature is available on the official protocol page.
             </div>
           </div>
 
@@ -507,44 +479,21 @@ export default function ProtocolWorkspaceTab({
             href={activeProtocol.slug ? `/protocol/${activeProtocol.slug}` : `/protocol/${product.slug || 'protocol'}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: '#003666',
-              color: '#ffffff',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '0.74rem',
-              fontWeight: 800,
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)'
-            }}
+            className="pds-protocol-summary-link"
           >
-            <span>Ver Protocolo Completo</span>
+            <span>View Full Protocol</span>
             <ExternalLink size={12} color="#ffffff" />
           </a>
         </div>
 
         {/* ── Workflow Stepper: Responsive Grid without Horizontal Scroll ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div className="pds-stepper-wrapper">
           {/* Mobile Step Title Pill */}
-          <div className="pds-stepper-mobile-title" style={{
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '5px 10px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            fontSize: '0.72rem'
-          }}>
+          <div className="pds-stepper-mobile-title">
             <span style={{ fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Paso {currentStep} de 5
+              STEP {currentStep} OF 5
             </span>
-            <span style={{ fontWeight: 700, color: '#1e293b' }}>
+            <span style={{ fontWeight: 700, color: '#0369a1' }}>
               {stepsList.find(s => s.number === currentStep)?.label}
             </span>
           </div>
@@ -1111,7 +1060,7 @@ export default function ProtocolWorkspaceTab({
                     cursor: 'pointer',
                     boxShadow: user ? '0 2px 4px rgba(22, 163, 74, 0.2)' : '0 2px 4px rgba(0, 54, 102, 0.2)'
                   }}
-                  title={user ? "Añadir requerimientos de viales a la cotización" : "Inicia sesión para cotizar"}
+                  title={user ? "Add vial requirements to quotation" : "Sign in required to request quotation"}
                 >
                   {user ? (
                     <>
@@ -1119,7 +1068,7 @@ export default function ProtocolWorkspaceTab({
                     </>
                   ) : (
                     <>
-                      <Lock size={14} /> Iniciar Sesión para Cotizar
+                      <Lock size={14} /> Sign in to Request Quotation
                     </>
                   )}
                 </button>
@@ -1550,85 +1499,50 @@ export default function ProtocolWorkspaceTab({
             </div>
 
             {/* Final Action CTAs */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.75rem',
-              borderTop: '1px solid #f1f5f9',
-              paddingTop: '1rem'
-            }}>
+            {/* Final Action CTAs (GCP UX Standard) */}
+            <div className="pds-protocol-step-footer gcp-action-bar">
               <button
                 type="button"
                 onClick={() => setCurrentStep(4)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1',
-                  color: '#475569',
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontSize: '0.80rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
+                className="gcp-btn-neutral"
               >
                 <ArrowLeft size={14} /> Back
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div className="gcp-action-bar-right">
                 <button
                   type="button"
                   onClick={() => {
+                    if (!user) {
+                      triggerHaptic('warning');
+                      toast.error('Sign in required: Please log in as a practitioner to add protocols to a patient plan.');
+                      const redirectUrl = typeof window !== 'undefined' ? window.location.pathname : '/';
+                      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+                      return;
+                    }
                     triggerHaptic('medium');
                     toast.success(`Protocol ${activeProtocol.name} added to Patient Treatment plan ✓`);
                   }}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: '#ffffff',
-                    border: '1.5px solid #003666',
-                    color: '#003666',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    fontSize: '0.80rem',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
+                  className="gcp-btn-secondary"
+                  title={user ? "Add protocol to patient treatment plan" : "Sign in required to add to patient protocol"}
                 >
-                  <Plus size={14} /> Add to Patient Protocol
+                  {!user ? <Lock size={13} style={{ opacity: 0.8 }} /> : <Plus size={14} />}
+                  <span>Add to Patient Protocol</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleAddRequirementsToCart}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: user ? '#16a34a' : '#003666',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    fontSize: '0.80rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    boxShadow: user ? '0 2px 4px rgba(22, 163, 74, 0.2)' : '0 2px 4px rgba(0, 54, 102, 0.2)'
-                  }}
-                  title={user ? "Solicitar cotización de viales para este protocolo" : "Inicia sesión para cotizar"}
+                  className={user ? "gcp-btn-success" : "gcp-btn-primary"}
+                  title={user ? "Request quote and order vials for this protocol" : "Sign in required to request quotation"}
                 >
                   {user ? (
                     <>
-                      <ShoppingCart size={14} /> Request Quote / Order Vials
+                      <ShoppingCart size={14} /> <span>Request Quote / Order Vials</span>
                     </>
                   ) : (
                     <>
-                      <Lock size={14} /> Iniciar Sesión para Cotizar
+                      <Lock size={14} /> <span>Sign in to Request Quotation</span>
                     </>
                   )}
                 </button>
@@ -1637,21 +1551,10 @@ export default function ProtocolWorkspaceTab({
                   <button
                     type="button"
                     onClick={onOpenPreviewModal}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      background: '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      fontSize: '0.80rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
+                    className="gcp-btn-neutral"
+                    title="Print or export clinical summary"
                   >
-                    <Printer size={14} /> Print Clinical Summary
+                    <Printer size={14} /> <span>Print Clinical Summary</span>
                   </button>
                 )}
               </div>

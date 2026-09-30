@@ -129,6 +129,21 @@
   color: #ffffff !important;
 }
 
+/* ── Document Format Selector ── */
+.mpm-doc-selector-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.35rem !important;
+}
+
+.mpm-doc-selector-title {
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #94a3b8 !important;
+}
+
 /* ── Segmented Control Tabs ── */
 .mpm-tabs-bar {
   display: flex !important;
@@ -145,6 +160,47 @@
 
 .mpm-tabs-bar::-webkit-scrollbar {
   display: none !important;
+}
+
+/* Document Purpose Notice Banner */
+.mpm-document-purpose-banner {
+  width: 100% !important;
+  max-width: 760px !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-left: 4px solid #0d9488 !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+  font-size: 0.72rem !important;
+  color: #334155 !important;
+  line-height: 1.35 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  box-sizing: border-box !important;
+}
+
+.mpm-pharma-box {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  padding: 0.65rem 0.85rem !important;
+  font-size: 0.72rem !important;
+  color: #334155 !important;
+  line-height: 1.4 !important;
+}
+
+.mpm-warning-card {
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  border-left: 4px solid #dc2626 !important;
+  border-radius: 6px !important;
+  padding: 0.6rem 0.75rem !important;
+  font-size: 0.7rem !important;
+  color: #991b1b !important;
+  line-height: 1.35 !important;
 }
 
 .mpm-tab-btn {

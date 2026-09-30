@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Copy, Check, Printer, Share2, ShieldCheck, FileText, FlaskConical, ExternalLink } from '@/lib/icons';
+import { Copy, Check, Printer, Share2, ShieldCheck, FileText, FlaskConical, ExternalLink, QrCode, X } from '@/lib/icons';
+import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 
@@ -21,6 +22,7 @@ export default function PeptideMonographHeader({
   onOpenShare
 }) {
   const [copied, setCopied] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   // Clean primary and generic names to prevent duplicate printing like "PT-141 (Bremelanotide) Bremelanotide"
   const rawName = product.canonicalName || product.name || 'PT-141';
@@ -187,6 +189,32 @@ export default function PeptideMonographHeader({
               </button>
             )}
 
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsQrModalOpen(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                color: '#1e293b',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              title="Verify Digital Monograph & QR"
+            >
+              <QrCode size={14} color="#003666" />
+              <span>Verify & QR</span>
+            </button>
+
             {onOpenShare && (
               <button
                 type="button"
@@ -284,6 +312,119 @@ export default function PeptideMonographHeader({
           )}
         </div>
       </div>
+
+      {/* Institutional QR Verification Modal */}
+      {isQrModalOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setIsQrModalOpen(false)}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              maxWidth: '380px',
+              width: '100%',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+              position: 'relative',
+              textAlign: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsQrModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: '#f1f5f9',
+                border: 'none',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={16} />
+            </button>
+
+            <div style={{ display: 'inline-flex', padding: '10px', background: '#eff6ff', borderRadius: '50%', marginBottom: '12px' }}>
+              <ShieldCheck size={28} color="#003666" />
+            </div>
+
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', color: '#003666', fontWeight: 800 }}>
+              Live Clinical Certificate
+            </h3>
+            <p style={{ margin: '0 0 16px 0', fontSize: '0.76rem', color: '#64748b', lineHeight: 1.4 }}>
+              Scan with any mobile camera to verify analytical purity, batch compliance, and clinical monograph documentation.
+            </p>
+
+            <div style={{
+              display: 'inline-flex',
+              padding: '14px',
+              background: '#ffffff',
+              border: '2px solid #e2e8f0',
+              borderRadius: '10px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+              marginBottom: '14px'
+            }}>
+              <QRCodeSVG 
+                value={typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : `https://med-peptides.com/p/${slug}`} 
+                size={160} 
+                level="M" 
+                includeMargin={false}
+              />
+            </div>
+
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '6px',
+              padding: '8px 10px',
+              fontSize: '0.74rem',
+              color: '#334155',
+              fontFamily: 'monospace',
+              marginBottom: '12px',
+              wordBreak: 'break-all'
+            }}>
+              Batch: {batchCode} • Purity: {verifiedPurity}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCopySpec}
+              style={{
+                width: '100%',
+                padding: '8px 14px',
+                borderRadius: '6px',
+                background: '#003666',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.80rem',
+                cursor: 'pointer'
+              }}
+            >
+              Copy Verification Details
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

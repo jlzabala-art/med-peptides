@@ -64,17 +64,10 @@ export default function ReferencesTab() {
   ];
 
   return (
-    <div className="pds-tab-content pds-references-tab" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="pds-tab-content pds-references-tab">
       
       {/* ── Sub-navigation Filter Bar ── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        borderBottom: '1px solid #e2e8f0',
-        paddingBottom: '0.75rem',
-        flexWrap: 'wrap'
-      }}>
+      <div className="pds-ref-filter-bar">
         {[
           { id: 'regulatory', label: '1. Regulatory & FDA Reference' },
           { id: 'pharmacology', label: '2. Receptor Pharmacology & MOA' },
@@ -88,17 +81,7 @@ export default function ReferencesTab() {
               triggerHaptic('selection');
               setActiveRefCategory(cat.id);
             }}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              border: activeRefCategory === cat.id ? '1px solid #003666' : '1px solid #cbd5e1',
-              background: activeRefCategory === cat.id ? '#003666' : '#ffffff',
-              color: activeRefCategory === cat.id ? '#ffffff' : '#334155',
-              fontSize: '0.78rem',
-              fontWeight: activeRefCategory === cat.id ? 800 : 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
+            className={`pds-ref-filter-btn ${activeRefCategory === cat.id ? 'is-active' : ''}`}
           >
             {cat.label}
           </button>
@@ -107,13 +90,7 @@ export default function ReferencesTab() {
 
       {/* ── Section 1: Regulatory & FDA Reference Dossier ── */}
       {(activeRefCategory === 'regulatory' || activeRefCategory === 'all') && (
-        <section style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '1.25rem 1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-        }}>
+        <section className="pds-ref-section">
           <h2 style={{
             margin: '0 0 0.85rem 0',
             fontSize: '0.92rem',
@@ -164,13 +141,7 @@ export default function ReferencesTab() {
 
       {/* ── Section 2: Receptor Pharmacology & Mechanism ── */}
       {(activeRefCategory === 'pharmacology' || activeRefCategory === 'all') && (
-        <section style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '1.25rem 1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-        }}>
+        <section className="pds-ref-section">
           <h2 style={{
             margin: '0 0 0.85rem 0',
             fontSize: '0.92rem',
@@ -182,8 +153,8 @@ export default function ReferencesTab() {
             2. Pharmacodynamics & Receptor Affinity
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem', marginBottom: '0.85rem' }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
               <strong style={{ fontSize: '0.80rem', color: '#003666' }}>Melanocortin Receptor Binding Affinity:</strong>
               <ul style={{ margin: '6px 0 0 0', paddingLeft: '1.2rem', fontSize: '0.76rem', color: '#475569', lineHeight: 1.5 }}>
                 <li><strong>MC4R (Central):</strong> Ki ~ 0.5–1.0 nM (Primary mediator of sexual motivation & erection)</li>
@@ -193,7 +164,7 @@ export default function ReferencesTab() {
               </ul>
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
               <strong style={{ fontSize: '0.80rem', color: '#003666' }}>Neurochemical Mechanism of Action:</strong>
               <p style={{ margin: '6px 0 0 0', fontSize: '0.76rem', color: '#475569', lineHeight: 1.5 }}>
                 Binding to MC4R in the paraventricular nucleus (PVN) and medial preoptic area (MPOA) triggers intracellular cAMP accumulation, stimulating downstream oxytocinergic and dopaminergic neural circuits that govern sexual incentive motivation.
@@ -205,20 +176,14 @@ export default function ReferencesTab() {
 
       {/* ── Section 3: Peer-Reviewed Clinical Literature ── */}
       {(activeRefCategory === 'literature' || activeRefCategory === 'all') && (
-        <section style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '1.25rem 1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-        }}>
+        <section className="pds-ref-section">
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: '1px solid #f1f5f9',
-            paddingBottom: '0.65rem',
-            marginBottom: '1rem'
+            paddingBottom: '0.5rem',
+            marginBottom: '0.75rem'
           }}>
             <h2 style={{
               margin: 0,
@@ -235,16 +200,11 @@ export default function ReferencesTab() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {scientificLiterature.map((study) => (
               <div
                 key={study.id}
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '12px 14px'
-                }}
+                className="pds-ref-study-card"
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
                   <div>
@@ -291,13 +251,7 @@ export default function ReferencesTab() {
 
       {/* ── Section 4: Clinical Safety & Contraindications ── */}
       {(activeRefCategory === 'safety' || activeRefCategory === 'all') && (
-        <section style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
-          padding: '1.25rem 1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-        }}>
+        <section className="pds-ref-section">
           <h2 style={{
             margin: '0 0 0.85rem 0',
             fontSize: '0.92rem',
