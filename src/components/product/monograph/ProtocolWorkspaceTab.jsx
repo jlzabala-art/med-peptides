@@ -23,7 +23,8 @@ import {
   RotateCcw,
   Plus,
   Lock,
-  ExternalLink
+  ExternalLink,
+  X
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
@@ -39,6 +40,7 @@ import { calculateReconstitution, calculateProtocolProcurement } from './monogra
 const CANONICAL_PT141_PROTOCOLS = Object.freeze([
   {
     id: 'proto-pt141-ondemand',
+    slug: 'pt-141-on-demand-libido',
     name: 'On-Demand Libido Enhancement',
     durationWeeks: 4,
     difficulty: 'Beginner',
@@ -60,6 +62,7 @@ const CANONICAL_PT141_PROTOCOLS = Object.freeze([
   },
   {
     id: 'proto-pt141-libido-arousal',
+    slug: 'pt-141-hsdd-titration',
     name: 'Libido & Arousal Conditioning',
     durationWeeks: 4,
     difficulty: 'Intermediate',
@@ -81,6 +84,7 @@ const CANONICAL_PT141_PROTOCOLS = Object.freeze([
   },
   {
     id: 'proto-pt141-sexual-health-12w',
+    slug: 'pt-141-sexual-health-extended',
     name: 'Sexual Health Protocol (Extended)',
     durationWeeks: 12,
     difficulty: 'Comprehensive',
@@ -182,6 +186,14 @@ export default function ProtocolWorkspaceTab({
   const activeProtocol = useMemo(() => {
     return availableProtocols.find(p => p.id === selectedProtocolId) || availableProtocols[0];
   }, [availableProtocols, selectedProtocolId]);
+
+  // Alternative protocols memo for comparison and fast switching
+  const otherProtocols = useMemo(() => {
+    return availableProtocols.filter(p => p.id !== (activeProtocol?.id || selectedProtocolId));
+  }, [availableProtocols, selectedProtocolId, activeProtocol]);
+
+  // Modal / Bottom Sheet state for Google Cloud UX protocol inspection
+  const [isProtocolModalOpen, setIsProtocolModalOpen] = useState(false);
 
   // ── Horizontal Stepper State: 1 to 5 ──
   const [currentStep, setCurrentStep] = useState(1);
@@ -413,6 +425,86 @@ export default function ProtocolWorkspaceTab({
 
       {/* ── MAIN WORKSPACE AREA ── */}
       <main className="pds-protocol-main-workspace">
+        {/* ── Google Cloud UX Protocol Switcher Deck (Mobile & Tablet) ── */}
+        <div className="pds-gcp-protocol-switcher">
+          <div className="pds-gcp-switcher-header">
+            <div className="pds-gcp-switcher-header-left">
+              <div className="pds-gcp-switcher-icon-box">
+                <FlaskConical size={16} />
+              </div>
+              <div>
+                <span className="pds-gcp-switcher-eyebrow">Available Protocol Blueprints</span>
+                <div className="pds-gcp-switcher-title-row">
+                  <h3 className="pds-gcp-switcher-title">
+                    {sanitizeProtocolTitle(activeProtocol.name, canonicalName)}
+                  </h3>
+                  <span className="pds-gcp-switcher-pill">
+                    {availableProtocols.length} available
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="pds-gcp-switcher-compare-btn"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsProtocolModalOpen(true);
+              }}
+              aria-label="Compare all protocols"
+            >
+              <Layers size={13} />
+              <span>Compare & Details ({availableProtocols.length})</span>
+            </button>
+          </div>
+
+          <div className="pds-gcp-switcher-deck" role="tablist" aria-label="Clinical Protocol Options">
+            {availableProtocols.map((proto, idx) => {
+              const isSelected = proto.id === selectedProtocolId;
+              return (
+                <button
+                  key={proto.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  className={`pds-gcp-switcher-card ${isSelected ? 'is-selected' : ''}`}
+                  onClick={() => handleSelectProtocol(proto.id)}
+                >
+                  <div className="pds-gcp-card-top">
+                    <span className={`pds-gcp-card-step ${isSelected ? 'is-selected' : ''}`}>
+                      {idx + 1}
+                    </span>
+                    <span className="pds-gcp-card-name" title={proto.name}>
+                      {sanitizeProtocolTitle(proto.name, canonicalName)}
+                    </span>
+                    {isSelected ? (
+                      <span className="pds-gcp-card-active-tag">
+                        <Check size={10} /> Active
+                      </span>
+                    ) : (
+                      <span className="pds-gcp-card-switch-tag">
+                        Select
+                      </span>
+                    )}
+                  </div>
+                  <div className="pds-gcp-card-meta">
+                    <span className="pds-gcp-meta-pill">
+                      <Clock size={10} /> {proto.durationWeeks} Wks
+                    </span>
+                    <span className="pds-gcp-meta-pill dose">
+                      • {proto.defaultDoseMg || 1.25} mg
+                    </span>
+                    <span className="pds-gcp-meta-pill">
+                      • {proto.difficulty || 'Clinical'}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Workspace Title & Current Protocol Context */}
         <div className="pds-protocol-header-row" style={{
           display: 'flex',
@@ -471,19 +563,48 @@ export default function ProtocolWorkspaceTab({
               <Info size={14} color="#0369a1" />
             </div>
             <div className="pds-protocol-summary-text">
-              <strong style={{ color: '#003666' }}>Executive Clinical Summary:</strong> This module is a rapid titration and vial requirement calculator. The complete clinical guide with phases, biomarkers, and literature is available on the official protocol page.
+              <strong style={{ color: '#003666' }}>Executive Clinical Summary:</strong> Active blueprint: <strong style={{ color: '#0369a1' }}>{sanitizeProtocolTitle(activeProtocol.name, canonicalName)}</strong> ({physicianDurationWeeks} Weeks, {physicianDoseMg} mg/admin). Use this calculator for rapid vial titration and reconstitution math, or explore alternative clinical pathways.
             </div>
           </div>
 
-          <a
-            href={activeProtocol.slug ? `/protocol/${activeProtocol.slug}` : `/protocol/${product.slug || 'protocol'}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pds-protocol-summary-link"
-          >
-            <span>View Full Protocol</span>
-            <ExternalLink size={12} color="#ffffff" />
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {availableProtocols.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setIsProtocolModalOpen(true);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 10px',
+                  background: '#ffffff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '6px',
+                  color: '#003666',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Layers size={13} color="#003666" />
+                <span>Compare Pathways ({availableProtocols.length})</span>
+              </button>
+            )}
+
+            <a
+              href={activeProtocol.slug ? `/protocol/${activeProtocol.slug}` : `/protocol/${product.slug || 'protocol'}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pds-protocol-summary-link"
+            >
+              <span>View Full Protocol</span>
+              <ExternalLink size={12} color="#ffffff" />
+            </a>
+          </div>
         </div>
 
         {/* ── Workflow Stepper: Responsive Grid without Horizontal Scroll ── */}
@@ -493,6 +614,7 @@ export default function ProtocolWorkspaceTab({
             <span style={{ fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               STEP {currentStep} OF 5
             </span>
+            <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>•</span>
             <span style={{ fontWeight: 700, color: '#0369a1' }}>
               {stepsList.find(s => s.number === currentStep)?.label}
             </span>
@@ -1561,7 +1683,289 @@ export default function ProtocolWorkspaceTab({
             </div>
           </div>
         )}
+
+        {/* ── Google Cloud Alternative Protocol Blueprints Section ── */}
+        {otherProtocols.length > 0 && (
+          <section className="pds-other-protocols-section" aria-label="Alternative Clinical Protocols">
+            <div className="pds-other-protocols-header">
+              <div className="pds-other-protocols-title-group">
+                <div className="pds-other-protocols-icon-box">
+                  <FlaskConical size={18} />
+                </div>
+                <div>
+                  <h4 className="pds-other-protocols-title">
+                    Alternative Clinical Protocols for {canonicalName}
+                  </h4>
+                  <p className="pds-other-protocols-subtitle">
+                    Select an alternative blueprint below to re-titrate vial requirements and administration schedules.
+                  </p>
+                </div>
+              </div>
+              <span className="pds-other-protocols-count-badge">
+                {otherProtocols.length} other {otherProtocols.length === 1 ? 'option' : 'options'}
+              </span>
+            </div>
+
+            <div className="pds-other-protocols-grid">
+              {otherProtocols.map(other => (
+                <div key={other.id} className="pds-other-protocol-card">
+                  <div>
+                    <div className="pds-other-card-meta">
+                      <span className="pds-other-card-category">{other.category || 'Clinical'}</span>
+                      <span className="pds-other-card-duration">
+                        <Clock size={11} /> {other.durationWeeks} Weeks
+                      </span>
+                    </div>
+
+                    <h5 className="pds-other-card-title">
+                      {sanitizeProtocolTitle(other.name, canonicalName)}
+                    </h5>
+
+                    <p className="pds-other-card-objective">
+                      {other.objective}
+                    </p>
+
+                    <div className="pds-other-card-specs">
+                      <span className="pds-other-spec-pill dose">
+                        {other.defaultDoseMg || 1.25} mg / admin
+                      </span>
+                      <span className="pds-other-spec-pill cadence">
+                        • {other.defaultDosesPerWeek || 2}× per week
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pds-other-card-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectProtocol(other.id)}
+                      className="pds-other-switch-btn"
+                    >
+                      <RotateCcw size={13} />
+                      <span>Switch to this Protocol</span>
+                    </button>
+
+                    <a
+                      href={other.slug ? `/protocol/${other.slug}` : `/protocol/${product.slug || 'protocol'}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pds-other-link-btn"
+                      title="View full protocol in new window"
+                    >
+                      <span>Full Blueprint</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
+
+      {/* ── Google Cloud Console Protocol Selector & Comparison Modal (Mobile/Tablet Sheet) ── */}
+      {isProtocolModalOpen && (
+        <div
+          className="pds-gcp-bottom-sheet-backdrop"
+          onClick={() => setIsProtocolModalOpen(false)}
+        >
+          <div
+            className="pds-gcp-bottom-sheet-panel"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pds-protocol-modal-title"
+          >
+            <div className="pds-gcp-bottom-sheet-drag-handle" />
+
+            <div className="pds-gcp-bottom-sheet-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#003666',
+                  flexShrink: 0
+                }}>
+                  <Layers size={16} />
+                </div>
+                <div>
+                  <h3 id="pds-protocol-modal-title" style={{ margin: 0, fontSize: '1rem', fontWeight: 850, color: '#003666' }}>
+                    Clinical Protocol Blueprints
+                  </h3>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b' }}>
+                    Compare available treatment strategies for {canonicalName} ({availableProtocols.length} verified)
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsProtocolModalOpen(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#475569'
+                }}
+                aria-label="Close dialog"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="pds-gcp-bottom-sheet-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {availableProtocols.map((proto, idx) => {
+                  const isSelected = proto.id === selectedProtocolId;
+                  return (
+                    <div
+                      key={proto.id}
+                      style={{
+                        background: isSelected ? '#eff6ff' : '#ffffff',
+                        border: isSelected ? '2px solid #003666' : '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        padding: '12px 14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                            <span style={{
+                              fontSize: '0.66rem',
+                              fontWeight: 800,
+                              color: isSelected ? '#003666' : '#64748b',
+                              background: isSelected ? '#dbeafe' : '#f1f5f9',
+                              padding: '1px 6px',
+                              borderRadius: '4px'
+                            }}>
+                              Blueprint #{idx + 1}
+                            </span>
+                            <span style={{
+                              fontSize: '0.66rem',
+                              fontWeight: 700,
+                              color: '#0284c7'
+                            }}>
+                              {proto.category}
+                            </span>
+                          </div>
+                          <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 850, color: isSelected ? '#003666' : '#0f172a' }}>
+                            {sanitizeProtocolTitle(proto.name, canonicalName)}
+                          </h4>
+                        </div>
+
+                        {isSelected && (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '0.70rem',
+                            fontWeight: 800,
+                            background: '#003666',
+                            color: '#ffffff',
+                            padding: '3px 8px',
+                            borderRadius: '12px',
+                            flexShrink: 0
+                          }}>
+                            <Check size={11} /> Selected
+                          </span>
+                        )}
+                      </div>
+
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
+                        {proto.objective}
+                      </p>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingTop: '8px',
+                        borderTop: '1px solid #f1f5f9',
+                        flexWrap: 'wrap',
+                        gap: '8px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem' }}>
+                          <span style={{ fontWeight: 700, color: '#334155', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <Clock size={12} /> {proto.durationWeeks} Weeks
+                          </span>
+                          <span style={{ fontWeight: 700, color: '#166534', background: '#f0fdf4', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
+                            {proto.defaultDoseMg || 1.25} mg / dose
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <a
+                            href={proto.slug ? `/protocol/${proto.slug}` : `/protocol/${product.slug || 'protocol'}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '5px 9px',
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              color: '#003666',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              textDecoration: 'none'
+                            }}
+                          >
+                            <span>Blueprint</span>
+                            <ExternalLink size={11} />
+                          </a>
+
+                          {!isSelected && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleSelectProtocol(proto.id);
+                                setIsProtocolModalOpen(false);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '5px 12px',
+                                background: '#003666',
+                                border: 'none',
+                                borderRadius: '6px',
+                                color: '#ffffff',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <span>Apply Protocol</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
