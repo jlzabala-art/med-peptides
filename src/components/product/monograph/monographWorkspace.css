@@ -673,6 +673,105 @@
   to { opacity: 1; }
 }
 
+/* ── Google Cloud Console Step Footer Action Bar Standard ── */
+.pds-protocol-step-footer.gcp-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.25rem;
+  margin-top: 1.5rem;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gcp-action-nav-slot {
+  order: 1;
+}
+
+.gcp-action-secondary-group {
+  order: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.gcp-action-primary-slot {
+  order: 3;
+}
+
+.gcp-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gcp-action-btn:active {
+  transform: scale(0.98);
+}
+
+.gcp-action-btn.primary {
+  background: #003666;
+  color: #ffffff;
+  border-color: #003666;
+  box-shadow: 0 1px 3px rgba(0, 54, 102, 0.2);
+}
+
+.gcp-action-btn.primary:hover {
+  background: #002244;
+  border-color: #002244;
+}
+
+.gcp-action-btn.success {
+  background: #166534;
+  color: #ffffff;
+  border-color: #166534;
+  box-shadow: 0 1px 3px rgba(22, 101, 52, 0.2);
+}
+
+.gcp-action-btn.success:hover {
+  background: #14532d;
+  border-color: #14532d;
+}
+
+.gcp-action-btn.secondary {
+  background: #eff6ff;
+  color: #003666;
+  border-color: #bfdbfe;
+}
+
+.gcp-action-btn.secondary:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.gcp-action-btn.neutral {
+  background: #ffffff;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.gcp-action-btn.neutral:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
 /* ── 5. Responsive Breakpoints: Tablet (< 1024px) ── */
 @media (max-width: 1023px) {
   .pds-protocol-picker-aside {
@@ -888,6 +987,69 @@
     word-break: break-word !important;
     line-height: 1.4 !important;
     text-align: left !important;
+  }
+
+  /* Google Cloud Console Action Bar Mobile Organization */
+  .pds-protocol-step-footer.gcp-action-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding-top: 1rem !important;
+    margin-top: 1.25rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .gcp-action-primary-slot {
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  .gcp-action-primary-slot .gcp-action-btn {
+    width: 100% !important;
+    min-height: 46px !important;
+    font-size: 0.88rem !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  .gcp-action-secondary-group {
+    order: 2 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .gcp-action-secondary-group .gcp-action-btn {
+    width: 100% !important;
+    min-height: 42px !important;
+    font-size: 0.78rem !important;
+    padding: 0 8px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: normal !important;
+    border-radius: 8px !important;
+    line-height: 1.25 !important;
+  }
+
+  .gcp-action-nav-slot {
+    order: 3 !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .gcp-action-nav-slot .gcp-action-btn {
+    width: 100% !important;
+    min-height: 38px !important;
+    font-size: 0.78rem !important;
+    justify-content: center !important;
+    color: #475569 !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
   }
 }
 

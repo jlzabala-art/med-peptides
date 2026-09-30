@@ -1620,18 +1620,30 @@ export default function ProtocolWorkspaceTab({
               </p>
             </div>
 
-            {/* Final Action CTAs */}
-            {/* Final Action CTAs (GCP UX Standard) */}
+            {/* Final Action CTAs (Google Cloud Console UX Standard) */}
             <div className="pds-protocol-step-footer gcp-action-bar">
-              <button
-                type="button"
-                onClick={() => setCurrentStep(4)}
-                className="gcp-btn-neutral"
-              >
-                <ArrowLeft size={14} /> Back
-              </button>
+              {/* Primary Procurement CTA (Prominent full width on mobile, rightmost on desktop) */}
+              <div className="gcp-action-primary-slot">
+                <button
+                  type="button"
+                  onClick={handleAddRequirementsToCart}
+                  className={`gcp-action-btn ${user ? 'success' : 'primary'}`}
+                  title={user ? "Request quote and order vials for this protocol" : "Sign in required to request quotation"}
+                >
+                  {user ? (
+                    <>
+                      <ShoppingCart size={15} /> <span>Request Quote / Order Vials</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={14} /> <span>Sign in to Request Quotation</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
-              <div className="gcp-action-bar-right">
+              {/* Secondary Clinical & Utility Actions (2-column symmetric grid on mobile, inline on desktop) */}
+              <div className="gcp-action-secondary-group">
                 <button
                   type="button"
                   onClick={() => {
@@ -1645,40 +1657,37 @@ export default function ProtocolWorkspaceTab({
                     triggerHaptic('medium');
                     toast.success(`Protocol ${activeProtocol.name} added to Patient Treatment plan ✓`);
                   }}
-                  className="gcp-btn-secondary"
+                  className="gcp-action-btn secondary"
                   title={user ? "Add protocol to patient treatment plan" : "Sign in required to add to patient protocol"}
                 >
                   {!user ? <Lock size={13} style={{ opacity: 0.8 }} /> : <Plus size={14} />}
-                  <span>Add to Patient Protocol</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleAddRequirementsToCart}
-                  className={user ? "gcp-btn-success" : "gcp-btn-primary"}
-                  title={user ? "Request quote and order vials for this protocol" : "Sign in required to request quotation"}
-                >
-                  {user ? (
-                    <>
-                      <ShoppingCart size={14} /> <span>Request Quote / Order Vials</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={14} /> <span>Sign in to Request Quotation</span>
-                    </>
-                  )}
+                  <span>Add to Protocol</span>
                 </button>
 
                 {onOpenPreviewModal && (
                   <button
                     type="button"
                     onClick={onOpenPreviewModal}
-                    className="gcp-btn-neutral"
+                    className="gcp-action-btn neutral"
                     title="Print or export clinical summary"
                   >
-                    <Printer size={14} /> <span>Print Clinical Summary</span>
+                    <Printer size={14} /> <span>Print Summary</span>
                   </button>
                 )}
+              </div>
+
+              {/* Navigation Return Action (Clean bottom link/button on mobile, leftmost on desktop) */}
+              <div className="gcp-action-nav-slot">
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setCurrentStep(4);
+                  }}
+                  className="gcp-action-btn neutral"
+                >
+                  <ArrowLeft size={14} /> <span>Back to Step 4</span>
+                </button>
               </div>
             </div>
           </div>
