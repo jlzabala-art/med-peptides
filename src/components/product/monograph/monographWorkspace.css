@@ -85,15 +85,12 @@
   line-height: 1.2;
 }
 
-/* ── 3. Main Workspace Grid Layout ── */
+/* ── 3. Main Workspace Full-Width Layout (100% Workspace Width) ── */
 .pds-monograph-main-grid {
   max-width: 1240px;
-  margin: 1.5rem auto 3rem auto;
+  margin: 0.5rem auto 3rem auto;
   padding: 0 1.5rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 1.5rem;
-  align-items: start;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -102,9 +99,9 @@
   width: 100%;
 }
 
-.pds-monograph-sidebar-wrapper {
+.pds-monograph-top-strip {
+  box-sizing: border-box;
   width: 100%;
-  max-width: 280px;
 }
 
 /* ── 4. Protocol Workspace Grid (Picker + Stepper) ── */
@@ -152,14 +149,6 @@
     margin: 1rem auto 5rem auto;
   }
 
-  .pds-monograph-sidebar-wrapper {
-    max-width: 100%;
-  }
-
-  .pds-contextual-sidebar {
-    max-width: 100% !important;
-  }
-
   .pds-protocol-workspace-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
@@ -170,6 +159,15 @@
 @media (max-width: 767px) {
   .pds-monograph-workspace-root {
     padding-bottom: 7rem;
+  }
+
+  .pds-monograph-top-strip {
+    padding: 0 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .pds-strip-divider {
+    display: none !important;
   }
 
   .pds-gcp-tab-bar {

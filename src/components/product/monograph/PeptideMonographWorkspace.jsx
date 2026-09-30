@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PeptideMonographHeader from './PeptideMonographHeader';
 import PeptideMonographTabs from './PeptideMonographTabs';
+import PeptideMonographTopStrip from './PeptideMonographTopStrip';
+import MonographTabsNavigatorDrawer from './MonographTabsNavigatorDrawer';
 import OverviewTab from './OverviewTab';
 import ProtocolWorkspaceTab from './ProtocolWorkspaceTab';
 import PreparationTab from './PreparationTab';
 import QualityBatchTab from './QualityBatchTab';
 import ReferencesTab from './ReferencesTab';
-import ContextualRightSidebar from './ContextualRightSidebar';
 import CoaModal from '../CoaModal';
 import MonographPreviewModal from '../MonographPreviewModal';
 import { triggerHaptic } from '@/utils/haptics';
@@ -48,8 +49,9 @@ export default function PeptideMonographWorkspace({
   // Modals state
   const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isTabsDrawerOpen, setIsTabsDrawerOpen] = useState(false);
 
-  // Active Protocol Context (reactive sync across center workspace & right task panel)
+  // Active Protocol Context (reactive sync across top strip & calculations)
   const [protocolContext, setProtocolContext] = useState(null);
 
   // Sync tab changes with URL query string without full page reload
@@ -62,6 +64,35 @@ export default function PeptideMonographWorkspace({
       window.history.replaceState(null, '', url.toString());
     }
   };
+
+  // Synchronize bottom floating bar (Tabs 1/5) with active tab
+  React.useEffect(() => {
+    const tabOrder = ['overview', 'protocols', 'preparation', 'quality', 'references'];
+    const activeIndex = tabOrder.indexOf(activeTab);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('datasheet-toc-progress', {
+        detail: {
+          currentProgress: activeIndex >= 0 ? activeIndex + 1 : 1,
+          totalSections: 5,
+          hasToc: true
+        }
+      }));
+    }
+  }, [activeTab]);
+
+  // Listen to external request from bottom sticky bar to open Tabs Navigator
+  React.useEffect(() => {
+    const handleOpenTabsNavigator = () => {
+      triggerHaptic('light');
+      setIsTabsDrawerOpen(true);
+    };
+    window.addEventListener('open-monograph-tabs-navigator', handleOpenTabsNavigator);
+    window.addEventListener('open-datasheet-toc', handleOpenTabsNavigator);
+    return () => {
+      window.removeEventListener('open-monograph-tabs-navigator', handleOpenTabsNavigator);
+      window.removeEventListener('open-datasheet-toc', handleOpenTabsNavigator);
+    };
+  }, []);
 
   return (
     <div className="pds-monograph-workspace-root">
@@ -91,9 +122,18 @@ export default function PeptideMonographWorkspace({
         protocolCount={associatedProtocols?.length || 3}
       />
 
-      {/* 3. Main Dual-Column Content Grid (Single-column on mobile) */}
+      {/* 3. Authoritative Top Context & Telemetry Strip (GCP Standard) */}
+      <PeptideMonographTopStrip
+        activeTab={activeTab}
+        product={product}
+        slug={slug}
+        effectiveBatch={effectiveBatch}
+        protocolContext={protocolContext}
+        onOpenCoaModal={() => setIsCoaModalOpen(true)}
+      />
+
+      {/* 4. Full-Width Main Workspace Area (100% liberated horizontal space) */}
       <div className="pds-monograph-main-grid">
-        {/* Main Task Area */}
         <div className="pds-monograph-task-area">
           {activeTab === 'overview' && (
             <OverviewTab
@@ -133,18 +173,16 @@ export default function PeptideMonographWorkspace({
             <ReferencesTab />
           )}
         </div>
-
-        {/* Contextual Right Panel (Adapts full-width on mobile below main task) */}
-        <aside className="pds-monograph-sidebar-wrapper">
-          <ContextualRightSidebar
-            activeTab={activeTab}
-            slug={slug}
-            effectiveBatch={effectiveBatch}
-            protocolContext={protocolContext}
-            onOpenCoaModal={() => setIsCoaModalOpen(true)}
-          />
-        </aside>
       </div>
+
+      {/* ── Tabs Quick Navigator Drawer (Triggered from bottom floating bar) ── */}
+      <MonographTabsNavigatorDrawer
+        isOpen={isTabsDrawerOpen}
+        onClose={() => setIsTabsDrawerOpen(false)}
+        activeTab={activeTab}
+        onSelectTab={handleTabChange}
+        protocolCount={associatedProtocols?.length || 3}
+      />
 
       {/* ── Institutional Modals ── */}
       <CoaModal

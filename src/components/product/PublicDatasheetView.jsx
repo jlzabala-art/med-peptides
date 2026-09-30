@@ -3101,10 +3101,15 @@ export default function PublicDatasheetView({
         onInquire={() => setIsInquiryDrawerOpen(true)}
         showClinicalAI={true}
         showSections={true}
-        sectionsCount={tocSections.length}
+        sectionsCount={isPeptideCompound ? 5 : tocSections.length}
+        sectionsLabel={isPeptideCompound ? (lang === 'es' ? 'Pestañas' : 'Tabs') : null}
         onOpenSections={() => {
           if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+            if (isPeptideCompound) {
+              window.dispatchEvent(new CustomEvent('open-monograph-tabs-navigator'));
+            } else {
+              window.dispatchEvent(new CustomEvent('open-datasheet-toc'));
+            }
           }
         }}
         lang={lang}
