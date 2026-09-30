@@ -117,24 +117,24 @@ export default function PeptideMonographHeader({
               fontWeight: 850,
               color: '#003666',
               letterSpacing: '-0.03em',
-              lineHeight: 1.15,
-              display: 'flex',
-              alignItems: 'baseline',
-              flexWrap: 'wrap',
-              gap: '0.5rem 0.85rem'
+              lineHeight: 1.15
             }}>
-              <span>{primaryName}</span>
-              {cleanScientific && (
-                <span style={{
-                  fontSize: 'clamp(0.95rem, 1.5vw, 1.25rem)',
-                  fontWeight: 600,
-                  color: '#64748b',
-                  letterSpacing: '-0.01em'
-                }}>
-                  {cleanScientific}
-                </span>
-              )}
+              {primaryName}
             </h1>
+            {cleanScientific && (
+              <div style={{
+                fontSize: '0.84rem',
+                fontWeight: 600,
+                color: '#64748b',
+                marginTop: '3px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span style={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 750, color: '#94a3b8', letterSpacing: '0.05em' }}>Generic:</span>
+                <span style={{ color: '#334155' }}>{cleanScientific}</span>
+              </div>
+            )}
           </div>
 
           {/* GCP Toolbar Actions */}
@@ -213,129 +213,75 @@ export default function PeptideMonographHeader({
           </div>
         </div>
 
-        {/* Row 2: Regulatory Metadata & Quality Chips (Small, Compact, Non-promotional) */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          gap: '0.5rem',
-          paddingTop: '0.2rem'
-        }}>
-          {/* FDA Reference Formulation Chip (Accurate distinction, no misleading badge) */}
+        {/* Row 2: Unified Google Cloud Resource Summary Panel (No Ragged Chips) */}
+        <div className="pds-header-summary-panel">
+          <div className="pds-summary-panel-grid">
+            {/* Field 1: Presentation */}
+            <div className="pds-summary-cell">
+              <span className="pds-summary-label">Presentation</span>
+              <strong className="pds-summary-value">{presentation}</strong>
+            </div>
+
+            {/* Field 2: Strengths */}
+            <div className="pds-summary-cell">
+              <span className="pds-summary-label">Available Strengths</span>
+              <strong className="pds-summary-value" style={{ fontFamily: 'monospace' }}>{availableStrengths}</strong>
+            </div>
+
+            {/* Field 3: Verified Purity */}
+            <div className="pds-summary-cell">
+              <span className="pds-summary-label">Verified Purity</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} />
+                <strong className="pds-summary-value" style={{ color: '#15803d' }}>{verifiedPurity}</strong>
+              </div>
+            </div>
+
+            {/* Field 4: Batch Record */}
+            <div className="pds-summary-cell">
+              <span className="pds-summary-label">Verified Batch (CoA)</span>
+              <div
+                onClick={onOpenCoaModal}
+                role={onOpenCoaModal ? "button" : undefined}
+                tabIndex={onOpenCoaModal ? 0 : undefined}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  cursor: onOpenCoaModal ? 'pointer' : 'default'
+                }}
+                title={onOpenCoaModal ? "Click to view Certificate of Analysis" : undefined}
+              >
+                <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#003666', fontSize: '0.80rem' }}>
+                  {batchCode}
+                </code>
+                {onOpenCoaModal && (
+                  <ExternalLink size={12} color="#003666" style={{ opacity: 0.7 }} />
+                )}
+              </div>
+            </div>
+
+            {/* Field 5: Supplier */}
+            <div className="pds-summary-cell">
+              <span className="pds-summary-label">Source Supplier</span>
+              <strong className="pds-summary-value">{supplier}</strong>
+            </div>
+          </div>
+
+          {/* FDA Reference Notice Strip if present */}
           {hasFdaRef && (
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              color: '#1e40af',
-              padding: '3px 10px',
-              borderRadius: '6px',
-              fontSize: '0.74rem'
-            }}>
-              <span style={{ color: '#3b82f6', fontWeight: 600 }}>FDA reference product available:</span>
-              <strong style={{ fontWeight: 800 }}>{fdaRefBrand}</strong>
-              <span style={{
-                background: '#dbeafe',
-                color: '#1d4ed8',
-                padding: '1px 6px',
-                borderRadius: '4px',
-                fontSize: '0.68rem',
-                fontWeight: 700
-              }}>
-                FDA approved {fdaRefYear}
+            <div className="pds-summary-fda-strip">
+              <span style={{ color: '#1e40af', fontWeight: 750, fontSize: '0.70rem', textTransform: 'uppercase' }}>
+                FDA Reference Drug:
+              </span>
+              <strong style={{ color: '#1e3a8a', fontSize: '0.76rem', fontWeight: 700 }}>
+                {fdaRefBrand}
+              </strong>
+              <span style={{ fontSize: '0.68rem', color: '#3b82f6', background: '#dbeafe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                Approved {fdaRefYear}
               </span>
             </div>
           )}
-
-          {/* Available Strengths */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            color: '#334155',
-            padding: '3px 10px',
-            borderRadius: '6px',
-            fontSize: '0.74rem'
-          }}>
-            <span style={{ color: '#64748b', fontWeight: 600 }}>Available strengths:</span>
-            <strong style={{ fontFamily: 'monospace', fontWeight: 700 }}>{availableStrengths}</strong>
-          </div>
-
-          {/* Presentation */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            color: '#334155',
-            padding: '3px 10px',
-            borderRadius: '6px',
-            fontSize: '0.74rem'
-          }}>
-            <span style={{ color: '#64748b', fontWeight: 600 }}>Presentation:</span>
-            <strong style={{ fontWeight: 700 }}>{presentation}</strong>
-          </div>
-
-          {/* Verified Purity */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            color: '#166534',
-            padding: '3px 10px',
-            borderRadius: '6px',
-            fontSize: '0.74rem'
-          }}>
-            <ShieldCheck size={13} color="#16a34a" />
-            <span style={{ color: '#15803d', fontWeight: 600 }}>Verified purity:</span>
-            <strong style={{ fontWeight: 800 }}>{verifiedPurity}</strong>
-          </div>
-
-          {/* Supplier / Laboratory */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            color: '#334155',
-            padding: '3px 10px',
-            borderRadius: '6px',
-            fontSize: '0.74rem'
-          }}>
-            <span style={{ color: '#64748b', fontWeight: 600 }}>Supplier:</span>
-            <strong style={{ fontWeight: 700 }}>{supplier}</strong>
-          </div>
-
-          {/* Latest Verified Batch */}
-          <div
-            onClick={onOpenCoaModal}
-            role={onOpenCoaModal ? "button" : undefined}
-            tabIndex={onOpenCoaModal ? 0 : undefined}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              color: '#334155',
-              padding: '3px 10px',
-              borderRadius: '6px',
-              fontSize: '0.74rem',
-              cursor: onOpenCoaModal ? 'pointer' : 'default'
-            }}
-            title={onOpenCoaModal ? "Click to view Certificate of Analysis" : undefined}
-          >
-            <span style={{ color: '#64748b', fontWeight: 600 }}>Latest verified batch:</span>
-            <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#003666' }}>{batchCode}</code>
-          </div>
         </div>
       </div>
     </header>

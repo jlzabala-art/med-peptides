@@ -21,10 +21,15 @@ import {
   Layers,
   Thermometer,
   RotateCcw,
-  Plus
+  Plus,
+  Lock,
+  ExternalLink
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { resolveVialSizeMg } from '@/utils/supplyMath';
 import PrecisionSyringeVisualizer from './PrecisionSyringeVisualizer';
 import { calculateReconstitution, calculateProtocolProcurement } from './monographCalculationEngine';
 
@@ -127,6 +132,8 @@ export default function ProtocolWorkspaceTab({
   onAddToCart,
   onProtocolChange
 }) {
+  const { user } = useAuth();
+  const router = useRouter();
   const canonicalName = product.canonicalName || product.name || 'PT-141';
 
   // Normalize protocols list: use provided or fallback to canonical PT-141 protocols
@@ -135,6 +142,7 @@ export default function ProtocolWorkspaceTab({
       // Map Firestore/Repository protocols into canonical structure
       return associatedProtocols.map(p => ({
         id: p.id || p.slug,
+        slug: p.slug || p.id,
         name: p.name || p.title || 'Clinical Protocol',
         durationWeeks: p.durationWeeks || (parseInt(p.duration, 10) || 4),
         difficulty: p.difficulty || p.difficulty_level || 'Clinical',
@@ -183,7 +191,9 @@ export default function ProtocolWorkspaceTab({
   const [physicianDoseMg, setPhysicianDoseMg] = useState(activeProtocol.defaultDoseMg || 1.25);
   const [physicianFreqPerWeek, setPhysicianFreqPerWeek] = useState(activeProtocol.defaultDosesPerWeek || 2);
   const [physicianDurationWeeks, setPhysicianDurationWeeks] = useState(activeProtocol.durationWeeks || 4);
-  const [selectedVialStrength, setSelectedVialStrength] = useState(10);
+  const [selectedVialStrength, setSelectedVialStrength] = useState(() => {
+    return resolveVialSizeMg({ product_slug: product.slug, product_title: canonicalName }) || 10;
+  });
   const [selectedBacVolume, setSelectedBacVolume] = useState(2.0);
 
   // Expanded stepper items for progressive disclosure in Step 4
@@ -244,6 +254,13 @@ export default function ProtocolWorkspaceTab({
   };
 
   const handleAddRequirementsToCart = () => {
+    if (!user) {
+      triggerHaptic('warning');
+      toast.error('Debes iniciar sesión para solicitar cotizaciones o tramitar suministros.');
+      const redirectUrl = typeof window !== 'undefined' ? window.location.pathname : '/';
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+      return;
+    }
     triggerHaptic('medium');
     procCalc.recommendedVials.forEach(v => {
       onAddToCart?.({
@@ -255,7 +272,7 @@ export default function ProtocolWorkspaceTab({
         price: v.strength === 5 ? 24.00 : v.strength === 10 ? 38.00 : 65.00
       }, v.count);
     });
-    toast.success(`Added ${procCalc.procurementSummary} to quotation / cart ✓`);
+    toast.success(`Añadido ${procCalc.procurementSummary} a la cotización / carrito ✓`);
   };
 
   // Notify parent component of current active protocol context
@@ -456,45 +473,122 @@ export default function ProtocolWorkspaceTab({
           </div>
         </div>
 
-        {/* ── Horizontal Workflow Stepper: 1 Protocol -> 2 Treatment Plan -> 3 Vials -> 4 Preparation -> 5 Review ── */}
-        <div className="pds-protocol-stepper-container">
-          {stepsList.map(s => {
-            const isActive = currentStep === s.number;
-            const isCompleted = currentStep > s.number;
+        {/* ── Official Protocol Page Link & Executive Summary Notice (GCP Standard) ── */}
+        <div style={{
+          background: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+            <div style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '6px',
+              background: '#e0f2fe',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Info size={14} color="#0369a1" />
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#0369a1', lineHeight: 1.45 }}>
+              <strong style={{ color: '#003666' }}>Resumen Clínico Ejecutivo:</strong> Este módulo es un calculador de titulación rápida y requerimiento de viales. La guía clínica completa con fases, biomarcadores y literatura está disponible en la página oficial del protocolo.
+            </div>
+          </div>
 
-            return (
-              <button
-                key={s.number}
-                type="button"
-                className={`pds-protocol-stepper-btn ${isActive ? 'is-active' : ''}`}
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setCurrentStep(s.number);
-                }}
-                style={{
-                  background: isActive ? '#003666' : isCompleted ? '#ffffff' : 'transparent',
-                  color: isActive ? '#ffffff' : isCompleted ? '#003666' : '#64748b',
-                  boxShadow: isActive ? '0 2px 4px rgba(0, 54, 102, 0.2)' : isCompleted ? '0 1px 2px rgba(0,0,0,0.04)' : 'none'
-                }}
-              >
-                <span style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  background: isActive ? '#38bdf8' : isCompleted ? '#e0f2fe' : '#e2e8f0',
-                  color: isActive ? '#003666' : isCompleted ? '#0369a1' : '#64748b',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.68rem',
-                  fontWeight: 850
-                }}>
-                  {isCompleted ? '✓' : s.number}
-                </span>
-                <span>{s.label}</span>
-              </button>
-            );
-          })}
+          <a
+            href={activeProtocol.slug ? `/protocol/${activeProtocol.slug}` : `/protocol/${product.slug || 'protocol'}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#003666',
+              color: '#ffffff',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: 800,
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)'
+            }}
+          >
+            <span>Ver Protocolo Completo</span>
+            <ExternalLink size={12} color="#ffffff" />
+          </a>
+        </div>
+
+        {/* ── Workflow Stepper: Responsive Grid without Horizontal Scroll ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {/* Mobile Step Title Pill */}
+          <div className="pds-stepper-mobile-title" style={{
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '5px 10px',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '6px',
+            fontSize: '0.72rem'
+          }}>
+            <span style={{ fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Paso {currentStep} de 5
+            </span>
+            <span style={{ fontWeight: 700, color: '#1e293b' }}>
+              {stepsList.find(s => s.number === currentStep)?.label}
+            </span>
+          </div>
+
+          <div className="pds-protocol-stepper-container">
+            {stepsList.map(s => {
+              const isActive = currentStep === s.number;
+              const isCompleted = currentStep > s.number;
+
+              return (
+                <button
+                  key={s.number}
+                  type="button"
+                  className={`pds-protocol-stepper-btn ${isActive ? 'is-active' : ''}`}
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setCurrentStep(s.number);
+                  }}
+                  style={{
+                    background: isActive ? '#003666' : isCompleted ? '#ffffff' : 'transparent',
+                    color: isActive ? '#ffffff' : isCompleted ? '#003666' : '#64748b',
+                    boxShadow: isActive ? '0 2px 4px rgba(0, 54, 102, 0.2)' : isCompleted ? '0 1px 2px rgba(0,0,0,0.04)' : 'none'
+                  }}
+                >
+                  <span style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: isActive ? '#38bdf8' : isCompleted ? '#e0f2fe' : '#e2e8f0',
+                    color: isActive ? '#003666' : isCompleted ? '#0369a1' : '#64748b',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.68rem',
+                    fontWeight: 850,
+                    flexShrink: 0
+                  }}>
+                    {isCompleted ? '✓' : s.number}
+                  </span>
+                  <span className="pds-stepper-btn-label">{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── STEP CONTENT ROUTER ── */}
@@ -1007,7 +1101,7 @@ export default function ProtocolWorkspaceTab({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    background: '#16a34a',
+                    background: user ? '#16a34a' : '#003666',
                     color: '#ffffff',
                     border: 'none',
                     padding: '8px 16px',
@@ -1015,10 +1109,19 @@ export default function ProtocolWorkspaceTab({
                     fontSize: '0.80rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    boxShadow: '0 2px 4px rgba(22, 163, 74, 0.2)'
+                    boxShadow: user ? '0 2px 4px rgba(22, 163, 74, 0.2)' : '0 2px 4px rgba(0, 54, 102, 0.2)'
                   }}
+                  title={user ? "Añadir requerimientos de viales a la cotización" : "Inicia sesión para cotizar"}
                 >
-                  <ShoppingCart size={14} /> Add Requirements to Quotation
+                  {user ? (
+                    <>
+                      <ShoppingCart size={14} /> Add Requirements to Quotation
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={14} /> Iniciar Sesión para Cotizar
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1507,7 +1610,7 @@ export default function ProtocolWorkspaceTab({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    background: '#16a34a',
+                    background: user ? '#16a34a' : '#003666',
                     color: '#ffffff',
                     border: 'none',
                     padding: '8px 16px',
@@ -1515,10 +1618,19 @@ export default function ProtocolWorkspaceTab({
                     fontSize: '0.80rem',
                     fontWeight: 800,
                     cursor: 'pointer',
-                    boxShadow: '0 2px 4px rgba(22, 163, 74, 0.2)'
+                    boxShadow: user ? '0 2px 4px rgba(22, 163, 74, 0.2)' : '0 2px 4px rgba(0, 54, 102, 0.2)'
                   }}
+                  title={user ? "Solicitar cotización de viales para este protocolo" : "Inicia sesión para cotizar"}
                 >
-                  <ShoppingCart size={14} /> Request Quote / Order Vials
+                  {user ? (
+                    <>
+                      <ShoppingCart size={14} /> Request Quote / Order Vials
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={14} /> Iniciar Sesión para Cotizar
+                    </>
+                  )}
                 </button>
 
                 {onOpenPreviewModal && (

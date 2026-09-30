@@ -88,6 +88,8 @@ import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
 import { getHumanFormatName } from '../../utils/productVariantProcessing';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../config/publicVersionConfig';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function PublicDatasheetView({ 
   product, 
@@ -125,6 +127,20 @@ export default function PublicDatasheetView({
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedLabelType, setCopiedLabelType] = useState(null);
   const [downloadingType, setDownloadingType] = useState(null);
+
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleOpenInquiry = () => {
+    if (!user) {
+      triggerHaptic('warning');
+      toast.error(lang === 'es' ? 'Debes iniciar sesión para consultar o solicitar cotizaciones.' : 'Please sign in to request a quotation.');
+      const redirectUrl = typeof window !== 'undefined' ? window.location.pathname : '/';
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+      return;
+    }
+    setIsInquiryDrawerOpen(true);
+  };
 
   const handleDownloadClick = (typeKey) => {
     setDownloadingType(typeKey);
@@ -1401,7 +1417,7 @@ export default function PublicDatasheetView({
           strength: selectedStrengthId || '',
           category: category || 'Research Peptides'
         }}
-        onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+        onOpenInquiry={handleOpenInquiry}
         hideContactButton={true}
         loginRedirect={`/p/${encodeURIComponent(slug)}`}
         hideTier2={true}
@@ -3098,7 +3114,7 @@ export default function PublicDatasheetView({
             ? (lang === 'es' ? 'Consultar Suministro' : 'Inquire Supply')
             : (lang === 'es' ? 'Consultar Producto' : 'Inquire Product')
         }
-        onInquire={() => setIsInquiryDrawerOpen(true)}
+        onInquire={handleOpenInquiry}
         showClinicalAI={true}
         showSections={true}
         sectionsCount={isPeptideCompound ? 5 : tocSections.length}
