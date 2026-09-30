@@ -61,7 +61,7 @@ const PUBLIC_RX_STYLES = `
   }
 `;
 
-export default function PublicPrescriptionClient({ rx }) {
+export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake = null }) {
   const [lang, setLang] = useState('en');
   const [copied, setCopied] = useState(false);
   const [previewDoc, setPreviewDoc] = useState(null);
@@ -438,33 +438,35 @@ export default function PublicPrescriptionClient({ rx }) {
       <style dangerouslySetInnerHTML={{ __html: PUBLIC_RX_STYLES }} />
 
       {/* ── Public Unified Header (GCP Standard with Login, Lang, Clinical AI) ───── */}
-      <PublicUnifiedHeader 
-        track="protocols"
-        lang={lang}
-        onLangChange={(newLang) => setLang(newLang)}
-        copyUrl={publicUrl}
-        shortUrl={publicUrl}
-        loginRedirect={publicUrl}
-        hideTier2={true}
-        inquiryContextType="prescription"
-        inquiryEntity={{
-          name: `Prescription ${rxId}`,
-          rxId,
-          code: rxId,
-          patientName,
-          doctorName,
-          clinic,
-          formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
-          dosage: '1.0 ml Once Daily at Night on Dry Scalp',
-          category: 'prescription',
-          genomicsTest: genomicsData?.test?.shortName || null
-        }}
-        breadcrumb={[
-          { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
-          { label: isEs ? 'Prescripciones Médicas' : 'Prescription Dossier' },
-          { label: rxId }
-        ]}
-      />
+      {!embedded && (
+        <PublicUnifiedHeader 
+          track="protocols"
+          lang={lang}
+          onLangChange={(newLang) => setLang(newLang)}
+          copyUrl={publicUrl}
+          shortUrl={publicUrl}
+          loginRedirect={publicUrl}
+          hideTier2={true}
+          inquiryContextType="prescription"
+          inquiryEntity={{
+            name: `Prescription ${rxId}`,
+            rxId,
+            code: rxId,
+            patientName,
+            doctorName,
+            clinic,
+            formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
+            dosage: '1.0 ml Once Daily at Night on Dry Scalp',
+            category: 'prescription',
+            genomicsTest: genomicsData?.test?.shortName || null
+          }}
+          breadcrumb={[
+            { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
+            { label: isEs ? 'Prescripciones Médicas' : 'Prescription Dossier' },
+            { label: rxId }
+          ]}
+        />
+      )}
 
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '1.5rem 1rem' }}>
         <div className="pds-content-with-sidebar">
@@ -1445,23 +1447,25 @@ export default function PublicPrescriptionClient({ rx }) {
       </div>
 
       {/* Unified Persistent Sticky Bottom Action Bar (GCP Standard) */}
-      <PublicStickyActionBar
-        title={`Rx: ${rxId}`}
-        subtitle={`${patientName} • ${doctorName}`}
-        badge={isEs ? 'Prescripción Médica' : 'Medical Prescription'}
-        badgeType="protocol"
-        inquireLabel={isEs ? 'Consultar Prescripción' : 'Inquire Prescription'}
-        onInquire={() => setIsInquiryDrawerOpen(true)}
-        showClinicalAI={true}
-        showSections={true}
-        sectionsCount={tocSections.length}
-        onOpenSections={() => {
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('open-rx-sections'));
-          }
-        }}
-        lang={lang}
-      />
+      {!embedded && (
+        <PublicStickyActionBar
+          title={`Rx: ${rxId}`}
+          subtitle={`${patientName} • ${doctorName}`}
+          badge={isEs ? 'Prescripción Médica' : 'Medical Prescription'}
+          badgeType="protocol"
+          inquireLabel={isEs ? 'Consultar Prescripción' : 'Inquire Prescription'}
+          onInquire={() => setIsInquiryDrawerOpen(true)}
+          showClinicalAI={true}
+          showSections={true}
+          sectionsCount={tocSections.length}
+          onOpenSections={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('open-rx-sections'));
+            }
+          }}
+          lang={lang}
+        />
+      )}
 
       {/* Context-Aware Prescription Clinical Inquiry Drawer */}
       <PublicInstitutionalInquiryDrawer

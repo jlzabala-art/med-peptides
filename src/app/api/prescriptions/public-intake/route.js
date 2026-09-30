@@ -111,6 +111,7 @@ export async function POST(request) {
           lineCount: (payload.prescriptionLines || payload.items || []).length,
           rxUrl: `/rx/${officialNumber}`,
           fullUrl: `https://med-peptides.com/rx/${officialNumber}`,
+          rxData: { id: docRef.id, ...payload },
         });
       } catch (err) {
         console.error('[public-intake] Error saving item:', err);
