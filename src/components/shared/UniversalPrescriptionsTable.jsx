@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw } from 'lucide-react';
+import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone } from 'lucide-react';
 import PrescriptionDetailModal from '../../features/prescriptions/components/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../admin/protocols/ProtocolDrawerContent';
 import ProductDetailsDrawer from '../admin/products/ProductDetailsDrawer';
@@ -20,6 +20,7 @@ import { getPrescriptionColumns } from '../admin/prescriptions/prescriptionColum
 import DataModule from '../ui/DataModule';
 import { useAuth } from '../../context/AuthContext';
 import PrescriptionIntakeWorkspace from '../../features/prescriptions/components/PrescriptionIntakeWorkspace';
+import ShareIntakeWhatsAppModal from './ShareIntakeWhatsAppModal';
 import PrimarySplitButton from '../ui/PrimarySplitButton';
 import AIQuickActionButton from '../ui/AIQuickActionButton';
 import SourceSelectorModal from '../../features/prescriptions/SourceSelectorModal';
@@ -55,6 +56,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   // Builder open state (was missing — caused runtime error for 'From Items' and 'Manual' sources)
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
+  const [isShareIntakeWhatsAppOpen, setIsShareIntakeWhatsAppOpen] = useState(false);
   const [isSourceSelectorOpen, setIsSourceSelectorOpen] = useState(false);
   const [isProtocolSearchOpen, setIsProtocolSearchOpen] = useState(false);
   const [initialBuilderItems, setInitialBuilderItems] = useState([]);
@@ -582,6 +584,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         icon={FileText}
 
         mobileOverflowActions={[
+          { label: 'Share Intake (WhatsApp)', icon: Phone, onClick: () => setIsShareIntakeWhatsAppOpen(true) },
           { label: 'Export CSV', icon: Download, onClick: handleExportCsv },
           { label: 'Refresh', icon: RefreshCw, onClick: () => refresh?.() }
         ]}
@@ -592,6 +595,28 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               onClick={() => setIsIntakeOpen(true)}
               title="Import and digitize medical prescription or Fagron Genomics report with Atlas AI"
             />
+            <button
+              type="button"
+              onClick={() => setIsShareIntakeWhatsAppOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '8px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#15803d',
+                fontWeight: 700,
+                fontSize: '0.84rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              title="Enviar enlace público para subir recetas o informes Fagron por WhatsApp"
+            >
+              <Phone size={14} style={{ color: '#25D366' }} />
+              <span>Enviar Portal (WhatsApp)</span>
+            </button>
             <PrimarySplitButton 
               mainAction={{
                 label: "New Prescription",
@@ -601,6 +626,11 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                 }
               }}
               dropdownActions={[
+                {
+                  label: "Share Intake (WhatsApp)",
+                  icon: <Phone size={14} style={{ color: '#25D366' }} />,
+                  onClick: () => setIsShareIntakeWhatsAppOpen(true)
+                },
                 {
                   label: "Import PDF / Fagron (AI)",
                   icon: <ScanText />,
@@ -905,6 +935,11 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
             onSaveSuccess={() => refresh?.()}
           />
         )}
+
+        <ShareIntakeWhatsAppModal
+          isOpen={isShareIntakeWhatsAppOpen}
+          onClose={() => setIsShareIntakeWhatsAppOpen(false)}
+        />
       </DataModule>
     </>
   );

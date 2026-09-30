@@ -16,7 +16,7 @@ import PWAInstallPrompt from '../components/mobile/PWAInstallPrompt';
 import AtlasAIDrawer from '../components/shared/AtlasAIDrawer';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 
-const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/auth', '/session-ended', '/shared', '/quotation', '/p', '/proto', '/catalog', '/verify', '/c', '/mediluxe', '/company', '/rx', '/d'];
+const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/auth', '/session-ended', '/shared', '/quotation', '/p', '/proto', '/catalog', '/verify', '/c', '/mediluxe', '/company', '/rx', '/d', '/intake'];
 
 function StorefrontShell({ children }) {
   const { isProfessional, activeRole } = useAuth();

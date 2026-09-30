@@ -1,5 +1,5 @@
 import React, { cache } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { adminDb } from '@/lib/firebaseAdmin';
 import PublicPrescriptionClient from './PublicPrescriptionClient';
 
@@ -211,6 +211,11 @@ export async function generateMetadata({ params }) {
 export default async function PublicPrescriptionPage({ params }) {
   const resolvedParams = await params;
   const code = resolvedParams?.code;
+
+  if (code?.toLowerCase() === 'intake') {
+    redirect('/rx/intake');
+  }
+
   const rx = await getPrescriptionData(code);
 
   if (!rx) {

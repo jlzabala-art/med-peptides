@@ -5,11 +5,12 @@ import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, CheckCircle2, Activity, AlertCircle, Save, FileText,
   Beaker, Sparkles, ExternalLink, RefreshCw, UserCheck, ShieldAlert,
-  Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight
+  Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight, Phone
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import StandardDrawer from '../../../components/ui/StandardDrawer';
 import AlgoliaProductPicker from '../../../components/admin/protocols/tabs/AlgoliaProductPicker';
+import ShareIntakeWhatsAppModal from '../../../components/shared/ShareIntakeWhatsAppModal';
 import toast from 'react-hot-toast';
 import { useDrawer } from '../../../context/DrawerContext';
 import {
@@ -36,6 +37,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
   const [groupIntoSession, setGroupIntoSession] = useState(true);
   const [savedPrescriptionsResult, setSavedPrescriptionsResult] = useState(null);
   const [copiedUrl, setCopiedUrl] = useState(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleProcessFile = useCallback(async (droppedFile) => {
     if (!droppedFile) return;
@@ -205,7 +207,8 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
   }, [normalizedRxList]);
 
   return (
-    <StandardDrawer
+    <>
+      <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
       title="Importar Prescripción con IA"
@@ -380,6 +383,29 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       {copiedUrl === saved.prescriptionNumber ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
                       <span>{copiedUrl === saved.prescriptionNumber ? 'Enlace Copiado ✓' : 'Copiar Enlace para el Paciente'}</span>
                     </button>
+
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hola ${saved.patientName}, aquí tiene su receta médica oficial digitalizada con acceso clínico validado:\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com'}${saved.rxUrl}\n\nCódigo de Verificación: ${saved.prescriptionNumber}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="gcp-btn-secondary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 14px',
+                        fontSize: '0.82rem',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        color: '#15803d',
+                        background: '#f0fdf4',
+                        borderColor: '#bbf7d0'
+                      }}
+                    >
+                      <Phone size={14} color="#25D366" />
+                      <span>WhatsApp</span>
+                    </a>
                   </div>
                 </div>
               ))}
@@ -399,48 +425,91 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
           backgroundColor: 'var(--surface-ground, #f8fafc)'
         }}>
           {!filePreview ? (
-            <div
-              {...getRootProps()}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2.5rem 1.5rem',
-                border: `2px dashed ${isDragActive ? '#3b82f6' : '#cbd5e1'}`,
-                margin: '1rem',
-                borderRadius: '12px',
-                backgroundColor: isDragActive ? '#eff6ff' : '#ffffff',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                textAlign: 'center'
-              }}
-            >
-              <input {...getInputProps()} />
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              {/* WhatsApp Quick Share Banner */}
               <div style={{
-                padding: '1.25rem',
-                backgroundColor: '#eff6ff',
-                color: '#2563eb',
-                borderRadius: '50%',
-                marginBottom: '1rem',
-                boxShadow: '0 4px 12px rgba(37,99,235,0.1)'
+                margin: '1rem 1rem 0',
+                padding: '0.75rem 1rem',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+                flexWrap: 'wrap'
               }}>
-                <Upload size={36} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Phone size={16} style={{ color: '#16a34a' }} />
+                  <span style={{ fontSize: '0.8rem', color: '#15803d', fontWeight: 600 }}>
+                    ¿Prefieres que el paciente o doctor suba el informe desde su móvil?
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsShareModalOpen(true)}
+                  style={{
+                    background: '#25D366',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Phone size={12} />
+                  <span>Enviar Portal por WhatsApp</span>
+                </button>
               </div>
-              <p style={{ margin: 0, fontWeight: 600, color: '#0f172a', fontSize: '1rem' }}>
-                {isDragActive ? 'Suelta el documento aquí...' : 'Arrastra y suelta la prescripción aquí'}
-              </p>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#64748b', maxWidth: '280px' }}>
-                Soporta archivos <strong>PDF</strong>, <strong>JPG</strong>, <strong>PNG</strong> de clínicas o informes <strong>Fagron Genomics</strong>.
-              </p>
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                style={{ marginTop: '1.25rem', fontSize: '0.85rem', pointerEvents: 'none' }}
+
+              <div
+                {...getRootProps()}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '2.5rem 1.5rem',
+                  border: `2px dashed ${isDragActive ? '#3b82f6' : '#cbd5e1'}`,
+                  margin: '1rem',
+                  borderRadius: '12px',
+                  backgroundColor: isDragActive ? '#eff6ff' : '#ffffff',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center'
+                }}
               >
-                Seleccionar archivo del equipo
-              </button>
+                <input {...getInputProps()} />
+                <div style={{
+                  padding: '1.25rem',
+                  backgroundColor: '#eff6ff',
+                  color: '#2563eb',
+                  borderRadius: '50%',
+                  marginBottom: '1rem',
+                  boxShadow: '0 4px 12px rgba(37,99,235,0.1)'
+                }}>
+                  <Upload size={36} />
+                </div>
+                <p style={{ margin: 0, fontWeight: 600, color: '#0f172a', fontSize: '1rem' }}>
+                  {isDragActive ? 'Suelta el documento aquí...' : 'Arrastra y suelta la prescripción aquí'}
+                </p>
+                <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#64748b', maxWidth: '280px' }}>
+                  Soporta archivos <strong>PDF</strong>, <strong>JPG</strong>, <strong>PNG</strong> de clínicas o informes <strong>Fagron Genomics</strong>.
+                </p>
+                <button
+                  type="button"
+                  className="gcp-btn-secondary"
+                  style={{ marginTop: '1.25rem', fontSize: '0.85rem', pointerEvents: 'none' }}
+                >
+                  Seleccionar archivo del equipo
+                </button>
+              </div>
             </div>
           ) : (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -883,7 +952,13 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
         </div>
       </>
     )}
-  </div>
-</StandardDrawer>
+      </div>
+    </StandardDrawer>
+
+    <ShareIntakeWhatsAppModal
+      isOpen={isShareModalOpen}
+      onClose={() => setIsShareModalOpen(false)}
+    />
+  </>
   );
 }
