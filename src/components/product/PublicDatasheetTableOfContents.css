@@ -312,6 +312,16 @@
   }
 }
 
+/* Laptop & Desktop Mode (>= 1024px): TOC is already rendered statically in the right column (.pds-sidebar-toc) */
+@media (min-width: 1024px) {
+  .pds-mobile-toc-backdrop,
+  .pds-mobile-toc-overlay,
+  .pds-mobile-toc-drawer,
+  .pds-mobile-toc-fab-container {
+    display: none !important;
+  }
+}
+
 /* Drag handle on mobile */
 .pds-drawer-drag-handle {
   width: 42px;

@@ -91,8 +91,8 @@ export default function PeptideMonographTopStrip({
                   <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
                     Active Protocol Focus
                   </span>
-                  <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '280px' }}>
-                    {protocolContext?.activeProtocol?.name || 'On-Demand Libido Enhancement'}
+                  <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
+                    {protocolContext?.activeProtocol?.cleanTitle || protocolContext?.activeProtocol?.name || 'On-Demand Libido Enhancement'}
                   </strong>
                 </div>
 

@@ -65,6 +65,15 @@ export default function ProtocolDetailSidebar({
   // Support external trigger
   useEffect(() => {
     const handleExternalOpen = () => {
+      // In laptop/desktop mode (>= 1024px), the sidebar is ALREADY rendered permanently on the right.
+      // Do NOT open duplicate drawer on desktop/laptop.
+      if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+        const sidebar = document.querySelector('.pds-sidebar-toc');
+        if (sidebar) {
+          sidebar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        return;
+      }
       triggerHaptic('light');
       setIsMobileDrawerOpen(true);
     };
