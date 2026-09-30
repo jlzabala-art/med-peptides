@@ -6,7 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
-const GOAL_EMOJIS = {
+export const GOAL_EMOJIS = {
   weight_loss_glp1: '⚖️',
   fat_loss: '🔥',
   metabolic_health: '⚡',

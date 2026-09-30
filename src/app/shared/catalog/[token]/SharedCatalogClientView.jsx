@@ -41,7 +41,7 @@ import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import SharedCatalogProductListRow from './components/SharedCatalogProductListRow';
-import CatalogRightSidebar from './components/CatalogRightSidebar';
+import CatalogRightSidebar, { GOAL_EMOJIS } from './components/CatalogRightSidebar';
 import CatalogStickyActionBar from './components/CatalogStickyActionBar';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -1071,52 +1071,105 @@ export default function SharedCatalogClientView({
                 </button>
               </div>
             ) : (
-              groupedProducts.map(group => (
-                <section key={group.goal.id} className="proto-goal-section" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Goal Section Header */}
-                  <div className="proto-goal-section-header" style={{
+              groupedProducts.map((group, gIdx) => (
+                <section
+                  key={group.goal.id}
+                  className="proto-goal-section"
+                  style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 14px',
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '10px',
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.02)'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        background: '#eff6ff',
-                        color: '#003666',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        <FlaskConical size={16} />
+                    flexDirection: 'column',
+                    gap: '8px',
+                    marginTop: gIdx === 0 ? '0' : '1.75rem'
+                  }}
+                >
+                  {/* Goal Section Header — Google Cloud Enterprise Navy Banner (#003666) */}
+                  <div
+                    className="proto-goal-section-header"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 16px',
+                      background: 'linear-gradient(135deg, #002244 0%, #003666 100%)',
+                      border: '1px solid #001f3f',
+                      borderRadius: '10px',
+                      boxShadow: '0 2px 6px rgba(0, 54, 102, 0.2)',
+                      color: '#ffffff'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div
+                        style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '8px',
+                          background: 'rgba(255, 255, 255, 0.12)',
+                          border: '1px solid rgba(255, 255, 255, 0.22)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.25rem',
+                          flexShrink: 0
+                        }}
+                      >
+                        {GOAL_EMOJIS[group.goal.id] || <FlaskConical size={18} color="#ffffff" />}
                       </div>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#003666', letterSpacing: '-0.01em' }}>
+                        <span
+                          style={{
+                            fontSize: '0.64rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.08em',
+                            color: '#93c5fd',
+                            display: 'block',
+                            marginBottom: '1px'
+                          }}
+                        >
+                          Clinical Goal • Portfolio Group
+                        </span>
+                        <h3
+                          style={{
+                            margin: 0,
+                            fontSize: '1.05rem',
+                            fontWeight: 850,
+                            color: '#ffffff',
+                            letterSpacing: '-0.02em',
+                            lineHeight: 1.2
+                          }}
+                        >
                           {group.goal.label}
                         </h3>
-                        <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>
+                        <div
+                          style={{
+                            fontSize: '0.72rem',
+                            color: 'rgba(255, 255, 255, 0.78)',
+                            fontWeight: 500,
+                            marginTop: '2px'
+                          }}
+                        >
                           {group.products.length} {group.products.length === 1 ? 'formulation available' : 'formulations available'}
                         </div>
                       </div>
                     </div>
-                    <span style={{
-                      fontSize: '0.74rem',
-                      fontWeight: 800,
-                      padding: '2px 10px',
-                      borderRadius: '9999px',
-                      background: '#eff6ff',
-                      color: '#003666',
-                      border: '1px solid #bfdbfe'
-                    }}>
-                      {group.products.length}
+
+                    <span
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 800,
+                        padding: '4px 12px',
+                        borderRadius: '9999px',
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        border: '1px solid rgba(255, 255, 255, 0.28)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <strong style={{ fontSize: '0.84rem', color: '#67e8f9' }}>{group.products.length}</strong>
+                      <span style={{ opacity: 0.9 }}>{group.products.length === 1 ? 'Formulation' : 'Formulations'}</span>
                     </span>
                   </div>
 

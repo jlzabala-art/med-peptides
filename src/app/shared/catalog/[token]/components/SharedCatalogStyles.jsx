@@ -1597,11 +1597,12 @@ export default function SharedCatalogStyles() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0.75rem 1rem;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
+          padding: 0.85rem 1.15rem;
+          background: linear-gradient(135deg, #002244 0%, #003666 100%);
+          border: 1px solid #001f3f;
           border-radius: 10px;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+          box-shadow: 0 2px 6px rgba(0, 54, 102, 0.2);
+          color: #ffffff;
         }
 
         /* ── List Mode Row Styles ── */
