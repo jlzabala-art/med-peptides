@@ -179,6 +179,7 @@ export default function ProtocolWorkspaceTab({
   const [currentStep, setCurrentStep] = useState(1);
 
   // ── Patient Treatment Specific Parameters (Physician Authorized Overrides) ──
+  const [isPickerExpandedMobile, setIsPickerExpandedMobile] = useState(false);
   const [physicianDoseMg, setPhysicianDoseMg] = useState(activeProtocol.defaultDoseMg || 1.25);
   const [physicianFreqPerWeek, setPhysicianFreqPerWeek] = useState(activeProtocol.defaultDosesPerWeek || 2);
   const [physicianDurationWeeks, setPhysicianDurationWeeks] = useState(activeProtocol.durationWeeks || 4);
@@ -198,6 +199,7 @@ export default function ProtocolWorkspaceTab({
     setPhysicianFreqPerWeek(nextProto.defaultDosesPerWeek || 2);
     setPhysicianDurationWeeks(nextProto.durationWeeks || 4);
     setCurrentStep(1); // Return to Step 1 for fresh review
+    setIsPickerExpandedMobile(false); // Auto-collapse on mobile upon selection
   };
 
   // Check if current parameters differ from protocol default
@@ -280,34 +282,59 @@ export default function ProtocolWorkspaceTab({
   return (
     <div className="pds-protocol-workspace-grid">
       
-      {/* ── LEFT COLUMN: Available Protocols ── */}
-      <aside style={{
-        background: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
-      }}>
-        <div style={{
-          padding: '0.85rem 1rem',
-          background: '#f8fafc',
-          borderBottom: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <FlaskConical size={14} color="#003666" />
-            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Available Protocols
-            </span>
+      {/* ── LEFT COLUMN: Available Protocols (Accordion on Mobile <1024px, Fixed Column on Desktop) ── */}
+      <aside className="pds-protocol-picker-aside">
+        <div
+          className="pds-protocol-picker-header"
+          onClick={() => {
+            triggerHaptic('light');
+            setIsPickerExpandedMobile(prev => !prev);
+          }}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isPickerExpandedMobile}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            <div style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '6px',
+              background: '#eff6ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <FlaskConical size={14} color="#003666" />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              {/* Desktop header label */}
+              <span className="pds-picker-title-desktop" style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Available Protocols
+              </span>
+              {/* Mobile header label (shows active protocol directly) */}
+              <div className="pds-picker-title-mobile">
+                <span style={{ fontSize: '0.64rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase' }}>
+                  Protocol:
+                </span>
+                <strong style={{ fontSize: '0.84rem', color: '#003666', fontWeight: 850, marginLeft: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {sanitizeProtocolTitle(activeProtocol.name, canonicalName)}
+                </strong>
+              </div>
+            </div>
           </div>
-          <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#e0f2fe', color: '#0369a1', padding: '1px 6px', borderRadius: '10px' }}>
-            {availableProtocols.length}
-          </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#e0f2fe', color: '#0369a1', padding: '2px 7px', borderRadius: '10px' }}>
+              {availableProtocols.length} {availableProtocols.length === 1 ? 'protocol' : 'protocols'}
+            </span>
+            <div className="pds-picker-chevron-mobile" style={{ color: '#003666', display: 'flex', alignItems: 'center' }}>
+              {isPickerExpandedMobile ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={`pds-protocol-picker-list ${isPickerExpandedMobile ? 'is-expanded' : 'is-collapsed'}`}>
           {availableProtocols.map(proto => {
             const isSelected = proto.id === selectedProtocolId;
             return (
