@@ -22,10 +22,24 @@ export default function PeptideMonographHeader({
 }) {
   const [copied, setCopied] = useState(false);
 
-  // Authoritative identity resolution
-  const name = product.canonicalName || product.name || 'PT-141';
-  const scientificName = product.scientificName || product.chemical_name || 'Bremelanotide';
-  const isPt141 = slug?.toLowerCase().includes('pt-141') || slug?.toLowerCase().includes('pt141') || name?.toLowerCase().includes('pt-141');
+  // Clean primary and generic names to prevent duplicate printing like "PT-141 (Bremelanotide) Bremelanotide"
+  const rawName = product.canonicalName || product.name || 'PT-141';
+  const rawScientific = product.scientificName || product.chemical_name || 'Bremelanotide';
+
+  let primaryName = rawName;
+  let cleanScientific = rawScientific;
+
+  const parenMatch = rawName.match(/^(.*?)\s*\((.*?)\)$/);
+  if (parenMatch) {
+    primaryName = parenMatch[1].trim();
+    if (!cleanScientific || cleanScientific.toLowerCase() === parenMatch[2].trim().toLowerCase()) {
+      cleanScientific = parenMatch[2].trim();
+    }
+  } else if (rawName.toLowerCase() === rawScientific.toLowerCase()) {
+    cleanScientific = '';
+  }
+
+  const isPt141 = slug?.toLowerCase().includes('pt-141') || slug?.toLowerCase().includes('pt141') || primaryName?.toLowerCase().includes('pt-141');
 
   // FDA reference formulation details (Vyleesi)
   const hasFdaRef = isPt141 || product.hasFdaReference;
@@ -42,7 +56,7 @@ export default function PeptideMonographHeader({
   const handleCopySpec = () => {
     triggerHaptic('light');
     const text = [
-      `Product: ${name} (${scientificName})`,
+      `Product: ${primaryName}${cleanScientific ? ` (${cleanScientific})` : ''}`,
       `Classification: Peptide • Clinical monograph`,
       hasFdaRef ? `FDA Reference Product: ${fdaRefBrand} (Approved ${fdaRefYear})` : null,
       `Available Strengths: ${availableStrengths}`,
@@ -60,7 +74,7 @@ export default function PeptideMonographHeader({
   };
 
   return (
-    <header className="pds-monograph-header" style={{
+    <header className="pds-monograph-header-root" style={{
       background: '#ffffff',
       borderBottom: '1px solid #e2e8f0',
       padding: '1.25rem 1.5rem',
@@ -74,7 +88,7 @@ export default function PeptideMonographHeader({
         gap: '0.85rem'
       }}>
         {/* Row 1: Title, Classification & Actions */}
-        <div style={{
+        <div className="pds-header-title-row" style={{
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
@@ -99,7 +113,7 @@ export default function PeptideMonographHeader({
 
             <h1 style={{
               margin: 0,
-              fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)',
+              fontSize: 'clamp(1.5rem, 2.5vw, 2.1rem)',
               fontWeight: 850,
               color: '#003666',
               letterSpacing: '-0.03em',
@@ -109,22 +123,22 @@ export default function PeptideMonographHeader({
               flexWrap: 'wrap',
               gap: '0.5rem 0.85rem'
             }}>
-              <span>{name}</span>
-              {scientificName && (
+              <span>{primaryName}</span>
+              {cleanScientific && (
                 <span style={{
-                  fontSize: 'clamp(1.05rem, 1.5vw, 1.25rem)',
+                  fontSize: 'clamp(0.95rem, 1.5vw, 1.25rem)',
                   fontWeight: 600,
                   color: '#64748b',
                   letterSpacing: '-0.01em'
                 }}>
-                  {scientificName}
+                  {cleanScientific}
                 </span>
               )}
             </h1>
           </div>
 
           {/* GCP Toolbar Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="pds-header-actions-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={handleCopySpec}

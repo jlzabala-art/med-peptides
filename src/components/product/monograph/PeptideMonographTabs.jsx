@@ -56,26 +56,8 @@ export default function PeptideMonographTabs({
       className={`pds-gcp-tab-bar ${className}`}
       role="tablist"
       aria-label="Monograph Top-Level Navigation"
-      style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #cbd5e1',
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-        padding: '0 1.5rem',
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)'
-      }}
     >
-      <div style={{
-        maxWidth: '1240px',
-        margin: '0 auto',
-        display: 'flex',
-        alignItems: 'stretch',
-        gap: '0.25rem',
-        overflowX: 'auto',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none'
-      }}>
+      <div className="pds-gcp-tab-scroll">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -93,48 +75,18 @@ export default function PeptideMonographTabs({
                 triggerHaptic('selection');
                 onTabChange?.(tab.id);
               }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '0.85rem 1rem',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                fontSize: '0.82rem',
-                fontWeight: isActive ? 800 : 600,
-                color: isActive ? '#003666' : '#64748b',
-                borderBottom: isActive ? '2.5px solid #003666' : '2.5px solid transparent',
-                marginBottom: '-1px',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
-                outline: 'none',
-                letterSpacing: '0.01em'
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.color = '#0f172a';
-                  e.currentTarget.style.borderBottom = '2.5px solid #cbd5e1';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.color = '#64748b';
-                  e.currentTarget.style.borderBottom = '2.5px solid transparent';
-                }
-              }}
+              className={`pds-gcp-tab-btn ${isActive ? 'is-active' : ''}`}
             >
-              <Icon size={15} color={isActive ? '#003666' : '#94a3b8'} />
-              <span>{tab.label}</span>
+              <Icon size={16} color={isActive ? '#003666' : '#94a3b8'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>{tab.label}</span>
               {typeof tab.count === 'number' && tab.count > 0 && (
-                <span style={{
-                  background: isActive ? '#003666' : '#f1f5f9',
-                  color: isActive ? '#ffffff' : '#64748b',
-                  fontSize: '0.68rem',
-                  fontWeight: 800,
-                  padding: '1px 6px',
-                  borderRadius: '10px'
-                }}>
+                <span
+                  className="pds-gcp-tab-badge"
+                  style={{
+                    background: isActive ? '#003666' : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#64748b',
+                  }}
+                >
                   {tab.count}
                 </span>
               )}

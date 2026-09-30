@@ -111,12 +111,24 @@ const CANONICAL_PT141_PROTOCOLS = Object.freeze([
   }
 ]);
 
+function sanitizeProtocolTitle(rawName = '', canonicalCompound = '') {
+  if (!rawName) return 'Clinical Protocol';
+  const prefix = (canonicalCompound || '').trim();
+  if (!prefix) return rawName;
+  const regex = new RegExp(`^${prefix}\\s*[-—:]?\\s*`, 'i');
+  const cleaned = rawName.replace(regex, '').trim();
+  return cleaned || rawName;
+}
+
 export default function ProtocolWorkspaceTab({
   product = {},
   associatedProtocols = [],
   onOpenPreviewModal,
-  onAddToCart
+  onAddToCart,
+  onProtocolChange
 }) {
+  const canonicalName = product.canonicalName || product.name || 'PT-141';
+
   // Normalize protocols list: use provided or fallback to canonical PT-141 protocols
   const availableProtocols = useMemo(() => {
     if (Array.isArray(associatedProtocols) && associatedProtocols.length > 0) {
@@ -244,6 +256,19 @@ export default function ProtocolWorkspaceTab({
     toast.success(`Added ${procCalc.procurementSummary} to quotation / cart ✓`);
   };
 
+  // Notify parent component of current active protocol context
+  React.useEffect(() => {
+    onProtocolChange?.({
+      activeProtocol,
+      procCalc,
+      reconCalc,
+      selectedVialStrength,
+      physicianDurationWeeks,
+      physicianDoseMg,
+      currentStep
+    });
+  }, [activeProtocol, procCalc, reconCalc, selectedVialStrength, physicianDurationWeeks, physicianDoseMg, currentStep, onProtocolChange]);
+
   const stepsList = [
     { number: 1, label: 'Protocol' },
     { number: 2, label: 'Treatment Plan' },
@@ -253,12 +278,7 @@ export default function ProtocolWorkspaceTab({
   ];
 
   return (
-    <div className="pds-protocol-workspace" style={{
-      display: 'grid',
-      gridTemplateColumns: 'minmax(260px, 300px) minmax(0, 1fr)',
-      gap: '1.5rem',
-      alignItems: 'start'
-    }}>
+    <div className="pds-protocol-workspace-grid">
       
       {/* ── LEFT COLUMN: Available Protocols ── */}
       <aside style={{
@@ -316,7 +336,7 @@ export default function ProtocolWorkspaceTab({
                   color: isSelected ? '#003666' : '#1e293b',
                   lineHeight: 1.3
                 }}>
-                  {proto.name}
+                  {sanitizeProtocolTitle(proto.name, canonicalName)}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
@@ -379,7 +399,7 @@ export default function ProtocolWorkspaceTab({
               color: '#003666',
               letterSpacing: '-0.02em'
             }}>
-              {product.canonicalName || 'PT-141'} — {activeProtocol.name}
+              {sanitizeProtocolTitle(activeProtocol.name, canonicalName)}
             </h2>
           </div>
 
@@ -410,15 +430,7 @@ export default function ProtocolWorkspaceTab({
         </div>
 
         {/* ── Horizontal Workflow Stepper: 1 Protocol -> 2 Treatment Plan -> 3 Vials -> 4 Preparation -> 5 Review ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: '0.35rem',
-          background: '#f8fafc',
-          padding: '4px',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0'
-        }}>
+        <div className="pds-protocol-stepper-container">
           {stepsList.map(s => {
             const isActive = currentStep === s.number;
             const isCompleted = currentStep > s.number;
@@ -427,26 +439,15 @@ export default function ProtocolWorkspaceTab({
               <button
                 key={s.number}
                 type="button"
+                className={`pds-protocol-stepper-btn ${isActive ? 'is-active' : ''}`}
                 onClick={() => {
                   triggerHaptic('selection');
                   setCurrentStep(s.number);
                 }}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  padding: '0.55rem 0.4rem',
-                  border: 'none',
-                  borderRadius: '6px',
                   background: isActive ? '#003666' : isCompleted ? '#ffffff' : 'transparent',
                   color: isActive ? '#ffffff' : isCompleted ? '#003666' : '#64748b',
-                  fontSize: '0.74rem',
-                  fontWeight: isActive ? 800 : 700,
-                  cursor: 'pointer',
-                  boxShadow: isActive ? '0 2px 4px rgba(0, 54, 102, 0.2)' : isCompleted ? '0 1px 2px rgba(0,0,0,0.04)' : 'none',
-                  transition: 'all 0.15s ease',
-                  whiteSpace: 'nowrap'
+                  boxShadow: isActive ? '0 2px 4px rgba(0, 54, 102, 0.2)' : isCompleted ? '0 1px 2px rgba(0,0,0,0.04)' : 'none'
                 }}
               >
                 <span style={{

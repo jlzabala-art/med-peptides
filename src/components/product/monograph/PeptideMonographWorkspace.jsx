@@ -13,6 +13,7 @@ import ContextualRightSidebar from './ContextualRightSidebar';
 import CoaModal from '../CoaModal';
 import MonographPreviewModal from '../MonographPreviewModal';
 import { triggerHaptic } from '@/utils/haptics';
+import './monographWorkspace.css';
 
 /**
  * PeptideMonographWorkspace
@@ -48,6 +49,9 @@ export default function PeptideMonographWorkspace({
   const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
+  // Active Protocol Context (reactive sync across center workspace & right task panel)
+  const [protocolContext, setProtocolContext] = useState(null);
+
   // Sync tab changes with URL query string without full page reload
   const handleTabChange = (tabId) => {
     triggerHaptic('selection');
@@ -60,11 +64,7 @@ export default function PeptideMonographWorkspace({
   };
 
   return (
-    <div className="pds-monograph-workspace-root" style={{
-      backgroundColor: '#f8fafc',
-      minHeight: '100vh',
-      color: '#0f172a'
-    }}>
+    <div className="pds-monograph-workspace-root">
       {/* 1. Compact Product Identity Header */}
       <PeptideMonographHeader
         product={product}
@@ -91,22 +91,13 @@ export default function PeptideMonographWorkspace({
         protocolCount={associatedProtocols?.length || 3}
       />
 
-      {/* 3. Main Dual-Column Content Grid: Active Tab Workspace + Narrow Contextual Right Panel */}
-      <div style={{
-        maxWidth: '1240px',
-        margin: '1.5rem auto 3rem auto',
-        padding: '0 1.5rem',
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 280px',
-        gap: '1.5rem',
-        alignItems: 'start'
-      }}>
+      {/* 3. Main Dual-Column Content Grid (Single-column on mobile) */}
+      <div className="pds-monograph-main-grid">
         {/* Main Task Area */}
-        <div style={{ minWidth: 0 }}>
+        <div className="pds-monograph-task-area">
           {activeTab === 'overview' && (
             <OverviewTab
               product={product}
-              slug={slug}
               onNavigateToProtocols={() => handleTabChange('protocols')}
             />
           )}
@@ -114,10 +105,10 @@ export default function PeptideMonographWorkspace({
           {activeTab === 'protocols' && (
             <ProtocolWorkspaceTab
               product={product}
-              slug={slug}
               associatedProtocols={associatedProtocols}
               onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
               onAddToCart={onAddToCart}
+              onProtocolChange={setProtocolContext}
             />
           )}
 
@@ -139,22 +130,20 @@ export default function PeptideMonographWorkspace({
           )}
 
           {activeTab === 'references' && (
-            <ReferencesTab
-              product={product}
-              slug={slug}
-            />
+            <ReferencesTab />
           )}
         </div>
 
-        {/* Narrow Contextual Right Panel */}
-        <ContextualRightSidebar
-          activeTab={activeTab}
-          product={product}
-          slug={slug}
-          effectiveBatch={effectiveBatch}
-          onOpenCoaModal={() => setIsCoaModalOpen(true)}
-          onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
-        />
+        {/* Contextual Right Panel (Adapts full-width on mobile below main task) */}
+        <aside className="pds-monograph-sidebar-wrapper">
+          <ContextualRightSidebar
+            activeTab={activeTab}
+            slug={slug}
+            effectiveBatch={effectiveBatch}
+            protocolContext={protocolContext}
+            onOpenCoaModal={() => setIsCoaModalOpen(true)}
+          />
+        </aside>
       </div>
 
       {/* ── Institutional Modals ── */}

@@ -1,0 +1,264 @@
+/**
+ * monographWorkspace.css
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Mobile-First Responsive Stylesheet for Clinical Monograph Workspace.
+ * Adheres strictly to:
+ * - Golden Rule #23 (Mobile-First UX Compatibility, min 44x44px touch targets).
+ * - Google Cloud Console restrained typography and component density.
+ * - WCAG 2.2 AA Contrast & Zero horizontal window scroll.
+ */
+
+/* ── 1. Root Workspace Shell ── */
+.pds-monograph-workspace-root {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  color: #0f172a;
+  padding-bottom: 6.5rem; /* Protection against bottom floating action bars */
+  box-sizing: border-box;
+}
+
+/* ── 2. Top-Level Tab Bar (Sticky, Horizontally Scrollable on Mobile) ── */
+.pds-gcp-tab-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #cbd5e1;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.pds-gcp-tab-scroll {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  ms-overflow-style: none;
+  width: 100%;
+}
+
+.pds-gcp-tab-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.pds-gcp-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.85rem 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 44px;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
+  outline: none;
+  letter-spacing: 0.01em;
+}
+
+.pds-gcp-tab-btn.is-active {
+  font-weight: 800;
+  color: #003666;
+  border-bottom: 2.5px solid #003666;
+}
+
+.pds-gcp-tab-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+/* ── 3. Main Workspace Grid Layout ── */
+.pds-monograph-main-grid {
+  max-width: 1240px;
+  margin: 1.5rem auto 3rem auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 1.5rem;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+.pds-monograph-task-area {
+  min-width: 0;
+  width: 100%;
+}
+
+.pds-monograph-sidebar-wrapper {
+  width: 100%;
+  max-width: 280px;
+}
+
+/* ── 4. Protocol Workspace Grid (Picker + Stepper) ── */
+.pds-protocol-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+.pds-protocol-stepper-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  background: #f8fafc;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.pds-protocol-stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.55rem 0.4rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* ── 5. Responsive Breakpoints: Tablet (< 1024px) ── */
+@media (max-width: 1023px) {
+  .pds-monograph-main-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 1rem;
+    margin: 1rem auto 5rem auto;
+  }
+
+  .pds-monograph-sidebar-wrapper {
+    max-width: 100%;
+  }
+
+  .pds-contextual-sidebar {
+    max-width: 100% !important;
+  }
+
+  .pds-protocol-workspace-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* ── 6. Responsive Breakpoints: Mobile Phones (< 768px) ── */
+@media (max-width: 767px) {
+  .pds-monograph-workspace-root {
+    padding-bottom: 7rem;
+  }
+
+  .pds-gcp-tab-bar {
+    padding: 0 0.5rem;
+  }
+
+  .pds-gcp-tab-btn {
+    padding: 0.75rem 0.65rem;
+    font-size: 0.78rem;
+    gap: 6px;
+  }
+
+  .pds-monograph-main-grid {
+    padding: 0 0.75rem;
+    margin-top: 0.75rem;
+    margin-bottom: 6rem;
+    gap: 1rem;
+  }
+
+  /* Header adjustments */
+  .pds-monograph-header-root {
+    padding: 1rem 0.75rem !important;
+  }
+
+  .pds-header-title-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .pds-header-actions-row {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .pds-header-actions-row button {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  /* Stepper on mobile: scrollable touch bar */
+  .pds-protocol-stepper-container {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .pds-protocol-stepper-btn {
+    flex: 1 0 auto !important;
+    min-width: max-content !important;
+    padding: 0.55rem 0.85rem !important;
+  }
+
+  /* Form & Parameters Grids */
+  .pds-auto-grid-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pds-quality-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Section Padding */
+  .pds-card-section {
+    padding: 1rem 0.85rem !important;
+  }
+
+  /* Badge and long-text wrapping */
+  .pds-wrap-badge {
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
+  }
+}
+
+/* ── 7. Extra Small Screens (< 420px) ── */
+@media (max-width: 419px) {
+  .pds-quality-metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pds-gcp-tab-btn {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.74rem;
+  }
+}

@@ -64,7 +64,7 @@ export default function PrecisionSyringeVisualizer({
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem 1rem' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
             <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Target dose:</span>
             <strong style={{ fontSize: '0.90rem', color: '#0f172a', fontWeight: 800 }}>{targetDoseMg} mg</strong>

@@ -31,6 +31,7 @@ export default function ContextualRightSidebar({
   activeTab = 'overview',
   slug = 'pt-141',
   effectiveBatch = 'AS-LOT-PT05-2609',
+  protocolContext = null,
   onOpenCoaModal
 }) {
   const pageUrl = `https://med-peptides.com/p/${slug}`;
@@ -128,18 +129,22 @@ export default function ContextualRightSidebar({
                   Protocol Focus
                 </span>
                 <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666', marginTop: '2px' }}>
-                  On-Demand Libido Enhancement
+                  {protocolContext?.activeProtocol?.name || 'On-Demand Libido Enhancement'}
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                 <div style={{ background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: '0.64rem', color: '#64748b' }}>Duration:</span>
-                  <strong style={{ display: 'block', fontSize: '0.80rem', color: '#003666' }}>4 Weeks</strong>
+                  <strong style={{ display: 'block', fontSize: '0.80rem', color: '#003666' }}>
+                    {protocolContext?.physicianDurationWeeks || protocolContext?.activeProtocol?.durationWeeks || 4} Weeks
+                  </strong>
                 </div>
                 <div style={{ background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '0.64rem', color: '#64748b' }}>Active Phase:</span>
-                  <strong style={{ display: 'block', fontSize: '0.80rem', color: '#0284c7' }}>Phase 1 of 1</strong>
+                  <span style={{ fontSize: '0.64rem', color: '#64748b' }}>Workflow:</span>
+                  <strong style={{ display: 'block', fontSize: '0.80rem', color: '#0284c7' }}>
+                    Step {protocolContext?.currentStep || 1} of 5
+                  </strong>
                 </div>
               </div>
 
@@ -148,7 +153,9 @@ export default function ContextualRightSidebar({
                   Calculated API Requirement
                 </span>
                 <div style={{ fontSize: '0.96rem', fontWeight: 850, color: '#1e3a8a', fontFamily: 'monospace' }}>
-                  10.0 mg (1 × 10mg vial)
+                  {protocolContext?.procCalc?.procurementSummary 
+                    ? `${protocolContext.procCalc.totalApiRequiredMg} mg (${protocolContext.procCalc.procurementSummary})`
+                    : '10.0 mg (1 × 10mg vial)'}
                 </div>
               </div>
             </>
@@ -162,18 +169,22 @@ export default function ContextualRightSidebar({
                   Selected Presentation
                 </span>
                 <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#003666', marginTop: '2px' }}>
-                  10 mg Lyophilized SubQ Vial
+                  {protocolContext?.selectedVialStrength ? `${protocolContext.selectedVialStrength} mg Lyophilized SubQ Vial` : '10 mg Lyophilized SubQ Vial'}
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                 <div style={{ background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: '0.64rem', color: '#64748b' }}>Concentration:</span>
-                  <strong style={{ display: 'block', fontSize: '0.82rem', color: '#166534', fontFamily: 'monospace' }}>5.0 mg/mL</strong>
+                  <strong style={{ display: 'block', fontSize: '0.82rem', color: '#166534', fontFamily: 'monospace' }}>
+                    {protocolContext?.reconCalc?.concentrationMgMl ? `${protocolContext.reconCalc.concentrationMgMl} mg/mL` : '5.0 mg/mL'}
+                  </strong>
                 </div>
                 <div style={{ background: '#f8fafc', padding: '6px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: '0.64rem', color: '#64748b' }}>Target Dose:</span>
-                  <strong style={{ display: 'block', fontSize: '0.82rem', color: '#003666' }}>1.25 mg</strong>
+                  <strong style={{ display: 'block', fontSize: '0.82rem', color: '#003666' }}>
+                    {protocolContext?.physicianDoseMg || protocolContext?.reconCalc?.targetDoseMg || 1.25} mg
+                  </strong>
                 </div>
               </div>
 
@@ -182,7 +193,9 @@ export default function ContextualRightSidebar({
                   U-100 Syringe Draw
                 </span>
                 <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#15803d', fontFamily: 'monospace' }}>
-                  25 Units (0.25 mL)
+                  {protocolContext?.reconCalc?.syringeUnitsU100 != null
+                    ? `${protocolContext.reconCalc.syringeUnitsU100} Units (${protocolContext.reconCalc.injectionVolumeMl} mL)`
+                    : '25 Units (0.25 mL)'}
                 </div>
               </div>
             </>
