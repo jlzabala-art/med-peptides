@@ -82,6 +82,7 @@ import PublicPageShell from '@/components/shared/public/PublicPageShell';
 import PublicPageHero from '@/components/shared/public/PublicPageHero';
 import PublicSegmentedControl from '@/components/shared/public/PublicSegmentedControl';
 import ProductDetailSidebar from './ProductDetailSidebar';
+import PeptideMonographWorkspace from './monograph/PeptideMonographWorkspace';
 import { Mail, Lock } from 'lucide-react';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import { prefetchPdf } from '../../utils/pdfPrefetch';
@@ -516,6 +517,10 @@ export default function PublicDatasheetView({
       pSlug.includes('strengthening-conditioner')
     );
   }, [product, slug]);
+
+  const isPeptideCompound = useMemo(() => {
+    return !isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isSolventProduct;
+  }, [isCorporateService, isDiagnosticKit, isCosmeticProduct, isSolventProduct]);
 
   const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : 'Clinical Peptide')))));
   const category = isCosmeticProduct
@@ -1406,8 +1411,17 @@ export default function PublicDatasheetView({
         ]}
       />
 
-      {/* ── Standardized Clinical Page Shell ── */}
-      <PublicPageShell>
+      {/* ── Standardized Clinical Page Shell / Peptide Monograph Workspace ── */}
+      {isPeptideCompound ? (
+        <PeptideMonographWorkspace
+          product={product}
+          slug={slug}
+          effectiveBatch={effectiveBatchCode}
+          associatedProtocols={associatedProtocols}
+          baseUrl={baseUrl}
+        />
+      ) : (
+        <PublicPageShell>
         {/* Universal Clinical / Institutional Page Hero */}
         <div id="overview">
           <PublicPageHero
@@ -2888,6 +2902,7 @@ export default function PublicDatasheetView({
           />
         </div>
       </PublicPageShell>
+      )}
 
       {/* Dynamic Flexible Share Monograph Drawer */}
       <ShareProductMonographDrawer

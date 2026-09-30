@@ -1,0 +1,472 @@
+Yes. Looking at the full sequence, the problem is not that information is missing; it’s that product data, protocol selection, dose calculation, reconstitution, administration, procurement, and QC are all competing at the same visual level.
+
+I would reorganize it around one simple mental model:
+
+Understand the peptide → Choose a protocol → Configure treatment → Prepare/administer → Verify quality
+
+The biggest change I’d make is to stop showing the protocol simulator as another huge section inside the monograph. Once the physician selects a protocol, Atlas should switch into a focused protocol workspace, while the product monograph remains available as reference. Also, values such as strength, concentration, BAC volume, dose, units, vial yield, and storage should each have one authoritative location and be referenced elsewhere rather than repeatedly displayed.
+
+One important correction: I would also remove a global “FDA Approved” badge from PT-141 unless the exact product/presentation shown is itself FDA-approved. The page can accurately say that bremelanotide has an FDA-approved reference product (Vyleesi), but that is different from implying that the displayed compounded/research vial is FDA-approved.
+
+Here is the prompt I would give Antigravity:
+
+REDESIGN TASK — ATLAS PEPTIDE MONOGRAPH + CLINICAL PROTOCOL WORKFLOW
+Redesign the existing Atlas peptide detail page and protocol workflow.
+The current page contains valuable clinical, pharmaceutical, analytical, dosing, reconstitution, procurement, and QC information, but the UX has become too dense and repetitive.
+The primary problem is INFORMATION ARCHITECTURE, not visual styling.
+The redesign must make the physician's workflow immediately understandable:
+
+1. Understand the peptide
+2. Select the appropriate clinical protocol
+3. Configure the treatment
+4. Review calculated requirements
+5. Prepare / administer
+6. Verify product and batch quality
+Do not simply restyle the existing page.
+Reorganize the entire information architecture.
+DESIGN SYSTEM
+Use Google Cloud Console UX principles as the main design reference.
+The interface should feel like a modern Google Cloud healthcare workspace:
+
+- strong information hierarchy
+- restrained use of color
+- compact but highly readable data density
+- progressive disclosure
+- contextual side panels
+- clear primary vs secondary actions
+- cards only when they represent meaningful functional groups
+- avoid decorative cards inside cards
+- avoid excessive badges
+- avoid repeating the same information
+- consistent spacing and typography
+- accessible contrast
+- WCAG 2.2 AA
+- responsive desktop/tablet behavior
+- predictable navigation
+- persistent context during complex workflows
+Think Google Cloud Console rather than a marketing website.
+
+--------------------------------------------------
+
+1. PRODUCT HEADER
+
+--------------------------------------------------
+
+Create a compact product identity header.
+Example:
+PT-141
+Bremelanotide
+Peptide • Clinical monograph
+Below this show only essential regulatory / quality metadata.
+Do NOT use "FDA Approved" as a generic badge for the peptide or supplied vial unless that exact product is FDA approved.
+Instead show:
+FDA reference product available
+Vyleesi® (bremelanotide)
+FDA approved 2019
+Then show separately:
+Available strengths: 5 mg | 10 mg | 20 mg
+Presentation: Lyophilized vial
+Verified purity: ≥99%
+Supplier / laboratory: Lotusland
+Latest verified batch: AS-LOT-PT05-2609
+Use small metadata chips rather than large promotional badges
+--------------------------------------------------
+
+2. TOP-LEVEL NAVIGATION
+
+--------------------------------------------------
+
+Replace the extremely long single page with five logical tabs:
+OVERVIEW
+PROTOCOLS
+PREPARATION & ADMINISTRATION
+QUALITY & BATCH
+REFERENCES
+The user must always know which context they are in.
+Do not duplicate information between tabs
+--------------------------------------------------
+
+3. OVERVIEW
+
+--------------------------------------------------
+This should answer:
+"What is this peptide and what presentations are available?"
+Include:
+A. Clinical identity
+
+- Generic name
+- Target/receptor
+- pharmacological summary
+- FDA reference formulation if applicable
+B. Available presentations
+Use ONE compact table:
+Strength | Format | Recommended Diluent | Resulting Concentration | Route
+5 mg
+10 mg
+20 mg
+Do not repeat this information elsewhere unless dynamically needed by the protocol calculator.
+C. Key clinical considerations
+Keep concise.
+Detailed scientific information belongs under References.
+
+--------------------------------------------------
+1. PROTOCOLS — MAIN CLINICAL WORKSPACE
+
+--------------------------------------------------
+
+This is the most important redesign.
+The existing protocol information should NOT appear as scattered cards in the sidebar plus another simulator lower on the page.
+Create a dedicated Protocols workspace.
+LEFT COLUMN:
+Available protocols
+Example:
+On-Demand Libido Enhancement
+4 weeks
+Libido & Arousal
+4 weeks
+Sexual Health Protocol
+12 weeks
+Selecting a protocol loads it into the main workspace.
+MAIN AREA:
+Protocol title
+PT-141 — On-Demand Libido Enhancement
+Then show a horizontal workflow:
+1 Protocol
+2 Treatment Plan
+3 Vials
+4 Preparation
+5 Review
+The physician should always know where they are
+--------------------------------------------------
+
+5. STEP 1 — PROTOCOL
+
+--------------------------------------------------
+
+Show only clinically relevant protocol information:
+Clinical objective
+Duration
+Administration route
+Protocol phases
+Target dose(s)
+Frequency
+Do NOT show BAC water or syringe units here.
+This step defines WHAT treatment is intended
+--------------------------------------------------
+
+6. STEP 2 — TREATMENT PLAN
+
+--------------------------------------------------
+
+Display the clinical schedule visually.
+Example:
+Phase 1
+Weeks 1–4
+1.25 mg
+[frequency]
+Phase 2
+Weeks 5–8
+2.5 mg
+[frequency]
+Phase 3
+Weeks 9–12
+3.75 mg
+[frequency]
+Allow physician-authorized editable parameters.
+Any modified value must clearly show:
+Protocol default
+Physician modified
+Do not silently overwrite clinical defaults
+--------------------------------------------------
+
+7. STEP 3 — VIAL CALCULATION
+
+--------------------------------------------------
+
+Atlas now translates the clinical protocol into product requirements.
+Show:
+Total API required
+Recommended vial strengths
+Number of vials
+Number of administrations
+Expected unused quantity if relevant
+Example:
+12-week treatment
+Total API required: 30 mg
+Recommended procurement:
+1 × 5 mg vial
+1 × 10 mg vial
+1 × 20 mg vial
+or whatever calculation is correct based on the protocol.
+Show the reasoning transparently.
+Primary CTA:
+Add treatment requirements to quotation
+Secondary:
+Copy procurement list
+Do not mix purchasing controls with reconstitution instructions
+--------------------------------------------------
+
+8. STEP 4 — PREPARATION
+
+--------------------------------------------------
+Only here should Atlas introduce:
+BAC water
+final concentration
+syringe units
+reconstitution instructions
+needle information
+storage
+beyond-use considerations
+Use a two-column layout:
+LEFT:
+Configuration
+Vial strength
+BAC volume
+Target dose
+RIGHT:
+Calculated administration
+Concentration
+Injection volume
+U-100 units
+Doses per vial
+Example:
+5 mg vial
+- 1.0 mL BAC
+Concentration
+5 mg/mL
+Target dose
+1.25 mg
+Draw
+0.25 mL
+25 U
+Doses per vial
+4
+These values should come from ONE calculation engine.
+Never independently hard-code the same values in several components.
+
+--------------------------------------------------
+1. SYRINGE VISUALIZATION
+
+--------------------------------------------------
+
+Keep the U-100 syringe visualization because it is useful.
+However, make it subordinate to the calculated dose.
+Display:
+Target dose: 1.25 mg
+Volume: 0.25 mL
+U-100: 25 units
+Then the syringe visualization.
+Do not repeat these values above, below and inside several cards
+--------------------------------------------------
+ 1. ADMINISTRATION GUIDE
+
+--------------------------------------------------
+
+Use a concise stepper:
+1 Disinfect
+2 Reconstitute
+3 Dissolve gently
+4 Draw dose
+5 Administer
+6 Store
+Each step can expand for detailed instructions.
+Collapsed state should remain extremely compact.
+This follows progressive disclosure.
+Do not show every instructional paragraph by default
+--------------------------------------------------
+ 1. REVIEW
+
+--------------------------------------------------
+
+Create one final treatment summary.
+Example:
+PT-141 / Bremelanotide
+Protocol
+On-Demand Libido Enhancement
+Duration
+4 weeks
+Dose
+1.25 mg per administration
+Presentation
+5 mg vial
+Reconstitution
+1.0 mL BAC
+Concentration
+5 mg/mL
+Per administration
+0.25 mL / 25 U
+Vial yield
+4 administrations
+Vials required
+1
+Then:
+[Add to Patient Protocol]
+[Request Quote]
+[Print Clinical Summary]
+This should be the only consolidated summary
+--------------------------------------------------
+ 1. QUALITY & BATCH
+
+--------------------------------------------------
+
+Move ALL batch-specific analytical information here.
+Example:
+Current verified batch
+AS-LOT-PT05-2609
+Purity
+99.4%
+Identity
+LC-MS confirmed
+Molecular mass
+1025.16 Da
+CAS
+189691-06-3
+Then provide:
+View COA
+Download COA
+Analytical methods
+Batch history
+Do not mix batch QC information with clinical dosing
+--------------------------------------------------
+ 1. REFERENCES
+
+--------------------------------------------------
+
+Move detailed scientific and regulatory content here:
+FDA reference products
+pharmacology
+mechanism
+literature
+clinical studies
+regulatory references
+pharmacopeial references
+The physician can access this when needed without cluttering the clinical workflow
+--------------------------------------------------
+ 1. RIGHT SIDEBAR
+
+--------------------------------------------------
+
+Remove the current large permanent sidebar containing multiple protocol cards and FDA-approved peptide recommendations.
+It competes with the main clinical workflow.
+Replace it with a narrow contextual panel.
+When browsing Overview:
+Quick facts
+Available presentations
+When configuring Protocol:
+Protocol summary
+Duration
+Current phase
+Calculated API requirement
+When preparing:
+Current vial
+Concentration
+Dose
+Units
+When viewing Quality:
+Current batch
+COA status
+The sidebar must always reflect the CURRENT TASK
+--------------------------------------------------
+ 1. REMOVE DUPLICATION
+
+--------------------------------------------------
+
+Audit the entire existing PT-141 implementation.
+Create a single source of truth for:
+product identity
+available strengths
+presentation
+BAC volume
+concentration
+target dose
+injection volume
+U-100 units
+vial yield
+number of vials
+storage
+batch ID
+purity
+analytical results
+A value may be REFERENCED elsewhere but should not be independently defined in multiple UI components.
+If the underlying value changes, every dependent screen must update automatically
+--------------------------------------------------
+ 1. VISUAL HIERARCHY
+
+--------------------------------------------------
+
+Use three information levels:
+LEVEL 1 — DECISION
+What does the physician need to decide now?
+LEVEL 2 — RESULT
+What did Atlas calculate or recommend based on that decision?
+LEVEL 3 — EVIDENCE
+What scientific, analytical or regulatory information supports it?
+Never present all three levels with equal visual weight
+--------------------------------------------------
+ 1. CLINICAL SAFETY
+
+--------------------------------------------------
+
+Clearly separate:
+REFERENCE INFORMATION
+PROTOCOL DEFAULT
+PHYSICIAN DECISION
+CALCULATED RESULT
+Use labels where appropriate.
+Example:
+Protocol reference dose
+1.25 mg
+Physician-selected dose
+1.25 mg
+Calculated draw
+25 U
+Never visually imply that an automated calculation is itself a medical prescription.
+Keep the prescriber responsibility notice, but make it concise and contextual rather than a large legal block dominating the page
+--------------------------------------------------
+ 1. GOOGLE CLOUD UX CONFORMANCE
+
+--------------------------------------------------
+
+Perform a final UX conformance review against Google Cloud-style interaction principles.
+Specifically check:
+Information hierarchy
+Navigation predictability
+Progressive disclosure
+Task-oriented workflows
+Data density
+Accessibility
+Keyboard navigation
+Focus states
+Error prevention
+Inline validation
+Loading states
+Empty states
+Responsive behavior
+Consistency of controls
+Destructive action confirmation
+Clear primary action per screen
+Avoid excessive gradients, glowing elements, oversized badges and unnecessary decorative UI.
+The product should look like a serious clinical SaaS platform built using the clarity and operational density of Google Cloud Console
+--------------------------------------------------
+
+FINAL DELIVERABLE
+--------------------------------------------------
+
+First create the redesigned PT-141 page using the existing underlying data.
+Do NOT remove clinically relevant information.
+Reorganize it.
+The final architecture should allow a physician to understand within approximately 10 seconds:
+
+1. What PT-141 is
+2. What presentations are available
+3. Which protocols exist
+4. Which protocol is currently selected
+5. What dose is being configured
+6. How many vials are required
+7. How the selected vial should be prepared
+8. What volume/units correspond to the dose
+9. Which batch supports the supplied product
+10. Where the scientific/regulatory evidence can be found
+Prioritize clinical clarity over information volume.
+
+I would make one additional architectural change in Atlas: “Product” and “Protocol” should be separate objects in the system. PT-141 is the product; “PT-141 On-Demand Libido Enhancement – 4 weeks” is a protocol that uses that product. Then a third object, Patient Treatment, is the physician-specific application of that protocol. That distinction will make the whole platform much cleaner later when one protocol contains several peptides or the same peptide appears in several protocols.
