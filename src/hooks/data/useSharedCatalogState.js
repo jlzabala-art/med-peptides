@@ -41,7 +41,8 @@ function syncFiltersToUrl(filters) {
     const params = new URLSearchParams(window.location.search);
     const set = (k, v, def) => v && v !== def ? params.set(k, v) : params.delete(k);
     set('q',     filters.searchQuery,  '');
-    set('goals', filters.selectedGoals.join(','), '');
+    set('g',     filters.selectedGoals.join(','), '');
+    params.delete('goals');
     set('cat',   filters.selectedCategories ? filters.selectedCategories.join(',') : '', '');
     set('fmt',   filters.packagingMode, 'all');
     set('dose',  filters.dosageFilter,  'all');
@@ -173,7 +174,7 @@ export function useSharedCatalogState({
   const [activeTab,     setActiveTab]     = useState(isProtocolCatalog ? 'protocols' : 'products');
   const [searchQuery,   setSearchQuery]   = useState(() => getUrlParam('q', ''));
   const [selectedGoals, setSelectedGoals] = useState(() => {
-    const raw = getUrlParam('goals', '');
+    const raw = getUrlParam('g', '') || getUrlParam('goals', '');
     if (!raw) return [];
     return raw.split(',').filter(g => VALID_GOALS.has(g));
   });
@@ -424,27 +425,41 @@ export function useSharedCatalogState({
 
   // ── Cart mutations ────────────────────────────────────────────────────────
   const updateQuantity = useCallback((variant, product, delta) => {
+    const targetVariantId = variant?.id || variant?.variantId;
+    if (!targetVariantId) return;
+
     setCart(prev => {
-      const current = prev[variant.id]?.quantity || 0;
+      const current = prev[targetVariantId]?.quantity || 0;
       const next    = Math.max(0, current + delta);
       if (next === 0) {
         const copy = { ...prev };
-        delete copy[variant.id];
+        delete copy[targetVariantId];
         return copy;
       }
       return {
         ...prev,
-        [variant.id]: {
-          id:              variant.id,
-          productName:     product.canonicalName,
-          dosage:          variant.dosage,
-          presentation:    variant.presentation,
-          price:           variant.price > 0 ? variant.price : 0,
-          tier10UnitPrice: variant.tier10UnitPrice > 0 ? variant.tier10UnitPrice : null,
-          kitPrice:        variant.kitPrice > 0 ? variant.kitPrice : null,
+        [targetVariantId]: {
+          id:              targetVariantId,
+          variantId:       targetVariantId,
+          productId:       product?.id || prev[targetVariantId]?.productId || null,
+          productName:     product?.canonicalName || product?.name || prev[targetVariantId]?.productName || 'Item',
+          dosage:          variant.dosage || prev[targetVariantId]?.dosage || '',
+          presentation:    variant.presentation || prev[targetVariantId]?.presentation || 'vials',
+          price:           variant.price > 0 ? variant.price : (prev[targetVariantId]?.price || 0),
+          tier10UnitPrice: variant.tier10UnitPrice > 0 ? variant.tier10UnitPrice : (prev[targetVariantId]?.tier10UnitPrice || null),
+          kitPrice:        variant.kitPrice > 0 ? variant.kitPrice : (prev[targetVariantId]?.kitPrice || null),
           quantity:        next,
         },
       };
+    });
+  }, []);
+
+  const removeFromCart = useCallback((variantId) => {
+    if (!variantId) return;
+    setCart(prev => {
+      const copy = { ...prev };
+      delete copy[variantId];
+      return copy;
     });
   }, []);
 
@@ -808,6 +823,7 @@ export function useSharedCatalogState({
     grandTotal,
     getItemEffectiveUnitPrice,
     updateQuantity,
+    removeFromCart,
     clearCart,
 
     // Filters

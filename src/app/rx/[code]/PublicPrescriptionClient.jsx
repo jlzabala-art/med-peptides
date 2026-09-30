@@ -76,12 +76,12 @@ export default function PublicPrescriptionClient({ rx }) {
   const patient = rx.patient || {};
   const patientName = patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
-  const doctorName = rx.doctorName || 'Dr. Hanieh Erdmann';
-  const clinic = rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : 'DHA Licensed Clinical Practice';
-  const doctorSpecialty = rx.doctorTitle || (isEs ? 'Médica Consultora Dermatología' : 'Physician Consultant Dermatology');
-  const doctorAddress = rx.doctorOfficeAddress || 'Index Tower 5709, Dubai (+971 50 354 6123)';
-  const doctorPhone = rx.doctorPhone || '+971 50 354 6123';
-  const doctorLicense = rx.doctorLicense || 'DHA-00013060-006';
+  const doctorName = rx.doctor?.name || rx.doctorName || (isEs ? 'Dr. Miguel Ángel López Aranda' : 'Dr. Miguel Angel Lopez Aranda');
+  const clinic = rx.doctor?.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico & Farmacia Magistral' : 'Licensed Clinical Practice'));
+  const doctorSpecialty = rx.doctor?.specialty || rx.doctorTitle || (isEs ? 'Médico Colegiado' : 'Physician Specialist');
+  const doctorAddress = rx.doctor?.address || rx.doctorOfficeAddress || rx.clinicAddress || '';
+  const doctorPhone = rx.doctor?.phone || rx.doctorPhone || '';
+  const doctorLicense = rx.doctor?.license || rx.doctorLicense || rx.doctorLicenseNumber || (rx.doctor?.licenseNumber || '');
 
   // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™)
   const genomicsData = detectFagronGenomicsTest(rx);
@@ -230,91 +230,142 @@ export default function PublicPrescriptionClient({ rx }) {
   ];
 
   // Clinical Prescription APIs & Compounded Formulation (One API per line standard)
-  const prescriptionApis = isEs ? [
-    {
-      id: 'api-1',
-      tag: 'API 1',
-      name: 'Latanoprost Fagron',
-      dosage: '0.005% (50 mcg/mL)',
-      role: 'Análogo de Prostaglandina F2α',
-      indication: 'Inductor Folicular de Fase Anágena',
-      action: 'Prolonga la duración de la fase anágena de crecimiento y reactiva folículos miniaturizados en reposo telógeno.',
-      rationale: 'Recomendación TrichoTest: Alta afinidad y respuesta del receptor folicular PGF2α.'
-    },
-    {
-      id: 'api-2',
-      tag: 'API 2',
-      name: '17-α-Estradiol',
-      dosage: '0.05% (500 mcg/mL)',
-      role: 'Modulador Estrogénico Folicular',
-      indication: 'Inhibidor Tópico de 5α-Reductasa',
-      action: 'Inhibe localmente la enzima 5-alfa reductasa y activa la aromatasa sin absorción hormonal sistémica detectable.',
-      rationale: 'Recomendación TrichoTest: Control de la conversión de testosterona a DHT en la papila dérmica.'
-    },
-    {
-      id: 'api-3',
-      tag: 'API 3',
-      name: 'IGrantine-F1™',
-      dosage: '0.5% (5 mg/mL)',
-      role: 'Complejo de Péptidos Biomiméticos',
-      indication: 'Señalización Wnt/β-Catenina & VEGF',
-      action: 'Estimula la vía canónica Wnt/β-Catenina y la síntesis de factor de crecimiento endotelial vascular (VEGF) en la papila dérmica.',
-      rationale: 'Optimización de microcirculación capilar y proliferación de queratinocitos matriciales.'
-    },
-    {
-      id: 'veh-1',
-      tag: 'VEHÍCULO',
-      isVehicle: true,
-      name: 'TrichoSol™ (Fagron)',
-      dosage: 'c.s.p. 100 mL',
-      role: 'Vehículo Liposomal Hidrofílico Patentado',
-      indication: 'Base Lipídica 100% Libre de Alcohol',
-      action: 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación o dermatitis y maximiza la biodisponibilidad y penetración transdérmica folicular.',
-      rationale: 'Vehículo biocompatible de liberación sostenida patentado por Fagron.'
+  const rawLines = rx.prescriptionLines || rx.items || rx.compounds || [];
+
+  const prescriptionApis = React.useMemo(() => {
+    if (Array.isArray(rawLines) && rawLines.length > 0) {
+      return rawLines.map((line, idx) => {
+        const isVehicle = Boolean(
+          line.isVehicleOrBase || 
+          line._isVehicleOrBase ||
+          line.isVehicle ||
+          line.dosageForm?.toLowerCase().includes('vehicle') ||
+          (line.productName || line.name || '').toLowerCase().includes('trichosol') ||
+          (line.productName || line.name || '').toLowerCase().includes('trichooil') ||
+          (line.productName || line.name || '').toLowerCase().includes('pentravan')
+        );
+
+        const name = line.productName || line.activeIngredient || line.name || (isEs ? `Componente ${idx + 1}` : `Compound Item ${idx + 1}`);
+        const dosage = line.dosage || line.dose || line.strength || line.concentration || '—';
+        const tag = isVehicle ? (isEs ? 'VEHÍCULO' : 'VEHICLE') : `API ${idx + 1}`;
+        
+        const role = line.role || (isVehicle 
+          ? (isEs ? 'Vehículo Magistral Liposomal' : 'Liposomal Compounding Vehicle')
+          : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient'));
+          
+        const indication = line.indication || (isVehicle
+          ? (isEs ? 'Base de Aplicación Transdérmica' : 'Targeted Dermal Carrier')
+          : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'));
+
+        const action = line.instructions || line.action || (isVehicle
+          ? (isEs ? 'Vehículo lipídico 100% libre de alcohol. Optimiza la absorción folicular y evita dermatitis por contacto.' : 'Alcohol-free hydrophilic lipid vehicle engineered for continuous follicular uptake without irritation.')
+          : (isEs ? `Tratamiento formulado a medida según el perfil clínico y farmacogenómico del paciente.` : `Custom compounded active ingredient calibrated to the patient's individual clinical profile.`));
+
+        const rationale = line.rationale || (rx.treatmentProgram 
+          ? (isEs ? `Prescrito bajo protocolo: ${rx.treatmentProgram}` : `Prescribed under program: ${rx.treatmentProgram}`)
+          : (rx.fagron?.testName ? (isEs ? `Selección TrichoTest™ para respuesta folicular óptima` : `TrichoTest™ recommended formulation`) : null));
+
+        return {
+          id: line.id || `api-${idx + 1}`,
+          tag,
+          isVehicle,
+          name,
+          dosage,
+          role,
+          indication,
+          action,
+          rationale
+        };
+      });
     }
-  ] : [
-    {
-      id: 'api-1',
-      tag: 'API 1',
-      name: 'Latanoprost Fagron',
-      dosage: '0.005% (50 mcg/mL)',
-      role: 'Prostaglandin F2α Analogue',
-      indication: 'Follicular Anagen Phase Inducer',
-      action: 'Prolongs the duration of the anagen growth cycle and reactivates dormant miniaturized hair follicles into active protein synthesis.',
-      rationale: 'Fagron TrichoTest Correlation: High PGF2α follicular receptor responsiveness.'
-    },
-    {
-      id: 'api-2',
-      tag: 'API 2',
-      name: '17-α-Estradiol',
-      dosage: '0.05% (500 mcg/mL)',
-      role: 'Follicular Estrogen Modulator',
-      indication: 'Local 5α-Reductase Inhibitor',
-      action: 'Locally inhibits the 5-alpha reductase enzyme and activates aromatase without detectable systemic hormone absorption.',
-      rationale: 'Fagron TrichoTest Correlation: Targeted reduction of testosterone-to-DHT conversion in dermal papilla.'
-    },
-    {
-      id: 'api-3',
-      tag: 'API 3',
-      name: 'IGrantine-F1™',
-      dosage: '0.5% (5 mg/mL)',
-      role: 'Biomimetic Peptide Complex',
-      indication: 'Wnt/β-Catenin Signaling & VEGF Synthesis',
-      action: 'Stimulates the canonical Wnt/β-Catenin signaling pathway and synthesizes Vascular Endothelial Growth Factor (VEGF) in dermal papillae.',
-      rationale: 'Follicular micro-vascularization and matrix keratinocyte proliferation.'
-    },
-    {
-      id: 'veh-1',
-      tag: 'VEHICLE',
-      isVehicle: true,
-      name: 'TrichoSol™ (Fagron)',
-      dosage: 'q.s. 100 mL',
-      role: 'Patented Liposomal Vehicle',
-      indication: '100% Alcohol & Propylene Glycol-Free',
-      action: '100% alcohol and propylene glycol-free hydrophilic lipid carrier. Prevents contact dermatitis and maximizes targeted follicular bioavailability.',
-      rationale: 'Patented Fagron phytocomplex carrier engineered for continuous follicular uptake.'
-    }
-  ];
+
+    // Fallback static demo if no lines are present
+    return isEs ? [
+      {
+        id: 'api-1',
+        tag: 'API 1',
+        name: 'Minoxidil Fagron',
+        dosage: '4 %',
+        role: 'Vasodilatador & Estimulador Folicular',
+        indication: 'Inductor Folicular de Fase Anágena',
+        action: 'Prolonga la duración de la fase anágena de crecimiento y reactiva folículos miniaturizados en reposo telógeno.',
+        rationale: 'Recomendación TrichoTest: Alta afinidad y respuesta del receptor folicular.'
+      },
+      {
+        id: 'api-2',
+        tag: 'API 2',
+        name: 'Espironolactona',
+        dosage: '1 %',
+        role: 'Antiandrógeno Tópico Folicular',
+        indication: 'Inhibidor del Receptor Androgénico',
+        action: 'Bloquea localmente los receptores androgénicos de la papila dérmica sin absorción sistémica detectable.',
+        rationale: 'Recomendación TrichoTest: Control de la sensibilidad androgénica folicular.'
+      },
+      {
+        id: 'api-3',
+        tag: 'API 3',
+        name: 'Arginina',
+        dosage: '1.5 %',
+        role: 'Aminoácido Precursor de Óxido Nítrico',
+        indication: 'Microcirculación & Perfusión Folicular',
+        action: 'Mejora la vascularización periférica de la raíz folicular y estimula la síntesis proteica del bulbo.',
+        rationale: 'Optimización de microcirculación capilar y proliferación de queratinocitos.'
+      },
+      {
+        id: 'veh-1',
+        tag: 'VEHÍCULO',
+        isVehicle: true,
+        name: 'TrichoSol™ (Fagron)',
+        dosage: '100 mL',
+        role: 'Vehículo Liposomal Hidrofílico Patentado',
+        indication: 'Base Lipídica 100% Libre de Alcohol',
+        action: 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación o dermatitis y maximiza la biodisponibilidad y penetración transdérmica folicular.',
+        rationale: 'Vehículo biocompatible de liberación sostenida patentado por Fagron.'
+      }
+    ] : [
+      {
+        id: 'api-1',
+        tag: 'API 1',
+        name: 'Minoxidil Fagron',
+        dosage: '4 %',
+        role: 'Vasodilator & Follicular Stimulator',
+        indication: 'Follicular Anagen Phase Inducer',
+        action: 'Prolongs the duration of the anagen growth cycle and reactivates dormant miniaturized hair follicles.',
+        rationale: 'Fagron TrichoTest Correlation: High follicular receptor responsiveness.'
+      },
+      {
+        id: 'api-2',
+        tag: 'API 2',
+        name: 'Spironolactone',
+        dosage: '1 %',
+        role: 'Topical Androgen Receptor Blocker',
+        indication: 'Local Androgenic Modulation',
+        action: 'Locally blocks androgen receptors in the dermal papilla without detectable systemic hormone absorption.',
+        rationale: 'Fagron TrichoTest Correlation: Targeted reduction of sensitivity in dermal papilla.'
+      },
+      {
+        id: 'api-3',
+        tag: 'API 3',
+        name: 'Arginine',
+        dosage: '1.5 %',
+        role: 'Nitric Oxide Precursor Amino Acid',
+        indication: 'Microvascular Follicular Perfusion',
+        action: 'Enhances peripheral follicular vascular supply and nourishes the dermal bulb.',
+        rationale: 'Follicular micro-vascularization and matrix keratinocyte proliferation.'
+      },
+      {
+        id: 'veh-1',
+        tag: 'VEHICLE',
+        isVehicle: true,
+        name: 'TrichoSol™ (Fagron)',
+        dosage: '100 mL',
+        role: 'Patented Liposomal Vehicle',
+        indication: '100% Alcohol & Propylene Glycol-Free',
+        action: '100% alcohol and propylene glycol-free hydrophilic lipid carrier. Prevents contact dermatitis and maximizes targeted follicular bioavailability.',
+        rationale: 'Patented Fagron phytocomplex carrier engineered for continuous follicular uptake.'
+      }
+    ];
+  }, [rawLines, isEs, rx.treatmentProgram, rx.fagron?.testName]);
 
   const handleCopyLink = async () => {
     try {
@@ -567,22 +618,34 @@ export default function PublicPrescriptionClient({ rx }) {
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Fórmula Magistral Personalizada en TrichoSol™' : 'Custom Compounded Formula in TrichoSol™'}
+                  {rx.treatmentType || (isEs ? 'Fórmula Magistral Personalizada' : 'Custom Compounded Formula')}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  {isEs 
-                    ? 'Recomendada tras Análisis Genético & Tricológico Fagron TrichoTest'
-                    : 'Recommended Following Fagron TrichoTest Genetic & Trichological Assessment'}
+                  {rx.treatmentProgram || rx.fagron?.testName || (isEs 
+                    ? 'Recomendada tras Análisis Genético & Evaluación Médica' 
+                    : 'Recommended Following Clinical & Genetic Assessment')}
                 </p>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                {isEs ? 'N3 = 3 Meses (3x 100ml)' : 'N3 = 3-Month Cycle (3x 100ml)'}
-              </span>
-              <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                {isEs ? 'Vehículo Sin Alcohol' : 'Alcohol-Free Lipid Vehicle'}
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {rx.volume && (
+                <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  {rx.volume}
+                </span>
+              )}
+              {rx.duration && (
+                <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  {rx.duration}
+                </span>
+              )}
+              {rx.fagron?.boxId && (
+                <span style={{ background: '#fdf4ff', color: '#9333ea', border: '1px solid #f0abfc', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                  Muestra: {rx.fagron.boxId}
+                </span>
+              )}
+              <span style={{ background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                {isEs ? 'Vehículo Sin Alcohol' : 'Alcohol-Free Vehicle'}
               </span>
             </div>
           </div>
@@ -714,9 +777,30 @@ export default function PublicPrescriptionClient({ rx }) {
               fontSize: '0.8rem',
               fontWeight: 800
             }}>
-              {isEs ? '1.0 ml Nocturno Diario' : '1.0 ml Nightly Daily'}
+              {rx.posology ? (isEs ? 'Pauta Médica Personalizada' : 'Custom Physician Regimen') : (isEs ? '1.0 ml Nocturno Diario' : '1.0 ml Nightly Daily')}
             </div>
           </div>
+
+          {/* Prominent Physician Prescribed Direction Callout */}
+          {rx.posology && (
+            <div style={{
+              background: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderLeft: '4px solid #0284c7',
+              borderRadius: '12px',
+              padding: '1.1rem 1.35rem',
+              marginBottom: '1.25rem',
+              boxShadow: '0 2px 6px rgba(2, 132, 199, 0.04)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#0369a1', fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
+                <Stethoscope size={15} />
+                <span>{isEs ? 'Instrucciones Específicas del Médico Prescriptor:' : 'Prescribing Physician Clinical Directions:'}</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.96rem', color: '#0f172a', fontWeight: 600, lineHeight: 1.55 }}>
+                "{rx.posology}"
+              </p>
+            </div>
+          )}
 
           {/* Unified Clinical Posology Pathway (100% Full-Width Rows, Zero Empty Spaces) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%', marginBottom: '1.25rem' }}>

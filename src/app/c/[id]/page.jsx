@@ -11,8 +11,9 @@ export const revalidate = 60; // 60-second ISR edge cache for shared catalogs
  * Uses lightweight (<180KB) og-catalog.png with crisp Med-Peptides institutional branding.
  * STRICT: Zero mention of "lotusland" or "regenpept".
  */
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
   const id = resolvedParams?.id;
 
   try {
@@ -69,7 +70,7 @@ export async function generateMetadata({ params }) {
     console.warn('[c/[id]/generateMetadata] Fallback to sharedGenerateMetadata:', err.message);
   }
 
-  return sharedGenerateMetadata({ params: { token: resolvedParams?.id } });
+  return sharedGenerateMetadata({ params: { token: resolvedParams?.id }, searchParams: resolvedSearch });
 }
 
 /**

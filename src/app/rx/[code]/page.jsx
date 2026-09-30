@@ -23,31 +23,61 @@ export function invalidateRxCache(code) {
 // ⚡ Per-Request React Server Component memoization
 const getPrescriptionData = cache(async (code) => {
   if (!adminDb || !code) return null;
-  const cleanCode = decodeURIComponent(code).trim().toUpperCase();
+  const rawCode = decodeURIComponent(code).trim();
+  const upperCode = rawCode.toUpperCase();
 
   // 1. RAM Cache
-  const cached = RX_RAM_CACHE.get(cleanCode);
+  const cached = RX_RAM_CACHE.get(upperCode) || RX_RAM_CACHE.get(rawCode);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.data;
   }
 
   let rxDoc = null;
 
-  // 2. Direct ID
-  const docSnap = await adminDb.collection('prescriptions').doc(cleanCode).get().catch(() => null);
+  // 2. Direct ID (try rawCode first to preserve Firestore's case-sensitive doc ID, then upperCode)
+  let docSnap = await adminDb.collection('prescriptions').doc(rawCode).get().catch(() => null);
+  if (!docSnap?.exists && rawCode !== upperCode) {
+    docSnap = await adminDb.collection('prescriptions').doc(upperCode).get().catch(() => null);
+  }
   if (docSnap && docSnap.exists) {
     rxDoc = { id: docSnap.id, ...docSnap.data() };
   }
 
-  // 3. Prescription Number / Order ID lookup
+  // 3. Prescription Number lookup
   if (!rxDoc) {
+    const codesToSearch = Array.from(new Set([upperCode, rawCode]));
     const qSnap = await adminDb.collection('prescriptions')
-      .where('prescriptionNumber', '==', cleanCode)
+      .where('prescriptionNumber', 'in', codesToSearch)
       .limit(1)
       .get()
       .catch(() => null);
     if (qSnap && !qSnap.empty) {
       rxDoc = { id: qSnap.docs[0].id, ...qSnap.docs[0].data() };
+    }
+  }
+
+  // 4. Fallback search by prescriptionCode or code
+  if (!rxDoc) {
+    const codesToSearch = Array.from(new Set([upperCode, rawCode]));
+    const qSnap2 = await adminDb.collection('prescriptions')
+      .where('prescriptionCode', 'in', codesToSearch)
+      .limit(1)
+      .get()
+      .catch(() => null);
+    if (qSnap2 && !qSnap2.empty) {
+      rxDoc = { id: qSnap2.docs[0].id, ...qSnap2.docs[0].data() };
+    }
+  }
+
+  if (!rxDoc) {
+    const codesToSearch = Array.from(new Set([upperCode, rawCode]));
+    const qSnap3 = await adminDb.collection('prescriptions')
+      .where('code', 'in', codesToSearch)
+      .limit(1)
+      .get()
+      .catch(() => null);
+    if (qSnap3 && !qSnap3.empty) {
+      rxDoc = { id: qSnap3.docs[0].id, ...qSnap3.docs[0].data() };
     }
   }
 

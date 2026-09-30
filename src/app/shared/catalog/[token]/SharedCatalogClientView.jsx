@@ -168,6 +168,7 @@ export default function SharedCatalogClientView({
     cartTotalPrice,
     grandTotal,
     updateQuantity,
+    removeFromCart,
     clearCart,
     categories,
     filteredProducts,
@@ -424,22 +425,54 @@ export default function SharedCatalogClientView({
     return () => clearTimeout(timer);
   }, [cartItems, catalogMeta?.catalogId]);
 
+  // Human-readable summary of active filters
+  const activeFilterLabel = React.useMemo(() => {
+    const parts = [];
+    if (selectedGoals?.length > 0) {
+      const GOAL_LABELS = {
+        fat_loss: 'Weight Management',
+        tissue_repair: 'Tissue Repair',
+        anti_aging: 'Longevity & Anti-Aging',
+        cognitive: 'Cognitive & Neuro',
+        muscle_growth: 'Hypertrophy & Growth',
+        libido_wellness: 'Hormonal Wellness',
+        general_health: 'General Health',
+        supplies: 'Solvents & Supplies'
+      };
+      parts.push(selectedGoals.map(g => GOAL_LABELS[g] || g.replace(/_/g, ' ')).join(', '));
+    }
+    if (fdaFilter && fdaFilter !== 'all') parts.push('FDA Approved');
+    if (packagingMode && packagingMode !== 'all') parts.push(packagingMode);
+    if (dosageFilter && dosageFilter !== 'all') parts.push(dosageFilter);
+    if (searchQuery && searchQuery.trim()) parts.push(`"${searchQuery.trim()}"`);
+    return parts.join(' • ');
+  }, [selectedGoals, fdaFilter, packagingMode, dosageFilter, searchQuery]);
+
   // ── Catalog PDF download — uses fetch+NDJSON streaming ──
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (scope = 'current') => {
     setIsGeneratingPdf(true);
     try {
+      const targetProducts = (scope === 'filtered' && displayedProducts.length > 0)
+        ? displayedProducts
+        : (scope === 'all' ? products : (displayedProducts.length < products.length ? displayedProducts : products));
+
+      const isFilteredExport = targetProducts.length < products.length;
+
       const response = await fetch('/api/generate-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           docType: 'catalog',
-          productIds: products.map(p => p.id),
+          productIds: targetProducts.map(p => p.id),
           batchCode,
           includePrices,
           priceTier: priceSource,
           currency: currentCurrency,
           recipientName: catalogMeta?.recipientName,
           recipientType: catalogMeta?.recipientType,
+          catalogSubtitle: isFilteredExport 
+            ? `Curated Clinical Selection (${targetProducts.length} Formulations${activeFilterLabel ? ` • ${activeFilterLabel}` : ''})` 
+            : null,
           isExWorks: false,
           incoterm: 'DAP',
           showKitPrice: true,
@@ -1227,7 +1260,14 @@ export default function SharedCatalogClientView({
         {/* Algolia Cross-sell (optional) */}
         {cartItems.length > 0 && !isProtocolCatalog && (
           <div style={{ marginTop: '24px' }}>
-            <AlgoliaRecommendCrossSell cartItems={cartItems} catalogProducts={products} onAddProduct={(prod, variant) => updateQuantity(variant, prod, 1)} />
+            <AlgoliaRecommendCrossSell
+              cartItems={cartItems}
+              catalogProducts={products}
+              currencySymbol={currencySymbol}
+              fxMultiplier={fxMultiplier}
+              currentCurrency={currentCurrency}
+              onAddProduct={(prod, variant, qty = 1) => updateQuantity(variant, prod, qty)}
+            />
           </div>
         )}
           </div> {/* end .catalog-main-column */}
@@ -1308,8 +1348,20 @@ export default function SharedCatalogClientView({
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                             <div style={{ fontWeight: 800, color: '#003666', minWidth: '56px', textAlign: 'right' }}>{currencySymbol}{(item.quantity * itemUnitPrice).toFixed(2)}</div>
-                            <button type="button" onClick={() => updateQuantity({ id: item.variantId, price: item.price, tier10UnitPrice: item.tier10UnitPrice, presentation: item.presentation, dosage: item.dosage }, { id: item.productId, canonicalName: item.productName }, -item.quantity)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '2px' }}>
-                              <Trash2 size={14} />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const vId = item.id || item.variantId;
+                                if (removeFromCart) {
+                                  removeFromCart(vId);
+                                } else {
+                                  updateQuantity({ id: vId }, { canonicalName: item.productName }, -item.quantity);
+                                }
+                              }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', display: 'flex', alignItems: 'center' }}
+                              title="Remove item"
+                            >
+                              <Trash2 size={15} />
                             </button>
                           </div>
                         </div>

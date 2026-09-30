@@ -14,8 +14,9 @@ import SharedCatalogClientView from './SharedCatalogClientView';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearch = await searchParams;
   const token = resolvedParams?.token;
 
   let catalogData = {};
@@ -44,15 +45,61 @@ export async function generateMetadata({ params }) {
 
   const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');
   const isWholesaler = catalogData.recipientType === 'wholeseller';
-  const title = hasRecipient
+
+  // ── Dynamic Filter Metadata for WhatsApp / Social Unfurling ────────────────
+  const goal = resolvedSearch?.g || resolvedSearch?.goals;
+  const fda = resolvedSearch?.fda;
+  const q = resolvedSearch?.q;
+  const fmt = resolvedSearch?.fmt;
+  const dose = resolvedSearch?.dose;
+
+  const filterLabels = [];
+  if (goal) {
+    const GOAL_LABELS = {
+      fat_loss: 'Weight Management',
+      tissue_repair: 'Tissue Repair',
+      anti_aging: 'Longevity & Anti-Aging',
+      cognitive: 'Cognitive & Neuro',
+      muscle_growth: 'Hypertrophy & Growth',
+      libido_wellness: 'Hormonal & Sexual Wellness',
+      general_health: 'General Health & Immunity',
+      supplies: 'Clinical Solvents & Supplies'
+    };
+    const mapped = goal.split(',').map(k => GOAL_LABELS[k] || k.replace(/_/g, ' ')).join(', ');
+    if (mapped) filterLabels.push(mapped);
+  }
+  if (fda === 'approved' || fda === '1') filterLabels.push('FDA Approved');
+  if (q) filterLabels.push(`"${q}"`);
+  if (fmt && fmt !== 'all') filterLabels.push(fmt);
+  if (dose && dose !== 'all') filterLabels.push(dose);
+
+  const filterSummary = filterLabels.join(' • ');
+  const hasFilter = filterSummary.length > 0;
+
+  const baseTitle = hasRecipient
     ? (isWholesaler ? `Wholesale Peptide Catalog • ${recipientName}` : `Clinical Peptide Catalog • ${recipientName}`)
     : `Clinical Peptide Catalog • ${supplierTitle}`;
 
-  const description = `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
+  const title = hasFilter
+    ? `Curated Catalog: ${filterSummary} • ${hasRecipient ? recipientName : supplierTitle}`
+    : baseTitle;
+
+  const description = hasFilter
+    ? `Curated clinical peptide selection matching ${filterSummary} in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch purity assays, and cold-chain logistics.`
+    : `Clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
 
   const appUrl = 'https://med-peptides.com';
   const catalogCode = catalogData.catalogId || token || '';
   const ogImageUrl = `${appUrl}/og-catalog.png`;
+
+  const queryParts = [];
+  if (goal) queryParts.push(`g=${encodeURIComponent(goal)}`);
+  if (fda && fda !== 'all') queryParts.push(`fda=${encodeURIComponent(fda)}`);
+  if (q) queryParts.push(`q=${encodeURIComponent(q)}`);
+  if (fmt && fmt !== 'all') queryParts.push(`fmt=${encodeURIComponent(fmt)}`);
+  if (dose && dose !== 'all') queryParts.push(`dose=${encodeURIComponent(dose)}`);
+  const qs = queryParts.join('&');
+  const canonicalUrl = `${appUrl}/c/${catalogCode}${qs ? `?${qs}` : ''}`;
 
   return {
     title,
@@ -62,7 +109,7 @@ export async function generateMetadata({ params }) {
       description,
       type: 'website',
       siteName: 'Clinical Peptide Catalog',
-      url: `${appUrl}/c/${catalogCode}`,
+      url: canonicalUrl,
       locale: 'en_US',
       images: [
         {

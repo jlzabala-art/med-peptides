@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, CheckCircle2, Activity, AlertCircle, Save, FileText,
   Beaker, Sparkles, ExternalLink, RefreshCw, UserCheck, ShieldAlert,
-  Calendar, Stethoscope, Dna, Info
+  Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import StandardDrawer from '../../../components/ui/StandardDrawer';
@@ -34,6 +34,8 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
   const [normalizedRxList, setNormalizedRxList] = useState([]);
   const [alsoCreatePatient, setAlsoCreatePatient] = useState(true);
   const [groupIntoSession, setGroupIntoSession] = useState(true);
+  const [savedPrescriptionsResult, setSavedPrescriptionsResult] = useState(null);
+  const [copiedUrl, setCopiedUrl] = useState(null);
 
   const handleProcessFile = useCallback(async (droppedFile) => {
     if (!droppedFile) return;
@@ -116,6 +118,24 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     toast.success(`Ingrediente vinculado a: ${selectedProduct.name}`);
   };
 
+  const handleCopyRxUrl = (url, rxNumber) => {
+    if (typeof window === 'undefined') return;
+    const fullUrl = `${window.location.origin}${url}`;
+    navigator?.clipboard?.writeText(fullUrl);
+    setCopiedUrl(rxNumber);
+    toast.success('Enlace de la receta online copiado al portapapeles ✓');
+    setTimeout(() => setCopiedUrl(null), 2500);
+  };
+
+  const handleResetForNewUpload = () => {
+    setFile(null);
+    setFilePreview(null);
+    setRawAiData(null);
+    setNormalizedRxList([]);
+    setSavedPrescriptionsResult(null);
+    setError(null);
+  };
+
   // Save directly to Firestore using canonical schema
   const handleConfirmSave = async () => {
     if (!normalizedRxList.length) {
@@ -139,7 +159,12 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       }
 
       onSaveSuccess && onSaveSuccess(result.savedIds);
-      onClose();
+
+      if (result.savedPrescriptions && result.savedPrescriptions.length > 0) {
+        setSavedPrescriptionsResult(result.savedPrescriptions);
+      } else {
+        onClose();
+      }
     } catch (err) {
       console.error('Save error:', err);
       toast.error(`Error al guardar: ${err.message}`, { id: 'save-intake' });
@@ -187,43 +212,66 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       subtitle="Sube una receta médica o informe Fagron Genomics (PDF/Imagen). Atlas AI extraerá y validará los datos clínicos automáticamente."
       width="90vw"
       footer={
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button className="gcp-btn-secondary" onClick={onClose}>Cancelar</button>
-            {normalizedRxList.length > 0 && (
-              <button
-                className="gcp-btn-secondary"
-                onClick={handleOpenInBuilder}
-                disabled={isSaving}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-              >
-                <ExternalLink size={15} />
-                <span>Abrir en Creador de Recetas</span>
-              </button>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        savedPrescriptionsResult ? (
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
             <button
-              className="gcp-btn-primary"
-              onClick={handleConfirmSave}
-              disabled={!normalizedRxList.length || isSaving}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '160px', justifyContent: 'center' }}
+              type="button"
+              className="gcp-btn-secondary"
+              onClick={handleResetForNewUpload}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
-              {isSaving ? (
-                <>
-                  <RefreshCw size={16} className="spin-slow" />
-                  <span>Guardando...</span>
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  <span>Guardar Prescripción</span>
-                </>
-              )}
+              <Upload size={14} />
+              <span>Importar Otra Prescripción</span>
+            </button>
+            <button
+              type="button"
+              className="gcp-btn-primary"
+              onClick={onClose}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '150px', justifyContent: 'center' }}
+            >
+              <span>Ver en Tabla de Prescripciones</span>
+              <ArrowRight size={15} />
             </button>
           </div>
-        </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button className="gcp-btn-secondary" onClick={onClose}>Cancelar</button>
+              {normalizedRxList.length > 0 && (
+                <button
+                  className="gcp-btn-secondary"
+                  onClick={handleOpenInBuilder}
+                  disabled={isSaving}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <ExternalLink size={15} />
+                  <span>Abrir en Creador de Recetas</span>
+                </button>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <button
+                className="gcp-btn-primary"
+                onClick={handleConfirmSave}
+                disabled={!normalizedRxList.length || isSaving}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '160px', justifyContent: 'center' }}
+              >
+                {isSaving ? (
+                  <>
+                    <RefreshCw size={16} className="spin-slow" />
+                    <span>Guardando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    <span>Guardar Prescripción</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )
       }
     >
       <div style={{
@@ -234,10 +282,114 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
         gap: '1rem',
         overflowY: 'auto'
       }}>
-        
-        {/* LEFT PANE: Document Preview / Dropzone */}
-        <div style={{
-          flex: '1 1 360px',
+        {savedPrescriptionsResult ? (
+          <div style={{ width: '100%', maxWidth: '840px', margin: '0 auto', padding: '1rem 0', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Header banner */}
+            <div style={{
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              boxShadow: '0 2px 8px rgba(22, 163, 74, 0.06)'
+            }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#166534' }}>
+                  ¡Prescripción guardada exitosamente en la base de datos!
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#15803d', lineHeight: 1.5 }}>
+                  Los datos clínicos, pautas de posología y fórmulas magistrales se han sincronizado en Firestore. Ya puedes consultar o compartir la receta online oficial con el paciente.
+                </p>
+              </div>
+            </div>
+
+            {/* List of saved prescriptions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {savedPrescriptionsResult.map((saved, idx) => (
+                <div
+                  key={saved.id || idx}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem',
+                    boxShadow: '0 2px 6px rgba(15, 23, 42, 0.04)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>💊</span>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#0f172a' }}>
+                          {saved.patientName} • {saved.treatmentType}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          {saved.lineCount} componentes formulados • Código Oficial: <code style={{ color: '#003666', fontWeight: 800 }}>{saved.prescriptionNumber}</code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      En Línea Activa
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px dashed #e2e8f0' }}>
+                    <a
+                      href={saved.rxUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="gcp-btn-primary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 16px',
+                        fontSize: '0.82rem',
+                        textDecoration: 'none',
+                        borderRadius: '6px',
+                        fontWeight: 700
+                      }}
+                    >
+                      <ExternalLink size={14} />
+                      <span>Ver Receta Online ({saved.prescriptionNumber})</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      className="gcp-btn-secondary"
+                      onClick={() => handleCopyRxUrl(saved.rxUrl, saved.prescriptionNumber)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 14px',
+                        fontSize: '0.82rem',
+                        borderRadius: '6px',
+                        fontWeight: 700
+                      }}
+                    >
+                      {copiedUrl === saved.prescriptionNumber ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
+                      <span>{copiedUrl === saved.prescriptionNumber ? 'Enlace Copiado ✓' : 'Copiar Enlace para el Paciente'}</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* LEFT PANE: Document Preview / Dropzone */}
+            <div style={{
+              flex: '1 1 360px',
           minHeight: '350px',
           display: 'flex',
           flexDirection: 'column',
@@ -729,8 +881,9 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
             ) : null}
           </div>
         </div>
-
-      </div>
-    </StandardDrawer>
+      </>
+    )}
+  </div>
+</StandardDrawer>
   );
 }

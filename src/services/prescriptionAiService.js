@@ -159,9 +159,18 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     const patientName = rawData.patient?.name || context.patientName || 'Unknown Patient';
     const doctorName = rawData.doctor?.name || context.doctorName || 'Prescribing Physician';
 
+    // Generate clean, official prescription number: RX-YYYYMMDD-XXXX
+    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const randPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const generatedRxNumber = `RX-${datePart}-${randPart}`;
+
     const normalizedRx = {
       ...prescriptionSchema,
       ...context,
+      prescriptionNumber: generatedRxNumber,
+      prescriptionCode: generatedRxNumber,
+      code: generatedRxNumber,
+      prescriptionId: generatedRxNumber,
       // Statuses strictly lowercase per AGENTS.md Rule #28
       status: PRESCRIPTION_STATUSES.DRAFT,
       validationStatus: anyUnresolved ? 'Needs Review' : (unassignedAlerts.length > 0 ? 'Review API Scope' : 'Ready'),
@@ -325,6 +334,7 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
   const { alsoCreatePatient = true, currentUser } = options;
   let savedCount = 0;
   const savedIds = [];
+  const savedPrescriptions = [];
   const errors = [];
 
   for (const rx of prescriptionsToSave) {
@@ -365,6 +375,16 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
       const docRef = await addDoc(collection(db, 'prescriptions'), payload);
       savedCount++;
       savedIds.push(docRef.id);
+
+      const officialCode = payload.prescriptionNumber || payload.code || docRef.id;
+      savedPrescriptions.push({
+        id: docRef.id,
+        prescriptionNumber: officialCode,
+        patientName: payload.patientName || payload.patient?.name || 'Patient',
+        treatmentType: payload.treatmentType || 'Formulation',
+        lineCount: payload.prescriptionLines?.length || 0,
+        rxUrl: `/rx/${officialCode}`,
+      });
     } catch (err) {
       logger.error('[prescriptionAiService] Error saving prescription', { error: err });
       errors.push(`Error on prescription for ${rx.patientName || 'Unknown'}: ${err.message}`);
@@ -374,6 +394,7 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
   return {
     savedCount,
     savedIds,
+    savedPrescriptions,
     errors,
   };
 }
