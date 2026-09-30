@@ -21,15 +21,26 @@ export default function ProtocolMasterDetailRow({
   const { openDrawer } = useDrawer();
   if (!protocol) return null;
 
-  const phases = protocol.phases || [];
+  const phases = (Array.isArray(protocol.phases) && protocol.phases.length > 0)
+    ? protocol.phases
+    : (Array.isArray(protocol.phase_blueprints) && protocol.phase_blueprints.length > 0)
+      ? protocol.phase_blueprints
+      : [];
   const goals = (Array.isArray(protocol.goals) && protocol.goals.length > 0)
     ? protocol.goals
     : (Array.isArray(protocol.goalIds) && protocol.goalIds.length > 0)
       ? protocol.goalIds
       : [protocol.primary_goal || 'Regenerative Therapy'];
 
+  const calculatedDuration = phases.reduce((acc, ph) => acc + (ph.durationWeeks || ph.duration_weeks || ph.durationInWeeks || ph.default_duration_weeks || 0), 0);
   const durationWeeks = protocol.protocol_duration_weeks || protocol.duration_weeks || protocol.durationWeeks || 
-    phases.reduce((acc, ph) => acc + (ph.durationWeeks || ph.duration_weeks || 0), 0) || 8;
+    (calculatedDuration > 0 ? calculatedDuration : 8);
+
+  const normalizedProtocol = {
+    ...protocol,
+    phases,
+    durationWeeks
+  };
 
   return (
     <div style={{
@@ -534,7 +545,7 @@ export default function ProtocolMasterDetailRow({
       )}
 
       {/* 7. Interactive Clinical Gantt Timeline */}
-      <ClinicalGanttTimeline protocol={protocol} />
+      <ClinicalGanttTimeline protocol={normalizedProtocol} />
 
       {/* 8. Additional Clinical Notes (if available) */}
       {(protocol.instructions || protocol.clinical_notes || protocol.administration_notes) && (

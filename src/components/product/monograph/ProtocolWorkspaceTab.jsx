@@ -31,8 +31,8 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { resolveVialSizeMg } from '@/utils/supplyMath';
-import PrecisionSyringeVisualizer from './PrecisionSyringeVisualizer';
 import { calculateReconstitution, calculateProtocolProcurement } from './monographCalculationEngine';
+import { matchClinicalBenchmark, CLINICAL_BENCHMARKS } from '@/utils/clinicalDosingEngine';
 
 /**
  * Built-in canonical protocol definitions for PT-141 & Peptide compounds
@@ -135,47 +135,190 @@ function sanitizeProtocolTitle(rawName = '', canonicalCompound = '') {
   return cleaned || rawName;
 }
 
+export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
+  const bm = matchClinicalBenchmark(canonicalName);
+  const name = bm?.canonicalName || canonicalName || 'Peptide';
+  const isPt141 = name.toLowerCase().includes('pt-141') || name.toLowerCase().includes('bremelanotide');
+  if (isPt141) return CANONICAL_PT141_PROTOCOLS;
+
+  const unit = bm?.unit || 'mg';
+  const steps = bm?.steps || [2.5, 5.0, 7.5];
+  const cadence = bm?.cadence || 'Once weekly';
+  const shortCadence = bm?.shortCadence || '1x/wk';
+  const timesPerWeek = bm?.timesPerWeek || 1;
+  const route = bm?.route || 'Subcutaneous';
+  const isWeekly = timesPerWeek === 1;
+
+  const stepMg = (st) => (unit === 'mcg' && st >= 100 ? st / 1000 : st);
+  const initialDose = stepMg(steps[0]);
+  const midDose = stepMg(steps[Math.min(1, steps.length - 1)]);
+  const maxDose = stepMg(steps[steps.length - 1]);
+
+  const proto1Weeks = steps.length * 4;
+  const proto1Phases = steps.map((st, i) => ({
+    phaseIndex: i + 1,
+    title: i === 0
+      ? 'Phase 1: Induction & Tolerance'
+      : (i === steps.length - 1 ? `Phase ${i + 1}: Maintenance & Peak Plateau` : `Phase ${i + 1}: Phased Titration`),
+    weeks: `Weeks ${i * 4 + 1}–${(i + 1) * 4}`,
+    doseMg: stepMg(st),
+    frequency: cadence
+  }));
+
+  const proto2Phases = [
+    { phaseIndex: 1, title: 'Phase 1: Initiation Ramp', weeks: 'Weeks 1–4', doseMg: initialDose, frequency: cadence },
+    { phaseIndex: 2, title: 'Phase 2: Target Maintenance', weeks: 'Weeks 5–12', doseMg: midDose, frequency: cadence }
+  ];
+
+  const proto3Phases = [
+    { phaseIndex: 1, title: 'Phase 1: Induction Priming', weeks: 'Weeks 1–2', doseMg: initialDose, frequency: cadence },
+    { phaseIndex: 2, title: 'Phase 2: Accelerated Escalation', weeks: 'Weeks 3–6', doseMg: midDose, frequency: cadence },
+    { phaseIndex: 3, title: 'Phase 3: Peak Plateau', weeks: 'Weeks 7–12', doseMg: maxDose, frequency: cadence }
+  ];
+
+  const category = isWeekly
+    ? 'Weight Management & Metabolic Optimization'
+    : (timesPerWeek >= 5 ? 'Tissue Regeneration & Healing' : 'Clinical Optimization');
+
+  return [
+    {
+      id: `proto-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-standard`,
+      slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-standard-titration`,
+      name: `${name} Standard Titration Protocol`,
+      durationWeeks: proto1Weeks,
+      difficulty: 'Standard Clinical',
+      category,
+      objective: `Gradual physiological titration of ${name} (${initialDose} mg initiation up to ${maxDose} mg peak) to ensure optimal cellular receptor adaptation and minimize side effects.`,
+      route,
+      defaultDoseMg: initialDose,
+      defaultDosesPerWeek: timesPerWeek,
+      frequencyDescription: `${cadence} (${shortCadence})`,
+      phases: proto1Phases
+    },
+    {
+      id: `proto-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-moderate`,
+      slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-moderate-maintenance`,
+      name: `${name} Moderate Maintenance Protocol`,
+      durationWeeks: 12,
+      difficulty: 'Intermediate',
+      category,
+      objective: `Structured 12-week clinical program establishing stable therapeutic levels of ${name} at ${midDose} mg with steady long-term maintenance.`,
+      route,
+      defaultDoseMg: initialDose,
+      defaultDosesPerWeek: timesPerWeek,
+      frequencyDescription: `${cadence} (${shortCadence})`,
+      phases: proto2Phases
+    },
+    {
+      id: `proto-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-intensive`,
+      slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-intensive-response`,
+      name: `${name} Intensive Response Protocol`,
+      durationWeeks: 12,
+      difficulty: 'Comprehensive',
+      category,
+      objective: `Rapid therapeutic ramp reaching steady-state levels of ${name} (${maxDose} mg) for intensive therapeutic targets and verified tolerance.`,
+      route,
+      defaultDoseMg: initialDose,
+      defaultDosesPerWeek: timesPerWeek,
+      frequencyDescription: `${cadence} (${shortCadence})`,
+      phases: proto3Phases
+    }
+  ];
+}
+
 function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
   const phases = Array.isArray(p.phases) && p.phases.length > 0
     ? p.phases
     : (Array.isArray(p.phase_blueprints) ? p.phase_blueprints : []);
 
+  const benchmark = matchClinicalBenchmark(canonicalCompound || p.name || '');
+
   let extractedDoseMg = null;
   let extractedFreqPerWeek = null;
   let extractedFreqDesc = '';
-  let extractedRoute = p.route || 'Subcutaneous';
+  let extractedRoute = p.route || benchmark?.route || 'Subcutaneous';
   let totalWeeks = 0;
 
   const mappedPhases = phases.map((ph, idx) => {
-    const drug = Array.isArray(ph.drugs) && ph.drugs.length > 0 ? ph.drugs[0] : null;
+    // Pick the drug in ph.drugs matching canonical compound
+    let drug = null;
+    if (Array.isArray(ph.drugs) && ph.drugs.length > 0) {
+      if (canonicalCompound) {
+        const compLower = canonicalCompound.toLowerCase().split(/[\s-]/)[0];
+        drug = ph.drugs.find(d => {
+          const dTitle = (d.product_title || d.product_name || d.name || '').toLowerCase();
+          const dId = (d.product_id || d.productId || '').toLowerCase();
+          return dTitle.includes(compLower) || dId.includes(compLower);
+        }) || ph.drugs[0];
+      } else {
+        drug = ph.drugs[0];
+      }
+    }
+
     const doseLogic = drug?.dose_logic || {};
     const phaseWeeks = Number(ph.durationWeeks || ph.default_duration_weeks || ph.duration) || 4;
     totalWeeks += phaseWeeks;
 
     let phaseDose = null;
-    if (ph.doseMg) phaseDose = parseFloat(ph.doseMg);
-    else if (ph.dose) {
-      const match = String(ph.dose).match(/([\d.]+)/);
-      if (match) phaseDose = parseFloat(match[1]);
+    let unit = 'mg';
+    const rawUnit = (ph.unit || drug?.unit || doseLogic.dose_unit || '').toLowerCase();
+    if (rawUnit === 'mcg' || rawUnit === 'µg') {
+      unit = 'mcg';
+    }
+
+    if (ph.doseMg) {
+      phaseDose = parseFloat(ph.doseMg);
+    } else if (ph.dose) {
+      const match = String(ph.dose).match(/([\d.]+)\s*(mg|mcg|µg)?/i);
+      if (match) {
+        phaseDose = parseFloat(match[1]);
+        if (match[2]?.toLowerCase() === 'mcg') unit = 'mcg';
+      }
     } else if (drug?.dose) {
-      const match = String(drug.dose).match(/([\d.]+)/);
-      if (match) phaseDose = parseFloat(match[1]);
+      const match = String(drug.dose).match(/([\d.]+)\s*(mg|mcg|µg)?/i);
+      if (match) {
+        phaseDose = parseFloat(match[1]);
+        if (match[2]?.toLowerCase() === 'mcg') unit = 'mcg';
+      }
     } else if (doseLogic.starting_weekly_dose) {
-      phaseDose = parseFloat(doseLogic.starting_weekly_dose);
+      const swd = parseFloat(doseLogic.starting_weekly_dose);
+      phaseDose = (unit === 'mcg' && swd > 50) ? swd / 1000 : swd;
     } else if (doseLogic.dose_per_administration) {
-      phaseDose = parseFloat(doseLogic.dose_per_administration);
+      const dpa = parseFloat(doseLogic.dose_per_administration);
+      phaseDose = (unit === 'mcg' && dpa >= 100) ? dpa / 1000 : dpa;
+    }
+
+    // Convert mcg to mg if unit is mcg and dose is large (e.g. 250 mcg -> 0.25 mg)
+    if (unit === 'mcg' && phaseDose !== null && phaseDose >= 50) {
+      phaseDose = phaseDose / 1000;
     }
 
     let phaseFreq = ph.frequency || drug?.frequency || doseLogic.administration_frequency || '';
-    if (/once|weekly|1x/i.test(phaseFreq)) {
+    if (/once|weekly|1x|semanal/i.test(phaseFreq)) {
       if (extractedFreqPerWeek === null) extractedFreqPerWeek = 1;
       phaseFreq = 'Once weekly';
-    } else if (/2x|twice/i.test(phaseFreq)) {
+    } else if (/2x|twice|biweekly|bi-weekly/i.test(phaseFreq)) {
       if (extractedFreqPerWeek === null) extractedFreqPerWeek = 2;
       phaseFreq = '2x per week';
-    } else if (/daily|qd|every day/i.test(phaseFreq)) {
+    } else if (/3x|3 times/i.test(phaseFreq)) {
+      if (extractedFreqPerWeek === null) extractedFreqPerWeek = 3;
+      phaseFreq = '3x per week';
+    } else if (/5d|5 days/i.test(phaseFreq)) {
+      if (extractedFreqPerWeek === null) extractedFreqPerWeek = 5;
+      phaseFreq = '5 days on / 2 days off';
+    } else if (/daily|qd|every day|diario/i.test(phaseFreq)) {
       if (extractedFreqPerWeek === null) extractedFreqPerWeek = 7;
       phaseFreq = 'Daily';
+    } else if (benchmark) {
+      phaseFreq = benchmark.cadence;
+      if (extractedFreqPerWeek === null) extractedFreqPerWeek = benchmark.timesPerWeek;
+    }
+
+    // Benchmark calibration if phase dose is missing or repeated
+    if ((phaseDose === null || isNaN(phaseDose)) && benchmark?.steps) {
+      const stepIdx = Math.min(idx, benchmark.steps.length - 1);
+      const bStep = benchmark.steps[stepIdx];
+      phaseDose = (benchmark.unit === 'mcg' && bStep >= 100) ? bStep / 1000 : bStep;
     }
 
     if (phaseDose && extractedDoseMg === null) {
@@ -183,28 +326,38 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
       extractedFreqDesc = phaseFreq;
     }
 
+    const fallbackDose = benchmark
+      ? (benchmark.unit === 'mcg' && benchmark.steps[0] >= 100 ? benchmark.steps[0] / 1000 : benchmark.steps[0])
+      : 2.5;
+
     return {
       phaseIndex: idx + 1,
       title: ph.phase_title || ph.phaseLabel || ph.name || `Phase ${idx + 1}`,
       weeks: `Weeks ${totalWeeks - phaseWeeks + 1}–${totalWeeks}`,
-      doseMg: phaseDose || 2.5,
+      doseMg: phaseDose || fallbackDose,
       frequency: phaseFreq || 'Once weekly'
     };
   });
 
   const compoundLower = String(canonicalCompound || p.name || '').toLowerCase();
   if (!extractedDoseMg) {
-    if (p.defaultDoseMg) extractedDoseMg = parseFloat(p.defaultDoseMg);
-    else if (compoundLower.includes('tirzepatide')) extractedDoseMg = 2.5;
-    else if (compoundLower.includes('semaglutide')) extractedDoseMg = 0.25;
-    else if (compoundLower.includes('retatrutide')) extractedDoseMg = 2.0;
-    else if (compoundLower.includes('bpc-157') || compoundLower.includes('bpc157')) extractedDoseMg = 0.25;
-    else if (compoundLower.includes('ghk-cu') || compoundLower.includes('ghk')) extractedDoseMg = 2.0;
-    else extractedDoseMg = 1.25;
+    if (p.defaultDoseMg) {
+      extractedDoseMg = parseFloat(p.defaultDoseMg);
+    } else if (benchmark) {
+      const bStep0 = benchmark.steps[0];
+      extractedDoseMg = (benchmark.unit === 'mcg' && bStep0 >= 100) ? bStep0 / 1000 : bStep0;
+      extractedFreqDesc = benchmark.cadence;
+      extractedFreqPerWeek = benchmark.timesPerWeek;
+    } else {
+      extractedDoseMg = 2.5;
+    }
   }
 
   if (!extractedFreqPerWeek) {
-    if (compoundLower.includes('tirzepatide') || compoundLower.includes('semaglutide') || compoundLower.includes('retatrutide')) {
+    if (benchmark) {
+      extractedFreqPerWeek = benchmark.timesPerWeek;
+      extractedFreqDesc = benchmark.cadence;
+    } else if (compoundLower.includes('tirzepatide') || compoundLower.includes('semaglutide') || compoundLower.includes('retatrutide')) {
       extractedFreqPerWeek = 1;
       extractedFreqDesc = 'Once weekly subcutaneous injection';
     } else if (compoundLower.includes('pt-141') || compoundLower.includes('bremelanotide')) {
@@ -216,14 +369,14 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
     }
   }
 
-  const finalDurationWeeks = totalWeeks > 0 ? totalWeeks : (Number(p.durationWeeks) || parseInt(p.duration, 10) || 12);
+  const calculatedDuration = totalWeeks > 0 ? totalWeeks : (Number(p.durationWeeks) || parseInt(p.duration, 10) || 12);
   let cleanedObjective = p.description || p.clinicalRationale || p.summary || 'Clinical administration protocol.';
-  if (finalDurationWeeks > 8 && cleanedObjective.includes('8-week')) {
-    cleanedObjective = cleanedObjective.replace(/\b8-week\b/gi, `${finalDurationWeeks}-week`);
+  if (calculatedDuration > 8 && cleanedObjective.includes('8-week')) {
+    cleanedObjective = cleanedObjective.replace(/\b8-week\b/gi, `${calculatedDuration}-week`);
   }
 
   return {
-    durationWeeks: finalDurationWeeks,
+    durationWeeks: calculatedDuration,
     defaultDoseMg: extractedDoseMg,
     defaultDosesPerWeek: extractedFreqPerWeek,
     frequencyDescription: extractedFreqDesc,
@@ -232,7 +385,7 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
       {
         phaseIndex: 1,
         title: 'Phase 1: Initiation Titration',
-        weeks: `Weeks 1–${finalDurationWeeks}`,
+        weeks: `Weeks 1–${calculatedDuration}`,
         doseMg: extractedDoseMg,
         frequency: extractedFreqDesc || 'Once weekly'
       }
@@ -252,7 +405,7 @@ export default function ProtocolWorkspaceTab({
   const router = useRouter();
   const canonicalName = product.canonicalName || product.name || 'PT-141';
 
-  // Normalize protocols list: use provided or fallback to canonical PT-141 protocols
+  // Normalize protocols list: use provided or fallback to canonical compound protocols
   const availableProtocols = useMemo(() => {
     if (Array.isArray(associatedProtocols) && associatedProtocols.length > 0) {
       // Map Firestore/Repository protocols into canonical structure using extractProtocolClinicalSpecs
@@ -261,7 +414,8 @@ export default function ProtocolWorkspaceTab({
         return {
           id: p.id || p.slug,
           slug: p.slug || p.id,
-          name: p.name || p.title || 'Clinical Protocol',
+          name: sanitizeProtocolTitle(p.name || p.title, canonicalName),
+          fullName: p.name || p.title || 'Clinical Protocol',
           durationWeeks: specs.durationWeeks,
           difficulty: p.difficulty || p.difficulty_level || 'Clinical',
           category: p.category || (specs.defaultDosesPerWeek === 1 ? 'Weight Management' : 'Clinical Protocol'),
@@ -270,21 +424,56 @@ export default function ProtocolWorkspaceTab({
           defaultDoseMg: specs.defaultDoseMg,
           defaultDosesPerWeek: specs.defaultDosesPerWeek,
           frequencyDescription: specs.frequencyDescription,
-          phases: specs.phases
+          phases: specs.phases,
+          _raw: p
         };
       });
     }
-    return CANONICAL_PT141_PROTOCOLS;
+    return buildCanonicalCompoundProtocols(canonicalName);
   }, [associatedProtocols, canonicalName]);
 
   // ── Selected Protocol State ──
   const [selectedProtocolId, setSelectedProtocolId] = useState(
-    availableProtocols[0]?.id || 'proto-pt141-ondemand'
+    availableProtocols[0]?.id || 'proto-standard'
   );
 
   const activeProtocol = useMemo(() => {
     return availableProtocols.find(p => p.id === selectedProtocolId) || availableProtocols[0];
   }, [availableProtocols, selectedProtocolId]);
+
+  // Dynamically computed dose steps from clinical benchmark and active protocol phases
+  const availableDoseSteps = useMemo(() => {
+    const bm = matchClinicalBenchmark(canonicalName);
+    let steps = [];
+    if (bm?.steps) {
+      steps = bm.steps.map(s => bm.unit === 'mcg' && s >= 100 ? s / 1000 : s);
+    }
+    const fromPhases = (activeProtocol?.phases || []).map(ph => Number(ph.doseMg)).filter(Boolean);
+    if (fromPhases.length > 0) {
+      steps = [...steps, ...fromPhases];
+    }
+    if (activeProtocol?.defaultDoseMg) {
+      steps.push(Number(activeProtocol.defaultDoseMg));
+    }
+    if (steps.length === 0) steps = [1.0, 2.0, 2.5, 5.0];
+    return [...new Set(steps)].sort((a, b) => a - b).slice(0, 6);
+  }, [canonicalName, activeProtocol]);
+
+  // Dynamically computed frequency cadences
+  const availableFrequencies = useMemo(() => {
+    const base = [1, 2, 3];
+    const protoFreq = Number(activeProtocol?.defaultDosesPerWeek);
+    if (protoFreq && !base.includes(protoFreq)) base.push(protoFreq);
+    return [...new Set(base)].sort((a, b) => a - b);
+  }, [activeProtocol?.defaultDosesPerWeek]);
+
+  // Dynamically computed treatment durations
+  const availableDurations = useMemo(() => {
+    const base = [4, 8, 12];
+    const protoDur = Number(activeProtocol?.durationWeeks);
+    if (protoDur && !base.includes(protoDur)) base.push(protoDur);
+    return [...new Set(base)].sort((a, b) => a - b);
+  }, [activeProtocol?.durationWeeks]);
 
   // Alternative protocols memo for comparison and fast switching
   const otherProtocols = useMemo(() => {
@@ -299,13 +488,31 @@ export default function ProtocolWorkspaceTab({
 
   // ── Patient Treatment Specific Parameters (Physician Authorized Overrides) ──
   const [isPickerExpandedMobile, setIsPickerExpandedMobile] = useState(false);
-  const [physicianDoseMg, setPhysicianDoseMg] = useState(activeProtocol.defaultDoseMg || 1.25);
-  const [physicianFreqPerWeek, setPhysicianFreqPerWeek] = useState(activeProtocol.defaultDosesPerWeek || 2);
-  const [physicianDurationWeeks, setPhysicianDurationWeeks] = useState(activeProtocol.durationWeeks || 4);
+  const [physicianDoseMg, setPhysicianDoseMg] = useState(activeProtocol.defaultDoseMg || 2.5);
+  const [physicianFreqPerWeek, setPhysicianFreqPerWeek] = useState(activeProtocol.defaultDosesPerWeek || 1);
+  const [physicianDurationWeeks, setPhysicianDurationWeeks] = useState(activeProtocol.durationWeeks || 12);
   const [selectedVialStrength, setSelectedVialStrength] = useState(() => {
     return resolveVialSizeMg({ product_slug: product.slug, product_title: canonicalName }) || 10;
   });
   const [selectedBacVolume, setSelectedBacVolume] = useState(2.0);
+
+  // Sync physician defaults whenever active protocol or protocols list updates
+  useEffect(() => {
+    if (availableProtocols.length > 0) {
+      const exists = availableProtocols.some(p => p.id === selectedProtocolId || p.slug === selectedProtocolId);
+      if (!exists) {
+        setSelectedProtocolId(availableProtocols[0].id || availableProtocols[0].slug);
+      }
+    }
+  }, [availableProtocols, selectedProtocolId]);
+
+  useEffect(() => {
+    if (activeProtocol) {
+      if (activeProtocol.defaultDoseMg) setPhysicianDoseMg(activeProtocol.defaultDoseMg);
+      if (activeProtocol.defaultDosesPerWeek) setPhysicianFreqPerWeek(activeProtocol.defaultDosesPerWeek);
+      if (activeProtocol.durationWeeks) setPhysicianDurationWeeks(activeProtocol.durationWeeks);
+    }
+  }, [activeProtocol?.id, activeProtocol?.defaultDoseMg, activeProtocol?.defaultDosesPerWeek, activeProtocol?.durationWeeks]);
 
   // Expanded stepper items for progressive disclosure in Step 4
   const [expandedSteps, setExpandedSteps] = useState({ 1: true, 2: false, 3: false, 4: false, 5: false, 6: false });
@@ -316,9 +523,9 @@ export default function ProtocolWorkspaceTab({
     if (!nextProto) return;
     triggerHaptic('selection');
     setSelectedProtocolId(protoId);
-    setPhysicianDoseMg(nextProto.defaultDoseMg || 1.25);
-    setPhysicianFreqPerWeek(nextProto.defaultDosesPerWeek || 2);
-    setPhysicianDurationWeeks(nextProto.durationWeeks || 4);
+    setPhysicianDoseMg(nextProto.defaultDoseMg || 2.5);
+    setPhysicianFreqPerWeek(nextProto.defaultDosesPerWeek || 1);
+    setPhysicianDurationWeeks(nextProto.durationWeeks || 12);
     setCurrentStep(1); // Return to Step 1 for fresh review
     setIsPickerExpandedMobile(false); // Auto-collapse on mobile upon selection
   };
@@ -1005,7 +1212,7 @@ export default function ProtocolWorkspaceTab({
                   type="button"
                   onClick={() => {
                     triggerHaptic('light');
-                    setPhysicianDoseMg(activeProtocol.defaultDoseMg || 1.25);
+                    setPhysicianDoseMg(activeProtocol.defaultDoseMg || (availableDoseSteps[0] || 1.25));
                     setPhysicianFreqPerWeek(activeProtocol.defaultDosesPerWeek || 2);
                     setPhysicianDurationWeeks(activeProtocol.durationWeeks || 4);
                     toast.success('Reset to protocol defaults');
@@ -1040,7 +1247,7 @@ export default function ProtocolWorkspaceTab({
                   <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Default: {activeProtocol.defaultDoseMg} mg</span>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {[1.0, 1.25, 1.5, 1.75, 2.0].map(d => (
+                  {availableDoseSteps.map(d => (
                     <button
                       key={d}
                       type="button"
@@ -1059,7 +1266,7 @@ export default function ProtocolWorkspaceTab({
                         cursor: 'pointer'
                       }}
                     >
-                      {d.toFixed(2)} mg {d === activeProtocol.defaultDoseMg ? '(Std)' : ''}
+                      {d >= 10 ? d.toFixed(0) : d >= 1 ? (d % 1 === 0 ? d.toFixed(0) : d.toFixed(2)) : d.toFixed(2)} mg {d === activeProtocol.defaultDoseMg ? '(Std)' : ''}
                     </button>
                   ))}
                 </div>
@@ -1073,8 +1280,8 @@ export default function ProtocolWorkspaceTab({
                   </label>
                   <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Default: {activeProtocol.defaultDosesPerWeek}×/wk</span>
                 </div>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  {[1, 2, 3].map(f => (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {availableFrequencies.map(f => (
                     <button
                       key={f}
                       type="button"
@@ -1083,7 +1290,7 @@ export default function ProtocolWorkspaceTab({
                         setPhysicianFreqPerWeek(f);
                       }}
                       style={{
-                        flex: 1,
+                        flex: '1 1 auto',
                         padding: '6px 10px',
                         borderRadius: '6px',
                         border: physicianFreqPerWeek === f ? '1.5px solid #003666' : '1px solid #cbd5e1',
@@ -1108,8 +1315,8 @@ export default function ProtocolWorkspaceTab({
                   </label>
                   <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Default: {activeProtocol.durationWeeks} wks</span>
                 </div>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  {[4, 8, 12].map(w => (
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {availableDurations.map(w => (
                     <button
                       key={w}
                       type="button"
@@ -1118,7 +1325,7 @@ export default function ProtocolWorkspaceTab({
                         setPhysicianDurationWeeks(w);
                       }}
                       style={{
-                        flex: 1,
+                        flex: '1 1 auto',
                         padding: '6px 10px',
                         borderRadius: '6px',
                         border: physicianDurationWeeks === w ? '1.5px solid #003666' : '1px solid #cbd5e1',

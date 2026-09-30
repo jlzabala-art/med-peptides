@@ -15,6 +15,7 @@ export default function PublicSectionCard({
   badge,
   badgeVariant = 'green',
   title,
+  subtitle,
   rightAction,
   children,
   variant = 'navy',
@@ -49,6 +50,9 @@ export default function PublicSectionCard({
               )}
               {title && (
                 <h3 className="pds-section-header-title">{title}</h3>
+              )}
+              {subtitle && (
+                <div className="pds-section-header-subtitle">{subtitle}</div>
               )}
             </div>
           </div>

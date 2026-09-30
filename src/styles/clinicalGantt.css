@@ -1000,6 +1000,25 @@
     text-overflow: clip;
     font-weight: 700;
   }
+
+  .gcp-doctor-console {
+    padding: 0.85rem !important;
+  }
+
+  .gcp-doc-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+  }
+
+  .gcp-doc-title {
+    font-size: 0.78rem !important;
+  }
+
+  .gcp-doc-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
 }
 
 /* ── GCP Mobile Phase Selector (< 640px) ── */

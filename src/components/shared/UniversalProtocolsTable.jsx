@@ -117,13 +117,27 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
   });
 
   const protocols = useMemo(() => {
-    return (rawProtocols || []).map(p => ({
-      ...p,
-      name: p.name || p.title || p.protocol_name || 'Unnamed Protocol',
-      status: p.status || 'active',
-      primary_goal: p.primary_goal || p.goal || (Array.isArray(p.goals) && p.goals[0]) || 'Tissue Repair & Recovery',
-      goals: (Array.isArray(p.goals) && p.goals.length > 0) ? p.goals : [p.primary_goal || p.goal || 'Tissue Repair & Recovery'],
-    }));
+    return (rawProtocols || []).map(p => {
+      const normalizedPhases = (Array.isArray(p.phases) && p.phases.length > 0)
+        ? p.phases
+        : (Array.isArray(p.phase_blueprints) && p.phase_blueprints.length > 0)
+          ? p.phase_blueprints
+          : [];
+      const calculatedDuration = normalizedPhases.reduce(
+        (acc, phase) => acc + (phase.durationWeeks || phase.duration_weeks || phase.durationInWeeks || phase.default_duration_weeks || 0),
+        0
+      );
+      return {
+        ...p,
+        name: p.name || p.title || p.protocol_name || 'Unnamed Protocol',
+        status: p.status || 'active',
+        phases: normalizedPhases,
+        calculatedDurationWeeks: calculatedDuration,
+        durationWeeks: p.durationWeeks || p.duration_weeks || p.protocol_duration_weeks || (calculatedDuration > 0 ? calculatedDuration : undefined),
+        primary_goal: p.primary_goal || p.goal || (Array.isArray(p.goals) && p.goals[0]) || 'Tissue Repair & Recovery',
+        goals: (Array.isArray(p.goals) && p.goals.length > 0) ? p.goals : [p.primary_goal || p.goal || 'Tissue Repair & Recovery'],
+      };
+    });
   }, [rawProtocols]);
 
   // ── 3-Tier Clinical AI Context Bridge for Protocols ─────────────────────────

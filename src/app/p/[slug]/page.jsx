@@ -344,19 +344,29 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
 
     snap.forEach(doc => {
       const data = doc.data();
+      const rawPhases = Array.isArray(data.phases) && data.phases.length > 0
+        ? data.phases
+        : (Array.isArray(data.phase_blueprints) ? data.phase_blueprints : []);
+
       const allItems = [
         ...(Array.isArray(data.bom) ? data.bom : []),
         ...(Array.isArray(data.items) ? data.items : []),
         ...(Array.isArray(data.products) ? data.products : []),
         ...(Array.isArray(data.peptides) ? data.peptides : []),
         ...(Array.isArray(data.compounds) ? data.compounds : []),
-        ...(Array.isArray(data.phases) ? data.phases.flatMap(ph => [...(ph.compounds || []), ...(ph.drugs_used || []), ...(ph.products || [])]) : [])
+        ...rawPhases.flatMap(ph => [
+          ...(ph.compounds || []),
+          ...(ph.drugs || []),
+          ...(ph.drugs_used || []),
+          ...(ph.items || []),
+          ...(ph.products || [])
+        ])
       ];
 
       const hasItemMatch = allItems.some(it => {
-        const itId = String(it.productId || it.id || '').toLowerCase();
+        const itId = String(it.productId || it.product_id || it.id || '').toLowerCase();
         const itSlug = String(it.slug || it.product_slug || '').toLowerCase();
-        const itName = String(it.product_name || it.name || it.title || it.canonicalName || '').toLowerCase();
+        const itName = String(it.product_name || it.product_title || it.name || it.title || it.canonicalName || '').toLowerCase();
         return (
           (itId && (itId === pIdLower || itId.includes(pSlugLower) || pSlugLower.includes(itId))) ||
           (itSlug && (itSlug === pSlugLower || pSlugLower.includes(itSlug))) ||
@@ -382,31 +392,51 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
         if (protoNameLower.includes(pNameLower) || protoNameLower.includes(pSlugLower)) clinicalScore += 35;
         if (protoNameLower.startsWith(pNameLower)) clinicalScore += 25;
         if (protoNameLower.includes('titration') || protoNameLower.includes('recomposition') || protoNameLower.includes('metabolic')) clinicalScore += 20;
-        const phasesCount = Array.isArray(data.phases) ? data.phases.length : 1;
+        const phasesCount = rawPhases.length || 1;
         clinicalScore += phasesCount * 8;
-        const durWeeks = Number(data.durationWeeks) || 8;
+
+        const calculatedDuration = rawPhases.reduce((acc, ph) => {
+          const w = Number(ph.durationWeeks || ph.duration_weeks || ph.default_duration_weeks || ph.duration) || 0;
+          return acc + w;
+        }, 0);
+        const durWeeks = calculatedDuration > 0
+          ? calculatedDuration
+          : (Number(data.durationWeeks || data.duration_weeks) || parseInt(data.duration, 10) || 12);
         clinicalScore += Math.min(durWeeks, 30);
+
+        let cleanDesc = (data.overview_summary || data.summary || data.description || data.clinicalRationale || '').substring(0, 220);
+        if (durWeeks > 8 && cleanDesc.includes('8-week')) {
+          cleanDesc = cleanDesc.replace(/\b8-week\b/gi, `${durWeeks}-week`);
+        }
 
         matched.push({
           id: doc.id,
           slug: data.slug || data.protocol_slug || doc.id,
           name: data.name || data.title || 'Clinical Pathway',
           category: data.category || data.goal || data.therapeutic_category || 'Clinical Protocol',
-          duration: data.durationWeeks ? `${data.durationWeeks} Weeks` : (data.duration || '8 Weeks'),
+          duration: `${durWeeks} Weeks`,
           durationWeeks: durWeeks,
           phasesCount,
-          description: (data.overview_summary || data.summary || data.description || data.clinicalRationale || '').substring(0, 180),
+          description: cleanDesc,
           clinicalScore,
-          phases: Array.isArray(data.phases) ? data.phases : [],
+          phases: rawPhases,
           bom: Array.isArray(data.bom) ? data.bom : [],
           dosage_schedule: data.dosage_schedule || [],
-          phasesSummary: Array.isArray(data.phases)
-            ? data.phases.slice(0, 4).map((ph, idx) => ({
-                label: ph.phaseLabel || ph.name || `Phase ${idx + 1}`,
-                dose: ph.dose || ph.dosage || null,
-                unit: ph.unit || 'mg'
-              }))
-            : []
+          phasesSummary: rawPhases.slice(0, 4).map((ph, idx) => {
+            const firstDrug = Array.isArray(ph.drugs) && ph.drugs.length > 0 ? ph.drugs[0] : null;
+            const doseLogic = firstDrug?.dose_logic || {};
+            let doseStr = ph.dose || ph.dosage || null;
+            if (!doseStr && doseLogic.starting_weekly_dose) {
+              doseStr = `${doseLogic.starting_weekly_dose} ${doseLogic.dose_unit || 'mg'}`;
+            } else if (!doseStr && doseLogic.dose_per_administration) {
+              doseStr = `${doseLogic.dose_per_administration} ${doseLogic.dose_unit || 'mcg'}`;
+            }
+            return {
+              label: ph.phase_title || ph.phaseLabel || ph.name || `Phase ${idx + 1}`,
+              dose: doseStr,
+              unit: ph.unit || doseLogic.dose_unit || 'mg'
+            };
+          })
         });
       }
     });

@@ -1017,14 +1017,14 @@ export default function PublicProtocolPage({ protocol, slug, baseUrl, similarPro
                 title={isTirzepatideProtocol
                   ? (lang === 'es' ? 'Cronograma Clínico y Fases de Titulación' : 'Clinical Titration Timeline & Phase Distribution')
                   : t.sec2Title}
-                badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
-                badgeVariant="green"
-                rightAction={
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#93c5fd' }}>
-                    <Activity size={14} />
+                subtitle={
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Activity size={14} style={{ flexShrink: 0 }} />
                     <span>{t.sec2Subtitle}</span>
                   </div>
                 }
+                badge={phases.length ? `${phases.length} ${lang === 'es' ? 'Fases' : 'Phases'}` : null}
+                badgeVariant="green"
               >
                 <ClinicalGanttTimeline 
                   protocol={protocol} 
