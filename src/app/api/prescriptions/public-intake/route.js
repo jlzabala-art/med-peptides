@@ -265,3 +265,39 @@ export async function POST(request) {
     );
   }
 }
+
+export async function DELETE(request) {
+  try {
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Database service is temporarily unavailable.' }, { status: 503 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const { id } = body || {};
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing prescription ID in request.' }, { status: 400 });
+    }
+
+    const docRef = adminDb.collection('prescriptions').doc(id);
+    const snap = await docRef.get();
+
+    if (snap.exists) {
+      const data = snap.data();
+      const rxNumber = data.prescriptionNumber || data.code;
+      await docRef.delete();
+      if (rxNumber) {
+        try { invalidateRxCache(rxNumber); } catch (_) {}
+      }
+      try { invalidateRxCache(id); } catch (_) {}
+    }
+
+    return NextResponse.json({ success: true, message: 'Prescription cancelled and discarded successfully.' });
+  } catch (error) {
+    console.error('[public-intake] DELETE error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to cancel and discard prescription.' },
+      { status: 500 }
+    );
+  }
+}

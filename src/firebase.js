@@ -4,7 +4,7 @@ import { getFirestore, initializeFirestore, persistentLocalCache, persistentMult
 import { getFunctions } from 'firebase/functions';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
-import { initStorageQuotaGuard } from './utils/storageQuotaGuard';
+import { initStorageQuotaGuard } from './utils/storageQuotaGuard.js';
 
 // NEXT_PUBLIC_* vars are baked into the bundle at build time.
 // If the env var is missing, the hardcoded fallback below covers local/CI environments.

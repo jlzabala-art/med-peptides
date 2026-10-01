@@ -39,6 +39,7 @@ import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
+import { getFagronClinicalMonograph, checkDosageSafety } from '@/data/fagronClinicalMonographs';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import '@/styles/publicDesignSystem.css';
@@ -493,42 +494,148 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         duration: rx.duration || '30 days',
         container: resolvedContainer,
         vehicle: vehicleObj,
-        apis: apis.map((api, aIdx) => ({
-          id: api.id || `api-${index}-${aIdx + 1}`,
-          tag: `API ${aIdx + 1}`,
-          name: api.productName || api.activeIngredient || api.name || `Active Compound ${aIdx + 1}`,
-          dosage: api.dosage || api.dose || api.strength || api.concentration || '—',
-          role: api.role || (isOral 
-            ? (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')
-            : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient')),
-          indication: api.indication || (isTrichoOil 
-            ? (isEs ? 'Higiene & Microcirculación Folicular' : 'Scalp Care & Follicular Microcirculation')
-            : (isOral 
-              ? (isEs ? 'Soporte Metabólico Sistémico' : 'Systemic Metabolic Fortification')
-              : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'))),
-          action: api.instructions || api.action || (isEs 
-            ? 'Tratamiento formulado a medida según el perfil clínico del paciente.' 
-            : 'Custom compounded active ingredient calibrated to patient clinical profile.'),
-          rationale: api.rationale || null
-        })),
+        apis: apis.map((api, aIdx) => {
+          const apiName = api.productName || api.activeIngredient || api.name || `Active Compound ${aIdx + 1}`;
+          const n = apiName.toLowerCase();
+          
+          const mono = getFagronClinicalMonograph(api.productId) || 
+                       getFagronClinicalMonograph(api.name) || 
+                       getFagronClinicalMonograph(api.activeIngredient) ||
+                       getFagronClinicalMonograph(apiName) ||
+                       getFagronClinicalMonograph(n);
+
+          let role = api.pharmacologicalClass || mono?.pharmacologicalClass || api.role;
+          let indication = api.clinicalIndication || mono?.clinicalIndication || api.indication;
+          let action = api.mechanismOfAction || mono?.mechanismOfAction || api.instructions || api.action;
+          const geneTargets = api.geneTargets || mono?.geneTargets || [];
+
+          if (n.includes('finasteride')) {
+            role = role || (isEs ? 'Inhibidor Selectivo 5α-Reductasa Tipo II' : 'Selective 5α-Reductase Type II Inhibitor');
+            indication = indication || (isEs ? 'Supresión de DHT Folicular & Prevención de Miniaturización' : 'Follicular DHT Suppression & Miniaturization Reversal');
+            action = action || (isEs 
+              ? 'Gen Diana: SRD5A2. Bloquea selectivamente la síntesis de dihidrotestosterona (DHT), protegiendo la papila dérmica.' 
+              : 'Target Gene: SRD5A2. Selectively halts follicular DHT synthesis, protecting dermal papilla cells against miniaturization.');
+          } else if (n.includes('cetirizine') || n.includes('cetirizina')) {
+            role = role || (isEs ? 'Antagonista Selectivo del Receptor PGD2' : 'Selective PGD2 Receptor Antagonist');
+            indication = indication || (isEs ? 'Modulación Antiinflamatoria Perifolicular' : 'Perifollicular Anti-Inflammatory Modulation');
+            action = action || (isEs 
+              ? 'Gen Diana: PTGDR2 / CRTH2. Antagoniza la PGD2 elevada en alopecia, eliminando el freno microinflamatorio sobre el crecimiento folicular.' 
+              : 'Target Gene: PTGDR2 / CRTH2. Antagonizes elevated scalp PGD2, clearing micro-inflammatory arrest of hair elongation.');
+          } else if (n.includes('panthenol') || n.includes('pantenol')) {
+            role = role || (isEs ? 'Precursor de Coenzima A & Regenerador Celular' : 'Coenzyme A Precursor & Cellular Regenerator');
+            indication = indication || (isEs ? 'Bioenergía Folicular, Reparación de Cutícula & Fuerza Tensil' : 'Follicular ATP Synthesis, Cuticle Repair & Tensile Resilience');
+            action = action || (isEs 
+              ? 'Ruta Metabólica: Biosíntesis de Coenzima A (ATP). Estimula la proliferación celular en la matriz del bulbo y fortalece la hidratación capilar.' 
+              : 'Metabolic Pathway: Coenzyme A Biosynthesis. Fuels energy production in hair bulb matrix cells and enhances hair shaft moisture retention.');
+          } else if (n.includes('minoxidil')) {
+            role = role || (isEs ? 'Activador de Sulfotransferasa & Canales K_ATP' : 'Sulfotransferase Activator & K_ATP Channel Opener');
+            indication = indication || (isEs ? 'Estimulación de Fase Anágena & Perfusión Microvascular' : 'Anagen Phase Induction & Microvascular Perfusion');
+            action = action || (isEs 
+              ? 'Gen Diana: SULT1A1. Metabolizado a sulfato de minoxidil activo para estimular la perfusión capilar y acelerar la anagénesis.' 
+              : 'Target Gene: SULT1A1. Enzymatically sulfated to reopen follicular microvascular circulation and trigger anagen phase.');
+          } else if (n.includes('latanoprost') || n.includes('bimatoprost')) {
+            role = role || (isEs ? 'Agonista de Receptores de Prostaglandina F2α (FP)' : 'Prostaglandin F2α (FP) Receptor Agonist');
+            indication = indication || (isEs ? 'Prolongación Anágena & Pigmentación Folicular' : 'Anagen Phase Extension & Follicular Pigmentation');
+            action = action || (isEs 
+              ? 'Gen Diana: PTGFR. Activa receptores de prostaglandinas en la papila dérmica, induciendo una fase anágena robusta y prolongada.' 
+              : 'Target Gene: PTGFR. Stimulates prostanoid FP receptors in dermal papilla cells to extend anagen duration and hair thickness.');
+          } else if (n.includes('spironolactone') || n.includes('espironolactona')) {
+            role = role || (isEs ? 'Antagonista de Receptores Androgénicos' : 'Competitive Androgen Receptor Antagonist');
+            indication = indication || (isEs ? 'Bloqueo Androgénico Localizado en Cuero Cabelludo' : 'Localized Scalp Androgen Receptor Blockade');
+            action = action || (isEs 
+              ? 'Gen Diana: AR. Bloquea competitivamente los receptores androgénicos en la papila dérmica folicular sin alterar hormonas sistémicas.' 
+              : 'Target Gene: AR. Competitively blocks androgen binding within follicular cells without systemic hormonal alteration.');
+          } else if (n.includes('estradiol')) {
+            role = role || (isEs ? 'Inhibidor Local de 5α-Reductasa & Estimulador de Aromatasa' : 'Local 5α-Reductase Inhibitor & Aromatase Stimulator');
+            indication = indication || (isEs ? 'Modulación Hormonal Tópica sin Efectos Sistémicos' : 'Topical Hormonal Modulation without Systemic Effects');
+            action = action || (isEs 
+              ? 'Genes Diana: CYP19A1 / SRD5A1. Favorece la conversión local a estrógenos protectores y reduce la DHT a nivel folicular.' 
+              : 'Target Genes: CYP19A1 / SRD5A1. Favors local follicular aromatization into protective estrogens while mitigating DHT.');
+          } else if (n.includes('ginseng')) {
+            role = role || (isEs ? 'Fitoestimulante Celular & Inductor de VEGF' : 'Cellular Phytostimulant & VEGF Inducer');
+            indication = indication || (isEs ? 'Proliferación de Papila Dérmica & Retardo Catágeno' : 'Dermal Papilla Proliferation & Catagen Delay');
+            action = action || (isEs 
+              ? 'Ruta Diana: Señalización VEGF. Incrementa el factor de crecimiento endotelial vascular, asegurando nutrición folicular continua.' 
+              : 'Target Pathway: VEGF Signaling. Upregulates vascular endothelial growth factor, promoting sustained hair follicle cycling.');
+          } else if (n.includes('ginkgo')) {
+            role = role || (isEs ? 'Optimizador Microvascular & Escudo Antioxidante' : 'Microvascular Optimizer & Antioxidant Shield');
+            indication = indication || (isEs ? 'Perfusión Capilar & Protección contra Estrés Oxidativo' : 'Capillary Perfusion & Oxidative Stress Shield');
+            action = action || (isEs 
+              ? 'Ruta Diana: Óxido Nítrico & Neutralización de Radicales Libres. Protege el nicho de células madre foliculares.' 
+              : 'Target Pathway: Nitric Oxide & Free-Radical Scavenging. Shields follicular stem cell niche against lipid peroxidation.');
+          }
+
+          if (!role) {
+            role = isOral 
+              ? (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')
+              : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient');
+          }
+          if (!indication) {
+            indication = isTrichoOil 
+              ? (isEs ? 'Higiene & Microcirculación Folicular' : 'Scalp Care & Follicular Microcirculation')
+              : (isOral 
+                ? (isEs ? 'Soporte Metabólico Sistémico' : 'Systemic Metabolic Fortification')
+                : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'));
+          }
+          if (!action) {
+            action = isEs 
+              ? 'Principio activo personalizado calibrado al perfil clínico y genómico del paciente.' 
+              : 'Personalized active ingredient calibrated to patient clinical and genomic profile.';
+          }
+
+          const doseStr = api.dosage || api.dose || api.strength || api.concentration || '—';
+          const dosageSafety = checkDosageSafety(
+            api.productId || apiName, 
+            doseStr, 
+            resolvedRoute.toLowerCase().includes('oral') ? 'oral' : 'topical'
+          );
+
+          return {
+            id: api.id || `api-${index}-${aIdx + 1}`,
+            tag: `API ${aIdx + 1}`,
+            name: apiName,
+            dosage: doseStr,
+            dosageSafety,
+            role,
+            indication,
+            action,
+            geneTargets,
+            rationale: api.rationale || null
+          };
+        }),
         posology: posologyObj
       };
     };
 
     // 1. If explicit multi-block formulations already exist on the rx document
-    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 1) {
+    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0) {
       const totalBlocks = rx.formulationBlocks.length;
       return rx.formulationBlocks.map((block, idx) => {
+        const rawBlockItems = block.apis || block.items || [];
+        
+        // Strictly separate vehicle excipients from true active ingredients (APIs)
+        const vehicleItem = rawBlockItems.find(i => {
+          const n = (i.name || i.productName || i.activeIngredient || '').toLowerCase();
+          return i.isVehicleOrBase || i._isVehicleOrBase || n.includes('trichosol') || n.includes('trichofoam') || n.includes('trichooil') || n.includes('pentravan') || n.includes('versabase');
+        });
+
+        const activeApis = rawBlockItems.filter(i => i !== vehicleItem && !i.isVehicleOrBase && !i._isVehicleOrBase);
+        
+        let detectedVehicleName = block.vehicle?.name || block.vehicleName;
+        if (!detectedVehicleName && vehicleItem) {
+          detectedVehicleName = vehicleItem.name || vehicleItem.productName || vehicleItem.activeIngredient;
+        }
+
         return buildVehicleData({
           index: idx + 1,
           totalCount: totalBlocks,
-          vehicleName: block.vehicle?.name || block.vehicleName || '',
+          vehicleName: detectedVehicleName,
           treatmentTitle: block.treatmentType || block.treatmentProgram || '',
           route: block.route || block.dispensingForm || '',
-          volume: block.volume || null,
+          volume: block.volume || vehicleItem?.dose || null,
           customPosology: block.posology || '',
           customInstructions: block.instructions || '',
-          apis: block.apis || block.items || [],
+          apis: activeApis,
           containerType: block.container || ''
         });
       });
@@ -1124,6 +1231,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           }}>
                             {api.dosage}
                           </span>
+                          {api.dosageSafety?.evaluated && (
+                            <span 
+                              style={{
+                                fontSize: '0.67rem',
+                                fontWeight: 700,
+                                padding: '2px 7px',
+                                borderRadius: '5px',
+                                background: api.dosageSafety.level === 'high' ? '#fef2f2' : (api.dosageSafety.level === 'low' ? '#fffbeb' : '#f0fdf4'),
+                                color: api.dosageSafety.level === 'high' ? '#dc2626' : (api.dosageSafety.level === 'low' ? '#b45309' : '#15803d'),
+                                border: `1px solid ${api.dosageSafety.level === 'high' ? '#fca5a5' : (api.dosageSafety.level === 'low' ? '#fde68a' : '#bbf7d0')}`,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }} 
+                              title={api.dosageSafety.message}
+                            >
+                              <span>{api.dosageSafety.level === 'high' ? '⚠️' : (api.dosageSafety.level === 'low' ? 'ℹ️' : '✓')}</span>
+                              <span>
+                                {api.dosageSafety.level === 'high' 
+                                  ? (isEs ? 'Dosis Elevada' : 'High Dose') 
+                                  : (api.dosageSafety.level === 'low' 
+                                    ? (isEs ? 'Dosis Baja' : 'Low Dose') 
+                                    : (isEs ? 'Dosis Estándar' : 'Standard Dose'))}
+                              </span>
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
                           {api.role} · <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.indication}</span>
@@ -1133,6 +1266,28 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <div style={{ fontSize: '0.79rem', color: '#334155', lineHeight: 1.5 }}>
                         {api.action}
                       </div>
+
+                      {api.geneTargets && api.geneTargets.length > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4338ca', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>🧬</span> {isEs ? 'Genes Diana:' : 'Target Genes:'}
+                          </span>
+                          {api.geneTargets.map((g, gIdx) => (
+                            <span key={gIdx} style={{
+                              fontSize: '0.68rem',
+                              fontWeight: 800,
+                              color: '#3730a3',
+                              background: '#e0e7ff',
+                              border: '1px solid #c7d2fe',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              fontFamily: 'monospace'
+                            }}>
+                              {g}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       {api.rationale && (
                         <div style={{

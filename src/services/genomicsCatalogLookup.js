@@ -15,6 +15,7 @@
 
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import * as fb from '../firebase.js';
+import { getFagronClinicalMonograph } from '../data/fagronClinicalMonographs.js';
 const db = fb?.db;
 
 // Cache holding canonical genomic products in memory
@@ -97,7 +98,7 @@ export const GENOMIC_SYNONYMS = {
   'minoxidil sulfate': 'minoxidil',
   'finasteride': 'finasteride',
   'dutasteride': 'dutasteride',
-  'latanoprost': 'latanoprost',
+  'latanoprost': 'latanoprost-fagron',
   'spironolactone': 'spironolactone',
   'clobetasol': 'clobetasol-propionate',
   'clobetasol propionate': 'clobetasol-propionate',
@@ -105,14 +106,25 @@ export const GENOMIC_SYNONYMS = {
   'melatonin': 'melatonin',
   'ginkgo': 'ginkgo-biloba',
   'ginkgo biloba': 'ginkgo-biloba',
+  'cetirizine': 'cetirizine-hcl',
+  'cetirizina': 'cetirizine-hcl',
+  'cetirizine hcl': 'cetirizine-hcl',
+  'cetirizina hcl': 'cetirizine-hcl',
+  'cetirizine hydrochloride': 'cetirizine-hcl',
+  'd-panthenol': 'd-panthenol',
+  'panthenol': 'd-panthenol',
+  'pantenol': 'd-panthenol',
+  'dexpanthenol': 'd-panthenol',
+  'dexpantenol': 'd-panthenol',
+  'dexapanthenol': 'd-panthenol',
 
   // Vehicles & Bases
-  'trichosol': 'trichosol-fagron',
-  'tricho-sol': 'trichosol-fagron',
-  'trichooil': 'trichooil-fagron',
-  'tricho-oil': 'trichooil-fagron',
-  'trichofoam': 'trichofoam-fagron',
-  'tricho-foam': 'trichofoam-fagron',
+  'trichosol': 'trichosol',
+  'tricho-sol': 'trichosol',
+  'trichooil': 'trichooil',
+  'tricho-oil': 'trichooil',
+  'trichofoam': 'trichofoam',
+  'tricho-foam': 'trichofoam',
   'pentravan': 'pentravan-fagron',
   'oliogel': 'oliogel-fagron',
   'versatile': 'versatile-fagron',
@@ -255,6 +267,25 @@ export async function lookupGenomicIngredient(rawName, programFilter = null) {
 
   // 2. Evaluate Program Assignment & Alerts
   if (matchedProduct) {
+    // Ensure clinical fields are populated (from product or fallback monograph)
+    if (!matchedProduct.geneTargets || !matchedProduct.mechanismOfAction) {
+      const mono = getFagronClinicalMonograph(matchedProduct.id) || 
+                   getFagronClinicalMonograph(matchedProduct.slug) || 
+                   getFagronClinicalMonograph(matchedProduct.name);
+      if (mono) {
+        matchedProduct = {
+          ...matchedProduct,
+          clinicalDescription: matchedProduct.clinicalDescription || mono.mechanismOfAction,
+          mechanismOfAction: matchedProduct.mechanismOfAction || mono.mechanismOfAction,
+          geneTargets: matchedProduct.geneTargets || mono.geneTargets,
+          clinicalIndication: matchedProduct.clinicalIndication || mono.clinicalIndication,
+          pharmacologicalClass: matchedProduct.pharmacologicalClass || mono.pharmacologicalClass,
+          compatibleVehicles: matchedProduct.compatibleVehicles || mono.compatibleVehicles,
+          standardDosages: matchedProduct.standardDosages || mono.standardDosages
+        };
+      }
+    }
+
     const programs = Array.isArray(matchedProduct.programs) ? matchedProduct.programs : [];
     
     if (targetProgramSlug) {

@@ -95,6 +95,20 @@ export const FAGRON_GENOMICS_REGISTRY = {
         rationaleEs: 'La cafeína inhibe la fosfodiesterasa intracelular, elevando el AMP cíclico (cAMP) para estimular la proliferación de queratinocitos foliculares y frenar la miniaturización.'
       },
       {
+        pathwayEn: 'PGD2 Receptor Antagonism & Perifollicular Anti-Inflammatory Modulation (PTGDR2 / CRTH2)',
+        pathwayEs: 'Antagonismo de Receptores PGD2 & Modulación Inflamatoria Perifolicular (PTGDR2 / CRTH2)',
+        apiMatch: ['cetirizine', 'cetirizina', 'cetirizine hcl'],
+        rationaleEn: 'Prostaglandin D2 (PGD2) is elevated in androgenetic alopecia scalp tissue and arrests hair growth via the GPR44/CRTH2 (PTGDR2) receptor. Topical Cetirizine competitively inhibits PGD2-mediated follicular arrest and diminishes micro-inflammatory infiltrates around the dermal papilla.',
+        rationaleEs: 'La prostaglandina D2 (PGD2) se encuentra elevada en alopecia androgenética e inhibe el alargamiento folicular a través del receptor PTGDR2/CRTH2. La cetirizina tópica antagoniza competitivamente esta vía, neutralizando el freno microinflamatorio perifolicular.'
+      },
+      {
+        pathwayEn: 'Follicular Proliferation & Coenzyme A Biosynthesis (Pantothenate Pathway)',
+        pathwayEs: 'Proliferación Folicular & Biosíntesis de Coenzima A (Ruta del Pantotenato)',
+        apiMatch: ['d-panthenol', 'panthenol', 'pantenol', 'd-pantenol', 'provitamin b5', 'vitamina b5'],
+        rationaleEn: 'D-Panthenol (Provitamin B5) is converted to Coenzyme A, an essential cofactor for ATP generation in rapidly dividing dermal papilla cells. It accelerates follicular recovery, hydrates the external root sheath, and increases hair shaft tensile resilience.',
+        rationaleEs: 'El D-Pantenol (Provitamina B5) es precursor de la Coenzima A, cofactor esencial en la generación de energía ATP en las células de la papila dérmica. Optimiza la nutrición celular folicular, repara la cutícula y refuerza la resistencia estructural de la fibra capilar.'
+      },
+      {
         pathwayEn: 'Hair Follicle Chronobiology & Clock Gene Regulation',
         pathwayEs: 'Cronobiología Folicular & Regulación de Genes Reloj',
         apiMatch: ['melatonin', 'melatonina'],
@@ -103,7 +117,7 @@ export const FAGRON_GENOMICS_REGISTRY = {
       }
     ],
     recommendedVehicle: {
-      name: 'TrichoSol™',
+      name: 'TrichoSol™ / TrichoFoam™',
       trademark: 'Fagron Patented Vehicle',
       descriptionEn: 'Hydrophilic lipid carrier formulated with patented TrichoTech™ phytocomplex. 100% free of alcohol and propylene glycol, preventing scalp irritation, desquamation, and lipid barrier degradation while maximizing active transdermal penetration.',
       descriptionEs: 'Vehículo lipídico hidrofílico formulado con el fitocomplejo patentado TrichoTech™. 100% libre de alcohol y propilenglicol, evitando la irritación y descamación del cuero cabelludo mientras optimiza la penetración folicular de los activos.'
@@ -215,6 +229,30 @@ export function detectFagronGenomicsTest(rx) {
   const rawBoxId = String(rx.fagronDetails?.boxId || rx.fagron?.boxId || rx.boxId || '');
   const rxId = String(rx.id || rx.prescriptionNumber || '').toLowerCase();
 
+  // Extract all API and compound names across all schema variations
+  const itemNames = [];
+  const addNames = (arr) => {
+    if (Array.isArray(arr)) {
+      arr.forEach(i => {
+        if (!i) return;
+        if (i.productName) itemNames.push(i.productName);
+        if (i.activeIngredient) itemNames.push(i.activeIngredient);
+        if (i.name) itemNames.push(i.name);
+        if (i.title) itemNames.push(i.title);
+      });
+    }
+  };
+
+  addNames(rx.prescriptionLines);
+  addNames(rx.items);
+  addNames(rx.compounds);
+  if (Array.isArray(rx.formulationBlocks)) {
+    rx.formulationBlocks.forEach(b => {
+      addNames(b?.items);
+      addNames(b?.apis);
+    });
+  }
+
   // Combine formula strings for chemical signature matching
   const formulaStr = [
     rx.formula,
@@ -222,8 +260,10 @@ export function detectFagronGenomicsTest(rx) {
     rx.productName,
     rx.title,
     rx.vehicle,
+    rx.treatmentType,
+    rx.treatmentProgram,
     rx.structuredPosology?.applicationSteps?.map(s => s.instruction || '').join(' '),
-    Array.isArray(rx.items) ? rx.items.map(i => i.name || i.title || '').join(' ') : ''
+    itemNames.join(' ')
   ].filter(Boolean).join(' ').toLowerCase();
 
   // 1. Explicit TrichoTest / Hair Test match

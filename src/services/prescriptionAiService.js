@@ -12,12 +12,95 @@
  *  - Optional automatic patient registration/linking via patientLinkService
  */
 
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, limit } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { PRESCRIPTION_SOURCES, PRESCRIPTION_STATUSES, prescriptionSchema, prescriptionLineSchema } from '../schemas/prescriptionSchema.js';
 import { resolveIngredients } from './apiIngredientMatcher.js';
 import { createPatient } from './patientLinkService.js';
 import { logger } from '../utils/logger';
+
+// ── Known Compounding Vehicles & Galenic Bases ──────────────────────────────
+export const GALENIC_VEHICLE_PATTERNS = [
+  'trichosol', 'trichooil', 'trichofoam', 'espumil', 'pentravan',
+  'versabase', 'nourivan', 'syrspend', 'bacteriostatic water',
+  'agua bacteriostatica', 'agua bacteriostática', 'suero fisiologico',
+  'suero fisiológico', 'beeler', 'vehiculo', 'vehículo', 'base csp',
+  'c.s.p.', 'csp', 'solucion hidroalcoholica', 'solución hidroalcohólica',
+  'liposomal base', 'crema base', 'gel base'
+];
+
+/**
+ * Checks if a product or ingredient name is a galenic vehicle / compounding base.
+ * @param {string} name 
+ * @returns {boolean}
+ */
+export function isGalenicVehicleOrBase(name) {
+  if (!name) return false;
+  const n = String(name).toLowerCase();
+  return GALENIC_VEHICLE_PATTERNS.some(pattern => n.includes(pattern));
+}
+
+/**
+ * Searches for an existing doctor in Firestore by license or full name.
+ * 
+ * @param {string} doctorName 
+ * @param {string} doctorLicense 
+ * @returns {Promise<Object|null>} Doctor object with id if found
+ */
+export async function lookupDoctorByNameOrLicense(doctorName = '', doctorLicense = '') {
+  try {
+    const cleanLic = (doctorLicense || '').trim();
+    const cleanName = (doctorName || '').trim().replace(/^dr\.?\s+/i, '');
+
+    // 1. Try matching license number if provided
+    if (cleanLic) {
+      const qLic = query(
+        collection(db, 'users'),
+        where('role', '==', 'doctor'),
+        where('licenseNumber', '==', cleanLic),
+        limit(1)
+      );
+      const snapLic = await getDocs(qLic);
+      if (!snapLic.empty) {
+        return { id: snapLic.docs[0].id, ...snapLic.docs[0].data() };
+      }
+
+      // Check alternate field medicalLicense
+      const qMedLic = query(
+        collection(db, 'users'),
+        where('role', '==', 'doctor'),
+        where('medicalLicense', '==', cleanLic),
+        limit(1)
+      );
+      const snapMedLic = await getDocs(qMedLic);
+      if (!snapMedLic.empty) {
+        return { id: snapMedLic.docs[0].id, ...snapMedLic.docs[0].data() };
+      }
+    }
+
+    // 2. Try matching doctor name against doctors list
+    if (cleanName && cleanName.length >= 3) {
+      const qDocs = query(
+        collection(db, 'users'),
+        where('role', '==', 'doctor'),
+        limit(100)
+      );
+      const snapDocs = await getDocs(qDocs);
+      const targetLower = cleanName.toLowerCase();
+
+      for (const d of snapDocs.docs) {
+        const data = d.data();
+        const dName = (data.displayName || data.name || `${data.firstName || ''} ${data.lastName || ''}`).toLowerCase();
+        if (dName.includes(targetLower) || targetLower.includes(dName)) {
+          return { id: d.id, ...data };
+        }
+      }
+    }
+  } catch (err) {
+    logger.warn('[prescriptionAiService] lookupDoctorByNameOrLicense warning', { error: err.message });
+  }
+  return null;
+}
 
 /**
  * Sends a file (PDF or Image) to the multimodal AI endpoint for extraction.
@@ -145,6 +228,12 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
           instructions: orig.instructions || block.posology || '',
           patientInstructions: block.posology || '',
           status: 'pending',
+          geneTargets: r.matchedProduct?.geneTargets || orig.geneTargets || [],
+          clinicalDescription: r.matchedProduct?.clinicalDescription || orig.clinicalDescription || '',
+          clinicalIndication: r.matchedProduct?.clinicalIndication || orig.clinicalIndication || '',
+          mechanismOfAction: r.matchedProduct?.mechanismOfAction || orig.mechanismOfAction || '',
+          pharmacologicalClass: r.matchedProduct?.pharmacologicalClass || orig.pharmacologicalClass || '',
+          compatibleVehicles: r.matchedProduct?.compatibleVehicles || orig.compatibleVehicles || [],
           _isPlaceholder: !!r.isPlaceholder,
           _isNewPlaceholder: !!r.isNew,
           _needsProductMapping: !r.productId || !!r.isPlaceholder,
@@ -154,7 +243,19 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
           _isUnassignedProgramApi: !!r.isUnassignedProgramApi,
           _programAlert: r.programAlert || null,
           _unassignedProgramName: r.unassignedProgramName || null,
-          _isVehicleOrBase: !!orig.isVehicleOrBase || nameLower.includes('trichosol') || nameLower.includes('trichooil') || nameLower.includes('pentravan'),
+          _isVehicleOrBase: !!orig.isVehicleOrBase || 
+            nameLower.includes('trichosol') || 
+            nameLower.includes('trichooil') || 
+            nameLower.includes('trichofoam') || 
+            nameLower.includes('pentravan') || 
+            nameLower.includes('oliogel') || 
+            nameLower.includes('versatile') || 
+            nameLower.includes('espuma') || 
+            nameLower.includes('foam') || 
+            nameLower.includes('vehiculo') || 
+            nameLower.includes('vehicle') ||
+            nameLower.includes('c.s.p') ||
+            nameLower.includes('csp'),
         };
       });
 

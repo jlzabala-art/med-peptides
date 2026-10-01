@@ -57,6 +57,8 @@ const FIELDS = [
   'status', 'isActive', 'active',
   'sku', 'dosage', 'warehouse', 'stock',
   'healthScore', 'hasCoa', 'registrationStatus',
+  'geneTargets', 'clinicalIndication', 'mechanismOfAction',
+  'pharmacologicalClass', 'compatibleVehicles', 'clinicalDescription',
 ];
 
 function toAlgoliaRecord(id, data) {
@@ -76,6 +78,13 @@ function toAlgoliaRecord(id, data) {
     tier:              data.tier || '',
     tags:              data.tags || [],
     description_short: data.description ? data.description.substring(0, 200) : '',
+    // ── Clinical & Genomics ────────────────────────────────────────────────
+    geneTargets:          data.geneTargets || [],
+    clinicalIndication:   data.clinicalIndication || '',
+    mechanismOfAction:    data.mechanismOfAction || '',
+    pharmacologicalClass: data.pharmacologicalClass || '',
+    compatibleVehicles:   data.compatibleVehicles || [],
+    clinicalDescription:  data.clinicalDescription || '',
     // ── Admin ─────────────────────────────────────────────────────────────
     sku:                data.sku || '',
     supplier:           data.supplier || '',

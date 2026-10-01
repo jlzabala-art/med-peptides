@@ -7,7 +7,7 @@ import {
   Upload, X, CheckCircle2, AlertCircle, FileText,
   Sparkles, RefreshCw, ExternalLink, Download, ArrowLeft,
   Eye, Phone, Stethoscope, Copy, Check, Camera, FileSpreadsheet, ShieldAlert, User,
-  Database, ThumbsUp, ThumbsDown, ClipboardCheck, ChevronRight, Info
+  Database, ThumbsUp, ThumbsDown, ClipboardCheck, ChevronRight, Info, XCircle
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +18,7 @@ import {
   extractPrescriptionFromDocument,
   normalizeExtractedPrescriptions
 } from '@/services/prescriptionAiService';
+import { uploadPrescriptionDocument } from '@/services/prescriptionStorageService';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import '@/styles/publicDesignSystem.css';
 
@@ -96,10 +97,22 @@ export default function PublicPrescriptionIntakeClient() {
     }
 
     try {
-      // 1. Multimodal AI Extraction
+      // 1. Multimodal AI Extraction & Background Storage Upload
       setProcessingStep(isEs ? 'Analizando documento con Atlas Clinical AI...' : 'Scanning document with Atlas Clinical AI...');
       toast.loading(isEs ? 'Analizando con Atlas Clinical AI...' : 'Scanning with Atlas Clinical AI...', { id: 'ai-intake-step' });
-      const aiData = await extractPrescriptionFromDocument(droppedFile);
+      
+      const [aiData, storageResult] = await Promise.all([
+        extractPrescriptionFromDocument(droppedFile),
+        uploadPrescriptionDocument(droppedFile).catch(err => {
+          console.warn('[PublicIntake] Background storage upload warning:', err);
+          return null;
+        })
+      ]);
+
+      // If persistent download URL is returned, set preview URL
+      if (storageResult?.downloadUrl) {
+        setFilePreviewUrl(storageResult.downloadUrl);
+      }
 
       // 2. Normalization & Ingredient Resolution
       setProcessingStep(isEs ? 'Mapeando fórmulas y vehículos contra catálogo farmacológico...' : 'Resolving compounded active ingredients and excipients...');
@@ -109,6 +122,17 @@ export default function PublicPrescriptionIntakeClient() {
 
       if (!normalizedList || normalizedList.length === 0) {
         throw new Error(isEs ? 'No se detectaron fórmulas legibles en el documento' : 'No legible compounded formulations detected in document');
+      }
+
+      // Attach storage document URLs to all normalized prescriptions
+      if (storageResult?.downloadUrl) {
+        normalizedList.forEach(rx => {
+          rx.originalFileUrl = storageResult.downloadUrl;
+          rx.scannedFileUrl = storageResult.downloadUrl;
+          rx.fileUrl = storageResult.downloadUrl;
+          rx.storagePath = storageResult.storagePath;
+          rx.fileName = storageResult.fileName;
+        });
       }
 
       // 3. Instant Firestore Publication
@@ -332,6 +356,32 @@ export default function PublicPrescriptionIntakeClient() {
     setAtlasResult(null);
   };
 
+  // ── Google Cloud UX Standard Cancel & Discard Handler ────────────────────────
+  const handleCancelAndDiscard = async () => {
+    const rxIdToDelete = publishedRx?.id || publishedRx?.firestoreId;
+    const confirmMsg = isEs
+      ? '¿Estás seguro de que deseas cancelar y descartar esta prescripción?\n\nEsta acción eliminará el borrador de la base de datos y cancelará el proceso de digitalización.'
+      : 'Are you sure you want to cancel and discard this prescription?\n\nThis will remove the draft record from the database and cancel the digitization process.';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      if (rxIdToDelete) {
+        toast.loading(isEs ? 'Cancelando y descartando...' : 'Cancelling and discarding...', { id: 'discard-intake' });
+        await fetch('/api/prescriptions/public-intake', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: rxIdToDelete })
+        });
+      }
+      toast.success(isEs ? 'Prescripción cancelada y descartada' : 'Prescription cancelled and discarded', { id: 'discard-intake' });
+      handleReset();
+    } catch (err) {
+      console.warn('[PublicPrescriptionIntake] Discard error:', err);
+      handleReset();
+    }
+  };
+
   // ── Atlas Registration Handler ────────────────────────────────────────────────
   const handleRegisterInAtlas = async () => {
     if (!publishedRx) return;
@@ -466,7 +516,7 @@ export default function PublicPrescriptionIntakeClient() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {filePreviewUrl && (
+            {(filePreviewUrl || publishedRx?.originalFileUrl || publishedRx?.scannedFileUrl || publishedRx?.fileUrl) && (
               <button type="button" onClick={() => setShowOriginalModal(true)} style={{
                 background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
                 color: '#fff', borderRadius: '8px', padding: '6px 12px',
@@ -896,10 +946,11 @@ export default function PublicPrescriptionIntakeClient() {
         <PublicPrescriptionClient rx={publishedRx} />
 
         {/* Modal to view the original uploaded/scanned file */}
-        {showOriginalModal && filePreviewUrl && (
+        {showOriginalModal && (filePreviewUrl || publishedRx?.originalFileUrl || publishedRx?.scannedFileUrl || publishedRx?.fileUrl) && (
           <DocumentPreviewModal
-            url={filePreviewUrl}
-            name={file?.name || 'Scanned Document'}
+            isOpen={showOriginalModal}
+            fileUrl={filePreviewUrl || publishedRx?.originalFileUrl || publishedRx?.scannedFileUrl || publishedRx?.fileUrl}
+            title={file?.name || publishedRx?.prescriptionNumber || (isEs ? 'Documento Escaneado' : 'Scanned Document')}
             onClose={() => setShowOriginalModal(false)}
           />
         )}

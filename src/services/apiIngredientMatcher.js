@@ -17,6 +17,7 @@
 import { searchAlgolia } from './algoliaSearch.js';
 import { extractApiBaseName, createPlaceholderApiProduct } from './placeholderProductService.js';
 import { lookupGenomicIngredient } from './genomicsCatalogLookup.js';
+import { getFagronClinicalMonograph } from '../data/fagronClinicalMonographs.js';
 import logger from '../utils/logger.js';
 
 // Minimum score to consider an Algolia result a confident match.
@@ -134,8 +135,28 @@ export async function resolveIngredient({
       ? `⚠️ Alerta: El API "${bestMatch.name || baseName}" se encontró en el catálogo general, pero NO está en la lista oficial de ${programName || programSlug} (Fagron Genomics).`
       : null;
 
+    const matchedProdId = bestMatch.objectID || bestMatch.id;
+    let enrichedMatch = { ...bestMatch };
+    if (!enrichedMatch.geneTargets || !enrichedMatch.mechanismOfAction) {
+      const mono = getFagronClinicalMonograph(matchedProdId) || 
+                   getFagronClinicalMonograph(enrichedMatch.slug) || 
+                   getFagronClinicalMonograph(enrichedMatch.name);
+      if (mono) {
+        enrichedMatch = {
+          ...enrichedMatch,
+          clinicalDescription: enrichedMatch.clinicalDescription || mono.mechanismOfAction,
+          mechanismOfAction: enrichedMatch.mechanismOfAction || mono.mechanismOfAction,
+          geneTargets: enrichedMatch.geneTargets || mono.geneTargets,
+          clinicalIndication: enrichedMatch.clinicalIndication || mono.clinicalIndication,
+          pharmacologicalClass: enrichedMatch.pharmacologicalClass || mono.pharmacologicalClass,
+          compatibleVehicles: enrichedMatch.compatibleVehicles || mono.compatibleVehicles,
+          standardDosages: enrichedMatch.standardDosages || mono.standardDosages,
+        };
+      }
+    }
+
     return {
-      productId: bestMatch.objectID || bestMatch.id,
+      productId: matchedProdId,
       matchedName: bestMatch.name || bestMatch.displayName || baseName,
       isNew: false,
       isPlaceholder: false,
@@ -145,7 +166,7 @@ export async function resolveIngredient({
       isUnassignedProgramApi: isUnassigned,
       unassignedProgramName: programName || programSlug,
       programAlert: alertMsg,
-      matchedProduct: bestMatch
+      matchedProduct: enrichedMatch
     };
   }
 
