@@ -89,6 +89,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [activeGcpTab, setActiveGcpTab] = useState('all'); // 'all' | 'formulations' | 'genomics' | 'posology' | 'traceability'
 
+  // Global smooth jump listener from sidebar
+  React.useEffect(() => {
+    const handleSectionJump = (e) => {
+      const targetId = e.detail?.id;
+      if (!targetId) return;
+      setActiveGcpTab('all');
+    };
+    window.addEventListener('OPEN_RX_SECTION', handleSectionJump);
+    return () => window.removeEventListener('OPEN_RX_SECTION', handleSectionJump);
+  }, []);
+
   // Treating Doctor Modal State
   const [customTreatingDoctor, setCustomTreatingDoctor] = useState(null);
   const [showDoctorModal, setShowDoctorModal] = useState(false);
@@ -1302,7 +1313,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
         {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'formulations') && (
-        <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           {compoundedFormulations.map((formulation, fIdx) => (
             <div
               key={formulation.id}
@@ -1315,7 +1326,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.35rem'
+                gap: '1.35rem',
+                scrollMarginTop: '100px'
               }}
             >
               {/* Preparation Master Header */}
@@ -1698,7 +1710,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           border: '1px solid #e2e8f0',
           padding: '1.5rem',
           boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-          marginBottom: '1.5rem'
+          marginBottom: '1.5rem',
+          scrollMarginTop: '100px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>

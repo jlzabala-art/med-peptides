@@ -113,11 +113,29 @@ export default function PrescriptionDetailSidebar({
 
   const scrollTo = (id) => {
     triggerHaptic('selection');
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveId(id);
-      if (isMobileDrawerOpen) setIsMobileDrawerOpen(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('OPEN_RX_SECTION', { detail: { id } }));
+    }
+
+    const performScroll = (targetId) => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        const headerOffset = 95;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: 'smooth'
+        });
+        setActiveId(targetId);
+        if (isMobileDrawerOpen) setIsMobileDrawerOpen(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (!performScroll(id)) {
+      setTimeout(() => performScroll(id), 60);
     }
   };
 

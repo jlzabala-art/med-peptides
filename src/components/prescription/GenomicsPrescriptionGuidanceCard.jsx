@@ -42,7 +42,8 @@ export default function GenomicsPrescriptionGuidanceCard({
         boxShadow: '0 4px 20px rgba(14, 165, 233, 0.08)',
         marginBottom: '1.5rem',
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        scrollMarginTop: '100px'
       }}
     >
       {/* ── Top Clinical Accent Bar ── */}
