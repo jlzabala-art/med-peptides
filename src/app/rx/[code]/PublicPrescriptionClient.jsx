@@ -551,79 +551,52 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                        getFagronClinicalMonograph(apiName) ||
                        getFagronClinicalMonograph(n);
 
-          let role = api.pharmacologicalClass || mono?.pharmacologicalClass || api.role;
-          let indication = api.clinicalIndication || mono?.clinicalIndication || api.indication;
-          let action = api.mechanismOfAction || mono?.mechanismOfAction || api.instructions || api.action;
-          const geneTargets = api.geneTargets || mono?.geneTargets || [];
+          // Priority for rich clinical metadata: Monograph / Explicit Clinical field > fallback generic strings
+          const isGenericAction = !api.mechanismOfAction && (!api.action || api.action.toLowerCase().includes('personalized active ingredient') || api.action.toLowerCase().includes('principio activo personalizado'));
+          const isGenericRole = !api.pharmacologicalClass && (!api.role || api.role.toLowerCase().includes('nutracéutico & modulador') || api.role.toLowerCase().includes('principio activo farmacogenómico') || api.role.toLowerCase().includes('systemic nutraceutical') || api.role.toLowerCase().includes('pharmacogenomic active'));
+          const isGenericIndication = !api.clinicalIndication && (!api.indication || api.indication.toLowerCase().includes('personalizado') || api.indication.toLowerCase().includes('personalized') || api.indication.toLowerCase().includes('soporte metabólico') || api.indication.toLowerCase().includes('systemic metabolic') || api.indication.toLowerCase().includes('tratamiento folicular'));
 
-          if (n.includes('finasteride')) {
-            role = role || (isEs ? 'Inhibidor Selectivo 5α-Reductasa Tipo II' : 'Selective 5α-Reductase Type II Inhibitor');
-            indication = indication || (isEs ? 'Supresión de DHT Folicular & Prevención de Miniaturización' : 'Follicular DHT Suppression & Miniaturization Reversal');
-            action = action || (isEs 
-              ? 'Gen Diana: SRD5A2. Bloquea selectivamente la síntesis de dihidrotestosterona (DHT), protegiendo la papila dérmica.' 
-              : 'Target Gene: SRD5A2. Selectively halts follicular DHT synthesis, protecting dermal papilla cells against miniaturization.');
-          } else if (n.includes('cetirizine') || n.includes('cetirizina')) {
-            role = role || (isEs ? 'Antagonista Selectivo del Receptor PGD2' : 'Selective PGD2 Receptor Antagonist');
-            indication = indication || (isEs ? 'Modulación Antiinflamatoria Perifolicular' : 'Perifollicular Anti-Inflammatory Modulation');
-            action = action || (isEs 
-              ? 'Gen Diana: PTGDR2 / CRTH2. Antagoniza la PGD2 elevada en alopecia, eliminando el freno microinflamatorio sobre el crecimiento folicular.' 
-              : 'Target Gene: PTGDR2 / CRTH2. Antagonizes elevated scalp PGD2, clearing micro-inflammatory arrest of hair elongation.');
-          } else if (n.includes('panthenol') || n.includes('pantenol')) {
-            role = role || (isEs ? 'Precursor de Coenzima A & Regenerador Celular' : 'Coenzyme A Precursor & Cellular Regenerator');
-            indication = indication || (isEs ? 'Bioenergía Folicular, Reparación de Cutícula & Fuerza Tensil' : 'Follicular ATP Synthesis, Cuticle Repair & Tensile Resilience');
-            action = action || (isEs 
-              ? 'Ruta Metabólica: Biosíntesis de Coenzima A (ATP). Estimula la proliferación celular en la matriz del bulbo y fortalece la hidratación capilar.' 
-              : 'Metabolic Pathway: Coenzyme A Biosynthesis. Fuels energy production in hair bulb matrix cells and enhances hair shaft moisture retention.');
-          } else if (n.includes('minoxidil')) {
-            role = role || (isEs ? 'Activador de Sulfotransferasa & Canales K_ATP' : 'Sulfotransferase Activator & K_ATP Channel Opener');
-            indication = indication || (isEs ? 'Estimulación de Fase Anágena & Perfusión Microvascular' : 'Anagen Phase Induction & Microvascular Perfusion');
-            action = action || (isEs 
-              ? 'Gen Diana: SULT1A1. Metabolizado a sulfato de minoxidil activo para estimular la perfusión capilar y acelerar la anagénesis.' 
-              : 'Target Gene: SULT1A1. Enzymatically sulfated to reopen follicular microvascular circulation and trigger anagen phase.');
-          } else if (n.includes('latanoprost') || n.includes('bimatoprost')) {
-            role = role || (isEs ? 'Agonista de Receptores de Prostaglandina F2α (FP)' : 'Prostaglandin F2α (FP) Receptor Agonist');
-            indication = indication || (isEs ? 'Prolongación Anágena & Pigmentación Folicular' : 'Anagen Phase Extension & Follicular Pigmentation');
-            action = action || (isEs 
-              ? 'Gen Diana: PTGFR. Activa receptores de prostaglandinas en la papila dérmica, induciendo una fase anágena robusta y prolongada.' 
-              : 'Target Gene: PTGFR. Stimulates prostanoid FP receptors in dermal papilla cells to extend anagen duration and hair thickness.');
-          } else if (n.includes('spironolactone') || n.includes('espironolactona')) {
-            role = role || (isEs ? 'Antagonista de Receptores Androgénicos' : 'Competitive Androgen Receptor Antagonist');
-            indication = indication || (isEs ? 'Bloqueo Androgénico Localizado en Cuero Cabelludo' : 'Localized Scalp Androgen Receptor Blockade');
-            action = action || (isEs 
-              ? 'Gen Diana: AR. Bloquea competitivamente los receptores androgénicos en la papila dérmica folicular sin alterar hormonas sistémicas.' 
-              : 'Target Gene: AR. Competitively blocks androgen binding within follicular cells without systemic hormonal alteration.');
-          } else if (n.includes('estradiol')) {
-            role = role || (isEs ? 'Inhibidor Local de 5α-Reductasa & Estimulador de Aromatasa' : 'Local 5α-Reductase Inhibitor & Aromatase Stimulator');
-            indication = indication || (isEs ? 'Modulación Hormonal Tópica sin Efectos Sistémicos' : 'Topical Hormonal Modulation without Systemic Effects');
-            action = action || (isEs 
-              ? 'Genes Diana: CYP19A1 / SRD5A1. Favorece la conversión local a estrógenos protectores y reduce la DHT a nivel folicular.' 
-              : 'Target Genes: CYP19A1 / SRD5A1. Favors local follicular aromatization into protective estrogens while mitigating DHT.');
-          } else if (n.includes('ginseng')) {
-            role = role || (isEs ? 'Fitoestimulante Celular & Inductor de VEGF' : 'Cellular Phytostimulant & VEGF Inducer');
-            indication = indication || (isEs ? 'Proliferación de Papila Dérmica & Retardo Catágeno' : 'Dermal Papilla Proliferation & Catagen Delay');
-            action = action || (isEs 
-              ? 'Ruta Diana: Señalización VEGF. Incrementa el factor de crecimiento endotelial vascular, asegurando nutrición folicular continua.' 
-              : 'Target Pathway: VEGF Signaling. Upregulates vascular endothelial growth factor, promoting sustained hair follicle cycling.');
-          } else if (n.includes('ginkgo')) {
-            role = role || (isEs ? 'Optimizador Microvascular & Escudo Antioxidante' : 'Microvascular Optimizer & Antioxidant Shield');
-            indication = indication || (isEs ? 'Perfusión Capilar & Protección contra Estrés Oxidativo' : 'Capillary Perfusion & Oxidative Stress Shield');
-            action = action || (isEs 
-              ? 'Ruta Diana: Óxido Nítrico & Neutralización de Radicales Libres. Protege el nicho de células madre foliculares.' 
-              : 'Target Pathway: Nitric Oxide & Free-Radical Scavenging. Shields follicular stem cell niche against lipid peroxidation.');
-          }
+          let role = mono?.pharmacologicalClass || api.pharmacologicalClass || (!isGenericRole ? api.role : null);
+          let indication = mono?.clinicalIndication || api.clinicalIndication || (!isGenericIndication ? api.indication : null);
+          let action = mono?.mechanismOfAction || api.mechanismOfAction || (!isGenericAction ? (api.instructions || api.action) : null);
+          const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : (api.geneTargets || []);
 
           if (!role) {
-            role = isOral 
-              ? (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')
-              : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient');
+            if (n.includes('finasteride')) {
+              role = isEs ? 'Inhibidor Selectivo 5α-Reductasa Tipo II' : 'Selective 5α-Reductase Type II Inhibitor';
+            } else if (n.includes('dutasteride')) {
+              role = isEs ? 'Inhibidor Dual 5α-Reductasa Tipo I y II' : 'Dual 5α-Reductase Type I & II Inhibitor';
+            } else if (n.includes('minoxidil')) {
+              role = isEs ? 'Activador de Sulfotransferasa & Canales K_ATP' : 'Sulfotransferase Activator & K_ATP Channel Opener';
+            } else if (n.includes('cetirizine') || n.includes('cetirizina')) {
+              role = isEs ? 'Antagonista Selectivo del Receptor PGD2' : 'Selective PGD2 Receptor Antagonist';
+            } else if (n.includes('panthenol') || n.includes('pantenol')) {
+              role = isEs ? 'Precursor de Coenzima A & Regenerador Celular' : 'Coenzyme A Precursor & Cellular Regenerator';
+            } else if (n.includes('ginseng')) {
+              role = isEs ? 'Fitoestimulante Celular & Inductor de VEGF' : 'Cellular Phytostimulant & VEGF Inducer';
+            } else if (n.includes('ginkgo')) {
+              role = isEs ? 'Optimizador Microvascular & Escudo Antioxidante' : 'Microvascular Optimizer & Antioxidant Shield';
+            } else {
+              role = isOral 
+                ? (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')
+                : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient');
+            }
           }
+
           if (!indication) {
-            indication = isTrichoOil 
-              ? (isEs ? 'Higiene & Microcirculación Folicular' : 'Scalp Care & Follicular Microcirculation')
-              : (isOral 
-                ? (isEs ? 'Soporte Metabólico Sistémico' : 'Systemic Metabolic Fortification')
-                : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'));
+            if (n.includes('finasteride') || n.includes('dutasteride')) {
+              indication = isEs ? 'Supresión de DHT Folicular & Prevención de Miniaturización' : 'Follicular DHT Suppression & Miniaturization Reversal';
+            } else if (n.includes('minoxidil')) {
+              indication = isEs ? 'Estimulación de Fase Anágena & Perfusión Microvascular' : 'Anagen Phase Induction & Microvascular Perfusion';
+            } else {
+              indication = isTrichoOil 
+                ? (isEs ? 'Higiene & Microcirculación Folicular' : 'Scalp Care & Follicular Microcirculation')
+                : (isOral 
+                  ? (isEs ? 'Soporte Metabólico Sistémico' : 'Systemic Metabolic Fortification')
+                  : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'));
+            }
           }
+
           if (!action) {
             action = isEs 
               ? 'Principio activo personalizado calibrado al perfil clínico y genómico del paciente.' 

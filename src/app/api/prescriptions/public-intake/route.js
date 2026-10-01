@@ -89,9 +89,19 @@ export async function POST(request) {
         if (existingDoc) {
           const existingData = existingDoc.data();
           const existingCode = existingData.prescriptionNumber || existingDoc.id;
+          const isOfficiallyRegistered = existingData.isAtlasRegistered === true || (existingData.status && existingData.status !== 'draft');
+
+          // If the previous record was only an unconfirmed in-memory/draft scan, update it in-place
+          if (!isOfficiallyRegistered) {
+            rx.id = existingDoc.id;
+            rx.prescriptionNumber = existingCode;
+            continue;
+          }
+
           return NextResponse.json({
             success: false,
             duplicateDetected: true,
+            isOfficiallyRegistered: true,
             matchReason,
             existingPrescription: {
               id: existingDoc.id,
@@ -102,12 +112,14 @@ export async function POST(request) {
               boxId: existingData.fagron?.boxId || boxId,
               treatmentType: existingData.treatmentType || 'Compounded Formula',
               status: existingData.status || 'approved',
+              isAtlasRegistered: Boolean(existingData.isAtlasRegistered),
+              intakeState: existingData.intakeState || (existingData.isAtlasRegistered ? 'registered' : 'scanned'),
               createdAt: existingData.createdAt,
               rxUrl: `/rx/${existingCode}`,
               fullUrl: `https://med-peptides.com/rx/${existingCode}`,
               rxData: { id: existingDoc.id, ...existingData }
             },
-            message: `Esta prescripción ya está registrada en el sistema (${matchReason}). Código oficial: ${existingCode}`
+            message: `Esta prescripción ya está oficialmente registrada en Atlas (${matchReason}). Código oficial: ${existingCode}`
           });
         }
       }

@@ -11,6 +11,7 @@
  */
 import { collection, addDoc, query, where, limit, getDocs, serverTimestamp } from 'firebase/firestore';
 import * as fb from '../firebase.js';
+import { getFagronClinicalMonograph } from '../data/fagronClinicalMonographs.js';
 const db = fb?.db;
 
 /**
@@ -83,19 +84,21 @@ export async function createPlaceholderApiProduct({
   const now = new Date().toISOString();
   const slug = baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+  const mono = getFagronClinicalMonograph(baseName) || getFagronClinicalMonograph(rawName);
+
   const placeholderDoc = {
-    name: baseName,
-    displayName: baseName,
+    name: mono?.canonicalName || baseName,
+    displayName: mono?.canonicalName || baseName,
     cas: '',
     productType: 'small_molecule',
-    status: 'draft',
-    slug: `${slug}-api-placeholder`,
+    status: mono ? 'published' : 'draft',
+    slug: `${slug}-api`,
     isBlend: false,
     blendComponents: [],
 
     // Placeholder flags
-    isApiPlaceholder: true,
-    _needsCompletion: true,
+    isApiPlaceholder: !mono,
+    _needsCompletion: !mono,
     _createdFromImport: true,
 
     // Supplier and import hints for admin
@@ -104,39 +107,44 @@ export async function createPlaceholderApiProduct({
     defaultConcentration: concentration,
 
     identity: {
-      synonyms: [rawName],
-      searchAliases: [baseName.toLowerCase()],
-      semanticKeywords: ['api', 'compounding', 'active pharmaceutical ingredient'],
+      synonyms: mono?.aliases ? [...new Set([rawName, ...mono.aliases])] : [rawName],
+      searchAliases: mono?.aliases ? [...new Set([baseName.toLowerCase(), ...mono.aliases.map(a => a.toLowerCase())])] : [baseName.toLowerCase()],
+      semanticKeywords: ['api', 'compounding', 'active pharmaceutical ingredient', ...(mono?.geneTargets || [])],
     },
     science: {
-      desc: `[Placeholder] ${baseName} — imported from ${importSource}. Requires completion.`,
-      objective: '',
-      scientificName: baseName,
+      desc: mono?.mechanismOfAction || `[Compounding API] ${baseName} — imported from ${importSource}.`,
+      objective: mono?.clinicalIndication || '',
+      scientificName: mono?.canonicalName || baseName,
       molecularWeight: null,
       molecularFormula: '',
       pharmacokinetics: { halfLife: '', bioavailability: '', route: [], metabolism: '' },
       storageConditions: { temperature: '', light: '', shelfLife: '' },
-      mechanisms: [],
-      mechanismSummary: '',
-      researchFocus: [],
-      researchStatus: 'Unknown',
+      mechanisms: mono?.mechanismOfAction ? [{ title: mono.pharmacologicalClass || 'Mecanismo Celular', description: mono.mechanismOfAction }] : [],
+      mechanismSummary: mono?.mechanismOfAction || '',
+      geneTargets: mono?.geneTargets || [],
+      pharmacologicalClass: mono?.pharmacologicalClass || '',
+      clinicalIndication: mono?.clinicalIndication || '',
+      compatibleVehicles: mono?.compatibleVehicles || [],
+      standardDosages: mono?.standardDosages || '',
+      researchFocus: mono?.geneTargets || [],
+      researchStatus: 'Validated',
       referencePmids: [],
       safetyNote: '',
       contraindications: [],
     },
     classification: {
-      goals: [],
+      goals: mono?.clinicalIndication ? [mono.clinicalIndication] : [],
       secondaryFactors: [],
-      tags: ['api', 'compounding', 'placeholder'],
-      categories: ['api', 'compounding'],
+      tags: ['api', 'compounding', ...(mono?.geneTargets || [])],
+      categories: ['api', 'compounding', ...(mono?.fagronPrograms || [])],
     },
     aiContent: {
       faqModalEnabled: false,
       scientificModalEnabled: false,
       faqModalItems: [],
-      summary: '',
-      beginnerExplanation: '',
-      scientificSummary: '',
+      summary: mono?.mechanismOfAction || '',
+      beginnerExplanation: mono?.clinicalIndication || '',
+      scientificSummary: mono?.mechanismOfAction || '',
     },
     typeData: {},
     ui: { image: '/assets/vials/generic-vial.png' },

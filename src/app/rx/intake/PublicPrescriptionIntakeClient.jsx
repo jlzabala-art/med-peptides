@@ -21,6 +21,7 @@ import {
 } from '@/services/prescriptionAiService';
 import { uploadPrescriptionDocument } from '@/services/prescriptionStorageService';
 import { exportPrescriptionToXlsx, exportBatchPrescriptionsToXlsx } from '@/utils/exportPrescriptionToXlsx';
+import { getFagronClinicalMonograph } from '@/data/fagronClinicalMonographs';
 import '@/styles/publicDesignSystem.css';
 
 const PUBLIC_INTAKE_STYLES = `
@@ -77,6 +78,10 @@ export default function PublicPrescriptionIntakeClient() {
   // Duplicate Warning & Override State
   const [duplicateWarning, setDuplicateWarning] = useState(null);
   const [pendingExtractedList, setPendingExtractedList] = useState(null);
+
+  // Missing API Clinical Details Modal & Enrichment State
+  const [enrichmentAuditModal, setEnrichmentAuditModal] = useState(null);
+  const [isEnrichingApis, setIsEnrichingApis] = useState(false);
 
   // Step 2: Multi-prescription published list & Active Index
   const [publishedRxList, setPublishedRxList] = useState([]);
@@ -295,52 +300,44 @@ export default function PublicPrescriptionIntakeClient() {
         role: userProfile?.role || 'user'
       } : null;
 
-      const res = await fetch('/api/prescriptions/public-intake', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prescriptions: allNormalized,
-          createPatientRecord: true,
-          source: 'public_scan_publish_batch',
-          batchId,
-          allowDuplicateOverride: false,
-          accountManager: accountManagerPayload,
-          uploadedBy: uploadedByPayload,
-        })
+      // ── Step 4 of 4: Active Ingredients Completeness Audit ──
+      const incompleteApis = [];
+      const seenNames = new Set();
+
+      allNormalized.forEach(rx => {
+        const apis = rx.prescriptionLines || rx.items || [];
+        apis.forEach(item => {
+          const rawName = item.productName || item.activeIngredient || item.name || '';
+          const cleanName = rawName.trim().replace(/\s+\d[\d.,]*\s*(%|mg|ml|mcg|ug|g|iu|µg)?.*/i, '').replace(/\s+\(.*?\)/g, '').trim();
+          if (!cleanName || seenNames.has(cleanName.toLowerCase())) return;
+          seenNames.add(cleanName.toLowerCase());
+
+          const mono = getFagronClinicalMonograph(cleanName) || getFagronClinicalMonograph(rawName);
+          const hasRichDesc = mono && mono.mechanismOfAction && (mono.geneTargets?.length > 0 || mono.pharmacologicalClass);
+          if (!hasRichDesc) {
+            incompleteApis.push({
+              rawName,
+              cleanName,
+              dose: item.dosage || item.dose || item.concentration || ''
+            });
+          }
+        });
       });
 
-      const data = await res.json();
-
-      // Check if existing duplicate was detected by Box ID or Patient + Date
-      if (data.duplicateDetected) {
+      // If active ingredients are missing complete descriptions, ask user to enrich with AI
+      if (incompleteApis.length > 0) {
         toast.dismiss('ai-intake-step');
-        setPendingExtractedList(allNormalized);
-        setDuplicateWarning(data);
+        setEnrichmentAuditModal({
+          incompleteApis,
+          allNormalized,
+          batchId,
+          accountManagerPayload,
+          uploadedByPayload
+        });
         return;
       }
 
-      if (!res.ok || !data.success || !data.savedPrescriptions?.length) {
-        throw new Error(data.error || 'Failed to save and publish electronic prescriptions');
-      }
-
-      const savedList = data.savedPrescriptions.map((saved, idx) => {
-        return saved.rxData || {
-          ...allNormalized[idx],
-          id: saved.id,
-          prescriptionNumber: saved.prescriptionNumber,
-          status: 'approved'
-        };
-      });
-
-      setPublishedRxList(savedList);
-      setActiveRxIndex(0);
-
-      toast.success(
-        isEs 
-          ? `¡${savedList.length} prescripción(es) publicada(s) con éxito!` 
-          : `Successfully published ${savedList.length} prescription(s)!`,
-        { id: 'ai-intake-step' }
-      );
+      await executeSavePrescriptions(allNormalized, batchId, accountManagerPayload, uploadedByPayload);
     } catch (err) {
       console.error('[PublicPrescriptionIntake] Error:', err);
       let rawMsg = String(err?.message || '');
@@ -368,6 +365,154 @@ export default function PublicPrescriptionIntakeClient() {
       setProcessingStep('');
     }
   }, [stagedFiles, isEs, user, userProfile, activeAmEmail, activeAmName, activeAmId]);
+
+  const executeSavePrescriptions = async (listToSave, batchIdToUse, amPayload, upPayload) => {
+    try {
+      setIsProcessing(true);
+      setCurrentStepIndex(4);
+      setProcessingStep(isEs 
+        ? `Registrando ${listToSave.length} prescripción(es) en Atlas...` 
+        : `Registering ${listToSave.length} official electronic prescription(s)...`);
+      toast.loading(isEs 
+        ? 'Generando dossiers electrónicos oficiales...' 
+        : 'Generating official electronic dossiers...', 
+        { id: 'ai-intake-step' }
+      );
+
+      const res = await fetch('/api/prescriptions/public-intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptions: listToSave,
+          createPatientRecord: true,
+          source: 'public_scan_publish_batch',
+          batchId: batchIdToUse,
+          allowDuplicateOverride: false,
+          accountManager: amPayload,
+          uploadedBy: upPayload,
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.duplicateDetected) {
+        toast.dismiss('ai-intake-step');
+        setPendingExtractedList(listToSave);
+        setDuplicateWarning(data);
+        return;
+      }
+
+      if (!res.ok || !data.success || !data.savedPrescriptions?.length) {
+        throw new Error(data.error || 'Failed to save and publish electronic prescriptions');
+      }
+
+      const savedList = data.savedPrescriptions.map((saved, idx) => {
+        return saved.rxData || {
+          ...listToSave[idx],
+          id: saved.id,
+          prescriptionNumber: saved.prescriptionNumber,
+          status: 'approved'
+        };
+      });
+
+      setPublishedRxList(savedList);
+      setActiveRxIndex(0);
+      setEnrichmentAuditModal(null);
+
+      toast.success(
+        isEs 
+          ? `¡${savedList.length} prescripción(es) registrada(s) con éxito en Atlas!` 
+          : `Successfully registered ${savedList.length} prescription(s) in Atlas!`,
+        { id: 'ai-intake-step' }
+      );
+    } catch (err) {
+      console.error('[PublicPrescriptionIntake] Error saving prescription:', err);
+      toast.error(err.message || 'Error saving prescription', { id: 'ai-intake-step' });
+    } finally {
+      setIsProcessing(false);
+      setProcessingStep('');
+    }
+  };
+
+  const handleEnrichAndSaveApis = async () => {
+    if (!enrichmentAuditModal) return;
+    const { incompleteApis, allNormalized, batchId, accountManagerPayload, uploadedByPayload } = enrichmentAuditModal;
+
+    try {
+      setIsEnrichingApis(true);
+      toast.loading(isEs ? 'Investigando farmacología y dianas genéticas con IA...' : 'Enriching clinical monographs with AI...', { id: 'enrich-apis' });
+
+      const res = await fetch('/api/prescriptions/enrich-apis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apis: incompleteApis.map(a => a.cleanName),
+          saveToCatalog: true
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to enrich APIs');
+      }
+
+      const enrichedMap = {};
+      (data.enrichedApis || []).forEach(api => {
+        enrichedMap[api.name.toLowerCase()] = api;
+      });
+
+      // Update all normalized prescriptions in memory with newly enriched data
+      const updatedNormalized = allNormalized.map(rx => {
+        const apis = (rx.prescriptionLines || rx.items || []).map(line => {
+          const rawName = line.productName || line.activeIngredient || line.name || '';
+          const cleanName = rawName.trim().replace(/\s+\d[\d.,]*\s*(%|mg|ml|mcg|ug|g|iu|µg)?.*/i, '').replace(/\s+\(.*?\)/g, '').trim().toLowerCase();
+          const enriched = enrichedMap[cleanName];
+          if (enriched) {
+            return {
+              ...line,
+              productId: enriched.productId || line.productId,
+              pharmacologicalClass: enriched.pharmacologicalClass || line.pharmacologicalClass,
+              clinicalIndication: enriched.clinicalIndication || line.clinicalIndication,
+              mechanismOfAction: enriched.mechanismOfAction || line.mechanismOfAction,
+              geneTargets: enriched.geneTargets || line.geneTargets || [],
+              action: enriched.mechanismOfAction || line.action,
+              role: enriched.pharmacologicalClass || line.role,
+              indication: enriched.clinicalIndication || line.indication,
+            };
+          }
+          return line;
+        });
+
+        return {
+          ...rx,
+          prescriptionLines: apis,
+          items: apis
+        };
+      });
+
+      toast.success(
+        isEs 
+          ? `¡${data.count} principios activos enriquecidos y guardados en Firestore!` 
+          : `Successfully enriched and saved ${data.count} active ingredients in Firestore!`,
+        { id: 'enrich-apis' }
+      );
+
+      setEnrichmentAuditModal(null);
+      await executeSavePrescriptions(updatedNormalized, batchId, accountManagerPayload, uploadedByPayload);
+    } catch (err) {
+      console.error('[PublicPrescriptionIntake] Enrich error:', err);
+      toast.error(err.message || 'Error during AI enrichment', { id: 'enrich-apis' });
+    } finally {
+      setIsEnrichingApis(false);
+    }
+  };
+
+  const handleSkipEnrichment = async () => {
+    if (!enrichmentAuditModal) return;
+    const { allNormalized, batchId, accountManagerPayload, uploadedByPayload } = enrichmentAuditModal;
+    setEnrichmentAuditModal(null);
+    await executeSavePrescriptions(allNormalized, batchId, accountManagerPayload, uploadedByPayload);
+  };
 
   // Duplicate Warning Actions
   const handleViewExistingRx = () => {
@@ -2031,6 +2176,233 @@ export default function PublicPrescriptionIntakeClient() {
           )}
         </div>
 
+        {/* ── API CLINICAL ENRICHMENT CONFIRMATION MODAL ── */}
+        {enrichmentAuditModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100000,
+            padding: '1rem'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '600px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.35)',
+              border: '1px solid #bae6fd',
+              overflow: 'hidden',
+              animation: 'fadeIn 0.2s ease-out'
+            }}>
+              {/* Header */}
+              <div style={{
+                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                padding: '1.25rem 1.5rem',
+                borderBottom: '1px solid #bae6fd',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Sparkles size={24} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0369a1' }}>
+                      {isEs ? 'Enriquecimiento de Principios Activos' : 'Clinical API Enrichment'}
+                    </h3>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      background: '#0284c7',
+                      color: '#ffffff'
+                    }}>
+                      {enrichmentAuditModal.incompleteApis.length} {isEs ? 'APIs' : 'APIs'}
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#0c4a6e' }}>
+                    {isEs 
+                      ? 'Se han detectado principios activos que no cuentan con descripción clínica o dianas genéticas en la base de datos.' 
+                      : 'Active ingredients detected without complete clinical pharmacology or gene targets in database.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSkipEnrichment}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#0369a1',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                  title={isEs ? 'Cerrar' : 'Close'}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.5 }}>
+                  {isEs 
+                    ? '¿Deseas que Atlas Clinical AI investigue en tiempo real el mecanismo celular, dianas genéticas y posología estándar de estos principios activos antes de registrarlos en la plataforma?' 
+                    : 'Would you like Atlas Clinical AI to research cellular mechanisms, gene targets, and standard dosages before registering in Atlas?'}
+                </div>
+
+                {/* Detected Incomplete APIs Chips */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'Principios Activos a Investigar' : 'Active Ingredients to Research'}
+                  </div>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {enrichmentAuditModal.incompleteApis.map((item, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          color: '#0f172a'
+                        }}
+                      >
+                        <span style={{ color: '#0284c7' }}>🧪</span>
+                        <span>{item.cleanName}</span>
+                        {item.dose && (
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px' }}>
+                            {item.dose}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Firestore Persistence Notice */}
+                <div style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '0.75rem 0.9rem',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                  fontSize: '0.8rem',
+                  color: '#166534'
+                }}>
+                  <Database size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#15803d' }} />
+                  <div>
+                    <strong>{isEs ? 'Guardado Permanente en Firestore:' : 'Permanent Firestore Persistence:'}</strong>{' '}
+                    {isEs 
+                      ? 'La información investigada se guardará directamente en la base de datos de productos para enriquecer futuras prescripciones e importaciones.'
+                      : 'Researched monographs will be persisted in the products database for all future prescription imports.'}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  marginTop: '0.5rem'
+                }}>
+                  {/* Primary: Enrich with AI */}
+                  <button
+                    type="button"
+                    disabled={isEnrichingApis}
+                    onClick={handleEnrichAndSaveApis}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.88rem',
+                      fontWeight: 700,
+                      cursor: isEnrichingApis ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
+                      opacity: isEnrichingApis ? 0.7 : 1
+                    }}
+                  >
+                    {isEnrichingApis ? (
+                      <>
+                        <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        <span>{isEs ? 'Investigando con IA y Guardando...' : 'Researching and Saving...'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={16} />
+                        <span>{isEs ? 'Enriquecer con IA y Guardar en Base de Datos' : 'Enrich with AI & Save to Firestore'}</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Secondary: Skip and Register directly */}
+                  <button
+                    type="button"
+                    disabled={isEnrichingApis}
+                    onClick={handleSkipEnrichment}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      background: '#ffffff',
+                      color: '#475569',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.84rem',
+                      fontWeight: 600,
+                      cursor: isEnrichingApis ? 'not-allowed' : 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {isEs ? 'Continuar Registro Directo en Atlas (Sin Enriquecer)' : 'Continue Direct Registration (Skip Enrichment)'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── DUPLICATE WARNING MODAL ── */}
         {duplicateWarning && (
           <div style={{
@@ -2131,8 +2503,24 @@ export default function PublicPrescriptionIntakeClient() {
                   borderRadius: '10px',
                   padding: '1rem'
                 }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-                    {isEs ? 'Prescripción Existente en Base de Datos' : 'Existing Record in Database'}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? 'Prescripción Existente en Base de Datos' : 'Existing Record in Database'}
+                    </div>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      background: '#dcfce7',
+                      color: '#166534',
+                      border: '1px solid #86efac',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      ● {isEs ? 'Registrado en Base de Datos' : 'Database Registered'}
+                    </span>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.82rem' }}>
