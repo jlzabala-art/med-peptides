@@ -951,6 +951,37 @@
     gap: 1.5rem !important;
     align-items: flex-start !important;
   }
+
+  /* ── Independent Dual-Column Scroll for Sticky Sidebar ── */
+  .pds-sidebar-desktop {
+    position: sticky !important;
+    top: 76px !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e1 transparent !important;
+    padding-right: 4px;
+    padding-bottom: 2rem;
+  }
+
+  .pds-sidebar-desktop::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .pds-sidebar-desktop::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .pds-sidebar-desktop::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+
+  .pds-sidebar-desktop:hover::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+  }
 }
 
 .pds-main-column {
