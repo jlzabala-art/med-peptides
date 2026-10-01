@@ -30,7 +30,11 @@ import {
   FileSpreadsheet,
   Box,
   Edit3,
-  X
+  X,
+  Layers,
+  Dna,
+  Factory,
+  QrCode
 } from '@/lib/icons';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
@@ -65,6 +69,15 @@ const PUBLIC_RX_STYLES = `
   [class*="PriceTransparency"] {
     display: none !important;
   }
+
+  @media (max-width: 768px) {
+    .mobile-floating-action-bar {
+      display: flex !important;
+    }
+    .pds-content-with-sidebar {
+      padding-bottom: 80px !important;
+    }
+  }
 `;
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake = null }) {
@@ -74,6 +87,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeDocTab, setActiveDocTab] = useState(0);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [activeGcpTab, setActiveGcpTab] = useState('all'); // 'all' | 'formulations' | 'genomics' | 'posology' | 'traceability'
 
   // Treating Doctor Modal State
   const [customTreatingDoctor, setCustomTreatingDoctor] = useState(null);
@@ -1219,7 +1233,75 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
             </div>
 
+            {/* ── GCP Standard Sub-Tabs Navigation (Laptop & Mobile) ── */}
+            <div className="gcp-subtabs-strip" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderBottom: '1px solid #e2e8f0',
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '6px 10px',
+              overflowX: 'auto',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              position: 'sticky',
+              top: '72px',
+              zIndex: 30,
+              backdropFilter: 'blur(8px)',
+              marginBottom: '0.5rem'
+            }}>
+              {[
+                { id: 'all', label: isEs ? 'Todo el Dossier' : 'Full Dossier', icon: Layers },
+                { id: 'formulations', label: isEs ? 'Fórmulas & Galénica' : 'Formulations', icon: FlaskConical, count: compoundedFormulations.length },
+                { id: 'genomics', label: isEs ? 'Farmacogenómica' : 'Genomics', icon: Dna },
+                { id: 'posology', label: isEs ? 'Posología & Régimen' : 'Posology', icon: Clock },
+                { id: 'traceability', label: isEs ? 'Laboratorio & Lote UE' : 'Lab & Traceability', icon: Factory }
+              ].map(tab => {
+                const isActive = activeGcpTab === tab.id;
+                const IconCmp = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveGcpTab(tab.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: isActive ? '#e0f2fe' : 'transparent',
+                      color: isActive ? '#0369a1' : '#64748b',
+                      fontWeight: isActive ? 700 : 500,
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.15s ease',
+                      borderBottom: isActive ? '2px solid #0284c7' : '2px solid transparent'
+                    }}
+                  >
+                    <IconCmp size={15} style={{ color: isActive ? '#0284c7' : '#64748b' }} />
+                    <span>{tab.label}</span>
+                    {tab.count !== undefined && (
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        padding: '1px 6px',
+                        borderRadius: '10px',
+                        background: isActive ? '#0284c7' : '#f1f5f9',
+                        color: isActive ? '#ffffff' : '#64748b'
+                      }}>
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
         {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
+        {(activeGcpTab === 'all' || activeGcpTab === 'formulations') && (
         <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem' }}>
           {compoundedFormulations.map((formulation, fIdx) => (
             <div
@@ -1606,8 +1688,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </div>
           ))}
         </div>
+        )}
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
+        {(activeGcpTab === 'all' || activeGcpTab === 'posology') && (
         <div id="milestones-card" className="rx-card" style={{
           background: '#ffffff',
           borderRadius: '16px',
@@ -1724,8 +1808,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             ))}
           </div>
         </div>
+        )}
 
         {/* ── Patient Mobile Access Portal (Private Patient Dossier) ──────────────── */}
+        {(activeGcpTab === 'all' || activeGcpTab === 'traceability') && (
+        <React.Fragment>
         <div id="qr-card" style={{
           background: '#ffffff',
           borderRadius: '16px',
@@ -2060,9 +2147,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             )}
           </div>
         )}
+        </React.Fragment>
+        )}
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
-        {genomicsData && (
+        {(activeGcpTab === 'all' || activeGcpTab === 'genomics') && genomicsData && (
           <GenomicsPrescriptionGuidanceCard
             genomicsData={genomicsData}
             lang={lang}
@@ -2540,6 +2629,101 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           </div>
         </div>
       )}
+
+      {/* ── Mobile-First Floating Action Bar (Golden Rule #23) ── */}
+      <div className="mobile-floating-action-bar" style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: 'rgba(255, 255, 255, 0.96)',
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid #cbd5e1',
+        padding: '10px 16px',
+        display: 'none',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '10px',
+        zIndex: 99999,
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.1)'
+      }}>
+        <button
+          type="button"
+          onClick={() => {
+            const printBtn = document.querySelector('button[title*="PDF"], button[title*="Imprimir"]');
+            if (printBtn) printBtn.click();
+            else window.print();
+          }}
+          style={{
+            flex: 1,
+            height: '46px',
+            borderRadius: '8px',
+            background: '#003666',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 700,
+            fontSize: '0.84rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          <Printer size={16} />
+          <span>PDF</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(window.location.href);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }
+          }}
+          style={{
+            flex: 1,
+            height: '46px',
+            borderRadius: '8px',
+            background: '#f1f5f9',
+            color: '#1e293b',
+            border: '1px solid #cbd5e1',
+            fontWeight: 600,
+            fontSize: '0.84rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          <Copy size={16} />
+          <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Enlace' : 'Link')}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowQrModal(true)}
+          style={{
+            flex: 1,
+            height: '46px',
+            borderRadius: '8px',
+            background: '#0284c7',
+            color: '#ffffff',
+            border: 'none',
+            fontWeight: 700,
+            fontSize: '0.84rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          <QrCode size={16} />
+          <span>QR Lote</span>
+        </button>
+      </div>
 
       {/* ── Prescription Dedicated Clinical AI Research Copilot ── */}
       <PublicAtlasAIDrawer
