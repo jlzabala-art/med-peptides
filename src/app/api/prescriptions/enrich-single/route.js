@@ -66,14 +66,14 @@ export async function POST(request) {
       if ((!monograph || !monograph.mechanismOfAction || !monograph.geneTargets?.length) && ai) {
         try {
           const prompt = `You are a clinical pharmacologist and genomics expert. Generate verified clinical pharmacology, mechanism of action, and gene targets for the active compounding ingredient: "${baseName}".
-Provide exact medical terms in Spanish:
-1. Canonical Name (INN)
-2. Pharmacological Class (e.g. Inhibidor 5α-reductasa, Precursor de Óxido Nítrico, Carotenoide Antioxidante)
-3. Clinical Indication (e.g. Alopecia androgenética, estimulación de perfusión dérmica)
-4. Mechanism of Action (detailed biological and cellular pathway)
+All output terms and descriptions MUST BE IN ENGLISH:
+1. Canonical Name (INN in English)
+2. Pharmacological Class (e.g. Selective 5α-Reductase Type II Inhibitor, Nitric Oxide Precursor & Follicular Vasodilator, Potent Antioxidant Xanthophyll Carotenoid)
+3. Clinical Indication (e.g. Follicular DHT suppression, microvascular perfusion enhancement, hair follicle density maintenance)
+4. Mechanism of Action (detailed scientific description of biological and cellular pathways, dermal papilla, keratinocytes, enzyme inhibition/stimulation)
 5. Gene Targets (Official HGNC symbols, e.g. ["SRD5A2", "NOS3", "SULT1A1"])
-6. Standard Dosages (e.g. "0.5% - 2% Tópico · 50 mg - 100 mg Oral")
-7. Compatible Galenic Vehicles (e.g. ["TrichoSol™", "TrichoFoam™", "Cápsulas Orales Micronizadas"])`;
+6. Standard Dosages (e.g. "0.5% - 2% Topical · 50 mg - 100 mg Oral")
+7. Compatible Galenic Vehicles (e.g. ["TrichoSol™", "TrichoFoam™", "Micronized Oral Capsules"])`;
 
           const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -102,11 +102,11 @@ Provide exact medical terms in Spanish:
               canonicalName: aiData.canonicalName || baseName,
               aliases: [baseName.toLowerCase()],
               geneTargets: aiData.geneTargets || [],
-              pharmacologicalClass: aiData.pharmacologicalClass || 'Principio Activo Farmacogenómico',
-              clinicalIndication: aiData.clinicalIndication || 'Tratamiento Folicular Personalizado',
+              pharmacologicalClass: aiData.pharmacologicalClass || 'Pharmacogenomic Active Ingredient',
+              clinicalIndication: aiData.clinicalIndication || 'Personalized Follicular Therapy',
               mechanismOfAction: aiData.mechanismOfAction,
-              compatibleVehicles: aiData.compatibleVehicles || ['TrichoSol™', 'Cápsulas Orales Micronizadas'],
-              standardDosages: aiData.standardDosages || 'Dosis terapéutica estandarizada USP'
+              compatibleVehicles: aiData.compatibleVehicles || ['TrichoSol™', 'Micronized Oral Capsules Base'],
+              standardDosages: aiData.standardDosages || 'Standardized USP therapeutic dosage'
             };
           }
         } catch (aiErr) {
@@ -123,13 +123,13 @@ Provide exact medical terms in Spanish:
         name: item.name || monograph?.canonicalName || baseName,
         productName: item.productName || monograph?.canonicalName || baseName,
         activeIngredient: monograph?.canonicalName || baseName,
-        description: item.description || monograph?.mechanismOfAction || `Principio activo ${baseName}`,
-        mechanismOfAction: item.mechanismOfAction || monograph?.mechanismOfAction || `Mecanismo de acción calibrado para ${baseName}`,
-        pharmacologicalClass: item.pharmacologicalClass || monograph?.pharmacologicalClass || 'Principio Activo',
+        description: item.description || monograph?.mechanismOfAction || `Active ingredient ${baseName}`,
+        mechanismOfAction: item.mechanismOfAction || monograph?.mechanismOfAction || `Mechanism of action calibrated for ${baseName}`,
+        pharmacologicalClass: item.pharmacologicalClass || monograph?.pharmacologicalClass || 'Active Compound',
         geneTargets: item.geneTargets?.length ? item.geneTargets : (monograph?.geneTargets || []),
         compatibleVehicles: item.compatibleVehicles || monograph?.compatibleVehicles || ['TrichoSol™'],
-        standardDosages: item.standardDosages || monograph?.standardDosages || item.dosage || 'Dosis estándar',
-        dosage: item.dosage || item.dose || item.strength || monograph?.standardDosages || '1 unidad',
+        standardDosages: item.standardDosages || monograph?.standardDosages || item.dosage || 'Standard dosage',
+        dosage: item.dosage || item.dose || item.strength || monograph?.standardDosages || '1 unit',
       };
 
       enrichedItems.push(enrichedItem);

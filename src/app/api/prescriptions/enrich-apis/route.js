@@ -63,14 +63,14 @@ export async function POST(request) {
       if ((!monograph || !monograph.mechanismOfAction || !monograph.geneTargets?.length) && ai) {
         try {
           const prompt = `You are a clinical pharmacologist and genomics expert. Generate verified clinical pharmacology, mechanism of action, and gene targets for the active compounding ingredient: "${baseName}".
-Provide exact medical terms in Spanish:
-1. Canonical Name (INN)
-2. Pharmacological Class (e.g. Inhibidor 5α-reductasa, Precursor de Óxido Nítrico, Carotenoide Antioxidante)
-3. Clinical Indication (e.g. Alopecia androgenética, estimulación de perfusión dérmica)
-4. Mechanism of Action (detailed biological and cellular pathway, dermal papilla, keratinocytes, enzyme inhibition/stimulation)
+All output terms and descriptions MUST BE IN ENGLISH:
+1. Canonical Name (INN in English)
+2. Pharmacological Class (e.g. Selective 5α-Reductase Type II Inhibitor, Nitric Oxide Precursor & Follicular Vasodilator, Potent Antioxidant Xanthophyll Carotenoid)
+3. Clinical Indication (e.g. Follicular DHT suppression, microvascular perfusion enhancement, hair follicle density maintenance)
+4. Mechanism of Action (detailed scientific description of biological and cellular pathways, dermal papilla, keratinocytes, enzyme inhibition/stimulation)
 5. Gene Targets (Official HGNC symbols, e.g. ["SRD5A2", "NOS3", "SULT1A1"])
-6. Standard Dosages (e.g. "0.5% - 2% Tópico · 50 mg - 100 mg Oral")
-7. Compatible Galenic Vehicles (e.g. ["TrichoSol™", "TrichoFoam™", "Cápsulas Orales Micronizadas"])`;
+6. Standard Dosages (e.g. "0.5% - 2% Topical · 50 mg - 100 mg Oral")
+7. Compatible Galenic Vehicles (e.g. ["TrichoSol™", "TrichoFoam™", "Micronized Oral Capsules"])`;
 
           const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -99,11 +99,11 @@ Provide exact medical terms in Spanish:
               canonicalName: aiData.canonicalName || baseName,
               aliases: [baseName.toLowerCase()],
               geneTargets: aiData.geneTargets || [],
-              pharmacologicalClass: aiData.pharmacologicalClass || 'Principio Activo Farmacogenómico',
-              clinicalIndication: aiData.clinicalIndication || 'Tratamiento Folicular Personalizado',
+              pharmacologicalClass: aiData.pharmacologicalClass || 'Pharmacogenomic Active Ingredient',
+              clinicalIndication: aiData.clinicalIndication || 'Personalized Follicular Therapy',
               mechanismOfAction: aiData.mechanismOfAction,
-              compatibleVehicles: aiData.compatibleVehicles || ['TrichoSol™', 'Cápsulas Orales Micronizadas'],
-              standardDosages: aiData.standardDosages || 'Dosis terapéutica estandarizada USP'
+              compatibleVehicles: aiData.compatibleVehicles || ['TrichoSol™', 'Micronized Oral Capsules Base'],
+              standardDosages: aiData.standardDosages || 'Standardized USP therapeutic dosage'
             };
           }
         } catch (aiErr) {
@@ -117,11 +117,11 @@ Provide exact medical terms in Spanish:
           canonicalName: baseName,
           aliases: [baseName.toLowerCase()],
           geneTargets: [],
-          pharmacologicalClass: 'Principio Activo Farmacogenómico',
-          clinicalIndication: 'Terapia Médica Personalizada',
-          mechanismOfAction: `Principio activo terapéutico ${baseName} calibrado para optimización celular y metabólica.`,
-          compatibleVehicles: ['TrichoSol™', 'Cápsulas Orales Micronizadas'],
-          standardDosages: 'Dosis personalizada'
+          pharmacologicalClass: 'Pharmacogenomic Active Ingredient',
+          clinicalIndication: 'Personalized Medical Therapy',
+          mechanismOfAction: `Therapeutic active ingredient ${baseName} calibrated for cellular and metabolic follicular optimization.`,
+          compatibleVehicles: ['TrichoSol™', 'Micronized Oral Capsules Base'],
+          standardDosages: 'Personalized Dosage'
         };
       }
 
