@@ -190,3 +190,151 @@ export function exportPrescriptionToXlsx(rx, options = {}) {
     itemCount: rawLines.length
   };
 }
+
+/**
+ * exportBatchPrescriptionsToXlsx
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Generates and downloads a consolidated Excel workbook containing all prescriptions
+ * in a batch (up to 3 or more), with a Master Index and combined formulation rows.
+ * 
+ * @param {Array<Object>} rxList - Array of canonical prescription objects
+ * @param {Object} options - Customization flags { filename, lang }
+ */
+export function exportBatchPrescriptionsToXlsx(rxList = [], options = {}) {
+  if (!Array.isArray(rxList) || rxList.length === 0) {
+    console.warn('[exportBatchPrescriptionsToXlsx] Empty prescription list provided');
+    return false;
+  }
+
+  const lang = options.lang || 'en';
+  const isEs = lang === 'es';
+  const exportDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const wb = XLSX.utils.book_new();
+
+  // ── Sheet 1: Master Batch Summary ─────────────────────────────────────────
+  const masterHeaders = [
+    '#',
+    isEs ? 'Código / Referencia' : 'Prescription Ref',
+    isEs ? 'Paciente' : 'Patient Name',
+    isEs ? 'Médico Prescriptor' : 'Prescribing Doctor',
+    isEs ? 'Tipo de Fórmula / Tratamiento' : 'Treatment / Formula Type',
+    isEs ? 'Nº Fórmulas / Líneas' : 'Total Items',
+    isEs ? 'Estado' : 'Status',
+    isEs ? 'Fecha de Emisión' : 'Date',
+    isEs ? 'Enlace Oficial de Verificación' : 'Official Verification Link'
+  ];
+
+  const masterRows = rxList.map((rx, idx) => {
+    const rxId = rx.prescriptionNumber || rx.code || rx.id || `RX-${idx + 1}`;
+    const patientName = rx.patient?.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
+    const doctorName = rx.treatingDoctor?.name || rx.doctor?.name || rx.doctorName || 'Physician';
+    const treatmentType = rx.treatmentType || rx.formulaName || (isEs ? 'Fórmula Magistral' : 'Compounded Formula');
+    const lines = rx.prescriptionLines || rx.items || rx.compounds || [];
+    const dateStr = rx.prescriptionDate || rx.createdAt?.slice(0, 10) || exportDate;
+    const url = `https://med-peptides.com/rx/${rxId}`;
+
+    return [
+      idx + 1,
+      rxId,
+      patientName,
+      doctorName,
+      treatmentType,
+      lines.length,
+      (rx.status || 'approved').toUpperCase(),
+      dateStr,
+      url
+    ];
+  });
+
+  const wsMaster = XLSX.utils.aoa_to_sheet([
+    [isEs ? 'REGENPEPT & ATLAS CLINICAL — RESUMEN DE LOTE DE PRESCRIPCIONES' : 'REGENPEPT & ATLAS CLINICAL — BATCH PRESCRIPTION SUMMARY', ''],
+    [isEs ? 'Fecha de Exportación' : 'Export Date', exportDate],
+    [isEs ? 'Total Prescripciones en Lote' : 'Total Prescriptions in Batch', rxList.length],
+    ['', ''],
+    masterHeaders,
+    ...masterRows
+  ]);
+  wsMaster['!cols'] = [
+    { wch: 5 },   // #
+    { wch: 22 },  // Code
+    { wch: 28 },  // Patient
+    { wch: 28 },  // Doctor
+    { wch: 32 },  // Treatment
+    { wch: 14 },  // Items
+    { wch: 14 },  // Status
+    { wch: 16 },  // Date
+    { wch: 45 },  // URL
+  ];
+  XLSX.utils.book_append_sheet(wb, wsMaster, isEs ? 'Resumen Lote' : 'Batch Summary');
+
+  // ── Sheet 2: Consolidated Formulations ─────────────────────────────────────
+  const allLinesHeaders = [
+    isEs ? 'Ref. Receta' : 'Prescription Ref',
+    isEs ? 'Paciente' : 'Patient',
+    '#',
+    isEs ? 'Formulación / Bloque' : 'Formulation Block',
+    isEs ? 'Producto / Principio Activo' : 'Product / Active Ingredient (API)',
+    isEs ? 'Concentración / Dosis' : 'Strength / Dose',
+    isEs ? 'Cantidad' : 'Quantity',
+    isEs ? 'Forma Farmacéutica' : 'Dosage Form',
+    isEs ? 'Vía' : 'Route',
+    isEs ? 'Frecuencia' : 'Frequency',
+    isEs ? 'Duración' : 'Duration',
+    isEs ? 'Posología / Instrucciones' : 'Posology / Instructions',
+    isEs ? 'Racional Clínico' : 'Clinical Rationale'
+  ];
+
+  const allLinesRows = [];
+  rxList.forEach((rx) => {
+    const rxId = rx.prescriptionNumber || rx.code || rx.id || 'RX';
+    const pName = rx.patient?.name || rx.patientName || 'Patient';
+    const lines = rx.prescriptionLines || rx.items || rx.compounds || [];
+
+    lines.forEach((line, lineIdx) => {
+      allLinesRows.push([
+        rxId,
+        pName,
+        lineIdx + 1,
+        line.formulationBlock || rx.treatmentType || 'Primary Formulation',
+        line.productName || line.name || line.activeIngredient || `Item ${lineIdx + 1}`,
+        line.dosage || line.dose || line.strength || line.concentration || '—',
+        line.quantity || 1,
+        line.dosageForm || 'Topical/Solution',
+        line.route || 'Topical',
+        line.frequency || 'Once daily',
+        line.duration || rx.duration || '30 days',
+        line.patientInstructions || line.instructions || rx.posology || '',
+        line.rationale || ''
+      ]);
+    });
+  });
+
+  const wsAllLines = XLSX.utils.aoa_to_sheet([allLinesHeaders, ...allLinesRows]);
+  wsAllLines['!cols'] = [
+    { wch: 20 },
+    { wch: 24 },
+    { wch: 5 },
+    { wch: 24 },
+    { wch: 30 },
+    { wch: 20 },
+    { wch: 10 },
+    { wch: 18 },
+    { wch: 14 },
+    { wch: 20 },
+    { wch: 14 },
+    { wch: 40 },
+    { wch: 28 },
+  ];
+  XLSX.utils.book_append_sheet(wb, wsAllLines, isEs ? 'Fórmulas Consolidadas' : 'All Prescribed Formulas');
+
+  const finalFilename = options.filename || `Batch_Prescriptions_Atlas_${Date.now()}.xlsx`;
+  XLSX.writeFile(wb, finalFilename);
+
+  return {
+    success: true,
+    filename: finalFilename,
+    batchCount: rxList.length,
+    itemCount: allLinesRows.length
+  };
+}
+

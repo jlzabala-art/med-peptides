@@ -182,6 +182,7 @@ export { default as X } from 'lucide-react/dist/esm/icons/x';
 export { default as XCircle } from 'lucide-react/dist/esm/icons/x-circle';
 export { default as Zap } from 'lucide-react/dist/esm/icons/zap';
 export { default as ZoomIn } from 'lucide-react/dist/esm/icons/zoom-in';
+export { default as ZoomOut } from 'lucide-react/dist/esm/icons/zoom-out';
 export { default as ArrowDownCircle } from 'lucide-react/dist/esm/icons/arrow-down-circle';
 export { default as AlertOctagon } from 'lucide-react/dist/esm/icons/alert-octagon';
 export { default as Battery } from 'lucide-react/dist/esm/icons/battery';

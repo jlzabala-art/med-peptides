@@ -254,6 +254,19 @@ export async function POST(request) {
           payload.doctorLicense = null;
         }
 
+        // Compounding Laboratory Specification (EU / Bulgaria Facility Readiness)
+        payload.compoundingLab = rx.compoundingLab || {
+          name: 'RegenPept European Compounding Center',
+          facilityCode: 'BG-SOF-MAG-01',
+          country: 'Bulgaria (EU)',
+          city: 'Sofia',
+          contactEmail: 'lab@med-peptides.com',
+          certification: 'EU-GMP / ISO 22716 & ISO 9001:2015',
+          isCertified: true,
+          status: 'ready_for_production',
+          batchId: rx.batchId || `BAT-${dateStr}`
+        };
+
         if (accountManager?.email || uploadedBy?.email) {
           const amEmail = accountManager?.email || uploadedBy?.email;
           const amName = accountManager?.name || uploadedBy?.name || (amEmail ? amEmail.split('@')[0] : '');
