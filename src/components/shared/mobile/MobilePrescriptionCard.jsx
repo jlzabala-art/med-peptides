@@ -10,6 +10,7 @@ import React, { useRef, useCallback } from 'react';
 import { MoreVertical, Check, FileText, Package, Calendar, Stethoscope, Play, Square, CheckSquare } from '@/lib/icons';
 import StatusBadge from '../../ui/StatusBadge';
 import SwipeableCard from '../../ui/SwipeableCard';
+import RxCompletenessBadge from '../../admin/prescriptions/RxCompletenessBadge';
 
 /* ── Source badge config ─────────────────────────────────────────── */
 const SOURCE_META = {
@@ -172,8 +173,17 @@ export default function MobilePrescriptionCard({
 
       {/* Right side: status + action */}
       {!selectionMode ? (
-        <div className="mrxc-right">
-          {!rx._isSessionGroup ? <StatusBadge status={status} compact /> : <span style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>Expand</span>}
+        <div className="mrxc-right" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+          {!rx._isSessionGroup ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <RxCompletenessBadge rx={rx} size="sm" />
+                <StatusBadge status={status} compact />
+              </div>
+            </>
+          ) : (
+            <span style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>Expand</span>
+          )}
           {onQuickAction && !rx._isSessionGroup && (
             <button
               className="mrxc-quick-btn"

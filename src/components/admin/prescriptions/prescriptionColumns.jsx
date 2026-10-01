@@ -13,6 +13,8 @@ import notifier from '../../../services/NotificationService';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 
 
+import RxCompletenessBadge from './RxCompletenessBadge';
+
 // ── Patient Avatar ────────────────────────────────────────────────────────────
 function PatientAvatar({ name, size = 40 }) {
   const initials = (name || '??')
@@ -97,13 +99,13 @@ function RenewButton({ rx, onRefresh, onRefill }) {
 
 // ── Columns Definition ────────────────────────────────────────────────────────
 export const getPrescriptionColumns = (options = {}) => {
-  const { onEdit, onRefresh, onRefill, isDoctor, role } = options;
+  const { onEdit, onRefresh, onRefill, onEnrich, isDoctor, role } = options;
   const canGenerateLabels = !isDoctor && role !== 'doctor';
   return [
     {
       key: 'patient',
       header: 'Patient & Doctor',
-      width: '32%',
+      width: '26%',
       render: (rx) => {
         const patient  = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const doctor   = rx.doctor?.name  || rx.doctorName  || '—';
@@ -144,9 +146,25 @@ export const getPrescriptionColumns = (options = {}) => {
       },
     },
     {
+      key: 'quality',
+      header: 'AI Quality',
+      width: '12%',
+      render: (rx) => {
+        if (rx._isSessionGroup) {
+          return <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Multi-Rx</span>;
+        }
+        return (
+          <RxCompletenessBadge
+            rx={rx}
+            onEnrich={onEnrich}
+          />
+        );
+      },
+    },
+    {
       key: 'source',
       header: 'Source & Items',
-      width: '14%',
+      width: '12%',
       render: (rx) => {
         // Determine if this is an AI/Fagron import or a manual entry
         const rawSource = (rx.source || 'manual').toLowerCase().trim();
@@ -344,6 +362,19 @@ export const getPrescriptionColumns = (options = {}) => {
               // Dispatches to the parent table's selectedItem state via a custom event
               // so PrescriptionDetailModal opens (same as row click, but from action menu)
               window.dispatchEvent(new CustomEvent('OPEN_PRESCRIPTION_VIEW', { detail: { rx } }));
+            }
+          },
+          // ── AI ENRICHMENT QUICK ACTION ──────────────────────────────────
+          {
+            type: 'action',
+            label: '✨ Enrich with AI (Auto-Repair)',
+            icon: Sparkles,
+            onClick: () => {
+              if (onEnrich) {
+                onEnrich(rx);
+              } else {
+                toast.error('Enrichment handler not configured');
+              }
             }
           },
           {

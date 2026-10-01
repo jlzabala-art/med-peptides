@@ -466,14 +466,37 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     });
   }, [openDrawer]);
 
+  const handleEnrichPrescription = useCallback(async (rx) => {
+    if (!rx) return;
+    const rxId = rx.id;
+    const toastId = toast.loading(`Enriqueciendo prescripción con IA #${rxId?.slice(0, 6)}…`);
+    try {
+      const res = await fetch('/api/prescriptions/enrich-single', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prescriptionId: rxId, currentRx: rx })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Error al enriquecer prescripción');
+      }
+      toast.success(`✨ Prescripción enriquecida (${data.completeness?.score || 100}% calidad clínica)`, { id: toastId });
+      refresh && refresh();
+    } catch (err) {
+      console.error('Prescription enrichment error:', err);
+      toast.error(`Error: ${err.message}`, { id: toastId });
+    }
+  }, [refresh]);
+
   const columns = useMemo(() => getPrescriptionColumns({
     onEdit: handleEdit,
     onRefresh: refresh,
     onRefill: handleRefill,
+    onEnrich: handleEnrichPrescription,
     onOpenPatientGuide: (rx) => setPatientGuideRx(rx),
     isDoctor,
     role: effectiveRole
-  }), [handleEdit, refresh, handleRefill, isDoctor, effectiveRole]);
+  }), [handleEdit, refresh, handleRefill, handleEnrichPrescription, isDoctor, effectiveRole]);
 
   const bulkActions = useMemo(() => {
     const actions = [
@@ -554,6 +577,29 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           ];
           exportToCSV(selectedRows, exportCols, `prescriptions_selected_${Date.now()}.csv`);
           toast.success(`Exported ${selectedRows.length} prescriptions to CSV`);
+        }
+      },
+      {
+        label: '✨ Enrich with AI',
+        icon: Sparkles,
+        onClick: async (selectedRows) => {
+          if (!selectedRows || selectedRows.length === 0) return;
+          const toastId = toast.loading(`Enriqueciendo ${selectedRows.length} prescripciones con IA…`);
+          let successCount = 0;
+          for (const rx of selectedRows) {
+            try {
+              const res = await fetch('/api/prescriptions/enrich-single', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prescriptionId: rx.id, currentRx: rx })
+              });
+              if (res.ok) successCount++;
+            } catch (err) {
+              console.warn('Bulk enrich error for', rx.id, err);
+            }
+          }
+          toast.success(`✨ ${successCount} de ${selectedRows.length} prescripciones enriquecidas con éxito`, { id: toastId });
+          refresh && refresh();
         }
       }
     ];
