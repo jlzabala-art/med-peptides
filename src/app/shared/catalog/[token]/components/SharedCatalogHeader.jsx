@@ -63,7 +63,7 @@ export default function SharedCatalogHeader({
     : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
 
   const verifiedCode = batchCode || catalogCode || 'RP-CATALOG';
-  const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : '');
+  const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://med-peptides.com');
   const activeFilteredUrl = typeof window !== 'undefined' ? window.location.href : cleanBaseUrl;
   const hasActiveFilters = Boolean(typeof window !== 'undefined' && window.location.search && window.location.search.length > 1);
   const activeQrUrl = (includeFiltersInQr && hasActiveFilters) ? activeFilteredUrl : cleanBaseUrl;
@@ -452,7 +452,7 @@ export default function SharedCatalogHeader({
               }}
               title="Click to enlarge QR code"
             >
-              <QRCodeSVG value={activeShareUrl} size={110} level="M" />
+              <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://med-peptides.com'} size={110} level="M" />
             </div>
 
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
@@ -530,7 +530,7 @@ export default function SharedCatalogHeader({
             </div>
 
             <div style={{ padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <QRCodeSVG value={activeQrUrl} size={200} level="H" />
+              <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://med-peptides.com'} size={200} level="H" />
             </div>
 
             {hasActiveFilters && (
