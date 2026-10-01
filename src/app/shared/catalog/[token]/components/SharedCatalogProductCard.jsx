@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Package, CheckCircle2, ClipboardList, FileText, FlaskConical } from 'lucide-react';
-import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
+import ProductPresentationIcon from '@/components/ui/ProductPresentationIcon';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 
@@ -92,18 +92,10 @@ export default function SharedCatalogProductCard({
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', gap: '14px', flex: '1 1 300px' }}>
           {!hideMasterImage && (
-            <img
-              src={resolveVariantClinicalImage(prod.variants[0], prod)}
-              alt={prod.canonicalName}
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '10px',
-                objectFit: 'cover',
-                border: '1px solid #e2e8f0',
-                flexShrink: 0,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
-              }}
+            <ProductPresentationIcon
+              product={prod}
+              variant={prod.variants?.[0]}
+              size="lg"
             />
           )}
           <div style={{ flex: '1 1 auto', minWidth: 0 }}>
@@ -273,14 +265,11 @@ export default function SharedCatalogProductCard({
                 }}
               >
                 <div className="variant-info-col">
-                  <div style={{
-                    width: '32px', height: '32px', borderRadius: '6px',
-                    backgroundColor: '#eff6ff', color: '#0284c7',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, fontSize: '0.75rem', flexShrink: 0,
-                  }}>
-                    #{vIdx + 1}
-                  </div>
+                  <ProductPresentationIcon
+                    product={prod}
+                    variant={v}
+                    size="sm"
+                  />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.92rem', lineHeight: 1.2 }}>
                       {v.dosage || v.name || 'Standard Presentation'}

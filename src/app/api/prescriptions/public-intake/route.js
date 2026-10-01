@@ -205,26 +205,53 @@ export async function POST(request) {
           updatedAt: new Date().toISOString(),
         };
 
-        // Two-Doctor Architecture:
-        // 1) treatingDoctor: El médico que vio al paciente (visible en la etiqueta y en el QR público)
-        // 2) productionDoctor: El médico interno de producción/farmacia (uso interno privado, nunca visible para el paciente)
-        const treatingDoctor = rx.treatingDoctor || rx.patientDoctor || rx.doctor || null;
-        const productionDoctor = rx.productionDoctor || rx.internalSignerDoctor || rx.dispensingDoctor || null;
+        // Two-Doctor Architecture (Strict Segregation):
+        // 1) productionDoctor: Always Dr. Miguel Ángel López Aranda (internal production order, no DHA).
+        // 2) treatingDoctor: The physician who examined the patient. Only one displayed on QR & label.
+        const defaultProductionDoctor = {
+          name: 'Dr. Miguel Ángel López Aranda',
+          license: '282869584',
+          specialty: 'Cirujano Capilar & Médico Prescriptor',
+          clinic: 'Clínica Capilar Dr. López Aranda',
+          country: 'España',
+          hasDHA: false,
+          isInternalOnly: true,
+          purpose: 'compounding_production_order'
+        };
 
-        if (treatingDoctor) {
-          payload.treatingDoctor = treatingDoctor;
-          payload.doctor = treatingDoctor;
-          payload.doctorName = treatingDoctor.name || payload.doctorName;
-          payload.doctorLicense = treatingDoctor.license || payload.doctorLicense;
-        }
+        const incomingDoctorName = String(rx.treatingDoctor?.name || rx.doctor?.name || rx.doctorName || '').trim();
+        const isIncomingMiguelAngel = incomingDoctorName.toLowerCase().includes('miguel ángel') || incomingDoctorName.toLowerCase().includes('miguel angel');
 
-        if (productionDoctor) {
-          payload.productionDoctor = {
-            ...productionDoctor,
-            isInternalOnly: true,
-            purpose: 'internal_production_order'
+        payload.productionDoctor = rx.productionDoctor || defaultProductionDoctor;
+        payload.hasInternalProductionDoctor = true;
+
+        if (rx.treatingDoctor && !String(rx.treatingDoctor.name).toLowerCase().includes('miguel angel')) {
+          payload.treatingDoctor = rx.treatingDoctor;
+          payload.doctor = rx.treatingDoctor;
+          payload.doctorName = rx.treatingDoctor.name;
+          payload.doctorLicense = rx.treatingDoctor.license || '';
+          payload.hasTreatingDoctor = true;
+        } else if (!isIncomingMiguelAngel && incomingDoctorName) {
+          const treatingDocObj = {
+            name: incomingDoctorName,
+            license: rx.doctor?.license || rx.doctorLicense || '',
+            clinic: rx.doctor?.clinic || rx.clinicName || '',
+            specialty: rx.doctor?.specialty || rx.doctorTitle || 'Physician Specialist',
+            address: rx.doctor?.address || rx.doctorOfficeAddress || '',
+            phone: rx.doctor?.phone || rx.doctorPhone || '',
+            role: 'treating_physician'
           };
-          payload.hasInternalProductionDoctor = true;
+          payload.treatingDoctor = treatingDocObj;
+          payload.doctor = treatingDocObj;
+          payload.doctorName = incomingDoctorName;
+          payload.doctorLicense = treatingDocObj.license;
+          payload.hasTreatingDoctor = true;
+        } else {
+          payload.treatingDoctor = null;
+          payload.hasTreatingDoctor = false;
+          payload.doctor = null;
+          payload.doctorName = null;
+          payload.doctorLicense = null;
         }
 
         if (accountManager?.email || uploadedBy?.email) {

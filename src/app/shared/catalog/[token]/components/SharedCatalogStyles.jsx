@@ -322,6 +322,14 @@ export default function SharedCatalogStyles() {
           border: 1px solid #e2e8f0;
           flex-shrink: 0;
         }
+        .gcp-presentation-badge {
+          flex-shrink: 0;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .catalog-list-row-header:hover .gcp-presentation-badge {
+          transform: scale(1.04);
+          box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+        }
         .catalog-row-info {
           display: flex;
           flex-direction: column;

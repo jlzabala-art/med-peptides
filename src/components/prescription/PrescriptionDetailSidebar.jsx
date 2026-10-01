@@ -55,6 +55,7 @@ export default function PrescriptionDetailSidebar({
   publicUrl = '',
   onOpenPdf = null,
   onExportExcel = null,
+  onAssignDoctor = null,
   lang = 'en'
 }) {
   const isEs = lang === 'es';
@@ -514,16 +515,16 @@ export default function PrescriptionDetailSidebar({
             </div>
             <div>
               <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'MÉDICO PRESCRIPTOR' : 'PRESCRIBING PHYSICIAN'}
+                {doctorName ? (isEs ? 'MÉDICO TRATANTE' : 'TREATING PHYSICIAN') : (isEs ? 'PRÁCTICA CLÍNICA' : 'CLINICAL PRACTICE')}
               </div>
               <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                {doctorName}
+                {doctorName || (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')}
               </div>
             </div>
           </div>
 
           <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4, marginBottom: '0.75rem' }}>
-            <div>{doctorTitle}</div>
+            {doctorTitle && <div>{doctorTitle}</div>}
             {doctorLicense && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
                 <ShieldCheck size={12} />
@@ -538,6 +539,26 @@ export default function PrescriptionDetailSidebar({
               <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
                 📍 {doctorOffice}
               </div>
+            )}
+            {!doctorName && onAssignDoctor && (
+              <button
+                type="button"
+                onClick={onAssignDoctor}
+                style={{
+                  marginTop: '8px',
+                  width: '100%',
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  background: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  color: '#166534',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                + {isEs ? 'Asignar Médico Tratante' : 'Assign Treating Physician'}
+              </button>
             )}
           </div>
         </div>

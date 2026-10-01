@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
-import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
+import ProductPresentationIcon from '@/components/ui/ProductPresentationIcon';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import SharedCatalogProductCard from './SharedCatalogProductCard';
 
@@ -45,12 +45,12 @@ export default function SharedCatalogProductListRow({
         onClick={onToggleExpand}
         className="catalog-list-row-header"
       >
-        {/* Main Info: Image + Title + Purity + Subtitle */}
+        {/* Main Info: GCP Presentation Icon + Title + Purity + Subtitle */}
         <div className="catalog-row-main">
-          <img
-            src={resolveVariantClinicalImage(prod.variants[0], prod)}
-            alt={prod.canonicalName}
-            className="catalog-row-img"
+          <ProductPresentationIcon
+            product={prod}
+            variant={prod.variants?.[0]}
+            size="md"
           />
 
           <div className="catalog-row-info">

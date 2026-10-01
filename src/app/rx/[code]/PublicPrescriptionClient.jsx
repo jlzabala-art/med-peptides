@@ -28,7 +28,9 @@ import {
   Phone,
   Printer,
   FileSpreadsheet,
-  Box
+  Box,
+  Edit3,
+  X
 } from '@/lib/icons';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
@@ -73,6 +75,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [activeDocTab, setActiveDocTab] = useState(0);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
 
+  // Treating Doctor Modal State
+  const [customTreatingDoctor, setCustomTreatingDoctor] = useState(null);
+  const [showDoctorModal, setShowDoctorModal] = useState(false);
+  const [isSavingDoctor, setIsSavingDoctor] = useState(false);
+  const [docForm, setDocForm] = useState({
+    name: 'Dr. Hanieh Erdmann',
+    specialty: 'Physician Consultant Dermatology',
+    license: 'DHA-00013060-006',
+    clinic: 'Bedaya Polyclinic',
+    phone: '+971 4 395 5599',
+    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+  });
+
   const isEs = lang === 'es';
 
   const rxId = rx.id || rx.prescriptionNumber || 'RX-PRESCRIPTION';
@@ -80,19 +95,53 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const patient = rx.patient || {};
   const patientName = patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
-  // ── Two-Doctor Clinical Architecture ───────────────────────────────────────
-  // 1) Treating Physician (El médico que vio al paciente y realizó la prescripción):
-  //    This is STRICTLY the ONLY doctor shown on the patient's QR code, mobile access portal, and label.
-  // 2) Production Physician (El médico utilizado internamente para tramitar la producción/receta):
-  //    Strictly private / internal only. Never displayed to the patient or on the public QR.
-  const treatingDoc = rx.treatingDoctor || rx.patientDoctor || rx.doctor || {};
-  const doctorName = treatingDoc.name || rx.doctorName || (isEs ? 'Dr. Miguel Ángel López Aranda' : 'Dr. Miguel Angel Lopez Aranda');
-  const clinic = treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico & Farmacia Magistral' : 'Licensed Clinical Practice'));
-  const doctorSpecialty = treatingDoc.specialty || rx.doctorTitle || (isEs ? 'Médico Colegiado' : 'Physician Specialist');
-  const doctorAddress = treatingDoc.address || rx.doctorOfficeAddress || rx.clinicAddress || '';
-  const doctorPhone = treatingDoc.phone || rx.doctorPhone || '';
-  const doctorLicense = treatingDoc.license || rx.doctorLicense || rx.doctorLicenseNumber || (treatingDoc.licenseNumber || '');
+
+  // ── Two-Doctor Clinical Architecture (Strict Segregation) ───────────────────
+  // 1) Treating Physician (treatingDoctor):
+  //    The doctor who physically/clinically evaluated the patient and ordered the therapy.
+  //    STRICTLY the ONLY physician shown on the patient QR code, bottle label, and patient portal.
+  // 2) Production Physician (productionDoctor):
+  //    Dr. Miguel Ángel López Aranda (España, Lic. 282869584, no DHA).
+  //    Strictly internal for compounding pharmacy / Fagron manufacture. NEVER shown to patient.
+  const rawCandidate = customTreatingDoctor || rx.treatingDoctor || (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
+  const isCandidateMiguelAngel = Boolean(rawCandidate && String(rawCandidate.name || '').includes('Miguel Ángel'));
+  const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateMiguelAngel);
+
+  const treatingDoc = hasTreatingDoctor ? rawCandidate : {};
+  const doctorName = treatingDoc.name || '';
+  const clinic = treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice'));
+  const doctorSpecialty = treatingDoc.specialty || (hasTreatingDoctor ? (isEs ? 'Médico Especialista' : 'Physician Consultant') : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice'));
+  const doctorAddress = treatingDoc.address || '';
+  const doctorPhone = treatingDoc.phone || '';
+  const doctorLicense = treatingDoc.license || treatingDoc.licenseNumber || '';
   const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
+
+  const handleSaveTreatingDoctor = async (doctorData) => {
+    setIsSavingDoctor(true);
+    try {
+      const res = await fetch('/api/prescriptions/update-treating-doctor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rx.id || rxId,
+          prescriptionNumber: rx.prescriptionNumber || rxId,
+          treatingDoctor: doctorData
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update treating physician');
+      }
+      setCustomTreatingDoctor(data.treatingDoctor);
+      setShowDoctorModal(false);
+      toast.success(isEs ? 'Médico tratante asignado con éxito ✓' : 'Treating physician updated successfully ✓');
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Error updating doctor');
+    } finally {
+      setIsSavingDoctor(false);
+    }
+  };
 
   // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™)
   const genomicsData = detectFagronGenomicsTest(rx);
@@ -999,12 +1048,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               <div className="rx-master-header-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
                 
                 {/* Prescribing Doctor Clinical Prominence */}
-                <div className="rx-doctor-col" style={{ display: 'flex', gap: '1rem', minWidth: 280 }}>
+                <div className="rx-doctor-col" style={{ display: 'flex', gap: '1rem', minWidth: 280, flex: '1 1 300px' }}>
                   <div className="rx-doctor-avatar" style={{
                     width: 56,
                     height: 56,
                     borderRadius: '14px',
-                    background: 'linear-gradient(135deg, #003666, #0284c7)',
+                    background: hasTreatingDoctor ? 'linear-gradient(135deg, #003666, #0284c7)' : 'linear-gradient(135deg, #475569, #64748b)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1012,28 +1061,105 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     flexShrink: 0,
                     boxShadow: '0 4px 12px rgba(0, 54, 102, 0.2)'
                   }}>
-                    <Stethoscope size={28} />
+                    {hasTreatingDoctor ? <Stethoscope size={28} /> : <Building2 size={28} />}
                   </div>
-                  <div className="rx-doctor-meta">
-                    <div className="rx-doctor-badge" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isDhaLicensed 
-                        ? (isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed')
-                        : (isEs ? 'Médico Prescriptor' : 'Prescribing Physician')}
+                  <div className="rx-doctor-meta" style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <div className="rx-doctor-badge" style={{ fontSize: '0.75rem', fontWeight: 700, color: hasTreatingDoctor ? '#0284c7' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {hasTreatingDoctor ? (
+                          isDhaLicensed 
+                            ? (isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed')
+                            : (isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician')
+                        ) : (
+                          isEs ? 'Práctica Clínica Colaboradora' : 'Collaborating Clinical Practice'
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setDocForm({
+                            name: treatingDoc.name || 'Dr. Hanieh Erdmann',
+                            specialty: treatingDoc.specialty || 'Physician Consultant Dermatology',
+                            license: treatingDoc.license || 'DHA-00013060-006',
+                            clinic: treatingDoc.clinic || 'Bedaya Polyclinic',
+                            phone: treatingDoc.phone || '+971 4 395 5599',
+                            address: treatingDoc.address || 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                          });
+                          setShowDoctorModal(true);
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#0284c7',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.75rem',
+                          fontWeight: 650,
+                          padding: '2px 6px',
+                          borderRadius: '4px'
+                        }}
+                        title={hasTreatingDoctor ? (isEs ? 'Editar médico tratante' : 'Edit treating physician') : (isEs ? 'Asignar médico' : 'Assign physician')}
+                      >
+                        <Edit3 size={12} />
+                        {hasTreatingDoctor ? (isEs ? 'Modificar' : 'Edit') : (isEs ? 'Asignar' : 'Assign')}
+                      </button>
                     </div>
+
                     <h1 className="rx-doctor-name" style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
-                      {doctorName}
+                      {hasTreatingDoctor ? doctorName : clinic}
                     </h1>
-                    <div className="rx-doctor-sub" style={{ fontSize: '0.82rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '3px' }}>
-                      <div>{doctorSpecialty}</div>
-                      {doctorLicense && (
-                        <div style={{ color: '#0284c7', fontWeight: 750, fontSize: '0.78rem' }}>
-                          · Lic. {doctorLicense}
+
+                    {hasTreatingDoctor ? (
+                      <div className="rx-doctor-sub" style={{ fontSize: '0.82rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '3px' }}>
+                        <div>{doctorSpecialty}</div>
+                        {doctorLicense && (
+                          <div style={{ color: '#0284c7', fontWeight: 750, fontSize: '0.78rem' }}>
+                            · Lic. {doctorLicense}
+                          </div>
+                        )}
+                        {doctorAddress && (
+                          <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px' }}>
+                            📍 {doctorAddress}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '6px' }}>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                          {isEs ? 'Sin médico tratante asignado a esta prescripción.' : 'No treating physician directly assigned to this prescription.'}
                         </div>
-                      )}
-                    </div>
-                    {doctorAddress && (
-                      <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px' }}>
-                        📍 {doctorAddress}
+                        <button
+                          onClick={() => {
+                            setDocForm({
+                              name: 'Dr. Hanieh Erdmann',
+                              specialty: 'Physician Consultant Dermatology',
+                              license: 'DHA-00013060-006',
+                              clinic: 'Bedaya Polyclinic',
+                              phone: '+971 4 395 5599',
+                              address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                            });
+                            setShowDoctorModal(true);
+                          }}
+                          style={{
+                            marginTop: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            borderRadius: '8px',
+                            border: 'none',
+                            fontSize: '0.8rem',
+                            fontWeight: 650,
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)'
+                          }}
+                        >
+                          <Edit3 size={14} />
+                          {isEs ? '✍️ Asignar Médico Tratante' : '✍️ Assign Treating Physician'}
+                        </button>
                       </div>
                     )}
                   </div>
@@ -2016,6 +2142,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             publicUrl={publicUrl}
             onOpenPdf={handleDownloadQrPng}
             onExportExcel={handleExportExcel}
+            onAssignDoctor={() => setShowDoctorModal(true)}
             lang={lang}
           />
         </div>
@@ -2025,7 +2152,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       {!embedded && (
         <PublicStickyActionBar
           title={`Rx: ${rxId}`}
-          subtitle={`${patientName} • ${doctorName}`}
+          subtitle={`${patientName} • ${hasTreatingDoctor ? doctorName : clinic}`}
           badge={isEs ? 'Prescripción Médica' : 'Medical Prescription'}
           badgeType="protocol"
           inquireLabel={isEs ? 'Consultar Prescripción' : 'Inquire Prescription'}
@@ -2158,6 +2285,287 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           name={previewDoc.title || previewDoc.name}
           onClose={() => setPreviewDoc(null)}
         />
+      )}
+
+      {/* ── Assign / Edit Treating Physician Modal ────────────────────────────── */}
+      {showDoctorModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            maxWidth: 540,
+            width: '100%',
+            padding: '1.75rem',
+            boxShadow: '0 20px 40px rgba(15, 23, 42, 0.2)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Stethoscope size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                    {isEs ? 'Médico Tratante / Clínico' : 'Treating Physician Assignment'}
+                  </h3>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                    {isEs ? 'Visible exclusivamente al paciente en QR, etiqueta y portal' : 'Strictly the only doctor visible on QR, bottle label, and patient portal'}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDoctorModal(false)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Quick Presets */}
+            <div style={{ marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
+                {isEs ? 'Plantillas Rápidas' : 'Quick Presets'}
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({
+                    name: 'Dr. Hanieh Erdmann',
+                    specialty: 'Physician Consultant Dermatology',
+                    license: 'DHA-00013060-006',
+                    clinic: 'Bedaya Polyclinic',
+                    phone: '+971 4 395 5599',
+                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                  })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: docForm.name.includes('Hanieh') ? '#eff6ff' : '#f8fafc',
+                    color: docForm.name.includes('Hanieh') ? '#0284c7' : '#334155',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🩺 Dr. Hanieh Erdmann (DHA)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({
+                    name: 'Dr. Sezgin Cagatay',
+                    specialty: 'Specialist Aesthetic & Regenerative Medicine',
+                    license: 'DHA-P-0248891',
+                    clinic: 'Bedaya Polyclinic',
+                    phone: '+971 4 395 5599',
+                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                  })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: docForm.name.includes('Sezgin') ? '#eff6ff' : '#f8fafc',
+                    color: docForm.name.includes('Sezgin') ? '#0284c7' : '#334155',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🩺 Dr. Sezgin Cagatay (DHA)
+                </button>
+              </div>
+            </div>
+
+            {/* Form Fields */}
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveTreatingDoctor(docForm);
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                  {isEs ? 'Nombre del Médico' : 'Doctor Full Name'} *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={docForm.name}
+                  onChange={(e) => setDocForm({ ...docForm, name: e.target.value })}
+                  placeholder="e.g. Dr. Hanieh Erdmann"
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.85rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    {isEs ? 'Especialidad / Título' : 'Specialty / Title'}
+                  </label>
+                  <input
+                    type="text"
+                    value={docForm.specialty}
+                    onChange={(e) => setDocForm({ ...docForm, specialty: e.target.value })}
+                    placeholder="Physician Consultant Dermatology"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    {isEs ? 'Nº de Licencia / Colegiado' : 'License Number'}
+                  </label>
+                  <input
+                    type="text"
+                    value={docForm.license}
+                    onChange={(e) => setDocForm({ ...docForm, license: e.target.value })}
+                    placeholder="e.g. DHA-00013060-006"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                  {isEs ? 'Clínica / Centro Médico' : 'Clinic / Medical Center'}
+                </label>
+                <input
+                  type="text"
+                  value={docForm.clinic}
+                  onChange={(e) => setDocForm({ ...docForm, clinic: e.target.value })}
+                  placeholder="Bedaya Polyclinic"
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.85rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    {isEs ? 'Teléfono de Contacto' : 'Phone'}
+                  </label>
+                  <input
+                    type="text"
+                    value={docForm.phone}
+                    onChange={(e) => setDocForm({ ...docForm, phone: e.target.value })}
+                    placeholder="+971 4 395 5599"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    {isEs ? 'Dirección' : 'Clinic Address'}
+                  </label>
+                  <input
+                    type="text"
+                    value={docForm.address}
+                    onChange={(e) => setDocForm({ ...docForm, address: e.target.value })}
+                    placeholder="Dubai, UAE"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                fontSize: '0.72rem',
+                color: '#64748b',
+                marginTop: '4px'
+              }}>
+                🔒 <strong>Segregación Clínica:</strong> La tramitación de fabricación con Fagron se mantiene internamente bajo la firma del Dr. Miguel Ángel López Aranda. Este formulario solo actualiza los datos clínicos expuestos al paciente.
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowDoctorModal(false)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Cancelar' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingDoctor}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: isSavingDoctor ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)'
+                  }}
+                >
+                  {isSavingDoctor ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar y Actualizar' : 'Save & Update')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* ── Prescription Dedicated Clinical AI Research Copilot ── */}
