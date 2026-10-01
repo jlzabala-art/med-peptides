@@ -41,6 +41,265 @@ const PUBLIC_INTAKE_STYLES = `
   [class*="PriceTransparency"] {
     display: none !important;
   }
+
+  /* ── Google Cloud Platform UX Standards for Intake Topbar ── */
+  .gcp-intake-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .gcp-intake-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .gcp-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .gcp-status-pill.published {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+
+  .gcp-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    display: inline-block;
+  }
+
+  .gcp-intake-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .gcp-intake-main-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  .gcp-intake-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #475569;
+    flex-wrap: wrap;
+  }
+
+  .gcp-code-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #003666;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .gcp-code-badge:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+  }
+
+  .gcp-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  .gcp-intake-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .gcp-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    line-height: 1.2;
+    border: 1px solid transparent;
+  }
+
+  .gcp-action-btn-primary {
+    background: #003666;
+    color: #ffffff;
+    border-color: #002244;
+    box-shadow: 0 1px 2px rgba(0, 54, 102, 0.15);
+  }
+  .gcp-action-btn-primary:hover {
+    background: #002b52;
+    box-shadow: 0 2px 4px rgba(0, 54, 102, 0.25);
+  }
+
+  .gcp-action-btn-secondary {
+    background: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+  .gcp-action-btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+  }
+
+  .gcp-action-btn-secondary.active-toggle {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    font-weight: 700;
+  }
+
+  .gcp-action-btn-excel {
+    background: #ffffff;
+    color: #15803d;
+    border-color: #bbf7d0;
+  }
+  .gcp-action-btn-excel:hover {
+    background: #f0fdf4;
+    border-color: #86efac;
+  }
+
+  .gcp-action-btn-ghost {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+  }
+  .gcp-action-btn-ghost:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+  }
+
+  .gcp-telemetry-bar {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .gcp-telemetry-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 5px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    border: 1px solid #e2e8f0;
+    line-height: 1.3;
+  }
+
+  /* Responsive for Mobile Devices (< 768px) */
+  @media (max-width: 768px) {
+    .gcp-intake-topbar {
+      padding: 8px 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .gcp-intake-header-left {
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .gcp-intake-main-title {
+      font-size: 0.86rem;
+    }
+
+    .gcp-intake-meta-row {
+      font-size: 0.72rem;
+      gap: 6px;
+    }
+
+    .gcp-intake-actions {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 6px;
+    }
+    .gcp-intake-actions::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gcp-action-btn {
+      padding: 7px 11px;
+      font-size: 0.76rem;
+      flex-shrink: 0;
+    }
+
+    .gcp-telemetry-bar {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding: 6px 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 6px;
+    }
+    .gcp-telemetry-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gcp-telemetry-chip {
+      flex-shrink: 0;
+      font-size: 0.7rem;
+    }
+  }
 `;
 
 function formatFileSize(bytes) {
@@ -732,6 +991,8 @@ export default function PublicPrescriptionIntakeClient() {
     }
   };
 
+  const [copiedCode, setCopiedCode] = useState(false);
+
   const officialCode = publishedRx?.prescriptionNumber || publishedRx?.id || 'RX-PRESCRIPTION';
   const fullPublicUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/rx/${officialCode}` 
@@ -742,6 +1003,13 @@ export default function PublicPrescriptionIntakeClient() {
     setCopiedLink(true);
     toast.success(isEs ? 'Enlace oficial copiado al portapapeles ✓' : 'Public prescription link copied ✓');
     setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleCopyCode = () => {
+    navigator?.clipboard?.writeText(officialCode);
+    setCopiedCode(true);
+    toast.success(isEs ? `Código ${officialCode} copiado al portapapeles ✓` : `Prescription code ${officialCode} copied ✓`);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   // ── Architecture Improvement 5: Single & Batch Excel Exports ────────────────
@@ -799,166 +1067,169 @@ export default function PublicPrescriptionIntakeClient() {
       <div style={{ position: 'relative', minHeight: '100vh', background: '#f8fafc' }}>
         <style dangerouslySetInnerHTML={{ __html: PUBLIC_INTAKE_STYLES }} />
 
-        {/* ── Top Sticky Bar — Quick Actions ── */}
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 9999,
-          background: 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)',
-          color: '#ffffff',
-          padding: '10px 16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '28px', height: '28px', borderRadius: '50%',
-              background: '#10b981', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', flexShrink: 0
-            }}>
-              <CheckCircle2 size={18} style={{ color: '#ffffff' }} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.86rem', fontWeight: 800 }}>
-                {isEs ? 'Prescripción Electrónica Publicada con Éxito' : 'Official Electronic Prescription Published'}
+        {/* ── GCP Standard Sticky Navigation & Action Header ── */}
+        <div className="gcp-intake-topbar">
+          {/* Left Block: Status, Title & Resource Identifiers */}
+          <div className="gcp-intake-header-left">
+            <span className="gcp-status-pill published">
+              <span className="gcp-status-dot" />
+              {isEs ? 'Publicada' : 'Published'}
+            </span>
+
+            <div className="gcp-intake-title-block">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1 className="gcp-intake-main-title">
+                  {isEs ? 'Prescripción Electrónica Oficial' : 'Official Electronic Prescription'}
+                </h1>
+                
+                {/* Copyable Resource ID Badge (GCP Style) */}
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="gcp-code-badge"
+                  title={isEs ? 'Clic para copiar código de referencia' : 'Click to copy reference code'}
+                >
+                  <span>{officialCode}</span>
+                  {copiedCode ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={11} style={{ opacity: 0.6 }} />}
+                </button>
               </div>
-              <div style={{ fontSize: '0.74rem', opacity: 0.85 }}>
-                Ref: <strong style={{ fontFamily: 'monospace' }}>{officialCode}</strong>
-                {' '}·{' '}{publishedRx.patientName || publishedRx.patient?.name || 'Patient'}
+
+              <div className="gcp-intake-meta-row">
+                <span className="gcp-meta-item">
+                  <User size={12} style={{ color: '#64748b' }} />
+                  <strong>{publishedRx.patientName || publishedRx.patient?.name || 'Patient'}</strong>
+                </span>
+
                 {publishedRxList.length > 1 && (
                   <span style={{
-                    marginLeft: '8px', background: 'rgba(255,255,255,0.2)',
-                    borderRadius: '4px', padding: '1px 6px', fontSize: '0.7rem', fontWeight: 700
+                    background: '#e0f2fe',
+                    color: '#0369a1',
+                    border: '1px solid #bae6fd',
+                    borderRadius: '4px',
+                    padding: '1px 6px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700
                   }}>
                     {isEs ? `Ítem ${activeRxIndex + 1} de ${publishedRxList.length}` : `Item ${activeRxIndex + 1} of ${publishedRxList.length}`}
                   </span>
                 )}
+
                 {atlasStatus === 'done' && (
                   <span style={{
-                    marginLeft: '10px', background: 'rgba(16,185,129,0.25)',
-                    border: '1px solid rgba(16,185,129,0.4)', borderRadius: '4px',
-                    padding: '1px 6px', fontSize: '0.7rem', fontWeight: 700
+                    background: '#f0fdf4',
+                    color: '#15803d',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '4px',
+                    padding: '1px 6px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px'
                   }}>
-                    ✓ Atlas Registered
+                    <Check size={11} /> {isEs ? 'Atlas Registrado' : 'Atlas Registered'}
                   </span>
                 )}
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Right Block: GCP Action Toolbar */}
+          <div className="gcp-intake-actions">
             {/* Split View Toggle */}
             {activeFileUrl && (
               <button
                 type="button"
                 onClick={() => setSplitView(prev => !prev)}
-                style={{
-                  background: splitView ? '#10b981' : 'rgba(255,255,255,0.15)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: '#fff',
-                  borderRadius: '8px',
-                  padding: '6px 12px',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
+                className={`gcp-action-btn gcp-action-btn-secondary ${splitView ? 'active-toggle' : ''}`}
                 title={isEs ? 'Alternar vista dividida original vs digitalizado' : 'Toggle split view original vs digitized'}
               >
                 <SplitSquareHorizontal size={14} />
-                <span>{splitView ? (isEs ? 'Cerrar Vista Dividida' : 'Close Split View') : (isEs ? 'Vista Dividida (2 Paneles)' : 'Split View')}</span>
+                <span>{splitView ? (isEs ? 'Cerrar Split' : 'Close Split') : (isEs ? 'Split View' : 'Split View')}</span>
               </button>
             )}
 
+            {/* View Original Document Modal */}
             {activeFileUrl && (
-              <button type="button" onClick={() => setShowOriginalModal(true)} style={{
-                background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)',
-                color: '#fff', borderRadius: '8px', padding: '6px 12px',
-                fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', gap: '6px'
-              }}>
+              <button
+                type="button"
+                onClick={() => setShowOriginalModal(true)}
+                className="gcp-action-btn gcp-action-btn-secondary"
+                title={isEs ? 'Ver documento escaneado original' : 'View original scanned document'}
+              >
                 <Eye size={14} />
                 <span>{isEs ? 'Ver Documento' : 'View Document'}</span>
               </button>
             )}
 
-            <button type="button" onClick={handleCopyLink} style={{
-              background: '#fff', border: 'none', color: '#064e3b', borderRadius: '8px',
-              padding: '6px 12px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer',
-              display: 'inline-flex', alignItems: 'center', gap: '5px'
-            }}>
-              {copiedLink ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
-              <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
+            {/* Primary Action: Copy Public Link */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="gcp-action-btn gcp-action-btn-primary"
+              title={isEs ? 'Copiar enlace público de la prescripción' : 'Copy public prescription link'}
+            >
+              {copiedLink ? <Check size={14} style={{ color: '#86efac' }} /> : <Copy size={14} />}
+              <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
             </button>
 
+            {/* Export to Excel */}
             {publishedRxList.length > 1 ? (
-              <button type="button" onClick={handleExportBatchExcel} style={{
-                background: '#fff', border: 'none', color: '#15803d', borderRadius: '8px',
-                padding: '6px 12px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', gap: '5px'
-              }} title={isEs ? 'Exportar lote completo a Excel (.xlsx)' : 'Export complete batch to Excel (.xlsx)'}>
-                <FileSpreadsheet size={14} style={{ color: '#15803d' }} />
-                <span>{isEs ? `Exportar Lote (${publishedRxList.length} .xlsx)` : `Export Batch (${publishedRxList.length} .xlsx)`}</span>
+              <button
+                type="button"
+                onClick={handleExportBatchExcel}
+                className="gcp-action-btn gcp-action-btn-excel"
+                title={isEs ? 'Exportar lote completo a Excel (.xlsx)' : 'Export complete batch to Excel (.xlsx)'}
+              >
+                <FileSpreadsheet size={14} />
+                <span>{isEs ? `Excel Lote (${publishedRxList.length})` : `Batch Excel (${publishedRxList.length})`}</span>
               </button>
             ) : (
-              <button type="button" onClick={handleExportExcel} style={{
-                background: '#fff', border: 'none', color: '#15803d', borderRadius: '8px',
-                padding: '6px 12px', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer',
-                display: 'inline-flex', alignItems: 'center', gap: '5px'
-              }} title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}>
-                <FileSpreadsheet size={14} style={{ color: '#15803d' }} />
-                <span>{isEs ? 'Exportar a Excel' : 'Export to Excel (.xlsx)'}</span>
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                className="gcp-action-btn gcp-action-btn-excel"
+                title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}
+              >
+                <FileSpreadsheet size={14} />
+                <span>{isEs ? 'Exportar Excel' : 'Export Excel'}</span>
               </button>
             )}
 
-            <button type="button" onClick={handleReset} style={{
-              background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff',
-              borderRadius: '8px', padding: '6px 10px', fontSize: '0.78rem',
-              fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
-            }}>
+            {/* Scan New Batch */}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="gcp-action-btn gcp-action-btn-ghost"
+              title={isEs ? 'Escanear un nuevo lote de prescripciones' : 'Scan a new prescription batch'}
+            >
               <RefreshCw size={13} />
-              <span>{isEs ? 'Escanear Nuevo Lote' : 'Scan New Batch'}</span>
+              <span>{isEs ? 'Nuevo Escaneo' : 'New Batch'}</span>
             </button>
           </div>
         </div>
 
-        {/* ── Architecture Improvement 3: Clinical Quality & Safety GCP Strip ── */}
-        <div style={{
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '8px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-        }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: '6px' }}>
-            <ShieldCheck size={13} />
+        {/* ── GCP Clinical Intelligence & Quality Strip ── */}
+        <div className="gcp-telemetry-bar">
+          <div className="gcp-telemetry-chip" style={{ color: '#15803d', borderColor: '#bbf7d0', background: '#f0fdf4' }}>
+            <ShieldCheck size={13} style={{ color: '#16a34a' }} />
             <span>{isEs ? 'Calidad OCR: 98.4% (Legibilidad Óptima)' : 'OCR Quality: 98.4% (Optimal Legibility)'}</span>
           </div>
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '3px 8px', borderRadius: '6px' }}>
-            <Activity size={13} />
+          <div className="gcp-telemetry-chip" style={{ color: '#1d4ed8', borderColor: '#bfdbfe', background: '#eff6ff' }}>
+            <Activity size={13} style={{ color: '#2563eb' }} />
             <span>{isEs ? 'Validación Galénica: Catálogo Fagron Verificado ✓' : 'Galenic Validation: Fagron Catalog Verified ✓'}</span>
           </div>
 
           {publishedRx?.fagron?.testName && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', padding: '3px 8px', borderRadius: '6px' }}>
-              <Dna size={13} />
+            <div className="gcp-telemetry-chip" style={{ color: '#6d28d9', borderColor: '#ddd6fe', background: '#f5f3ff' }}>
+              <Dna size={13} style={{ color: '#7c3aed' }} />
               <span>{publishedRx.fagron.testName} · {isEs ? 'Dianas Génicas Mapeadas' : 'Genomic Targets Mapped'}</span>
             </div>
           )}
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '3px 8px', borderRadius: '6px' }}>
-            <Factory size={13} />
+          <div className="gcp-telemetry-chip" style={{ color: '#0f766e', borderColor: '#99f6e4', background: '#f0fdfa' }}>
+            <Factory size={13} style={{ color: '#0d9488' }} />
             <span>{isEs ? 'Planta de Producción: BG-SOF-MAG-01 (EU-GMP Ready)' : 'Compounding Center: BG-SOF-MAG-01 (EU-GMP Ready)'}</span>
           </div>
         </div>
