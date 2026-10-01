@@ -1136,18 +1136,6 @@ export default function PublicPrescriptionIntakeClient() {
 
           {/* Right Block: GCP Action Toolbar */}
           <div className="gcp-intake-actions">
-            {/* Split View Toggle */}
-            {activeFileUrl && (
-              <button
-                type="button"
-                onClick={() => setSplitView(prev => !prev)}
-                className={`gcp-action-btn gcp-action-btn-secondary ${splitView ? 'active-toggle' : ''}`}
-                title={isEs ? 'Alternar vista dividida original vs digitalizado' : 'Toggle split view original vs digitized'}
-              >
-                <SplitSquareHorizontal size={14} />
-                <span>{splitView ? (isEs ? 'Cerrar Split' : 'Close Split') : (isEs ? 'Split View' : 'Split View')}</span>
-              </button>
-            )}
 
             {/* View Original Document Modal */}
             {activeFileUrl && (
@@ -1371,530 +1359,248 @@ export default function PublicPrescriptionIntakeClient() {
           </div>
         )}
 
-        {/* ── ATLAS REGISTRATION PANEL ── */}
+        {/* ── GCP COMPACT ATLAS REGISTRATION INLINE BANNER ── */}
         {atlasStatus !== 'done' && (
           <div style={{
-            maxWidth: splitView ? '100%' : '900px',
-            margin: '20px auto 0',
-            padding: '0 16px',
+            maxWidth: '1240px',
+            margin: '8px auto 0',
+            padding: '0 12px',
           }}>
             <div style={{
               background: '#ffffff',
               border: '1px solid #e2e8f0',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+              borderLeft: '4px solid #003666',
+              borderRadius: '8px',
+              padding: '8px 14px',
+              boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              flexWrap: 'wrap'
             }}>
-              {/* Panel Header */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 20px',
-                background: 'linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%)',
-                borderBottom: '1px solid #dbe4ff',
-              }}>
+              {/* Left: Indicator & Description */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
                 <div style={{
-                  width: '36px', height: '36px', borderRadius: '10px',
-                  background: '#1a56db', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', flexShrink: 0
+                  width: '28px', height: '28px', borderRadius: '6px',
+                  background: '#f0f4ff', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', flexShrink: 0, border: '1px solid #dbeafe'
                 }}>
-                  <Database size={18} style={{ color: '#ffffff' }} />
+                  <Database size={15} style={{ color: '#003666' }} />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1e3a8a' }}>
-                    {isEs ? 'Registrar en Atlas' : 'Register in Atlas'}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginTop: '1px' }}>
-                    {isEs
-                      ? 'Consolida oficialmente esta prescripción en el sistema Atlas de gestión clínica'
-                      : 'Officially consolidate this prescription into the Atlas clinical management system'}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                      {isEs ? 'Consolidación en Atlas' : 'Atlas Clinical Consolidation'}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      — {isEs ? 'Verifica la extracción antes de registrar en el historial clínico' : 'Verify AI extraction before clinical registry'}
+                    </span>
                   </div>
                 </div>
-                {atlasStatus === 'error' && (
-                  <span style={{
-                    padding: '3px 9px', borderRadius: '6px', fontSize: '0.72rem',
-                    fontWeight: 700, background: '#fef2f2', color: '#dc2626',
-                    border: '1px solid #fecaca'
-                  }}>Registration failed</span>
-                )}
               </div>
 
-              <div style={{ padding: '20px' }}>
-
-                {/* ── STEP A: Review Satisfaction ── */}
-                {atlasStatus !== 'registering' && reviewSatisfied === null && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'flex-start', gap: '10px',
-                      padding: '12px 14px', background: '#f8fafc',
-                      borderRadius: '10px', border: '1px solid #e2e8f0'
-                    }}>
-                      <Info size={16} style={{ color: '#64748b', flexShrink: 0, marginTop: '2px' }} />
-                      <p style={{ margin: 0, fontSize: '0.84rem', color: '#475569', lineHeight: 1.55 }}>
-                        {isEs
-                          ? 'Antes de registrar en Atlas, confirme que los datos extraídos por la IA son correctos y que la prescripción electrónica generada es satisfactoria.'
-                          : 'Before registering in Atlas, please confirm that the AI-extracted data is accurate and the generated electronic prescription is satisfactory.'}
-                      </p>
-                    </div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1e293b' }}>
-                      {isEs ? '¿La revisión de la prescripción es satisfactoria?' : 'Is the prescription review satisfactory?'}
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setReviewSatisfied('yes')}
-                        style={{
-                          flex: 1, padding: '11px 14px', borderRadius: '10px',
-                          background: '#f0fdf4', border: '2px solid #86efac',
-                          color: '#15803d', fontWeight: 700, fontSize: '0.86rem',
-                          cursor: 'pointer', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', gap: '8px', transition: 'all 0.15s'
-                        }}
-                      >
-                        <ThumbsUp size={16} />
-                        <span>{isEs ? 'Sí, es correcta' : 'Yes, data is correct'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setReviewSatisfied('no')}
-                        style={{
-                          flex: 1, padding: '11px 14px', borderRadius: '10px',
-                          background: '#fff7ed', border: '2px solid #fed7aa',
-                          color: '#c2410c', fontWeight: 700, fontSize: '0.86rem',
-                          cursor: 'pointer', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', gap: '8px', transition: 'all 0.15s'
-                        }}
-                      >
-                        <ThumbsDown size={16} />
-                        <span>{isEs ? 'No, hay errores' : 'No, data has errors'}</span>
-                      </button>
-                    </div>
+              {/* Right: Inline Actions */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {atlasStatus !== 'registering' && atlasStatus !== 'confirming' && reviewSatisfied === null && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.76rem', color: '#475569', fontWeight: 600, marginRight: '2px' }}>
+                      {isEs ? '¿Datos correctos?' : 'Data accurate?'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setReviewSatisfied('yes')}
+                      style={{
+                        padding: '4px 10px', borderRadius: '5px',
+                        background: '#f0fdf4', border: '1px solid #86efac',
+                        color: '#15803d', fontWeight: 700, fontSize: '0.75rem',
+                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}
+                    >
+                      <ThumbsUp size={12} />
+                      <span>{isEs ? 'Sí, correcto' : 'Yes, correct'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReviewSatisfied('no')}
+                      style={{
+                        padding: '4px 10px', borderRadius: '5px',
+                        background: '#fff7ed', border: '1px solid #fed7aa',
+                        color: '#c2410c', fontWeight: 700, fontSize: '0.75rem',
+                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}
+                    >
+                      <ThumbsDown size={12} />
+                      <span>{isEs ? 'Con incidencias' : 'Has errors'}</span>
+                    </button>
                   </div>
                 )}
 
-                {/* ── STEP B: Not satisfied — guidance ── */}
-                {reviewSatisfied === 'no' && atlasStatus !== 'registering' && (
-                  <div style={{
-                    display: 'flex', flexDirection: 'column', gap: '14px'
-                  }}>
-                    <div style={{
-                      padding: '14px 16px', background: '#fff7ed',
-                      border: '1px solid #fed7aa', borderRadius: '10px',
-                      display: 'flex', gap: '12px', alignItems: 'flex-start'
-                    }}>
-                      <AlertCircle size={18} style={{ color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
-                      <div>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#92400e', marginBottom: '4px' }}>
-                          {isEs ? 'Revisión marcada como insatisfactoria' : 'Review marked as unsatisfactory'}
-                        </div>
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#b45309', lineHeight: 1.5 }}>
-                          {isEs
-                            ? 'Puedes registrar de todos modos e incluir una nota para el equipo clínico, o descartar y escanear de nuevo.'
-                            : 'You can still register with a note for the clinical team, or discard and re-scan the document.'}
-                        </p>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        onClick={() => { setAtlasStatus('confirming'); }}
-                        style={{
-                          padding: '9px 16px', borderRadius: '8px',
-                          background: '#1a56db', color: '#fff', border: 'none',
-                          fontSize: '0.84rem', fontWeight: 700, cursor: 'pointer',
-                          display: 'inline-flex', alignItems: 'center', gap: '7px'
-                        }}
-                      >
-                        <Database size={15} />
-                        <span>{isEs ? 'Registrar con nota de incidencia' : 'Register with incident note'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setReviewSatisfied(null)}
-                        style={{
-                          padding: '9px 14px', borderRadius: '8px',
-                          background: '#f8fafc', color: '#475569',
-                          border: '1px solid #e2e8f0', fontSize: '0.84rem',
-                          fontWeight: 600, cursor: 'pointer'
-                        }}
-                      >
-                        {isEs ? '← Cambiar respuesta' : '← Change answer'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* ── STEP C: Satisfied — confirm & register ── */}
                 {reviewSatisfied === 'yes' && atlasStatus === 'idle' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '10px 14px', background: '#f0fdf4',
-                      border: '1px solid #86efac', borderRadius: '10px'
-                    }}>
-                      <CheckCircle2 size={16} style={{ color: '#16a34a', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.83rem', fontWeight: 600, color: '#15803d' }}>
-                        {isEs ? 'Revisión confirmada como satisfactoria' : 'Review confirmed as satisfactory'}
-                      </span>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <CheckCircle2 size={13} /> {isEs ? 'Verificado' : 'Verified'}
+                    </span>
                     <button
                       type="button"
                       onClick={() => setAtlasStatus('confirming')}
                       style={{
-                        width: '100%', padding: '13px 20px', borderRadius: '10px',
-                        background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
-                        color: '#ffffff', border: 'none', fontWeight: 800,
-                        fontSize: '0.95rem', cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        gap: '10px', boxShadow: '0 4px 14px rgba(26,86,219,0.35)',
-                        transition: 'all 0.15s'
+                        padding: '4px 12px', borderRadius: '5px',
+                        background: '#003666', color: '#ffffff', border: 'none',
+                        fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                        boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)'
                       }}
                     >
-                      <Database size={18} />
+                      <Database size={12} />
                       <span>{isEs ? 'Registrar en Atlas' : 'Register in Atlas'}</span>
-                      <ChevronRight size={16} style={{ marginLeft: '2px' }} />
                     </button>
                     <button
                       type="button"
                       onClick={() => setReviewSatisfied(null)}
                       style={{
                         background: 'none', border: 'none', color: '#94a3b8',
-                        fontSize: '0.78rem', cursor: 'pointer', textAlign: 'center'
+                        fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline'
                       }}
                     >
-                      {isEs ? '← Cambiar respuesta' : '← Change answer'}
+                      {isEs ? 'Cambiar' : 'Change'}
                     </button>
                   </div>
                 )}
 
-                {/* ── STEP D: Confirmation modal ── */}
+                {reviewSatisfied === 'no' && atlasStatus === 'idle' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', color: '#d97706', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <AlertCircle size={13} /> {isEs ? 'Incidencia reportada' : 'Flagged with incident'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setAtlasStatus('confirming')}
+                      style={{
+                        padding: '4px 10px', borderRadius: '5px',
+                        background: '#d97706', color: '#ffffff', border: 'none',
+                        fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}
+                    >
+                      <Database size={12} />
+                      <span>{isEs ? 'Registrar con Nota' : 'Register with Note'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReviewSatisfied(null)}
+                      style={{
+                        background: 'none', border: 'none', color: '#94a3b8',
+                        fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline'
+                      }}
+                    >
+                      {isEs ? 'Cambiar' : 'Change'}
+                    </button>
+                  </div>
+                )}
+
                 {atlasStatus === 'confirming' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1e293b' }}>
-                      {isEs ? 'Confirmar registro en Atlas' : 'Confirm Atlas Registration'}
-                    </div>
-                    <div style={{
-                      padding: '12px 14px', background: '#f8fafc',
-                      border: '1px solid #e2e8f0', borderRadius: '10px',
-                      fontSize: '0.82rem', color: '#475569', lineHeight: 1.5
-                    }}>
-                      <strong style={{ color: '#0f172a' }}>
-                        {publishedRx.patientName || publishedRx.patient?.name || 'Patient'}
-                      </strong>
-                      {' — '}
-                      <span style={{ fontFamily: 'monospace', color: '#1a56db', fontWeight: 700 }}>
-                        {officialCode}
-                      </span>
-                      <br />
-                      {publishedRx.doctorName || publishedRx.prescribingDoctor || ''}
-                      {reviewSatisfied === 'no' && (
-                        <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: 600 }}>
-                          · {isEs ? 'Marcada con incidencia' : 'Flagged with incident'}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>
-                        {isEs ? 'Notas para el equipo clínico (opcional)' : 'Notes for clinical team (optional)'}
-                      </label>
-                      <textarea
-                        value={atlasNotes}
-                        onChange={(e) => setAtlasNotes(e.target.value)}
-                        placeholder={isEs ? 'Observaciones, correcciones, aclaraciones...' : 'Observations, corrections, clarifications...'}
-                        rows={3}
-                        style={{
-                          width: '100%', padding: '10px 12px',
-                          borderRadius: '8px', border: '1px solid #cbd5e1',
-                          fontSize: '0.83rem', color: '#334155', resize: 'vertical',
-                          boxSizing: 'border-box', fontFamily: 'inherit',
-                          outline: 'none', lineHeight: 1.5
-                        }}
-                      />
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        type="button"
-                        onClick={handleRegisterInAtlas}
-                        disabled={atlasStatus === 'registering'}
-                        style={{
-                          flex: 1, padding: '11px 18px', borderRadius: '10px',
-                          background: 'linear-gradient(135deg, #1a56db 0%, #1e40af 100%)',
-                          color: '#fff', border: 'none', fontWeight: 800,
-                          fontSize: '0.88rem', cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          gap: '8px', boxShadow: '0 4px 12px rgba(26,86,219,0.3)',
-                          opacity: atlasStatus === 'registering' ? 0.7 : 1,
-                          transition: 'all 0.15s'
-                        }}
-                      >
-                        <ClipboardCheck size={16} />
-                        <span>{isEs ? 'Confirmar y Registrar en Atlas' : 'Confirm & Register in Atlas'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAtlasStatus('idle')}
-                        disabled={atlasStatus === 'registering'}
-                        style={{
-                          padding: '11px 16px', borderRadius: '10px',
-                          background: '#f8fafc', color: '#64748b',
-                          border: '1px solid #e2e8f0', fontWeight: 600,
-                          fontSize: '0.85rem', cursor: 'pointer'
-                        }}
-                      >
-                        {isEs ? 'Cancelar' : 'Cancel'}
-                      </button>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      value={atlasNotes}
+                      onChange={(e) => setAtlasNotes(e.target.value)}
+                      placeholder={isEs ? 'Nota clínica opcional...' : 'Optional clinical note...'}
+                      style={{
+                        padding: '4px 8px', borderRadius: '5px', border: '1px solid #cbd5e1',
+                        fontSize: '0.75rem', color: '#334155', minWidth: '180px', outline: 'none'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRegisterInAtlas}
+                      style={{
+                        padding: '4px 12px', borderRadius: '5px',
+                        background: '#003666', color: '#fff', border: 'none',
+                        fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}
+                    >
+                      <ClipboardCheck size={12} />
+                      <span>{isEs ? 'Confirmar' : 'Confirm'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAtlasStatus('idle')}
+                      style={{
+                        padding: '4px 8px', borderRadius: '5px',
+                        background: '#f1f5f9', color: '#64748b',
+                        border: '1px solid #e2e8f0', fontSize: '0.75rem', cursor: 'pointer'
+                      }}
+                    >
+                      {isEs ? 'Cancelar' : 'Cancel'}
+                    </button>
                   </div>
                 )}
 
-                {/* ── STEP E: Registering spinner ── */}
                 {atlasStatus === 'registering' && (
-                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                    <div style={{
-                      width: '48px', height: '48px', borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #1a56db 0%, #7c3aed 100%)',
-                      margin: '0 auto 14px', display: 'flex',
-                      alignItems: 'center', justifyContent: 'center',
-                      animation: 'pulse 1.5s infinite'
-                    }}>
-                      <Database size={22} style={{ color: '#fff' }} />
-                    </div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1e293b' }}>
-                      {isEs ? 'Registrando en Atlas...' : 'Registering in Atlas...'}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px' }}>
-                      {isEs ? 'Sincronizando con la base de datos clínica' : 'Syncing with clinical management database'}
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontSize: '0.78rem', fontWeight: 600 }}>
+                    <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>{isEs ? 'Registrando en Atlas...' : 'Registering in Atlas...'}</span>
                   </div>
                 )}
 
-                {/* ── STEP F: Error ── */}
                 {atlasStatus === 'error' && (
-                  <div style={{
-                    display: 'flex', flexDirection: 'column', gap: '12px'
-                  }}>
-                    <div style={{
-                      padding: '12px 14px', background: '#fef2f2',
-                      border: '1px solid #fecaca', borderRadius: '10px',
-                      display: 'flex', gap: '10px', alignItems: 'flex-start'
-                    }}>
-                      <AlertCircle size={16} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
-                      <div style={{ fontSize: '0.83rem', color: '#b91c1c' }}>
-                        {isEs
-                          ? 'El registro en Atlas falló. Por favor, inténtalo de nuevo o contacta con el equipo técnico.'
-                          : 'Atlas registration failed. Please try again or contact the technical team.'}
-                      </div>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.74rem', color: '#dc2626', fontWeight: 600 }}>
+                      {isEs ? 'Error al registrar' : 'Registration failed'}
+                    </span>
                     <button
                       type="button"
                       onClick={() => setAtlasStatus(reviewSatisfied === null ? 'idle' : 'confirming')}
                       style={{
-                        padding: '9px 16px', borderRadius: '8px',
-                        background: '#1a56db', color: '#fff', border: 'none',
-                        fontWeight: 700, fontSize: '0.84rem', cursor: 'pointer',
-                        display: 'inline-flex', alignItems: 'center', gap: '7px'
+                        padding: '3px 8px', borderRadius: '4px', background: '#dc2626',
+                        color: '#fff', border: 'none', fontSize: '0.72rem', cursor: 'pointer'
                       }}
                     >
-                      <RefreshCw size={14} />
-                      <span>{isEs ? 'Reintentar' : 'Retry'}</span>
+                      {isEs ? 'Reintentar' : 'Retry'}
                     </button>
                   </div>
                 )}
-
               </div>
             </div>
           </div>
         )}
 
-        {/* ── POST-REGISTRATION SUCCESS BANNER ── */}
+        {/* ── POST-REGISTRATION SUCCESS BANNER (GCP STYLE) ── */}
         {atlasStatus === 'done' && atlasResult && (
           <div style={{
-            maxWidth: splitView ? '100%' : '900px', margin: '20px auto 0', padding: '0 16px'
+            maxWidth: '1240px', margin: '8px auto 0', padding: '0 12px'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-              border: '1px solid #86efac', borderRadius: '16px',
-              padding: '18px 22px',
-              display: 'flex', alignItems: 'flex-start', gap: '14px',
-              boxShadow: '0 4px 16px rgba(22,163,74,0.1)'
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderLeft: '4px solid #16a34a',
+              borderRadius: '8px',
+              padding: '8px 14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: '10px', flexWrap: 'wrap'
             }}>
-              <div style={{
-                width: '42px', height: '42px', borderRadius: '12px',
-                background: '#16a34a', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', flexShrink: 0
-              }}>
-                <ClipboardCheck size={22} style={{ color: '#ffffff' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={16} style={{ color: '#16a34a', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#15803d' }}>
+                  {isEs ? 'Prescripción consolidada en Atlas con éxito' : 'Prescription officially consolidated in Atlas'}
+                </span>
+                <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', background: '#ffffff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #86efac', color: '#166534', fontWeight: 700 }}>
+                  {atlasResult.prescriptionNumber || officialCode}
+                </span>
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#15803d', marginBottom: '4px' }}>
-                  {isEs ? 'Prescripción registrada en Atlas con éxito' : 'Prescription successfully registered in Atlas'}
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#166534', lineHeight: 1.55 }}>
-                  <strong style={{ fontFamily: 'monospace' }}>
-                    {atlasResult.prescriptionNumber || officialCode}
-                  </strong>
-                  {' — '}
-                  {isEs ? 'Registrada el' : 'Registered at'}{' '}
-                  <strong>{new Date(atlasResult.atlasRegistration?.registeredAt || Date.now()).toLocaleString()}</strong>
-                  {atlasResult.atlasRegistration?.registeredBy?.email && (
-                    <span style={{ display: 'block', marginTop: '2px', color: '#16a34a' }}>
-                      {isEs ? 'Por:' : 'By:'} {atlasResult.atlasRegistration.registeredBy.email}
-                    </span>
-                  )}
-                  {atlasResult.atlasRegistration?.notes && (
-                    <span style={{ display: 'block', marginTop: '4px', fontStyle: 'italic' }}>
-                      "{atlasResult.atlasRegistration.notes}"
-                    </span>
-                  )}
-                </div>
-              </div>
-              <span style={{
-                padding: '4px 10px', borderRadius: '8px', background: '#ffffff',
-                border: '1px solid #bbf7d0', fontSize: '0.74rem', fontWeight: 800,
-                color: '#16a34a', whiteSpace: 'nowrap', flexShrink: 0,
-                alignSelf: 'flex-start'
-              }}>Atlas ✓</span>
+              <span style={{ fontSize: '0.72rem', color: '#15803d' }}>
+                {new Date(atlasResult.atlasRegistration?.registeredAt || Date.now()).toLocaleTimeString()} ✓
+              </span>
             </div>
           </div>
         )}
 
-        {/* ── MAIN CONTENT: FULL VIEW OR SIDE-BY-SIDE SPLIT VIEW ── */}
-        {splitView ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)',
-            gap: '16px',
-            padding: '16px',
-            maxWidth: '1800px',
-            margin: '0 auto'
-          }}>
-            {/* Left Column: Digitalized Prescription Dossier */}
-            <div style={{ minWidth: 0 }}>
-              <PublicPrescriptionClient rx={publishedRx} />
-            </div>
-
-            {/* Right Column: Original Document Viewer */}
-            <div style={{
-              position: 'sticky',
-              top: '90px',
-              height: 'calc(100vh - 110px)',
-              background: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #cbd5e1',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}>
-              {/* Document Viewer Toolbar */}
-              <div style={{
-                padding: '10px 14px',
-                background: '#f8fafc',
-                borderBottom: '1px solid #e2e8f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '8px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                  <FileText size={16} style={{ color: '#0284c7', flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {publishedRx?.fileName || (isEs ? 'Documento Original' : 'Original Document')}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setDocZoom(prev => Math.max(50, prev - 20))}
-                    style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer' }}
-                    title={isEs ? 'Reducir' : 'Zoom out'}
-                  >
-                    <ZoomOut size={13} />
-                  </button>
-                  <span style={{ fontSize: '0.74rem', color: '#64748b', minWidth: '38px', textAlign: 'center' }}>
-                    {docZoom}%
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setDocZoom(prev => Math.min(200, prev + 20))}
-                    style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer' }}
-                    title={isEs ? 'Aumentar' : 'Zoom in'}
-                  >
-                    <ZoomIn size={13} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDocZoom(100)}
-                    style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer' }}
-                    title={isEs ? 'Restablecer zoom' : 'Reset zoom'}
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                  {activeFileUrl && (
-                    <a
-                      href={activeFileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', color: '#334155', display: 'flex', alignItems: 'center' }}
-                      title={isEs ? 'Abrir en pestaña nueva' : 'Open in new tab'}
-                    >
-                      <ExternalLink size={13} />
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setSplitView(false)}
-                    style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', color: '#dc2626', cursor: 'pointer' }}
-                    title={isEs ? 'Cerrar panel' : 'Close pane'}
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Document Container */}
-              <div style={{ flex: 1, overflow: 'auto', background: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
-                {isPdf ? (
-                  <iframe
-                    src={activeFileUrl}
-                    title="Original Document"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      borderRadius: '8px',
-                      background: '#fff',
-                      transform: docZoom !== 100 ? `scale(${docZoom / 100})` : 'none',
-                      transformOrigin: 'top center',
-                      transition: 'transform 0.15s ease'
-                    }}
-                  />
-                ) : (
-                  <img
-                    src={activeFileUrl}
-                    alt="Original Document"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      objectFit: 'contain',
-                      borderRadius: '6px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                      transform: docZoom !== 100 ? `scale(${docZoom / 100})` : 'none',
-                      transformOrigin: 'top center',
-                      transition: 'transform 0.15s ease'
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Normal Single Column View */
-          <PublicPrescriptionClient rx={publishedRx} />
-        )}
+        {/* ── MAIN CONTENT: Public Prescription Dossier ── */}
+        <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 8px' }}>
+          <PublicPrescriptionClient rx={publishedRx} embedded={true} />
+        </div>
 
         {/* Modal to view the original uploaded/scanned file */}
         {showOriginalModal && activeFileUrl && (

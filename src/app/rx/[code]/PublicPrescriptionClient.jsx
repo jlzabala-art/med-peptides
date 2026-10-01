@@ -1030,40 +1030,40 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         />
       )}
 
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '1.5rem 1rem' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0.75rem 1rem' }}>
         <div className="pds-content-with-sidebar">
-          <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
-            {/* ── Master Header Card ─────────────────────────────────────────────────── */}
+            {/* ── Master Header Card (GCP Standard High-Density Clinical Card) ─────── */}
             <div className="rx-card" style={{
               background: '#ffffff',
-              borderRadius: '16px',
+              borderRadius: '12px',
               border: '1px solid #e2e8f0',
-              padding: '1.75rem',
-              boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-              marginBottom: '0.25rem'
+              padding: '1.1rem 1.25rem',
+              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)',
+              marginBottom: '0.15rem'
             }}>
-              <div className="rx-master-header-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem' }}>
+              <div className="rx-master-header-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 
                 {/* Prescribing Doctor Clinical Prominence */}
-                <div className="rx-doctor-col" style={{ display: 'flex', gap: '1rem', minWidth: 280, flex: '1 1 300px' }}>
+                <div className="rx-doctor-col" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 260, flex: '1 1 280px' }}>
                   <div className="rx-doctor-avatar" style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '14px',
+                    width: 44,
+                    height: 44,
+                    borderRadius: '10px',
                     background: hasTreatingDoctor ? 'linear-gradient(135deg, #003666, #0284c7)' : 'linear-gradient(135deg, #475569, #64748b)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#ffffff',
                     flexShrink: 0,
-                    boxShadow: '0 4px 12px rgba(0, 54, 102, 0.2)'
+                    boxShadow: '0 2px 6px rgba(0, 54, 102, 0.15)'
                   }}>
-                    {hasTreatingDoctor ? <Stethoscope size={28} /> : <Building2 size={28} />}
+                    {hasTreatingDoctor ? <Stethoscope size={22} /> : <Building2 size={22} />}
                   </div>
-                  <div className="rx-doctor-meta" style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <div className="rx-doctor-badge" style={{ fontSize: '0.75rem', fontWeight: 700, color: hasTreatingDoctor ? '#0284c7' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="rx-doctor-meta" style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <div className="rx-doctor-badge" style={{ fontSize: '0.72rem', fontWeight: 700, color: hasTreatingDoctor ? '#0284c7' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                         {hasTreatingDoctor ? (
                           isDhaLicensed 
                             ? (isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed')
@@ -1091,42 +1091,42 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '0.75rem',
+                          gap: '3px',
+                          fontSize: '0.73rem',
                           fontWeight: 650,
-                          padding: '2px 6px',
+                          padding: '1px 5px',
                           borderRadius: '4px'
                         }}
                         title={hasTreatingDoctor ? (isEs ? 'Editar médico tratante' : 'Edit treating physician') : (isEs ? 'Asignar médico' : 'Assign physician')}
                       >
-                        <Edit3 size={12} />
+                        <Edit3 size={11} />
                         {hasTreatingDoctor ? (isEs ? 'Modificar' : 'Edit') : (isEs ? 'Asignar' : 'Assign')}
                       </button>
                     </div>
 
-                    <h1 className="rx-doctor-name" style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h1 className="rx-doctor-name" style={{ margin: '0.1rem 0', fontSize: '1.15rem', fontWeight: 750, color: '#0f172a', lineHeight: 1.3 }}>
                       {hasTreatingDoctor ? doctorName : clinic}
                     </h1>
 
                     {hasTreatingDoctor ? (
-                      <div className="rx-doctor-sub" style={{ fontSize: '0.82rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '3px' }}>
-                        <div>{doctorSpecialty}</div>
+                      <div className="rx-doctor-sub" style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '1px' }}>
+                        <span>{doctorSpecialty}</span>
                         {doctorLicense && (
-                          <div style={{ color: '#0284c7', fontWeight: 750, fontSize: '0.78rem' }}>
+                          <span style={{ color: '#0284c7', fontWeight: 700 }}>
                             · Lic. {doctorLicense}
-                          </div>
+                          </span>
                         )}
                         {doctorAddress && (
-                          <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px' }}>
+                          <span style={{ color: '#94a3b8' }}>
                             📍 {doctorAddress}
-                          </div>
+                          </span>
                         )}
                       </div>
                     ) : (
-                      <div style={{ marginTop: '6px' }}>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                          {isEs ? 'Sin médico tratante asignado a esta prescripción.' : 'No treating physician directly assigned to this prescription.'}
-                        </div>
+                      <div style={{ marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.76rem', color: '#64748b' }}>
+                          {isEs ? 'Sin médico asignado.' : 'No physician assigned.'}
+                        </span>
                         <button
                           onClick={() => {
                             setDocForm({
@@ -1140,39 +1140,38 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                             setShowDoctorModal(true);
                           }}
                           style={{
-                            marginTop: '8px',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 14px',
-                            background: '#0284c7',
-                            color: '#ffffff',
-                            borderRadius: '8px',
-                            border: 'none',
-                            fontSize: '0.8rem',
+                            gap: '4px',
+                            padding: '3px 9px',
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: '5px',
+                            fontSize: '0.74rem',
                             fontWeight: 650,
-                            cursor: 'pointer',
-                            boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)'
+                            cursor: 'pointer'
                           }}
                         >
-                          <Edit3 size={14} />
-                          {isEs ? '✍️ Asignar Médico Tratante' : '✍️ Assign Treating Physician'}
+                          <Edit3 size={12} />
+                          {isEs ? 'Asignar Médico' : 'Assign Physician'}
                         </button>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Patient Identity Card */}
+                {/* Patient Identity Card (Compact GCP Style) */}
                 <div className="rx-patient-box" style={{
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '1rem 1.25rem',
-                  minWidth: 260
+                  borderRadius: '8px',
+                  padding: '0.7rem 1rem',
+                  minWidth: 240,
+                  flex: '0 1 auto'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', gap: '8px' }}>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px', gap: '8px' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       {isEs ? 'Paciente Registrado' : 'Registered Patient'}
                     </div>
                     <span 
@@ -1181,11 +1180,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         toast.success(isEs ? 'Referencia copiada ✓' : 'Reference copied ✓');
                       }}
                       style={{ 
-                        fontSize: '0.68rem', 
+                        fontSize: '0.66rem', 
                         fontFamily: 'monospace', 
                         color: '#0369a1', 
                         background: '#e0f2fe', 
-                        padding: '2px 7px', 
+                        padding: '1px 6px', 
                         borderRadius: '4px', 
                         fontWeight: 700,
                         cursor: 'pointer',
@@ -1196,22 +1195,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       title={isEs ? 'Copiar referencia' : 'Copy reference'}
                     >
                       Ref: {rxId}
-                      <Copy size={11} />
+                      <Copy size={10} />
                     </span>
                   </div>
-                  <div className="rx-patient-name" style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                  <div className="rx-patient-name" style={{ fontSize: '0.98rem', fontWeight: 750, color: '#0f172a', marginTop: '1px' }}>
                     {patientName} {patientAlias}
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', display: 'flex', gap: '0.75rem' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <span>PIN: <strong>{patient.pin || '11774'}</strong></span>
                     <span>·</span>
                     <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob || '15/06/1984'}</strong></span>
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '4px', fontWeight: 600 }}>
-                    {patient.maskedPhone || '+971 54 *** **80'}
+                    <span>·</span>
+                    <span style={{ color: '#0284c7', fontWeight: 600 }}>{patient.maskedPhone || '+971 54 *** **80'}</span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
                     <button
                       type="button"
                       onClick={() => {
@@ -1222,21 +1220,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        padding: '0.45rem 0.95rem',
-                        borderRadius: '8px',
+                        gap: '5px',
+                        padding: '3px 8px',
+                        borderRadius: '5px',
                         background: '#ffffff',
-                        color: '#0f172a',
+                        color: '#334155',
                         border: '1px solid #cbd5e1',
-                        fontSize: '0.82rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        transition: 'all 0.15s ease'
+                        fontSize: '0.73rem',
+                        fontWeight: 650,
+                        cursor: 'pointer'
                       }}
                       title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
                     >
-                      <Printer size={15} color="#003666" />
+                      <Printer size={13} color="#003666" />
                       <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
                     </button>
                   </div>
@@ -2654,7 +2650,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       )}
 
       {/* ── Mobile-First Floating Action Bar (Golden Rule #23) ── */}
-      <div className="mobile-floating-action-bar" style={{
+      {!embedded && (
+        <div className="mobile-floating-action-bar" style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
@@ -2747,6 +2744,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           <span>QR Lote</span>
         </button>
       </div>
+      )}
 
       {/* ── Prescription Dedicated Clinical AI Research Copilot ── */}
       <PublicAtlasAIDrawer
