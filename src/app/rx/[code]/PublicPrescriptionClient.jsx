@@ -94,12 +94,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showDoctorModal, setShowDoctorModal] = useState(false);
   const [isSavingDoctor, setIsSavingDoctor] = useState(false);
   const [docForm, setDocForm] = useState({
-    name: 'Dr. Hanieh Erdmann',
-    specialty: 'Physician Consultant Dermatology',
-    license: 'DHA-00013060-006',
-    clinic: 'Bedaya Polyclinic',
-    phone: '+971 4 395 5599',
-    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+    name: '',
+    specialty: '',
+    license: '',
+    clinic: '',
+    phone: '',
+    address: ''
   });
 
   const isEs = lang === 'es';
@@ -1064,12 +1064,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <button
                         onClick={() => {
                           setDocForm({
-                            name: treatingDoc.name || 'Dr. Hanieh Erdmann',
-                            specialty: treatingDoc.specialty || 'Physician Consultant Dermatology',
-                            license: treatingDoc.license || 'DHA-00013060-006',
-                            clinic: treatingDoc.clinic || 'Bedaya Polyclinic',
-                            phone: treatingDoc.phone || '+971 4 395 5599',
-                            address: treatingDoc.address || 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                            name: treatingDoc.name || '',
+                            specialty: treatingDoc.specialty || '',
+                            license: treatingDoc.license || treatingDoc.licenseNumber || '',
+                            clinic: treatingDoc.clinic || '',
+                            phone: treatingDoc.phone || '',
+                            address: treatingDoc.address || ''
                           });
                           setShowDoctorModal(true);
                         }}
@@ -1119,12 +1119,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         <button
                           onClick={() => {
                             setDocForm({
-                              name: 'Dr. Hanieh Erdmann',
-                              specialty: 'Physician Consultant Dermatology',
-                              license: 'DHA-00013060-006',
-                              clinic: 'Bedaya Polyclinic',
-                              phone: '+971 4 395 5599',
-                              address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                              name: treatingDoc.name || '',
+                              specialty: treatingDoc.specialty || '',
+                              license: treatingDoc.license || treatingDoc.licenseNumber || '',
+                              clinic: treatingDoc.clinic || '',
+                              phone: treatingDoc.phone || '',
+                              address: treatingDoc.address || ''
                             });
                             setShowDoctorModal(true);
                           }}
@@ -2204,7 +2204,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             publicUrl={publicUrl}
             onOpenPdf={handleDownloadQrPng}
             onExportExcel={handleExportExcel}
-            onAssignDoctor={() => setShowDoctorModal(true)}
+            onAssignDoctor={() => {
+              setDocForm({
+                name: treatingDoc.name || '',
+                specialty: treatingDoc.specialty || '',
+                license: treatingDoc.license || treatingDoc.licenseNumber || '',
+                clinic: treatingDoc.clinic || '',
+                phone: treatingDoc.phone || '',
+                address: treatingDoc.address || ''
+              });
+              setShowDoctorModal(true);
+            }}
             lang={lang}
           />
         </div>
