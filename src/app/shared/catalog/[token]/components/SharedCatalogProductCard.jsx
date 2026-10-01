@@ -80,7 +80,13 @@ export default function SharedCatalogProductCard({
   }
 
   return (
-    <div className="product-card" style={{
+    <div className="product-card" style={hideMasterImage ? {
+      backgroundColor: 'transparent',
+      border: 'none',
+      borderRadius: '0',
+      padding: '8px 2px 2px 2px',
+      boxShadow: 'none'
+    } : {
       backgroundColor: '#ffffff',
       border: '1px solid #e2e8f0',
       borderRadius: '12px',
@@ -89,7 +95,7 @@ export default function SharedCatalogProductCard({
       transition: 'all 0.2s ease',
     }}>
       {/* Product Master Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', marginBottom: hideMasterImage ? '10px' : '16px' }}>
         <div style={{ display: 'flex', gap: '14px', flex: '1 1 300px' }}>
           {!hideMasterImage && (
             <ProductPresentationIcon
@@ -163,37 +169,51 @@ export default function SharedCatalogProductCard({
                 </a>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
                 <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  backgroundColor: '#f8fafc',
-                  color: '#64748b',
-                  padding: '3px 8px',
-                  borderRadius: '5px',
-                  border: '1px solid #e2e8f0'
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  border: '1px solid #e2e8f0',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em'
                 }}>
                   {prod.category}
                 </span>
-                <a
-                  href={`/p/${encodeURIComponent(prod.slug || prod.id)}?supplier=${resolvedSupplier}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pds-catalog-monograph-btn"
-                  title={monographLabel}
-                >
-                  <FileText size={13} />
-                  <span>{monographLabel}</span>
-                </a>
+                {prod.purity && (
+                  <span style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    padding: '2px 7px',
+                    borderRadius: '4px',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    {prod.purity}
+                  </span>
+                )}
               </div>
             )}
             {prod.description && (
-              <p className="product-desc-clamp" style={hideMasterImage ? { marginTop: '2px', marginBottom: '8px' } : undefined}>{prod.description}</p>
+              <p className="product-desc-clamp" style={{
+                marginTop: '4px',
+                marginBottom: '4px',
+                fontSize: '0.85rem',
+                lineHeight: 1.5,
+                color: '#475569'
+              }}>
+                {prod.description}
+              </p>
             )}
           </div>
         </div>
 
-        {includePrices && cleanVariants.length > 0 && (
+        {/* Starting From Price Box (Only shown on standalone card, NEVER duplicated in expanded row) */}
+        {includePrices && cleanVariants.length > 0 && !hideMasterImage && (
           <div className="mobile-hide" style={{
             backgroundColor: '#f8fafc',
             border: '1px solid #e2e8f0',
@@ -212,13 +232,42 @@ export default function SharedCatalogProductCard({
         )}
       </div>
 
-      {/* Variant Presentations Section */}
-      <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderLeft: '3px solid #0284c7', borderRadius: '10px', padding: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Package size={14} color="#0284c7" /> Available Formats & Dosages ({cleanVariants.length})
+      {/* Variant Presentations Section (Google Cloud Console Sub-Table UX) */}
+      <div style={{
+        backgroundColor: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        padding: '12px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '8px',
+          paddingBottom: '8px',
+          borderBottom: '1px solid #e2e8f0'
+        }}>
+          <span style={{
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            color: '#334155',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <Package size={13} color="#0284c7" /> Available Formats & Dosages ({cleanVariants.length})
           </span>
-          <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600 }}>
+          <span style={{
+            fontSize: '0.7rem',
+            color: '#0284c7',
+            fontWeight: 650,
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            padding: '1.5px 6px',
+            borderRadius: '4px'
+          }}>
             Verified Analytical Grade
           </span>
         </div>
