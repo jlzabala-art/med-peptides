@@ -216,32 +216,48 @@ CRITICAL PARSING RULES:
    - Calculate an overall legibility/completeness score (0-100).
    - List any critical missing fields in 'missing' (e.g., "Doctor License", "Patient DOB", "Quantity").`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { text: systemPrompt },
+    const CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
+    let response = null;
+    let lastError = null;
+
+    for (const modelName of CANDIDATE_MODELS) {
+      try {
+        response = await ai.models.generateContent({
+          model: modelName,
+          contents: [
             {
-              inlineData: {
-                mimeType,
-                data: buffer.toString('base64'),
-              },
+              role: 'user',
+              parts: [
+                { text: systemPrompt },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: buffer.toString('base64'),
+                  },
+                },
+              ],
             },
           ],
-        },
-      ],
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-        temperature: 0.1,
-      },
-    });
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: schema,
+            temperature: 0.1,
+          },
+        });
 
-    const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        console.warn(`[ai-extract-prescription] Model ${modelName} failed, falling back:`, err?.message || err);
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+    }
+
+    const text = response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) {
-      throw new Error('Gemini returned an empty response.');
+      throw lastError || new Error('All Atlas AI models were temporarily unable to process this document.');
     }
 
     let parsedData;
@@ -260,9 +276,16 @@ CRITICAL PARSING RULES:
     return applyRateLimitHeaders(NextResponse.json(parsedData), rateInfo);
   } catch (error) {
     console.error('[ai-extract-prescription] Extraction error:', error);
+    const rawMsg = String(error?.message || '');
+    const isCapacityIssue = /503|UNAVAILABLE|high demand|overloaded|ResourceExhausted|429|spikes in demand/i.test(rawMsg);
+
+    const friendlyError = isCapacityIssue
+      ? 'Atlas Clinical AI is experiencing temporary peak demand. Please try again in a few moments.'
+      : 'Atlas Clinical AI was unable to parse the document. Please verify the document is clear and retry.';
+
     return NextResponse.json(
-      { error: error.message || 'Failed to extract prescription with AI' },
-      { status: 500 }
+      { error: friendlyError },
+      { status: isCapacityIssue ? 503 : 500 }
     );
   }
 }

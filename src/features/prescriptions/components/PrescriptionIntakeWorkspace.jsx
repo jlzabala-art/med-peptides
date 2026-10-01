@@ -54,7 +54,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     setFilePreview(URL.createObjectURL(droppedFile));
 
     try {
-      toast.loading('Analizando prescripción con Gemini AI...', { id: 'ai-intake' });
+      toast.loading('Analizando prescripción con Atlas Clinical AI...', { id: 'ai-intake' });
       
       // 1. Multimodal Gemini extraction
       const aiData = await extractPrescriptionFromDocument(droppedFile);
@@ -76,8 +76,17 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       );
     } catch (err) {
       console.error('[PrescriptionIntakeWorkspace] Error:', err);
-      setError(err.message || 'Error al analizar el documento con IA');
-      toast.error(`Error: ${err.message}`, { id: 'ai-intake' });
+      let rawMsg = String(err?.message || '');
+      let cleanMsg = 'Error al analizar el documento con Atlas AI';
+
+      if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
+        cleanMsg = 'El servicio de Atlas AI está temporalmente saturado por alta demanda. Por favor, reintente en unos instantes.';
+      } else if (rawMsg && !rawMsg.startsWith('{')) {
+        cleanMsg = rawMsg;
+      }
+
+      setError(cleanMsg);
+      toast.error(cleanMsg, { id: 'ai-intake' });
     } finally {
       setIsProcessing(false);
     }

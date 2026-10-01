@@ -109,10 +109,16 @@ const getPrescriptionData = cache(async (code) => {
     isAuthentic: true
   };
 
-  RX_RAM_CACHE.set(cleanCode, {
+  RX_RAM_CACHE.set(upperCode, {
     data: result,
     expiresAt: Date.now() + CACHE_TTL_MS
   });
+  if (rawCode !== upperCode) {
+    RX_RAM_CACHE.set(rawCode, {
+      data: result,
+      expiresAt: Date.now() + CACHE_TTL_MS
+    });
+  }
 
   return result;
 });

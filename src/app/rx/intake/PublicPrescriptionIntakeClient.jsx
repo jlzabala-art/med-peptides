@@ -88,8 +88,8 @@ export default function PublicPrescriptionIntakeClient() {
 
     try {
       // 1. Multimodal AI Extraction
-      setProcessingStep(isEs ? 'Analizando documento con Gemini AI Multimodal...' : 'Scanning document with Multimodal Gemini AI...');
-      toast.loading(isEs ? 'Escaneando con Gemini AI...' : 'Scanning with Multimodal Gemini AI...', { id: 'ai-intake-step' });
+      setProcessingStep(isEs ? 'Analizando documento con Atlas Clinical AI...' : 'Scanning document with Atlas Clinical AI...');
+      toast.loading(isEs ? 'Analizando con Atlas Clinical AI...' : 'Scanning with Atlas Clinical AI...', { id: 'ai-intake-step' });
       const aiData = await extractPrescriptionFromDocument(droppedFile);
 
       // 2. Normalization & Ingredient Resolution
@@ -163,9 +163,26 @@ export default function PublicPrescriptionIntakeClient() {
       );
     } catch (err) {
       console.error('[PublicPrescriptionIntake] Error:', err);
-      const msg = err.message || (isEs ? 'Error al procesar el archivo con IA' : 'Failed to scan and publish document');
-      setError(msg);
-      toast.error(msg, { id: 'ai-intake-step' });
+      let rawMsg = String(err?.message || '');
+      let cleanMsg = isEs ? 'Error al procesar el archivo con Atlas AI' : 'Failed to scan and publish document';
+
+      if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
+        cleanMsg = isEs
+          ? 'El servicio de Atlas AI está temporalmente saturado por alta demanda. Por favor, reintente en unos instantes.'
+          : 'Atlas Clinical AI is experiencing temporary peak demand. Please retry in a few moments.';
+      } else if (rawMsg.startsWith('{') && rawMsg.includes('error')) {
+        try {
+          const parsed = JSON.parse(rawMsg);
+          cleanMsg = parsed?.error?.message || (isEs ? 'El servicio de Atlas AI está momentáneamente ocupado. Reintente en unos instantes.' : 'Atlas AI is momentarily busy. Please retry shortly.');
+        } catch (_) {
+          cleanMsg = isEs ? 'Atlas AI está ocupado en este momento. Por favor, intente de nuevo en breve.' : 'Atlas AI is currently busy. Please try again shortly.';
+        }
+      } else if (rawMsg && !rawMsg.startsWith('{')) {
+        cleanMsg = rawMsg;
+      }
+
+      setError(cleanMsg);
+      toast.error(cleanMsg, { id: 'ai-intake-step' });
     } finally {
       setIsProcessing(false);
       setProcessingStep('');
