@@ -2,29 +2,30 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
+  FlaskConical,
   List, 
   X, 
   ChevronRight, 
   FileText, 
   ShieldCheck, 
   Stethoscope, 
-  ExternalLink,
-  Award,
-  Sparkles,
-  Download,
-  Dna,
-  Droplets,
-  Clock,
-  Calendar,
-  Layers,
-  ArrowUp,
-  Printer,
-  FileSpreadsheet,
-  Copy,
-  Check,
-  Box,
-  Lock,
-  QrCode
+  ExternalLink, 
+  Award, 
+  Sparkles, 
+  Download, 
+  Dna, 
+  Droplets, 
+  Clock, 
+  Calendar, 
+  Layers, 
+  ArrowUp, 
+  Printer, 
+  FileSpreadsheet, 
+  Copy, 
+  Check, 
+  Box, 
+  Lock, 
+  QrCode 
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
@@ -144,17 +145,9 @@ export default function PrescriptionDetailSidebar({
     if (iconType === 'calendar' || id.includes('milestone')) return Calendar;
     if (iconType === 'shield' || id.includes('qr')) return ShieldCheck;
     if (iconType === 'file' || id.includes('doc')) return FileText;
-    if (id.includes('formula')) return FlaskConicalIcon;
+    if (id.includes('formula')) return FlaskConical;
     return List;
   };
-
-  const FlaskConicalIcon = ({ size, color }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
-      <path d="M8.5 2h7" />
-      <path d="M7 16h10" />
-    </svg>
-  );
 
   return (
     <>

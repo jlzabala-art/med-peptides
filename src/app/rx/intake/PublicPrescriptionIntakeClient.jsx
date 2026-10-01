@@ -138,13 +138,13 @@ export default function PublicPrescriptionIntakeClient() {
       const currentCount = prev.length;
       const availableSlots = 3 - currentCount;
       if (availableSlots <= 0) {
-        toast.error(isEs ? 'Límite alcanzado: Máximo 3 documentos por lote' : 'Limit reached: Maximum 3 documents per batch');
+        toast.error(isEs ? 'Límite de lote alcanzado: Máximo 3 documentos al mismo tiempo' : 'Batch limit reached: Maximum 3 documents at a time');
         return prev;
       }
 
       const filesToAdd = incomingFiles.slice(0, availableSlots);
       if (incomingFiles.length > availableSlots) {
-        toast(isEs ? `Solo se añadieron ${availableSlots} archivo(s). Máximo 3 por lote.` : `Only ${availableSlots} file(s) added. Maximum 3 per batch.`, { icon: '⚠️' });
+        toast(isEs ? `Solo se añadieron ${availableSlots} archivo(s). Máximo 3 documentos al mismo tiempo por lote.` : `Only ${availableSlots} file(s) added. Maximum 3 documents at a time per batch.`, { icon: '⚠️' });
       }
 
       const newEntries = filesToAdd.map((f, idx) => {
@@ -1677,7 +1677,7 @@ export default function PublicPrescriptionIntakeClient() {
             boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
           }}>
             <Sparkles size={14} style={{ color: '#6366f1' }} />
-            <span>{isEs ? 'MOTOR ATLAS CLINICAL AI · ESCANEO MULTI-DOCUMENTO (HASTA 3)' : 'ATLAS CLINICAL AI ENGINE · MULTI-DOC SCAN (UP TO 3)'}</span>
+            <span>{isEs ? 'MOTOR ATLAS CLINICAL AI · LOTE SIMULTÁNEO (HASTA 3 DOCUMENTOS A LA VEZ)' : 'ATLAS CLINICAL AI ENGINE · SIMULTANEOUS BATCH (UP TO 3 DOCS AT A TIME)'}</span>
           </div>
 
           <h1 style={{
@@ -1700,8 +1700,8 @@ export default function PublicPrescriptionIntakeClient() {
             lineHeight: 1.6
           }}>
             {isEs
-              ? 'Suba hasta 3 informes Fagron Genomics (TrichoTest™, NutriGen™) o recetas médicas. La IA extraerá todas las fórmulas y publicará las prescripciones con navegación interactiva.'
-              : 'Upload up to 3 Fagron Genomics reports (TrichoTest™, NutriGen™) or prescriptions. Atlas AI will extract all formulas and publish official electronic dossiers with multi-item navigation.'}
+              ? 'Suba hasta 3 informes Fagron Genomics (TrichoTest™, NutriGen™) o recetas al mismo tiempo por lote (sin límite diario ni por sesión). La IA extraerá todas las fórmulas y publicará las prescripciones con navegación interactiva.'
+              : 'Upload up to 3 Fagron Genomics reports (TrichoTest™, NutriGen™) or prescriptions at the same time per batch (no daily or per-session limit). Atlas AI will extract all formulas and publish official electronic dossiers with multi-item navigation.'}
           </p>
         </div>
 
@@ -2091,14 +2091,14 @@ export default function PublicPrescriptionIntakeClient() {
                 {isDragActive 
                   ? (isEs ? 'Suelte los documentos aquí...' : 'Drop your clinical documents here...') 
                   : (stagedFiles.length > 0 
-                    ? (isEs ? 'Arrastre más documentos para añadir al lote (hasta 3)' : 'Drag more documents to add to batch (up to 3)')
-                    : (isEs ? 'Arrastre o seleccione hasta 3 documentos clínicos' : 'Drag & drop or browse up to 3 clinical documents'))}
+                    ? (isEs ? 'Arrastre más documentos para este lote (hasta 3 al mismo tiempo)' : 'Drag more documents to this batch (up to 3 at a time)')
+                    : (isEs ? 'Arrastre o seleccione hasta 3 documentos al mismo tiempo' : 'Drag & drop or browse up to 3 documents at a time'))}
               </h3>
               
               <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 1.75rem' }}>
                 {isEs 
-                  ? 'PDF de Fagron TrichoTest/NutriGen, recetas escaneadas, PNG, JPG (hasta 3 archivos, máx 15MB c/u)' 
-                  : 'Fagron TrichoTest/NutriGen PDF, medical prescriptions, PNG, JPG (up to 3 files, max 15MB each)'}
+                  ? 'Fagron TrichoTest/NutriGen PDF, recetas médicas, PNG, JPG (hasta 3 archivos al mismo tiempo por lote, máx 15MB c/u · Sin límite diario ni por sesión)' 
+                  : 'Fagron TrichoTest/NutriGen PDF, medical prescriptions, PNG, JPG (up to 3 files at the same time per batch, max 15MB each · No daily or session limit)'}
               </p>
 
               {stagedFiles.length < 3 && (
