@@ -40,7 +40,10 @@ export default function InviteUserModal({
     const token = `inv_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
     const inviteLink = `${window.location.origin}/login?invite=${token}&role=${formData.role}&email=${encodeURIComponent(formData.email)}`;
 
-    const whatsappMessage = `Hello Dr. ${formData.name},\n\nYou have been invited to the Atlas Health Clinical Platform as a ${formData.role.toUpperCase()} with ${formData.pricingChannel.toUpperCase()} pricing.\n\nAccess your clinical workspace here:\n${inviteLink}\n\nBest regards,\nAtlas Health Clinical Operations`;
+    const isAM = formData.role === 'account_manager';
+    const whatsappMessage = isAM
+      ? `Hello ${formData.name},\n\nYou have been granted access to the Med-Peptides / Atlas Health Clinical Portal as an ACCOUNT MANAGER (Prescription Operations).\n\nLog in directly to your workspace here:\n${inviteLink}\n\nBest regards,\nAtlas Health Clinical Operations`
+      : `Hello Dr. ${formData.name},\n\nYou have been invited to the Atlas Health Clinical Platform as a ${formData.role.toUpperCase()} with ${formData.pricingChannel.toUpperCase()} pricing.\n\nAccess your clinical workspace here:\n${inviteLink}\n\nBest regards,\nAtlas Health Clinical Operations`;
 
     setGeneratedInvite({
       token,
@@ -182,6 +185,7 @@ export default function InviteUserModal({
                     onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
                     style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
                   >
+                    <option value="account_manager">Account Manager (Gestión de Prescripciones)</option>
                     <option value="doctor">Practitioner / Physician</option>
                     <option value="clinic">Clinic / Practice</option>
                     <option value="wholesaler">Wholesaler / Distributor</option>
