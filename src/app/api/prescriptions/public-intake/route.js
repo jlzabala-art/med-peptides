@@ -184,10 +184,18 @@ export async function POST(request) {
         // Generate canonical prescriptionNumber if missing
         const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
         const officialNumber = rx.prescriptionNumber || `RX-${dateStr}-${randomHex}`;
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+        const canonicalUrl = `${baseUrl}/rx/${officialNumber}`;
+        const rxPath = `/rx/${officialNumber}`;
 
         const payload = {
           ...rx,
           prescriptionNumber: officialNumber,
+          publicUrl: canonicalUrl,
+          canonicalUrl: canonicalUrl,
+          shareUrl: canonicalUrl,
+          rxUrl: rxPath,
+          rxPath: rxPath,
           patientId: patientId || rx.patientId || null,
           status: rx.status || 'pending',
           isPublicIntake: true,
@@ -196,6 +204,28 @@ export async function POST(request) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
+
+        // Two-Doctor Architecture:
+        // 1) treatingDoctor: El médico que vio al paciente (visible en la etiqueta y en el QR público)
+        // 2) productionDoctor: El médico interno de producción/farmacia (uso interno privado, nunca visible para el paciente)
+        const treatingDoctor = rx.treatingDoctor || rx.patientDoctor || rx.doctor || null;
+        const productionDoctor = rx.productionDoctor || rx.internalSignerDoctor || rx.dispensingDoctor || null;
+
+        if (treatingDoctor) {
+          payload.treatingDoctor = treatingDoctor;
+          payload.doctor = treatingDoctor;
+          payload.doctorName = treatingDoctor.name || payload.doctorName;
+          payload.doctorLicense = treatingDoctor.license || payload.doctorLicense;
+        }
+
+        if (productionDoctor) {
+          payload.productionDoctor = {
+            ...productionDoctor,
+            isInternalOnly: true,
+            purpose: 'internal_production_order'
+          };
+          payload.hasInternalProductionDoctor = true;
+        }
 
         if (accountManager?.email || uploadedBy?.email) {
           const amEmail = accountManager?.email || uploadedBy?.email;
@@ -228,6 +258,9 @@ export async function POST(request) {
 
         // Save to Firestore
         const docRef = await adminDb.collection('prescriptions').add(payload);
+        const directIdUrl = `${baseUrl}/rx/${docRef.id}`;
+        await docRef.update({ directIdUrl }).catch(() => null);
+        payload.directIdUrl = directIdUrl;
 
         // Invalidate server cache if needed
         try {
@@ -241,8 +274,12 @@ export async function POST(request) {
           patientName: payload.patientName || payload.patient?.name || 'Patient',
           treatmentType: payload.treatmentType || 'Medical Formulation',
           lineCount: (payload.prescriptionLines || payload.items || []).length,
-          rxUrl: `/rx/${officialNumber}`,
-          fullUrl: `https://med-peptides.com/rx/${officialNumber}`,
+          rxUrl: rxPath,
+          fullUrl: canonicalUrl,
+          publicUrl: canonicalUrl,
+          canonicalUrl: canonicalUrl,
+          shareUrl: canonicalUrl,
+          directIdUrl: directIdUrl,
           rxData: { id: docRef.id, ...payload },
         });
       } catch (err) {

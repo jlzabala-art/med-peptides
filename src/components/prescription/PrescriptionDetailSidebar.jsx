@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import { 
   List, 
   X, 
@@ -20,8 +19,14 @@ import {
   Layers,
   ArrowUp,
   Printer,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Copy,
+  Check,
+  Box,
+  Lock,
+  QrCode
 } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '@/utils/haptics';
 import '@/components/product/PublicDatasheetTableOfContents.css';
 
@@ -29,14 +34,18 @@ import '@/components/product/PublicDatasheetTableOfContents.css';
  * PrescriptionDetailSidebar
  * ─────────────────────────────────────────────────────────────────────────────
  * Google Cloud Console-compliant dedicated sidebar for public prescription dossiers.
- * Features:
- *  - On This Dossier (TOC) with real-time IntersectionObserver ScrollSpy
+ * Flexible Architecture:
+ *  - Supports single or multiple compounded formulations / vehicles
+ *  - Supports multi-phase clinical regimens (e.g. Induction vs Maintenance)
+ *  - Real-time IntersectionObserver ScrollSpy
+ *  - Permanent Unique URL copy-on-click & direct verification
  *  - Clinical Actions widget (PDF Download, DHA Verification badge, Prescribing Physician)
- *  - Instant QR code validation widget (SSOT 2026 seal)
  *  - Responsive: Desktop sticky sidebar + Mobile drawer (triggered via PublicStickyActionBar)
  */
 export default function PrescriptionDetailSidebar({
   sections = [],
+  formulations = [],
+  phases = [],
   rxId = '',
   doctorName = 'Dr. Hanieh Erdmann',
   doctorTitle = 'Physician Consultant Dermatology',
@@ -51,6 +60,11 @@ export default function PrescriptionDetailSidebar({
   const isEs = lang === 'es';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const canonicalUrl = publicUrl || (typeof window !== 'undefined' 
+    ? `${window.location.origin}/rx/${rxId}` 
+    : `https://med-peptides.com/rx/${rxId}`);
 
   const availableSections = useMemo(() => {
     return sections.filter(sec => sec && sec.id);
@@ -105,13 +119,31 @@ export default function PrescriptionDetailSidebar({
     }
   };
 
-  const getSectionIcon = (id) => {
+  const handleCopyPermanentUrl = () => {
+    try {
+      navigator?.clipboard?.writeText(canonicalUrl);
+      setCopiedUrl(true);
+      triggerHaptic('success');
+      toast.success(
+        isEs 
+          ? 'URL permanente de la prescripción copiada ✓' 
+          : 'Permanent prescription URL copied ✓'
+      );
+      setTimeout(() => setCopiedUrl(false), 2500);
+    } catch (_) {
+      toast.error('Could not copy link');
+    }
+  };
+
+  const getSectionIcon = (id, iconType) => {
+    if (iconType === 'box' || id.includes('oral')) return Box;
+    if (iconType === 'droplets' || id.includes('oil') || id.includes('infographic')) return Droplets;
+    if (iconType === 'dna' || id.includes('genomics')) return Dna;
+    if (iconType === 'clock' || id.includes('posology')) return Clock;
+    if (iconType === 'calendar' || id.includes('milestone')) return Calendar;
+    if (iconType === 'shield' || id.includes('qr')) return ShieldCheck;
+    if (iconType === 'file' || id.includes('doc')) return FileText;
     if (id.includes('formula')) return FlaskConicalIcon;
-    if (id.includes('genomics')) return Dna;
-    if (id.includes('infographic') || id.includes('posology')) return Droplets;
-    if (id.includes('milestone')) return Calendar;
-    if (id.includes('qr')) return ShieldCheck;
-    if (id.includes('doc')) return FileText;
     return List;
   };
 
@@ -129,7 +161,10 @@ export default function PrescriptionDetailSidebar({
       <div 
         className="pds-sidebar-desktop"
         style={{
-          width: '100%'
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.15rem'
         }}
       >
         {/* Widget 1: On This Dossier (TOC) */}
@@ -157,10 +192,10 @@ export default function PrescriptionDetailSidebar({
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {availableSections.map((sec, idx) => {
               const isActive = activeId === sec.id;
-              const IconComp = getSectionIcon(sec.id);
+              const IconComp = getSectionIcon(sec.id, sec.icon);
               return (
                 <button
                   key={sec.id}
@@ -171,7 +206,7 @@ export default function PrescriptionDetailSidebar({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: '100%',
-                    padding: '7px 10px',
+                    padding: '8px 10px',
                     borderRadius: '8px',
                     border: 'none',
                     background: isActive ? '#f0f9ff' : 'transparent',
@@ -183,23 +218,279 @@ export default function PrescriptionDetailSidebar({
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
                     <span style={{ fontSize: '0.70rem', color: isActive ? '#0284c7' : '#94a3b8', fontFamily: 'monospace' }}>
                       {idx + 1}
                     </span>
-                    <IconComp size={13} color={isActive ? '#0284c7' : '#94a3b8'} />
+                    <IconComp size={14} color={isActive ? (sec.accentColor || '#0284c7') : '#94a3b8'} style={{ flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {sec.label}
                     </span>
                   </div>
-                  {isActive && <ChevronRight size={13} color="#0284c7" />}
+                  {sec.badge && (
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      background: isActive ? '#e0f2fe' : '#f1f5f9',
+                      color: isActive ? '#0369a1' : '#64748b',
+                      marginLeft: '6px',
+                      flexShrink: 0
+                    }}>
+                      {sec.badge}
+                    </span>
+                  )}
+                  {isActive && <ChevronRight size={13} color="#0284c7" style={{ marginLeft: '4px', flexShrink: 0 }} />}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Widget 2: Prescribing Physician Authority (Doctor Prominence) */}
+        {/* Widget 2: Formulations & Vehicles Multi-Vehicle Navigator (Flexible) */}
+        {formulations && formulations.length > 0 && (
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '14px',
+            border: '1px solid #e2e8f0',
+            padding: '1.15rem',
+            boxShadow: '0 4px 16px rgba(0, 54, 102, 0.05)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '0.75rem',
+              paddingBottom: '0.5rem',
+              borderBottom: '1px solid #f1f5f9'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <Layers size={14} color="#0d9488" />
+                <span>{isEs ? 'VEHÍCULOS & FÓRMULAS' : 'VEHICLES & FORMULAS'}</span>
+              </div>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                color: '#0d9488',
+                background: '#ccfbf1',
+                padding: '1px 6px',
+                borderRadius: '4px'
+              }}>
+                {formulations.length} {formulations.length === 1 ? (isEs ? 'Vehículo' : 'Vehicle') : (isEs ? 'Vehículos' : 'Vehicles')}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {formulations.map((form, fIdx) => {
+                const isFormActive = activeId === form.id || activeId === `posology-${form.id}`;
+                return (
+                  <div
+                    key={form.id || fIdx}
+                    onClick={() => scrollTo(form.id)}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: '1px solid',
+                      borderColor: isFormActive ? (form.accentColor || '#0284c7') : '#e2e8f0',
+                      background: isFormActive ? '#f0fdfa' : '#f8fafc',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
+                      <span style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        background: form.accentColor || '#0284c7',
+                        color: '#ffffff'
+                      }}>
+                        {form.vehicle?.tag || `PREP ${fIdx + 1}`}
+                      </span>
+                      {form.volume && (
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a' }}>
+                          {form.volume}
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
+                      {form.vehicle?.name || form.title}
+                    </div>
+
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>{form.route}</span>
+                      {form.apis?.length > 0 && (
+                        <>
+                          <span>·</span>
+                          <span style={{ fontWeight: 600, color: '#0284c7' }}>
+                            {form.apis.length} {isEs ? 'APIs' : 'APIs'}
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    {form.posology?.regimen && (
+                      <div style={{
+                        marginTop: '6px',
+                        padding: '4px 8px',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '0.70rem',
+                        color: '#334155',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}>
+                        <Clock size={11} color="#0d9488" />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {form.posology.regimen}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Widget 3: Treatment Phases (if multi-phase protocol) */}
+        {phases && phases.length > 0 && (
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '14px',
+            border: '1px solid #e2e8f0',
+            padding: '1.15rem',
+            boxShadow: '0 4px 16px rgba(0, 54, 102, 0.05)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '0.75rem',
+              paddingBottom: '0.5rem',
+              borderBottom: '1px solid #f1f5f9'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <Calendar size={14} color="#7c3aed" />
+                <span>{isEs ? 'FASES DE TRATAMIENTO' : 'TREATMENT PHASES'}</span>
+              </div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#7c3aed', background: '#ede9fe', padding: '1px 6px', borderRadius: '4px' }}>
+                {phases.length} {isEs ? 'Fases' : 'Phases'}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {phases.map((phase, pIdx) => (
+                <div key={pIdx} style={{
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                    {phase.name || `${isEs ? 'Fase' : 'Phase'} ${pIdx + 1}`}
+                  </div>
+                  {phase.duration && (
+                    <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
+                      {phase.duration}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Widget 4: Permanent Prescription Canonical URL (Golden Rule) */}
+        <div style={{
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
+          borderRadius: '14px',
+          border: '1px solid #86efac',
+          padding: '1.15rem',
+          boxShadow: '0 4px 16px rgba(22, 163, 74, 0.06)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <Lock size={12} color="#16a34a" />
+              <span>{isEs ? 'URL PERMANENTE OFICIAL' : 'OFFICIAL PERMANENT URL'}</span>
+            </div>
+            <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#15803d', background: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
+              SSL 2026
+            </span>
+          </div>
+
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #bbf7d0',
+            borderRadius: '8px',
+            padding: '8px 10px',
+            fontSize: '0.74rem',
+            fontFamily: 'monospace',
+            color: '#1e293b',
+            wordBreak: 'break-all',
+            marginBottom: '0.65rem'
+          }}>
+            {canonicalUrl}
+          </div>
+
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={handleCopyPermanentUrl}
+              style={{
+                flex: 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '5px',
+                padding: '7px 10px',
+                borderRadius: '8px',
+                background: '#16a34a',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.76rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {copiedUrl ? <Check size={13} /> : <Copy size={13} />}
+              <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy URL')}</span>
+            </button>
+            <a
+              href={canonicalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '7px 10px',
+                borderRadius: '8px',
+                background: '#ffffff',
+                color: '#166534',
+                border: '1px solid #86efac',
+                textDecoration: 'none',
+                fontWeight: 700,
+                fontSize: '0.76rem'
+              }}
+              title={isEs ? 'Abrir enlace directo' : 'Open permanent link'}
+            >
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
+
+        {/* Widget 5: Prescribing Physician Authority (Doctor Prominence) */}
         <div style={{
           background: 'linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%)',
           borderRadius: '14px',
@@ -233,115 +524,129 @@ export default function PrescriptionDetailSidebar({
 
           <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4, marginBottom: '0.75rem' }}>
             <div>{doctorTitle}</div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
-              <ShieldCheck size={12} />
-              <span>Lic. {doctorLicense}</span>
-            </div>
-            <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-              📍 {doctorOffice}
-            </div>
+            {doctorLicense && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
+                <ShieldCheck size={12} />
+                <span>
+                  {doctorLicense.toUpperCase().includes('DHA') 
+                    ? `DHA Licensed · Lic. ${doctorLicense}` 
+                    : `Lic. ${doctorLicense}`}
+                </span>
+              </div>
+            )}
+            {doctorOffice && (
+              <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+                📍 {doctorOffice}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Widget 3: Patient Mobile Access QR */}
+        {/* Widget 6: Actions & Downloads (No duplicate QR graphic) */}
         <div style={{
           background: '#ffffff',
           borderRadius: '14px',
           border: '1px solid #e2e8f0',
-          padding: '1rem',
-          textAlign: 'center',
+          padding: '1.15rem',
           boxShadow: '0 2px 10px rgba(0, 54, 102, 0.04)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'ACCESO PACIENTE' : 'PATIENT ACCESS'}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'ACCIONES & DESCARGAS' : 'ACTIONS & EXPORTS'}
             </span>
-            <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px' }}>
-              {isEs ? 'CONFIDENCIAL' : 'CONFIDENTIAL'}
+            <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+              {rxId}
             </span>
           </div>
 
-          {publicUrl && (
-            <div style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '10px',
-              display: 'inline-flex',
-              marginBottom: '0.5rem'
-            }}>
-              <QRCodeSVG 
-                value={publicUrl}
-                size={110}
-                level="M"
-                includeMargin={false}
-              />
-            </div>
-          )}
-
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>
-            {rxId}
-          </div>
-          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '2px', marginBottom: '0.5rem' }}>
-            {isEs ? 'Acceso móvil confidencial del paciente' : 'Confidential mobile access for registered patient'}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('selection');
-              window.print();
-            }}
-            className="rx-print-btn"
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '0.55rem',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              color: '#003666',
-              border: '1px solid #cbd5e1',
-              fontWeight: 700,
-              fontSize: '0.76rem',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <Printer size={13} color="#003666" />
-            <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
-          </button>
-
-          {onExportExcel && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
               type="button"
-              onClick={onExportExcel}
-              className="rx-excel-btn"
+              onClick={() => {
+                triggerHaptic('selection');
+                scrollTo('qr-card');
+              }}
               style={{
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
-                padding: '0.55rem',
+                padding: '0.6rem 0.75rem',
                 borderRadius: '8px',
-                background: '#f0fdf4',
-                color: '#15803d',
-                border: '1px solid #bbf7d0',
+                background: '#f0f9ff',
+                color: '#0284c7',
+                border: '1px solid #bae6fd',
                 fontWeight: 700,
                 fontSize: '0.76rem',
                 cursor: 'pointer',
-                marginTop: '6px',
                 transition: 'all 0.15s ease'
               }}
-              title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}
+              title={isEs ? 'Ir a la tarjeta de Código QR del paciente' : 'Go to Patient QR Code'}
             >
-              <FileSpreadsheet size={13} color="#15803d" />
-              <span>{isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}</span>
+              <QrCode size={14} color="#0284c7" />
+              <span>{isEs ? 'Ver Código QR Paciente' : 'View Patient QR Code'}</span>
             </button>
-          )}
+
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                window.print();
+              }}
+              className="rx-print-btn"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '0.6rem 0.75rem',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                color: '#003666',
+                border: '1px solid #cbd5e1',
+                fontWeight: 700,
+                fontSize: '0.76rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Printer size={14} color="#003666" />
+              <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
+            </button>
+
+            {onExportExcel && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  onExportExcel();
+                }}
+                className="rx-excel-btn"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '0.6rem 0.75rem',
+                  borderRadius: '8px',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  border: '1px solid #bbf7d0',
+                  fontWeight: 700,
+                  fontSize: '0.76rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}
+              >
+                <FileSpreadsheet size={14} color="#15803d" />
+                <span>{isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
       </div>
@@ -366,17 +671,18 @@ export default function PrescriptionDetailSidebar({
             onClick={(e) => e.stopPropagation()}
             style={{
               width: '85%',
-              maxWidth: '340px',
+              maxWidth: '350px',
               height: '100%',
               background: '#ffffff',
               display: 'flex',
               flexDirection: 'column',
               padding: '1.25rem',
               overflowY: 'auto',
-              boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.25)'
+              boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.25)',
+              gap: '1rem'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', fontWeight: 800, color: '#003666' }}>
                 <List size={16} color="#0284c7" />
                 <span>{isEs ? 'Secciones del Dossier' : 'Dossier Sections'}</span>
@@ -401,10 +707,90 @@ export default function PrescriptionDetailSidebar({
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '1.5rem' }}>
+            {/* Permanent URL Action in Mobile */}
+            <div style={{
+              background: '#f0fdf4',
+              border: '1px solid #86efac',
+              borderRadius: '10px',
+              padding: '10px 12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>
+                {isEs ? 'URL Permanente' : 'Permanent URL'}
+              </div>
+              <div style={{ fontSize: '0.72rem', fontFamily: 'monospace', color: '#1e293b', wordBreak: 'break-all' }}>
+                {canonicalUrl}
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyPermanentUrl}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  background: '#16a34a',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px'
+                }}
+              >
+                {copiedUrl ? <Check size={12} /> : <Copy size={12} />}
+                <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy URL')}</span>
+              </button>
+            </div>
+
+            {/* Formulations & Vehicles Quick Switcher in Mobile */}
+            {formulations && formulations.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                  {isEs ? 'Vehículos & Preparaciones' : 'Vehicles & Formulations'}
+                </div>
+                {formulations.map((form, fIdx) => (
+                  <button
+                    key={fIdx}
+                    type="button"
+                    onClick={() => scrollTo(form.id)}
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
+                        {form.vehicle?.name || form.title}
+                      </div>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                        {form.route} {form.volume ? `· ${form.volume}` : ''}
+                      </div>
+                    </div>
+                    <ChevronRight size={14} color="#94a3b8" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* TOC Sections List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                {isEs ? 'Todas las Secciones' : 'All Sections'}
+              </div>
               {availableSections.map((sec, idx) => {
                 const isActive = activeId === sec.id;
-                const IconComp = getSectionIcon(sec.id);
+                const IconComp = getSectionIcon(sec.id, sec.icon);
                 return (
                   <button
                     key={sec.id}
@@ -422,7 +808,8 @@ export default function PrescriptionDetailSidebar({
                       color: isActive ? '#0284c7' : '#334155',
                       fontSize: '0.84rem',
                       fontWeight: isActive ? 750 : 550,
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      cursor: 'pointer'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -452,8 +839,15 @@ export default function PrescriptionDetailSidebar({
               <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
                 {doctorName}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                {doctorTitle} · Lic. {doctorLicense}
+              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div>{doctorTitle}</div>
+                {doctorLicense && (
+                  <div style={{ color: '#047857', fontWeight: 700 }}>
+                    {doctorLicense.toUpperCase().includes('DHA') 
+                      ? `DHA Licensed · Lic. ${doctorLicense}` 
+                      : `Lic. ${doctorLicense}`}
+                  </div>
+                )}
               </div>
             </div>
           </div>

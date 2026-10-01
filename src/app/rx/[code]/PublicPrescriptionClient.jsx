@@ -80,25 +80,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const patient = rx.patient || {};
   const patientName = patient.name || rx.patientName || (isEs ? 'Paciente' : 'Patient');
   const patientAlias = rx.patientAlias || patient.alias ? ` (${rx.patientAlias || patient.alias})` : '';
-  const doctorName = rx.doctor?.name || rx.doctorName || (isEs ? 'Dr. Miguel Ángel López Aranda' : 'Dr. Miguel Angel Lopez Aranda');
-  const clinic = rx.doctor?.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico & Farmacia Magistral' : 'Licensed Clinical Practice'));
-  const doctorSpecialty = rx.doctor?.specialty || rx.doctorTitle || (isEs ? 'Médico Colegiado' : 'Physician Specialist');
-  const doctorAddress = rx.doctor?.address || rx.doctorOfficeAddress || rx.clinicAddress || '';
-  const doctorPhone = rx.doctor?.phone || rx.doctorPhone || '';
-  const doctorLicense = rx.doctor?.license || rx.doctorLicense || rx.doctorLicenseNumber || (rx.doctor?.licenseNumber || '');
+  // ── Two-Doctor Clinical Architecture ───────────────────────────────────────
+  // 1) Treating Physician (El médico que vio al paciente y realizó la prescripción):
+  //    This is STRICTLY the ONLY doctor shown on the patient's QR code, mobile access portal, and label.
+  // 2) Production Physician (El médico utilizado internamente para tramitar la producción/receta):
+  //    Strictly private / internal only. Never displayed to the patient or on the public QR.
+  const treatingDoc = rx.treatingDoctor || rx.patientDoctor || rx.doctor || {};
+  const doctorName = treatingDoc.name || rx.doctorName || (isEs ? 'Dr. Miguel Ángel López Aranda' : 'Dr. Miguel Angel Lopez Aranda');
+  const clinic = treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico & Farmacia Magistral' : 'Licensed Clinical Practice'));
+  const doctorSpecialty = treatingDoc.specialty || rx.doctorTitle || (isEs ? 'Médico Colegiado' : 'Physician Specialist');
+  const doctorAddress = treatingDoc.address || rx.doctorOfficeAddress || rx.clinicAddress || '';
+  const doctorPhone = treatingDoc.phone || rx.doctorPhone || '';
+  const doctorLicense = treatingDoc.license || rx.doctorLicense || rx.doctorLicenseNumber || (treatingDoc.licenseNumber || '');
+  const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
 
   // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™)
   const genomicsData = detectFagronGenomicsTest(rx);
   const docs = rx.documents || rx.attachedDocuments || [];
-
-  const tocSections = [
-    { id: 'formula-card', label: isEs ? 'Fórmula Magistral' : 'Compounded Formula' },
-    ...(genomicsData ? [{ id: 'genomics-card', label: isEs ? 'Guía Genómica' : 'Genomics Guidance' }] : []),
-    { id: 'posology-card', label: isEs ? 'Pauta de Posología' : 'Posology Protocol' },
-    { id: 'milestones-card', label: isEs ? 'Evolución Clínica' : 'Clinical Milestones' },
-    { id: 'qr-card', label: isEs ? 'Portal del Paciente' : 'Patient Mobile Portal' },
-    ...(docs.length > 0 ? [{ id: 'docs-card', label: isEs ? 'Documentos' : 'Attached Records' }] : [])
-  ];
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
@@ -786,6 +784,83 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     return compoundedFormulations.flatMap(f => f.apis);
   }, [compoundedFormulations]);
 
+  // Dynamic Flexible TOC Sections (Adapts to 1 or Multiple Vehicles / Formulations)
+  const tocSections = React.useMemo(() => {
+    const list = [];
+    if (compoundedFormulations.length > 1) {
+      compoundedFormulations.forEach((form, idx) => {
+        list.push({
+          id: form.id,
+          label: form.vehicle?.name || form.title || (isEs ? `Preparación ${idx + 1}` : `Preparation ${idx + 1}`),
+          category: 'formula',
+          badge: form.volume || form.vehicle?.volume || null,
+          accentColor: form.accentColor,
+          icon: form.id.includes('oral') ? 'box' : (form.id.includes('oil') ? 'droplets' : 'flask')
+        });
+      });
+    } else {
+      list.push({ 
+        id: 'formula-card', 
+        label: isEs ? 'Fórmula Magistral' : 'Compounded Formula',
+        category: 'formula',
+        icon: 'flask'
+      });
+    }
+
+    if (genomicsData) {
+      list.push({ 
+        id: 'genomics-card', 
+        label: isEs ? 'Guía Genómica' : 'Genomics Guidance',
+        category: 'genomics',
+        icon: 'dna'
+      });
+    }
+
+    if (compoundedFormulations.length > 1) {
+      compoundedFormulations.forEach((form, idx) => {
+        list.push({
+          id: idx === 0 ? 'posology-card' : `posology-${form.id}`,
+          label: isEs ? `Pauta: ${form.vehicle?.name || `Prep ${idx + 1}`}` : `Posology: ${form.vehicle?.name || `Prep ${idx + 1}`}`,
+          category: 'posology',
+          accentColor: form.accentColor,
+          icon: 'clock'
+        });
+      });
+    } else {
+      list.push({ 
+        id: 'posology-card', 
+        label: isEs ? 'Pauta de Posología' : 'Posology Protocol',
+        category: 'posology',
+        icon: 'clock'
+      });
+    }
+
+    list.push({ 
+      id: 'milestones-card', 
+      label: isEs ? 'Evolución Clínica' : 'Clinical Milestones',
+      category: 'milestones',
+      icon: 'calendar'
+    });
+
+    list.push({ 
+      id: 'qr-card', 
+      label: isEs ? 'Portal del Paciente' : 'Patient Mobile Portal',
+      category: 'qr',
+      icon: 'shield'
+    });
+
+    if (docs.length > 0) {
+      list.push({ 
+        id: 'docs-card', 
+        label: isEs ? 'Documentos Adjuntos' : 'Attached Records',
+        category: 'docs',
+        icon: 'file'
+      });
+    }
+
+    return list;
+  }, [compoundedFormulations, genomicsData, docs.length, isEs]);
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(publicUrl);
@@ -941,17 +1016,26 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </div>
                   <div className="rx-doctor-meta">
                     <div className="rx-doctor-badge" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed'}
+                      {isDhaLicensed 
+                        ? (isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed')
+                        : (isEs ? 'Médico Prescriptor' : 'Prescribing Physician')}
                     </div>
                     <h1 className="rx-doctor-name" style={{ margin: '0.2rem 0', fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
                       {doctorName}
                     </h1>
-                    <div className="rx-doctor-sub" style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                      {doctorSpecialty} · Lic. {doctorLicense}
+                    <div className="rx-doctor-sub" style={{ fontSize: '0.82rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '3px' }}>
+                      <div>{doctorSpecialty}</div>
+                      {doctorLicense && (
+                        <div style={{ color: '#0284c7', fontWeight: 750, fontSize: '0.78rem' }}>
+                          · Lic. {doctorLicense}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
-                      📍 {doctorAddress}
-                    </div>
+                    {doctorAddress && (
+                      <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px' }}>
+                        📍 {doctorAddress}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1041,6 +1125,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           {compoundedFormulations.map((formulation, fIdx) => (
             <div
               key={formulation.id}
+              id={formulation.id}
               style={{
                 background: '#ffffff',
                 borderRadius: '16px',
@@ -1920,6 +2005,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           {/* Persistent Sticky Prescription Sidebar (Desktop Sticky + Mobile Drawer) */}
           <PrescriptionDetailSidebar
             sections={tocSections}
+            formulations={compoundedFormulations}
+            phases={rx.phases || rx.treatmentPhases || []}
             rxId={rxId}
             doctorName={doctorName}
             doctorTitle={doctorSpecialty}

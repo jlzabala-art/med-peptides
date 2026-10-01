@@ -214,6 +214,106 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     compatibleVehicles: ['Cápsulas Orales', 'TrichoSol™'],
     standardDosages: '15 mg - 30 mg Zinc Elemental Oral',
     fagronPrograms: ['TrichoTest', 'NutriGen']
+  },
+  'zinc-sulfate': {
+    canonicalName: 'Zinc Sulfato Monohidrato / Heptahidrato',
+    geneTargets: ['MT1A', 'ZNT1', 'SLC30A1', 'ZIP4'],
+    pharmacologicalClass: 'Metaloenzima Esencial & Regulador Enzimático Folicular',
+    clinicalIndication: 'Inmunidad dérmica, control de hiperseborrea folicular y cofactor de división celular en el bulbo piloso',
+    mechanismOfAction: 'Forma biodisponible de zinc inorgánico. Actúa como cofactor estructural de más de 300 enzimas celulares, estabiliza las membranas celulares del folículo, modula la secreción de sebo a través de la inhibición de 5α-reductasa y estimula la síntesis de proteínas queratínicas.',
+    compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Orales Micronizadas'],
+    standardDosages: '0.2% - 1% Tópico · 50 mg - 220 mg Oral (10 mg - 50 mg Zn elemental)',
+    fagronPrograms: ['TrichoTest', 'NutriGen']
+  },
+  'astaxanthin': {
+    canonicalName: 'Astaxantina Natural (Haematococcus pluvialis)',
+    geneTargets: ['NFE2L2', 'NRF2', 'SOD1', 'CAT', 'GPX1'],
+    pharmacologicalClass: 'Carotenoide Xantófila de Ultra-Alta Potencia Antioxidante',
+    clinicalIndication: 'Protección mitocondrial frente a estrés oxidativo severo, anti-fotoenvejecimiento dérmico y longevidad folicular',
+    mechanismOfAction: 'Potente carotenoide antioxidante con capacidad de cruzar completamente la bicapa lipídica de las membranas celulares (efecto transmembrana). Su capacidad de neutralización de radicales de oxígeno singlete es 6,000 veces superior a la vitamina C y 550 veces superior a la vitamina E. Inhibe la peroxidación lipídica en la papila dérmica y preserva la microvasculatura folicular.',
+    compatibleVehicles: ['Cápsulas Blandas Lipídicas USP', 'TrichoOil™', 'Cápsulas Micronizadas'],
+    standardDosages: '4 mg - 12 mg Oral Diaria',
+    fagronPrograms: ['NutriGen', 'TeloTest', 'TrichoTest']
+  },
+  'vitamin-b12': {
+    canonicalName: 'Vitamina B12 (Cianocobalamina / Metilcobalamina)',
+    geneTargets: ['MTR', 'MTRR', 'TCN2', 'MTHFR'],
+    pharmacologicalClass: 'Cofactor de Metionina Sintasa & Síntesis de ADN Eritropoyético',
+    clinicalIndication: 'Optimización del ciclo de un carbono, oxigenación microvascular periférica y replicación celular en la matriz capilar',
+    mechanismOfAction: 'Cofactor esencial para la síntesis de purinas y pirimidinas durante la división celular de alta frecuencia de los queratinocitos de la matriz folicular. Participa en la conversión de homocisteína a metionina (ciclo de metilación), previniendo la isquemia microvascular perifolicular y garantizando una eritropoyesis normal.',
+    compatibleVehicles: ['Cápsulas Sublinguales / Orales', 'TrichoSol™'],
+    standardDosages: '500 mcg - 2,500 mcg Oral / Sublingual',
+    fagronPrograms: ['NutriGen', 'TeloTest']
+  },
+  'l-carnitine-l-tartrate': {
+    canonicalName: 'L-Carnitina L-Tartrato (LCLT)',
+    geneTargets: ['CPT1A', 'CPT2', 'SLC22A5', 'PPARGC1A'],
+    pharmacologicalClass: 'Lanzadera Mitocondrial de Ácidos Grasos & Estimulador Energético Folicular',
+    clinicalIndication: 'Elongación del tallo piloso, retraso de fase catágena y optimización de bioenergética folicular',
+    mechanismOfAction: 'Transporta ácidos grasos de cadena larga a través de la membrana mitocondrial interna para β-oxidación y generación de ATP en las células de la papila dérmica. Estimula significativamente la proliferación de queratinocitos foliculares y regula al alza factores de proliferación celular retrasando la apoptosis de fase catágena.',
+    compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'Cápsulas Orales Micronizadas'],
+    standardDosages: '1% - 2% Tópico · 1,000 mg - 2,000 mg Oral Diaria',
+    fagronPrograms: ['TrichoTest', 'NutriGen']
+  },
+  'vitamin-e': {
+    canonicalName: 'Vitamina E (D-α-Tocoferol / DL-α-Tocoferil Acetato)',
+    geneTargets: ['GPX4', 'TTPA', 'SECISBP2'],
+    pharmacologicalClass: 'Antioxidante Lipofílico de Membrana & Protector Endotelial',
+    clinicalIndication: 'Inhibición de peroxidación lipídica en cuero cabelludo, protección de la cutícula y microperfusión capilar',
+    mechanismOfAction: 'Principal antioxidante liposoluble endógeno de las membranas celulares. Interrumpe la cascada de radicales libres reaccionando con radicales peroxilo lipídicos (LOO•), protegiendo los ácidos grasos poliinsaturados de la barrera cutánea folicular y manteniendo la integridad vascular de la papila dérmica.',
+    compatibleVehicles: ['TrichoOil™', 'TrichoSol™', 'Cápsulas Blandas Lipídicas USP'],
+    standardDosages: '0.5% - 2% Tópico · 200 UI - 800 UI (134 mg - 536 mg) Oral',
+    fagronPrograms: ['TrichoTest', 'NutriGen', 'TeloTest']
+  },
+  'saw-palmetto': {
+    canonicalName: 'Saw Palmetto (Serenoa repens Extracto Lipídico Estandarizado >85-95%)',
+    geneTargets: ['SRD5A1', 'SRD5A2', 'AR'],
+    pharmacologicalClass: 'Fitofármaco Antiandrogénico & Inhibidor Dual 5α-Reductasa',
+    clinicalIndication: 'Reducción de DHT folicular, prevención de miniaturización y alternativa fitoterápica a finasteride',
+    mechanismOfAction: 'Ácidos grasos libres (láurico, mirístico, oleico) y fitoesteroles (β-sitosterol) que inhiben de manera dual las isoformas 1 y 2 de la 5α-reductasa, reduciendo la producción local de dihidrotestosterona (DHT) y antagonizando competitivamente los receptores androgénicos en la papila dérmica sin efectos adversos sexuales sistémicos.',
+    compatibleVehicles: ['Cápsulas Blandas Lipídicas USP', 'TrichoOil™', 'TrichoSol™'],
+    standardDosages: '160 mg - 320 mg Oral Diaria · 1% - 3% Tópico',
+    fagronPrograms: ['TrichoTest', 'NutriGen']
+  },
+  'resveratrol': {
+    canonicalName: 'trans-Resveratrol Micronizado Puro (>98%)',
+    geneTargets: ['SIRT1', 'AMPK', 'NFE2L2', 'FOXO3'],
+    pharmacologicalClass: 'Activador de Sirtuina 1 (SIRT1) & Polifenol Antisenescencia Folicular',
+    clinicalIndication: 'Longevidad folicular, regeneración mitocondrial dérmica y supresión de senescencia prematura',
+    mechanismOfAction: 'Polifenol estilbenoide natural que actúa como potente mimético de restricción calórica activando alostéricamente la desacetilasa SIRT1 y la vía AMPK. Fomenta la autofagia mitocondrial en células madre del bulbo, incrementa la expresión de enzimas antioxidantes y preserva la capacidad proliferativa del nicho folicular.',
+    compatibleVehicles: ['Cápsulas Micronizadas USP', 'TrichoSol™', 'TrichoOil™'],
+    standardDosages: '250 mg - 500 mg Oral Diaria · 0.5% - 1% Tópico',
+    fagronPrograms: ['TeloTest', 'NutriGen', 'TrichoTest']
+  },
+  'n-acetylcysteine': {
+    canonicalName: 'N-Acetilcisteína (NAC) USP',
+    geneTargets: ['GCLC', 'GSS', 'GSR', 'SOD1'],
+    pharmacologicalClass: 'Precursor Limitante de Glutatión Reducido (GSH) & Mucolítico Celular',
+    clinicalIndication: 'Detoxificación celular, síntesis de enlaces disulfuro en queratina y protección contra estrés oxidativo ambiental',
+    mechanismOfAction: 'Aporta cisteína biodisponible, el aminoácido limitante para la biosíntesis intracelular de glutatión (GSH). Incrementa las defensas redox intracelulares en el bulbo piloso, protege contra el estrés oxidativo por toxinas y radiación UV, y proporciona puentes de azufre para la cohesión y resistencia de la fibra queratínica.',
+    compatibleVehicles: ['Cápsulas Orales Micronizadas'],
+    standardDosages: '600 mg - 1,200 mg Oral Diaria',
+    fagronPrograms: ['NutriGen', 'TeloTest', 'TrichoTest']
+  },
+  'selenium-yeast': {
+    canonicalName: 'Selenio (Levadura Enriquecida / L-Selenometionina)',
+    geneTargets: ['GPX1', 'GPX4', 'TXNRD1', 'DIO2'],
+    pharmacologicalClass: 'Selenoproteína Esencial & Cofactor de Glutatión Peroxidasa',
+    clinicalIndication: 'Protección frente a peroxidación lipídica, función tiroidea folicular y calidad estructural del cabello',
+    mechanismOfAction: 'Componente catalítico de las selenoproteínas humanas, incluidas las glutatión peroxidasas (GPx1, GPx4) y las tiorredoxina reductasas. Cataliza la degradación de peróxidos de hidrógeno y lípidos, previniendo el daño oxidativo en la membrana celular folicular.',
+    compatibleVehicles: ['Cápsulas Orales'],
+    standardDosages: '50 mcg - 200 mcg Selenio Elemental Oral Diaria',
+    fagronPrograms: ['NutriGen', 'TeloTest', 'TrichoTest']
+  },
+  'folic-acid': {
+    canonicalName: 'Ácido Fólico / L-Metilfolato de Calcio',
+    geneTargets: ['MTHFR', 'FOLR1', 'DHFR', 'TYMS'],
+    pharmacologicalClass: 'Donador de Grupos Metilo & Cofactor de Síntesis de Timidilato',
+    clinicalIndication: 'Proliferación celular en queratinocitos del bulbo piloso y metilación del ADN',
+    mechanismOfAction: 'Forma activa del folato esencial para la síntesis de timidina y metilación del ADN. Garantiza la división celular mitótica acelerada de los queratinocitos foliculares en fase anágena y previene la elevación de homocisteína dañina para el endotelio dérmico.',
+    compatibleVehicles: ['Cápsulas Orales Micronizadas'],
+    standardDosages: '400 mcg - 1,000 mcg (1 mg) Oral Diaria',
+    fagronPrograms: ['NutriGen', 'TrichoTest']
   }
 };
 

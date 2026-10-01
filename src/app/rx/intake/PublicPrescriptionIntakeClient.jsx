@@ -59,6 +59,7 @@ export default function PublicPrescriptionIntakeClient() {
   const [filePreviewUrl, setFilePreviewUrl] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState('');
+  const [currentStepIndex, setCurrentStepIndex] = useState(1);
   const [error, setError] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -97,9 +98,16 @@ export default function PublicPrescriptionIntakeClient() {
     }
 
     try {
-      // 1. Multimodal AI Extraction & Background Storage Upload
-      setProcessingStep(isEs ? 'Analizando documento con Atlas Clinical AI...' : 'Scanning document with Atlas Clinical AI...');
-      toast.loading(isEs ? 'Analizando con Atlas Clinical AI...' : 'Scanning with Atlas Clinical AI...', { id: 'ai-intake-step' });
+      // ── Step 1 of 4: Multimodal AI Extraction & Background Storage Upload ──
+      setCurrentStepIndex(1);
+      setProcessingStep(isEs 
+        ? 'Analizando la receta médica con Atlas Clinical AI y procesando la imagen...' 
+        : 'Analyzing prescription document with Atlas Clinical AI and processing image...');
+      toast.loading(isEs 
+        ? 'Paso 1 de 4: Digitalizando documento...' 
+        : 'Step 1 of 4: Scanning document...', 
+        { id: 'ai-intake-step' }
+      );
       
       const [aiData, storageResult] = await Promise.all([
         extractPrescriptionFromDocument(droppedFile),
@@ -114,8 +122,17 @@ export default function PublicPrescriptionIntakeClient() {
         setFilePreviewUrl(storageResult.downloadUrl);
       }
 
-      // 2. Normalization & Ingredient Resolution
-      setProcessingStep(isEs ? 'Mapeando fórmulas y vehículos contra catálogo farmacológico...' : 'Resolving compounded active ingredients and excipients...');
+      // ── Step 2 of 4: Normalization & Ingredient Resolution ──
+      setCurrentStepIndex(2);
+      setProcessingStep(isEs 
+        ? 'Mapeando principios activos, vehículos y dosis con el catálogo oficial Fagron...' 
+        : 'Matching active ingredients, vehicles and dosages against Fagron catalog...');
+      toast.loading(isEs 
+        ? 'Paso 2 de 4: Mapeando fórmulas y vehículos...' 
+        : 'Step 2 of 4: Matching formulas and vehicles...', 
+        { id: 'ai-intake-step' }
+      );
+
       const normalizedList = await normalizeExtractedPrescriptions(aiData, {
         currentUser: user || null,
       });
@@ -135,8 +152,27 @@ export default function PublicPrescriptionIntakeClient() {
         });
       }
 
-      // 3. Instant Firestore Publication
-      setProcessingStep(isEs ? 'Publicando prescripción médica electrónica oficial...' : 'Publishing official electronic prescription dossier...');
+      // ── Step 3 of 4: Dosimetry & Safety Validation ──
+      setCurrentStepIndex(3);
+      setProcessingStep(isEs 
+        ? 'Verificando rangos terapéuticos estándar, dianas génicas y compatibilidad galénica...' 
+        : 'Validating standard therapeutic ranges, gene targets and vehicle compatibility...');
+      toast.loading(isEs 
+        ? 'Paso 3 de 4: Verificando dosimetría y compatibilidad...' 
+        : 'Step 3 of 4: Validating dosimetry and compatibility...', 
+        { id: 'ai-intake-step' }
+      );
+
+      // ── Step 4 of 4: Instant Firestore Publication ──
+      setCurrentStepIndex(4);
+      setProcessingStep(isEs 
+        ? 'Publicando receta médica electrónica oficial con código QR y verificación...' 
+        : 'Publishing official electronic prescription with QR code and verification...');
+      toast.loading(isEs 
+        ? 'Paso 4 de 4: Generando dossier electrónico...' 
+        : 'Step 4 of 4: Generating electronic dossier...', 
+        { id: 'ai-intake-step' }
+      );
       
       const accountManagerPayload = activeAmEmail ? {
         email: activeAmEmail,
@@ -348,6 +384,7 @@ export default function PublicPrescriptionIntakeClient() {
     setPublishedRx(null);
     setDuplicateWarning(null);
     setPendingExtractedList(null);
+    setCurrentStepIndex(1);
     setError(null);
     setShowOriginalModal(false);
     setReviewSatisfied(null);
@@ -1132,26 +1169,75 @@ export default function PublicPrescriptionIntakeClient() {
           <input {...getInputProps()} />
 
           {isProcessing ? (
-            <div style={{ padding: '2rem 1rem' }}>
+            <div style={{ padding: '2rem 1rem', maxWidth: '520px', margin: '0 auto' }}>
               <div style={{
-                width: '68px',
-                height: '68px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
                 background: 'linear-gradient(135deg, #0284c7 0%, #6366f1 100%)',
-                margin: '0 auto 1.5rem',
+                margin: '0 auto 1.25rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 animation: 'pulse 1.5s infinite',
-                boxShadow: '0 8px 24px rgba(2, 132, 199, 0.3)'
+                boxShadow: '0 8px 24px rgba(2, 132, 199, 0.25)'
               }}>
-                <RefreshCw size={32} style={{ color: '#ffffff', animation: 'spin 2s linear infinite' }} />
+                <RefreshCw size={28} style={{ color: '#ffffff', animation: 'spin 2s linear infinite' }} />
               </div>
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                {isEs ? 'Procesando prescripción con IA...' : 'Scanning document with Clinical AI...'}
+
+              {/* Progress step badge "1 de 4" */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                padding: '4px 14px',
+                borderRadius: '20px',
+                marginBottom: '0.85rem'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0369a1' }}>
+                  {isEs ? `Paso ${currentStepIndex} de 4` : `Step ${currentStepIndex} of 4`}
+                </span>
+                <span style={{ color: '#38bdf8', fontSize: '0.75rem' }}>•</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0284c7' }}>
+                  {currentStepIndex === 1 && '25%'}
+                  {currentStepIndex === 2 && '50%'}
+                  {currentStepIndex === 3 && '75%'}
+                  {currentStepIndex === 4 && '100%'}
+                </span>
+              </div>
+
+              {/* Visual Progress Bar */}
+              <div style={{
+                width: '100%',
+                height: '6px',
+                background: '#e2e8f0',
+                borderRadius: '3px',
+                overflow: 'hidden',
+                margin: '0 auto 1.25rem',
+                maxWidth: '340px'
+              }}>
+                <div style={{
+                  width: currentStepIndex === 1 ? '25%' : currentStepIndex === 2 ? '50%' : currentStepIndex === 3 ? '75%' : '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #0284c7 0%, #6366f1 100%)',
+                  borderRadius: '3px',
+                  transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                }} />
+              </div>
+
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem' }}>
+                {currentStepIndex === 1 && (isEs ? 'Digitalización & Reconocimiento OCR' : 'Document Scanning & OCR')}
+                {currentStepIndex === 2 && (isEs ? 'Resolución de Fórmulas & APIs' : 'Formula & API Resolution')}
+                {currentStepIndex === 3 && (isEs ? 'Farmacovigilancia & Dosimetría' : 'Dosimetry & Safety Validation')}
+                {currentStepIndex === 4 && (isEs ? 'Generación del Dossier Electrónico' : 'Electronic Dossier Publication')}
               </h3>
-              <p style={{ color: '#64748b', fontSize: '0.92rem', maxWidth: '440px', margin: '0 auto' }}>
-                {processingStep || (isEs ? 'Extrayendo fórmulas magistrales y publicando...' : 'Extracting active ingredients and publishing electronic dossier...')}
+
+              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.55, maxWidth: '440px', margin: '0 auto' }}>
+                {processingStep || (isEs 
+                  ? 'Analizando la receta médica con Atlas Clinical AI...' 
+                  : 'Analyzing prescription document with Atlas Clinical AI...')}
               </p>
             </div>
           ) : (

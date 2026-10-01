@@ -4,6 +4,7 @@ import React from 'react';
 import { ArrowRight, Target, ShieldCheck, Activity, Clock, Syringe, Info, Sparkles } from '@/lib/icons';
 import DataTable from '@/components/ui/DataTable';
 import { STANDARD_PRESENTATIONS } from './monographCalculationEngine';
+import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 
 /**
  * OverviewTab
@@ -25,7 +26,11 @@ export default function OverviewTab({
   const pharmacologicalSummary = product.overview_summary || product.summary || product.description || 
     (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.');
 
-  const fdaRefProduct = product.referenceBrand ? `${product.referenceBrand} ${product.referenceApprovalYear ? `(Approved ${product.referenceApprovalYear})` : ''}` : (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null);
+  const fdaStatusObj = getFdaPeptideStatus(product.slug || product.canonicalName || product.name || '');
+  const rawRef = product.referenceBrand 
+    ? `${product.referenceBrand}${product.referenceApprovalYear ? ` (Approved ${product.referenceApprovalYear})` : ''}` 
+    : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null));
+  const fdaRefProduct = rawRef && String(rawRef).trim().length > 0 ? String(rawRef).trim() : null;
 
   const clinicalConsiderations = [
     {
@@ -152,22 +157,24 @@ export default function OverviewTab({
             </div>
           </div>
 
-          <div style={{ gridColumn: '1 / -1' }}>
-            <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '2px' }}>
-              FDA Reference Formulation
+          {fdaRefProduct && (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '2px' }}>
+                FDA Reference Formulation
+              </div>
+              <div style={{
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                color: '#1e40af',
+                background: '#eff6ff',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                border: '1px solid #bfdbfe'
+              }}>
+                {fdaRefProduct}
+              </div>
             </div>
-            <div style={{
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              color: '#1e40af',
-              background: '#eff6ff',
-              padding: '6px 10px',
-              borderRadius: '6px',
-              border: '1px solid #bfdbfe'
-            }}>
-              {fdaRefProduct}
-            </div>
-          </div>
+          )}
         </div>
 
         <div>

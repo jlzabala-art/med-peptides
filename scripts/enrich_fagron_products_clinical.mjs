@@ -1,106 +1,126 @@
-#!/usr/bin/env node
-/**
- * enrich_fagron_products_clinical.mjs
- * ─────────────────────────────────────────────────────────────────────────────
- * Enriches all Fagron Genomics & Compounding APIs in Firestore with:
- *  - geneTargets
- *  - clinicalIndication
- *  - mechanismOfAction
- *  - pharmacologicalClass
- *  - compatibleVehicles
- *
- * Usage:
- *   node scripts/enrich_fagron_products_clinical.mjs
- */
-
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { readFileSync } from 'fs';
+import admin from 'firebase-admin';
+import dotenv from 'dotenv';
+import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-import { FAGRON_CLINICAL_MONOGRAPHS, getFagronClinicalMonograph } from '../src/data/fagronClinicalMonographs.js';
+import { FAGRON_CLINICAL_MONOGRAPHS } from '../src/data/fagronClinicalMonographs.js';
+import { algoliasearch } from 'algoliasearch';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
-const serviceAccount = JSON.parse(
-  readFileSync(resolve(__dirname, 'serviceAccountKey.json'), 'utf8')
-);
-if (!getApps().length) {
-  initializeApp({ credential: cert(serviceAccount) });
+if (!admin.apps.length) {
+  admin.initializeApp();
 }
-const db = getFirestore();
+const db = admin.firestore();
 
-async function run() {
-  console.log('🔄 Starting Fagron Clinical Enrichment in Firestore...');
+const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+const ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY;
+let algoliaClient = null;
+if (APP_ID && ADMIN_KEY) {
+  algoliaClient = algoliasearch(APP_ID, ADMIN_KEY);
+}
 
-  const snap = await db.collection('products')
-    .where('tags', 'array-contains', 'Fagron Genomics')
-    .get();
+async function runEnrichment() {
+  console.log('🚀 Starting Fagron Clinical Monographs Firestore & Algolia Enrichment...');
+  console.log(`Found ${Object.keys(FAGRON_CLINICAL_MONOGRAPHS).length} clinical monographs to apply.`);
 
-  console.log(`Found ${snap.size} Fagron Genomics products in Firestore.`);
+  const productsSnap = await db.collection('products').get();
+  console.log(`Retrieved ${productsSnap.size} total products from Firestore.`);
+
   let updatedCount = 0;
+  const algoliaRecordsToUpdate = [];
 
-  for (const doc of snap.docs) {
+  for (const doc of productsSnap.docs) {
     const data = doc.data();
-    const docId = doc.id;
-    const name = data.name || data.displayName || '';
+    const docId = doc.id.toLowerCase();
+    const slug = (data.slug || '').toLowerCase();
+    const name = (data.name || data.title || '').toLowerCase();
+    const canonicalName = (data.canonicalName || '').toLowerCase();
 
-    const mono = FAGRON_CLINICAL_MONOGRAPHS[docId] || getFagronClinicalMonograph(docId) || getFagronClinicalMonograph(name);
+    // Check if any monograph key matches this product
+    let matchedKey = null;
+    let matchedMono = null;
 
-    if (mono) {
-      const updates = {
-        clinicalDescription: mono.mechanismOfAction,
-        mechanismOfAction: mono.mechanismOfAction,
-        geneTargets: mono.geneTargets,
-        clinicalIndication: mono.clinicalIndication,
-        pharmacologicalClass: mono.pharmacologicalClass,
-        compatibleVehicles: mono.compatibleVehicles,
-        standardDosages: mono.standardDosages,
-        updatedAt: new Date()
-      };
+    for (const [key, mono] of Object.entries(FAGRON_CLINICAL_MONOGRAPHS)) {
+      const keyLower = key.toLowerCase();
+      const monoNameLower = mono.canonicalName.toLowerCase();
 
-      await doc.ref.update(updates);
-      console.log(`✅ Enriched ${docId} (${name}) -> Genes: ${mono.geneTargets.join(', ')}`);
-      updatedCount++;
-    } else {
-      // Provide standard fallback clinical descriptors if no specific monograph
-      const fallbackUpdates = {
-        clinicalDescription: data.description || 'Principio activo farmacéutico de grado compendial para formulación magistral individualizada.',
-        mechanismOfAction: data.description || 'Modulación de rutas celulares y biológicas adaptadas al perfil clínico del paciente.',
-        geneTargets: data.geneTargets || [],
-        clinicalIndication: data.clinicalIndication || 'Terapia magistral personalizada según criterio médico.',
-        pharmacologicalClass: 'Principio Activo Compounding Farmacogenómico',
-        updatedAt: new Date()
-      };
-      await doc.ref.update(fallbackUpdates);
-      console.log(`ℹ️ Standard metadata set for ${docId} (${name})`);
-      updatedCount++;
+      if (
+        docId === keyLower ||
+        docId.includes(keyLower) ||
+        slug === keyLower ||
+        slug.includes(keyLower) ||
+        name.includes(keyLower) ||
+        canonicalName.includes(keyLower) ||
+        name.includes(monoNameLower) ||
+        canonicalName.includes(monoNameLower)
+      ) {
+        matchedKey = key;
+        matchedMono = mono;
+        break;
+      }
     }
-  }
 
-  // Also check specific key products that might not have the tag
-  const keyIds = ['finasteride', 'minoxidil', 'cetirizine-hcl', 'd-panthenol', 'latanoprost-fagron', 'dutasteride', 'spironolactone', 'trichosol', 'trichofoam', 'trichooil'];
-  for (const id of keyIds) {
-    const doc = await db.collection('products').doc(id).get();
-    if (doc.exists) {
-      const mono = FAGRON_CLINICAL_MONOGRAPHS[id] || getFagronClinicalMonograph(id);
-      if (mono) {
-        await doc.ref.update({
-          clinicalDescription: mono.mechanismOfAction,
-          mechanismOfAction: mono.mechanismOfAction,
-          geneTargets: mono.geneTargets,
-          clinicalIndication: mono.clinicalIndication,
-          pharmacologicalClass: mono.pharmacologicalClass,
-          compatibleVehicles: mono.compatibleVehicles,
-          standardDosages: mono.standardDosages,
-          updatedAt: new Date()
+    if (matchedMono) {
+      console.log(`✨ Matched product "${data.name || doc.id}" with monograph "${matchedMono.canonicalName}"`);
+      
+      const updatePayload = {
+        geneTargets: matchedMono.geneTargets || [],
+        pharmacologicalClass: matchedMono.pharmacologicalClass || '',
+        clinicalIndication: matchedMono.clinicalIndication || '',
+        mechanismOfAction: matchedMono.mechanismOfAction || '',
+        compatibleVehicles: matchedMono.compatibleVehicles || [],
+        standardDosages: matchedMono.standardDosages || '',
+        fagronPrograms: matchedMono.fagronPrograms || ['TrichoTest'],
+        fagronClinicalEnriched: true,
+        updatedAt: new Date().toISOString()
+      };
+
+      await doc.ref.update(updatePayload);
+      updatedCount++;
+
+      if (algoliaClient) {
+        algoliaRecordsToUpdate.push({
+          objectID: doc.id,
+          id: doc.id,
+          name: data.name || data.title || matchedMono.canonicalName,
+          canonicalName: data.canonicalName || matchedMono.canonicalName,
+          category: data.category || 'Compounding API',
+          geneTargets: matchedMono.geneTargets || [],
+          pharmacologicalClass: matchedMono.pharmacologicalClass || '',
+          clinicalIndication: matchedMono.clinicalIndication || '',
+          mechanismOfAction: matchedMono.mechanismOfAction ? matchedMono.mechanismOfAction.substring(0, 500) : '',
+          compatibleVehicles: matchedMono.compatibleVehicles || [],
+          standardDosages: matchedMono.standardDosages || '',
+          goals: data.goals || [],
+          tags: [...new Set([...(data.tags || []), ...(matchedMono.geneTargets || []), matchedMono.pharmacologicalClass])],
+          fagronClinicalEnriched: true,
+          updatedAt_ts: Date.now()
         });
-        console.log(`🎯 Key API enriched: ${id}`);
       }
     }
   }
 
-  console.log(`\n🎉 Successfully enriched ${updatedCount} Fagron products in Firestore!`);
+  console.log(`\n✅ Successfully enriched ${updatedCount} products in Firestore.`);
+
+  if (algoliaClient && algoliaRecordsToUpdate.length > 0) {
+    try {
+      await algoliaClient.partialUpdateObjects({
+        indexName: 'products',
+        objects: algoliaRecordsToUpdate,
+        createIfNotExists: true
+      });
+      console.log(`⚡ Synced ${algoliaRecordsToUpdate.length} enriched products to Algolia 'products' index.`);
+    } catch (algErr) {
+      console.warn('⚠️ Algolia update warning:', algErr.message);
+    }
+  }
+
+  process.exit(0);
 }
 
-run().catch(console.error);
+runEnrichment().catch(err => {
+  console.error('Fatal error during enrichment:', err);
+  process.exit(1);
+});
