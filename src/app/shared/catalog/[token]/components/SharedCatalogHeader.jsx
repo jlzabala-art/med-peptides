@@ -100,38 +100,38 @@ export default function SharedCatalogHeader({
         style={{
           background: '#ffffff',
           border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '1.1rem 1.35rem',
+          borderRadius: '10px',
+          padding: '0.65rem 0.95rem',
           boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
-          marginBottom: '0.85rem'
+          marginBottom: '0.65rem'
         }}
       >
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '1.25rem',
+          gap: '1rem',
           flexWrap: 'wrap'
         }}>
           
-          {/* Left / Main Column */}
+          {/* Main Column */}
           <div style={{ flex: '1 1 540px', minWidth: 0 }}>
             
-            {/* Badges Strip */}
+            {/* Badges Strip (Compact GCP Pill Row) */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '5px',
               flexWrap: 'wrap',
-              marginBottom: '0.45rem'
+              marginBottom: '0.35rem'
             }}>
               <span style={{
                 background: '#eff6ff',
                 color: '#1d4ed8',
                 border: '1px solid #bfdbfe',
                 borderRadius: '9999px',
-                padding: '2px 8px',
-                fontSize: '0.70rem',
+                padding: '1px 7px',
+                fontSize: '0.66rem',
                 fontWeight: 800,
                 letterSpacing: '0.04em',
                 textTransform: 'uppercase'
@@ -142,27 +142,26 @@ export default function SharedCatalogHeader({
               <span style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '3px',
                 background: '#f0fdf4',
                 color: '#15803d',
                 border: '1px solid #bbf7d0',
                 borderRadius: '9999px',
-                padding: '2px 8px',
-                fontSize: '0.70rem',
+                padding: '1px 7px',
+                fontSize: '0.66rem',
                 fontWeight: 700
               }}>
-                <ShieldCheck size={12} color="#16a34a" />
-                <span>Dual-Stage RP-HPLC & LC-MS Certified</span>
+                <ShieldCheck size={11} color="#16a34a" />
+                <span>RP-HPLC & LC-MS Certified</span>
               </span>
 
-              {/* Date / Validity badge */}
               <span style={{
                 background: '#f8fafc',
                 color: '#475569',
                 border: '1px solid #e2e8f0',
                 borderRadius: '9999px',
-                padding: '2px 8px',
-                fontSize: '0.68rem',
+                padding: '1px 7px',
+                fontSize: '0.66rem',
                 fontWeight: 600
               }}>
                 📅 {catalogMeta?.issuedAt || catalogMeta?.iat
@@ -179,12 +178,12 @@ export default function SharedCatalogHeader({
                     borderWidth: '1px',
                     borderStyle: 'solid',
                     borderRadius: '9999px',
-                    padding: '2px 8px',
-                    fontSize: '0.68rem',
+                    padding: '1px 7px',
+                    fontSize: '0.66rem',
                     fontWeight: 700
                   }}
                 >
-                  ⏳ {validity.daysLeft > 0 ? `Valid for ${validity.daysLeft} days` : 'Terms under review'}
+                  ⏳ {validity.daysLeft > 0 ? `Valid for ${validity.daysLeft}d` : 'Terms review'}
                 </span>
               )}
 
@@ -193,8 +192,8 @@ export default function SharedCatalogHeader({
                 color: '#003666',
                 border: '1px solid #bfdbfe',
                 borderRadius: '9999px',
-                padding: '2px 8px',
-                fontSize: '0.68rem',
+                padding: '1px 7px',
+                fontSize: '0.66rem',
                 fontWeight: 700
               }}>
                 📦 {products.length} Formulations • {totalVariants || products.length} SKUs
@@ -203,8 +202,8 @@ export default function SharedCatalogHeader({
 
             {/* Title */}
             <h1 style={{
-              margin: '0 0 0.35rem 0',
-              fontSize: '1.5rem',
+              margin: '0 0 0.2rem 0',
+              fontSize: '1.25rem',
               fontWeight: 800,
               color: '#003666',
               letterSpacing: '-0.02em',
@@ -217,24 +216,25 @@ export default function SharedCatalogHeader({
                 : 'Clinical Peptide Catalog'}
             </h1>
 
-            {/* Description */}
+            {/* Description (Compact 1-line summary) */}
             <p style={{
-              margin: '0 0 0.75rem 0',
-              fontSize: '0.84rem',
+              margin: '0 0 0.5rem 0',
+              fontSize: '0.78rem',
               color: '#475569',
-              lineHeight: 1.45,
+              lineHeight: 1.35,
               maxWidth: '720px'
             }}>
-              Analytical-grade lyophilized peptide vials, multi-dose presentations, and standardized therapeutic protocols. Verified direct delivery terms for authorized healthcare institutions.
+              Analytical-grade lyophilized peptide vials & standardized therapeutic protocols. Verified institutional terms.
             </p>
 
-            {/* Action Buttons Strip (GCP Style) */}
+            {/* GCP High-Density Unified Action Toolbar */}
             <div className="catalog-actions-group" style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               flexWrap: 'wrap'
             }}>
+              {/* 1. Download PDF */}
               <button
                 type="button"
                 onClick={handleDownloadPdf}
@@ -242,24 +242,26 @@ export default function SharedCatalogHeader({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '5px',
                   background: '#003666',
                   color: '#ffffff',
                   border: '1px solid #002244',
-                  borderRadius: '8px',
-                  padding: '7px 14px',
-                  fontSize: '0.78rem',
+                  borderRadius: '6px',
+                  padding: '5px 11px',
+                  fontSize: '0.74rem',
                   fontWeight: 700,
+                  height: '30px',
                   cursor: isGeneratingPdf ? 'wait' : 'pointer',
-                  boxShadow: '0 1px 3px rgba(0, 54, 102, 0.25)',
-                  transition: 'all 0.15s ease'
+                  boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)',
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
                 }}
               >
-                <Download size={13} />
-                <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Catalog (PDF)'}</span>
+                <Download size={12} />
+                <span>{isGeneratingPdf ? 'Generating...' : 'Download PDF'}</span>
               </button>
 
-              {/* Dual Copy Link Button / Dropdown */}
+              {/* 2. Copy Link / Dropdown */}
               <div style={{ position: 'relative', display: 'inline-block' }}>
                 <button
                   type="button"
@@ -273,53 +275,54 @@ export default function SharedCatalogHeader({
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '6px',
+                    gap: '5px',
                     background: hasActiveFilters ? '#eff6ff' : '#ffffff',
                     color: hasActiveFilters ? '#003666' : '#334155',
                     border: hasActiveFilters ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    padding: '7px 12px',
-                    fontSize: '0.78rem',
+                    borderRadius: '6px',
+                    padding: '5px 10px',
+                    fontSize: '0.74rem',
                     fontWeight: 700,
+                    height: '30px',
                     cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                     transition: 'all 0.15s ease'
                   }}
-                  title={hasActiveFilters ? "Opciones de copia con o sin filtros" : "Copy direct web link to this catalog"}
+                  title={hasActiveFilters ? "Share options (with or without active filters)" : "Copy direct link to this catalog"}
                 >
                   {copiedType ? (
-                    <Check size={13} color="#16a34a" />
+                    <Check size={12} color="#16a34a" />
                   ) : hasActiveFilters ? (
-                    <Filter size={13} color="#003666" />
+                    <Filter size={12} color="#003666" />
                   ) : (
-                    <Copy size={13} color="#64748b" />
+                    <Copy size={12} color="#64748b" />
                   )}
                   <span>
                     {copiedType
-                      ? (copiedType === 'filtered' ? 'Link with Filters Copied ✓' : 'Base Link Copied ✓')
+                      ? (copiedType === 'filtered' ? 'Filtered Copied ✓' : 'Link Copied ✓')
                       : hasActiveFilters
-                      ? 'Copy Link (Filters Active) ▾'
-                      : 'Copy Catalog Link'}
+                      ? 'Copy Link (Filters) ▾'
+                      : 'Copy Link'}
                   </span>
-                  {hasActiveFilters && <ChevronDown size={12} style={{ opacity: 0.7 }} />}
+                  {hasActiveFilters && <ChevronDown size={11} style={{ opacity: 0.7 }} />}
                 </button>
 
-                {/* Dropdown with options when filters are active */}
+                {/* Dropdown menu */}
                 {hasActiveFilters && showShareDropdown && (
                   <div style={{
                     position: 'absolute',
-                    top: 'calc(100% + 6px)',
-                    right: 0,
+                    top: 'calc(100% + 4px)',
+                    left: 0,
                     zIndex: 1000,
                     background: '#ffffff',
                     border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15)',
-                    padding: '6px',
-                    width: '270px',
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.15)',
+                    padding: '4px',
+                    width: '240px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '4px'
+                    gap: '3px'
                   }}>
                     <button
                       type="button"
@@ -328,21 +331,21 @@ export default function SharedCatalogHeader({
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',
-                        gap: '2px',
-                        padding: '8px 10px',
+                        gap: '1px',
+                        padding: '6px 8px',
                         background: '#f0fdf4',
                         border: '1px solid #bbf7d0',
-                        borderRadius: '6px',
+                        borderRadius: '5px',
                         cursor: 'pointer',
                         textAlign: 'left'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, color: '#166534' }}>
-                        <Filter size={13} />
-                        <span>Copy with Active Filters</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 800, color: '#166534' }}>
+                        <Filter size={11} />
+                        <span>With Active Filters</span>
                       </div>
-                      <span style={{ fontSize: '0.68rem', color: '#15803d' }}>
-                        Preserves dosage, FDA, search, and active clinical goals
+                      <span style={{ fontSize: '0.64rem', color: '#15803d' }}>
+                        Preserves active goals & query
                       </span>
                     </button>
 
@@ -353,84 +356,28 @@ export default function SharedCatalogHeader({
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',
-                        gap: '2px',
-                        padding: '8px 10px',
+                        gap: '1px',
+                        padding: '6px 8px',
                         background: '#f8fafc',
                         border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
+                        borderRadius: '5px',
                         cursor: 'pointer',
                         textAlign: 'left'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
-                        <Copy size={13} />
-                        <span>Copy Complete Catalog</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', fontWeight: 700, color: '#334155' }}>
+                        <Copy size={11} />
+                        <span>Full Unfiltered Catalog</span>
                       </div>
-                      <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                        Clean link without any applied filter parameters
+                      <span style={{ fontSize: '0.64rem', color: '#64748b' }}>
+                        Clean canonical URL
                       </span>
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Desktop Batch Verified Inline Pill (Regla #11: Copy-on-Click) */}
-              <div className="catalog-desktop-batch-pill" style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '6px 10px',
-                fontSize: '0.72rem'
-              }}>
-                <ShieldCheck size={13} color="#16a34a" />
-                <span style={{ fontWeight: 600, color: '#64748b' }}>Batch:</span>
-                <code style={{ fontSize: '0.70rem', color: '#003666', fontFamily: 'monospace', fontWeight: 800 }}>
-                  {verifiedCode}
-                </code>
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '2px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    color: '#64748b'
-                  }}
-                  title="Copy verified batch code"
-                >
-                  {copiedType === 'code' ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Verification Bar (< 768px only) */}
-            <div className="catalog-mobile-verification-bar" style={{
-              marginTop: '0.75rem',
-              padding: '0.55rem 0.75rem',
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '8px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-                <ShieldCheck size={14} color="#16a34a" style={{ flexShrink: 0 }} />
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#334155' }}>
-                  Batch:
-                </span>
-                <code style={{ fontSize: '0.68rem', color: '#003666', background: '#eff6ff', padding: '1px 5px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {verifiedCode}
-                </code>
-              </div>
-
+              {/* 3. QR Code Trigger Button */}
               <button
                 type="button"
                 onClick={() => setIsQrModalOpen(true)}
@@ -441,80 +388,105 @@ export default function SharedCatalogHeader({
                   background: '#ffffff',
                   border: '1px solid #cbd5e1',
                   borderRadius: '6px',
-                  padding: '4px 8px',
-                  fontSize: '0.70rem',
+                  padding: '5px 9px',
+                  fontSize: '0.74rem',
                   fontWeight: 700,
+                  height: '30px',
                   color: '#003666',
                   cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  transition: 'all 0.15s ease',
                   flexShrink: 0
                 }}
+                title="Scan QR Code to open on mobile"
               >
                 <QrCode size={12} />
-                <span>View QR</span>
+                <span>QR Code</span>
               </button>
+
+              {/* 4. Batch Code Verified Chip (Copy-on-Click) */}
+              <div
+                onClick={handleCopyCode}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  padding: '4px 8px',
+                  height: '30px',
+                  fontSize: '0.70rem',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  transition: 'background 0.15s ease',
+                  flexShrink: 0
+                }}
+                title="Click to copy verified batch identifier"
+              >
+                <ShieldCheck size={12} color="#16a34a" />
+                <span style={{ fontWeight: 600, color: '#64748b' }}>Batch:</span>
+                <code style={{ fontSize: '0.68rem', color: '#003666', fontFamily: 'monospace', fontWeight: 800 }}>
+                  {verifiedCode}
+                </code>
+                {copiedType === 'code' ? (
+                  <Check size={11} color="#16a34a" />
+                ) : (
+                  <Copy size={11} color="#94a3b8" />
+                )}
+              </div>
+
             </div>
 
           </div>
 
-          {/* Right Column: Sleek Compact QR Verification Widget (Desktop ≥ 769px) */}
+          {/* Right Column: Compact QR Thumbnail (Desktop ≥ 1024px) */}
           <div className="catalog-desktop-qr-box" style={{
             flexShrink: 0,
-            width: '124px',
+            width: '90px',
             background: '#ffffff',
             border: '1px solid #e2e8f0',
-            borderRadius: '10px',
-            padding: '8px',
+            borderRadius: '8px',
+            padding: '5px',
             textAlign: 'center',
-            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px'
-          }}>
-            <div
-              onClick={() => setIsQrModalOpen(true)}
-              style={{
-                cursor: 'pointer',
-                padding: '4px',
-                background: '#ffffff',
-                borderRadius: '6px',
-                border: '1px solid #f1f5f9',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'transform 0.15s ease'
-              }}
-              title="Click to enlarge QR code"
-            >
-              <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://med-peptides.com'} size={84} level="M" />
-            </div>
-
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '2px' }}>
-              <ShieldCheck size={11} color="#16a34a" />
-              <span>Verified Catalog</span>
-            </div>
-
-            <div style={{ fontSize: '0.60rem', color: '#64748b', fontWeight: 600 }}>
-              Scan for live app
+            gap: '2px',
+            cursor: 'pointer'
+          }}
+          onClick={() => setIsQrModalOpen(true)}
+          title="Click to enlarge QR code"
+          >
+            <QRCodeSVG value={activeQrUrl || cleanBaseUrl || 'https://med-peptides.com'} size={64} level="M" />
+            <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '2px', marginTop: '1px' }}>
+              <ShieldCheck size={9} color="#16a34a" />
+              <span>Verified QR</span>
             </div>
           </div>
 
         </div>
 
         <style>{`
-          @media (min-width: 769px) {
-            .catalog-mobile-verification-bar { display: none !important; }
+          @media (min-width: 1024px) {
             .catalog-desktop-qr-box { display: flex !important; }
-            .catalog-desktop-batch-pill { display: inline-flex !important; }
           }
-          @media (max-width: 768px) {
+          @media (max-width: 1023px) {
             .catalog-desktop-qr-box { display: none !important; }
-            .catalog-desktop-batch-pill { display: none !important; }
-            .catalog-mobile-verification-bar { display: flex !important; }
-            .catalog-actions-group { width: 100%; }
+          }
+          @media (max-width: 640px) {
+            .catalog-actions-group {
+              width: 100%;
+              display: flex;
+              flex-wrap: wrap;
+              gap: 4px;
+            }
             .catalog-actions-group > button,
-            .catalog-actions-group > div { flex: 1 1 auto; }
-            .catalog-actions-group > div > button { width: 100%; justify-content: center; }
+            .catalog-actions-group > div {
+              flex: 1 1 auto;
+              justify-content: center;
+            }
           }
         `}</style>
       </section>

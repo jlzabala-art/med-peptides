@@ -789,7 +789,7 @@ export default function ProtocolWorkspaceTab({
 
       {/* ── MAIN WORKSPACE AREA ── */}
       <main className="pds-protocol-main-workspace">
-        {/* ── Google Cloud UX Protocol Switcher Deck (Mobile & Tablet) ── */}
+        {/* ── Google Cloud UX Protocol Switcher (Mobile & Desktop) ── */}
         <div className="pds-gcp-protocol-switcher">
           <div className="pds-gcp-switcher-header">
             <div className="pds-gcp-switcher-header-left">
@@ -819,11 +819,43 @@ export default function ProtocolWorkspaceTab({
               aria-label="Compare all protocols"
             >
               <Layers size={13} />
-              <span>Compare & Details ({availableProtocols.length})</span>
+              <span>Compare All ({availableProtocols.length})</span>
             </button>
           </div>
 
-          <div className="pds-gcp-switcher-deck" role="tablist" aria-label="Clinical Protocol Options">
+          {/* Clean Google Cloud Dropdown Field for Mobile (No horizontal scroll) */}
+          <div className="pds-gcp-mobile-select-wrapper">
+            <div className="pds-gcp-select-container">
+              <select
+                className="pds-gcp-native-select"
+                value={selectedProtocolId}
+                onChange={(e) => handleSelectProtocol(e.target.value)}
+                aria-label="Select Clinical Protocol Blueprint"
+              >
+                {availableProtocols.map((proto, idx) => (
+                  <option key={proto.id} value={proto.id}>
+                    #{idx + 1} · {sanitizeProtocolTitle(proto.name, canonicalName)} ({proto.durationWeeks} Wks • {proto.defaultDoseMg || proto.phases?.[0]?.doseMg || 2.5} mg)
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="pds-gcp-select-arrow" />
+            </div>
+
+            <div className="pds-gcp-select-meta-strip">
+              <span className="pds-gcp-meta-pill">
+                <Clock size={11} /> {activeProtocol.durationWeeks} Weeks
+              </span>
+              <span className="pds-gcp-meta-pill dose">
+                • {activeProtocol.defaultDoseMg || activeProtocol.phases?.[0]?.doseMg || 2.5} mg / admin
+              </span>
+              <span className="pds-gcp-meta-pill">
+                • {activeProtocol.difficulty || 'Clinical'}
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop/Tablet Segmented Switcher Deck */}
+          <div className="pds-gcp-switcher-deck hide-on-mobile" role="tablist" aria-label="Clinical Protocol Options">
             {availableProtocols.map((proto, idx) => {
               const isSelected = proto.id === selectedProtocolId;
               return (

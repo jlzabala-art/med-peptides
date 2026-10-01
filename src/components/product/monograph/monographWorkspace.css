@@ -362,15 +362,16 @@
 .pds-gcp-switcher-compare-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 11px;
-  background: #f8fafc;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
   color: #003666;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.15s ease;
   white-space: nowrap;
 }
@@ -378,6 +379,74 @@
 .pds-gcp-switcher-compare-btn:hover {
   background: #eff6ff;
   border-color: #003666;
+  color: #002244;
+}
+
+/* ── Mobile GCP Dropdown Field ── */
+.pds-gcp-mobile-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.pds-gcp-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.pds-gcp-native-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 34px 9px 12px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #003666;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.pds-gcp-native-select:focus {
+  border-color: #003666;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 54, 102, 0.10);
+}
+
+.pds-gcp-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #64748b;
+}
+
+.pds-gcp-select-meta-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 2px 4px;
+}
+
+/* On Desktop/Large Tablets, hide the mobile select wrapper and show the deck */
+@media (min-width: 769px) {
+  .pds-gcp-mobile-select-wrapper {
+    display: none !important;
+  }
+}
+
+/* On Mobile, hide the overflowing deck */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
 }
 
 .pds-gcp-switcher-deck {

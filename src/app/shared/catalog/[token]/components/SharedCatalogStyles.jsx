@@ -46,24 +46,24 @@ export default function SharedCatalogStyles() {
           color: #ffffff;
         }
         .topbar-inner {
-          max-width: 1160px;
+          max-width: 1360px;
           margin: 0 auto;
-          padding: 0.55rem 1.25rem;
+          padding: 0.35rem 0.85rem;
           display: flex;
           align-items: center;
           justify-content: space-between;
           flex-wrap: nowrap;
-          gap: 12px;
+          gap: 8px;
         }
         .topbar-brand {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           flex-shrink: 0;
           white-space: nowrap;
         }
         .topbar-brand-title {
-          font-size: 0.95rem;
+          font-size: 0.88rem;
           font-weight: 800;
           color: #ffffff;
           letter-spacing: -0.01em;
@@ -74,18 +74,18 @@ export default function SharedCatalogStyles() {
         }
         .topbar-brand-divider {
           width: 1px;
-          height: 15px;
-          background-color: rgba(255, 255, 255, 0.25);
+          height: 14px;
+          background-color: rgba(255, 255, 255, 0.22);
           display: inline-block;
-          margin: 0 4px;
+          margin: 0 2px;
         }
         .topbar-badge-pill {
           background-color: rgba(56, 189, 248, 0.15);
           border: 1px solid rgba(56, 189, 248, 0.35);
           color: #7dd3fc;
-          font-size: 0.68rem;
+          font-size: 0.65rem;
           font-weight: 800;
-          padding: 2px 8px;
+          padding: 1px 6px;
           border-radius: 9999px;
           letter-spacing: 0.04em;
           white-space: nowrap;
@@ -93,34 +93,75 @@ export default function SharedCatalogStyles() {
         .portal-verified-badge {
           display: inline-flex;
           align-items: center;
-          gap: 4px;
-          background-color: rgba(255, 255, 255, 0.14);
-          border: 1px solid rgba(255, 255, 255, 0.22);
+          gap: 3px;
+          background-color: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.20);
           color: #e0f2fe;
-          font-size: 0.72rem;
+          font-size: 0.68rem;
           font-weight: 700;
-          padding: 2px 8px;
-          border-radius: 6px;
+          padding: 1px 6px;
+          border-radius: 5px;
           white-space: nowrap;
+        }
+        @media (max-width: 768px) {
+          .portal-verified-badge,
+          .topbar-badge-pill,
+          .topbar-brand-divider {
+            display: none !important;
+          }
         }
         .topbar-actions {
           display: flex;
           align-items: center;
           flex-wrap: nowrap;
-          gap: 8px;
+          gap: 5px;
+          flex-shrink: 0;
         }
-        .topbar-destination {
-          height: 32px;
+        .topbar-destination-compact {
+          height: 28px;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
           background-color: rgba(255, 255, 255, 0.10);
-          padding: 0 10px;
+          padding: 0 6px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          font-size: 0.72rem;
+          color: #ffffff;
+          flex-shrink: 0;
+          box-sizing: border-box;
+          transition: all 0.15s ease;
+        }
+        .topbar-destination-compact:hover {
+          background-color: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.35);
+        }
+        .topbar-dest-compact-select {
+          background: transparent;
+          color: #ffffff;
+          border: none;
+          font-size: 0.72rem;
+          font-weight: 700;
+          cursor: pointer;
+          outline: none;
+          white-space: nowrap;
+        }
+        .topbar-dest-compact-select option {
+          background: #002544;
+          color: #ffffff;
+        }
+        .topbar-destination {
+          height: 28px;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background-color: rgba(255, 255, 255, 0.10);
+          padding: 0 8px;
           border-radius: 6px;
           border: 1px solid rgba(255, 255, 255, 0.20);
-          font-size: 0.78rem;
+          font-size: 0.74rem;
           color: #ffffff;
-          min-width: 170px;
+          min-width: 140px;
           flex-shrink: 0;
           box-sizing: border-box;
           transition: all 0.15s ease;
@@ -130,14 +171,14 @@ export default function SharedCatalogStyles() {
           border-color: rgba(255, 255, 255, 0.35);
         }
         .dest-flag-icon {
-          font-size: 0.85rem;
+          font-size: 0.80rem;
           flex-shrink: 0;
         }
         .topbar-dest-select {
           background: transparent;
           color: #ffffff;
           border: none;
-          font-size: 0.78rem;
+          font-size: 0.74rem;
           font-weight: 700;
           cursor: pointer;
           outline: none;
@@ -151,17 +192,17 @@ export default function SharedCatalogStyles() {
         .topbar-quick-tools {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
           flex-shrink: 0;
         }
         .topbar-select {
-          height: 32px;
+          height: 28px;
           background-color: rgba(255, 255, 255, 0.10);
           color: #ffffff;
           border: 1px solid rgba(255, 255, 255, 0.20);
           border-radius: 6px;
-          padding: 0 8px;
-          font-size: 0.75rem;
+          padding: 0 6px;
+          font-size: 0.72rem;
           font-weight: 700;
           cursor: pointer;
           outline: none;
@@ -177,17 +218,17 @@ export default function SharedCatalogStyles() {
           color: #ffffff;
         }
         .topbar-contact-btn {
-          height: 32px;
+          height: 28px;
           background-color: rgba(255, 255, 255, 0.10);
           color: #e2e8f0;
           border: 1px solid rgba(255, 255, 255, 0.20);
           border-radius: 6px;
-          padding: 0 10px;
-          font-size: 0.75rem;
+          padding: 0 8px;
+          font-size: 0.72rem;
           font-weight: 600;
           display: inline-flex;
           align-items: center;
-          gap: 5px;
+          gap: 4px;
           cursor: pointer;
           box-sizing: border-box;
           transition: all 0.15s ease;
@@ -198,17 +239,22 @@ export default function SharedCatalogStyles() {
           border-color: rgba(255, 255, 255, 0.35);
           color: #ffffff;
         }
+        @media (max-width: 640px) {
+          .topbar-contact-btn .contact-label-text {
+            display: none !important;
+          }
+        }
         .topbar-cart-pill {
-          height: 32px;
+          height: 28px;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
           background-color: rgba(56, 189, 248, 0.18);
           border: 1px solid rgba(56, 189, 248, 0.38);
           color: #e0f2fe;
-          padding: 0 10px;
+          padding: 0 8px;
           border-radius: 6px;
-          font-size: 0.76rem;
+          font-size: 0.72rem;
           font-weight: 800;
           cursor: pointer;
           box-sizing: border-box;
@@ -221,16 +267,36 @@ export default function SharedCatalogStyles() {
         .topbar-row-access {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
           flex-shrink: 0;
+        }
+        .puh-btn-auth-user {
+          height: 28px;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background: #ffffff;
+          color: #0f172a;
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          border-radius: 6px;
+          padding: 0 8px;
+          font-size: 0.72rem;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+          transition: all 0.15s ease;
+          white-space: nowrap;
+        }
+        .puh-btn-auth-user:hover {
+          background: #f8fafc;
         }
         .topbar-auth-inner {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
         }
         .topbar-signin-btn {
-          height: 32px;
+          height: 28px;
           display: inline-flex;
           align-items: center;
           justify-content: center;

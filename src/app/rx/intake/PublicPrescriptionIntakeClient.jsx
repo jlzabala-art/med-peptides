@@ -17,6 +17,9 @@ import { useAuth } from '@/context/AuthContext';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPrescriptionClient from '../[code]/PublicPrescriptionClient';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
+import IntakeStepperHeader from './components/IntakeStepperHeader';
+import IntakePhase3Deliver from './components/IntakePhase3Deliver';
+import IntakePatientQrModal from './components/IntakePatientQrModal';
 import {
   extractPrescriptionFromDocument,
   normalizeExtractedPrescriptions
@@ -44,11 +47,123 @@ const PUBLIC_INTAKE_STYLES = `
     display: none !important;
   }
 
-  /* ── Google Cloud Platform UX Standards for Intake Topbar ── */
-  .gcp-intake-topbar {
+  /* ── Google Cloud Platform UX Stepper Navigation ── */
+  .gcp-stepper-wrapper {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     position: sticky;
     top: 0;
     z-index: 9999;
+  }
+
+  .gcp-stepper-container {
+    max-width: 1040px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .gcp-stepper-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .gcp-stepper-step.active {
+    background: #f0f7ff;
+    border-color: #bfdbfe;
+  }
+
+  .gcp-stepper-step.clickable {
+    cursor: pointer;
+  }
+  .gcp-stepper-step.clickable:hover {
+    background: #f8fafc;
+  }
+
+  .gcp-stepper-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .gcp-stepper-step.active .gcp-stepper-circle {
+    background: #003666;
+    color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 54, 102, 0.15);
+  }
+
+  .gcp-stepper-step.completed .gcp-stepper-circle {
+    background: #16a34a;
+    color: #ffffff;
+  }
+
+  .gcp-stepper-step.pending .gcp-stepper-circle {
+    background: #e2e8f0;
+    color: #64748b;
+  }
+
+  .gcp-stepper-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .gcp-stepper-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gcp-stepper-step.pending .gcp-stepper-title {
+    color: #64748b;
+  }
+
+  .gcp-stepper-step.active .gcp-stepper-title {
+    color: #003666;
+  }
+
+  .gcp-stepper-desc {
+    font-size: 0.7rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gcp-stepper-divider {
+    height: 2px;
+    background: #e2e8f0;
+    flex: 0 0 24px;
+    border-radius: 1px;
+  }
+
+  .gcp-stepper-divider.completed {
+    background: #16a34a;
+  }
+
+  /* ── Google Cloud Platform UX Standards for Intake Topbar ── */
+  .gcp-intake-topbar {
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -84,6 +199,12 @@ const PUBLIC_INTAKE_STYLES = `
     background: #f0fdf4;
     color: #15803d;
     border: 1px solid #bbf7d0;
+  }
+
+  .gcp-status-pill.review {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
   }
 
   .gcp-status-dot {
@@ -192,13 +313,6 @@ const PUBLIC_INTAKE_STYLES = `
     color: #0f172a;
   }
 
-  .gcp-action-btn-secondary.active-toggle {
-    background: #eff6ff;
-    color: #1d4ed8;
-    border-color: #93c5fd;
-    font-weight: 700;
-  }
-
   .gcp-action-btn-excel {
     background: #ffffff;
     color: #15803d;
@@ -246,6 +360,28 @@ const PUBLIC_INTAKE_STYLES = `
 
   /* Responsive for Mobile Devices (< 768px) */
   @media (max-width: 768px) {
+    .gcp-stepper-wrapper {
+      padding: 8px 10px;
+    }
+    .gcp-stepper-step {
+      padding: 4px 6px;
+      gap: 6px;
+    }
+    .gcp-stepper-circle {
+      width: 22px;
+      height: 22px;
+      font-size: 0.7rem;
+    }
+    .gcp-stepper-desc {
+      display: none;
+    }
+    .gcp-stepper-title {
+      font-size: 0.72rem;
+    }
+    .gcp-stepper-divider {
+      flex: 0 0 8px;
+    }
+
     .gcp-intake-topbar {
       padding: 8px 12px;
       flex-direction: column;
@@ -312,7 +448,7 @@ function formatFileSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
-const STORAGE_SESSION_KEY = 'atlas_intake_session_v1';
+const STORAGE_SESSION_KEY = 'atlas_intake_session_v2';
 
 export default function PublicPrescriptionIntakeClient() {
   const { user, userProfile } = useAuth();
@@ -322,50 +458,41 @@ export default function PublicPrescriptionIntakeClient() {
   const activeAmEmail = user?.email || referralAm || '';
   const activeAmName = user?.displayName || userProfile?.name || (activeAmEmail ? activeAmEmail.split('@')[0] : '');
   const activeAmId = user?.uid || null;
-  const isUserLoggedIn = Boolean(user?.email);
 
-  // English by default
+  // Language state (English by default)
   const [lang, setLang] = useState('en');
   const isEs = lang === 'es';
 
-  // Multi-document staging (capped at 3 files)
+  // ── 3-Phase Stepper State: 1 = Scan | 2 = Verify & Complete | 3 = Quotation & QR ──
+  const [currentPhase, setCurrentPhase] = useState(1);
+
+  // Staging and processing state (Phase 1)
   const [stagedFiles, setStagedFiles] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState('');
   const [currentStepIndex, setCurrentStepIndex] = useState(1);
   const [error, setError] = useState(null);
-  const [copiedLink, setCopiedLink] = useState(false);
 
-  // Duplicate Warning & Override State
-  const [duplicateWarning, setDuplicateWarning] = useState(null);
-  const [pendingExtractedList, setPendingExtractedList] = useState(null);
+  // Draft extracted prescriptions for Review (Phase 2)
+  const [draftRxList, setDraftRxList] = useState([]);
+  const [activeDraftIndex, setActiveDraftIndex] = useState(0);
+  const [batchMeta, setBatchMeta] = useState(null);
 
   // Missing API Clinical Details Modal & Enrichment State
   const [enrichmentAuditModal, setEnrichmentAuditModal] = useState(null);
   const [isEnrichingApis, setIsEnrichingApis] = useState(false);
 
-  // Step 2: Multi-prescription published list & Active Index
+  // Step 3: Multi-prescription published list & Active Index
   const [publishedRxList, setPublishedRxList] = useState([]);
   const [activeRxIndex, setActiveRxIndex] = useState(0);
   const [showOriginalModal, setShowOriginalModal] = useState(false);
-
-  // ── Architecture Improvement 1: Side-by-Side Split View Mode ───────────────
-  const [splitView, setSplitView] = useState(false);
   const [docZoom, setDocZoom] = useState(100);
 
-  // Active prescription object
-  const publishedRx = publishedRxList[activeRxIndex] || (publishedRxList.length > 0 ? publishedRxList[0] : null);
+  // Duplicate Warning & Override State
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  const [pendingExtractedList, setPendingExtractedList] = useState(null);
 
-  // ── Atlas Registration State ──────────────────────────────────────────────────
-  // null = not yet answered | 'yes' | 'no'
-  const [reviewSatisfied, setReviewSatisfied] = useState(null);
-  // 'idle' | 'confirming' | 'registering' | 'done' | 'error'
-  const [atlasStatus, setAtlasStatus] = useState('idle');
-  const [atlasNotes, setAtlasNotes] = useState('');
-  const [atlasResult, setAtlasResult] = useState(null);
-
-  // ── Step 3 Gate: Physician Details Verification State ──────────────────────────
-  const [showPhysicianModal, setShowPhysicianModal] = useState(false);
+  // ── Physician Verification State ──────────────────────────────
   const [isSavingPhysician, setIsSavingPhysician] = useState(false);
   const [physicianForm, setPhysicianForm] = useState({
     name: '',
@@ -376,17 +503,62 @@ export default function PublicPrescriptionIntakeClient() {
     specialty: 'Physician Specialist'
   });
 
-  // ── Step 4: Compounding Quotation State ───────────────────────────────────────
+  // ── Patient Verification State ────────────────────────────────
+  const [patientForm, setPatientForm] = useState({
+    name: '',
+    age: '',
+    gender: '',
+    clinicalNotes: ''
+  });
+
+  // ── Step 3: Compounding Quotation State ────────────────────────
   const [quotationEmail, setQuotationEmail] = useState('');
   const [quotationNotes, setQuotationNotes] = useState('');
   const [isSubmittingQuotation, setIsSubmittingQuotation] = useState(false);
   const [quotationStatus, setQuotationStatus] = useState('idle'); // 'idle' | 'submitted' | 'skipped'
 
-  // ── Step 5: Patient Version Link & QR Code Modal State ────────────────────────
+  // ── Step 3: Patient Version Link & QR Code Modal State ─────────
   const [showPatientQrModal, setShowPatientQrModal] = useState(false);
   const [copiedPatientLink, setCopiedPatientLink] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
-  // Pre-fill physician form whenever active prescription changes
+  // Active items based on current phase
+  const activeDraftRx = draftRxList[activeDraftIndex] || (draftRxList.length > 0 ? draftRxList[0] : null);
+  const publishedRx = publishedRxList[activeRxIndex] || (publishedRxList.length > 0 ? publishedRxList[0] : null);
+
+  const activeRx = currentPhase === 3 ? publishedRx : activeDraftRx;
+  const activeFileUrl = activeRx?.originalFileUrl || activeRx?.scannedFileUrl || activeRx?.fileUrl || null;
+
+  const officialCode = activeRx?.prescriptionNumber || activeRx?.id || 'RX-PRESCRIPTION';
+  const fullPublicUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/rx/${officialCode}` 
+    : `https://med-peptides.com/rx/${officialCode}`;
+
+  // Pre-fill physician & patient forms whenever active draft changes in Phase 2
+  useEffect(() => {
+    if (activeDraftRx) {
+      setPhysicianForm({
+        name: activeDraftRx.doctorName && activeDraftRx.doctorName !== 'Licensed Clinical Practice' && activeDraftRx.doctorName !== 'Not Specified'
+          ? activeDraftRx.doctorName
+          : (activeDraftRx.prescribingDoctor || ''),
+        licenseNumber: activeDraftRx.doctorLicenseNumber || activeDraftRx.licenseNumber || '',
+        clinic: activeDraftRx.clinic && activeDraftRx.clinic !== 'Licensed Clinical Practice' ? activeDraftRx.clinic : '',
+        email: activeDraftRx.doctorEmail || activeDraftRx.email || user?.email || '',
+        phone: activeDraftRx.doctorPhone || activeDraftRx.phone || '',
+        specialty: activeDraftRx.doctorSpecialty || 'Physician Specialist'
+      });
+      setPatientForm({
+        name: activeDraftRx.patientName || '',
+        age: activeDraftRx.patientAge || '',
+        gender: activeDraftRx.patientGender || '',
+        clinicalNotes: activeDraftRx.clinicalNotes || activeDraftRx.diagnosis || ''
+      });
+      setQuotationEmail(activeDraftRx.doctorEmail || activeDraftRx.email || user?.email || '');
+    }
+  }, [activeDraftRx, user]);
+
+  // Pre-fill physician form when published in Phase 3
   useEffect(() => {
     if (publishedRx) {
       setPhysicianForm({
@@ -395,7 +567,7 @@ export default function PublicPrescriptionIntakeClient() {
           : (publishedRx.prescribingDoctor || ''),
         licenseNumber: publishedRx.doctorLicenseNumber || publishedRx.licenseNumber || '',
         clinic: publishedRx.clinic && publishedRx.clinic !== 'Licensed Clinical Practice' ? publishedRx.clinic : '',
-        email: publishedRx.doctorEmail || publishedRx.email || '',
+        email: publishedRx.doctorEmail || publishedRx.email || user?.email || '',
         phone: publishedRx.doctorPhone || publishedRx.phone || '',
         specialty: publishedRx.doctorSpecialty || 'Physician Specialist'
       });
@@ -403,133 +575,21 @@ export default function PublicPrescriptionIntakeClient() {
     }
   }, [publishedRx, user]);
 
-  // Handler to update Physician details in Firestore & memory
-  const handleSavePhysicianDetails = async (e) => {
-    if (e) e.preventDefault();
-    if (!physicianForm.name.trim()) {
-      toast.error(isEs ? 'El nombre del médico es obligatorio' : 'Physician full name is required');
-      return;
-    }
-    if (!physicianForm.email.trim() || !physicianForm.email.includes('@')) {
-      toast.error(isEs ? 'El email del médico es obligatorio' : 'Physician valid email is required');
-      return;
-    }
-
-    setIsSavingPhysician(true);
-    try {
-      const response = await fetch('/api/prescriptions/update-treating-doctor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prescriptionId: publishedRx.id,
-          prescriptionNumber: publishedRx.prescriptionNumber || officialCode,
-          treatingDoctor: {
-            name: physicianForm.name.trim(),
-            specialty: physicianForm.specialty.trim() || 'Physician Specialist',
-            licenseNumber: physicianForm.licenseNumber.trim(),
-            clinic: physicianForm.clinic.trim() || 'Clinical Practice',
-            email: physicianForm.email.trim().toLowerCase(),
-            phone: physicianForm.phone.trim()
-          }
-        })
-      });
-
-      const resData = await response.json();
-      if (!response.ok) {
-        throw new Error(resData.error || 'Failed to update physician details');
-      }
-
-      // Update in local state
-      setPublishedRxList(prev => prev.map((item, idx) => {
-        if (idx === activeRxIndex) {
-          return {
-            ...item,
-            doctorName: physicianForm.name.trim(),
-            prescribingDoctor: physicianForm.name.trim(),
-            doctorLicenseNumber: physicianForm.licenseNumber.trim(),
-            licenseNumber: physicianForm.licenseNumber.trim(),
-            clinic: physicianForm.clinic.trim() || 'Clinical Practice',
-            doctorEmail: physicianForm.email.trim().toLowerCase(),
-            doctorPhone: physicianForm.phone.trim(),
-            treatingDoctor: {
-              name: physicianForm.name.trim(),
-              licenseNumber: physicianForm.licenseNumber.trim(),
-              clinic: physicianForm.clinic.trim() || 'Clinical Practice',
-              email: physicianForm.email.trim().toLowerCase(),
-              phone: physicianForm.phone.trim()
-            }
-          };
-        }
-        return item;
-      }));
-
-      setShowPhysicianModal(false);
-      setQuotationEmail(physicianForm.email.trim().toLowerCase());
-      toast.success(isEs ? 'Datos del médico actualizados y validados ✓' : 'Physician details verified and saved ✓');
-    } catch (err) {
-      console.error('[PublicIntake] Update physician error:', err);
-      toast.error(err.message || (isEs ? 'Error al guardar datos del médico' : 'Failed to save physician details'));
-    } finally {
-      setIsSavingPhysician(false);
-    }
-  };
-
-  // Handler to request official compounding quotation
-  const handleRequestCompoundingQuotation = async () => {
-    const targetEmail = quotationEmail.trim() || publishedRx?.doctorEmail || physicianForm.email;
-    if (!targetEmail || !targetEmail.includes('@')) {
-      toast.error(isEs ? 'Por favor introduce un email válido para recibir la cotización' : 'Please provide a valid email to receive the quotation');
-      return;
-    }
-
-    setIsSubmittingQuotation(true);
-    try {
-      const response = await fetch('/api/portal/inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: publishedRx.doctorName || physicianForm.name || 'Physician',
-          email: targetEmail.toLowerCase(),
-          organization: publishedRx.clinic || physicianForm.clinic || 'Clinical Practice',
-          phone: publishedRx.doctorPhone || physicianForm.phone || '',
-          topic: 'compounding_quotation',
-          contextType: 'prescription',
-          message: quotationNotes.trim() || `Official compounding quotation and production estimate request for prescription ${officialCode}. Patient: ${publishedRx.patientName || 'Clinical Patient'}.`,
-          attachedEntity: {
-            id: publishedRx.id,
-            name: `Prescription ${officialCode}`,
-            code: officialCode,
-            category: 'compounding_prescription'
-          },
-          sourceUrl: typeof window !== 'undefined' ? window.location.href : ''
-        })
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to submit quotation request');
-      }
-
-      setQuotationStatus('submitted');
-      toast.success(isEs ? 'Solicitud de cotización enviada con éxito ✓' : 'Official compounding quotation requested successfully ✓');
-    } catch (err) {
-      console.error('[PublicIntake] Quotation request error:', err);
-      toast.error(err.message || (isEs ? 'Error al solicitar cotización' : 'Failed to request quotation'));
-    } finally {
-      setIsSubmittingQuotation(false);
-    }
-  };
-
-  // ── Architecture Improvement 2: Session Persistence & Recovery ───────────────
+  // Session persistence and restoration across reloads
   useEffect(() => {
     try {
-      const savedSession = sessionStorage.getItem(STORAGE_SESSION_KEY);
-      if (savedSession && publishedRxList.length === 0 && stagedFiles.length === 0) {
-        const parsed = JSON.parse(savedSession);
+      const saved = sessionStorage.getItem(STORAGE_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
         if (parsed?.publishedRxList?.length > 0) {
           setPublishedRxList(parsed.publishedRxList);
           setActiveRxIndex(parsed.activeRxIndex || 0);
-          toast.success(isEs ? 'Lote de prescripciones recuperado de la sesión anterior ✓' : 'Prescription batch restored from active session ✓', { id: 'session-restore' });
+          setCurrentPhase(3);
+        } else if (parsed?.draftRxList?.length > 0) {
+          setDraftRxList(parsed.draftRxList);
+          setActiveDraftIndex(parsed.activeDraftIndex || 0);
+          setBatchMeta(parsed.batchMeta || null);
+          setCurrentPhase(2);
         }
       }
     } catch (_) {}
@@ -537,17 +597,19 @@ export default function PublicPrescriptionIntakeClient() {
 
   useEffect(() => {
     try {
-      if (publishedRxList.length > 0) {
-        sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify({
-          publishedRxList,
-          activeRxIndex,
-          timestamp: Date.now()
-        }));
-      }
+      sessionStorage.setItem(STORAGE_SESSION_KEY, JSON.stringify({
+        currentPhase,
+        draftRxList,
+        activeDraftIndex,
+        publishedRxList,
+        activeRxIndex,
+        batchMeta,
+        timestamp: Date.now()
+      }));
     } catch (_) {}
-  }, [publishedRxList, activeRxIndex]);
+  }, [currentPhase, draftRxList, activeDraftIndex, publishedRxList, activeRxIndex, batchMeta]);
 
-  // ── Multi-file Staging Handlers ───────────────────────────────────────────────
+  // Multi-document staging handlers
   const handleAddFiles = useCallback((incomingFiles) => {
     if (!incomingFiles || incomingFiles.length === 0) return;
 
@@ -555,13 +617,13 @@ export default function PublicPrescriptionIntakeClient() {
       const currentCount = prev.length;
       const availableSlots = 3 - currentCount;
       if (availableSlots <= 0) {
-        toast.error(isEs ? 'Límite de lote alcanzado: Máximo 3 documentos al mismo tiempo' : 'Batch limit reached: Maximum 3 documents at a time');
+        toast.error('Batch limit reached: Maximum 3 documents at a time');
         return prev;
       }
 
       const filesToAdd = incomingFiles.slice(0, availableSlots);
       if (incomingFiles.length > availableSlots) {
-        toast(isEs ? `Solo se añadieron ${availableSlots} archivo(s). Máximo 3 documentos al mismo tiempo por lote.` : `Only ${availableSlots} file(s) added. Maximum 3 documents at a time per batch.`, { icon: '⚠️' });
+        toast(`Only ${availableSlots} file(s) added. Maximum 3 documents at a time per batch.`, { icon: '⚠️' });
       }
 
       const newEntries = filesToAdd.map((f, idx) => {
@@ -581,14 +643,10 @@ export default function PublicPrescriptionIntakeClient() {
         };
       });
 
-      toast.success(isEs 
-        ? `${newEntries.length} documento(s) cargado(s) correctamente` 
-        : `${newEntries.length} document(s) added to staging`
-      );
-
+      toast.success(`${newEntries.length} document(s) added to staging`);
       return [...prev, ...newEntries];
     });
-  }, [isEs]);
+  }, []);
 
   const handleRemoveStagedFile = (idToRemove) => {
     setStagedFiles(prev => prev.filter(item => item.id !== idToRemove));
@@ -599,11 +657,13 @@ export default function PublicPrescriptionIntakeClient() {
     setError(null);
   };
 
-  // Step 1: Batch Handle Document Upload & Multimodal Extraction + Instant Publication
+  // ── PHASE 1 ACTION: Run Multimodal Extraction & Transition to Phase 2 ──
   const handleProcessAllStagedFiles = useCallback(async () => {
     if (stagedFiles.length === 0) return;
     setIsProcessing(true);
     setError(null);
+    setDraftRxList([]);
+    setActiveDraftIndex(0);
     setPublishedRxList([]);
     setActiveRxIndex(0);
     setDuplicateWarning(null);
@@ -619,17 +679,11 @@ export default function PublicPrescriptionIntakeClient() {
         const totalDocs = stagedFiles.length;
         const currentFile = staged.file;
 
-        // ── Step 1 of 4: Multimodal AI Extraction & Background Storage Upload ──
+        // Step 1 of 3: Multimodal AI Extraction
         setCurrentStepIndex(1);
-        setProcessingStep(isEs 
-          ? `[Documento ${docNum}/${totalDocs}: ${currentFile.name}] Analizando receta con Atlas Clinical AI...` 
-          : `[Document ${docNum}/${totalDocs}: ${currentFile.name}] Scanning prescription with Atlas Clinical AI...`);
-        toast.loading(isEs 
-          ? `[${docNum}/${totalDocs}] Digitalizando: ${currentFile.name}...` 
-          : `[${docNum}/${totalDocs}] Scanning: ${currentFile.name}...`, 
-          { id: 'ai-intake-step' }
-        );
-        
+        setProcessingStep(`[Document ${docNum}/${totalDocs}: ${currentFile.name}] Scanning prescription with Atlas Clinical AI...`);
+        toast.loading(`[${docNum}/${totalDocs}] Scanning: ${currentFile.name}...`, { id: 'ai-intake-step' });
+
         const [aiData, storageResult] = await Promise.all([
           extractPrescriptionFromDocument(currentFile),
           uploadPrescriptionDocument(currentFile).catch(err => {
@@ -638,16 +692,10 @@ export default function PublicPrescriptionIntakeClient() {
           })
         ]);
 
-        // ── Step 2 of 4: Normalization & Ingredient Resolution ──
+        // Step 2 of 3: Normalization & Ingredient Matching
         setCurrentStepIndex(2);
-        setProcessingStep(isEs 
-          ? `[Documento ${docNum}/${totalDocs}] Mapeando principios activos y farmacopea clínica...` 
-          : `[Document ${docNum}/${totalDocs}] Matching active ingredients against clinical pharmacopeia...`);
-        toast.loading(isEs 
-          ? `[${docNum}/${totalDocs}] Mapeando fórmulas...` 
-          : `[${docNum}/${totalDocs}] Matching formulas...`, 
-          { id: 'ai-intake-step' }
-        );
+        setProcessingStep(`[Document ${docNum}/${totalDocs}] Matching active ingredients against clinical pharmacopeia...`);
+        toast.loading(`[${docNum}/${totalDocs}] Matching formulas...`, { id: 'ai-intake-step' });
 
         const normalizedList = await normalizeExtractedPrescriptions(aiData, {
           currentUser: user || null,
@@ -658,7 +706,6 @@ export default function PublicPrescriptionIntakeClient() {
           continue;
         }
 
-        // Attach storage document URLs and batchId to all normalized prescriptions in this file
         const fileUrl = storageResult?.downloadUrl || staged.previewUrl;
         normalizedList.forEach(rx => {
           if (fileUrl) {
@@ -677,33 +724,14 @@ export default function PublicPrescriptionIntakeClient() {
       }
 
       if (allNormalized.length === 0) {
-        throw new Error(isEs 
-          ? 'No se detectaron fórmulas legibles en los documentos proporcionados.' 
-          : 'No legible compounded formulations detected in the provided documents.');
+        throw new Error('No legible compounded formulations detected in the provided documents.');
       }
 
-      // ── Step 3 of 4: Dosimetry & Safety Validation ──
+      // Step 3 of 3: Dosimetry & Clinical Validation
       setCurrentStepIndex(3);
-      setProcessingStep(isEs 
-        ? 'Verificando rangos terapéuticos estándar, dianas moleculares y compatibilidad galénica...' 
-        : 'Validating standard therapeutic ranges, molecular targets and vehicle compatibility...');
-      toast.loading(isEs 
-        ? 'Validando dosimetría y compatibilidad...' 
-        : 'Validating dosimetry and compatibility...', 
-        { id: 'ai-intake-step' }
-      );
+      setProcessingStep('Validating standard therapeutic ranges, molecular targets and vehicle compatibility...');
+      toast.loading('Validating dosimetry and compatibility...', { id: 'ai-intake-step' });
 
-      // ── Step 4 of 4: Instant Firestore Publication ──
-      setCurrentStepIndex(4);
-      setProcessingStep(isEs 
-        ? `Publicando ${allNormalized.length} prescripción(es) electrónica(s) oficial(es)...` 
-        : `Publishing ${allNormalized.length} official electronic prescription(s)...`);
-      toast.loading(isEs 
-        ? 'Generando dossiers electrónicos oficiales...' 
-        : 'Generating official electronic dossiers...', 
-        { id: 'ai-intake-step' }
-      );
-      
       const accountManagerPayload = activeAmEmail ? {
         email: activeAmEmail,
         name: activeAmName,
@@ -717,7 +745,7 @@ export default function PublicPrescriptionIntakeClient() {
         role: userProfile?.role || 'user'
       } : null;
 
-      // ── Step 4 of 4: Active Ingredients Completeness Audit ──
+      // Active Ingredients Completeness Audit
       const incompleteApis = [];
       const seenNames = new Set();
 
@@ -741,7 +769,8 @@ export default function PublicPrescriptionIntakeClient() {
         });
       });
 
-      // If active ingredients are missing complete descriptions, ask user to enrich with AI
+      setBatchMeta({ batchId, accountManagerPayload, uploadedByPayload });
+
       if (incompleteApis.length > 0) {
         toast.dismiss('ai-intake-step');
         setEnrichmentAuditModal({
@@ -754,23 +783,19 @@ export default function PublicPrescriptionIntakeClient() {
         return;
       }
 
-      await executeSavePrescriptions(allNormalized, batchId, accountManagerPayload, uploadedByPayload);
+      // Transition smoothly into Phase 2 (Verification & Completion)
+      toast.dismiss('ai-intake-step');
+      setDraftRxList(allNormalized);
+      setActiveDraftIndex(0);
+      setCurrentPhase(2);
+      toast.success('Prescription scanned successfully! Please verify details in Phase 2.');
     } catch (err) {
       console.error('[PublicPrescriptionIntake] Error:', err);
       let rawMsg = String(err?.message || '');
-      let cleanMsg = isEs ? 'Error al procesar los archivos con Atlas AI' : 'Failed to scan and publish documents';
+      let cleanMsg = 'Failed to scan and digitize documents';
 
       if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
-        cleanMsg = isEs
-          ? 'El servicio de Atlas AI está temporalmente saturado por alta demanda. Por favor, reintente en unos instantes.'
-          : 'Atlas Clinical AI is experiencing temporary peak demand. Please retry in a few moments.';
-      } else if (rawMsg.startsWith('{') && rawMsg.includes('error')) {
-        try {
-          const parsed = JSON.parse(rawMsg);
-          cleanMsg = parsed?.error?.message || (isEs ? 'El servicio de Atlas AI está momentáneamente ocupado. Reintente en unos instantes.' : 'Atlas AI is momentarily busy. Please retry shortly.');
-        } catch (_) {
-          cleanMsg = isEs ? 'Atlas AI está ocupado en este momento. Por favor, intente de nuevo en breve.' : 'Atlas AI is currently busy. Please try again shortly.';
-        }
+        cleanMsg = 'Atlas Clinical AI is experiencing temporary peak demand. Please retry in a few moments.';
       } else if (rawMsg && !rawMsg.startsWith('{')) {
         cleanMsg = rawMsg;
       }
@@ -781,40 +806,71 @@ export default function PublicPrescriptionIntakeClient() {
       setIsProcessing(false);
       setProcessingStep('');
     }
-  }, [stagedFiles, isEs, user, userProfile, activeAmEmail, activeAmName, activeAmId]);
+  }, [stagedFiles, user, userProfile, activeAmEmail, activeAmName, activeAmId]);
 
-  const executeSavePrescriptions = async (listToSave, batchIdToUse, amPayload, upPayload) => {
+  // ── PHASE 2 ACTION: Approve, Save to Firestore & Advance to Phase 3 ──
+  const handleValidateAndPublish = async () => {
+    if (!physicianForm.name.trim()) {
+      toast.error('Physician full name is required for official validation');
+      return;
+    }
+    if (!physicianForm.email.trim() || !physicianForm.email.includes('@')) {
+      toast.error('Valid physician email is required for compounding quotation and validation');
+      return;
+    }
+
+    setIsSavingPhysician(true);
+    toast.loading('Registering official electronic prescription...', { id: 'publish-rx' });
+
     try {
-      setIsProcessing(true);
-      setCurrentStepIndex(4);
-      setProcessingStep(isEs 
-        ? `Registrando ${listToSave.length} prescripción(es) en Atlas...` 
-        : `Registering ${listToSave.length} official electronic prescription(s)...`);
-      toast.loading(isEs 
-        ? 'Generando dossiers electrónicos oficiales...' 
-        : 'Generating official electronic dossiers...', 
-        { id: 'ai-intake-step' }
-      );
+      // Merge updated physician and patient details into draft list
+      const updatedDraftList = draftRxList.map((item, idx) => {
+        if (idx === activeDraftIndex) {
+          return {
+            ...item,
+            doctorName: physicianForm.name.trim(),
+            prescribingDoctor: physicianForm.name.trim(),
+            doctorLicenseNumber: physicianForm.licenseNumber.trim(),
+            licenseNumber: physicianForm.licenseNumber.trim(),
+            clinic: physicianForm.clinic.trim() || 'Clinical Practice',
+            doctorEmail: physicianForm.email.trim().toLowerCase(),
+            doctorPhone: physicianForm.phone.trim(),
+            treatingDoctor: {
+              name: physicianForm.name.trim(),
+              licenseNumber: physicianForm.licenseNumber.trim(),
+              clinic: physicianForm.clinic.trim() || 'Clinical Practice',
+              email: physicianForm.email.trim().toLowerCase(),
+              phone: physicianForm.phone.trim(),
+              specialty: physicianForm.specialty || 'Physician Specialist'
+            },
+            patientName: patientForm.name.trim() || item.patientName || 'Clinical Patient',
+            patientAge: patientForm.age.trim() || item.patientAge || '',
+            patientGender: patientForm.gender.trim() || item.patientGender || '',
+            clinicalNotes: patientForm.clinicalNotes.trim() || item.clinicalNotes || ''
+          };
+        }
+        return item;
+      });
 
       const res = await fetch('/api/prescriptions/public-intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prescriptions: listToSave,
+          prescriptions: updatedDraftList,
           createPatientRecord: true,
           source: 'public_scan_publish_batch',
-          batchId: batchIdToUse,
+          batchId: batchMeta?.batchId || `BATCH-${Date.now()}`,
           allowDuplicateOverride: false,
-          accountManager: amPayload,
-          uploadedBy: upPayload,
+          accountManager: batchMeta?.accountManagerPayload || null,
+          uploadedBy: batchMeta?.uploadedByPayload || null,
         })
       });
 
       const data = await res.json();
 
       if (data.duplicateDetected) {
-        toast.dismiss('ai-intake-step');
-        setPendingExtractedList(listToSave);
+        toast.dismiss('publish-rx');
+        setPendingExtractedList(updatedDraftList);
         setDuplicateWarning(data);
         return;
       }
@@ -825,7 +881,7 @@ export default function PublicPrescriptionIntakeClient() {
 
       const savedList = data.savedPrescriptions.map((saved, idx) => {
         return saved.rxData || {
-          ...listToSave[idx],
+          ...updatedDraftList[idx],
           id: saved.id,
           prescriptionNumber: saved.prescriptionNumber,
           status: 'approved'
@@ -834,347 +890,84 @@ export default function PublicPrescriptionIntakeClient() {
 
       setPublishedRxList(savedList);
       setActiveRxIndex(0);
-      setEnrichmentAuditModal(null);
+      setQuotationEmail(physicianForm.email.trim().toLowerCase());
+      setCurrentPhase(3);
 
-      toast.success(
-        isEs 
-          ? `¡${savedList.length} prescripción(es) registrada(s) con éxito en Atlas!` 
-          : `Successfully registered ${savedList.length} prescription(s) in Atlas!`,
-        { id: 'ai-intake-step' }
-      );
+      toast.success(`Successfully registered ${savedList.length} electronic prescription(s) in Atlas!`, { id: 'publish-rx' });
     } catch (err) {
-      console.error('[PublicPrescriptionIntake] Error saving prescription:', err);
-      toast.error(err.message || 'Error saving prescription', { id: 'ai-intake-step' });
+      console.error('[PublicIntake] Publish error:', err);
+      toast.error(err.message || 'Error publishing prescription', { id: 'publish-rx' });
     } finally {
-      setIsProcessing(false);
-      setProcessingStep('');
+      setIsSavingPhysician(false);
     }
   };
 
-  const handleEnrichAndSaveApis = async () => {
-    if (!enrichmentAuditModal) return;
-    const { incompleteApis, allNormalized, batchId, accountManagerPayload, uploadedByPayload } = enrichmentAuditModal;
+  // ── PHASE 3 ACTION: Compounding Quotation Opt-In ──
+  const handleRequestCompoundingQuotation = async () => {
+    const targetEmail = quotationEmail.trim() || publishedRx?.doctorEmail || physicianForm.email;
+    if (!targetEmail || !targetEmail.includes('@')) {
+      toast.error('Please provide a valid physician email to receive the quotation');
+      return;
+    }
 
+    setIsSubmittingQuotation(true);
     try {
-      setIsEnrichingApis(true);
-      toast.loading(isEs ? 'Investigando farmacología y dianas genéticas con IA...' : 'Enriching clinical monographs with AI...', { id: 'enrich-apis' });
-
-      const res = await fetch('/api/prescriptions/enrich-apis', {
+      const response = await fetch('/api/portal/inquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apis: incompleteApis.map(a => a.cleanName),
-          saveToCatalog: true
+          name: publishedRx?.doctorName || physicianForm.name || 'Physician',
+          email: targetEmail.toLowerCase(),
+          organization: publishedRx?.clinic || physicianForm.clinic || 'Clinical Practice',
+          phone: publishedRx?.doctorPhone || physicianForm.phone || '',
+          topic: 'compounding_quotation',
+          contextType: 'prescription',
+          message: quotationNotes.trim() || `Official compounding quotation and production estimate request for prescription ${officialCode}. Patient: ${publishedRx?.patientName || 'Clinical Patient'}.`,
+          attachedEntity: {
+            id: publishedRx?.id,
+            name: `Prescription ${officialCode}`,
+            code: officialCode,
+            category: 'compounding_prescription'
+          },
+          sourceUrl: typeof window !== 'undefined' ? window.location.href : ''
         })
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to enrich APIs');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to submit quotation request');
       }
 
-      const enrichedMap = {};
-      (data.enrichedApis || []).forEach(api => {
-        enrichedMap[api.name.toLowerCase()] = api;
-      });
-
-      // Update all normalized prescriptions in memory with newly enriched data
-      const updatedNormalized = allNormalized.map(rx => {
-        const apis = (rx.prescriptionLines || rx.items || []).map(line => {
-          const rawName = line.productName || line.activeIngredient || line.name || '';
-          const cleanName = rawName.trim().replace(/\s+\d[\d.,]*\s*(%|mg|ml|mcg|ug|g|iu|µg)?.*/i, '').replace(/\s+\(.*?\)/g, '').trim().toLowerCase();
-          const enriched = enrichedMap[cleanName];
-          if (enriched) {
-            return {
-              ...line,
-              productId: enriched.productId || line.productId,
-              pharmacologicalClass: enriched.pharmacologicalClass || line.pharmacologicalClass,
-              clinicalIndication: enriched.clinicalIndication || line.clinicalIndication,
-              mechanismOfAction: enriched.mechanismOfAction || line.mechanismOfAction,
-              geneTargets: enriched.geneTargets || line.geneTargets || [],
-              action: enriched.mechanismOfAction || line.action,
-              role: enriched.pharmacologicalClass || line.role,
-              indication: enriched.clinicalIndication || line.indication,
-            };
-          }
-          return line;
-        });
-
-        return {
-          ...rx,
-          prescriptionLines: apis,
-          items: apis
-        };
-      });
-
-      toast.success(
-        isEs 
-          ? `¡${data.count} principios activos enriquecidos y guardados en Firestore!` 
-          : `Successfully enriched and saved ${data.count} active ingredients in Firestore!`,
-        { id: 'enrich-apis' }
-      );
-
-      setEnrichmentAuditModal(null);
-      await executeSavePrescriptions(updatedNormalized, batchId, accountManagerPayload, uploadedByPayload);
+      setQuotationStatus('submitted');
+      toast.success('Official compounding quotation requested successfully ✓');
     } catch (err) {
-      console.error('[PublicPrescriptionIntake] Enrich error:', err);
-      toast.error(err.message || 'Error during AI enrichment', { id: 'enrich-apis' });
+      console.error('[PublicIntake] Quotation error:', err);
+      toast.error(err.message || 'Failed to request quotation');
     } finally {
-      setIsEnrichingApis(false);
+      setIsSubmittingQuotation(false);
     }
   };
 
-  const handleSkipEnrichment = async () => {
-    if (!enrichmentAuditModal) return;
-    const { allNormalized, batchId, accountManagerPayload, uploadedByPayload } = enrichmentAuditModal;
-    setEnrichmentAuditModal(null);
-    await executeSavePrescriptions(allNormalized, batchId, accountManagerPayload, uploadedByPayload);
-  };
-
-  // Duplicate Warning Actions
-  const handleViewExistingRx = () => {
-    if (duplicateWarning?.existingPrescription?.rxData) {
-      setPublishedRxList([duplicateWarning.existingPrescription.rxData]);
-      setActiveRxIndex(0);
-      setDuplicateWarning(null);
-      setPendingExtractedList(null);
-      toast.success(isEs ? 'Abriendo prescripción existente' : 'Viewing existing prescription');
-    } else if (duplicateWarning?.existingPrescription?.rxUrl) {
-      window.location.href = duplicateWarning.existingPrescription.rxUrl;
-    }
-  };
-
-  const handleForcePublish = async () => {
-    if (!pendingExtractedList) return;
-    setIsProcessing(true);
-    setProcessingStep(isEs ? 'Publicando prescripción (confirmada por usuario)...' : 'Publishing prescription (override confirmed)...');
-    toast.loading(isEs ? 'Guardando prescripción...' : 'Saving prescription...', { id: 'ai-intake-step' });
-
-    try {
-      const accountManagerPayload = activeAmEmail ? {
-        email: activeAmEmail,
-        name: activeAmName,
-        id: activeAmId,
-      } : null;
-
-      const uploadedByPayload = user?.email ? {
-        email: user.email,
-        name: user.displayName || userProfile?.name || user.email.split('@')[0],
-        id: user.uid,
-        role: userProfile?.role || 'user'
-      } : null;
-
-      const res = await fetch('/api/prescriptions/public-intake', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prescriptions: pendingExtractedList,
-          createPatientRecord: true,
-          source: 'public_scan_publish_override',
-          allowDuplicateOverride: true,
-          accountManager: accountManagerPayload,
-          uploadedBy: uploadedByPayload,
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success || !data.savedPrescriptions?.length) {
-        throw new Error(data.error || 'Failed to save electronic prescription');
-      }
-
-      const savedList = data.savedPrescriptions.map((saved, idx) => {
-        return saved.rxData || {
-          ...pendingExtractedList[idx],
-          id: saved.id,
-          prescriptionNumber: saved.prescriptionNumber,
-          status: 'approved'
-        };
-      });
-
-      setDuplicateWarning(null);
-      setPendingExtractedList(null);
-      setPublishedRxList(savedList);
-      setActiveRxIndex(0);
-
-      toast.success(
-        isEs 
-          ? `¡Prescripción cargada de nuevo con éxito! Código: ${savedList[0].prescriptionNumber}` 
-          : `Official electronic prescription published! Ref: ${savedList[0].prescriptionNumber}`,
-        { id: 'ai-intake-step' }
-      );
-    } catch (err) {
-      console.error('[PublicPrescriptionIntake] Duplicate override error:', err);
-      toast.error(err.message || 'Error', { id: 'ai-intake-step' });
-    } finally {
-      setIsProcessing(false);
-      setProcessingStep('');
-    }
-  };
-
-  const handleDismissDuplicate = () => {
-    setDuplicateWarning(null);
-    setPendingExtractedList(null);
-    setStagedFiles([]);
-  };
-
-  const cameraInputRef = useRef(null);
-
-  // Global clipboard paste listener (Phase 1 zero-friction intake)
-  useEffect(() => {
-    const handlePaste = (e) => {
-      if (isProcessing) return;
-      const clipboardItems = e.clipboardData?.items;
-      if (!clipboardItems) return;
-
-      const pastedFiles = [];
-      for (let i = 0; i < clipboardItems.length; i++) {
-        const item = clipboardItems[i];
-        if (item.type.indexOf('image') !== -1 || item.type === 'application/pdf') {
-          const blob = item.getAsFile();
-          if (blob) {
-            pastedFiles.push(blob);
-          }
-        }
-      }
-
-      if (pastedFiles.length > 0) {
-        e.preventDefault();
-        toast.success(isEs ? 'Documento detectado desde portapapeles (⌘V)' : 'Document pasted from clipboard (⌘V)');
-        handleAddFiles(pastedFiles);
-      }
-    };
-
-    window.addEventListener('paste', handlePaste);
-    return () => window.removeEventListener('paste', handlePaste);
-  }, [isProcessing, isEs, handleAddFiles]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (accepted) => accepted.length > 0 && handleAddFiles(accepted),
-    accept: {
-      'application/pdf': ['.pdf'],
-      'image/*': ['.png', '.jpg', '.jpeg', '.webp']
-    },
-    disabled: isProcessing || stagedFiles.length >= 3,
-    multiple: true
-  });
-
-  const handleReset = () => {
-    try { sessionStorage.removeItem(STORAGE_SESSION_KEY); } catch (_) {}
-    setStagedFiles([]);
-    setPublishedRxList([]);
-    setActiveRxIndex(0);
-    setDuplicateWarning(null);
-    setPendingExtractedList(null);
-    setCurrentStepIndex(1);
-    setError(null);
-    setShowOriginalModal(false);
-    setSplitView(false);
-    setReviewSatisfied(null);
-    setAtlasStatus('idle');
-    setAtlasNotes('');
-    setAtlasResult(null);
-  };
-
-  // ── Google Cloud UX Standard Cancel & Discard Handler ────────────────────────
-  const handleCancelAndDiscard = async () => {
-    const rxIdToDelete = publishedRx?.id || publishedRx?.firestoreId;
-    const confirmMsg = isEs
-      ? '¿Estás seguro de que deseas cancelar y descartar esta prescripción?\n\nEsta acción eliminará el borrador de la base de datos y cancelará el proceso de digitalización.'
-      : 'Are you sure you want to cancel and discard this prescription?\n\nThis will remove the draft record from the database and cancel the digitization process.';
-
-    if (!window.confirm(confirmMsg)) return;
-
-    try {
-      if (rxIdToDelete) {
-        toast.loading(isEs ? 'Cancelando y descartando...' : 'Cancelling and discarding...', { id: 'discard-intake' });
-        await fetch('/api/prescriptions/public-intake', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: rxIdToDelete })
-        });
-      }
-      toast.success(isEs ? 'Prescripción cancelada y descartada' : 'Prescription cancelled and discarded', { id: 'discard-intake' });
-      handleReset();
-    } catch (err) {
-      console.warn('[PublicPrescriptionIntake] Discard error:', err);
-      handleReset();
-    }
-  };
-
-  // ── Atlas Registration Handler ────────────────────────────────────────────────
-  const handleRegisterInAtlas = async () => {
-    if (!publishedRx) return;
-    setAtlasStatus('registering');
-    const toastId = 'atlas-register';
-    toast.loading('Registering in Atlas...', { id: toastId });
-
-    try {
-      const prescriptionId = publishedRx.id || publishedRx.firestoreId || null;
-      const prescriptionNumber = publishedRx.prescriptionNumber || officialCode;
-
-      const registeredByPayload = user?.email ? {
-        email: user.email,
-        name: user.displayName || userProfile?.name || user.email.split('@')[0],
-        id: user.uid,
-      } : (activeAmEmail ? { email: activeAmEmail, name: activeAmName, id: activeAmId } : null);
-
-      const res = await fetch('/api/prescriptions/register-atlas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prescriptionId,
-          prescriptionNumber,
-          registeredBy: registeredByPayload,
-          reviewSatisfied: reviewSatisfied === 'yes',
-          notes: atlasNotes.trim(),
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Atlas registration failed');
-      }
-
-      setAtlasResult(data);
-      setAtlasStatus('done');
-      toast.success(
-        `Prescription ${data.prescriptionNumber} registered in Atlas ✓`,
-        { id: toastId }
-      );
-    } catch (err) {
-      console.error('[Atlas Registration]', err);
-      setAtlasStatus('error');
-      toast.error(err.message || 'Failed to register in Atlas', { id: toastId });
-    }
-  };
-
-  const [copiedCode, setCopiedCode] = useState(false);
-
-  const officialCode = publishedRx?.prescriptionNumber || publishedRx?.id || 'RX-PRESCRIPTION';
-  const fullPublicUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/rx/${officialCode}` 
-    : `https://med-peptides.com/rx/${officialCode}`;
-
+  // ── Sharing and Export Helpers ──
   const handleCopyLink = () => {
     navigator?.clipboard?.writeText(fullPublicUrl);
     setCopiedLink(true);
-    toast.success(isEs ? 'Enlace oficial copiado al portapapeles ✓' : 'Public prescription link copied ✓');
+    toast.success('Public prescription link copied to clipboard ✓');
     setTimeout(() => setCopiedLink(false), 2500);
-  };
-
-  const handleCopyCode = () => {
-    navigator?.clipboard?.writeText(officialCode);
-    setCopiedCode(true);
-    toast.success(isEs ? `Código ${officialCode} copiado al portapapeles ✓` : `Prescription code ${officialCode} copied ✓`);
-    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   const handleCopyPatientLink = () => {
     navigator?.clipboard?.writeText(fullPublicUrl);
     setCopiedPatientLink(true);
-    toast.success(isEs ? 'Enlace del paciente copiado al portapapeles ✓' : 'Patient digital prescription link copied ✓');
+    toast.success('Patient digital prescription link copied ✓');
     setTimeout(() => setCopiedPatientLink(false), 2500);
+  };
+
+  const handleCopyCode = () => {
+    navigator?.clipboard?.writeText(officialCode);
+    setCopiedCode(true);
+    toast.success(`Prescription reference ${officialCode} copied ✓`);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
   const handleDownloadPatientQrPng = () => {
@@ -1193,1358 +986,81 @@ export default function PublicPrescriptionIntakeClient() {
         ctx.drawImage(img, 50, 50, 500, 500);
         const pngFile = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        downloadLink.download = `QR_PATIENT_${officialCode || 'PRESCRIPTION'}.png`;
+        downloadLink.download = `QR_PATIENT_${officialCode}.png`;
         downloadLink.href = pngFile;
         downloadLink.click();
       };
       img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-      toast.success(isEs ? 'Código QR del paciente descargado ✓' : 'Patient QR code PNG downloaded ✓');
+      toast.success('Patient QR code PNG downloaded ✓');
     } catch (err) {
       console.warn('[PublicIntake] Download QR error:', err);
     }
   };
 
-  // ── Architecture Improvement 5: Single & Batch Excel Exports ────────────────
   const handleExportExcel = () => {
     if (!publishedRx) return;
     try {
-      toast.loading(isEs ? 'Generando archivo Excel (.xlsx)...' : 'Generating Excel (.xlsx) file...', { id: 'intake-excel' });
-      const res = exportPrescriptionToXlsx(publishedRx, { lang });
+      toast.loading('Generating Excel (.xlsx) file...', { id: 'intake-excel' });
+      const res = exportPrescriptionToXlsx(publishedRx, { lang: 'en' });
       if (res && res.success) {
-        toast.success(
-          isEs 
-            ? `Receta exportada a Excel: ${res.filename} (${res.itemCount} productos)` 
-            : `Prescription exported to Excel: ${res.filename} (${res.itemCount} items)`,
-          { id: 'intake-excel' }
-        );
+        toast.success(`Prescription exported to Excel: ${res.filename}`, { id: 'intake-excel' });
       } else {
-        toast.error(isEs ? 'No se pudo exportar a Excel' : 'Failed to export to Excel', { id: 'intake-excel' });
+        toast.error('Failed to generate Excel file', { id: 'intake-excel' });
       }
-    } catch (err) {
-      console.error('[PublicPrescriptionIntake] Excel export error:', err);
-      toast.error(isEs ? 'Error al generar Excel' : 'Error generating Excel file', { id: 'intake-excel' });
+    } catch (e) {
+      toast.error('Error generating Excel spreadsheet', { id: 'intake-excel' });
     }
   };
 
   const handleExportBatchExcel = () => {
-    if (publishedRxList.length === 0) return;
+    if (!publishedRxList || publishedRxList.length === 0) return;
     try {
-      toast.loading(isEs ? 'Generando libro Excel del lote completo...' : 'Generating batch Excel workbook...', { id: 'batch-excel' });
-      const res = exportBatchPrescriptionsToXlsx(publishedRxList, { lang });
+      toast.loading(`Generating Batch Excel (${publishedRxList.length} prescriptions)...`, { id: 'intake-excel' });
+      const res = exportBatchPrescriptionsToXlsx(publishedRxList, { lang: 'en' });
       if (res && res.success) {
-        toast.success(
-          isEs 
-            ? `Lote exportado a Excel (${res.batchCount} recetas, ${res.itemCount} fórmulas)` 
-            : `Batch exported to Excel (${res.batchCount} prescriptions, ${res.itemCount} formulas)`,
-          { id: 'batch-excel' }
-        );
+        toast.success(`Batch exported to Excel: ${res.filename}`, { id: 'intake-excel' });
       } else {
-        toast.error(isEs ? 'No se pudo exportar el lote a Excel' : 'Failed to export batch to Excel', { id: 'batch-excel' });
+        toast.error('Failed to generate Batch Excel file', { id: 'intake-excel' });
       }
-    } catch (err) {
-      console.error('[PublicPrescriptionIntake] Batch Excel export error:', err);
-      toast.error(isEs ? 'Error al exportar lote' : 'Error exporting batch file', { id: 'batch-excel' });
+    } catch (e) {
+      toast.error('Error exporting batch to Excel', { id: 'intake-excel' });
     }
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // STEP 2: VISUALIZE THE GENERATED PUBLIC PRESCRIPTION(S)
-  // Reuses 100% of the code from PublicPrescriptionClient (the public publishing page)
-  // ─────────────────────────────────────────────────────────────────────────────
-  if (publishedRx) {
-    const activeFileUrl = publishedRx?.originalFileUrl || publishedRx?.scannedFileUrl || publishedRx?.fileUrl || stagedFiles[activeRxIndex]?.previewUrl || stagedFiles[0]?.previewUrl;
-    const isPdf = Boolean(activeFileUrl && (activeFileUrl.includes('.pdf') || activeFileUrl.includes('/pdf') || activeFileUrl.startsWith('blob:')));
+  const handleReset = () => {
+    setStagedFiles([]);
+    setDraftRxList([]);
+    setPublishedRxList([]);
+    setActiveDraftIndex(0);
+    setActiveRxIndex(0);
+    setError(null);
+    setCurrentPhase(1);
+    setQuotationStatus('idle');
+    try {
+      sessionStorage.removeItem(STORAGE_SESSION_KEY);
+    } catch (_) {}
+  };
 
-    return (
-      <div style={{ position: 'relative', minHeight: '100vh', background: '#f8fafc' }}>
-        <style dangerouslySetInnerHTML={{ __html: PUBLIC_INTAKE_STYLES }} />
+  // Dropzone hook for Phase 1
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      'application/pdf': ['.pdf'],
+      'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.heic']
+    },
+    maxFiles: 3,
+    maxSize: 25 * 1024 * 1024,
+    onDrop: (accepted, rejected) => {
+      if (rejected && rejected.length > 0) {
+        toast.error('Some files exceed the 25MB limit or have unsupported formats');
+      }
+      if (accepted && accepted.length > 0) {
+        handleAddFiles(accepted);
+      }
+    }
+  });
 
-        {/* ── GCP Standard Sticky Navigation & Action Header ── */}
-        <div className="gcp-intake-topbar">
-          {/* Left Block: Status, Title & Resource Identifiers */}
-          <div className="gcp-intake-header-left">
-            <span className="gcp-status-pill published">
-              <span className="gcp-status-dot" />
-              {isEs ? 'Publicada' : 'Published'}
-            </span>
+  const isPhysicianValid = physicianForm.name.trim().length > 0 && physicianForm.email.includes('@');
 
-            <div className="gcp-intake-title-block">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h1 className="gcp-intake-main-title">
-                  {isEs ? 'Prescripción Electrónica Oficial' : 'Official Electronic Prescription'}
-                </h1>
-                
-                {/* Copyable Resource ID Badge (GCP Style) */}
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  className="gcp-code-badge"
-                  title={isEs ? 'Clic para copiar código de referencia' : 'Click to copy reference code'}
-                >
-                  <span>{officialCode}</span>
-                  {copiedCode ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={11} style={{ opacity: 0.6 }} />}
-                </button>
-              </div>
-
-              <div className="gcp-intake-meta-row">
-                <span className="gcp-meta-item">
-                  <User size={12} style={{ color: '#64748b' }} />
-                  <strong>{publishedRx.patientName || publishedRx.patient?.name || 'Patient'}</strong>
-                </span>
-
-                {publishedRxList.length > 1 && (
-                  <span style={{
-                    background: '#e0f2fe',
-                    color: '#0369a1',
-                    border: '1px solid #bae6fd',
-                    borderRadius: '4px',
-                    padding: '1px 6px',
-                    fontSize: '0.7rem',
-                    fontWeight: 700
-                  }}>
-                    {isEs ? `Ítem ${activeRxIndex + 1} de ${publishedRxList.length}` : `Item ${activeRxIndex + 1} of ${publishedRxList.length}`}
-                  </span>
-                )}
-
-                {atlasStatus === 'done' && (
-                  <span style={{
-                    background: '#f0fdf4',
-                    color: '#15803d',
-                    border: '1px solid #bbf7d0',
-                    borderRadius: '4px',
-                    padding: '1px 6px',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '3px'
-                  }}>
-                    <Check size={11} /> {isEs ? 'Atlas Registrado' : 'Atlas Registered'}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right Block: GCP Action Toolbar */}
-          <div className="gcp-intake-actions">
-
-            {/* View Original Document Modal */}
-            {activeFileUrl && (
-              <button
-                type="button"
-                onClick={() => setShowOriginalModal(true)}
-                className="gcp-action-btn gcp-action-btn-secondary"
-                title={isEs ? 'Ver documento escaneado original' : 'View original scanned document'}
-              >
-                <Eye size={14} />
-                <span>{isEs ? 'Ver Documento' : 'View Document'}</span>
-              </button>
-            )}
-
-            {/* Primary Action: Copy Public Link */}
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              className="gcp-action-btn gcp-action-btn-primary"
-              title={isEs ? 'Copiar enlace público de la prescripción' : 'Copy public prescription link'}
-            >
-              {copiedLink ? <Check size={14} style={{ color: '#86efac' }} /> : <Copy size={14} />}
-              <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
-            </button>
-
-            {/* Patient Version & QR Modal */}
-            <button
-              type="button"
-              onClick={() => setShowPatientQrModal(true)}
-              className="gcp-action-btn gcp-action-btn-secondary"
-              title={isEs ? 'Ver versión del paciente y código QR para compartir' : 'Patient link and QR code for sharing'}
-            >
-              <QrCode size={14} style={{ color: '#0284c7' }} />
-              <span>{isEs ? 'Versión Paciente & QR' : 'Patient Link & QR'}</span>
-            </button>
-
-            {/* Export to Excel */}
-            {publishedRxList.length > 1 ? (
-              <button
-                type="button"
-                onClick={handleExportBatchExcel}
-                className="gcp-action-btn gcp-action-btn-excel"
-                title={isEs ? 'Exportar lote completo a Excel (.xlsx)' : 'Export complete batch to Excel (.xlsx)'}
-              >
-                <FileSpreadsheet size={14} />
-                <span>{isEs ? `Excel Lote (${publishedRxList.length})` : `Batch Excel (${publishedRxList.length})`}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleExportExcel}
-                className="gcp-action-btn gcp-action-btn-excel"
-                title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}
-              >
-                <FileSpreadsheet size={14} />
-                <span>{isEs ? 'Exportar Excel' : 'Export Excel'}</span>
-              </button>
-            )}
-
-            {/* Scan New Batch */}
-            <button
-              type="button"
-              onClick={handleReset}
-              className="gcp-action-btn gcp-action-btn-ghost"
-              title={isEs ? 'Escanear un nuevo lote de prescripciones' : 'Scan a new prescription batch'}
-            >
-              <RefreshCw size={13} />
-              <span>{isEs ? 'Nuevo Escaneo' : 'New Batch'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ── GCP Clinical Intelligence & Quality Strip ── */}
-        <div className="gcp-telemetry-bar">
-          <div className="gcp-telemetry-chip" style={{ color: '#15803d', borderColor: '#bbf7d0', background: '#f0fdf4' }}>
-            <ShieldCheck size={13} style={{ color: '#16a34a' }} />
-            <span>{isEs ? 'Calidad OCR: 98.4% (Legibilidad Óptima)' : 'OCR Quality: 98.4% (Optimal Legibility)'}</span>
-          </div>
-
-          <div className="gcp-telemetry-chip" style={{ color: '#1d4ed8', borderColor: '#bfdbfe', background: '#eff6ff' }}>
-            <Activity size={13} style={{ color: '#2563eb' }} />
-            <span>{isEs ? 'Validación Galénica: Farmacopea y Buenas Prácticas (GMP) ✓' : 'Galenic Validation: Pharmacopeia & GMP Standards ✓'}</span>
-          </div>
-
-          <div className="gcp-telemetry-chip" style={{ color: '#6d28d9', borderColor: '#ddd6fe', background: '#f5f3ff' }}>
-            <Dna size={13} style={{ color: '#7c3aed' }} />
-            <span>{isEs ? 'Mapeo Molecular: Dianas Terapéuticas Identificadas' : 'Molecular Resolution: Therapeutic Targets Mapped'}</span>
-          </div>
-
-          <div className="gcp-telemetry-chip" style={{ color: '#0f766e', borderColor: '#99f6e4', background: '#f0fdfa' }}>
-            <Factory size={13} style={{ color: '#0d9488' }} />
-            <span>{isEs ? 'Planta de Producción: BG-SOF-MAG-01 (EU-GMP Ready)' : 'Compounding Center: BG-SOF-MAG-01 (EU-GMP Ready)'}</span>
-          </div>
-        </div>
-
-        {/* ── Multi-Prescription GCP Segmented Stepper Bar ── */}
-        {publishedRxList.length > 1 && (
-          <div style={{
-            position: 'sticky',
-            top: '48px',
-            zIndex: 9998,
-            background: '#ffffff',
-            borderBottom: '1px solid #e2e8f0',
-            padding: '10px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-            flexWrap: 'wrap',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569', fontSize: '0.8rem', fontWeight: 800 }}>
-                <Layers size={16} style={{ color: '#2563eb' }} />
-                <span>{isEs ? 'Lote de Prescripciones Generadas:' : 'Generated Prescriptions Batch:'}</span>
-              </div>
-
-              <div style={{
-                display: 'inline-flex',
-                background: '#f1f5f9',
-                padding: '3px',
-                borderRadius: '8px',
-                gap: '4px',
-                flexWrap: 'wrap'
-              }}>
-                {publishedRxList.map((rxItem, idx) => {
-                  const isActive = idx === activeRxIndex;
-                  const code = rxItem.prescriptionNumber || rxItem.id || `#${idx + 1}`;
-                  const label = rxItem.treatmentType || rxItem.formulaName || rxItem.compoundedFormulation?.name || (isEs ? `Fórmula ${idx + 1}` : `Formula ${idx + 1}`);
-
-                  return (
-                    <button
-                      key={rxItem.id || idx}
-                      type="button"
-                      onClick={() => {
-                        setActiveRxIndex(idx);
-                        setReviewSatisfied(null);
-                        setAtlasStatus('idle');
-                        setAtlasNotes('');
-                        setAtlasResult(null);
-                        setQuotationStatus('idle');
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        border: isActive ? '1px solid #93c5fd' : '1px solid transparent',
-                        background: isActive ? '#ffffff' : 'transparent',
-                        color: isActive ? '#1d4ed8' : '#475569',
-                        fontWeight: isActive ? 800 : 600,
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                        transition: 'all 0.15s'
-                      }}
-                    >
-                      <span style={{
-                        width: '18px', height: '18px', borderRadius: '50%',
-                        background: isActive ? '#2563eb' : '#cbd5e1',
-                        color: '#fff', fontSize: '0.68rem', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', fontWeight: 800
-                      }}>
-                        {idx + 1}
-                      </span>
-                      <span style={{ fontFamily: 'monospace' }}>{code}</span>
-                      <span style={{ opacity: 0.85, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        ({label})
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Previous / Next Stepper Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                type="button"
-                disabled={activeRxIndex === 0}
-                onClick={() => {
-                  setActiveRxIndex(prev => Math.max(0, prev - 1));
-                  setReviewSatisfied(null);
-                  setAtlasStatus('idle');
-                  setQuotationStatus('idle');
-                }}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: activeRxIndex === 0 ? '#f8fafc' : '#ffffff',
-                  color: activeRxIndex === 0 ? '#94a3b8' : '#334155',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: activeRxIndex === 0 ? 'not-allowed' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <span>{isEs ? '← Anterior' : '← Previous'}</span>
-              </button>
-              <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>
-                {activeRxIndex + 1} / {publishedRxList.length}
-              </span>
-              <button
-                type="button"
-                disabled={activeRxIndex === publishedRxList.length - 1}
-                onClick={() => {
-                  setActiveRxIndex(prev => Math.min(publishedRxList.length - 1, prev + 1));
-                  setReviewSatisfied(null);
-                  setAtlasStatus('idle');
-                  setQuotationStatus('idle');
-                }}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: activeRxIndex === publishedRxList.length - 1 ? '#f8fafc' : '#ffffff',
-                  color: activeRxIndex === publishedRxList.length - 1 ? '#94a3b8' : '#334155',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: activeRxIndex === publishedRxList.length - 1 ? 'not-allowed' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <span>{isEs ? 'Siguiente →' : 'Next →'}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 3 GATE: PHYSICIAN CREDENTIALS INCOMPLETE WARNING BANNER ── */}
-        {(!publishedRx.doctorName || publishedRx.doctorName === 'Licensed Clinical Practice' || publishedRx.doctorName === 'Not Specified' || !publishedRx.doctorEmail) && (
-          <div style={{ maxWidth: '1240px', margin: '8px auto 0', padding: '0 12px' }}>
-            <div style={{
-              background: '#fffbeb',
-              border: '1px solid #fde68a',
-              borderLeft: '4px solid #d97706',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-              flexWrap: 'wrap',
-              boxShadow: '0 1px 3px rgba(217, 119, 6, 0.08)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
-                <div style={{
-                  width: '32px', height: '32px', borderRadius: '6px',
-                  background: '#fef3c7', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', flexShrink: 0, color: '#b45309'
-                }}>
-                  <Stethoscope size={18} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#92400e' }}>
-                    {isEs ? 'Verificación Médica Requerida' : 'Physician Verification Required'}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '1px' }}>
-                    {isEs 
-                      ? 'La IA no pudo identificar todos los datos del médico prescriptor. Por favor, complétalos antes de la aprobación final.'
-                      : 'AI could not fully identify all prescribing doctor details. Please complete physician credentials before final approval.'}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowPhysicianModal(true)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  background: '#d97706',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 6px rgba(217, 119, 6, 0.25)',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <Stethoscope size={14} />
-                <span>{isEs ? 'Completar Datos del Médico' : 'Complete Physician Details'}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── GCP COMPACT ATLAS REGISTRATION INLINE BANNER ── */}
-        {atlasStatus !== 'done' && (
-          <div style={{
-            maxWidth: '1240px',
-            margin: '8px auto 0',
-            padding: '0 12px',
-          }}>
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderLeft: '4px solid #003666',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-              flexWrap: 'wrap'
-            }}>
-              {/* Left: Indicator & Description */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
-                <div style={{
-                  width: '28px', height: '28px', borderRadius: '6px',
-                  background: '#f0f4ff', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', flexShrink: 0, border: '1px solid #dbeafe'
-                }}>
-                  <Database size={15} style={{ color: '#003666' }} />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-                      {isEs ? 'Consolidación en Atlas' : 'Atlas Clinical Consolidation'}
-                    </span>
-                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                      — {isEs ? 'Verifica la extracción antes de registrar en el historial clínico' : 'Verify AI extraction before clinical registry'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Inline Actions */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                {atlasStatus !== 'registering' && atlasStatus !== 'confirming' && reviewSatisfied === null && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.76rem', color: '#475569', fontWeight: 600, marginRight: '2px' }}>
-                      {isEs ? '¿Datos correctos?' : 'Data accurate?'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setReviewSatisfied('yes')}
-                      style={{
-                        padding: '4px 10px', borderRadius: '5px',
-                        background: '#f0fdf4', border: '1px solid #86efac',
-                        color: '#15803d', fontWeight: 700, fontSize: '0.75rem',
-                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
-                      }}
-                    >
-                      <ThumbsUp size={12} />
-                      <span>{isEs ? 'Sí, correcto' : 'Yes, correct'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setReviewSatisfied('no')}
-                      style={{
-                        padding: '4px 10px', borderRadius: '5px',
-                        background: '#fff7ed', border: '1px solid #fed7aa',
-                        color: '#c2410c', fontWeight: 700, fontSize: '0.75rem',
-                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'
-                      }}
-                    >
-                      <ThumbsDown size={12} />
-                      <span>{isEs ? 'Con incidencias' : 'Has errors'}</span>
-                    </button>
-                  </div>
-                )}
-
-                {reviewSatisfied === 'yes' && atlasStatus === 'idle' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <CheckCircle2 size={13} /> {isEs ? 'Verificado' : 'Verified'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setAtlasStatus('confirming')}
-                      style={{
-                        padding: '4px 12px', borderRadius: '5px',
-                        background: '#003666', color: '#ffffff', border: 'none',
-                        fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
-                        display: 'inline-flex', alignItems: 'center', gap: '5px',
-                        boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)'
-                      }}
-                    >
-                      <Database size={12} />
-                      <span>{isEs ? 'Registrar en Atlas' : 'Register in Atlas'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setReviewSatisfied(null)}
-                      style={{
-                        background: 'none', border: 'none', color: '#94a3b8',
-                        fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline'
-                      }}
-                    >
-                      {isEs ? 'Cambiar' : 'Change'}
-                    </button>
-                  </div>
-                )}
-
-                {reviewSatisfied === 'no' && atlasStatus === 'idle' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.74rem', color: '#d97706', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <AlertCircle size={13} /> {isEs ? 'Incidencia reportada' : 'Flagged with incident'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setAtlasStatus('confirming')}
-                      style={{
-                        padding: '4px 10px', borderRadius: '5px',
-                        background: '#d97706', color: '#ffffff', border: 'none',
-                        fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
-                        display: 'inline-flex', alignItems: 'center', gap: '4px'
-                      }}
-                    >
-                      <Database size={12} />
-                      <span>{isEs ? 'Registrar con Nota' : 'Register with Note'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setReviewSatisfied(null)}
-                      style={{
-                        background: 'none', border: 'none', color: '#94a3b8',
-                        fontSize: '0.72rem', cursor: 'pointer', textDecoration: 'underline'
-                      }}
-                    >
-                      {isEs ? 'Cambiar' : 'Change'}
-                    </button>
-                  </div>
-                )}
-
-                {atlasStatus === 'confirming' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <input
-                      type="text"
-                      value={atlasNotes}
-                      onChange={(e) => setAtlasNotes(e.target.value)}
-                      placeholder={isEs ? 'Nota clínica opcional...' : 'Optional clinical note...'}
-                      style={{
-                        padding: '4px 8px', borderRadius: '5px', border: '1px solid #cbd5e1',
-                        fontSize: '0.75rem', color: '#334155', minWidth: '180px', outline: 'none'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRegisterInAtlas}
-                      style={{
-                        padding: '4px 12px', borderRadius: '5px',
-                        background: '#003666', color: '#fff', border: 'none',
-                        fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer',
-                        display: 'inline-flex', alignItems: 'center', gap: '4px'
-                      }}
-                    >
-                      <ClipboardCheck size={12} />
-                      <span>{isEs ? 'Confirmar' : 'Confirm'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAtlasStatus('idle')}
-                      style={{
-                        padding: '4px 8px', borderRadius: '5px',
-                        background: '#f1f5f9', color: '#64748b',
-                        border: '1px solid #e2e8f0', fontSize: '0.75rem', cursor: 'pointer'
-                      }}
-                    >
-                      {isEs ? 'Cancelar' : 'Cancel'}
-                    </button>
-                  </div>
-                )}
-
-                {atlasStatus === 'registering' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#003666', fontSize: '0.78rem', fontWeight: 600 }}>
-                    <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} />
-                    <span>{isEs ? 'Registrando en Atlas...' : 'Registering in Atlas...'}</span>
-                  </div>
-                )}
-
-                {atlasStatus === 'error' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.74rem', color: '#dc2626', fontWeight: 600 }}>
-                      {isEs ? 'Error al registrar' : 'Registration failed'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setAtlasStatus(reviewSatisfied === null ? 'idle' : 'confirming')}
-                      style={{
-                        padding: '3px 8px', borderRadius: '4px', background: '#dc2626',
-                        color: '#fff', border: 'none', fontSize: '0.72rem', cursor: 'pointer'
-                      }}
-                    >
-                      {isEs ? 'Reintentar' : 'Retry'}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 4: COMPOUNDING QUOTATION REQUEST CARD ── */}
-        {quotationStatus !== 'submitted' && quotationStatus !== 'skipped' && (
-          <div style={{ maxWidth: '1240px', margin: '8px auto 0', padding: '0 12px' }}>
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderLeft: '4px solid #0284c7',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-              flexWrap: 'wrap',
-              boxShadow: '0 1px 3px rgba(2, 132, 199, 0.06)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 auto' }}>
-                <div style={{
-                  width: '32px', height: '32px', borderRadius: '6px',
-                  background: '#f0f9ff', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', flexShrink: 0, color: '#0284c7', border: '1px solid #bae6fd'
-                }}>
-                  <Mail size={16} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0369a1' }}>
-                    {isEs ? '¿Deseas recibir una cotización de formulación magistral?' : 'Would you like to receive an official Compounding Quotation?'}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '1px' }}>
-                    {isEs 
-                      ? 'Recibe estimación de coste de producción, plazos de entrega y opciones de lote directamente en tu email.'
-                      : 'Get production cost estimates, compounding lead times, and batch dispatch options.'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Email & Submit Button Inline */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="email"
-                    value={quotationEmail}
-                    onChange={(e) => setQuotationEmail(e.target.value)}
-                    placeholder={isEs ? 'Email del médico/clínica...' : 'Physician or clinic email...'}
-                    style={{
-                      padding: '5px 10px 5px 28px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.78rem',
-                      color: '#0f172a',
-                      minWidth: '220px',
-                      outline: 'none'
-                    }}
-                  />
-                  <Mail size={13} style={{ position: 'absolute', left: '8px', top: '8px', color: '#94a3b8' }} />
-                </div>
-
-                <button
-                  type="button"
-                  disabled={isSubmittingQuotation}
-                  onClick={handleRequestCompoundingQuotation}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    cursor: isSubmittingQuotation ? 'not-allowed' : 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
-                    opacity: isSubmittingQuotation ? 0.7 : 1
-                  }}
-                >
-                  {isSubmittingQuotation ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
-                  <span>{isEs ? 'Solicitar Cotización' : 'Request Quotation'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setQuotationStatus('skipped')}
-                  style={{
-                    padding: '6px 10px',
-                    background: 'none',
-                    border: 'none',
-                    color: '#94a3b8',
-                    fontSize: '0.75rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {isEs ? 'Omitir' : 'Dismiss'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── QUOTATION CONFIRMATION BADGE ── */}
-        {quotationStatus === 'submitted' && (
-          <div style={{ maxWidth: '1240px', margin: '8px auto 0', padding: '0 12px' }}>
-            <div style={{
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderLeft: '4px solid #16a34a',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '10px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#15803d' }}>
-                  {isEs ? 'Cotización oficial solicitada con éxito' : 'Official Compounding Quotation requested successfully'}
-                </span>
-                <span style={{ fontSize: '0.75rem', color: '#166534', fontFamily: 'monospace', background: '#ffffff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #86efac' }}>
-                  {quotationEmail}
-                </span>
-              </div>
-              <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>
-                {isEs ? 'Revisa tu bandeja de entrada' : 'Check your inbox shortly'}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 5: SUCCESS HUB & ONBOARDING PROMPT (GCP STYLE) ── */}
-        {atlasStatus === 'done' && (
-          <div style={{ maxWidth: '1240px', margin: '12px auto 0', padding: '0 12px' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-              border: '1px solid #cbd5e1',
-              borderLeft: '4px solid #16a34a',
-              borderRadius: '12px',
-              padding: '16px 20px',
-              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '8px',
-                    background: '#dcfce7', color: '#16a34a',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    <Award size={20} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                      {isEs ? '¡Gracias por utilizar el Motor Autónomo de Prescripciones!' : 'Thank you for using the Autonomous Prescription Engine!'}
-                    </h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
-                      {isEs ? 'Tu prescripción ha sido consolidada en el registro clínico digital con validez oficial.' : 'Your prescription has been consolidated into the electronic clinical registry with official validity.'}
-                    </p>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowPatientQrModal(true)}
-                    style={{
-                      padding: '7px 14px',
-                      borderRadius: '8px',
-                      background: '#eff6ff',
-                      color: '#1d4ed8',
-                      border: '1px solid #bfdbfe',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <QrCode size={14} />
-                    <span>{isEs ? 'Ver Enlace Paciente & QR' : 'Patient Link & QR'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    style={{
-                      padding: '7px 14px',
-                      borderRadius: '8px',
-                      background: '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      boxShadow: '0 2px 6px rgba(0, 54, 102, 0.2)'
-                    }}
-                  >
-                    <Plus size={14} />
-                    <span>{isEs ? 'Escanear Otra Prescripción' : 'Scan Another Prescription'}</span>
-                  </button>
-
-                  {!user && (
-                    <a
-                      href={`/auth/login?mode=register&role=doctor&rx=${officialCode}`}
-                      style={{
-                        padding: '7px 14px',
-                        borderRadius: '8px',
-                        background: '#0284c7',
-                        color: '#ffffff',
-                        textDecoration: 'none',
-                        fontWeight: 700,
-                        fontSize: '0.8rem',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        boxShadow: '0 2px 6px rgba(2, 132, 199, 0.2)'
-                      }}
-                    >
-                      <User size={14} />
-                      <span>{isEs ? 'Registrar Cuenta de Médico' : 'Create Free Doctor Account'}</span>
-                      <ArrowRight size={13} />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Onboarding Incentive Badges */}
-              {!user && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: '8px',
-                  paddingTop: '8px',
-                  borderTop: '1px solid #e2e8f0'
-                }}>
-                  <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckCircle2 size={13} style={{ color: '#16a34a' }} />
-                    <span>{isEs ? 'Seguimiento de producción en tiempo real' : 'Real-time compounding & batch tracking'}</span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckCircle2 size={13} style={{ color: '#16a34a' }} />
-                    <span>{isEs ? 'Renovación de recetas en 1 clic' : '1-click electronic refills & re-orders'}</span>
-                  </div>
-                  <div style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckCircle2 size={13} style={{ color: '#16a34a' }} />
-                    <span>{isEs ? 'Histórico clínico centralizado de pacientes' : 'Centralized patient clinical dossiers'}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── MAIN CONTENT: Public Prescription Dossier ── */}
-        <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 8px' }}>
-          <PublicPrescriptionClient rx={publishedRx} embedded={true} />
-        </div>
-
-        {/* ── PHYSICIAN VERIFICATION & COMPLETION MODAL ── */}
-        {showPhysicianModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.70)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100000,
-            padding: '1rem'
-          }}>
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '520px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-              border: '1px solid #e2e8f0',
-              overflow: 'hidden',
-              animation: 'fadeIn 0.2s ease-out'
-            }}>
-              {/* Header */}
-              <div style={{
-                background: 'linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%)',
-                padding: '1.25rem 1.5rem',
-                borderBottom: '1px solid #dbe4ff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '10px',
-                    background: '#003666', color: '#ffffff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    <Stethoscope size={20} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                      {isEs ? 'Verificación de Datos del Médico' : 'Verify Physician Credentials'}
-                    </h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#64748b' }}>
-                      {isEs ? 'Completa los datos del médico para validar la prescripción' : 'Complete doctor information to validate prescription'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPhysicianModal(false)}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Form Body */}
-              <form onSubmit={handleSavePhysicianDetails} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                    {isEs ? 'Nombre Completo del Médico *' : 'Physician Full Name *'}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={physicianForm.name}
-                    onChange={(e) => setPhysicianForm({ ...physicianForm, name: e.target.value })}
-                    placeholder="e.g. Dr. Jane Doe"
-                    style={{
-                      width: '100%', padding: '8px 12px', borderRadius: '6px',
-                      border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                      outline: 'none', boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      {isEs ? 'Nº de Colegiado / Licencia' : 'Medical License / No.'}
-                    </label>
-                    <input
-                      type="text"
-                      value={physicianForm.licenseNumber}
-                      onChange={(e) => setPhysicianForm({ ...physicianForm, licenseNumber: e.target.value })}
-                      placeholder="e.g. MD-982314"
-                      style={{
-                        width: '100%', padding: '8px 12px', borderRadius: '6px',
-                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                        outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace'
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      {isEs ? 'Clínica / Consulta' : 'Practice / Clinic Name'}
-                    </label>
-                    <input
-                      type="text"
-                      value={physicianForm.clinic}
-                      onChange={(e) => setPhysicianForm({ ...physicianForm, clinic: e.target.value })}
-                      placeholder="e.g. Dermatology & Trichology Clinic"
-                      style={{
-                        width: '100%', padding: '8px 12px', borderRadius: '6px',
-                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                        outline: 'none', boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      {isEs ? 'Email del Médico *' : 'Physician Email *'}
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={physicianForm.email}
-                      onChange={(e) => setPhysicianForm({ ...physicianForm, email: e.target.value })}
-                      placeholder="doctor@clinic.com"
-                      style={{
-                        width: '100%', padding: '8px 12px', borderRadius: '6px',
-                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                        outline: 'none', boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      {isEs ? 'Teléfono de Contacto' : 'Phone Number'}
-                    </label>
-                    <input
-                      type="tel"
-                      value={physicianForm.phone}
-                      onChange={(e) => setPhysicianForm({ ...physicianForm, phone: e.target.value })}
-                      placeholder="+34 600 000 000"
-                      style={{
-                        width: '100%', padding: '8px 12px', borderRadius: '6px',
-                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                        outline: 'none', boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Modal Footer Actions */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '0.75rem' }}>
-                  <button
-                    type="submit"
-                    disabled={isSavingPhysician}
-                    style={{
-                      flex: 1,
-                      padding: '10px 16px',
-                      borderRadius: '8px',
-                      background: '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '0.86rem',
-                      cursor: isSavingPhysician ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    {isSavingPhysician ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
-                    <span>{isEs ? 'Guardar y Validar Prescripción' : 'Save & Validate Prescription'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPhysicianModal(false)}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      background: '#f1f5f9',
-                      color: '#64748b',
-                      border: '1px solid #e2e8f0',
-                      fontWeight: 600,
-                      fontSize: '0.84rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {isEs ? 'Cancelar' : 'Cancel'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ── PATIENT VERSION & QR CODE MODAL ── */}
-        {showPatientQrModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.70)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100000,
-            padding: '1rem'
-          }}>
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '480px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-              border: '1px solid #e2e8f0',
-              overflow: 'hidden',
-              animation: 'fadeIn 0.2s ease-out'
-            }}>
-              {/* Header */}
-              <div style={{
-                background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-                padding: '1.25rem 1.5rem',
-                borderBottom: '1px solid #bfdbfe',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '10px',
-                    background: '#0284c7', color: '#ffffff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    <QrCode size={20} />
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                      {isEs ? 'Acceso del Paciente y Código QR' : 'Patient Access & Digital QR Code'}
-                    </h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#475569' }}>
-                      {officialCode} · {publishedRx?.patientName || (isEs ? 'Paciente' : 'Patient')}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPatientQrModal(false)}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div style={{ padding: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-                <div style={{
-                  padding: '14px',
-                  background: '#ffffff',
-                  borderRadius: '12px',
-                  border: '2px solid #e2e8f0',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  display: 'inline-block'
-                }}>
-                  <QRCodeSVG
-                    id="patient-intake-qr-code"
-                    value={fullPublicUrl}
-                    size={200}
-                    level="H"
-                    includeMargin={false}
-                  />
-                </div>
-
-                <div style={{ width: '100%', textAlign: 'left' }}>
-                  <label style={{ display: 'block', fontSize: '0.74rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                    {isEs ? 'URL Pública de la Prescripción Digital' : 'Public Digital Prescription URL'}
-                  </label>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    background: '#f8fafc',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    padding: '4px 8px',
-                    gap: '6px'
-                  }}>
-                    <input
-                      type="text"
-                      readOnly
-                      value={fullPublicUrl}
-                      style={{
-                        flex: 1,
-                        background: 'transparent',
-                        border: 'none',
-                        fontSize: '0.78rem',
-                        fontFamily: 'monospace',
-                        color: '#0f172a',
-                        outline: 'none'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCopyPatientLink}
-                      style={{
-                        padding: '5px 10px',
-                        background: copiedPatientLink ? '#15803d' : '#003666',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {copiedPatientLink ? <Check size={12} /> : <Copy size={12} />}
-                      <span>{copiedPatientLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar' : 'Copy')}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Quick Share Buttons */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                  <button
-                    type="button"
-                    onClick={handleDownloadPatientQrPng}
-                    style={{
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      background: '#f1f5f9',
-                      color: '#0f172a',
-                      border: '1px solid #cbd5e1',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Download size={14} />
-                    <span>{isEs ? 'Descargar PNG' : 'Download QR (PNG)'}</span>
-                  </button>
-
-                  <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                      `Atlas Clinical Services — Medical Prescription ${officialCode}\nPatient: ${publishedRx?.patientName || 'Clinical Patient'}\nView Electronic Prescription & Posology: ${fullPublicUrl}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      background: '#22c55e',
-                      color: '#ffffff',
-                      textDecoration: 'none',
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <MessageCircle size={14} />
-                    <span>{isEs ? 'Compartir WhatsApp' : 'Share WhatsApp'}</span>
-                  </a>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                  <a
-                    href={`mailto:?subject=${encodeURIComponent(`Medical Prescription ${officialCode} — Atlas Clinical Services`)}&body=${encodeURIComponent(
-                      `Dear Patient,\n\nYour digital electronic prescription (${officialCode}) is available for consultation.\n\nYou can access the full treatment dossier and posology guide at the following link:\n${fullPublicUrl}\n\nKind regards,\nAtlas Clinical Services`
-                    )}`}
-                    style={{
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      background: '#f8fafc',
-                      color: '#475569',
-                      border: '1px solid #e2e8f0',
-                      textDecoration: 'none',
-                      fontWeight: 600,
-                      fontSize: '0.78rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Mail size={14} />
-                    <span>{isEs ? 'Enviar por Email' : 'Send via Email'}</span>
-                  </a>
-
-                  <a
-                    href={fullPublicUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      background: '#003666',
-                      color: '#ffffff',
-                      textDecoration: 'none',
-                      fontWeight: 700,
-                      fontSize: '0.78rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <ExternalLink size={14} />
-                    <span>{isEs ? 'Abrir Ficha' : 'Open Patient View'}</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal to view the original uploaded/scanned file */}
-        {showOriginalModal && activeFileUrl && (
-          <DocumentPreviewModal
-            isOpen={showOriginalModal}
-            fileUrl={activeFileUrl}
-            title={publishedRx?.fileName || publishedRx?.prescriptionNumber || (isEs ? 'Documento Escaneado' : 'Scanned Document')}
-            onClose={() => setShowOriginalModal(false)}
-          />
-        )}
-      </div>
-    );
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // STEP 1: SCAN / UPLOAD DOCUMENT & MULTI-FILE STAGING AREA (MAX 3)
-  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="pds-page-shell" style={{ minHeight: '100vh', background: '#f8fafc', color: '#0f172a' }}>
       <style dangerouslySetInnerHTML={{ __html: PUBLIC_INTAKE_STYLES }} />
@@ -2556,1117 +1072,901 @@ export default function PublicPrescriptionIntakeClient() {
         onLangChange={setLang}
         hideTier2={false}
         breadcrumb={[
-          { label: isEs ? 'Inicio' : 'Home', href: '/' },
-          { label: isEs ? 'Digitalización de Prescripciones' : 'Prescription Intake' }
+          { label: 'Home', href: '/' },
+          { label: 'Autonomous Clinical Intake' }
         ]}
         copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/rx/intake` : 'https://med-peptides.com/rx/intake'}
       />
 
-      <div className="pds-page-shell-inner" style={{ maxWidth: '960px', margin: '0 auto', padding: '2.5rem 1.25rem 5rem' }}>
-        
-        {/* Clean GCP Autonomous Presentation Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            background: 'linear-gradient(135deg, #e0f2fe 0%, #ede9fe 100%)',
-            border: '1px solid #c7d2fe',
-            borderRadius: '9999px',
-            fontSize: '0.78rem',
-            fontWeight: 700,
-            color: '#4338ca',
-            marginBottom: '1rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-          }}>
-            <Sparkles size={14} style={{ color: '#6366f1' }} />
-            <span>{isEs ? 'MOTOR AUTÓNOMO DE EXTRACCIÓN CLÍNICA · MULTIPROTOCOLO' : 'AUTONOMOUS CLINICAL PRESCRIPTION INGESTION ENGINE'}</span>
-          </div>
+      {/* ── GOOGLE CLOUD UX: 3-PHASE STEPPER BAR ── */}
+      <IntakeStepperHeader
+        currentStep={currentPhase}
+        onStepClick={(step) => {
+          if (step === 1 && currentPhase > 1) setCurrentPhase(1);
+          if (step === 2 && currentPhase > 2 && draftRxList.length > 0) setCurrentPhase(2);
+        }}
+        isProcessing={isProcessing}
+      />
 
-          <h1 style={{
-            fontSize: 'clamp(1.75rem, 4vw, 2.4rem)',
-            fontWeight: 900,
-            color: '#0f172a',
-            lineHeight: 1.2,
-            margin: '0 0 0.75rem'
-          }}>
-            {isEs 
-              ? 'Digitalización y Gestión Autónoma de Prescripciones' 
-              : 'Autonomous Clinical Prescription Intake Engine'}
-          </h1>
-
-          <p style={{
-            maxWidth: '680px',
-            margin: '0 auto 1.75rem',
-            fontSize: '0.96rem',
-            color: '#475569',
-            lineHeight: 1.6
-          }}>
-            {isEs
-              ? 'Sistema de IA entrenado para identificar, estandarizar y extraer múltiples tipos de prescripciones médicas: fórmulas magistrales, dermatología, tricología, péptidos y terapias hormonales a partir de documentos PDF o imágenes.'
-              : 'Autonomous AI engine trained to identify, standardize, and extract complex medical prescriptions across multiple clinical disciplines — including custom compounding formulations, trichology regimens, dermatological treatments, peptide & hormone protocols, and galenic orders.'}
-          </p>
-
-          {/* ── 3 GCP Feature Capability Cards ── */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: '12px',
-            textAlign: 'left',
-            maxWidth: '880px',
-            margin: '0 auto 1.5rem'
-          }}>
+      {/* ─────────────────────────────────────────────────────────────────────────── */}
+      {/* PHASE 1: SCAN / UPLOAD DOCUMENT & MULTI-FILE STAGING AREA (MAX 3)           */}
+      {/* ─────────────────────────────────────────────────────────────────────────── */}
+      {currentPhase === 1 && (
+        <div className="pds-page-shell-inner" style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.25rem 5rem' }}>
+          
+          {/* GCP Autonomous Presentation Header */}
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '14px 16px',
-              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileText size={16} />
-                </div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Reconocimiento Multiformato' : 'Multi-Format Clinical Ingestion'}
-                </div>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                {isEs 
-                  ? 'Entrenado para recetas magistrales, dermatológicas, tricología, péptidos y preparados galénicos (PDF, fotos y escaneos).'
-                  : 'Trained on standard clinical Rx, compounding magistral formulas, topical and oral regimens from PDFs, photos, or scans.'}
-              </p>
-            </div>
-
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '14px 16px',
-              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Dna size={16} />
-                </div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Mapeo de APIs & Posología' : 'Automated API & Dosage Mapping'}
-                </div>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                {isEs
-                  ? 'Extrae automáticamente principios activos (APIs), concentraciones, vehículos galénicos y posología terapéutica.'
-                  : 'Extracts Active Pharmaceutical Ingredients (APIs), percentage strengths, base vehicles, and dosage schedules.'}
-              </p>
-            </div>
-
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '14px 16px',
-              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Factory size={16} />
-                </div>
-                <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Cotización & Producción GMP' : 'Compounding Quotes & Production'}
-                </div>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                {isEs
-                  ? 'Solicitud de cotización automática para centros de formulación magistral con trazabilidad por lote.'
-                  : 'Automated compounding cost estimates, turnaround scheduling, and batch dispatch tracking.'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Account Manager Status Banner */}
-        {isUserLoggedIn && (
-          <div style={{
-            maxWidth: '680px',
-            margin: '0 auto 1.5rem',
-            padding: '12px 18px',
-            background: '#f0fdf4',
-            border: '1px solid #86efac',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            boxShadow: '0 2px 8px rgba(22, 163, 74, 0.08)'
-          }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#dcfce7',
-              color: '#16a34a',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <CheckCircle2 size={20} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-              <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#166534' }}>
-                {isEs ? 'Modo Account Manager Conectado' : 'Connected Account Manager Mode'}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#15803d', marginTop: '1px' }}>
-                {isEs 
-                  ? `Sesión activa: ${user.email}. Todas las prescripciones digitalizadas se atribuirán a tu cuenta.` 
-                  : `Active session: ${user.email}. All digitized prescriptions will be automatically linked to your account.`}
-              </div>
-            </div>
-            <span style={{
-              padding: '4px 8px',
-              background: '#ffffff',
-              borderRadius: '6px',
-              border: '1px solid #bbf7d0',
-              fontSize: '0.72rem',
+              gap: '8px',
+              padding: '6px 14px',
+              background: 'linear-gradient(135deg, #e0f2fe 0%, #ede9fe 100%)',
+              border: '1px solid #c7d2fe',
+              borderRadius: '9999px',
+              fontSize: '0.78rem',
               fontWeight: 700,
-              color: '#16a34a',
-              whiteSpace: 'nowrap'
+              color: '#4338ca',
+              marginBottom: '1rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
             }}>
-              Account Manager
-            </span>
-          </div>
-        )}
+              <Sparkles size={14} style={{ color: '#6366f1' }} />
+              <span>AUTONOMOUS CLINICAL PRESCRIPTION INGESTION ENGINE</span>
+            </div>
 
-        {!isUserLoggedIn && referralAm && (
-          <div style={{
-            maxWidth: '680px',
-            margin: '0 auto 1.5rem',
-            padding: '12px 18px',
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.08)'
-          }}>
+            <h1 style={{
+              fontSize: 'clamp(1.75rem, 4vw, 2.3rem)',
+              fontWeight: 900,
+              color: '#0f172a',
+              lineHeight: 1.2,
+              margin: '0 0 0.75rem'
+            }}>
+              Autonomous Clinical Prescription Intake Engine
+            </h1>
+
+            <p style={{
+              maxWidth: '680px',
+              margin: '0 auto 1.5rem',
+              fontSize: '0.94rem',
+              color: '#475569',
+              lineHeight: 1.6
+            }}>
+              Autonomous AI engine trained to identify, standardize, and extract complex medical prescriptions across multiple clinical disciplines — including custom compounding formulations, trichology regimens, dermatological treatments, peptide protocols, and galenic orders.
+            </p>
+
+            {/* 3 GCP Feature Capability Cards */}
             <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: '#dbeafe',
-              color: '#2563eb',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: '12px',
+              textAlign: 'left',
+              maxWidth: '880px',
+              margin: '0 auto 1.5rem'
             }}>
-              <User size={20} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-              <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1e40af' }}>
-                {isEs ? 'Canalizado por Account Manager' : 'Referred by Account Manager'}
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '14px 16px',
+                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FileText size={16} />
+                  </div>
+                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+                    Multi-Format Clinical Ingestion
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
+                  Trained on standard clinical Rx, compounding magistral formulas, topical and oral regimens from PDFs, photos, or scans.
+                </p>
               </div>
-              <div style={{ fontSize: '0.78rem', color: '#1d4ed8', marginTop: '1px' }}>
-                {isEs 
-                  ? `Gestor asignado: ${referralAm}. Su solicitud será atendida directamente por este gestor.` 
-                  : `Assigned manager: ${referralAm}. Your request will be directly handled by this manager.`}
+
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '14px 16px',
+                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Dna size={16} />
+                  </div>
+                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+                    Automated API & Dosage Mapping
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
+                  Matches active ingredients, therapeutic ranges, molecular targets, and galenic vehicles against clinical pharmacopeias.
+                </p>
+              </div>
+
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '14px 16px',
+                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Factory size={16} />
+                  </div>
+                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+                    Compounding Quotes & Production
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
+                  Instantly request official compounding quotations, batch timelines, and generate secure QR codes for patient posology.
+                </p>
               </div>
             </div>
           </div>
-        )}
 
-        {/* ── STAGED FILES VISUAL CONFIRMATION PANEL (IF FILES ARE LOADED) ── */}
-        {stagedFiles.length > 0 && !isProcessing && (
+          {/* Staging & Dropzone Container */}
           <div style={{
             background: '#ffffff',
-            borderRadius: '20px',
-            border: '1px solid #cbd5e1',
-            padding: '1.5rem',
-            marginBottom: '1.5rem',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.05)'
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06)',
+            padding: '1.75rem',
+            marginBottom: '2rem'
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1rem',
-              flexWrap: 'wrap',
-              gap: '8px'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '28px', height: '28px', borderRadius: '8px',
-                  background: '#eff6ff', color: '#2563eb',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  <Layers size={16} />
-                </div>
-                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? `Documentos Cargados (${stagedFiles.length} de 3)` : `Loaded Documents (${stagedFiles.length} of 3)`}
-                </h3>
+                <Upload size={18} style={{ color: '#003666' }} />
+                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                  Upload Prescriptions & Reports (Max 3 files)
+                </h2>
               </div>
-
-              <button
-                type="button"
-                onClick={handleClearAllStaged}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#dc2626',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <Trash2 size={14} />
-                <span>{isEs ? 'Limpiar cola' : 'Clear all'}</span>
-              </button>
+              <span style={{
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: stagedFiles.length >= 3 ? '#dc2626' : '#64748b',
+                background: stagedFiles.length >= 3 ? '#fef2f2' : '#f1f5f9',
+                padding: '3px 10px',
+                borderRadius: '9999px',
+                border: `1px solid ${stagedFiles.length >= 3 ? '#fecaca' : '#cbd5e1'}`
+              }}>
+                {stagedFiles.length} / 3 Staged
+              </span>
             </div>
 
-            {/* List of staged document cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {stagedFiles.map((doc, idx) => {
-                const isPdf = doc.name.toLowerCase().endsWith('.pdf') || doc.type === 'application/pdf';
-                return (
-                  <div
-                    key={doc.id}
-                    style={{
+            {/* Dropzone */}
+            <div
+              {...getRootProps()}
+              style={{
+                border: `2px dashed ${isDragActive ? '#2563eb' : '#cbd5e1'}`,
+                borderRadius: '12px',
+                padding: '2.5rem 1.5rem',
+                textAlign: 'center',
+                background: isDragActive ? '#eff6ff' : '#f8fafc',
+                cursor: stagedFiles.length >= 3 ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                opacity: stagedFiles.length >= 3 ? 0.6 : 1
+              }}
+            >
+              <input {...getInputProps()} disabled={stagedFiles.length >= 3 || isProcessing} />
+              
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '50%',
+                background: '#eff6ff', color: '#2563eb',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 1rem'
+              }}>
+                <FileText size={24} />
+              </div>
+
+              <h3 style={{ margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                {isDragActive ? 'Drop files here...' : 'Drag & drop prescription files here'}
+              </h3>
+              
+              <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#64748b' }}>
+                Supports medical prescriptions (PDF, JPEG, PNG, WebP) up to 25MB each
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  disabled={stagedFiles.length >= 3 || isProcessing}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: '#003666',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: stagedFiles.length >= 3 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  Browse Files
+                </button>
+              </div>
+            </div>
+
+            {/* Staged File Cards */}
+            {stagedFiles.length > 0 && (
+              <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
+                    Staged Documents for Scanning:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleClearAllStaged}
+                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Clear All
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                  {stagedFiles.map((staged, sIdx) => (
+                    <div key={staged.id} style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '10px',
+                      padding: '10px 12px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '12px 14px',
-                      background: '#f8fafc',
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0',
-                      gap: '12px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                      <div style={{
-                        width: '38px',
-                        height: '38px',
-                        borderRadius: '8px',
-                        background: isPdf ? '#fee2e2' : '#e0f2fe',
-                        color: isPdf ? '#dc2626' : '#0284c7',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        <FileText size={20} />
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{
-                          fontSize: '0.88rem',
-                          fontWeight: 700,
-                          color: '#0f172a',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}>
-                          {idx + 1}. {doc.name}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>{formatFileSize(doc.size)}</span>
-                          <span>•</span>
-                          <span style={{ color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                            <CheckCircle2 size={12} />
-                            {isEs ? 'Listo para procesar' : 'Ready to process'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveStagedFile(doc.id)}
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        padding: '6px',
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.15s'
-                      }}
-                      title={isEs ? 'Eliminar de la lista' : 'Remove from list'}
-                    >
-                      <X size={15} />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Primary Action Button: Digitalizar y Publicar */}
-            <div style={{ marginTop: '1.25rem', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                onClick={handleProcessAllStagedFiles}
-                style={{
-                  flex: 1,
-                  padding: '0.95rem 1.5rem',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: '1rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(2, 132, 199, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <Sparkles size={20} />
-                <span>
-                  {isEs 
-                    ? `Digitalizar y Publicar (${stagedFiles.length} documento${stagedFiles.length > 1 ? 's' : ''})` 
-                    : `Scan & Publish (${stagedFiles.length} document${stagedFiles.length > 1 ? 's' : ''})`}
-                </span>
-                <ChevronRight size={18} />
-              </button>
-
-              {stagedFiles.length < 3 && (
-                <button
-                  type="button"
-                  {...getRootProps()}
-                  style={{
-                    padding: '0.95rem 1.25rem',
-                    borderRadius: '12px',
-                    background: '#f8fafc',
-                    color: '#0f172a',
-                    fontWeight: 700,
-                    fontSize: '0.88rem',
-                    border: '1px solid #cbd5e1',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <Plus size={16} />
-                  <span>{isEs ? 'Añadir otro (máx 3)' : 'Add another (max 3)'}</span>
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Dropzone Upload & Scan Area */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '24px',
-          border: stagedFiles.length > 0 ? '2px dashed #93c5fd' : '2px dashed #cbd5e1',
-          padding: stagedFiles.length > 0 ? '2.5rem 1.5rem' : '3.5rem 2rem',
-          textAlign: 'center',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
-          transition: 'all 0.2s ease',
-          cursor: isProcessing ? 'wait' : (stagedFiles.length >= 3 ? 'default' : 'pointer')
-        }}
-        {...(stagedFiles.length >= 3 ? {} : getRootProps())}
-        >
-          {stagedFiles.length < 3 && <input {...getInputProps()} />}
-
-          {isProcessing ? (
-            <div style={{ padding: '2rem 1rem', maxWidth: '520px', margin: '0 auto' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #0284c7 0%, #6366f1 100%)',
-                margin: '0 auto 1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: 'pulse 1.5s infinite',
-                boxShadow: '0 8px 24px rgba(2, 132, 199, 0.25)'
-              }}>
-                <RefreshCw size={28} style={{ color: '#ffffff', animation: 'spin 2s linear infinite' }} />
-              </div>
-
-              {/* Progress step badge "1 de 4" */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#f0f9ff',
-                border: '1px solid #bae6fd',
-                padding: '4px 14px',
-                borderRadius: '20px',
-                marginBottom: '0.85rem'
-              }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0369a1' }}>
-                  {isEs ? `Paso ${currentStepIndex} de 4` : `Step ${currentStepIndex} of 4`}
-                </span>
-                <span style={{ color: '#38bdf8', fontSize: '0.75rem' }}>•</span>
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0284c7' }}>
-                  {currentStepIndex === 1 && '25%'}
-                  {currentStepIndex === 2 && '50%'}
-                  {currentStepIndex === 3 && '75%'}
-                  {currentStepIndex === 4 && '100%'}
-                </span>
-              </div>
-
-              {/* Visual Progress Bar */}
-              <div style={{
-                width: '100%',
-                height: '6px',
-                background: '#e2e8f0',
-                borderRadius: '3px',
-                overflow: 'hidden',
-                margin: '0 auto 1.25rem',
-                maxWidth: '340px'
-              }}>
-                <div style={{
-                  width: currentStepIndex === 1 ? '25%' : currentStepIndex === 2 ? '50%' : currentStepIndex === 3 ? '75%' : '100%',
-                  height: '100%',
-                  background: 'linear-gradient(90deg, #0284c7 0%, #6366f1 100%)',
-                  borderRadius: '3px',
-                  transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                }} />
-              </div>
-
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                {currentStepIndex === 1 && (isEs ? 'Digitalización & Reconocimiento OCR' : 'Document Scanning & OCR')}
-                {currentStepIndex === 2 && (isEs ? 'Resolución de Fórmulas & APIs' : 'Formula & API Resolution')}
-                {currentStepIndex === 3 && (isEs ? 'Farmacovigilancia & Dosimetría' : 'Dosimetry & Safety Validation')}
-                {currentStepIndex === 4 && (isEs ? 'Generación del Dossier Electrónico' : 'Electronic Dossier Publication')}
-              </h3>
-
-              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.55, maxWidth: '440px', margin: '0 auto' }}>
-                {processingStep || (isEs 
-                  ? 'Analizando la receta médica con Atlas Clinical AI...' 
-                  : 'Analyzing prescription document with Atlas Clinical AI...')}
-              </p>
-            </div>
-          ) : (
-            <div>
-              <div style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '20px',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                margin: '0 auto 1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#16a34a'
-              }}>
-                <Upload size={34} />
-              </div>
-
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                {isDragActive 
-                  ? (isEs ? 'Suelte los documentos aquí...' : 'Drop your clinical documents here...') 
-                  : (stagedFiles.length > 0 
-                    ? (isEs ? 'Arrastre más documentos para este lote (hasta 3 al mismo tiempo)' : 'Drag more documents to this batch (up to 3 at a time)')
-                    : (isEs ? 'Arrastre o seleccione hasta 3 documentos al mismo tiempo' : 'Drag & drop or browse up to 3 documents at a time'))}
-              </h3>
-              
-              <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0 0 1.75rem' }}>
-                {isEs 
-                  ? 'Recetas clínicas, fórmulas magistrales, informes de dermatología/tricología, PDF, PNG, JPG (hasta 3 archivos por lote, máx 15MB c/u · Sin límite diario)' 
-                  : 'Clinical prescriptions, compounding formulas, dermatology & trichology reports, PDF, PNG, JPG (up to 3 files per batch, max 15MB each · No limit)'}
-              </p>
-
-              {stagedFiles.length < 3 && (
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    style={{
-                      padding: '0.85rem 1.8rem',
-                      borderRadius: '12px',
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      fontWeight: 800,
-                      fontSize: '0.95rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
-                  >
-                    <FileText size={18} />
-                    <span>{isEs ? 'Seleccionar Archivo(s) o PDF' : 'Browse Document(s) or PDF'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      cameraInputRef.current?.click();
-                    }}
-                    style={{
-                      padding: '0.85rem 1.8rem',
-                      borderRadius: '12px',
-                      background: '#047857',
-                      color: '#ffffff',
-                      fontWeight: 800,
-                      fontSize: '0.95rem',
-                      border: 'none',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 14px rgba(4, 120, 87, 0.3)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
-                  >
-                    <Camera size={18} />
-                    <span>{isEs ? 'Fotografiar con Cámara' : 'Scan with Camera'}</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Hidden camera input for mobile photo snap */}
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    handleAddFiles([e.target.files[0]]);
-                  }
-                }}
-              />
-
-              {/* Clipboard paste hint */}
-              <div style={{ marginTop: '1.25rem', fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <span>💡 {isEs ? 'O pega una captura directamente con' : 'Or paste a screenshot directly with'}</span>
-                <kbd style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '1px 6px', fontFamily: 'monospace', fontWeight: 700, color: '#334155' }}>
-                  ⌘V / Ctrl+V
-                </kbd>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── API CLINICAL ENRICHMENT CONFIRMATION MODAL ── */}
-        {enrichmentAuditModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.75)',
-            backdropFilter: 'blur(5px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100000,
-            padding: '1rem'
-          }}>
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '600px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.35)',
-              border: '1px solid #bae6fd',
-              overflow: 'hidden',
-              animation: 'fadeIn 0.2s ease-out'
-            }}>
-              {/* Header */}
-              <div style={{
-                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                padding: '1.25rem 1.5rem',
-                borderBottom: '1px solid #bae6fd',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px'
-              }}>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
-                  background: '#0284c7',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Sparkles size={24} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0369a1' }}>
-                      {isEs ? 'Enriquecimiento de Principios Activos' : 'Clinical API Enrichment'}
-                    </h3>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      background: '#0284c7',
-                      color: '#ffffff'
+                      gap: '10px'
                     }}>
-                      {enrichmentAuditModal.incompleteApis.length} {isEs ? 'APIs' : 'APIs'}
-                    </span>
-                  </div>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#0c4a6e' }}>
-                    {isEs 
-                      ? 'Se han detectado principios activos que no cuentan con descripción clínica o dianas genéticas en la base de datos.' 
-                      : 'Active ingredients detected without complete clinical pharmacology or gene targets in database.'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSkipEnrichment}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#0369a1',
-                    cursor: 'pointer',
-                    padding: '4px'
-                  }}
-                  title={isEs ? 'Cerrar' : 'Close'}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-                <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.5 }}>
-                  {isEs 
-                    ? '¿Deseas que Atlas Clinical AI investigue en tiempo real el mecanismo celular, dianas genéticas y posología estándar de estos principios activos antes de registrarlos en la plataforma?' 
-                    : 'Would you like Atlas Clinical AI to research cellular mechanisms, gene targets, and standard dosages before registering in Atlas?'}
-                </div>
-
-                {/* Detected Incomplete APIs Chips */}
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  padding: '1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
-                }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {isEs ? 'Principios Activos a Investigar' : 'Active Ingredients to Research'}
-                  </div>
-
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {enrichmentAuditModal.incompleteApis.map((item, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          background: '#ffffff',
-                          border: '1px solid #cbd5e1',
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          fontSize: '0.8rem',
-                          fontWeight: 700,
-                          color: '#0f172a'
-                        }}
-                      >
-                        <span style={{ color: '#0284c7' }}>🧪</span>
-                        <span>{item.cleanName}</span>
-                        {item.dose && (
-                          <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '1px 5px', borderRadius: '4px' }}>
-                            {item.dose}
-                          </span>
-                        )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <FileText size={14} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {staged.name}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                            {formatFileSize(staged.size)} · Doc #{sIdx + 1}
+                          </div>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveStagedFile(staged.id)}
+                        disabled={isProcessing}
+                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Firestore Persistence Notice */}
-                <div style={{
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: '8px',
-                  padding: '0.75rem 0.9rem',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  fontSize: '0.8rem',
-                  color: '#166534'
-                }}>
-                  <Database size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#15803d' }} />
-                  <div>
-                    <strong>{isEs ? 'Guardado Permanente en Firestore:' : 'Permanent Firestore Persistence:'}</strong>{' '}
-                    {isEs 
-                      ? 'La información investigada se guardará directamente en la base de datos de productos para enriquecer futuras prescripciones e importaciones.'
-                      : 'Researched monographs will be persisted in the products database for all future prescription imports.'}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  marginTop: '0.5rem'
-                }}>
-                  {/* Primary: Enrich with AI */}
+                {/* Main Scan Trigger */}
+                <div style={{ marginTop: '1.25rem' }}>
                   <button
                     type="button"
-                    disabled={isEnrichingApis}
-                    onClick={handleEnrichAndSaveApis}
+                    onClick={handleProcessAllStagedFiles}
+                    disabled={isProcessing}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
-                      background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                      padding: '12px 20px',
+                      borderRadius: '10px',
+                      background: isProcessing ? '#64748b' : 'linear-gradient(135deg, #003666 0%, #002244 100%)',
                       color: '#ffffff',
                       border: 'none',
-                      fontSize: '0.88rem',
-                      fontWeight: 700,
-                      cursor: isEnrichingApis ? 'not-allowed' : 'pointer',
+                      fontSize: '0.92rem',
+                      fontWeight: 800,
+                      cursor: isProcessing ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
-                      boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
-                      opacity: isEnrichingApis ? 0.7 : 1
+                      boxShadow: '0 4px 12px rgba(0, 54, 102, 0.25)',
+                      transition: 'all 0.2s'
                     }}
                   >
-                    {isEnrichingApis ? (
+                    {isProcessing ? (
                       <>
-                        <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                        <span>{isEs ? 'Investigando con IA y Guardando...' : 'Researching and Saving...'}</span>
+                        <RefreshCw size={16} className="animate-spin" />
+                        <span>Processing with Atlas AI...</span>
                       </>
                     ) : (
                       <>
                         <Sparkles size={16} />
-                        <span>{isEs ? 'Enriquecer con IA y Guardar en Base de Datos' : 'Enrich with AI & Save to Firestore'}</span>
+                        <span>Scan & Extract {stagedFiles.length} Prescription(s) with Atlas AI ➔</span>
                       </>
                     )}
                   </button>
-
-                  {/* Secondary: Skip and Register directly */}
-                  <button
-                    type="button"
-                    disabled={isEnrichingApis}
-                    onClick={handleSkipEnrichment}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      background: '#ffffff',
-                      color: '#475569',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.84rem',
-                      fontWeight: 600,
-                      cursor: isEnrichingApis ? 'not-allowed' : 'pointer',
-                      textAlign: 'center'
-                    }}
-                  >
-                    {isEs ? 'Continuar Registro Directo en Atlas (Sin Enriquecer)' : 'Continue Direct Registration (Skip Enrichment)'}
-                  </button>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* ── DUPLICATE WARNING MODAL ── */}
-        {duplicateWarning && (
+            {/* Real-Time Processing Status Banner */}
+            {isProcessing && (
+              <div style={{
+                marginTop: '1.25rem',
+                background: '#f0f7ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '12px',
+                padding: '16px',
+                animation: 'pulse 2s infinite'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <RefreshCw size={16} className="animate-spin" style={{ color: '#1d4ed8' }} />
+                  <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1e40af' }}>
+                    {processingStep || 'Processing prescriptions with Atlas Clinical AI...'}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '6px', background: '#dbeafe', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${(currentStepIndex / 3) * 100}%`,
+                    height: '100%',
+                    background: '#2563eb',
+                    transition: 'width 0.3s ease'
+                  }} />
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div style={{
+                marginTop: '1rem',
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '10px',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                color: '#991b1b',
+                fontSize: '0.82rem'
+              }}>
+                <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────────────── */}
+      {/* PHASE 2: VERIFICATION, CLINICAL AUDIT & DOCTOR CREDENTIALS COMPLETION       */}
+      {/* ─────────────────────────────────────────────────────────────────────────── */}
+      {currentPhase === 2 && activeDraftRx && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem 1rem 5rem' }}>
+          
+          {/* Phase 2 Header & Action Toolbar */}
           <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.70)',
-            backdropFilter: 'blur(4px)',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '14px 18px',
+            marginBottom: '1.25rem',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100000,
-            padding: '1rem'
+            justifyContent: 'space-between',
+            gap: '12px',
+            flexWrap: 'wrap',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                <span className={`gcp-status-pill ${isPhysicianValid ? 'published' : 'review'}`}>
+                  <span className="gcp-status-dot" />
+                  {isPhysicianValid ? 'Physician Verified' : 'Action Required: Verify Doctor'}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  Draft Document {activeDraftIndex + 1} of {draftRxList.length}
+                </span>
+              </div>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                Phase 2: Review Clinical Data & Complete Doctor Credentials
+              </h2>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => setCurrentPhase(1)}
+                className="gcp-action-btn gcp-action-btn-ghost"
+              >
+                <ArrowLeft size={14} />
+                <span>Back to Upload</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleValidateAndPublish}
+                disabled={isSavingPhysician}
+                className="gcp-action-btn gcp-action-btn-primary"
+                style={{ padding: '8px 16px', fontSize: '0.84rem' }}
+              >
+                {isSavingPhysician ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                <span>Validate & Publish Official Prescription ➔</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Batch Selector if multiple files */}
+          {draftRxList.length > 1 && (
             <div style={{
               background: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '560px',
-              width: '100%',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-              border: '1px solid #fed7aa',
-              overflow: 'hidden',
-              animation: 'fadeIn 0.2s ease-out'
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '8px 14px',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              overflowX: 'auto'
             }}>
-              {/* Header */}
-              <div style={{
-                background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
-                padding: '1.25rem 1.5rem',
-                borderBottom: '1px solid #fde68a',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '12px'
-              }}>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
-                  background: '#d97706',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <ShieldAlert size={24} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800, color: '#92400e' }}>
-                    {isEs ? 'Prescripción Previamente Registrada' : 'Prescription Already Registered'}
-                  </h3>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#b45309' }}>
-                    {isEs 
-                      ? 'Se ha detectado una prescripción existente con los mismos identificadores clave.' 
-                      : 'An existing prescription with the same key identifiers was found in the database.'}
-                  </p>
-                </div>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#475569', whiteSpace: 'nowrap' }}>
+                Select Prescription Draft:
+              </span>
+              {draftRxList.map((d, dIdx) => (
                 <button
+                  key={dIdx}
                   type="button"
-                  onClick={handleDismissDuplicate}
+                  onClick={() => setActiveDraftIndex(dIdx)}
                   style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#92400e',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    border: dIdx === activeDraftIndex ? '1px solid #93c5fd' : '1px solid #e2e8f0',
+                    background: dIdx === activeDraftIndex ? '#eff6ff' : '#ffffff',
+                    color: dIdx === activeDraftIndex ? '#1d4ed8' : '#475569',
+                    fontSize: '0.78rem',
+                    fontWeight: dIdx === activeDraftIndex ? 800 : 600,
                     cursor: 'pointer',
-                    padding: '4px'
+                    whiteSpace: 'nowrap'
                   }}
-                  title={isEs ? 'Cerrar' : 'Close'}
                 >
-                  <X size={20} />
+                  #{dIdx + 1} {d.patientName ? `· ${d.patientName}` : ''}
                 </button>
-              </div>
+              ))}
+            </div>
+          )}
 
-              {/* Body */}
-              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {/* Match criteria tag */}
-                <div style={{
-                  background: '#fffbeb',
-                  border: '1px solid #fde68a',
-                  borderRadius: '8px',
-                  padding: '0.65rem 0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '0.82rem',
-                  color: '#92400e',
-                  fontWeight: 600
-                }}>
-                  <span>📌 {isEs ? 'Causa de coincidencia:' : 'Match criteria:'}</span>
-                  <span style={{ fontWeight: 800, color: '#b45309' }}>{duplicateWarning.matchReason}</span>
+          {/* Main 2-Column Verification Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gap: '1.25rem'
+          }}>
+            
+            {/* Left Column: Scanned Document Preview */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '14px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              padding: '1.25rem',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={16} style={{ color: '#003666' }} />
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                    Scanned Document Preview
+                  </span>
                 </div>
-
-                {/* Existing Card Details */}
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  padding: '1rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? 'Prescripción Existente en Base de Datos' : 'Existing Record in Database'}
-                    </div>
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 800,
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      background: '#dcfce7',
-                      color: '#166534',
-                      border: '1px solid #86efac',
+                {activeFileUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setShowOriginalModal(true)}
+                    style={{
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      padding: '4px 8px',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      color: '#003666',
+                      cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px'
-                    }}>
-                      ● {isEs ? 'Registrado en Base de Datos' : 'Database Registered'}
+                    }}
+                  >
+                    <Maximize2 size={12} /> Full Screen
+                  </button>
+                )}
+              </div>
+
+              {activeFileUrl ? (
+                <div style={{
+                  flex: 1,
+                  minHeight: '380px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                  {activeFileUrl.endsWith('.pdf') ? (
+                    <iframe
+                      src={activeFileUrl}
+                      title="PDF Preview"
+                      style={{ width: '100%', height: '100%', minHeight: '420px', border: 'none' }}
+                    />
+                  ) : (
+                    <img
+                      src={activeFileUrl}
+                      alt="Scanned Prescription"
+                      style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain' }}
+                    />
+                  )}
+                </div>
+              ) : (
+                <div style={{
+                  flex: 1, minHeight: '280px', background: '#f8fafc',
+                  borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#94a3b8', fontSize: '0.82rem'
+                }}>
+                  No preview document available
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Doctor & Patient Verification Form */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              {/* Doctor Details Verification Card */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '14px',
+                border: isPhysicianValid ? '1px solid #bbf7d0' : '1px solid #fde68a',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                padding: '1.25rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Stethoscope size={18} style={{ color: '#003666' }} />
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                      Treating Physician Credentials
                     </span>
                   </div>
+                  {isPhysicianValid ? (
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
+                      Verified ✓
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b45309', background: '#fffbeb', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fde68a' }}>
+                      Complete Email & Name
+                    </span>
+                  )}
+                </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.82rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Physician Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={physicianForm.name}
+                      onChange={(e) => setPhysicianForm({ ...physicianForm, name: e.target.value })}
+                      placeholder="e.g. Dr. Jane Doe"
+                      style={{
+                        width: '100%', padding: '8px 12px', borderRadius: '6px',
+                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <div>
-                      <span style={{ color: '#64748b' }}>{isEs ? 'Código:' : 'Code:'} </span>
-                      <strong style={{ fontFamily: 'monospace', color: '#003666' }}>
-                        {duplicateWarning.existingPrescription?.prescriptionNumber || duplicateWarning.existingPrescription?.id}
-                      </strong>
+                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                        Medical License / No. *
+                      </label>
+                      <input
+                        type="text"
+                        value={physicianForm.licenseNumber}
+                        onChange={(e) => setPhysicianForm({ ...physicianForm, licenseNumber: e.target.value })}
+                        placeholder="e.g. MD-982314"
+                        style={{
+                          width: '100%', padding: '8px 12px', borderRadius: '6px',
+                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                          boxSizing: 'border-box', fontFamily: 'monospace'
+                        }}
+                      />
                     </div>
                     <div>
-                      <span style={{ color: '#64748b' }}>{isEs ? 'Paciente:' : 'Patient:'} </span>
-                      <strong>{duplicateWarning.existingPrescription?.patientName || '—'}</strong>
+                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                        Practice / Clinic
+                      </label>
+                      <input
+                        type="text"
+                        value={physicianForm.clinic}
+                        onChange={(e) => setPhysicianForm({ ...physicianForm, clinic: e.target.value })}
+                        placeholder="e.g. Dermatology Clinic"
+                        style={{
+                          width: '100%', padding: '8px 12px', borderRadius: '6px',
+                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '8px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                        Physician Email (For Compounding Quotes) *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={physicianForm.email}
+                        onChange={(e) => {
+                          setPhysicianForm({ ...physicianForm, email: e.target.value });
+                          setQuotationEmail(e.target.value);
+                        }}
+                        placeholder="doctor@clinic.com"
+                        style={{
+                          width: '100%', padding: '8px 12px', borderRadius: '6px',
+                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
                     </div>
                     <div>
-                      <span style={{ color: '#64748b' }}>{isEs ? 'Fecha:' : 'Date:'} </span>
-                      <strong>{duplicateWarning.existingPrescription?.prescriptionDate || '—'}</strong>
-                    </div>
-                    {duplicateWarning.existingPrescription?.boxId && (
-                      <div>
-                        <span style={{ color: '#64748b' }}>Box ID: </span>
-                        <strong style={{ fontFamily: 'monospace' }}>{duplicateWarning.existingPrescription.boxId}</strong>
-                      </div>
-                    )}
-                    <div>
-                      <span style={{ color: '#64748b' }}>{isEs ? 'Médico:' : 'Doctor:'} </span>
-                      <span>{duplicateWarning.existingPrescription?.doctorName || 'Physician'}</span>
+                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={physicianForm.phone}
+                        onChange={(e) => setPhysicianForm({ ...physicianForm, phone: e.target.value })}
+                        placeholder="+34 600 000 000"
+                        style={{
+                          width: '100%', padding: '8px 12px', borderRadius: '6px',
+                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
-                  {isEs
-                    ? 'Para mantener la trazabilidad clínica y evitar duplicados innecesarios, se recomienda abrir la prescripción ya existente. Si se trata de una nueva versión o rectificación y deseas cargarla de nuevo igualmente, pulsa "Cargar de Todos Modos".'
-                    : 'To preserve clinical audit trails, you can open the existing prescription. If this is a revised version and you still wish to re-upload it, you can proceed by confirming.'}
-                </p>
+              {/* Patient Details Card */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '14px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                padding: '1.25rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <User size={18} style={{ color: '#003666' }} />
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                    Patient Clinical Details
+                  </span>
+                </div>
 
-                {/* Actions */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  marginTop: '0.5rem'
-                }}>
-                  {/* Action 1: View Existing (Recommended) */}
-                  <button
-                    type="button"
-                    onClick={handleViewExistingRx}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Patient Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={patientForm.name}
+                      onChange={(e) => setPatientForm({ ...patientForm, name: e.target.value })}
+                      placeholder="e.g. Carlos Gomez"
+                      style={{
+                        width: '100%', padding: '8px 12px', borderRadius: '6px',
+                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Age / DOB
+                    </label>
+                    <input
+                      type="text"
+                      value={patientForm.age}
+                      onChange={(e) => setPatientForm({ ...patientForm, age: e.target.value })}
+                      placeholder="e.g. 42"
+                      style={{
+                        width: '100%', padding: '8px 12px', borderRadius: '6px',
+                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    Diagnosis / Clinical Indication Notes
+                  </label>
+                  <input
+                    type="text"
+                    value={patientForm.clinicalNotes}
+                    onChange={(e) => setPatientForm({ ...patientForm, clinicalNotes: e.target.value })}
+                    placeholder="e.g. Androgenetic alopecia Norwood III, scalp diffuse thinning"
                     style={{
-                      width: '100%',
-                      padding: '11px 14px',
-                      borderRadius: '8px',
-                      background: '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.86rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 4px rgba(0,54,102,0.2)'
+                      width: '100%', padding: '8px 12px', borderRadius: '6px',
+                      border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
+                      boxSizing: 'border-box'
                     }}
-                  >
-                    <Eye size={16} />
-                    <span>{isEs ? 'Ver Prescripción Existente (Recomendado)' : 'View Existing Prescription (Recommended)'}</span>
-                  </button>
-
-                  {/* Action 2: Force Re-Upload (Override) */}
-                  <button
-                    type="button"
-                    onClick={handleForcePublish}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      background: '#fffbeb',
-                      color: '#92400e',
-                      border: '1px solid #fde68a',
-                      fontSize: '0.84rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px'
-                    }}
-                  >
-                    <ShieldAlert size={16} color="#d97706" />
-                    <span>{isEs ? 'Cargar de Todos Modos (Permitir Duplicado)' : 'Upload Anyway (Allow Duplicate)'}</span>
-                  </button>
-
-                  {/* Action 3: Cancel */}
-                  <button
-                    type="button"
-                    onClick={handleDismissDuplicate}
-                    style={{
-                      width: '100%',
-                      padding: '8px 14px',
-                      borderRadius: '8px',
-                      background: 'transparent',
-                      color: '#64748b',
-                      border: 'none',
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {isEs ? 'Cancelar y descartar este archivo' : 'Cancel and dismiss file'}
-                  </button>
+                  />
                 </div>
               </div>
+
+              {/* Extracted Formulations & APIs Preview Card */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '14px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                padding: '1.25rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <Dna size={18} style={{ color: '#003666' }} />
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                    Compounded Active Ingredients Mapped ({activeDraftRx.prescriptionLines?.length || activeDraftRx.items?.length || 0})
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {(activeDraftRx.prescriptionLines || activeDraftRx.items || []).map((line, lIdx) => (
+                    <div key={lIdx} style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                          {line.productName || line.activeIngredient || line.name}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          {line.action || line.mechanismOfAction || 'Standard Compounding Pharmacopeia'}
+                        </div>
+                      </div>
+                      <span style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        color: '#003666',
+                        background: '#eff6ff',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #bfdbfe'
+                      }}>
+                        {line.dosage || line.dose || line.concentration || '1.0%'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
-        )}
 
-        {/* Error message */}
-        {error && (
+          {/* Sticky Bottom Action Bar */}
           <div style={{
-            marginTop: '1.5rem',
-            padding: '1rem 1.25rem',
-            background: '#fef2f2',
-            border: '1px solid #fecaca',
+            position: 'sticky',
+            bottom: '16px',
+            marginTop: '2rem',
+            background: 'rgba(255, 255, 255, 0.96)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid #cbd5e1',
             borderRadius: '12px',
-            color: '#b91c1c',
+            padding: '12px 20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px'
+            justifyContent: 'space-between',
+            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)'
           }}>
-            <AlertCircle size={20} style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1, fontSize: '0.88rem' }}>{error}</div>
             <button
-              onClick={handleReset}
+              type="button"
+              onClick={() => setCurrentPhase(1)}
               style={{
-                background: 'none',
-                border: 'none',
-                color: '#b91c1c',
+                background: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontSize: '0.84rem',
                 fontWeight: 700,
+                color: '#475569',
                 cursor: 'pointer',
-                fontSize: '0.85rem'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
               }}
             >
-              {isEs ? 'Reintentar' : 'Retry'}
+              <ArrowLeft size={14} /> Back to Upload
+            </button>
+
+            <button
+              type="button"
+              onClick={handleValidateAndPublish}
+              disabled={isSavingPhysician}
+              style={{
+                background: '#003666',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '10px 24px',
+                fontSize: '0.88rem',
+                fontWeight: 800,
+                color: '#ffffff',
+                cursor: isSavingPhysician ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(0, 54, 102, 0.25)'
+              }}
+            >
+              {isSavingPhysician ? <RefreshCw size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+              <span>Validate & Generate Official Prescription ➔</span>
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Public Clinical Footer */}
-        <footer style={{
-          marginTop: '4rem',
-          borderTop: '1px solid #e2e8f0',
-          paddingTop: '2rem',
-          textAlign: 'center',
-          color: '#64748b',
-          fontSize: '0.8rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <div style={{ color: '#94a3b8', fontSize: '0.74rem' }}>
-            Atlas Services Clinical Intelligence · HIPAA & GDPR Compliant Medical Protocol Intake
-          </div>
-        </footer>
+      {/* ─────────────────────────────────────────────────────────────────────────── */}
+      {/* PHASE 3: OFFICIAL ELECTRONIC DOSSIER, COMPOUNDING QUOTATION & PATIENT QR    */}
+      {/* ─────────────────────────────────────────────────────────────────────────── */}
+      {currentPhase === 3 && publishedRx && (
+        <IntakePhase3Deliver
+          publishedRx={publishedRx}
+          publishedRxList={publishedRxList}
+          activeRxIndex={activeRxIndex}
+          setActiveRxIndex={setActiveRxIndex}
+          officialCode={officialCode}
+          activeRx={activeRx}
+          copiedLink={copiedLink}
+          handleCopyLink={handleCopyLink}
+          setShowPatientQrModal={setShowPatientQrModal}
+          handleExportBatchExcel={handleExportBatchExcel}
+          handleExportExcel={handleExportExcel}
+          handleReset={handleReset}
+          quotationStatus={quotationStatus}
+          quotationEmail={quotationEmail}
+          setQuotationEmail={setQuotationEmail}
+          handleRequestCompoundingQuotation={handleRequestCompoundingQuotation}
+          isSubmittingQuotation={isSubmittingQuotation}
+          user={user}
+          setShowOriginalModal={setShowOriginalModal}
+          activeFileUrl={activeFileUrl}
+        />
+      )}
 
-      </div>
+      {/* ── PATIENT VERSION & QR CODE MODAL ── */}
+      <IntakePatientQrModal
+        isOpen={showPatientQrModal}
+        onClose={() => setShowPatientQrModal(false)}
+        officialCode={officialCode}
+        patientName={activeRx?.patientName}
+        fullPublicUrl={fullPublicUrl}
+        copiedPatientLink={copiedPatientLink}
+        onCopyPatientLink={handleCopyPatientLink}
+        onDownloadQrPng={handleDownloadPatientQrPng}
+      />
+
+      {/* Modal to view the original uploaded/scanned file */}
+      {showOriginalModal && activeFileUrl && (
+        <DocumentPreviewModal
+          isOpen={showOriginalModal}
+          fileUrl={activeFileUrl}
+          title={activeRx?.fileName || activeRx?.prescriptionNumber || 'Scanned Document'}
+          onClose={() => setShowOriginalModal(false)}
+        />
+      )}
     </div>
   );
 }
