@@ -236,325 +236,442 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const rawLines = rx.prescriptionLines || rx.items || rx.compounds || [];
 
   const compoundedFormulations = React.useMemo(() => {
-    // 1. If explicit formulation blocks already exist on the rx document (e.g. from AI intake)
-    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0) {
-      return rx.formulationBlocks.map((block, idx) => {
-        const isTopical = (block.dispensingForm || block.route || '').toLowerCase().includes('topical') ||
-                          (block.treatmentType || '').toLowerCase().includes('topical') ||
-                          (block.treatmentType || '').toLowerCase().includes('follicular');
-        return {
-          id: `block-${idx + 1}`,
-          index: idx + 1,
-          badge: isEs 
-            ? `PREPARACIÓN ${idx + 1} DE ${rx.formulationBlocks.length}` 
-            : `PREPARATION ${idx + 1} OF ${rx.formulationBlocks.length}`,
-          title: block.treatmentType || (isEs ? `Fórmula Magistral ${idx + 1}` : `Compounded Formulation ${idx + 1}`),
-          route: block.route || (isTopical ? (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application') : (isEs ? 'Vía Oral' : 'Oral Administration')),
-          volume: block.volume || rx.volume || (isTopical ? '100 mL' : '30 Capsules'),
-          container: isTopical 
-            ? (isEs ? 'Frasco Topacio con Dosificador Cuentagotas / Spray de Precisión' : 'Amber Glass Bottle with Precision Dropper / Metered Spray')
-            : (isEs ? 'Frasco Topacio Hermético con Cierre de Seguridad' : 'Safety-Sealed Amber Bottle with Desiccant Cap'),
-          vehicle: {
-            tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
-            name: block.vehicle?.name || block.vehicleName || (isTopical ? 'TrichoSol™ Liposomal Hydrophilic Base' : 'Compounded Micronized Capsule Base'),
-            volume: block.volume || rx.volume || (isTopical ? '100 mL' : '30 Capsules'),
-            specs: block.vehicle?.specs || (isTopical
-              ? (isEs ? '100% Libre de alcohol y propilenglicol. Maximiza la absorción transdérmica folicular sin dermatitis.' : '100% Alcohol-Free & Propylene Glycol-Free hydrophilic liposomal vehicle. Eliminates dermatitis while optimizing transdermal uptake.')
-              : (isEs ? 'Base micronizada de grado farmacéutico para dispersión entérica homogénea.' : 'Pharmaceutical-grade micronized powder excipient designed for consistent gastrointestinal absorption.'))
+    // Helper to generate rich vehicle specs and tailored posology based on vehicle type and instructions
+    const buildVehicleData = ({
+      index,
+      totalCount,
+      vehicleName = '',
+      treatmentTitle = '',
+      route = '',
+      volume = null,
+      customPosology = '',
+      customInstructions = '',
+      apis = [],
+      containerType = ''
+    }) => {
+      const vNameLower = (vehicleName || '').toLowerCase();
+      const titleLower = (treatmentTitle || '').toLowerCase();
+      const routeLower = (route || '').toLowerCase();
+
+      // Detection of vehicle types
+      const isTrichoOil = vNameLower.includes('trichooil') || 
+                          vNameLower.includes('oil') || 
+                          vNameLower.includes('aceite') ||
+                          titleLower.includes('trichooil') || 
+                          titleLower.includes('scalp care') || 
+                          titleLower.includes('higiene') || 
+                          titleLower.includes('hygiene') ||
+                          (apis.some(a => {
+                            const an = (a.name || a.productName || a.activeIngredient || '').toLowerCase();
+                            return an.includes('ginseng') || an.includes('ginkgo') || an.includes('tocopherol') || an.includes('vitamin e');
+                          }) && (vNameLower.includes('oil') || titleLower.includes('scalp care') || titleLower.includes('higiene')));
+
+      const isOral = routeLower.includes('oral') || 
+                     titleLower.includes('oral') || 
+                     titleLower.includes('capsule') || 
+                     vNameLower.includes('capsule') || 
+                     vNameLower.includes('tablet');
+
+      const isTrichoFoam = vNameLower.includes('trichofoam') || vNameLower.includes('foam') || titleLower.includes('foam');
+
+      // Theme accent color & badges
+      let accentColor = '#0284c7';
+      let accentBg = '#e0f2fe';
+      let badgeText = isEs ? `PREPARACIÓN ${index} DE ${totalCount}` : `PREPARATION ${index} OF ${totalCount}`;
+      let resolvedTitle = treatmentTitle || (isEs ? `Fórmula Magistral ${index}` : `Compounded Formulation ${index}`);
+      let resolvedRoute = route || (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application');
+      let resolvedVolume = volume || (isTrichoOil ? '30 mL' : (isOral ? '30 Capsules' : '100 mL'));
+      let resolvedContainer = containerType;
+
+      let vehicleObj = {
+        tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
+        name: vehicleName || (isTrichoOil ? 'TrichoOil™ Natural Lipidic Carrier' : 'TrichoSol™ Liposomal Hydrophilic Base'),
+        volume: resolvedVolume,
+        specs: ''
+      };
+
+      let posologyObj = {
+        title: '',
+        regimen: customPosology || '',
+        timing: '',
+        duration: rx.duration || '30 days',
+        steps: []
+      };
+
+      if (isTrichoOil) {
+        accentColor = '#0d9488'; // Emerald / Teal for scalp hygiene & oil
+        accentBg = '#ccfbf1';
+        badgeText += isEs ? ' · ACEITE DE CUIDADO CAPILAR' : ' · SCALP CARE & HYGIENE OIL';
+        resolvedTitle = treatmentTitle || (isEs ? 'Higiene & Cuidado Folicular (TrichoOil™)' : 'Scalp Care & Hygiene (TrichoOil™)');
+        resolvedRoute = isEs ? 'Aplicación Tópica / Masaje Capilar' : 'Topical Scalp Application & Massage';
+        resolvedVolume = volume || '30 mL';
+        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Topacio con Pipeta Cuentagotas de Precisión' : 'Amber Glass Bottle with Precision Pipette Dropper');
+        vehicleObj.name = vehicleName || 'TrichoOil™ Natural Lipidic Carrier';
+        vehicleObj.specs = isEs 
+          ? 'Vehículo 100% natural a base de ácidos grasos esenciales y fitocomplejo patentado TrichoTech™. Restaura la barrera lipídica cutánea, normaliza el exceso de sebo y protege el nicho de células madre foliculares.'
+          : '100% Natural essential fatty acid vehicle enriched with patented TrichoTech™ phytocomplex. Restores scalp epidermal lipid barrier, balances sebum excretion, and shields follicular stem cells.';
+        
+        posologyObj.title = isEs ? 'Pauta de Higiene & Cuidado del Cuero Cabelludo' : 'Pre-Wash Scalp Care & Hygiene Regimen';
+        posologyObj.regimen = customPosology || (isEs ? '1–2 Veces por Semana (Tratamiento Pre-Lavado)' : '1–2 Times Weekly (Pre-Shampoo Treatment)');
+        posologyObj.timing = isEs ? '10–15 minutos antes de lavar el cabello' : '10–15 minutes before showering / washing hair';
+        posologyObj.steps = [
+          {
+            step: 1,
+            title: isEs ? 'Seccionado & Dosificación' : 'Sectioning & Application',
+            timing: isEs ? '1-2 Veces / Semana' : '1-2 Times / Week',
+            instruction: isEs 
+              ? 'Divida el cabello en secciones para exponer el cuero cabelludo y aplique unas gotas directamente con la pipeta en las zonas a tratar.' 
+              : 'Part hair into sections to expose the scalp and dispense a few drops directly with the pipette across target areas.'
           },
-          apis: (block.apis || block.items || []).map((api, aIdx) => ({
-            id: api.id || `api-${idx + 1}-${aIdx + 1}`,
-            tag: `API ${aIdx + 1}`,
-            name: api.productName || api.activeIngredient || api.name || `Active Ingredient ${aIdx + 1}`,
-            dosage: api.dosage || api.dose || api.strength || api.concentration || '—',
-            role: api.role || (isTopical 
-              ? (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient')
-              : (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')),
-            indication: api.indication || (isTopical 
-              ? (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy')
-              : (isEs ? 'Soporte Metabólico & Folicular' : 'Metabolic & Follicular Fortification')),
-            action: api.instructions || api.action || (isEs 
-              ? 'Tratamiento formulado a medida según el perfil clínico del paciente.' 
-              : 'Custom compounded active ingredient calibrated to the patient clinical profile.'),
-            rationale: api.rationale || null
-          })),
-          posology: {
-            title: isEs ? 'Pauta Médica Específica para este Vehículo' : 'Specific Administration Regimen for this Vehicle',
-            regimen: block.posology || rx.posology || (isTopical ? (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)') : (isEs ? '1 Cápsula Diaria' : '1 Capsule Daily')),
-            timing: isTopical ? (isEs ? 'Cada noche antes de dormir sobre cuero cabelludo seco' : 'Nightly at bedtime on dry scalp') : (isEs ? 'Junto con la cena o antes de dormir' : 'With dinner or at bedtime'),
-            duration: block.duration || rx.duration || '30 days',
-            steps: isTopical ? [
-              {
-                step: 1,
-                title: isEs ? 'Preparación del Cuero Cabelludo' : 'Scalp Preparation',
-                timing: isEs ? 'Paso 1' : 'Step 1',
-                instruction: isEs 
-                  ? 'Asegúrese de que el cuero cabelludo esté completamente limpio y seco antes de la aplicación.' 
-                  : 'Ensure the scalp is clean and completely dry before applying the solution.'
-              },
-              {
-                step: 2,
-                title: isEs ? 'Dosificación de Precisión' : 'Precision Dosing',
-                timing: isEs ? '1.0 mL / 4-5 Sprays' : '1.0 mL / 4-5 Sprays',
-                instruction: isEs 
-                  ? 'Cargue exactamente 1.0 mL en el dosificador cuentagotas o aplique 4 a 5 pulverizaciones directamente sobre las áreas afectadas.' 
-                  : 'Measure exactly 1.0 mL in the calibrated dropper or apply 4 to 5 metered sprays directly onto target thinning areas.'
-              },
-              {
-                step: 3,
-                title: isEs ? 'Masaje y Absorción' : 'Fingertip Massage & Uptake',
-                timing: isEs ? '30-60 Segundos' : '30-60 Seconds',
-                instruction: isEs 
-                  ? 'Distribuya suavemente con la yema de los dedos en movimientos circulares durante 30 a 60 segundos hasta su completa absorción. No enjuagar durante al menos 4 horas.' 
-                  : 'Gently distribute with fingertips using circular motions for 30 to 60 seconds until absorbed. Do not rinse or wash hair for at least 4 hours.'
-              },
-              {
-                step: 4,
-                title: isEs ? 'Lavado de Manos Post-Aplicación' : 'Post-Application Cleansing',
-                timing: isEs ? 'Inmediato' : 'Immediate',
-                instruction: isEs 
-                  ? 'Lávese las manos con agua y jabón inmediatamente después de finalizar la aplicación.' 
-                  : 'Wash hands thoroughly with soap and water immediately following application.'
-              }
-            ] : [
-              {
-                step: 1,
-                title: isEs ? 'Toma Diaria con Agua' : 'Daily Oral Ingestion',
-                timing: isEs ? '1 Cápsula' : '1 Capsule',
-                instruction: isEs 
-                  ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL).' 
-                  : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL).'
-              },
-              {
-                step: 2,
-                title: isEs ? 'Momento de Administración' : 'Optimal Timing',
-                timing: isEs ? 'Cena / Antes de Dormir' : 'Dinner / Bedtime',
-                instruction: isEs 
-                  ? 'Se recomienda tomar durante la cena o 30 minutos antes de dormir para maximizar la absorción y sinergia de los micronutrientes.' 
-                  : 'Best taken with evening dinner or 30 minutes before sleep to optimize micronutrient absorption and tolerance.'
-              },
-              {
-                step: 3,
-                title: isEs ? 'Conservación' : 'Storage Conditions',
-                timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
-                instruction: isEs 
-                  ? 'Mantener en lugar fresco y seco (inferior a 25°C), protegido de la luz solar directa y humedad.' 
-                  : 'Store in a cool, dry place below 25°C (77°F), securely closed and protected from direct sunlight and moisture.'
-              }
-            ]
+          {
+            step: 2,
+            title: isEs ? 'Masaje Microcirculatorio' : 'Stimulating Microcirculation Massage',
+            timing: isEs ? '3 a 5 Minutos' : '3 to 5 Minutes',
+            instruction: isEs 
+              ? 'Masajee suavemente con las yemas de los dedos mediante movimientos circulares continuos durante 3 a 5 minutos para estimular la perfusión capilar y solubilizar tapones de sebo.' 
+              : 'Gently massage with circular fingertip motions for 3 to 5 minutes to stimulate capillary perfusion and emulsify follicular micro-sebum plugs.'
+          },
+          {
+            step: 3,
+            title: isEs ? 'Tiempo de Acción Folicular' : 'Active Diffusion Period',
+            timing: isEs ? '10 Minutos' : '10 Minutes',
+            instruction: isEs 
+              ? 'Deje actuar sobre el cuero cabelludo durante 10 minutos para permitir la difusión transdérmica de los antioxidantes y nutrientes bioactivos.' 
+              : 'Leave on the scalp for 10 minutes prior to washing to allow transdermal diffusion of bioactive botanical cofactors.'
+          },
+          {
+            step: 4,
+            title: isEs ? 'Lavado & Aclarado' : 'Hair Washing & Cleansing',
+            timing: isEs ? 'Aclarado Completo' : 'Complete Rinse',
+            instruction: isEs 
+              ? 'Lave el cabello con un champú dermatológico suave y aclare con abundante agua templada.' 
+              : 'Wash hair with a gentle dermatological shampoo and rinse thoroughly with lukewarm water.'
           }
-        };
+        ];
+      } else if (isOral) {
+        accentColor = '#7c3aed'; // Purple for Oral
+        accentBg = '#ede9fe';
+        badgeText += isEs ? ' · VÍA ORAL' : ' · ORAL COMPOUND';
+        resolvedTitle = treatmentTitle || (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Nutraceutical Support (Capsules)');
+        resolvedRoute = isEs ? 'Vía Oral' : 'Oral Administration';
+        resolvedVolume = volume || (isEs ? '30 Cápsulas' : '30 Compounded Capsules');
+        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Topacio Hermético con Cierre de Seguridad' : 'Safety-Sealed Amber Bottle with Desiccant Cap');
+        vehicleObj.tag = isEs ? 'VEHÍCULO ORAL' : 'ORAL VEHICLE BASE';
+        vehicleObj.name = vehicleName || (isEs ? 'Cápsulas de Gelatina / Celulosa Micronizada' : 'Micronized Compounded Hard Capsules Base');
+        vehicleObj.specs = isEs
+          ? 'Base micronizada de grado farmacéutico para dispersión entérica homogénea sin irritación gástrica.'
+          : 'Pharmaceutical-grade micronized powder excipient designed for consistent gastrointestinal absorption without gastric irritation.';
+        
+        posologyObj.title = isEs ? 'Pauta de Administración Oral' : 'Oral Administration Regimen';
+        posologyObj.regimen = customPosology || (isEs ? '1 Cápsula Diaria con la Cena / Noche' : '1 Capsule Daily with Dinner / Bedtime');
+        posologyObj.timing = isEs ? 'Junto con alimentos y un vaso de agua' : 'With food and a full glass of water';
+        posologyObj.steps = [
+          {
+            step: 1,
+            title: isEs ? 'Toma Diaria con Agua' : 'Daily Oral Ingestion',
+            timing: isEs ? '1 Cápsula' : '1 Capsule',
+            instruction: isEs 
+              ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL).' 
+              : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL).'
+          },
+          {
+            step: 2,
+            title: isEs ? 'Momento de Administración' : 'Optimal Timing',
+            timing: isEs ? 'Cena / Antes de Dormir' : 'Dinner / Bedtime',
+            instruction: isEs 
+              ? 'Se recomienda tomar durante la cena o antes de dormir para optimizar la biodisponibilidad y tolerancia gástrica.' 
+              : 'Best taken with evening dinner or at bedtime to optimize absorption and tolerance.'
+          },
+          {
+            step: 3,
+            title: isEs ? 'Conservación' : 'Storage Conditions',
+            timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
+            instruction: isEs 
+              ? 'Mantener en lugar fresco y seco (inferior a 25°C), protegido de la luz solar directa.' 
+              : 'Store in a cool, dry place below 25°C (77°F), securely closed and protected from direct sunlight.'
+          }
+        ];
+      } else if (isTrichoFoam) {
+        accentColor = '#0891b2'; // Cyan
+        accentBg = '#cffafe';
+        badgeText += isEs ? ' · ESPUMA TÓPICA' : ' · TOPICAL FOAM';
+        resolvedTitle = treatmentTitle || (isEs ? 'Espuma Tópica Folicular (TrichoFoam™)' : 'Follicular Topical Foam (TrichoFoam™)');
+        resolvedRoute = isEs ? 'Aplicación Tópica en Espuma' : 'Topical Foam Scalp Application';
+        resolvedVolume = volume || '50 mL';
+        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Dosificador de Espuma con Bomba de Precisión' : 'Metered Foam Dispenser Bottle');
+        vehicleObj.name = vehicleName || 'TrichoFoam™ Patented Vehicle';
+        vehicleObj.specs = isEs
+          ? 'Espuma de penetración rápida libre de propilenglicol con fitocomplejo TrichoTech™.'
+          : 'Rapid-penetration, propylene glycol-free foam carrier formulated with TrichoTech™ phytocomplex.';
+        posologyObj.title = isEs ? 'Pauta de Administración en Espuma' : 'Topical Foam Administration Protocol';
+        posologyObj.regimen = customPosology || (isEs ? '2 Pulsaciones Diarias' : '2 Pumps Daily');
+        posologyObj.timing = isEs ? 'Por la mañana o noche sobre cuero cabelludo seco' : 'Morning or evening onto dry scalp';
+        posologyObj.steps = [
+          {
+            step: 1,
+            title: isEs ? 'Dispensación' : 'Dispense Foam',
+            timing: isEs ? '2 Pulsaciones' : '2 Pumps',
+            instruction: isEs ? 'Presione el dosificador 2 veces directamente sobre la palma o yemas.' : 'Dispense 2 metered pumps of foam onto fingertips.'
+          },
+          {
+            step: 2,
+            title: isEs ? 'Distribución' : 'Application',
+            timing: isEs ? 'Zonas Afectadas' : 'Thinning Zones',
+            instruction: isEs ? 'Aplique separando mechones de cabello y masajee hasta absorción.' : 'Apply by parting hair and gently massage until fully absorbed.'
+          }
+        ];
+      } else {
+        // TrichoSol / Topical Solution (Default)
+        accentColor = '#0284c7'; // Blue
+        accentBg = '#e0f2fe';
+        badgeText += isEs ? ' · SOLUCIÓN MAGISTRAL TÓPICA' : ' · TOPICAL COMPOUNDED SOLUTION';
+        resolvedTitle = treatmentTitle || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)');
+        resolvedRoute = isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application';
+        resolvedVolume = volume || '100 mL';
+        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Topacio con Dosificador Cuentagotas / Spray de Precisión' : 'Amber Glass Bottle with Precision Dropper / Metered Spray');
+        vehicleObj.name = vehicleName || 'TrichoSol™ Liposomal Hydrophilic Base';
+        vehicleObj.specs = isEs 
+          ? 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación y descamación dérmica mientras maximiza la absorción transdérmica folicular continua.' 
+          : '100% Alcohol-Free & Propylene Glycol-Free hydrophilic liposomal vehicle. Eliminates scalp dermatitis and contact erythema while optimizing follicle transdermal uptake.';
+        
+        posologyObj.title = isEs ? 'Pauta de Administración Nocturna' : 'Nightly Administration Regimen (Topical Solution)';
+        posologyObj.regimen = customPosology || (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)');
+        posologyObj.timing = isEs ? 'Cada noche antes de acostarse sobre cuero cabelludo limpio y seco' : 'Nightly at bedtime onto clean, dry scalp';
+        posologyObj.steps = [
+          {
+            step: 1,
+            title: isEs ? 'Preparación del Cuero Cabelludo' : 'Scalp Preparation',
+            timing: isEs ? 'Paso 1' : 'Step 1',
+            instruction: isEs 
+              ? 'Asegúrese de que el cuero cabelludo esté completamente limpio y seco antes de la aplicación.' 
+              : 'Ensure the scalp is clean and completely dry before applying the solution.'
+          },
+          {
+            step: 2,
+            title: isEs ? 'Dosificación de Precisión' : 'Precision Dosing',
+            timing: isEs ? '1.0 mL / 4-5 Sprays' : '1.0 mL / 4-5 Sprays',
+            instruction: isEs 
+              ? 'Cargue exactamente 1.0 mL en el dosificador cuentagotas o aplique 4 a 5 pulverizaciones directamente sobre las áreas con miniaturización.' 
+              : 'Measure exactly 1.0 mL in the calibrated dropper or apply 4 to 5 metered sprays directly onto target thinning areas.'
+          },
+          {
+            step: 3,
+            title: isEs ? 'Masaje y Absorción Nocturna' : 'Fingertip Massage & Overnight Uptake',
+            timing: isEs ? '30-60 Segundos' : '30-60 Seconds',
+            instruction: isEs 
+              ? 'Distribuya suavemente con la yema de los dedos en movimientos circulares durante 30 a 60 segundos hasta su completa absorción. Dejar actuar durante la noche; no lavar el cabello hasta la mañana siguiente.' 
+              : 'Gently distribute with fingertips in circular motions for 30 to 60 seconds until absorbed. Leave on scalp overnight; do not wash hair until the following morning.'
+          },
+          {
+            step: 4,
+            title: isEs ? 'Lavado de Manos Post-Aplicación' : 'Post-Application Cleansing',
+            timing: isEs ? 'Inmediato' : 'Immediate',
+            instruction: isEs 
+              ? 'Lávese las manos con agua y jabón inmediatamente después de finalizar la aplicación.' 
+              : 'Wash hands thoroughly with soap and water immediately following application.'
+          }
+        ];
+      }
+
+      // If doctor posology exists, use its text
+      if (customPosology && customPosology.length > 5 && customPosology !== posologyObj.regimen) {
+        posologyObj.regimen = customPosology;
+      }
+
+      return {
+        id: `formulation-${index}`,
+        index,
+        accentColor,
+        accentBg,
+        badge: badgeText,
+        title: resolvedTitle,
+        subtitle: rx.treatmentProgram || rx.fagron?.testName || (isEs 
+          ? 'Formulación magistral calibrada al perfil clínico del paciente' 
+          : 'Compounded formulation calibrated to patient clinical profile'),
+        route: resolvedRoute,
+        volume: resolvedVolume,
+        duration: rx.duration || '30 days',
+        container: resolvedContainer,
+        vehicle: vehicleObj,
+        apis: apis.map((api, aIdx) => ({
+          id: api.id || `api-${index}-${aIdx + 1}`,
+          tag: `API ${aIdx + 1}`,
+          name: api.productName || api.activeIngredient || api.name || `Active Compound ${aIdx + 1}`,
+          dosage: api.dosage || api.dose || api.strength || api.concentration || '—',
+          role: api.role || (isOral 
+            ? (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')
+            : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient')),
+          indication: api.indication || (isTrichoOil 
+            ? (isEs ? 'Higiene & Microcirculación Folicular' : 'Scalp Care & Follicular Microcirculation')
+            : (isOral 
+              ? (isEs ? 'Soporte Metabólico Sistémico' : 'Systemic Metabolic Fortification')
+              : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'))),
+          action: api.instructions || api.action || (isEs 
+            ? 'Tratamiento formulado a medida según el perfil clínico del paciente.' 
+            : 'Custom compounded active ingredient calibrated to patient clinical profile.'),
+          rationale: api.rationale || null
+        })),
+        posology: posologyObj
+      };
+    };
+
+    // 1. If explicit multi-block formulations already exist on the rx document
+    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 1) {
+      const totalBlocks = rx.formulationBlocks.length;
+      return rx.formulationBlocks.map((block, idx) => {
+        return buildVehicleData({
+          index: idx + 1,
+          totalCount: totalBlocks,
+          vehicleName: block.vehicle?.name || block.vehicleName || '',
+          treatmentTitle: block.treatmentType || block.treatmentProgram || '',
+          route: block.route || block.dispensingForm || '',
+          volume: block.volume || null,
+          customPosology: block.posology || '',
+          customInstructions: block.instructions || '',
+          apis: block.apis || block.items || [],
+          containerType: block.container || ''
+        });
       });
     }
 
-    // 2. Separate rawLines into distinct Vehicle Formulations
+    // 2. Intelligent separation of rawLines into Distinct Vehicle Formulations
     const vehicleLines = [];
-    const topicalLines = [];
-    const oralLines = [];
+    const trichoSolItems = [];
+    const trichoOilItems = [];
+    const oralItems = [];
+    const generalItems = [];
 
     rawLines.forEach((item) => {
-      const nameLower = (item.name || item.productName || '').toLowerCase();
-      const dosage = (item.dosage || item.dose || item.strength || '').toLowerCase();
-      const form = (item.dosageForm || item.form || '').toLowerCase();
-      const route = (item.route || '').toLowerCase();
+      const nameLower = (item.name || item.productName || item.activeIngredient || '').toLowerCase();
+      const formLower = (item.dosageForm || item.form || '').toLowerCase();
+      const routeLower = (item.route || '').toLowerCase();
+      const blockLower = (item.formulationBlock || '').toLowerCase();
 
-      const isVehicleLine = Boolean(
-        item.isVehicleOrBase || 
-        item._isVehicleOrBase || 
-        item.isVehicle || 
-        form.includes('vehicle') ||
-        nameLower.includes('trichosol') || 
-        nameLower.includes('trichooil') || 
-        nameLower.includes('trichofoam') || 
+      const isVeh = Boolean(
+        item.isVehicleOrBase ||
+        item._isVehicleOrBase ||
+        item.isVehicle ||
+        formLower.includes('vehicle') ||
+        nameLower.includes('trichosol') ||
+        nameLower.includes('trichooil') ||
+        nameLower.includes('trichofoam') ||
         nameLower.includes('pentravan') ||
         nameLower.includes('vehiculo') ||
         nameLower.includes('vehicle base')
       );
 
-      if (isVehicleLine) {
+      if (isVeh) {
         vehicleLines.push(item);
         return;
       }
 
-      const isOral = route.includes('oral') ||
-                     dosage.includes('mg') || 
-                     dosage.includes('mcg') || 
-                     dosage.includes('iu') ||
-                     nameLower.includes('melatonin') || 
-                     nameLower.includes('saw palmetto') || 
-                     nameLower.includes('ginkgo') || 
-                     nameLower.includes('vitamin') || 
-                     nameLower.includes('selenium') || 
-                     nameLower.includes('zinc') || 
-                     nameLower.includes('biotin') || 
-                     form.includes('capsule') || 
-                     form.includes('tablet');
+      // Check if item belongs to Scalp care / TrichoOil
+      const isOilItem = blockLower.includes('trichooil') || 
+                        blockLower.includes('scalp care') || 
+                        blockLower.includes('higiene') || 
+                        blockLower.includes('hygiene') ||
+                        nameLower.includes('ginseng') || 
+                        nameLower.includes('ginkgo') || 
+                        (nameLower.includes('vitamin e') && !routeLower.includes('oral')) ||
+                        (nameLower.includes('tocopherol') && !routeLower.includes('oral'));
 
-      if (isOral) {
-        oralLines.push(item);
+      // Check if oral
+      const isOralItem = routeLower.includes('oral') ||
+                         formLower.includes('capsule') || 
+                         formLower.includes('tablet') ||
+                         blockLower.includes('oral') ||
+                         blockLower.includes('capsule');
+
+      // Check if TrichoSol / Topical Solution
+      const isSolItem = blockLower.includes('trichosol') || 
+                        blockLower.includes('topical treatment') ||
+                        nameLower.includes('minoxidil') || 
+                        nameLower.includes('spironolactone') || 
+                        nameLower.includes('arginine') || 
+                        nameLower.includes('latanoprost') || 
+                        nameLower.includes('estradiol');
+
+      if (isOilItem) {
+        trichoOilItems.push(item);
+      } else if (isOralItem) {
+        oralItems.push(item);
+      } else if (isSolItem) {
+        trichoSolItems.push(item);
       } else {
-        topicalLines.push(item);
+        generalItems.push(item);
       }
     });
 
-    const results = [];
-    const totalPreparations = (topicalLines.length > 0 ? 1 : 0) + (oralLines.length > 0 ? 1 : 0) || 1;
+    // If general items exist without specific group:
+    if (generalItems.length > 0) {
+      if (trichoSolItems.length > 0 || trichoOilItems.length > 0) {
+        trichoSolItems.push(...generalItems);
+      } else if (oralItems.length > 0) {
+        oralItems.push(...generalItems);
+      } else {
+        trichoSolItems.push(...generalItems);
+      }
+    }
 
-    // Preparation 1: Topical Compounded Solution
-    if (topicalLines.length > 0 || (oralLines.length === 0 && rawLines.length > 0)) {
-      const activeItems = topicalLines.length > 0 ? topicalLines : rawLines;
-      const detectedVeh = vehicleLines.find(v => (v.name || '').toLowerCase().includes('tricho'))?.name || 'TrichoSol™ (Fagron)';
-      
-      results.push({
-        id: 'prep-topical',
-        index: 1,
-        badge: isEs 
-          ? `PREPARACIÓN 1 DE ${totalPreparations} · FÓRMULA MAGISTRAL TÓPICA` 
-          : `PREPARATION 1 OF ${totalPreparations} · TOPICAL COMPOUNDED FORMULATION`,
-        title: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada' : 'Personalized Follicular Therapy (Topical Scalp Solution)'),
-        subtitle: rx.treatmentProgram || rx.fagron?.testName || (isEs 
-          ? 'Recomendada tras Análisis Genético & Evaluación Médica' 
-          : 'Recommended Following Clinical & Genetic Assessment'),
+    // Determine how many distinct vehicle formulations exist
+    const activeBlocks = [];
+
+    // Preparation A: Topical Solution (TrichoSol)
+    if (trichoSolItems.length > 0 || (trichoOilItems.length === 0 && oralItems.length === 0 && rawLines.length > 0)) {
+      const solItems = trichoSolItems.length > 0 ? trichoSolItems : rawLines.filter(i => !i._isVehicleOrBase);
+      const solVeh = vehicleLines.find(v => (v.name || '').toLowerCase().includes('trichosol'))?.name || 'TrichoSol™ (Fagron)';
+      activeBlocks.push({
+        type: 'trichosol',
+        vehicleName: solVeh,
+        treatmentTitle: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'),
         route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
         volume: rx.volume || '100 mL',
-        duration: rx.duration || '30 days',
-        container: isEs ? 'Frasco Topacio con Dosificador Cuentagotas / Spray de Precisión' : 'Amber Glass Bottle with Precision Dropper / Metered Spray',
-        vehicle: {
-          tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
-          name: detectedVeh.includes('Tricho') ? `${detectedVeh} — Liposomal Hydrophilic Base` : 'TrichoSol™ Liposomal Hydrophilic Base',
-          volume: rx.volume || '100 mL',
-          specs: isEs 
-            ? 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación y descamación dérmica mientras maximiza la absorción transdérmica folicular continua.' 
-            : '100% Alcohol-Free & Propylene Glycol-Free hydrophilic liposomal vehicle. Eliminates scalp dermatitis and contact erythema while optimizing follicle transdermal uptake.'
-        },
-        apis: activeItems.map((item, idx) => ({
-          id: item.id || `api-topical-${idx + 1}`,
-          tag: `API ${idx + 1}`,
-          name: item.productName || item.activeIngredient || item.name || `Active Compound ${idx + 1}`,
-          dosage: item.dosage || item.dose || item.strength || item.concentration || '—',
-          role: item.role || (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient'),
-          indication: item.indication || (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'),
-          action: item.instructions || item.action || (isEs 
-            ? 'Tratamiento formulado a medida según el perfil clínico y farmacogenómico del paciente.' 
-            : "Custom compounded active ingredient calibrated to the patient's individual clinical profile."),
-          rationale: item.rationale || (rx.fagron?.testName ? (isEs ? 'Recomendación TrichoTest™ para respuesta folicular óptima' : 'TrichoTest™ recommended formulation') : null)
-        })),
-        posology: {
-          title: isEs ? 'Pauta de Administración Tópica' : 'Administration Regimen for Topical Scalp Solution',
-          regimen: rx.posology || (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)'),
-          timing: isEs ? 'Cada noche antes de acostarse sobre cuero cabelludo limpio y seco' : 'Nightly at bedtime onto clean, dry scalp',
-          duration: rx.duration || (isEs ? '30 días (1 frasco de 100 mL)' : '30-Day Course (100 mL Bottle)'),
-          steps: [
-            {
-              step: 1,
-              title: isEs ? 'Preparación del Cuero Cabelludo' : 'Scalp Preparation',
-              timing: isEs ? 'Paso 1' : 'Step 1',
-              instruction: isEs 
-                ? 'Asegúrese de que el cuero cabelludo esté completamente limpio y seco antes de la aplicación.' 
-                : 'Ensure the scalp is clean and completely dry before applying the solution.'
-            },
-            {
-              step: 2,
-              title: isEs ? 'Dosificación de Precisión' : 'Precision Dosing',
-              timing: isEs ? '1.0 mL / 4-5 Sprays' : '1.0 mL / 4-5 Sprays',
-              instruction: isEs 
-                ? 'Cargue exactamente 1.0 mL en el cuentagotas o aplique 4 a 5 pulverizaciones directamente sobre las áreas con miniaturización o pérdida capilar.' 
-                : 'Measure exactly 1.0 mL in the calibrated dropper or apply 4 to 5 metered sprays directly onto target thinning areas.'
-            },
-            {
-              step: 3,
-              title: isEs ? 'Masaje y Absorción' : 'Fingertip Massage & Uptake',
-              timing: isEs ? '30-60 Segundos' : '30-60 Seconds',
-              instruction: isEs 
-                ? 'Distribuya suavemente con la yema de los dedos en movimientos circulares durante 30 a 60 segundos hasta su completa absorción. No aclare el cabello durante al menos 4 horas.' 
-                : 'Gently distribute with fingertips using circular motions for 30 to 60 seconds until absorbed. Do not rinse or wash hair for at least 4 hours.'
-            },
-            {
-              step: 4,
-              title: isEs ? 'Lavado de Manos Post-Aplicación' : 'Post-Application Cleansing',
-              timing: isEs ? 'Inmediato' : 'Immediate',
-              instruction: isEs 
-                ? 'Lávese las manos con agua y jabón inmediatamente después de finalizar la aplicación.' 
-                : 'Wash hands thoroughly with soap and water immediately following application.'
-            }
-          ]
-        }
+        customPosology: rx.posology || '',
+        apis: solItems
       });
     }
 
-    // Preparation 2: Oral Compounded Formulation
-    if (oralLines.length > 0) {
-      const oralIndex = results.length + 1;
-      results.push({
-        id: 'prep-oral',
-        index: oralIndex,
-        badge: isEs 
-          ? `PREPARACIÓN ${oralIndex} DE ${totalPreparations} · FÓRMULA MAGISTRAL ORAL` 
-          : `PREPARATION ${oralIndex} OF ${totalPreparations} · ORAL COMPOUNDED FORMULATION`,
-        title: isEs ? 'Soporte Nutracéutico & Antiandrogénico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Compounded Capsules)',
-        subtitle: isEs 
-          ? 'Formulación oral micronizada en cápsulas de alta biodisponibilidad' 
-          : 'Pharmaceutical micronized oral formulation in high-bioavailability capsules',
+    // Preparation B: Scalp Care & Hygiene (TrichoOil)
+    if (trichoOilItems.length > 0) {
+      const oilVeh = vehicleLines.find(v => (v.name || '').toLowerCase().includes('trichooil'))?.name || 'TrichoOil™ (Fagron)';
+      activeBlocks.push({
+        type: 'trichooil',
+        vehicleName: oilVeh,
+        treatmentTitle: isEs ? 'Higiene & Cuidado Folicular (TrichoOil™)' : 'Scalp Care & Hygiene (TrichoOil™)',
+        route: isEs ? 'Aplicación Tópica / Masaje Capilar' : 'Topical Scalp Application & Massage',
+        volume: '30 mL',
+        customPosology: isEs ? '1–2 Veces por Semana (Tratamiento Pre-Lavado)' : '1–2 Times Weekly (Pre-Shampoo Treatment)',
+        apis: trichoOilItems
+      });
+    }
+
+    // Preparation C: Oral Compounded Capsules
+    if (oralItems.length > 0) {
+      activeBlocks.push({
+        type: 'oral',
+        vehicleName: isEs ? 'Cápsulas de Gelatina / Celulosa Micronizada' : 'Micronized Compounded Hard Capsules Base',
+        treatmentTitle: isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Capsules)',
         route: isEs ? 'Vía Oral' : 'Oral Administration',
         volume: isEs ? '30 Cápsulas' : '30 Compounded Capsules',
-        duration: rx.duration || '30 days',
-        container: isEs ? 'Frasco Topacio Hermético con Cierre de Seguridad' : 'Safety-Sealed Amber Bottle with Desiccant Cap',
-        vehicle: {
-          tag: isEs ? 'VEHÍCULO ORAL' : 'ORAL VEHICLE BASE',
-          name: isEs ? 'Cápsulas de Gelatina / Celulosa Vegetal Micronizada' : 'Micronized Compounded Hard Gelatin / Vegetable Capsules',
-          volume: isEs ? '30 Cápsulas (Tratamiento Mensual)' : '30 Capsules (1-Month Supply)',
-          specs: isEs 
-            ? 'Base micronizada de grado farmacéutico para dispersión y absorción entérica homogénea sin irritación gástrica.' 
-            : 'Pharmaceutical-grade micronized powder excipient designed for consistent systemic gastrointestinal absorption without gastric irritation.'
-        },
-        apis: oralLines.map((item, idx) => ({
-          id: item.id || `api-oral-${idx + 1}`,
-          tag: `API ${idx + 1}`,
-          name: item.productName || item.activeIngredient || item.name || `Active Compound ${idx + 1}`,
-          dosage: item.dosage || item.dose || item.strength || item.concentration || (item.quantity ? `${item.quantity} un.` : '—'),
-          role: item.role || (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator'),
-          indication: item.indication || (isEs ? 'Soporte Metabólico & Folicular' : 'Metabolic & Follicular Fortification'),
-          action: item.instructions || item.action || (isEs 
-            ? 'Aporte de micronutrientes y fitoterapéuticos para optimizar el ciclo folicular sistémico.' 
-            : 'Provides targeted micronutrients and botanical anti-androgenic co-factors to support follicular growth.'),
-          rationale: item.rationale || null
-        })),
-        posology: {
-          title: isEs ? 'Pauta de Administración Oral' : 'Administration Regimen for Oral Capsules',
-          regimen: isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime',
-          timing: isEs ? 'Por la noche, junto con alimentos y un vaso de agua' : 'Nightly with food and a full glass of water',
-          duration: rx.duration || (isEs ? '30 días (1 frasco de 30 cápsulas)' : '30-Day Course (30 Capsules)'),
-          steps: [
-            {
-              step: 1,
-              title: isEs ? 'Toma Diaria con Agua' : 'Daily Oral Ingestion',
-              timing: isEs ? '1 Cápsula' : '1 Capsule',
-              instruction: isEs 
-                ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL).' 
-                : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL).'
-            },
-            {
-              step: 2,
-              title: isEs ? 'Momento de Administración' : 'Optimal Timing',
-              timing: isEs ? 'Cena / Antes de Dormir' : 'Dinner / Bedtime',
-              instruction: isEs 
-                ? 'Se recomienda tomar durante la cena o 30 minutos antes de dormir para maximizar la absorción y sinergia de los micronutrientes.' 
-                : 'Best taken with evening dinner or 30 minutes before sleep to optimize micronutrient absorption and tolerance.'
-            },
-            {
-              step: 3,
-              title: isEs ? 'Conservación' : 'Storage Conditions',
-              timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
-              instruction: isEs 
-                ? 'Mantener en lugar fresco y seco (inferior a 25°C), protegido de la luz solar directa y humedad.' 
-                : 'Store in a cool, dry place below 25°C (77°F), securely closed and protected from direct sunlight and moisture.'
-            }
-          ]
-        }
+        customPosology: isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime',
+        apis: oralItems
       });
     }
 
-    return results;
+    const totalCount = activeBlocks.length || 1;
+
+    return activeBlocks.map((b, idx) => {
+      return buildVehicleData({
+        index: idx + 1,
+        totalCount,
+        vehicleName: b.vehicleName,
+        treatmentTitle: b.treatmentTitle,
+        route: b.route,
+        volume: b.volume,
+        customPosology: b.customPosology,
+        apis: b.apis
+      });
+    });
   }, [rawLines, rx, isEs]);
 
   // Keep prescriptionApis for any auxiliary references
@@ -835,17 +952,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     width: 42,
                     height: 42,
                     borderRadius: '12px',
-                    background: formulation.id.includes('topical')
-                      ? 'linear-gradient(135deg, #0284c7, #0369a1)'
-                      : 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                    background: `linear-gradient(135deg, ${formulation.accentColor || '#0284c7'}, ${formulation.accentColor || '#0284c7'}dd)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#ffffff',
                     flexShrink: 0,
-                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.2)'
+                    boxShadow: `0 4px 12px ${(formulation.accentColor || '#0284c7')}33`
                   }}>
-                    {formulation.id.includes('topical') ? <FlaskConical size={22} /> : <Box size={22} />}
+                    {formulation.id.includes('oral') ? <Box size={22} /> : <FlaskConical size={22} />}
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
@@ -854,8 +969,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         fontWeight: 800,
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
-                        color: formulation.id.includes('topical') ? '#0284c7' : '#7c3aed',
-                        background: formulation.id.includes('topical') ? '#e0f2fe' : '#ede9fe',
+                        color: formulation.accentColor || '#0284c7',
+                        background: formulation.accentBg || '#e0f2fe',
                         padding: '2px 8px',
                         borderRadius: '6px'
                       }}>
@@ -897,7 +1012,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               <div style={{
                 background: '#f8fafc',
                 border: '1px solid #cbd5e1',
-                borderLeft: formulation.id.includes('topical') ? '4px solid #0284c7' : '4px solid #8b5cf6',
+                borderLeft: `4px solid ${formulation.accentColor || '#0284c7'}`,
                 borderRadius: '12px',
                 padding: '1.15rem 1.35rem',
                 display: 'flex',
@@ -913,7 +1028,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       textTransform: 'uppercase',
                       padding: '3px 8px',
                       borderRadius: '4px',
-                      background: formulation.id.includes('topical') ? '#0284c7' : '#7c3aed',
+                      background: formulation.accentColor || '#0284c7',
                       color: '#ffffff',
                       letterSpacing: '0.04em'
                     }}>
@@ -1061,7 +1176,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       width: 32,
                       height: 32,
                       borderRadius: '8px',
-                      background: '#0284c7',
+                      background: formulation.accentColor || '#0284c7',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1100,7 +1215,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       style={{
                         background: '#ffffff',
                         border: '1px solid #e2e8f0',
-                        borderLeft: '3px solid #0284c7',
+                        borderLeft: `3px solid ${formulation.accentColor || '#0284c7'}`,
                         borderRadius: '8px',
                         padding: '0.85rem 1rem',
                         display: 'flex',
@@ -1114,7 +1229,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                             width: 22,
                             height: 22,
                             borderRadius: '50%',
-                            background: '#0284c7',
+                            background: formulation.accentColor || '#0284c7',
                             color: '#ffffff',
                             fontSize: '0.74rem',
                             fontWeight: 800,
@@ -1152,14 +1267,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </div>
           ))}
         </div>
-
-        {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
-        {genomicsData && (
-          <GenomicsPrescriptionGuidanceCard
-            genomicsData={genomicsData}
-            lang={lang}
-          />
-        )}
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
         <div id="milestones-card" className="rx-card" style={{
@@ -1613,6 +1720,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
             )}
           </div>
+        )}
+
+        {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
+        {genomicsData && (
+          <GenomicsPrescriptionGuidanceCard
+            genomicsData={genomicsData}
+            lang={lang}
+          />
         )}
 
             {/* Standardized Institutional Footer with Reference */}

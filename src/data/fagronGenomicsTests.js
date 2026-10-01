@@ -51,6 +51,55 @@ export const FAGRON_GENOMICS_REGISTRY = {
         apiMatch: ['minoxidil'],
         rationaleEn: 'Correlates follicular sulfotransferase (SULT1A1) enzymatic competence with topical vs oral Minoxidil activation, determining optimal response thresholds.',
         rationaleEs: 'Correlaciona la actividad enzimática de la sulfotransferasa folicular (SULT1A1) para optimizar la bioactivación de Minoxidil.'
+      },
+      {
+        pathwayEn: 'Androgen Receptor Antagonism & DHT Modulation (AR / SRD5A)',
+        pathwayEs: 'Antagonismo de Receptores Androgénicos & Modulación DHT (AR / SRD5A)',
+        apiMatch: ['spironolactone', 'espironolactona'],
+        rationaleEn: 'Patients with heightened androgen sensitivity or 5α-reductase expression benefit from topical Spironolactone, competitively antagonizing androgen receptor binding within dermal papilla cells without inducing systemic hormonal imbalances.',
+        rationaleEs: 'Pacientes con hipersensibilidad androgénica se benefician de Espironolactona tópica, bloqueando competitivamente la unión a receptores de andrógenos a nivel folicular sin desequilibrio hormonal sistémico.'
+      },
+      {
+        pathwayEn: 'Nitric Oxide Synthesis & Microvascular Perfusion (NOS3)',
+        pathwayEs: 'Síntesis de Óxido Nítrico & Perfusión Microvascular (NOS3)',
+        apiMatch: ['l-arginine', 'arginine', 'l-arginina', 'arginina'],
+        rationaleEn: 'L-Arginine serves as the physiological substrate for endothelial nitric oxide synthase (eNOS), promoting vascular relaxation in the dermal papilla capillary network to maximize nutrient and oxygen delivery to the hair bulb.',
+        rationaleEs: 'La L-Arginina es el sustrato fisiológico de la óxido nítrico sintasa (eNOS), estimulando la vasodilatación del lecho capilar papilar y maximizando el aporte de nutrientes al bulbo folicular.'
+      },
+      {
+        pathwayEn: 'Follicular Proliferation & Anagen Phase Induction (VEGF / Dermal Papilla)',
+        pathwayEs: 'Proliferación Folicular & Inducción de Fase Anágena (VEGF / Papila Dérmica)',
+        apiMatch: ['ginseng', 'panax ginseng'],
+        rationaleEn: 'Panax Ginseng ginsenosides stimulate dermal papilla cell proliferation and upregulate Vascular Endothelial Growth Factor (VEGF), counteracting early catagen entry and promoting sustained follicular cycling.',
+        rationaleEs: 'Los ginsenósidos de Panax Ginseng estimulan la proliferación de células de la papila dérmica e incrementan la expresión de VEGF, retrasando la fase catágena y prolongando el crecimiento anágeno.'
+      },
+      {
+        pathwayEn: 'Scalp Microcirculation & Free-Radical Antioxidant Shield',
+        pathwayEs: 'Microcirculación del Cuero Cabelludo & Escudo Antioxidante',
+        apiMatch: ['ginkgo', 'ginkgo biloba'],
+        rationaleEn: 'Standardized Ginkgo Biloba flavonoids improve microvascular blood flow to peripheral scalp capillary beds and provide potent free-radical scavenging, protecting the hair follicle stem cell niche against oxidative stress.',
+        rationaleEs: 'Los flavonoides estandarizados de Ginkgo Biloba optimizan el flujo microvascular periférico del cuero cabelludo y ofrecen protección antioxidante contra el estrés oxidativo folicular.'
+      },
+      {
+        pathwayEn: 'Cell Membrane Lipid Peroxidation Shield & Scalp Sebum Balance',
+        pathwayEs: 'Protección contra Peroxidación Lipídica & Barrera Cutánea',
+        apiMatch: ['vitamin e', 'vitamina e', 'tocopherol', 'tocoferol', 'alpha-tocopherol', 'alfa-tocoferol'],
+        rationaleEn: 'Alpha-Tocopherol acts as a primary lipophilic antioxidant, preventing peroxidation of follicular cell membrane lipids, maintaining scalp cutaneous barrier integrity and mitigating oxidative damage.',
+        rationaleEs: 'El Alfa-Tocoferol actúa como antioxidante lipofílico primario, previniendo la peroxidación lipídica de las membranas celulares foliculares y fortaleciendo la barrera cutánea del cuero cabelludo.'
+      },
+      {
+        pathwayEn: 'Phosphodiesterase Inhibition & Keratinocyte Proliferation',
+        pathwayEs: 'Inhibición de Fosfodiesterasa & Proliferación de Queratinocitos',
+        apiMatch: ['caffeine', 'cafeina', 'cafeína'],
+        rationaleEn: 'Caffeine inhibits intracellular phosphodiesterase, increasing cyclic AMP (cAMP) levels to stimulate follicular keratinocyte proliferation and counteract testosterone-induced miniaturization.',
+        rationaleEs: 'La cafeína inhibe la fosfodiesterasa intracelular, elevando el AMP cíclico (cAMP) para estimular la proliferación de queratinocitos foliculares y frenar la miniaturización.'
+      },
+      {
+        pathwayEn: 'Hair Follicle Chronobiology & Clock Gene Regulation',
+        pathwayEs: 'Cronobiología Folicular & Regulación de Genes Reloj',
+        apiMatch: ['melatonin', 'melatonina'],
+        rationaleEn: 'Melatonin directly modulates hair follicle growth through high-affinity MT1/MT2 receptors, acting as a potent localized chronobiological regulator and hydroxyl radical scavenger.',
+        rationaleEs: 'La melatonina modula el crecimiento del folículo piloso mediante receptores MT1/MT2, actuando como regulador cronobiológico y potente barredor de radicales libres.'
       }
     ],
     recommendedVehicle: {
@@ -198,7 +247,7 @@ export function detectFagronGenomicsTest(rx) {
       testKey: 'trichotest',
       test,
       boxId: rawBoxId || (rxId.includes('11774') ? 'BOX-FAGRON-TRICHO-11774' : null),
-      matchedPathways: matchedPathways.length > 0 ? matchedPathways : test.pathways.slice(0, 3)
+      matchedPathways: matchedPathways
     };
   }
 

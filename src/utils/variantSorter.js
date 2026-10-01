@@ -29,25 +29,42 @@ export function deduplicateVariants(variants = []) {
   const map = new Map();
   for (const v of variants) {
     if (!v) continue;
-    const rawDose = (v.dosage || v.strength || v.name || '').trim().toLowerCase();
-    const cleanDose = rawDose.replace(/\s+/g, '').replace(/\.0+mg/i, 'mg');
-    const cleanFormat = (v.presentation || v.format || 'vial').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    const key = `${cleanDose}__${cleanFormat}`;
+    const rawDose = (v.dosage || v.dose || v.strength || v.name || '').trim().toLowerCase();
+    const cleanDose = rawDose.replace(/\s+/g, '').replace(/\.0+mg/i, 'mg').replace(/bottles?/g, 'vials');
+    
+    // Normalize container types: bottles, vials, boxes for the same volume/dose should map to canonical liquid container
+    let cleanFormat = (v.presentation || v.format || 'vial').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanFormat.includes('bottle') || cleanFormat.includes('vial') || cleanFormat.includes('box')) {
+      cleanFormat = 'vial';
+    } else if (cleanFormat.includes('spray') || cleanFormat.includes('nasal')) {
+      cleanFormat = 'spray';
+    } else if (cleanFormat.includes('pen')) {
+      cleanFormat = 'pen';
+    } else if (cleanFormat.includes('capsule') || cleanFormat.includes('pill')) {
+      cleanFormat = 'capsule';
+    }
+
+    const supp = (v.supplierId || v.supplier || '').toLowerCase().replace(/^supplier-/, '');
+    const key = `${supp}__${cleanDose}__${cleanFormat}`;
 
     if (!map.has(key)) {
       map.set(key, v);
     } else {
       const existing = map.get(key);
-      const existingPrice = Number(existing.price || existing.unitPrice || 0);
-      const newPrice = Number(v.price || v.unitPrice || 0);
-      // Prefer variant with a valid price over unpriced
-      if (newPrice > 0 && existingPrice === 0) {
+      const existingPrice = Number(existing.price || existing.unitPrice || existing.unit_price || 0);
+      const newPrice = Number(v.price || v.unitPrice || v.unit_price || 0);
+      
+      const existingHasKit = Boolean(existing.kitPrice || existing.tier10UnitPrice || existing.quantityPerKit > 1 || existing.pricing?.wholesale?.kit);
+      const newHasKit = Boolean(v.kitPrice || v.tier10UnitPrice || v.quantityPerKit > 1 || v.pricing?.wholesale?.kit);
+
+      // Prefer variant with kit/volume tier info or higher completeness
+      if (newHasKit && !existingHasKit) {
         map.set(key, { ...existing, ...v });
-      } else if (newPrice > 0 && existingPrice > 0) {
-        // If both have prices, keep the one with kit price or volume tier
-        if ((v.kitPrice || v.tier10UnitPrice) && !(existing.kitPrice || existing.tier10UnitPrice)) {
-          map.set(key, { ...existing, ...v });
-        }
+      } else if (newPrice > 0 && existingPrice === 0) {
+        map.set(key, { ...existing, ...v });
+      } else {
+        // Keep existing but merge missing fields from duplicate
+        map.set(key, { ...v, ...existing });
       }
     }
   }

@@ -268,50 +268,148 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     setEditingRx(rx);
   };
 
+  // Listen for View Prescription action dispatched from prescriptionColumns
+  useEffect(() => {
+    const handleViewEvent = (e) => {
+      if (e.detail?.rx) {
+        setSelectedItem(e.detail.rx);
+        loadProductsLazy();
+      }
+    };
+    window.addEventListener('OPEN_PRESCRIPTION_VIEW', handleViewEvent);
+    return () => window.removeEventListener('OPEN_PRESCRIPTION_VIEW', handleViewEvent);
+  }, [loadProductsLazy]);
+
   const prescriptionExpandableRender = useCallback((row) => {
-    if (!row._isSessionGroup) return null;
-    
-    return (
-      <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderTop: '1px dashed #cbd5e1' }}>
-        <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', color: '#475569' }}>Formulations in Session</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {row._sessionMembers.map(member => (
-            <div 
-              key={member.id} 
-              style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                padding: '0.75rem', 
-                backgroundColor: '#ffffff', 
-                border: '1px solid #e2e8f0', 
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-              onClick={() => { setSelectedItem(member); loadProductsLazy(); }}
-            >
-              <div>
-                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
-                  {member.treatmentType || 'Formulation'}
+    // ── SESSION GROUP: list each formulation member ─────────────────────────────────
+    if (row._isSessionGroup) {
+      return (
+        <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderTop: '1px dashed #cbd5e1' }}>
+          <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', color: '#475569' }}>Formulations in Session</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {row._sessionMembers.map(member => (
+              <div
+                key={member.id}
+                style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '0.75rem', backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer'
+                }}
+                onClick={() => { setSelectedItem(member); loadProductsLazy(); }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
+                    {member.treatmentType || 'Formulation'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {(member.items || []).map(i => i.name).join(', ') || 'No items'}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                  {(member.items || []).map(i => i.name).join(', ') || 'No items'}
-                </div>
-              </div>
-              <div>
-                <button 
-                  style={{
+                <div>
+                  <button style={{
                     padding: '4px 8px', backgroundColor: '#f1f5f9', color: '#475569',
                     border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
                     cursor: 'pointer'
-                  }}
-                >
-                  View Details
-                </button>
+                  }}>
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ── REGULAR ROW: show source details, items, and imported file ───────────────────
+    const rawSource = (row.source || 'manual').toLowerCase().trim();
+    const isImport = rawSource !== 'manual';
+    const items = row.items || row.compounds || row.products || [];
+    const importedFileUrl = row.fagron?.originalFileUrl || row.importedFileUrl || row.sourceFileUrl || null;
+    const importedFileName = row.fagron?.originalFileName || row.importedFileName || row.sourceFileName || null;
+    const sourceLabel = isImport
+      ? (rawSource === 'fagron' ? 'Fagron Genomics Report' :
+         rawSource === 'document' ? 'Scanned Document' :
+         rawSource === 'ai_report' ? 'AI Report' :
+         rawSource === 'protocol' ? 'Clinical Protocol' :
+         'Import')
+      : 'Manual Entry';
+
+    if (items.length === 0 && !importedFileUrl) return null;
+
+    return (
+      <div style={{
+        padding: '12px 16px',
+        background: '#f8fafc',
+        borderTop: '1px dashed #e2e8f0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+      }}>
+        {/* Source chip */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700,
+            background: isImport ? '#eff6ff' : '#f8fafc',
+            color: isImport ? '#2563eb' : '#64748b',
+            border: isImport ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+          }}>
+            {isImport ? '↑ Import' : '✏ Manual'}
+          </span>
+          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{sourceLabel}</span>
+        </div>
+
+        {/* Items list */}
+        {items.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '2px' }}>
+              Compounded APIs ({items.length})
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+              {items.map((item, idx) => (
+                <span key={idx} style={{
+                  padding: '2px 8px', borderRadius: '5px',
+                  background: '#ffffff', border: '1px solid #e2e8f0',
+                  fontSize: '0.76rem', color: '#334155', fontWeight: 500,
+                }}>
+                  {item.name || item.productName || `Item ${idx + 1}`}
+                  {item.dosage || item.dose ? <span style={{ color: '#94a3b8', marginLeft: '4px' }}>{item.dosage || item.dose}</span> : null}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Imported file link */}
+        {importedFileUrl && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '8px 10px', background: '#ffffff',
+            border: '1px solid #e2e8f0', borderRadius: '8px',
+          }}>
+            <FileText size={13} style={{ color: '#2563eb', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>Source file</div>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {importedFileName || 'Imported document'}
               </div>
             </div>
-          ))}
-        </div>
+            <a
+              href={importedFileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: '3px 8px', borderRadius: '5px',
+                background: '#eff6ff', color: '#2563eb',
+                border: '1px solid #bfdbfe',
+                fontSize: '0.7rem', fontWeight: 700,
+                textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+              }}
+            >
+              Open file
+            </a>
+          </div>
+        )}
       </div>
     );
   }, [loadProductsLazy]);
@@ -753,9 +851,9 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               onClick: () => { setSelectedItem(mobileActionRx); loadProductsLazy(); },
             },
             {
-              label: 'Edit Prescription',
-              icon: Edit3,
-              onClick: () => openDrawer('rx-builder', mobileActionRx?.id, { existingRx: mobileActionRx }),
+              label: 'View Prescription',
+              icon: Eye,
+              onClick: () => { setSelectedItem(mobileActionRx); loadProductsLazy(); setMobileActionRx(null); },
             },
             {
               label: 'Refill / Re-prescribe',

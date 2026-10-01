@@ -27,7 +27,11 @@ export default function SharedCatalogProductCard({
   hideMasterImage = false,
   t,
 }) {
-  const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
+  const cleanVariants = React.useMemo(() => {
+    return sortVariantsAscending(prod?.variants || [], true);
+  }, [prod?.variants]);
+
+  const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (cleanVariants[0]?.price || 0)) * fxMultiplier;
 
   const fdaStatus = React.useMemo(() => getFdaPeptideStatus(prod), [prod]);
 
@@ -197,7 +201,7 @@ export default function SharedCatalogProductCard({
           </div>
         </div>
 
-        {includePrices && prod.variants.length > 0 && (
+        {includePrices && cleanVariants.length > 0 && (
           <div className="mobile-hide" style={{
             backgroundColor: '#f8fafc',
             border: '1px solid #e2e8f0',
@@ -220,7 +224,7 @@ export default function SharedCatalogProductCard({
       <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderLeft: '3px solid #0284c7', borderRadius: '10px', padding: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid #e2e8f0' }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Package size={14} color="#0284c7" /> Available Formats & Dosages ({prod.variants.length})
+            <Package size={14} color="#0284c7" /> Available Formats & Dosages ({cleanVariants.length})
           </span>
           <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600 }}>
             Verified Analytical Grade
@@ -228,7 +232,7 @@ export default function SharedCatalogProductCard({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {sortVariantsAscending(prod.variants).map((v, vIdx) => {
+          {cleanVariants.map((v, vIdx) => {
             const displayPrice = (v.price > 0 ? v.price : 0) * fxMultiplier;
             const tier10Rate = (v.tier10UnitPrice && v.tier10UnitPrice > 0 ? v.tier10UnitPrice : (v.price > 0 ? v.price * 0.9 : 0)) * fxMultiplier;
             const kitDisplayPrice = (v.kitPrice && v.kitPrice > 0 ? v.kitPrice : tier10Rate * 10) * fxMultiplier;

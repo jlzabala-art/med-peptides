@@ -367,237 +367,174 @@ export default function PrescriptionDetailModal({
     <HighDensityDrawer
       isOpen={true}
       onClose={onClose}
-      width="min(1200px, calc(100vw - 280px))"
+      width="min(1100px, calc(100vw - 240px))"
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
         
         {/* ── Sticky Header Area ── */}
-        <div style={{ 
-          background: 'var(--surface)', 
+        <div className="rx-drawer-header" style={{
+          background: 'var(--surface)',
           borderBottom: '1px solid var(--border)',
           zIndex: 10,
+          position: 'sticky',
+          top: 0,
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}>
-          
-          {/* Top Row: Title, Subtitle, Actions & Close */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+
+          {/* Top Row: Avatar + Identity + Close */}
+          <div className="rx-drawer-top-row" style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'flex-start',
-            padding: '1.5rem 1.5rem 1rem 1.5rem',
-            gap: '1rem',
-            flexWrap: 'wrap'
+            padding: '1rem 1.25rem 0.75rem',
+            gap: '0.75rem',
           }}>
-            {/* Title & Patient Info */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
-              <PatientAvatar name={patient} size={56} />
-              <div style={{ minWidth: 0 }}>
-                <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  Prescription: {patient}
+            {/* Left: Avatar + Identity */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+              <PatientAvatar name={patient} size={44} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <h2 className="rx-drawer-title" style={{
+                    margin: 0, fontSize: '1.05rem', fontWeight: 700,
+                    color: 'var(--text-main)', whiteSpace: 'nowrap',
+                    overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+                  }}>
+                    {patient}
+                  </h2>
                   {(rx.version || 1) > 1 && (
-                    <span style={{ fontSize: '0.72rem', background: '#dbeafe', color: '#1e40af', padding: '0.15rem 0.55rem', borderRadius: '12px', fontWeight: 800 }}>
+                    <span style={{ fontSize: '0.7rem', background: '#dbeafe', color: '#1e40af', padding: '0.1rem 0.45rem', borderRadius: '10px', fontWeight: 800, flexShrink: 0 }}>
                       v{rx.version}
                     </span>
                   )}
-                </h2>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>Created: {date}</span>
+                  <StatusChip status={rx.status} />
                 </div>
-                {/* Protocol Link */}
+
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span>{date}</span>
+                  {doctor && <span>· Dr. {doctor}</span>}
+                </div>
+
                 {protocol && (
                   <div
-                    onClick={() =>
-                      onProtocolClick &&
-                      rx.protocolId &&
-                      onProtocolClick({ id: rx.protocolId, name: protocol })
-                    }
+                    onClick={() => onProtocolClick && rx.protocolId && onProtocolClick({ id: rx.protocolId, name: protocol })}
                     style={{
-                      fontSize: '0.85rem',
-                      color: '#6366f1',
-                      fontWeight: 600,
-                      marginTop: '0.3rem',
-                      cursor: onProtocolClick && rx.protocolId ? 'pointer' : 'default',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.3rem',
-                      padding: onProtocolClick && rx.protocolId ? '0.1rem 0.3rem' : '0',
-                      borderRadius: '4px',
-                      transition: 'background 0.1s',
+                      fontSize: '0.78rem', color: '#6366f1', fontWeight: 600,
+                      marginTop: '0.2rem', cursor: onProtocolClick && rx.protocolId ? 'pointer' : 'default',
+                      display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
                     }}
-                    onMouseEnter={(e) => {
-                      if (onProtocolClick && rx.protocolId)
-                        e.currentTarget.style.background = '#eef2ff';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '';
-                    }}
-                    title={onProtocolClick && rx.protocolId ? 'View protocol details' : ''}
                   >
                     {protocol}
-                    {onProtocolClick && rx.protocolId && (
-                      <span style={{ fontSize: '0.7rem', color: '#a5b4fc' }}>↗</span>
-                    )}
+                    {onProtocolClick && rx.protocolId && <span style={{ fontSize: '0.65rem', color: '#a5b4fc' }}>↗</span>}
                   </div>
                 )}
-                {/* Doctor & Manager Info */}
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.3rem', flexWrap: 'wrap' }}>
-                  {doctor && (
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Dr. {doctor}</span>
-                  )}
-                  {manager && (
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Manager: {manager}</span>
-                  )}
-                </div>
-                
+
                 {/* Session Group Badges */}
                 {rx.sessionId && (
-                  <div style={{ marginTop: '0.75rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', marginBottom: '0.3rem' }}>
-                      Session Group: {rx.treatmentProgram || 'Multiple Formulations'}
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#0f766e', color: '#fff', borderRadius: '4px', fontWeight: 500 }}>
-                        {rx.treatmentType || 'Current'}
-                      </span>
-                      {isLoadingRelated && <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Loading related...</span>}
-                      {relatedPrescriptions.map(rel => (
-                        <button
-                          key={rel.id}
-                          onClick={() => {
-                            if (onClose) onClose(); // Optionally close first if we can't navigate directly
-                            // If we can navigate directly:
-                            setCurrentRx(rel);
-                            setActiveTab('Overview');
-                          }}
-                          style={{ 
-                            fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#e2e8f0', color: '#334155', 
-                            borderRadius: '4px', fontWeight: 500, border: 'none', cursor: 'pointer' 
-                          }}
-                          title={`View ${rel.treatmentType || 'Related Formulation'}`}
-                        >
-                          {rel.treatmentType || 'Related Formulation'}
-                        </button>
-                      ))}
-                    </div>
+                  <div style={{ marginTop: '0.5rem', padding: '0.4rem 0.6rem', background: '#f8fafc', borderRadius: '6px', border: '1px dashed #cbd5e1', display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>{rx.treatmentProgram || 'Multi-formulation'}</span>
+                    <span style={{ fontSize: '0.72rem', padding: '1px 6px', background: '#0f766e', color: '#fff', borderRadius: '4px', fontWeight: 500 }}>{rx.treatmentType || 'Current'}</span>
+                    {relatedPrescriptions.map(rel => (
+                      <button key={rel.id} onClick={() => { setCurrentRx(rel); setActiveTab('Overview'); }}
+                        style={{ fontSize: '0.72rem', padding: '1px 6px', background: '#e2e8f0', color: '#334155', borderRadius: '4px', fontWeight: 500, border: 'none', cursor: 'pointer' }}>
+                        {rel.treatmentType || 'Related'}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Actions & Status */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <StatusChip status={rx.status} large />
-                <button 
-                  onClick={onClose}
-                  style={{ 
-                    background: 'var(--bg-main)',
-                    border: '1px solid var(--border)',
-                    cursor: 'pointer',
-                    padding: '0.45rem', 
-                    color: 'var(--text-secondary)',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-main)')}
-                >
-                  <X size={18} />
-                </button>
-              </div>
+            {/* Right: Close button */}
+            <button
+              onClick={onClose}
+              style={{
+                background: 'var(--bg-main)', border: '1px solid var(--border)',
+                cursor: 'pointer', padding: '0.4rem',
+                color: 'var(--text-secondary)', borderRadius: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
+              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-main)')}
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                <button
-                  disabled={isDrafting}
-                  onClick={handleAutoDraft}
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    borderRadius: '6px',
-                    border: 'none',
-                    background: 'var(--color-primary, #4f46e5)',
-                    color: 'white',
-                    fontWeight: 600,
-                    fontSize: '0.8rem',
-                    cursor: isDrafting ? 'wait' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    opacity: isDrafting ? 0.7 : 1
-                  }}
-                >
-                  <Wand2 size={13} /> {isDrafting ? 'Drafting...' : 'Zero-Click Quote'}
-                </button>
-                {['Approved', 'Active'].includes(rx.status) && (
-                  <button
-                    onClick={() => { window.location.href = `/admin/orders/new?sourceRx=${rx.id}`; }}
-                    style={{
-                      padding: '0.45rem 0.8rem',
-                      borderRadius: '6px',
-                      border: 'none',
-                      background: '#10b981',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                    }}
-                  >
-                    <Package size={13} /> Convert to Order
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    setActiveTab('items');
-                    if (onEdit) onEdit(rx);
-                  }}
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    borderRadius: '6px',
-                    border: '1px solid #bfdbfe',
-                    background: '#eff6ff',
-                    color: '#1d4ed8',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  <Edit size={13} /> Modify Formulation
-                </button>
-                <button
-                  onClick={handleApprove}
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-main)',
-                    color: 'var(--text-main)',
-                    fontWeight: 600,
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  <CheckCircle size={13} /> Approve
-                </button>
-                {/* More Actions Dropdown */}
-                <div style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => setMoreOpen(!moreOpen)}
-                    style={{
-                      padding: '0.45rem 0.8rem',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border)',
-                      background: moreOpen ? 'var(--bg-hover)' : 'var(--bg-main)',
+          {/* Action Bar — collapses on mobile */}
+          <div className="rx-drawer-actions" style={{
+            padding: '0 1.25rem 0.75rem',
+            display: 'flex',
+            gap: '0.5rem',
+            flexWrap: 'wrap',
+          }}>
+            <button
+              disabled={isDrafting}
+              onClick={handleAutoDraft}
+              className="rx-action-btn rx-action-btn--primary"
+              style={{
+                padding: '0.4rem 0.75rem', borderRadius: '6px', border: 'none',
+                background: 'var(--color-primary, #4f46e5)', color: 'white',
+                fontWeight: 600, fontSize: '0.8rem',
+                cursor: isDrafting ? 'wait' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+                opacity: isDrafting ? 0.7 : 1,
+              }}
+            >
+              <Wand2 size={13} /> {isDrafting ? 'Drafting…' : 'Zero-Click Quote'}
+            </button>
+
+            <button
+              onClick={() => { setActiveTab('items'); if (onEdit) onEdit(rx); }}
+              className="rx-action-btn"
+              style={{
+                padding: '0.4rem 0.75rem', borderRadius: '6px',
+                border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8',
+                fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+              }}
+            >
+              <Edit size={13} /> Modify
+            </button>
+
+            <button
+              onClick={handleApprove}
+              className="rx-action-btn"
+              style={{
+                padding: '0.4rem 0.75rem', borderRadius: '6px',
+                border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)',
+                fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+              }}
+            >
+              <CheckCircle size={13} /> Approve
+            </button>
+
+            {['Approved', 'Active'].includes(rx.status) && (
+              <button
+                onClick={() => window.location.href = `/admin/orders/new?sourceRx=${rx.id}`}
+                className="rx-action-btn"
+                style={{
+                  padding: '0.4rem 0.75rem', borderRadius: '6px', border: 'none',
+                  background: '#10b981', color: 'white',
+                  fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '0.35rem',
+                }}
+              >
+                <Package size={13} /> To Order
+              </button>
+            )}
+
+            {/* More Actions Dropdown */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setMoreOpen(!moreOpen)}
+                style={{
+                  padding: '0.4rem 0.75rem', borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                  background: moreOpen ? 'var(--bg-hover)' : 'var(--bg-main)',
                       color: 'var(--text-main)',
                       fontWeight: 600,
                       fontSize: '0.8rem',
@@ -745,11 +682,9 @@ export default function PrescriptionDetailModal({
                   )}
                 </div>
               </div>
-            </div>
-          </div>
 
           {/* Clinical Summary Strip */}
-          <div style={{ padding: '0 1.5rem 1rem 1.5rem' }}>
+          <div style={{ padding: '0 1.25rem 0.75rem', overflowX: 'auto' }}>
             <div
               style={{
                 display: 'flex',
@@ -757,6 +692,7 @@ export default function PrescriptionDetailModal({
                 borderRadius: '10px',
                 overflow: 'hidden',
                 border: '1px solid #f1f5f9',
+                minWidth: 'min-content',
               }}
             >
               {[
@@ -826,6 +762,47 @@ export default function PrescriptionDetailModal({
         onClose={() => setPreviewPdfUrl(null)}
         fileUrl={previewPdfUrl}
       />
+
+      <style>{`
+        /* ── Prescription Drawer — Mobile Responsive ─────────────────── */
+        @media (max-width: 768px) {
+          .rx-drawer-header {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 20 !important;
+          }
+          .rx-drawer-top-row {
+            padding: 0.75rem 1rem 0.5rem !important;
+          }
+          .rx-drawer-title {
+            font-size: 0.95rem !important;
+            white-space: normal !important;
+          }
+          .rx-drawer-actions {
+            padding: 0 1rem 0.75rem !important;
+            gap: 0.4rem !important;
+          }
+          /* On mobile: hide the Zero-Click Quote and To Order buttons (they're in the More menu) */
+          .rx-action-btn--primary {
+            display: none !important;
+          }
+          /* Compact action buttons on mobile */
+          .rx-action-btn {
+            font-size: 0.75rem !important;
+            padding: 0.35rem 0.6rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .rx-drawer-actions {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            padding-bottom: 0.5rem !important;
+          }
+          .rx-action-btn {
+            flex-shrink: 0 !important;
+          }
+        }
+      `}</style>
     </HighDensityDrawer>
   );
 }

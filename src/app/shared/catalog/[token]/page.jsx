@@ -466,16 +466,8 @@ export default async function SharedCatalogPage({ params }) {
 
     const subVariants = variantsByProduct[data.id] || [];
     const docVariants = Array.isArray(data.variants) ? data.variants : [];
-    const variantMap = new Map();
-    for (const v of [...docVariants, ...subVariants]) {
-      if (v && (v.id || v.dosage || v.dose)) {
-        const vKey = v.id || `${v.dosage || v.dose}-${v.presentation || v.format || 'std'}`;
-        variantMap.set(vKey, v);
-      }
-    }
-    const productVariants = variantMap.size > 0
-      ? Array.from(variantMap.values())
-      : (subVariants.length > 0 ? subVariants : docVariants);
+    const combinedVariants = [...docVariants, ...subVariants].filter(v => v && (v.id || v.dosage || v.dose));
+    const productVariants = deduplicateVariants(combinedVariants);
 
     // Supplier filter — supports single or multiple suppliers (e.g. ['supplier-lotusland', 'supplier-magenta'] or 'supplier-lotusland,supplier-magenta')
     if (supplierId && supplierId !== 'all') {

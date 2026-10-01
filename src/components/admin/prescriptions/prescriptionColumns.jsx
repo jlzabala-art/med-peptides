@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag, Package, RotateCcw, MessageCircle } from '@/lib/icons';
+import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag, Package, RotateCcw, MessageCircle, Eye } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
@@ -148,50 +148,36 @@ export const getPrescriptionColumns = (options = {}) => {
       header: 'Source & Items',
       width: '14%',
       render: (rx) => {
-        const sourceMap = {
-          fagron:    { label: 'Fagron',    color: '#db2777', bg: '#fdf2f8' },
-          document:  { label: 'Doc Upload',color: '#2563eb', bg: '#eff6ff' },
-          protocol:  { label: 'Protocol',  color: '#0d9488', bg: '#f0fdfa' },
-          items:     { label: 'Items',     color: '#7c3aed', bg: '#f5f3ff' },
-          ai_report: { label: 'AI Report', color: '#4f46e5', bg: '#eef2ff' },
-          manual:    { label: 'Manual',    color: '#475569', bg: '#f8fafc' },
-        };
+        // Determine if this is an AI/Fagron import or a manual entry
         const rawSource = (rx.source || 'manual').toLowerCase().trim();
-        const meta = sourceMap[rawSource] || sourceMap.manual;
-        
-        if (rx._isSessionGroup) {
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-              {rx.treatmentProgram && (
-                <span style={{ display: 'inline-block', padding: '1px 6px', borderRadius: '4px', background: '#fdf2f8', color: '#db2777', fontSize: '0.72rem', fontWeight: 700, width: 'fit-content', marginBottom: '2px' }}>
-                  {rx.treatmentProgram}
-                </span>
-              )}
-              <span style={{ display: 'inline-block', padding: '1px 6px', borderRadius: '4px', background: meta.bg, color: meta.color, fontSize: '0.72rem', fontWeight: 700, width: 'fit-content' }}>
-                {meta.label}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{rx._sessionCount} formulations</span>
-            </div>
-          );
-        }
+        const isImport = rawSource !== 'manual';
+
+        const badge = isImport
+          ? { label: 'Import', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' }
+          : { label: 'Manual', color: '#475569', bg: '#f8fafc', border: '#e2e8f0' };
 
         const apiCount = (rx.items || rx.compounds || []).length;
+
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-            {rx.treatmentProgram && (
-              <span style={{ display: 'inline-block', padding: '1px 6px', borderRadius: '4px', background: '#fdf2f8', color: '#db2777', fontSize: '0.72rem', fontWeight: 700, width: 'fit-content', marginBottom: '2px' }}>
-                {rx.treatmentProgram}
-              </span>
-            )}
-            <span style={{ display: 'inline-block', padding: '1px 6px', borderRadius: '4px', background: meta.bg, color: meta.color, fontSize: '0.72rem', fontWeight: 700, width: 'fit-content' }}>
-              {meta.label}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{
+              display: 'inline-block',
+              padding: '2px 8px',
+              borderRadius: '6px',
+              background: badge.bg,
+              color: badge.color,
+              border: `1px solid ${badge.border}`,
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              width: 'fit-content',
+              letterSpacing: '0.02em',
+            }}>
+              {badge.label}
             </span>
-            {rx.treatmentType ? (
-              <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 500 }}>{rx.treatmentType} ({apiCount} items)</span>
-            ) : (
-              apiCount > 0
-                ? <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{apiCount} item{apiCount !== 1 ? 's' : ''}</span>
-                : <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontStyle: 'italic' }}>No items</span>
+            {apiCount > 0 && (
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                {apiCount} item{apiCount !== 1 ? 's' : ''}
+              </span>
             )}
           </div>
         );
@@ -348,6 +334,18 @@ export const getPrescriptionColumns = (options = {}) => {
         }
         
         const actions = [
+          // ── PRIMARY QUICK ACTION: View Prescription ─────────────────────
+          {
+            type: 'action',
+            label: 'View Prescription',
+            icon: Eye,
+            isPrimary: true,
+            onClick: () => {
+              // Dispatches to the parent table's selectedItem state via a custom event
+              // so PrescriptionDetailModal opens (same as row click, but from action menu)
+              window.dispatchEvent(new CustomEvent('OPEN_PRESCRIPTION_VIEW', { detail: { rx } }));
+            }
+          },
           {
             type: 'clone',
             label: 'Clone / Re-emit Prescription',
@@ -358,11 +356,6 @@ export const getPrescriptionColumns = (options = {}) => {
                   toast.success('Cloning prescription...');
                 }
               }
-            },
-            {
-              type: 'edit',
-              label: 'Edit Prescription',
-              onClick: () => onEdit && onEdit(rx)
             },
             {
               type: 'sparkles',
