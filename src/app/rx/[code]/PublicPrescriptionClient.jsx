@@ -27,7 +27,8 @@ import {
   Award,
   Phone,
   Printer,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Box
 } from '@/lib/icons';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
@@ -227,152 +228,335 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       phase: 'Weeks 9 - 12',
       title: 'Shaft Thickening, Density & Consolidation',
       badge: 'Month 3',
-      description: 'Measurable caliber increase in hair shafts and visible density coverage. Completion of the 3-bottle course (300 ml). Follow-up clinical review with Dr. Hanieh Erdmann.'
-    }
-  ];
-
-  // Clinical Prescription APIs & Compounded Formulation (One API per line standard)
+      description: 'Measurable caliber increase in hair shafts and visible density coverage. Completion of the 3-bottle course (300  // ── Compounded Formulations Architecture (Grouped by Vehicle & Route with Dedicated Posology) ──
   const rawLines = rx.prescriptionLines || rx.items || rx.compounds || [];
 
-  const prescriptionApis = React.useMemo(() => {
-    if (Array.isArray(rawLines) && rawLines.length > 0) {
-      return rawLines.map((line, idx) => {
-        const isVehicle = Boolean(
-          line.isVehicleOrBase || 
-          line._isVehicleOrBase ||
-          line.isVehicle ||
-          line.dosageForm?.toLowerCase().includes('vehicle') ||
-          (line.productName || line.name || '').toLowerCase().includes('trichosol') ||
-          (line.productName || line.name || '').toLowerCase().includes('trichooil') ||
-          (line.productName || line.name || '').toLowerCase().includes('pentravan')
-        );
-
-        const name = line.productName || line.activeIngredient || line.name || (isEs ? `Componente ${idx + 1}` : `Compound Item ${idx + 1}`);
-        const dosage = line.dosage || line.dose || line.strength || line.concentration || '—';
-        const tag = isVehicle ? (isEs ? 'VEHÍCULO' : 'VEHICLE') : `API ${idx + 1}`;
-        
-        const role = line.role || (isVehicle 
-          ? (isEs ? 'Vehículo Magistral Liposomal' : 'Liposomal Compounding Vehicle')
-          : (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient'));
-          
-        const indication = line.indication || (isVehicle
-          ? (isEs ? 'Base de Aplicación Transdérmica' : 'Targeted Dermal Carrier')
-          : (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'));
-
-        const action = line.instructions || line.action || (isVehicle
-          ? (isEs ? 'Vehículo lipídico 100% libre de alcohol. Optimiza la absorción folicular y evita dermatitis por contacto.' : 'Alcohol-free hydrophilic lipid vehicle engineered for continuous follicular uptake without irritation.')
-          : (isEs ? `Tratamiento formulado a medida según el perfil clínico y farmacogenómico del paciente.` : `Custom compounded active ingredient calibrated to the patient's individual clinical profile.`));
-
-        const rationale = line.rationale || (rx.treatmentProgram 
-          ? (isEs ? `Prescrito bajo protocolo: ${rx.treatmentProgram}` : `Prescribed under program: ${rx.treatmentProgram}`)
-          : (rx.fagron?.testName ? (isEs ? `Selección TrichoTest™ para respuesta folicular óptima` : `TrichoTest™ recommended formulation`) : null));
-
+  const compoundedFormulations = React.useMemo(() => {
+    // 1. If explicit formulation blocks already exist on the rx document (e.g. from AI intake)
+    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0) {
+      return rx.formulationBlocks.map((block, idx) => {
+        const isTopical = (block.dispensingForm || block.route || '').toLowerCase().includes('topical') ||
+                          (block.treatmentType || '').toLowerCase().includes('topical') ||
+                          (block.treatmentType || '').toLowerCase().includes('follicular');
         return {
-          id: line.id || `api-${idx + 1}`,
-          tag,
-          isVehicle,
-          name,
-          dosage,
-          role,
-          indication,
-          action,
-          rationale,
-          formulationBlock: line.formulationBlock || null,
-          dosageForm: line.dosageForm || null,
-          route: line.route || null,
-          frequency: line.frequency || null,
-          quantity: line.quantity || 1
+          id: `block-${idx + 1}`,
+          index: idx + 1,
+          badge: isEs 
+            ? `PREPARACIÓN ${idx + 1} DE ${rx.formulationBlocks.length}` 
+            : `PREPARATION ${idx + 1} OF ${rx.formulationBlocks.length}`,
+          title: block.treatmentType || (isEs ? `Fórmula Magistral ${idx + 1}` : `Compounded Formulation ${idx + 1}`),
+          route: block.route || (isTopical ? (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application') : (isEs ? 'Vía Oral' : 'Oral Administration')),
+          volume: block.volume || rx.volume || (isTopical ? '100 mL' : '30 Capsules'),
+          container: isTopical 
+            ? (isEs ? 'Frasco Topacio con Dosificador Cuentagotas / Spray de Precisión' : 'Amber Glass Bottle with Precision Dropper / Metered Spray')
+            : (isEs ? 'Frasco Topacio Hermético con Cierre de Seguridad' : 'Safety-Sealed Amber Bottle with Desiccant Cap'),
+          vehicle: {
+            tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
+            name: block.vehicle?.name || block.vehicleName || (isTopical ? 'TrichoSol™ Liposomal Hydrophilic Base' : 'Compounded Micronized Capsule Base'),
+            volume: block.volume || rx.volume || (isTopical ? '100 mL' : '30 Capsules'),
+            specs: block.vehicle?.specs || (isTopical
+              ? (isEs ? '100% Libre de alcohol y propilenglicol. Maximiza la absorción transdérmica folicular sin dermatitis.' : '100% Alcohol-Free & Propylene Glycol-Free hydrophilic liposomal vehicle. Eliminates dermatitis while optimizing transdermal uptake.')
+              : (isEs ? 'Base micronizada de grado farmacéutico para dispersión entérica homogénea.' : 'Pharmaceutical-grade micronized powder excipient designed for consistent gastrointestinal absorption.'))
+          },
+          apis: (block.apis || block.items || []).map((api, aIdx) => ({
+            id: api.id || `api-${idx + 1}-${aIdx + 1}`,
+            tag: `API ${aIdx + 1}`,
+            name: api.productName || api.activeIngredient || api.name || `Active Ingredient ${aIdx + 1}`,
+            dosage: api.dosage || api.dose || api.strength || api.concentration || '—',
+            role: api.role || (isTopical 
+              ? (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient')
+              : (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator')),
+            indication: api.indication || (isTopical 
+              ? (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy')
+              : (isEs ? 'Soporte Metabólico & Folicular' : 'Metabolic & Follicular Fortification')),
+            action: api.instructions || api.action || (isEs 
+              ? 'Tratamiento formulado a medida según el perfil clínico del paciente.' 
+              : 'Custom compounded active ingredient calibrated to the patient clinical profile.'),
+            rationale: api.rationale || null
+          })),
+          posology: {
+            title: isEs ? 'Pauta Médica Específica para este Vehículo' : 'Specific Administration Regimen for this Vehicle',
+            regimen: block.posology || rx.posology || (isTopical ? (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)') : (isEs ? '1 Cápsula Diaria' : '1 Capsule Daily')),
+            timing: isTopical ? (isEs ? 'Cada noche antes de dormir sobre cuero cabelludo seco' : 'Nightly at bedtime on dry scalp') : (isEs ? 'Junto con la cena o antes de dormir' : 'With dinner or at bedtime'),
+            duration: block.duration || rx.duration || '30 days',
+            steps: isTopical ? [
+              {
+                step: 1,
+                title: isEs ? 'Preparación del Cuero Cabelludo' : 'Scalp Preparation',
+                timing: isEs ? 'Paso 1' : 'Step 1',
+                instruction: isEs 
+                  ? 'Asegúrese de que el cuero cabelludo esté completamente limpio y seco antes de la aplicación.' 
+                  : 'Ensure the scalp is clean and completely dry before applying the solution.'
+              },
+              {
+                step: 2,
+                title: isEs ? 'Dosificación de Precisión' : 'Precision Dosing',
+                timing: isEs ? '1.0 mL / 4-5 Sprays' : '1.0 mL / 4-5 Sprays',
+                instruction: isEs 
+                  ? 'Cargue exactamente 1.0 mL en el dosificador cuentagotas o aplique 4 a 5 pulverizaciones directamente sobre las áreas afectadas.' 
+                  : 'Measure exactly 1.0 mL in the calibrated dropper or apply 4 to 5 metered sprays directly onto target thinning areas.'
+              },
+              {
+                step: 3,
+                title: isEs ? 'Masaje y Absorción' : 'Fingertip Massage & Uptake',
+                timing: isEs ? '30-60 Segundos' : '30-60 Seconds',
+                instruction: isEs 
+                  ? 'Distribuya suavemente con la yema de los dedos en movimientos circulares durante 30 a 60 segundos hasta su completa absorción. No enjuagar durante al menos 4 horas.' 
+                  : 'Gently distribute with fingertips using circular motions for 30 to 60 seconds until absorbed. Do not rinse or wash hair for at least 4 hours.'
+              },
+              {
+                step: 4,
+                title: isEs ? 'Lavado de Manos Post-Aplicación' : 'Post-Application Cleansing',
+                timing: isEs ? 'Inmediato' : 'Immediate',
+                instruction: isEs 
+                  ? 'Lávese las manos con agua y jabón inmediatamente después de finalizar la aplicación.' 
+                  : 'Wash hands thoroughly with soap and water immediately following application.'
+              }
+            ] : [
+              {
+                step: 1,
+                title: isEs ? 'Toma Diaria con Agua' : 'Daily Oral Ingestion',
+                timing: isEs ? '1 Cápsula' : '1 Capsule',
+                instruction: isEs 
+                  ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL).' 
+                  : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL).'
+              },
+              {
+                step: 2,
+                title: isEs ? 'Momento de Administración' : 'Optimal Timing',
+                timing: isEs ? 'Cena / Antes de Dormir' : 'Dinner / Bedtime',
+                instruction: isEs 
+                  ? 'Se recomienda tomar durante la cena o 30 minutos antes de dormir para maximizar la absorción y sinergia de los micronutrientes.' 
+                  : 'Best taken with evening dinner or 30 minutes before sleep to optimize micronutrient absorption and tolerance.'
+              },
+              {
+                step: 3,
+                title: isEs ? 'Conservación' : 'Storage Conditions',
+                timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
+                instruction: isEs 
+                  ? 'Mantener en lugar fresco y seco (inferior a 25°C), protegido de la luz solar directa y humedad.' 
+                  : 'Store in a cool, dry place below 25°C (77°F), securely closed and protected from direct sunlight and moisture.'
+              }
+            ]
+          }
         };
       });
     }
 
-    // Fallback static demo if no lines are present
-    return isEs ? [
-      {
-        id: 'api-1',
-        tag: 'API 1',
-        name: 'Minoxidil Fagron',
-        dosage: '4 %',
-        role: 'Vasodilatador & Estimulador Folicular',
-        indication: 'Inductor Folicular de Fase Anágena',
-        action: 'Prolonga la duración de la fase anágena de crecimiento y reactiva folículos miniaturizados en reposo telógeno.',
-        rationale: 'Recomendación TrichoTest: Alta afinidad y respuesta del receptor folicular.'
-      },
-      {
-        id: 'api-2',
-        tag: 'API 2',
-        name: 'Espironolactona',
-        dosage: '1 %',
-        role: 'Antiandrógeno Tópico Folicular',
-        indication: 'Inhibidor del Receptor Androgénico',
-        action: 'Bloquea localmente los receptores androgénicos de la papila dérmica sin absorción sistémica detectable.',
-        rationale: 'Recomendación TrichoTest: Control de la sensibilidad androgénica folicular.'
-      },
-      {
-        id: 'api-3',
-        tag: 'API 3',
-        name: 'Arginina',
-        dosage: '1.5 %',
-        role: 'Aminoácido Precursor de Óxido Nítrico',
-        indication: 'Microcirculación & Perfusión Folicular',
-        action: 'Mejora la vascularización periférica de la raíz folicular y estimula la síntesis proteica del bulbo.',
-        rationale: 'Optimización de microcirculación capilar y proliferación de queratinocitos.'
-      },
-      {
-        id: 'veh-1',
-        tag: 'VEHÍCULO',
-        isVehicle: true,
-        name: 'TrichoSol™ (Fagron)',
-        dosage: '100 mL',
-        role: 'Vehículo Liposomal Hidrofílico Patentado',
-        indication: 'Base Lipídica 100% Libre de Alcohol',
-        action: 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación o dermatitis y maximiza la biodisponibilidad y penetración transdérmica folicular.',
-        rationale: 'Vehículo biocompatible de liberación sostenida patentado por Fagron.'
+    // 2. Separate rawLines into distinct Vehicle Formulations
+    const vehicleLines = [];
+    const topicalLines = [];
+    const oralLines = [];
+
+    rawLines.forEach((item) => {
+      const nameLower = (item.name || item.productName || '').toLowerCase();
+      const dosage = (item.dosage || item.dose || item.strength || '').toLowerCase();
+      const form = (item.dosageForm || item.form || '').toLowerCase();
+      const route = (item.route || '').toLowerCase();
+
+      const isVehicleLine = Boolean(
+        item.isVehicleOrBase || 
+        item._isVehicleOrBase || 
+        item.isVehicle || 
+        form.includes('vehicle') ||
+        nameLower.includes('trichosol') || 
+        nameLower.includes('trichooil') || 
+        nameLower.includes('trichofoam') || 
+        nameLower.includes('pentravan') ||
+        nameLower.includes('vehiculo') ||
+        nameLower.includes('vehicle base')
+      );
+
+      if (isVehicleLine) {
+        vehicleLines.push(item);
+        return;
       }
-    ] : [
-      {
-        id: 'api-1',
-        tag: 'API 1',
-        name: 'Minoxidil Fagron',
-        dosage: '4 %',
-        role: 'Vasodilator & Follicular Stimulator',
-        indication: 'Follicular Anagen Phase Inducer',
-        action: 'Prolongs the duration of the anagen growth cycle and reactivates dormant miniaturized hair follicles.',
-        rationale: 'Fagron TrichoTest Correlation: High follicular receptor responsiveness.'
-      },
-      {
-        id: 'api-2',
-        tag: 'API 2',
-        name: 'Spironolactone',
-        dosage: '1 %',
-        role: 'Topical Androgen Receptor Blocker',
-        indication: 'Local Androgenic Modulation',
-        action: 'Locally blocks androgen receptors in the dermal papilla without detectable systemic hormone absorption.',
-        rationale: 'Fagron TrichoTest Correlation: Targeted reduction of sensitivity in dermal papilla.'
-      },
-      {
-        id: 'api-3',
-        tag: 'API 3',
-        name: 'Arginine',
-        dosage: '1.5 %',
-        role: 'Nitric Oxide Precursor Amino Acid',
-        indication: 'Microvascular Follicular Perfusion',
-        action: 'Enhances peripheral follicular vascular supply and nourishes the dermal bulb.',
-        rationale: 'Follicular micro-vascularization and matrix keratinocyte proliferation.'
-      },
-      {
-        id: 'veh-1',
-        tag: 'VEHICLE',
-        isVehicle: true,
-        name: 'TrichoSol™ (Fagron)',
-        dosage: '100 mL',
-        role: 'Patented Liposomal Vehicle',
-        indication: '100% Alcohol & Propylene Glycol-Free',
-        action: '100% alcohol and propylene glycol-free hydrophilic lipid carrier. Prevents contact dermatitis and maximizes targeted follicular bioavailability.',
-        rationale: 'Patented Fagron phytocomplex carrier engineered for continuous follicular uptake.'
+
+      const isOral = route.includes('oral') ||
+                     dosage.includes('mg') || 
+                     dosage.includes('mcg') || 
+                     dosage.includes('iu') ||
+                     nameLower.includes('melatonin') || 
+                     nameLower.includes('saw palmetto') || 
+                     nameLower.includes('ginkgo') || 
+                     nameLower.includes('vitamin') || 
+                     nameLower.includes('selenium') || 
+                     nameLower.includes('zinc') || 
+                     nameLower.includes('biotin') || 
+                     form.includes('capsule') || 
+                     form.includes('tablet');
+
+      if (isOral) {
+        oralLines.push(item);
+      } else {
+        topicalLines.push(item);
       }
-    ];
-  }, [rawLines, isEs, rx.treatmentProgram, rx.fagron?.testName]);
+    });
+
+    const results = [];
+    const totalPreparations = (topicalLines.length > 0 ? 1 : 0) + (oralLines.length > 0 ? 1 : 0) || 1;
+
+    // Preparation 1: Topical Compounded Solution
+    if (topicalLines.length > 0 || (oralLines.length === 0 && rawLines.length > 0)) {
+      const activeItems = topicalLines.length > 0 ? topicalLines : rawLines;
+      const detectedVeh = vehicleLines.find(v => (v.name || '').toLowerCase().includes('tricho'))?.name || 'TrichoSol™ (Fagron)';
+      
+      results.push({
+        id: 'prep-topical',
+        index: 1,
+        badge: isEs 
+          ? `PREPARACIÓN 1 DE ${totalPreparations} · FÓRMULA MAGISTRAL TÓPICA` 
+          : `PREPARATION 1 OF ${totalPreparations} · TOPICAL COMPOUNDED FORMULATION`,
+        title: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada' : 'Personalized Follicular Therapy (Topical Scalp Solution)'),
+        subtitle: rx.treatmentProgram || rx.fagron?.testName || (isEs 
+          ? 'Recomendada tras Análisis Genético & Evaluación Médica' 
+          : 'Recommended Following Clinical & Genetic Assessment'),
+        route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
+        volume: rx.volume || '100 mL',
+        duration: rx.duration || '30 days',
+        container: isEs ? 'Frasco Topacio con Dosificador Cuentagotas / Spray de Precisión' : 'Amber Glass Bottle with Precision Dropper / Metered Spray',
+        vehicle: {
+          tag: isEs ? 'VEHÍCULO MAGISTRAL' : 'COMPOUNDING VEHICLE / BASE',
+          name: detectedVeh.includes('Tricho') ? `${detectedVeh} — Liposomal Hydrophilic Base` : 'TrichoSol™ Liposomal Hydrophilic Base',
+          volume: rx.volume || '100 mL',
+          specs: isEs 
+            ? 'Formulación 100% libre de alcohol y propilenglicol. Evita irritación y descamación dérmica mientras maximiza la absorción transdérmica folicular continua.' 
+            : '100% Alcohol-Free & Propylene Glycol-Free hydrophilic liposomal vehicle. Eliminates scalp dermatitis and contact erythema while optimizing follicle transdermal uptake.'
+        },
+        apis: activeItems.map((item, idx) => ({
+          id: item.id || `api-topical-${idx + 1}`,
+          tag: `API ${idx + 1}`,
+          name: item.productName || item.activeIngredient || item.name || `Active Compound ${idx + 1}`,
+          dosage: item.dosage || item.dose || item.strength || item.concentration || '—',
+          role: item.role || (isEs ? 'Principio Activo Farmacogenómico' : 'Pharmacogenomic Active Ingredient'),
+          indication: item.indication || (isEs ? 'Tratamiento Folicular Personalizado' : 'Personalized Follicular Therapy'),
+          action: item.instructions || item.action || (isEs 
+            ? 'Tratamiento formulado a medida según el perfil clínico y farmacogenómico del paciente.' 
+            : "Custom compounded active ingredient calibrated to the patient's individual clinical profile."),
+          rationale: item.rationale || (rx.fagron?.testName ? (isEs ? 'Recomendación TrichoTest™ para respuesta folicular óptima' : 'TrichoTest™ recommended formulation') : null)
+        })),
+        posology: {
+          title: isEs ? 'Pauta de Administración Tópica' : 'Administration Regimen for Topical Scalp Solution',
+          regimen: rx.posology || (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)'),
+          timing: isEs ? 'Cada noche antes de acostarse sobre cuero cabelludo limpio y seco' : 'Nightly at bedtime onto clean, dry scalp',
+          duration: rx.duration || (isEs ? '30 días (1 frasco de 100 mL)' : '30-Day Course (100 mL Bottle)'),
+          steps: [
+            {
+              step: 1,
+              title: isEs ? 'Preparación del Cuero Cabelludo' : 'Scalp Preparation',
+              timing: isEs ? 'Paso 1' : 'Step 1',
+              instruction: isEs 
+                ? 'Asegúrese de que el cuero cabelludo esté completamente limpio y seco antes de la aplicación.' 
+                : 'Ensure the scalp is clean and completely dry before applying the solution.'
+            },
+            {
+              step: 2,
+              title: isEs ? 'Dosificación de Precisión' : 'Precision Dosing',
+              timing: isEs ? '1.0 mL / 4-5 Sprays' : '1.0 mL / 4-5 Sprays',
+              instruction: isEs 
+                ? 'Cargue exactamente 1.0 mL en el cuentagotas o aplique 4 a 5 pulverizaciones directamente sobre las áreas con miniaturización o pérdida capilar.' 
+                : 'Measure exactly 1.0 mL in the calibrated dropper or apply 4 to 5 metered sprays directly onto target thinning areas.'
+            },
+            {
+              step: 3,
+              title: isEs ? 'Masaje y Absorción' : 'Fingertip Massage & Uptake',
+              timing: isEs ? '30-60 Segundos' : '30-60 Seconds',
+              instruction: isEs 
+                ? 'Distribuya suavemente con la yema de los dedos en movimientos circulares durante 30 a 60 segundos hasta su completa absorción. No aclare el cabello durante al menos 4 horas.' 
+                : 'Gently distribute with fingertips using circular motions for 30 to 60 seconds until absorbed. Do not rinse or wash hair for at least 4 hours.'
+            },
+            {
+              step: 4,
+              title: isEs ? 'Lavado de Manos Post-Aplicación' : 'Post-Application Cleansing',
+              timing: isEs ? 'Inmediato' : 'Immediate',
+              instruction: isEs 
+                ? 'Lávese las manos con agua y jabón inmediatamente después de finalizar la aplicación.' 
+                : 'Wash hands thoroughly with soap and water immediately following application.'
+            }
+          ]
+        }
+      });
+    }
+
+    // Preparation 2: Oral Compounded Formulation
+    if (oralLines.length > 0) {
+      const oralIndex = results.length + 1;
+      results.push({
+        id: 'prep-oral',
+        index: oralIndex,
+        badge: isEs 
+          ? `PREPARACIÓN ${oralIndex} DE ${totalPreparations} · FÓRMULA MAGISTRAL ORAL` 
+          : `PREPARATION ${oralIndex} OF ${totalPreparations} · ORAL COMPOUNDED FORMULATION`,
+        title: isEs ? 'Soporte Nutracéutico & Antiandrogénico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Compounded Capsules)',
+        subtitle: isEs 
+          ? 'Formulación oral micronizada en cápsulas de alta biodisponibilidad' 
+          : 'Pharmaceutical micronized oral formulation in high-bioavailability capsules',
+        route: isEs ? 'Vía Oral' : 'Oral Administration',
+        volume: isEs ? '30 Cápsulas' : '30 Compounded Capsules',
+        duration: rx.duration || '30 days',
+        container: isEs ? 'Frasco Topacio Hermético con Cierre de Seguridad' : 'Safety-Sealed Amber Bottle with Desiccant Cap',
+        vehicle: {
+          tag: isEs ? 'VEHÍCULO ORAL' : 'ORAL VEHICLE BASE',
+          name: isEs ? 'Cápsulas de Gelatina / Celulosa Vegetal Micronizada' : 'Micronized Compounded Hard Gelatin / Vegetable Capsules',
+          volume: isEs ? '30 Cápsulas (Tratamiento Mensual)' : '30 Capsules (1-Month Supply)',
+          specs: isEs 
+            ? 'Base micronizada de grado farmacéutico para dispersión y absorción entérica homogénea sin irritación gástrica.' 
+            : 'Pharmaceutical-grade micronized powder excipient designed for consistent systemic gastrointestinal absorption without gastric irritation.'
+        },
+        apis: oralLines.map((item, idx) => ({
+          id: item.id || `api-oral-${idx + 1}`,
+          tag: `API ${idx + 1}`,
+          name: item.productName || item.activeIngredient || item.name || `Active Compound ${idx + 1}`,
+          dosage: item.dosage || item.dose || item.strength || item.concentration || (item.quantity ? `${item.quantity} un.` : '—'),
+          role: item.role || (isEs ? 'Nutracéutico & Modulador Sistémico' : 'Systemic Nutraceutical & Modulator'),
+          indication: item.indication || (isEs ? 'Soporte Metabólico & Folicular' : 'Metabolic & Follicular Fortification'),
+          action: item.instructions || item.action || (isEs 
+            ? 'Aporte de micronutrientes y fitoterapéuticos para optimizar el ciclo folicular sistémico.' 
+            : 'Provides targeted micronutrients and botanical anti-androgenic co-factors to support follicular growth.'),
+          rationale: item.rationale || null
+        })),
+        posology: {
+          title: isEs ? 'Pauta de Administración Oral' : 'Administration Regimen for Oral Capsules',
+          regimen: isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime',
+          timing: isEs ? 'Por la noche, junto con alimentos y un vaso de agua' : 'Nightly with food and a full glass of water',
+          duration: rx.duration || (isEs ? '30 días (1 frasco de 30 cápsulas)' : '30-Day Course (30 Capsules)'),
+          steps: [
+            {
+              step: 1,
+              title: isEs ? 'Toma Diaria con Agua' : 'Daily Oral Ingestion',
+              timing: isEs ? '1 Cápsula' : '1 Capsule',
+              instruction: isEs 
+                ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL).' 
+                : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL).'
+            },
+            {
+              step: 2,
+              title: isEs ? 'Momento de Administración' : 'Optimal Timing',
+              timing: isEs ? 'Cena / Antes de Dormir' : 'Dinner / Bedtime',
+              instruction: isEs 
+                ? 'Se recomienda tomar durante la cena o 30 minutos antes de dormir para maximizar la absorción y sinergia de los micronutrientes.' 
+                : 'Best taken with evening dinner or 30 minutes before sleep to optimize micronutrient absorption and tolerance.'
+            },
+            {
+              step: 3,
+              title: isEs ? 'Conservación' : 'Storage Conditions',
+              timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
+              instruction: isEs 
+                ? 'Mantener en lugar fresco y seco (inferior a 25°C), protegido de la luz solar directa y humedad.' 
+                : 'Store in a cool, dry place below 25°C (77°F), securely closed and protected from direct sunlight and moisture.'
+            }
+          ]
+        }
+      });
+    }
+
+    return results;
+  }, [rawLines, rx, isEs]);
+
+  // Keep prescriptionApis for any auxiliary references
+  const prescriptionApis = React.useMemo(() => {
+    return compoundedFormulations.flatMap(f => f.apis);
+  }, [compoundedFormulations]);
 
   const handleCopyLink = async () => {
     try {
@@ -603,12 +787,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',
-                        padding: '0.42rem 0.8rem',
+                        padding: '0.45rem 0.95rem',
                         borderRadius: '8px',
                         background: '#ffffff',
                         color: '#0f172a',
                         border: '1px solid #cbd5e1',
-                        fontSize: '0.74rem',
+                        fontSize: '0.82rem',
                         fontWeight: 700,
                         cursor: 'pointer',
                         boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
@@ -616,207 +800,353 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       }}
                       title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
                     >
-                      <Printer size={13} color="#003666" />
+                      <Printer size={15} color="#003666" />
                       <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleExportExcel}
-                      className="rx-excel-btn"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '0.42rem 0.8rem',
-                        borderRadius: '8px',
-                        background: '#f0fdf4',
-                        color: '#15803d',
-                        border: '1px solid #86efac',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        transition: 'all 0.15s ease'
-                      }}
-                      title={isEs ? 'Exportar Receta a Excel (.xlsx)' : 'Export Prescription to Excel (.xlsx)'}
-                    >
-                      <FileSpreadsheet size={13} color="#15803d" />
-                      <span>{isEs ? 'Exportar a Excel' : 'Export to Excel (.xlsx)'}</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
 
-        {/* ── Active Formula & Ingredients Card ───────────────────────────────────── */}
-        <div id="formula-card" style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          padding: '1.5rem',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10b981, #059669)',
+        {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
+        <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          {compoundedFormulations.map((formulation, fIdx) => (
+            <div
+              key={formulation.id}
+              style={{
+                background: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e2e8f0',
+                padding: '1.75rem',
+                boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff'
+                flexDirection: 'column',
+                gap: '1.35rem'
+              }}
+            >
+              {/* Preparation Master Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: '12px',
+                    background: formulation.id.includes('topical')
+                      ? 'linear-gradient(135deg, #0284c7, #0369a1)'
+                      : 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(2, 132, 199, 0.2)'
+                  }}>
+                    {formulation.id.includes('topical') ? <FlaskConical size={22} /> : <Box size={22} />}
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        color: formulation.id.includes('topical') ? '#0284c7' : '#7c3aed',
+                        background: formulation.id.includes('topical') ? '#e0f2fe' : '#ede9fe',
+                        padding: '2px 8px',
+                        borderRadius: '6px'
+                      }}>
+                        {formulation.badge}
+                      </span>
+                      <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
+                        {formulation.route}
+                      </span>
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                      {formulation.title}
+                    </h3>
+                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                      {formulation.subtitle}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {formulation.volume && (
+                    <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '4px 11px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      {formulation.volume}
+                    </span>
+                  )}
+                  {formulation.duration && (
+                    <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 11px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      {formulation.duration}
+                    </span>
+                  )}
+                  {rx.fagron?.boxId && fIdx === 0 && (
+                    <span style={{ background: '#fdf4ff', color: '#9333ea', border: '1px solid #f0abfc', padding: '4px 11px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      Sample: {rx.fagron.boxId}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Sub-Section 1: Compounding Vehicle / Base Carrier */}
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderLeft: formulation.id.includes('topical') ? '4px solid #0284c7' : '4px solid #8b5cf6',
+                borderRadius: '12px',
+                padding: '1.15rem 1.35rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.55rem',
+                boxShadow: '0 2px 6px rgba(15, 23, 42, 0.03)'
               }}>
-                <FlaskConical size={20} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      textTransform: 'uppercase',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      background: formulation.id.includes('topical') ? '#0284c7' : '#7c3aed',
+                      color: '#ffffff',
+                      letterSpacing: '0.04em'
+                    }}>
+                      {formulation.vehicle.tag}
+                    </span>
+                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                      {formulation.vehicle.name}
+                    </span>
+                    {formulation.vehicle.volume && (
+                      <span style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        color: '#0284c7',
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        fontFamily: 'monospace'
+                      }}>
+                        {formulation.vehicle.volume}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={13} />
+                    <span>{formulation.id.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder'}</span>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.55 }}>
+                  {formulation.vehicle.specs}
+                </div>
+
+                <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>📦 {isEs ? 'Envase Dispensador:' : 'Dispensing Container:'}</span>
+                  <strong style={{ color: '#0f172a' }}>{formulation.container}</strong>
+                </div>
               </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  {rx.treatmentType || (isEs ? 'Fórmula Magistral Personalizada' : 'Custom Compounded Formula')}
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  {rx.treatmentProgram || rx.fagron?.testName || (isEs 
-                    ? 'Recomendada tras Análisis Genético & Evaluación Médica' 
-                    : 'Recommended Following Clinical & Genetic Assessment')}
-                </p>
+
+              {/* Sub-Section 2: Compounded Active Ingredients (APIs) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs 
+                      ? `Principios Activos Formulados en este Vehículo (${formulation.apis.length})` 
+                      : `Active Compounded Ingredients in this Vehicle (${formulation.apis.length} APIs)`}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                    {isEs ? 'Calibrados al perfil farmacogenómico' : 'Calibrated to patient pharmacogenomics'}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {formulation.apis.map((api) => (
+                    <div
+                      key={api.id}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        padding: '1rem 1.15rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.45rem',
+                        boxShadow: '0 1px 4px rgba(15, 23, 42, 0.02)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            padding: '2px 7px',
+                            borderRadius: '4px',
+                            background: '#e0f2fe',
+                            color: '#0369a1'
+                          }}>
+                            {api.tag}
+                          </span>
+                          <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                            {api.name}
+                          </span>
+                          <span style={{
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            color: '#0284c7',
+                            background: '#f0f9ff',
+                            border: '1px solid #bae6fd',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                            fontFamily: 'monospace'
+                          }}>
+                            {api.dosage}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                          {api.role} · <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.indication}</span>
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: '0.79rem', color: '#334155', lineHeight: 1.5 }}>
+                        {api.action}
+                      </div>
+
+                      {api.rationale && (
+                        <div style={{
+                          fontSize: '0.72rem',
+                          color: '#047857',
+                          background: '#f0fdf4',
+                          border: '1px solid #bbf7d0',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          width: 'fit-content'
+                        }}>
+                          <span>🧬</span>
+                          <span>{api.rationale}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              {rx.volume && (
-                <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  {rx.volume}
-                </span>
-              )}
-              {rx.duration && (
-                <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  {rx.duration}
-                </span>
-              )}
-              {rx.fagron?.boxId && (
-                <span style={{ background: '#fdf4ff', color: '#9333ea', border: '1px solid #f0abfc', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  Muestra: {rx.fagron.boxId}
-                </span>
-              )}
-              <span style={{ background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                {isEs ? 'Vehículo Sin Alcohol' : 'Alcohol-Free Vehicle'}
-              </span>
-
-              <button
-                type="button"
-                onClick={handleExportExcel}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #86efac',
-                  padding: '3px 10px',
-                  borderRadius: '20px',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title={isEs ? 'Exportar receta completa a Excel (.xlsx)' : 'Export full prescription to Excel (.xlsx)'}
-              >
-                <FileSpreadsheet size={13} />
-                <span>{isEs ? 'Excel (.xlsx)' : 'Excel (.xlsx)'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Active Pharmaceutical Ingredients — One API per line standard */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {prescriptionApis.map((api) => (
+              {/* Sub-Section 3: Dedicated Posology Protocol FOR THIS SPECIFIC VEHICLE */}
               <div 
-                key={api.id}
+                id={fIdx === 0 ? "posology-card" : `posology-${formulation.id}`}
                 style={{
-                  background: api.isVehicle ? '#f8fafc' : '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderLeft: api.isVehicle ? '4px solid #64748b' : '4px solid #0284c7',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
                   borderRadius: '12px',
-                  padding: '1.1rem 1.25rem',
+                  padding: '1.25rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.55rem',
-                  boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)'
+                  gap: '1rem',
+                  marginTop: '0.25rem'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
-                    <span style={{ 
-                      fontSize: '0.68rem', 
-                      fontWeight: 800, 
-                      textTransform: 'uppercase', 
-                      padding: '3px 8px', 
-                      borderRadius: '4px', 
-                      background: api.isVehicle ? '#e2e8f0' : '#e0f2fe', 
-                      color: api.isVehicle ? '#334155' : '#0369a1' 
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <div style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      background: '#0284c7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#ffffff'
                     }}>
-                      {api.tag}
-                    </span>
-                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-                      {api.name}
-                    </span>
-                    {api.formulationBlock && (
-                      <span style={{
-                        fontSize: '0.66rem',
-                        fontWeight: 700,
-                        background: '#f1f5f9',
-                        color: '#334155',
-                        border: '1px solid #cbd5e1',
-                        padding: '2px 7px',
-                        borderRadius: '6px'
-                      }}>
-                        {api.formulationBlock}
-                      </span>
-                    )}
-                    <span style={{ 
-                      fontSize: '0.78rem', 
-                      fontWeight: 800, 
-                      color: '#0284c7', 
-                      background: '#f0f9ff', 
-                      border: '1px solid #bae6fd', 
-                      padding: '2px 8px', 
-                      borderRadius: '6px', 
-                      fontFamily: 'monospace' 
-                    }}>
-                      {api.dosage}
-                    </span>
+                      <Clock size={18} />
+                    </div>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                        {formulation.posology.title}
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.74rem', color: '#64748b' }}>
+                        {formulation.posology.timing}
+                      </p>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
-                    {api.role} · <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.indication}</span>
-                  </div>
-                </div>
 
-                <div style={{ fontSize: '0.80rem', color: '#334155', lineHeight: 1.55 }}>
-                  {api.action}
-                </div>
-
-                {api.rationale && (
-                  <div style={{ 
-                    fontSize: '0.72rem', 
-                    color: '#047857', 
-                    background: '#f0fdf4', 
-                    border: '1px solid #bbf7d0', 
-                    borderRadius: '6px', 
-                    padding: '4px 10px', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    gap: '6px', 
-                    width: 'fit-content' 
+                  <div style={{
+                    background: '#f0fdf4',
+                    border: '1px solid #86efac',
+                    color: '#15803d',
+                    padding: '4px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800
                   }}>
-                    <span>🧬</span>
-                    <span>{api.rationale}</span>
+                    {formulation.posology.regimen}
                   </div>
-                )}
+                </div>
+
+                {/* Step-by-Step Pathway for this vehicle */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {formulation.posology.steps.map((st) => (
+                    <div
+                      key={st.step}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderLeft: '3px solid #0284c7',
+                        borderRadius: '8px',
+                        padding: '0.85rem 1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.35rem'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                          <span style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: '50%',
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            {st.step}
+                          </span>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                            {st.title}
+                          </span>
+                        </div>
+                        {st.timing && (
+                          <span style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            color: '#0369a1',
+                            background: '#e0f2fe',
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}>
+                            {st.timing}
+                          </span>
+                        )}
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.79rem', color: '#334155', lineHeight: 1.55, paddingLeft: '30px' }}>
+                        {st.instruction}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
@@ -826,213 +1156,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             lang={lang}
           />
         )}
-
-        {/* ── Enhanced Posology & Step-by-Step Guide ───────────────────────────────── */}
-        <div id="posology-card" style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          padding: '1.5rem',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff'
-              }}>
-                <Clock size={20} />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Protocolo de Posología & Guía de Aplicación' : 'Posology Protocol & Administration Guide'}
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  {isEs ? 'Instrucciones detalladas de administración diaria para el paciente' : 'Detailed daily patient administration instructions'}
-                </p>
-              </div>
-            </div>
-
-            <div style={{
-              background: '#f0fdf4',
-              border: '1px solid #86efac',
-              color: '#15803d',
-              padding: '4px 12px',
-              borderRadius: '8px',
-              fontSize: '0.8rem',
-              fontWeight: 800
-            }}>
-              {rx.posology ? (isEs ? 'Pauta Médica Personalizada' : 'Custom Physician Regimen') : (isEs ? '1.0 ml Nocturno Diario' : '1.0 ml Nightly Daily')}
-            </div>
-          </div>
-
-          {/* Prominent Physician Prescribed Direction Callout */}
-          {rx.posology && (
-            <div style={{
-              background: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              borderLeft: '4px solid #0284c7',
-              borderRadius: '12px',
-              padding: '1.1rem 1.35rem',
-              marginBottom: '1.25rem',
-              boxShadow: '0 2px 6px rgba(2, 132, 199, 0.04)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#0369a1', fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
-                <Stethoscope size={15} />
-                <span>{isEs ? 'Instrucciones Específicas del Médico Prescriptor:' : 'Prescribing Physician Clinical Directions:'}</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '0.96rem', color: '#0f172a', fontWeight: 600, lineHeight: 1.55 }}>
-                "{rx.posology}"
-              </p>
-            </div>
-          )}
-
-          {/* Unified Clinical Posology Pathway (100% Full-Width Rows, Zero Empty Spaces) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%', marginBottom: '1.25rem' }}>
-            {steps.map((st) => (
-              <div 
-                key={st.step}
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderLeft: '4px solid #0284c7',
-                  borderRadius: '12px',
-                  padding: '1.15rem 1.35rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.55rem',
-                  width: '100%',
-                  boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)',
-                  boxSizing: 'border-box'
-                }}
-              >
-                {/* Header row: Step number circle + Title on left, timing & key badges on right */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.65rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      fontSize: '0.82rem',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      {st.step}
-                    </div>
-                    <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
-                      {st.title}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: '#0369a1',
-                      background: '#e0f2fe',
-                      padding: '3px 10px',
-                      borderRadius: '6px',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {st.timing}
-                    </span>
-                    {st.badge && (
-                      <span style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        color: '#047857',
-                        background: '#f0fdf4',
-                        border: '1px solid #bbf7d0',
-                        padding: '3px 10px',
-                        borderRadius: '6px',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {st.badge}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Instruction full-width text */}
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.82rem',
-                  color: '#334155',
-                  lineHeight: 1.6,
-                  paddingLeft: '36px'
-                }}>
-                  {st.instruction}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Vehicle Formulation Specifications Banner (100% Full-Width) */}
-          <div style={{
-            background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
-            border: '1px solid #bbf7d0',
-            borderRadius: '12px',
-            padding: '1rem 1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '0.75rem',
-            width: '100%',
-            boxSizing: 'border-box'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{
-                width: 32,
-                height: 32,
-                borderRadius: '8px',
-                background: '#047857',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <Sparkles size={16} />
-              </div>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#064e3b' }}>
-                  {isEs ? 'Vehículo Liposomal TrichoSol™ Patentado (Fagron)' : 'Patented TrichoSol™ Liposomal Phytocomplex Vehicle (Fagron)'}
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#047857' }}>
-                  {isEs 
-                    ? '100% Libre de alcohol y propilenglicol · Cero residuo graso · Óptima tolerancia cutánea'
-                    : '100% Alcohol-free & propylene glycol-free · Non-greasy finish · Superior scalp tolerance & intracellular uptake'}
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #86efac',
-              color: '#15803d',
-              padding: '4px 12px',
-              borderRadius: '8px',
-              fontSize: '0.76rem',
-              fontWeight: 800,
-              whiteSpace: 'nowrap'
-            }}>
-              {isEs ? 'Ciclo Completo: 90 Días (3x 100 mL)' : 'Full Cycle: 90 Days (3x 100 mL)'}
-            </div>
-          </div>
-        </div>
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
         <div id="milestones-card" className="rx-card" style={{

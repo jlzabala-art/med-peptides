@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone } from 'lucide-react';
+import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone, Sparkles } from 'lucide-react';
 import PrescriptionDetailModal from '../../features/prescriptions/components/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../admin/protocols/ProtocolDrawerContent';
 import ProductDetailsDrawer from '../admin/products/ProductDetailsDrawer';
@@ -584,17 +584,16 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         icon={FileText}
 
         mobileOverflowActions={[
-          { label: 'Share Intake (WhatsApp)', icon: Phone, onClick: () => setIsShareIntakeWhatsAppOpen(true) },
+          { label: 'Share Intake Portal', icon: Share2, onClick: () => setIsShareIntakeWhatsAppOpen(true) },
+          { label: 'Import with AI', icon: Sparkles, onClick: () => setIsIntakeOpen(true) },
+          { label: 'New Prescription', icon: FilePlus, onClick: () => openDrawer('rx-builder', 'new') },
+          { label: 'From Clinical Protocol', icon: Stethoscope, onClick: () => setIsProtocolSearchOpen(true) },
           { label: 'Export CSV', icon: Download, onClick: handleExportCsv },
           { label: 'Refresh', icon: RefreshCw, onClick: () => refresh?.() }
         ]}
         actions={!readOnly ? (
           <div className="prescriptions-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <AIQuickActionButton
-              label="✨ Import with AI (PDF / Fagron)"
-              onClick={() => setIsIntakeOpen(true)}
-              title="Import and digitize medical prescription or Fagron Genomics report with Atlas AI"
-            />
+            {/* Secondary Action: Share Intake Portal (Link, WhatsApp, QR) */}
             <button
               type="button"
               onClick={() => setIsShareIntakeWhatsAppOpen(true)}
@@ -602,52 +601,76 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '7px 14px',
+                height: '36px',
+                padding: '0 14px',
                 borderRadius: '8px',
-                background: '#f8fafc',
+                background: '#ffffff',
                 border: '1px solid #cbd5e1',
                 color: '#0f172a',
-                fontWeight: 700,
+                fontWeight: 600,
                 fontSize: '0.84rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                whiteSpace: 'nowrap'
               }}
-              title="Compartir enlace público para subir recetas (WhatsApp, Enlace directo, QR con atribución)"
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
+              title="Share public prescription intake link (WhatsApp, direct URL, QR with attribution)"
             >
-              <Share2 size={14} style={{ color: '#0284c7' }} />
-              <span>Compartir Portal Público</span>
+              <Share2 size={15} style={{ color: '#003666' }} />
+              <span>Share Intake Portal</span>
             </button>
+
+            {/* AI Action: Import with AI (PDF / Fagron Report) */}
+            <button
+              type="button"
+              onClick={() => setIsIntakeOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: '36px',
+                padding: '0 14px',
+                borderRadius: '8px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                fontWeight: 600,
+                fontSize: '0.84rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                boxShadow: '0 1px 2px rgba(29,78,216,0.05)',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#dbeafe';
+                e.currentTarget.style.borderColor = '#93c5fd';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#eff6ff';
+                e.currentTarget.style.borderColor = '#bfdbfe';
+              }}
+              title="Import and digitize medical prescription or Fagron Genomics report with Atlas AI"
+            >
+              <Sparkles size={15} style={{ color: '#2563eb' }} />
+              <span>Import with AI</span>
+            </button>
+
+            {/* Primary Action: New Prescription with Non-Redundant Creation Options */}
             <PrimarySplitButton 
               mainAction={{
                 label: "New Prescription",
-                icon: <FilePlus />,
+                icon: <FilePlus size={16} />,
                 onClick: () => {
                   openDrawer('rx-builder', 'new');
                 }
               }}
               dropdownActions={[
                 {
-                  label: "Share Intake (WhatsApp)",
-                  icon: <Phone size={14} style={{ color: '#25D366' }} />,
-                  onClick: () => setIsShareIntakeWhatsAppOpen(true)
-                },
-                {
-                  label: "Import PDF / Fagron (AI)",
-                  icon: <ScanText />,
-                  onClick: () => setIsIntakeOpen(true)
-                },
-                {
                   label: "From Clinical Protocol",
-                  icon: <Stethoscope />,
+                  icon: <Stethoscope size={15} style={{ color: '#003666' }} />,
                   onClick: () => setIsProtocolSearchOpen(true)
-                },
-                {
-                  label: "From Catalog",
-                  icon: <Box />,
-                  onClick: () => {
-                    openDrawer('rx-builder', 'new');
-                  }
                 }
               ]}
             />

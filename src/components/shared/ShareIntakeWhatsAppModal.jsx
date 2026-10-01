@@ -24,7 +24,7 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
   const { user, userProfile } = useAuth();
   const [recipientPhone, setRecipientPhone] = useState('');
   const [recipientType, setRecipientType] = useState('patient'); // 'patient' | 'doctor' | 'general'
-  const [lang, setLang] = useState('es');
+  const [lang, setLang] = useState('en');
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'link'
 
   if (!isOpen) return null;
@@ -119,42 +119,44 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{
           background: '#ffffff',
-          borderRadius: '24px',
-          padding: '2rem',
+          borderRadius: '16px',
+          padding: '1.75rem',
           maxWidth: '560px',
           width: '100%',
           maxHeight: '92vh',
           overflowY: 'auto',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 20px 40px -8px rgba(0, 0, 0, 0.2)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.25rem'
+          gap: '1.25rem',
+          border: '1px solid #e2e8f0'
         }}
       >
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '12px',
-              background: '#e0f2fe',
-              color: '#0284c7',
+              width: '42px',
+              height: '42px',
+              borderRadius: '10px',
+              background: '#eff6ff',
+              color: '#1d4ed8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0
+              flexShrink: 0,
+              border: '1px solid #bfdbfe'
             }}>
-              <Share2 size={24} />
+              <Share2 size={22} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
                 {isEs ? 'Compartir Portal Público de Prescripciones' : 'Share Public Prescription Intake Portal'}
               </h3>
               <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
                 {isEs 
                   ? 'Permite a pacientes o médicos subir sus recetas y análisis genéticos para su digitalización con IA' 
-                  : 'Allow patients or doctors to upload prescriptions & genomics reports for AI processing'}
+                  : 'Allow patients or physicians to upload prescriptions and genomics reports for AI digitization'}
               </p>
             </div>
           </div>
@@ -183,14 +185,17 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
             gap: '10px',
             background: '#f0fdf4',
             border: '1px solid #bbf7d0',
-            borderRadius: '12px',
+            borderRadius: '10px',
             padding: '10px 14px',
             fontSize: '0.8rem',
             color: '#166534'
           }}>
             <ShieldCheck size={18} style={{ color: '#16a34a', flexShrink: 0 }} />
             <div>
-              <strong>Atribución de Account Manager Activa:</strong> Las recetas enviadas o cargadas a través de este enlace se vincularán automáticamente a tu usuario <strong>({userEmail})</strong>.
+              <strong>{isEs ? 'Atribución de Account Manager Activa:' : 'Active Account Manager Attribution:'}</strong>{' '}
+              {isEs 
+                ? <>Las recetas enviadas o cargadas a través de este enlace se vincularán automáticamente a tu usuario <strong>({userEmail})</strong>.</>
+                : <>Prescriptions uploaded through this link will be automatically attributed to your account <strong>({userEmail})</strong>.</>}
             </div>
           </div>
         )}
