@@ -226,14 +226,20 @@
 .pds-protocol-summary-compare-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 11px;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 0 13px;
   background: #ffffff;
   border: 1px solid #bfdbfe;
   border-radius: 6px;
   color: #003666;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -241,25 +247,33 @@
 .pds-protocol-summary-compare-btn:hover {
   background: #eff6ff;
   border-color: #003666;
+  color: #002244;
 }
 
 .pds-protocol-summary-link-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 11px;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 0 13px;
   background: #003666;
   border: 1px solid #003666;
   border-radius: 6px;
   color: #ffffff;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
   text-decoration: none;
   transition: all 0.15s ease;
 }
 
 .pds-protocol-summary-link-btn:hover {
   background: #002244;
+  border-color: #002244;
 }
 
 /* ── Google Cloud UX Protocol Switcher Strip & Deck (Mobile & Tablet) ── */

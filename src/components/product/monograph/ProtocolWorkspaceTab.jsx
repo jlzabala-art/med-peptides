@@ -969,9 +969,9 @@ export default function ProtocolWorkspaceTab({
               target="_blank"
               rel="noopener noreferrer"
               className="pds-protocol-summary-link-btn"
-              title={`Open full clinical protocol page for ${sanitizeProtocolTitle(activeProtocol?.name, canonicalName)}`}
+              title={`Open full clinical protocol blueprint for ${sanitizeProtocolTitle(activeProtocol?.name, canonicalName)}`}
             >
-              <span>Full Protocol Page</span>
+              <span>Full Blueprint</span>
               <ExternalLink size={12} />
             </a>
           </div>
@@ -2125,7 +2125,7 @@ export default function ProtocolWorkspaceTab({
                     </button>
 
                     <a
-                      href={other.slug ? `/protocol/${other.slug}` : `/protocol/${product.slug || 'protocol'}`}
+                      href={other.slug ? `/proto/${other.slug}` : (other.id ? `/proto/${other.id}` : `/proto/${product.slug || 'protocol'}`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="pds-other-link-btn"
