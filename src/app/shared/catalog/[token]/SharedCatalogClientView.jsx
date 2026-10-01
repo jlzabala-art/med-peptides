@@ -21,6 +21,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import toast from 'react-hot-toast';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import {
@@ -41,7 +42,8 @@ import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import SharedCatalogProductListRow from './components/SharedCatalogProductListRow';
-import CatalogRightSidebar, { GOAL_EMOJIS } from './components/CatalogRightSidebar';
+import CatalogRightSidebar from './components/CatalogRightSidebar';
+import GoalIcon from '@/components/common/GoalIcon';
 import CatalogStickyActionBar from './components/CatalogStickyActionBar';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -1145,7 +1147,7 @@ export default function SharedCatalogClientView({
                           flexShrink: 0
                         }}
                       >
-                        {GOAL_EMOJIS[group.goal.id] || <FlaskConical size={18} color="#ffffff" />}
+                        <GoalIcon goalId={group.goal.id} size={20} strokeWidth={2} color="#ffffff" />
                       </div>
                       <div>
                         <span
@@ -1328,9 +1330,38 @@ export default function SharedCatalogClientView({
                     <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>Order Estimate</span>
                     <span style={{ backgroundColor: '#003666', color: '#fff', borderRadius: '10px', padding: '1px 7px', fontSize: '0.74rem', fontWeight: 800 }}>{cartTotalUnits}</span>
                   </div>
-                  <button type="button" onClick={() => setIsCartOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px' }}>
-                    <X size={18} />
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {cartItems.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof clearCart === 'function') clearCart();
+                          toast.success('Order selection cleared');
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: '#fee2e2',
+                          border: '1px solid #fecaca',
+                          color: '#dc2626',
+                          borderRadius: '6px',
+                          padding: '3px 7px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                        title="Clear all selected formulations"
+                        aria-label="Clear all selected formulations"
+                      >
+                        <Trash2 size={12} />
+                        <span>Clear All</span>
+                      </button>
+                    )}
+                    <button type="button" onClick={() => setIsCartOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px' }}>
+                      <X size={18} />
+                    </button>
+                  </div>
                 </div>
 
                 {cartItems.length === 0 ? (
@@ -1589,20 +1620,135 @@ export default function SharedCatalogClientView({
                   padding: '12px 14px',
                   marginBottom: '16px',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
+                  flexDirection: 'column',
+                  gap: '10px'
                 }}>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
-                      Estimated Order Total
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Estimated Order Total
+                      </div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>
+                        {cartTotalUnits} units • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>
-                      {cartTotalUnits} units • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
+                        {activeShipping.flag} Destination {activeShipping.code}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof clearCart === 'function') clearCart();
+                          setIsCheckoutModalOpen(false);
+                          toast.success('Order selection cleared');
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          backgroundColor: '#fee2e2',
+                          color: '#b91c1c',
+                          border: '1px solid #fca5a5',
+                          borderRadius: '6px',
+                          padding: '5px 9px',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        title="Clear all selected formulations"
+                        aria-label="Clear all selected formulations"
+                      >
+                        <Trash2 size={13} color="#b91c1c" />
+                        <span>Clear Selection</span>
+                      </button>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
-                    {activeShipping.flag} Destination {activeShipping.code}
-                  </div>
+
+                  {/* Itemized Selection Breakdown */}
+                  {cartItems && cartItems.length > 0 && (
+                    <div style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                      borderRadius: '8px',
+                      border: '1px solid #dcfce7',
+                      padding: '8px 10px',
+                      maxHeight: '130px',
+                      overflowY: 'auto',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px'
+                    }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Selected Formulations ({cartItems.length})
+                      </div>
+                      {cartItems.map((item) => {
+                        const isBulk = item.quantity >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0;
+                        const itemUnitPrice = (isBulk ? item.tier10UnitPrice : item.price) * fxMultiplier;
+                        const vId = item.id || item.variantId;
+                        return (
+                          <div
+                            key={item.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '8px',
+                              fontSize: '0.78rem',
+                              color: '#0f172a',
+                              borderBottom: '1px solid #f1f5f9',
+                              paddingBottom: '4px'
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <span style={{ fontWeight: 700 }}>{item.productName}</span>
+                              <span style={{ color: '#64748b', marginLeft: '6px', fontSize: '0.72rem' }}>
+                                {item.dosage} × {item.quantity}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                              <span style={{ fontWeight: 700, color: '#003666', fontSize: '0.78rem' }}>
+                                {currencySymbol}{(item.quantity * itemUnitPrice).toFixed(2)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (removeFromCart) {
+                                    removeFromCart(vId);
+                                  } else {
+                                    updateQuantity({ id: vId }, { canonicalName: item.productName }, -item.quantity);
+                                  }
+                                  toast.success(`Removed ${item.productName}`);
+                                  if (cartItems.length <= 1) {
+                                    setIsCheckoutModalOpen(false);
+                                  }
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#dc2626',
+                                  cursor: 'pointer',
+                                  padding: '2px',
+                                  display: 'flex',
+                                  alignItems: 'center'
+                                }}
+                                title={`Remove ${item.productName}`}
+                                aria-label={`Remove ${item.productName}`}
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Form Fields */}

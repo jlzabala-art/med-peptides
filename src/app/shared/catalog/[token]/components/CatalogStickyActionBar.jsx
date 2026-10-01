@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, Filter, ShoppingBag, X } from 'lucide-react';
+import { Sparkles, ArrowRight, Filter, ShoppingBag, X, Trash2 } from 'lucide-react';
 import '@/components/shared/PublicStickyActionBar.css';
 
 /**
@@ -130,6 +130,26 @@ export default function CatalogStickyActionBar({
                   }}
                 >
                   {isCartOpen ? 'Hide' : 'Review'}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (typeof clearCart === 'function') clearCart();
+                  }}
+                  title="Clear order selection"
+                  aria-label="Clear order selection"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#dc2626',
+                    cursor: 'pointer',
+                    padding: '0 2px',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Trash2 size={12} />
                 </button>
               </div>
             )}

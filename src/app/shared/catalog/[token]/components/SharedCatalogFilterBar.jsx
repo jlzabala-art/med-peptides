@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Search, Filter, ChevronDown, List, LayoutGrid } from 'lucide-react';
+import { Search, Filter, ChevronDown, List, LayoutGrid, Landmark, Zap, Package } from 'lucide-react';
+import GoalIcon from '@/components/common/GoalIcon';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
 
 /**
@@ -313,15 +314,17 @@ export default function SharedCatalogFilterBar({
               <span key={gId} style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
                 backgroundColor: '#eff6ff',
                 color: '#003666',
                 padding: '2px 8px',
                 borderRadius: '12px',
                 border: '1px solid #bfdbfe',
-                fontWeight: 700
+                fontWeight: 700,
+                fontSize: '0.74rem'
               }}>
-                🎯 {label}
+                <GoalIcon goalId={gId} size={12} strokeWidth={2} color="#003666" />
+                <span>{label}</span>
                 <button
                   type="button"
                   onClick={() => toggleGoal(gId)}
@@ -337,15 +340,17 @@ export default function SharedCatalogFilterBar({
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
               backgroundColor: '#eff6ff',
               color: '#1d4ed8',
               padding: '2px 8px',
               borderRadius: '12px',
               border: '1px solid #bfdbfe',
-              fontWeight: 700
+              fontWeight: 700,
+              fontSize: '0.74rem'
             }}>
-              🏛️ FDA: {FDA_LABELS[fdaFilter] || fdaFilter}
+              <Landmark size={12} color="#1d4ed8" />
+              <span>FDA: {FDA_LABELS[fdaFilter] || fdaFilter}</span>
               <button
                 type="button"
                 onClick={() => setFdaFilter('all')}
@@ -360,15 +365,17 @@ export default function SharedCatalogFilterBar({
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
               backgroundColor: '#f0fdf4',
               color: '#15803d',
               padding: '2px 8px',
               borderRadius: '12px',
               border: '1px solid #bbf7d0',
-              fontWeight: 600
+              fontWeight: 600,
+              fontSize: '0.74rem'
             }}>
-              💪 High Dose (≥10mg)
+              <Zap size={12} color="#15803d" />
+              <span>High Dose (≥10mg)</span>
               <button
                 type="button"
                 onClick={() => setDosageFilter('all')}
@@ -383,15 +390,17 @@ export default function SharedCatalogFilterBar({
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '5px',
               backgroundColor: '#f0fdf4',
               color: '#15803d',
               padding: '2px 8px',
               borderRadius: '12px',
               border: '1px solid #bbf7d0',
-              fontWeight: 600
+              fontWeight: 600,
+              fontSize: '0.74rem'
             }}>
-              📦 Format: {packagingMode}
+              <Package size={12} color="#15803d" />
+              <span>Format: {packagingMode}</span>
               <button
                 type="button"
                 onClick={() => setPackagingMode('all')}

@@ -4,25 +4,7 @@ import React, { useState } from 'react';
 import { Target, Landmark, ShieldCheck, Check, X, RotateCcw, Sparkles, Filter, ChevronRight, Copy, Share2 } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
-
-export const GOAL_EMOJIS = {
-  weight_loss_glp1: '⚖️',
-  fat_loss: '🔥',
-  metabolic_health: '⚡',
-  anti_aging_longevity: '🧬',
-  recovery_healing: '🩹',
-  tissue_repair: '🩹',
-  cognitive_mood: '🧠',
-  cognitive: '🧠',
-  hormonal_optimization: '⚖️',
-  muscle_growth: '💪',
-  performance_muscle: '💪',
-  skin_hair_aesthetics: '✨',
-  hair_scalp: '💧',
-  immune_support: '🛡️',
-  general_health: '🌿',
-  general_wellness: '🌿'
-};
+import GoalIcon from '@/components/common/GoalIcon';
 
 const FDA_STATUS_CONFIG = [
   {
@@ -194,7 +176,6 @@ export default function CatalogRightSidebar({
           ) : (
             availableGoals.map((goal) => {
               const isSelected = selectedGoals.includes(goal.id);
-              const emoji = GOAL_EMOJIS[goal.id] || '🎯';
 
               return (
                 <button
@@ -237,10 +218,30 @@ export default function CatalogRightSidebar({
                       {isSelected && <Check size={11} color="#ffffff" strokeWidth={3} />}
                     </div>
 
-                    <span style={{ fontSize: '0.78rem', color: isSelected ? '#003666' : '#334155', fontWeight: isSelected ? 700 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      <span style={{ marginRight: '5px' }}>{emoji}</span>
-                      {goal.label}
-                    </span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      minWidth: 0
+                    }}>
+                      <GoalIcon
+                        goalId={goal.id}
+                        size={15}
+                        strokeWidth={2}
+                        color={isSelected ? '#003666' : '#64748b'}
+                        style={{ flexShrink: 0 }}
+                      />
+                      <span style={{
+                        fontSize: '0.78rem',
+                        color: isSelected ? '#003666' : '#334155',
+                        fontWeight: isSelected ? 700 : 500,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {goal.label}
+                      </span>
+                    </div>
                   </div>
 
                   <span style={{
