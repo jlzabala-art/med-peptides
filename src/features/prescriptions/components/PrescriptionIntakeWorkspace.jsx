@@ -5,7 +5,8 @@ import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, CheckCircle2, Activity, AlertCircle, Save, FileText,
   Beaker, Sparkles, ExternalLink, RefreshCw, UserCheck, ShieldAlert,
-  Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight, Phone
+  Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight, Phone,
+  FileSpreadsheet, Eye
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import StandardDrawer from '../../../components/ui/StandardDrawer';
@@ -20,6 +21,7 @@ import {
   savePrescriptionsToFirestore,
   validatePrescriptionClinicalRules
 } from '../../../services/prescriptionAiService';
+import { exportPrescriptionToXlsx } from '../../../utils/exportPrescriptionToXlsx';
 
 export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuccess }) {
   const { openDrawer } = useDrawer();
@@ -38,6 +40,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
   const [savedPrescriptionsResult, setSavedPrescriptionsResult] = useState(null);
   const [copiedUrl, setCopiedUrl] = useState(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
   const handleProcessFile = useCallback(async (droppedFile) => {
     if (!droppedFile) return;
@@ -136,22 +139,31 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     setNormalizedRxList([]);
     setSavedPrescriptionsResult(null);
     setError(null);
+    setShowDuplicateModal(false);
   };
 
   // Save directly to Firestore using canonical schema
-  const handleConfirmSave = async () => {
+  const handleConfirmSave = async (overrideDuplicate = false) => {
     if (!normalizedRxList.length) {
       toast.error('No hay prescripciones para guardar.');
       return;
     }
 
+    const hasDups = normalizedRxList.some(r => r._dupStatus === 'duplicate');
+    if (hasDups && !overrideDuplicate) {
+      setShowDuplicateModal(true);
+      return;
+    }
+
     setIsSaving(true);
+    setShowDuplicateModal(false);
     try {
       toast.loading('Guardando prescripciones en Firestore...', { id: 'save-intake' });
       
       const result = await savePrescriptionsToFirestore(normalizedRxList, {
         alsoCreatePatient,
         currentUser: user,
+        overrideDuplicate,
       });
 
       if (result.errors?.length > 0) {
@@ -202,6 +214,13 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
 
   const isFagron = rawAiData?.documentType === 'FagronGenomics' || rawAiData?.fagronDetails?.isFagron;
   const hasDuplicates = normalizedRxList.some(r => r._dupStatus === 'duplicate');
+  const duplicateItem = normalizedRxList.find(r => r._dupStatus === 'duplicate');
+  const existingCode = duplicateItem?._existingData?.prescriptionNumber || duplicateItem?._existingData?.code || duplicateItem?._existingId;
+  const existingPatient = duplicateItem?._existingData?.patientName || duplicateItem?._existingData?.patient?.name;
+  const existingDate = duplicateItem?._existingData?.reportDate || duplicateItem?._existingData?.prescriptionDate;
+  const existingBox = duplicateItem?._existingData?.fagron?.boxId || duplicateItem?._existingData?.boxId;
+  const dupReason = duplicateItem?._duplicateReason;
+
   const clinicalValidation = React.useMemo(() => {
     return validatePrescriptionClinicalRules(normalizedRxList);
   }, [normalizedRxList]);
@@ -241,15 +260,39 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <button className="gcp-btn-secondary" onClick={onClose}>Cancelar</button>
               {normalizedRxList.length > 0 && (
-                <button
-                  className="gcp-btn-secondary"
-                  onClick={handleOpenInBuilder}
-                  disabled={isSaving}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <ExternalLink size={15} />
-                  <span>Abrir en Creador de Recetas</span>
-                </button>
+                <>
+                  <button
+                    className="gcp-btn-secondary"
+                    onClick={handleOpenInBuilder}
+                    disabled={isSaving}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <ExternalLink size={15} />
+                    <span>Abrir en Creador de Recetas</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="gcp-btn-secondary"
+                    onClick={() => {
+                      if (normalizedRxList[0]) {
+                        toast.loading('Generando Excel...', { id: 'ws-excel' });
+                        const res = exportPrescriptionToXlsx(normalizedRxList[0], { lang: 'es' });
+                        if (res?.success) {
+                          toast.success(`Exportado a Excel: ${res.filename} (${res.itemCount} items)`, { id: 'ws-excel' });
+                        } else {
+                          toast.error('Error al exportar a Excel', { id: 'ws-excel' });
+                        }
+                      }
+                    }}
+                    disabled={isSaving}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#15803d' }}
+                    title="Exportar prescripción analizada a Excel (.xlsx)"
+                  >
+                    <FileSpreadsheet size={15} color="#15803d" />
+                    <span>Exportar a Excel</span>
+                  </button>
+                </>
               )}
             </div>
 
@@ -668,18 +711,42 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 {/* Duplication Warning */}
                 {hasDuplicates && (
                   <div style={{
-                    padding: '0.75rem 1rem',
+                    padding: '0.85rem 1rem',
                     backgroundColor: '#fffbeb',
                     border: '1px solid #fde68a',
                     borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.6rem'
+                    justifyContent: 'space-between',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap'
                   }}>
-                    <ShieldAlert size={18} color="#d97706" />
-                    <span style={{ fontSize: '0.82rem', color: '#92400e', fontWeight: 500 }}>
-                      Advertencia: Ya existe una prescripción con este Box ID o paciente/fecha en Firestore.
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <ShieldAlert size={20} color="#d97706" style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '0.84rem', color: '#92400e', fontWeight: 600 }}>
+                          Posible Duplicado Detectado: {dupReason || 'Ya existe un registro con idéntico Box ID o Paciente + Fecha en la base de datos.'}
+                        </div>
+                        {existingCode && (
+                          <div style={{ fontSize: '0.78rem', color: '#b45309', marginTop: '2px' }}>
+                            Prescripción existente: <strong>{existingCode}</strong> {existingPatient ? `(${existingPatient})` : ''} {existingDate ? `— ${existingDate}` : ''}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {existingCode && (
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          className="gcp-btn-secondary"
+                          onClick={() => window.open(`/rx/${existingCode}`, '_blank')}
+                          style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                          <Eye size={13} />
+                          <span>Ver Existente</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -959,6 +1026,142 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       isOpen={isShareModalOpen}
       onClose={() => setIsShareModalOpen(false)}
     />
+
+    {/* Duplicate Confirmation Modal */}
+    {showDuplicateModal && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '1rem'
+      }}>
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          maxWidth: '520px',
+          width: '100%',
+          padding: '1.75rem',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #fed7aa',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.25rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '10px',
+              backgroundColor: '#fef3c7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <ShieldAlert size={24} color="#d97706" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>
+                Prescripción Posiblemente Duplicada
+              </h3>
+              <p style={{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: '#64748b', lineHeight: 1.45 }}>
+                {dupReason || 'Se ha detectado un registro existente con el mismo Box ID o con el mismo paciente y fecha de prescripción.'}
+              </p>
+            </div>
+          </div>
+
+          {existingCode && (
+            <div style={{
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '0.85rem 1rem',
+              fontSize: '0.82rem',
+              color: '#334155',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem'
+            }}>
+              <div><strong>Código Existente:</strong> <span style={{ fontFamily: 'monospace' }}>{existingCode}</span></div>
+              {existingPatient && <div><strong>Paciente:</strong> {existingPatient}</div>}
+              {existingDate && <div><strong>Fecha Registro:</strong> {existingDate}</div>}
+              {existingBox && <div><strong>Box ID:</strong> {existingBox}</div>}
+            </div>
+          )}
+
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.6rem',
+            marginTop: '0.5rem'
+          }}>
+            {existingCode && (
+              <button
+                type="button"
+                onClick={() => window.open(`/rx/${existingCode}`, '_blank')}
+                className="gcp-btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  padding: '0.65rem 1rem',
+                  width: '100%'
+                }}
+              >
+                <Eye size={15} />
+                <span>Ver Prescripción Existente</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => handleConfirmSave(true)}
+              className="gcp-btn-primary"
+              style={{
+                backgroundColor: '#ea580c',
+                borderColor: '#c2410c',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                padding: '0.65rem 1rem',
+                width: '100%',
+                color: '#ffffff',
+                fontWeight: 600
+              }}
+            >
+              <Save size={15} />
+              <span>Cargar de Todos Modos (Crear Nueva Versión)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowDuplicateModal(false)}
+              className="gcp-btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0.55rem 1rem',
+                width: '100%',
+                color: '#64748b'
+              }}
+            >
+              Cancelar y Revisar
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </>
   );
 }

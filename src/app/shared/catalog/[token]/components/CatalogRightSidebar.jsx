@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Target, Landmark, ShieldCheck, Check, X, RotateCcw, Sparkles, Filter, ChevronRight, QrCode, Copy } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { Target, Landmark, ShieldCheck, Check, X, RotateCcw, Sparkles, Filter, ChevronRight, Copy, Share2 } from 'lucide-react';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 
@@ -89,23 +88,30 @@ export default function CatalogRightSidebar({
 }) {
   const activeGoalsCount = selectedGoals.length;
   const isFdaActive = fdaFilter && fdaFilter !== 'all';
-  const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedType, setCopiedType] = useState(null);
 
-  const handleCopyLink = async () => {
+  const cleanBaseUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : 'https://med-peptides.com/catalog';
+  const activeFilteredUrl = typeof window !== 'undefined' ? window.location.href : cleanBaseUrl;
+  const hasActiveFilters = Boolean(typeof window !== 'undefined' && window.location.search && window.location.search.length > 1);
+
+  const handleCopyLink = async (type = 'filtered') => {
     try {
+      const urlToCopy = type === 'base' ? cleanBaseUrl : activeFilteredUrl;
       if (typeof window !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(urlToCopy);
         triggerHaptic('copy');
-        setCopiedUrl(true);
-        toast.success('Catalog URL copied to clipboard ✓');
-        setTimeout(() => setCopiedUrl(false), 2000);
+        setCopiedType(type);
+        toast.success(
+          type === 'filtered' && hasActiveFilters
+            ? 'Enlace con filtros activos copiado al portapapeles ✓'
+            : 'Enlace base del catálogo copiado al portapapeles ✓'
+        );
+        setTimeout(() => setCopiedType(null), 2000);
       }
     } catch {
       toast.error('Could not copy URL');
     }
   };
-
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://med-peptides.com/catalog';
 
   const sidebarContent = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -385,76 +391,90 @@ export default function CatalogRightSidebar({
         </div>
       </div>
 
-      {/* ── CARD 3: INSTITUTIONAL QR & DIRECT VERIFICATION ── */}
+      {/* ── CARD 3: SHARE CATALOG LINK (Option A: Streamlined without redundant QR) ── */}
       <div style={{
         background: '#ffffff',
         border: '1px solid #e2e8f0',
         borderRadius: '12px',
         padding: '0.85rem',
-        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
-        textAlign: 'center'
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '0.75rem',
-          paddingBottom: '0.5rem',
+          marginBottom: '0.6rem',
+          paddingBottom: '0.4rem',
           borderBottom: '1px solid #f1f5f9'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <QrCode size={15} style={{ color: '#003666' }} />
+            <Share2 size={14} style={{ color: '#003666' }} />
             <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              INSTITUTIONAL QR
+              SHARE CATALOG
             </span>
           </div>
           <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#003666', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px' }}>
-            SSOT 2026
+            {hasActiveFilters ? 'FILTERS ACTIVE' : 'OFFICIAL LINK'}
           </span>
         </div>
 
-        <div style={{
-          display: 'inline-block',
-          padding: '8px',
-          background: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-        }}>
-          <QRCodeSVG 
-            value={currentUrl}
-            size={95}
-            level="M"
-            includeMargin={false}
-          />
-        </div>
-
-        <p style={{ margin: '8px 0 10px 0', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.4 }}>
-          Scan with mobile device for bedside or pharmacy dispensing access.
+        <p style={{ margin: '0 0 10px 0', fontSize: '0.70rem', color: '#64748b', lineHeight: 1.4 }}>
+          {hasActiveFilters 
+            ? 'Share this exact filtered view (doses, indications, search) or copy the general catalog.' 
+            : 'Share this active catalog link with physicians, compounding partners, or clinical staff.'}
         </p>
 
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          style={{
-            width: '100%',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '6px 10px',
-            borderRadius: '6px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            background: copiedUrl ? '#f0fdf4' : '#f8fafc',
-            color: copiedUrl ? '#16a34a' : '#334155',
-            border: copiedUrl ? '1px solid #86efac' : '1px solid #cbd5e1',
-            cursor: 'pointer'
-          }}
-        >
-          {copiedUrl ? <Check size={13} /> : <Copy size={13} />}
-          <span>{copiedUrl ? 'Copied ✓' : 'Copy Catalog Link'}</span>
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={() => handleCopyLink('filtered')}
+              style={{
+                width: '100%',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '7px 10px',
+                borderRadius: '6px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                background: copiedType === 'filtered' ? '#f0fdf4' : '#003666',
+                color: copiedType === 'filtered' ? '#16a34a' : '#ffffff',
+                border: copiedType === 'filtered' ? '1px solid #86efac' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {copiedType === 'filtered' ? <Check size={13} /> : <Filter size={13} />}
+              <span>{copiedType === 'filtered' ? 'Link with Filters Copied ✓' : 'Copy with Active Filters'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => handleCopyLink('base')}
+            style={{
+              width: '100%',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '7px 10px',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              background: copiedType === 'base' ? '#f0fdf4' : (hasActiveFilters ? '#f8fafc' : '#003666'),
+              color: copiedType === 'base' ? '#16a34a' : (hasActiveFilters ? '#334155' : '#ffffff'),
+              border: copiedType === 'base' ? '1px solid #86efac' : (hasActiveFilters ? '1px solid #cbd5e1' : 'none'),
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {copiedType === 'base' ? <Check size={13} /> : <Copy size={13} />}
+            <span>{copiedType === 'base' ? 'Base Link Copied ✓' : (hasActiveFilters ? 'Copy Clean Catalog Link' : 'Copy Catalog Link')}</span>
+          </button>
+        </div>
       </div>
 
       {/* Quick Summary Pill */}

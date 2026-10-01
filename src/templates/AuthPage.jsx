@@ -18,7 +18,7 @@ import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useAuth, ADMIN_EMAILS } from '../context/AuthContext';
+import { useAuth, ADMIN_EMAILS, ACCOUNT_MANAGER_EMAILS } from '../context/AuthContext';
 import { useRegistration } from '../hooks/useRegistration';
 
 
@@ -128,7 +128,12 @@ export default function AuthPage({ onBack }) {
   const resolveTargetPortal = (targetRole, userEmail, explicitRedirect) => {
     const cleanEmail = (userEmail || '').toLowerCase().trim();
     const cleanRole = (targetRole || 'guest').toLowerCase();
+    const isAccountManager = cleanRole === 'account_manager' || ACCOUNT_MANAGER_EMAILS.includes(cleanEmail);
     const isUserAdmin = cleanRole === 'admin' || ADMIN_EMAILS.includes(cleanEmail);
+
+    if (isAccountManager) {
+      return '/admin/prescriptions';
+    }
 
     if (isUserAdmin) {
       if (explicitRedirect && explicitRedirect.startsWith('/admin')) {

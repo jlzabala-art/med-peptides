@@ -26,8 +26,10 @@ import {
   Sparkles,
   Award,
   Phone,
-  Printer
+  Printer,
+  FileSpreadsheet
 } from '@/lib/icons';
+import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
@@ -274,7 +276,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           role,
           indication,
           action,
-          rationale
+          rationale,
+          formulationBlock: line.formulationBlock || null,
+          dosageForm: line.dosageForm || null,
+          route: line.route || null,
+          frequency: line.frequency || null,
+          quantity: line.quantity || 1
         };
       });
     }
@@ -376,6 +383,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       setTimeout(() => setCopied(false), 2200);
     } catch {
       toast.error(isEs ? 'No se pudo copiar el enlace' : 'Failed to copy link');
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      triggerHaptic('selection');
+      toast.loading(isEs ? 'Generando archivo Excel (.xlsx)...' : 'Generating Excel (.xlsx) file...', { id: 'rx-excel' });
+      const res = exportPrescriptionToXlsx(rx, { lang });
+      if (res && res.success) {
+        toast.success(
+          isEs 
+            ? `Receta exportada a Excel: ${res.filename} (${res.itemCount} productos)` 
+            : `Prescription exported to Excel: ${res.filename} (${res.itemCount} items)`,
+          { id: 'rx-excel' }
+        );
+      } else {
+        toast.error(isEs ? 'No se pudo exportar a Excel' : 'Failed to export to Excel', { id: 'rx-excel' });
+      }
+    } catch (err) {
+      console.error('[PublicPrescriptionClient] Excel export error:', err);
+      toast.error(isEs ? 'Error al generar Excel' : 'Error generating Excel file', { id: 'rx-excel' });
     }
   };
 
@@ -563,34 +591,60 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     {patient.maskedPhone || '+971 54 *** **80'}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      window.print();
-                    }}
-                    className="rx-print-btn"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '0.42rem 0.8rem',
-                      borderRadius: '8px',
-                      background: '#ffffff',
-                      color: '#0f172a',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      marginTop: '8px',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                      transition: 'all 0.15s ease'
-                    }}
-                    title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
-                  >
-                    <Printer size={13} color="#003666" />
-                    <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('selection');
+                        window.print();
+                      }}
+                      className="rx-print-btn"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '0.42rem 0.8rem',
+                        borderRadius: '8px',
+                        background: '#ffffff',
+                        color: '#0f172a',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
+                    >
+                      <Printer size={13} color="#003666" />
+                      <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleExportExcel}
+                      className="rx-excel-btn"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '0.42rem 0.8rem',
+                        borderRadius: '8px',
+                        background: '#f0fdf4',
+                        color: '#15803d',
+                        border: '1px solid #86efac',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={isEs ? 'Exportar Receta a Excel (.xlsx)' : 'Export Prescription to Excel (.xlsx)'}
+                    >
+                      <FileSpreadsheet size={13} color="#15803d" />
+                      <span>{isEs ? 'Exportar a Excel' : 'Export to Excel (.xlsx)'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -630,7 +684,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
               {rx.volume && (
                 <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
                   {rx.volume}
@@ -649,6 +703,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               <span style={{ background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', padding: '3px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
                 {isEs ? 'Vehículo Sin Alcohol' : 'Alcohol-Free Vehicle'}
               </span>
+
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  border: '1px solid #86efac',
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                title={isEs ? 'Exportar receta completa a Excel (.xlsx)' : 'Export full prescription to Excel (.xlsx)'}
+              >
+                <FileSpreadsheet size={13} />
+                <span>{isEs ? 'Excel (.xlsx)' : 'Excel (.xlsx)'}</span>
+              </button>
             </div>
           </div>
 
@@ -685,6 +762,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
                       {api.name}
                     </span>
+                    {api.formulationBlock && (
+                      <span style={{
+                        fontSize: '0.66rem',
+                        fontWeight: 700,
+                        background: '#f1f5f9',
+                        color: '#334155',
+                        border: '1px solid #cbd5e1',
+                        padding: '2px 7px',
+                        borderRadius: '6px'
+                      }}>
+                        {api.formulationBlock}
+                      </span>
+                    )}
                     <span style={{ 
                       fontSize: '0.78rem', 
                       fontWeight: 800, 
@@ -1441,6 +1531,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             doctorPhone={doctorPhone}
             publicUrl={publicUrl}
             onOpenPdf={handleDownloadQrPng}
+            onExportExcel={handleExportExcel}
             lang={lang}
           />
         </div>

@@ -52,12 +52,15 @@ export function useAuth() {
 
 export const ADMIN_EMAILS = [
   'jose@mediluxem.com',
-  'kasia@mediluxem.com',
   'jose@mediluxeme.com',
-  'kasia@mediluxeme.com',
-  'business@mediluxeme.com',
   'admin@regenpept.test',
   'jlzabala@gmail.com'
+];
+
+export const ACCOUNT_MANAGER_EMAILS = [
+  'kasia@mediluxeme.com',
+  'business@mediluxeme.com',
+  'kasia@mediluxem.com'
 ];
 
 export const DEFAULT_ROLE_PERMISSIONS = {
@@ -68,6 +71,14 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     clinicalLogs: true,
     manageStaff: true,
     trackCommission: true
+  },
+  account_manager: {
+    canRecommend: false,
+    canBulkOrder: false,
+    customSynthesis: false,
+    clinicalLogs: false,
+    manageStaff: false,
+    trackCommission: false
   },
   clinic: {
     canRecommend: true,
@@ -168,6 +179,7 @@ export function AuthProvider({ children, serverUser = null }) {
       if (cred && cred.user) {
         const userEmail = (cred.user.email || '').toLowerCase().trim();
         const isAdmin = ADMIN_EMAILS.includes(userEmail);
+        const isAccountManager = ACCOUNT_MANAGER_EMAILS.includes(userEmail);
         const docRef = doc(db, 'users', cred.user.uid);
         const docSnap = await getDoc(docRef);
         let profile = null;
@@ -176,15 +188,19 @@ export function AuthProvider({ children, serverUser = null }) {
           if (isAdmin && (profile.role !== 'admin' || !profile.approved)) {
             profile = { ...profile, role: 'admin', approved: true, professionalStatus: 'approved' };
             try { await updateDoc(docRef, { role: 'admin', approved: true, professionalStatus: 'approved' }); } catch (e) {}
+          } else if (isAccountManager && (profile.role !== 'account_manager' || !profile.approved)) {
+            profile = { ...profile, role: 'account_manager', approved: true, professionalStatus: 'approved' };
+            try { await updateDoc(docRef, { role: 'account_manager', approved: true, professionalStatus: 'approved' }); } catch (e) {}
           }
         } else {
           const nameParts = (cred.user.displayName || '').trim().split(' ');
+          const assignedRole = isAdmin ? 'admin' : (isAccountManager ? 'account_manager' : 'pending');
           profile = {
             firstName: nameParts[0] || '',
             lastName: nameParts.slice(1).join(' ') || '',
             email: userEmail,
-            role: isAdmin ? 'admin' : 'pending',
-            approved: isAdmin ? true : false,
+            role: assignedRole,
+            approved: (isAdmin || isAccountManager) ? true : false,
             createdAt: new Date().toISOString()
           };
           try { await setDoc(docRef, profile); } catch (e) {}
@@ -218,10 +234,12 @@ export function AuthProvider({ children, serverUser = null }) {
           } catch (e) {}
         }
 
-        const role = (profile?.role || (isAdmin ? 'admin' : 'pending')).toLowerCase();
+        const role = (profile?.role || (isAdmin ? 'admin' : (isAccountManager ? 'account_manager' : 'pending'))).toLowerCase();
         let destination = '';
 
-        if (isAdmin || role === 'admin') {
+        if (isAccountManager || role === 'account_manager') {
+          destination = '/admin/prescriptions';
+        } else if (isAdmin || role === 'admin') {
           // If admin, prioritize /admin unless storedTarget is an explicit admin route
           destination = (storedTarget && storedTarget.startsWith('/admin')) ? storedTarget : '/admin';
         } else if (role === 'pending') {
@@ -231,6 +249,7 @@ export function AuthProvider({ children, serverUser = null }) {
         } else {
           const roleMap = {
             admin: '/admin',
+            account_manager: '/admin/prescriptions',
             doctor: '/doctor',
             medical_director: '/doctor',
             fagron_doctor: '/doctor',
@@ -287,11 +306,16 @@ export function AuthProvider({ children, serverUser = null }) {
           const docSnap = await getDoc(docRef);
           const userEmail = (firebaseUser.email || '').toLowerCase().trim();
           const isKnownAdmin = ADMIN_EMAILS.includes(userEmail);
+          const isKnownAccountManager = ACCOUNT_MANAGER_EMAILS.includes(userEmail);
 
           if (docSnap.exists()) {
             const data = docSnap.data();
             if (isKnownAdmin && (data.role !== 'admin' || !data.approved)) {
               data.role = 'admin';
+              data.approved = true;
+              data.professionalStatus = 'approved';
+            } else if (isKnownAccountManager && (data.role !== 'account_manager' || !data.approved)) {
+              data.role = 'account_manager';
               data.approved = true;
               data.professionalStatus = 'approved';
             }
@@ -306,10 +330,12 @@ export function AuthProvider({ children, serverUser = null }) {
                   localStorage.removeItem('auth_redirect_target');
                   sessionStorage.removeItem('auth_redirect_origin');
                   localStorage.removeItem('auth_redirect_origin');
-                  const role = (data.role || (isKnownAdmin ? 'admin' : 'pending')).toLowerCase();
+                  const role = (data.role || (isKnownAdmin ? 'admin' : (isKnownAccountManager ? 'account_manager' : 'pending'))).toLowerCase();
                   if (role !== 'pending') {
                     window.location.replace(storedTarget);
                   }
+                } else if (isKnownAccountManager || data.role === 'account_manager') {
+                  window.location.replace('/admin/prescriptions');
                 }
               }
             }
@@ -326,8 +352,9 @@ export function AuthProvider({ children, serverUser = null }) {
             setAnalyticsUserRole(gaRole, firebaseUser.uid);
           } else {
             // Auth user exists but no Firestore doc yet
-            const fallbackProfile = isKnownAdmin
-              ? { approved: true, role: 'admin', professionalStatus: 'approved', email: userEmail, userType: 'admin' }
+            const fallbackRole = isKnownAdmin ? 'admin' : (isKnownAccountManager ? 'account_manager' : 'pending');
+            const fallbackProfile = (isKnownAdmin || isKnownAccountManager)
+              ? { approved: true, role: fallbackRole, professionalStatus: 'approved', email: userEmail, userType: fallbackRole }
               : { approved: false, role: 'pending' };
             setUserProfile(fallbackProfile);
             setUserProperties({ user_type: fallbackProfile.role, is_verified: fallbackProfile.approved ? 'true' : 'false' });
@@ -337,8 +364,10 @@ export function AuthProvider({ children, serverUser = null }) {
           console.warn('Could not fetch user profile:', err);
           const userEmail = (firebaseUser.email || '').toLowerCase().trim();
           const isKnownAdmin = ADMIN_EMAILS.includes(userEmail);
-          const fallbackProfile = isKnownAdmin
-            ? { approved: true, role: 'admin', professionalStatus: 'approved', email: userEmail, userType: 'admin' }
+          const isKnownAccountManager = ACCOUNT_MANAGER_EMAILS.includes(userEmail);
+          const fallbackRole = isKnownAdmin ? 'admin' : (isKnownAccountManager ? 'account_manager' : 'pending');
+          const fallbackProfile = (isKnownAdmin || isKnownAccountManager)
+            ? { approved: true, role: fallbackRole, professionalStatus: 'approved', email: userEmail, userType: fallbackRole }
             : { approved: false, role: 'pending' };
           setUserProfile(fallbackProfile);
           setAnalyticsUserRole(isKnownAdmin ? 'admin' : 'guest', firebaseUser.uid);

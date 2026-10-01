@@ -79,11 +79,7 @@ const ROLE_ACTION_PERMISSIONS = Object.freeze({
 
   account_manager: [
     'view:admin',
-    'view:clients',
-    'view:quotations', 'create:quotations',
-    'view:orders', 'create:orders',
-    'view:products',
-    'manage:staff',
+    'view:prescriptions', 'create:prescriptions', 'edit:prescriptions', 'export:prescriptions',
   ],
 
   patient_coordinator: [

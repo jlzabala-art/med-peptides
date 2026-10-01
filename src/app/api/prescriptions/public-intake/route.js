@@ -21,13 +21,94 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { prescriptions, createPatientRecord = true, source = 'public_rx_intake' } = body || {};
+    const { 
+      prescriptions, 
+      createPatientRecord = true, 
+      source = 'public_rx_intake', 
+      allowDuplicateOverride = false 
+    } = body || {};
 
     if (!Array.isArray(prescriptions) || prescriptions.length === 0) {
       return NextResponse.json(
         { error: 'No prescription records provided in payload.' },
         { status: 400 }
       );
+    }
+
+    // ── DEDUPLICATION VERIFICATION ─────────────────────────────────────────────
+    // If not explicitly overridden, detect existing records by Box ID or Patient + Date
+    if (!allowDuplicateOverride) {
+      for (const rx of prescriptions) {
+        const boxId = rx.fagron?.boxId ? String(rx.fagron.boxId).trim() : null;
+        const patientName = String(rx.patient?.name || rx.patientName || '').trim();
+        const dateVal = String(rx.fagron?.reportDate || rx.prescriptionDate || rx.date || '').trim();
+
+        let existingDoc = null;
+        let matchReason = null;
+
+        // 1. Check Fagron Box ID
+        if (boxId) {
+          const snap = await adminDb.collection('prescriptions')
+            .where('fagron.boxId', '==', boxId)
+            .limit(1)
+            .get()
+            .catch(() => null);
+          if (snap && !snap.empty) {
+            existingDoc = snap.docs[0];
+            matchReason = `Fagron Box ID: ${boxId}`;
+          }
+        }
+
+        // 2. Check Patient Name + Date
+        if (!existingDoc && patientName && dateVal) {
+          const snapDate = await adminDb.collection('prescriptions')
+            .where('patient.name', '==', patientName)
+            .where('prescriptionDate', '==', dateVal)
+            .limit(1)
+            .get()
+            .catch(() => null);
+          if (snapDate && !snapDate.empty) {
+            existingDoc = snapDate.docs[0];
+            matchReason = `Paciente "${patientName}" con fecha ${dateVal}`;
+          } else {
+            const snapFagron = await adminDb.collection('prescriptions')
+              .where('patient.name', '==', patientName)
+              .where('fagron.reportDate', '==', dateVal)
+              .limit(1)
+              .get()
+              .catch(() => null);
+            if (snapFagron && !snapFagron.empty) {
+              existingDoc = snapFagron.docs[0];
+              matchReason = `Paciente "${patientName}" con fecha ${dateVal}`;
+            }
+          }
+        }
+
+        if (existingDoc) {
+          const existingData = existingDoc.data();
+          const existingCode = existingData.prescriptionNumber || existingDoc.id;
+          return NextResponse.json({
+            success: false,
+            duplicateDetected: true,
+            matchReason,
+            existingPrescription: {
+              id: existingDoc.id,
+              prescriptionNumber: existingCode,
+              patientName: existingData.patientName || existingData.patient?.name || patientName,
+              doctorName: existingData.doctorName || existingData.doctor?.name || 'Physician',
+              prescriptionDate: existingData.prescriptionDate || existingData.fagron?.reportDate || dateVal,
+              boxId: existingData.fagron?.boxId || boxId,
+              treatmentType: existingData.treatmentType || 'Compounded Formula',
+              status: existingData.status || 'approved',
+              createdAt: existingData.createdAt,
+              rxUrl: `/rx/${existingCode}`,
+              fullUrl: `https://med-peptides.com/rx/${existingCode}`,
+              rxData: { id: existingDoc.id, ...existingData }
+            },
+            message: `Esta prescripción ya está registrada en el sistema (${matchReason}). Código oficial: ${existingCode}`
+          });
+        }
+      }
     }
 
     const savedPrescriptions = [];
@@ -89,9 +170,16 @@ export async function POST(request) {
           updatedAt: new Date().toISOString(),
         };
 
+        if (allowDuplicateOverride) {
+          payload.duplicateOverride = true;
+          payload.duplicateOverrideAt = new Date().toISOString();
+        }
+
         // Clean internal UI helper fields
         delete payload._dupStatus;
         delete payload._existingId;
+        delete payload._existingData;
+        delete payload._duplicateReason;
         delete payload._isManuallyMapped;
 
         // Save to Firestore

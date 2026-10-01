@@ -194,7 +194,12 @@ export default function AdminDashboard({ children }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const isAccountManager = is('account_manager') || userProfile?.role === 'account_manager';
+
   const dynamicPinnedItems = React.useMemo(() => {
+    if (isAccountManager) {
+      return [];
+    }
     return PINNED_ITEMS.map((item) => {
       if (item.id === 'messages') {
         return {
@@ -226,7 +231,7 @@ export default function AdminDashboard({ children }) {
       }
       return item;
     });
-  }, [unreadMessages, pendingInboxItems, upcomingCalendarCount, pendingApiCount]);
+  }, [unreadMessages, pendingInboxItems, upcomingCalendarCount, pendingApiCount, isAccountManager]);
 
   const filteredNavGroups = React.useMemo(() => {
     // 1. Determine which role to use for navigation (simulated or real)
@@ -312,10 +317,14 @@ export default function AdminDashboard({ children }) {
           router.push('/admin/catalog?apiPlaceholder=Only APIs');
           return;
         }
+        if (tabId === 'dashboard' && isAccountManager) {
+          router.push('/admin/prescriptions');
+          return;
+        }
         router.push(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
       });
     },
-    [router]
+    [router, isAccountManager]
   );
 
   const handleLogout = () => {
@@ -334,12 +343,12 @@ export default function AdminDashboard({ children }) {
       sidebarPinnedItems={dynamicPinnedItems}
       activeNavId={activeTab}
       onNavigate={navToTab}
-      portalTitle="Admin Portal"
-      roleContext="admin"
+      portalTitle={isAccountManager ? "Clinical Portal" : "Admin Portal"}
+      roleContext={isAccountManager ? "account_manager" : "admin"}
       pageContext={{
         activeTab: activeTab,
-        label: currentItem?.label || 'Dashboard',
-        group: currentGroup?.label || 'Overview',
+        label: currentItem?.label || (isAccountManager ? 'Prescripciones' : 'Dashboard'),
+        group: currentGroup?.label || (isAccountManager ? 'Gestión Clínica' : 'Overview'),
       }}
       headerActions={
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

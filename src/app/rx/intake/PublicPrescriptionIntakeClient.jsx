@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, CheckCircle2, AlertCircle, FileText,
   Sparkles, RefreshCw, ExternalLink, Download, ArrowLeft,
-  Eye, Phone, Stethoscope, Copy, Check
+  Eye, Phone, Stethoscope, Copy, Check, Camera, FileSpreadsheet, ShieldAlert
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
@@ -15,6 +15,7 @@ import {
   extractPrescriptionFromDocument,
   normalizeExtractedPrescriptions
 } from '@/services/prescriptionAiService';
+import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import '@/styles/publicDesignSystem.css';
 
 const PUBLIC_INTAKE_STYLES = `
@@ -48,6 +49,10 @@ export default function PublicPrescriptionIntakeClient() {
   const [error, setError] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // Duplicate Warning & Override State
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  const [pendingExtractedList, setPendingExtractedList] = useState(null);
+
   // Step 2: The generated and published public prescription object
   const [publishedRx, setPublishedRx] = useState(null);
   const [showOriginalModal, setShowOriginalModal] = useState(false);
@@ -59,6 +64,8 @@ export default function PublicPrescriptionIntakeClient() {
     setIsProcessing(true);
     setError(null);
     setPublishedRx(null);
+    setDuplicateWarning(null);
+    setPendingExtractedList(null);
 
     // Create local object URL for original document preview
     try {
@@ -93,10 +100,20 @@ export default function PublicPrescriptionIntakeClient() {
           prescriptions: normalizedList,
           createPatientRecord: true,
           source: 'public_scan_publish',
+          allowDuplicateOverride: false,
         })
       });
 
       const data = await res.json();
+
+      // Check if existing duplicate was detected by Box ID or Patient + Date
+      if (data.duplicateDetected) {
+        toast.dismiss('ai-intake-step');
+        setPendingExtractedList(normalizedList);
+        setDuplicateWarning(data);
+        return;
+      }
+
       if (!res.ok || !data.success || !data.savedPrescriptions?.[0]) {
         throw new Error(data.error || 'Failed to save and publish electronic prescription');
       }
@@ -128,6 +145,102 @@ export default function PublicPrescriptionIntakeClient() {
     }
   }, [isEs]);
 
+  // Duplicate Warning Actions
+  const handleViewExistingRx = () => {
+    if (duplicateWarning?.existingPrescription?.rxData) {
+      setPublishedRx(duplicateWarning.existingPrescription.rxData);
+      setDuplicateWarning(null);
+      setPendingExtractedList(null);
+      toast.success(isEs ? 'Abriendo prescripción existente' : 'Viewing existing prescription');
+    } else if (duplicateWarning?.existingPrescription?.rxUrl) {
+      window.location.href = duplicateWarning.existingPrescription.rxUrl;
+    }
+  };
+
+  const handleForcePublish = async () => {
+    if (!pendingExtractedList) return;
+    setIsProcessing(true);
+    setProcessingStep(isEs ? 'Publicando prescripción (confirmada por usuario)...' : 'Publishing prescription (override confirmed)...');
+    toast.loading(isEs ? 'Guardando prescripción...' : 'Saving prescription...', { id: 'ai-intake-step' });
+
+    try {
+      const res = await fetch('/api/prescriptions/public-intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptions: pendingExtractedList,
+          createPatientRecord: true,
+          source: 'public_scan_publish_override',
+          allowDuplicateOverride: true,
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.savedPrescriptions?.[0]) {
+        throw new Error(data.error || 'Failed to save electronic prescription');
+      }
+
+      const saved = data.savedPrescriptions[0];
+      const fullRxPayload = saved.rxData || {
+        ...pendingExtractedList[0],
+        id: saved.id,
+        prescriptionNumber: saved.prescriptionNumber,
+        status: 'approved'
+      };
+
+      setDuplicateWarning(null);
+      setPendingExtractedList(null);
+      setPublishedRx(fullRxPayload);
+
+      toast.success(
+        isEs 
+          ? `¡Prescripción cargada de nuevo con éxito! Código: ${saved.prescriptionNumber}` 
+          : `Official electronic prescription published! Ref: ${saved.prescriptionNumber}`,
+        { id: 'ai-intake-step' }
+      );
+    } catch (err) {
+      console.error('[PublicPrescriptionIntake] Duplicate override error:', err);
+      toast.error(err.message || 'Error', { id: 'ai-intake-step' });
+    } finally {
+      setIsProcessing(false);
+      setProcessingStep('');
+    }
+  };
+
+  const handleDismissDuplicate = () => {
+    setDuplicateWarning(null);
+    setPendingExtractedList(null);
+    setFile(null);
+    setFilePreviewUrl(null);
+  };
+
+  const cameraInputRef = useRef(null);
+
+  // Global clipboard paste listener (Phase 1 zero-friction intake)
+  useEffect(() => {
+    const handlePaste = (e) => {
+      if (isProcessing) return;
+      const clipboardItems = e.clipboardData?.items;
+      if (!clipboardItems) return;
+
+      for (let i = 0; i < clipboardItems.length; i++) {
+        const item = clipboardItems[i];
+        if (item.type.indexOf('image') !== -1 || item.type === 'application/pdf') {
+          const blob = item.getAsFile();
+          if (blob) {
+            e.preventDefault();
+            toast.success(isEs ? 'Documento detectado desde portapapeles (⌘V)' : 'Document pasted from clipboard (⌘V)');
+            handleProcessFile(blob);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [isProcessing, isEs, handleProcessFile]);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (accepted) => accepted.length > 0 && handleProcessFile(accepted[0]),
     accept: {
@@ -141,6 +254,8 @@ export default function PublicPrescriptionIntakeClient() {
     setFile(null);
     setFilePreviewUrl(null);
     setPublishedRx(null);
+    setDuplicateWarning(null);
+    setPendingExtractedList(null);
     setError(null);
     setShowOriginalModal(false);
   };
@@ -155,6 +270,27 @@ export default function PublicPrescriptionIntakeClient() {
     setCopiedLink(true);
     toast.success(isEs ? 'Enlace oficial copiado al portapapeles ✓' : 'Public prescription link copied ✓');
     setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleExportExcel = () => {
+    if (!publishedRx) return;
+    try {
+      toast.loading(isEs ? 'Generando archivo Excel (.xlsx)...' : 'Generating Excel (.xlsx) file...', { id: 'intake-excel' });
+      const res = exportPrescriptionToXlsx(publishedRx, { lang });
+      if (res && res.success) {
+        toast.success(
+          isEs 
+            ? `Receta exportada a Excel: ${res.filename} (${res.itemCount} productos)` 
+            : `Prescription exported to Excel: ${res.filename} (${res.itemCount} items)`,
+          { id: 'intake-excel' }
+        );
+      } else {
+        toast.error(isEs ? 'No se pudo exportar a Excel' : 'Failed to export to Excel', { id: 'intake-excel' });
+      }
+    } catch (err) {
+      console.error('[PublicPrescriptionIntake] Excel export error:', err);
+      toast.error(isEs ? 'Error al generar Excel' : 'Error generating Excel file', { id: 'intake-excel' });
+    }
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -247,6 +383,28 @@ export default function PublicPrescriptionIntakeClient() {
             >
               {copiedLink ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
               <span>{copiedLink ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              style={{
+                background: '#ffffff',
+                border: 'none',
+                color: '#15803d',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '0.78rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+              title={isEs ? 'Exportar receta escaneada a Excel (.xlsx)' : 'Export scanned prescription to Excel (.xlsx)'}
+            >
+              <FileSpreadsheet size={14} style={{ color: '#15803d' }} />
+              <span>{isEs ? 'Exportar a Excel' : 'Export to Excel (.xlsx)'}</span>
             </button>
 
             <button
@@ -421,29 +579,296 @@ export default function PublicPrescriptionIntakeClient() {
                   : 'Fagron TrichoTest PDF, medical prescription scans, PNG, JPG (up to 15MB)'}
               </p>
 
-              <button
-                type="button"
-                style={{
-                  padding: '0.85rem 2rem',
-                  borderRadius: '12px',
-                  background: '#0284c7',
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px'
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  style={{
+                    padding: '0.85rem 1.8rem',
+                    borderRadius: '12px',
+                    background: '#0284c7',
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    fontSize: '0.95rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(2, 132, 199, 0.3)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <FileText size={18} />
+                  <span>{isEs ? 'Seleccionar Archivo o PDF' : 'Browse Document or PDF'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cameraInputRef.current?.click();
+                  }}
+                  style={{
+                    padding: '0.85rem 1.8rem',
+                    borderRadius: '12px',
+                    background: '#047857',
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    fontSize: '0.95rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(4, 120, 87, 0.3)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Camera size={18} />
+                  <span>{isEs ? 'Fotografiar con Cámara' : 'Scan with Camera'}</span>
+                </button>
+              </div>
+
+              {/* Hidden camera input for mobile photo snap */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    handleProcessFile(e.target.files[0]);
+                  }
                 }}
-              >
-                <FileText size={18} />
-                <span>{isEs ? 'Seleccionar Documento para Escanear' : 'Select Document to Scan'}</span>
-              </button>
+              />
+
+              {/* Clipboard paste hint */}
+              <div style={{ marginTop: '1.25rem', fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <span>💡 {isEs ? 'O pega una captura directamente con' : 'Or paste a screenshot directly with'}</span>
+                <kbd style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '1px 6px', fontFamily: 'monospace', fontWeight: 700, color: '#334155' }}>
+                  ⌘V / Ctrl+V
+                </kbd>
+              </div>
             </div>
           )}
         </div>
+
+        {/* ── DUPLICATE WARNING MODAL ── */}
+        {duplicateWarning && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.70)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100000,
+            padding: '1rem'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '560px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+              border: '1px solid #fed7aa',
+              overflow: 'hidden',
+              animation: 'fadeIn 0.2s ease-out'
+            }}>
+              {/* Header */}
+              <div style={{
+                background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+                padding: '1.25rem 1.5rem',
+                borderBottom: '1px solid #fde68a',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: '#d97706',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <ShieldAlert size={24} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 800, color: '#92400e' }}>
+                    {isEs ? 'Prescripción Previamente Registrada' : 'Prescription Already Registered'}
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#b45309' }}>
+                    {isEs 
+                      ? 'Se ha detectado una prescripción existente con los mismos identificadores clave.' 
+                      : 'An existing prescription with the same key identifiers was found in the database.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDismissDuplicate}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#92400e',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                  title={isEs ? 'Cerrar' : 'Close'}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* Match criteria tag */}
+                <div style={{
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '8px',
+                  padding: '0.65rem 0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.82rem',
+                  color: '#92400e',
+                  fontWeight: 600
+                }}>
+                  <span>📌 {isEs ? 'Causa de coincidencia:' : 'Match criteria:'}</span>
+                  <span style={{ fontWeight: 800, color: '#b45309' }}>{duplicateWarning.matchReason}</span>
+                </div>
+
+                {/* Existing Card Details */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '1rem'
+                }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                    {isEs ? 'Prescripción Existente en Base de Datos' : 'Existing Record in Database'}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.82rem' }}>
+                    <div>
+                      <span style={{ color: '#64748b' }}>{isEs ? 'Código:' : 'Code:'} </span>
+                      <strong style={{ fontFamily: 'monospace', color: '#003666' }}>
+                        {duplicateWarning.existingPrescription?.prescriptionNumber || duplicateWarning.existingPrescription?.id}
+                      </strong>
+                    </div>
+                    <div>
+                      <span style={{ color: '#64748b' }}>{isEs ? 'Paciente:' : 'Patient:'} </span>
+                      <strong>{duplicateWarning.existingPrescription?.patientName || '—'}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: '#64748b' }}>{isEs ? 'Fecha:' : 'Date:'} </span>
+                      <strong>{duplicateWarning.existingPrescription?.prescriptionDate || '—'}</strong>
+                    </div>
+                    {duplicateWarning.existingPrescription?.boxId && (
+                      <div>
+                        <span style={{ color: '#64748b' }}>Box ID: </span>
+                        <strong style={{ fontFamily: 'monospace' }}>{duplicateWarning.existingPrescription.boxId}</strong>
+                      </div>
+                    )}
+                    <div>
+                      <span style={{ color: '#64748b' }}>{isEs ? 'Médico:' : 'Doctor:'} </span>
+                      <span>{duplicateWarning.existingPrescription?.doctorName || 'Physician'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>
+                  {isEs
+                    ? 'Para mantener la trazabilidad clínica y evitar duplicados innecesarios, se recomienda abrir la prescripción ya existente. Si se trata de una nueva versión o rectificación y deseas cargarla de nuevo igualmente, pulsa "Cargar de Todos Modos".'
+                    : 'To preserve clinical audit trails, you can open the existing prescription. If this is a revised version and you still wish to re-upload it, you can proceed by confirming.'}
+                </p>
+
+                {/* Actions */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  marginTop: '0.5rem'
+                }}>
+                  {/* Action 1: View Existing (Recommended) */}
+                  <button
+                    type="button"
+                    onClick={handleViewExistingRx}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: '8px',
+                      background: '#003666',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 4px rgba(0,54,102,0.2)'
+                    }}
+                  >
+                    <Eye size={16} />
+                    <span>{isEs ? 'Ver Prescripción Existente (Recomendado)' : 'View Existing Prescription (Recommended)'}</span>
+                  </button>
+
+                  {/* Action 2: Force Re-Upload (Override) */}
+                  <button
+                    type="button"
+                    onClick={handleForcePublish}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      background: '#fffbeb',
+                      color: '#92400e',
+                      border: '1px solid #fde68a',
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <ShieldAlert size={16} color="#d97706" />
+                    <span>{isEs ? 'Cargar de Todos Modos (Permitir Duplicado)' : 'Upload Anyway (Allow Duplicate)'}</span>
+                  </button>
+
+                  {/* Action 3: Cancel */}
+                  <button
+                    type="button"
+                    onClick={handleDismissDuplicate}
+                    style={{
+                      width: '100%',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      color: '#64748b',
+                      border: 'none',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isEs ? 'Cancelar y descartar este archivo' : 'Cancel and dismiss file'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error message */}
         {error && (

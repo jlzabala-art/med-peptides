@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, ShieldCheck, QrCode, Copy, Check, ExternalLink, FileText, X } from 'lucide-react';
+import { Download, ShieldCheck, QrCode, Copy, Check, ExternalLink, FileText, X, Filter, ChevronDown } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 /** Returns { daysLeft, urgency, expiresAt } */
@@ -51,8 +51,10 @@ export default function SharedCatalogHeader({
   t = (k, f) => f || k,
 }) {
   const validity = useValidityCountdown(catalogMeta);
-  const [copied, setCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState(null); // 'filtered' | 'base' | 'code' | null
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [showShareDropdown, setShowShareDropdown] = useState(false);
+  const [includeFiltersInQr, setIncludeFiltersInQr] = useState(true);
 
   const rawRecipientName = catalogMeta?.recipientName || '';
   const isWholesaler = catalogMeta?.recipientType === 'wholeseller' || catalogMeta?.recipientType === 'wholesaler';
@@ -61,15 +63,20 @@ export default function SharedCatalogHeader({
     : (isWholesaler && rawRecipientName.includes(' • ') ? rawRecipientName.split(' • ')[0].trim() : rawRecipientName);
 
   const verifiedCode = batchCode || catalogCode || 'RP-CATALOG';
-  const activeShareUrl = shareUrl || (typeof window !== 'undefined' ? window.location.href : '');
+  const cleanBaseUrl = shareUrl || (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : '');
+  const activeFilteredUrl = typeof window !== 'undefined' ? window.location.href : cleanBaseUrl;
+  const hasActiveFilters = Boolean(typeof window !== 'undefined' && window.location.search && window.location.search.length > 1);
+  const activeQrUrl = (includeFiltersInQr && hasActiveFilters) ? activeFilteredUrl : cleanBaseUrl;
 
-  const handleCopyLink = async () => {
+  const handleCopy = async (type = 'filtered') => {
     try {
+      const urlToCopy = type === 'base' ? cleanBaseUrl : activeFilteredUrl;
       if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(activeShareUrl);
+        await navigator.clipboard.writeText(urlToCopy);
       }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2200);
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2200);
+      setShowShareDropdown(false);
     } catch (e) {
       console.error('Failed to copy share URL:', e);
     }
@@ -80,8 +87,8 @@ export default function SharedCatalogHeader({
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(verifiedCode);
       }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedType('code');
+      setTimeout(() => setCopiedType(null), 2000);
     } catch (e) {}
   };
 
@@ -252,29 +259,120 @@ export default function SharedCatalogHeader({
                 <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Catalog (PDF)'}</span>
               </button>
 
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#ffffff',
-                  color: '#334155',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  padding: '7px 14px',
-                  fontSize: '0.80rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                  transition: 'all 0.15s ease'
-                }}
-                title="Copy direct web link to this catalog"
-              >
-                {copied ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#64748b" />}
-                <span>{copied ? 'Link Copied ✓' : 'Copy Catalog Link'}</span>
-              </button>
+              {/* Dual Copy Link Button / Dropdown */}
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (hasActiveFilters) {
+                      setShowShareDropdown(prev => !prev);
+                    } else {
+                      handleCopy('base');
+                    }
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: hasActiveFilters ? '#eff6ff' : '#ffffff',
+                    color: hasActiveFilters ? '#003666' : '#334155',
+                    border: hasActiveFilters ? '1px solid #bfdbfe' : '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '7px 14px',
+                    fontSize: '0.80rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={hasActiveFilters ? "Opciones de copia con o sin filtros" : "Copy direct web link to this catalog"}
+                >
+                  {copiedType ? (
+                    <Check size={14} color="#16a34a" />
+                  ) : hasActiveFilters ? (
+                    <Filter size={14} color="#003666" />
+                  ) : (
+                    <Copy size={14} color="#64748b" />
+                  )}
+                  <span>
+                    {copiedType
+                      ? (copiedType === 'filtered' ? 'Link with Filters Copied ✓' : 'Base Link Copied ✓')
+                      : hasActiveFilters
+                      ? 'Copy Link (Filters Active) ▾'
+                      : 'Copy Catalog Link'}
+                  </span>
+                  {hasActiveFilters && <ChevronDown size={13} style={{ opacity: 0.7 }} />}
+                </button>
+
+                {/* Dropdown with options when filters are active */}
+                {hasActiveFilters && showShareDropdown && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    right: 0,
+                    zIndex: 1000,
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '10px',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15)',
+                    padding: '6px',
+                    width: '270px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy('filtered')}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: '2px',
+                        padding: '8px 10px',
+                        background: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, color: '#166534' }}>
+                        <Filter size={13} />
+                        <span>Copiar con Filtros Activos</span>
+                      </div>
+                      <span style={{ fontSize: '0.68rem', color: '#15803d' }}>
+                        Conserva dosis, FDA, búsqueda y objetivos actuales
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopy('base')}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: '2px',
+                        padding: '8px 10px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
+                        <Copy size={13} />
+                        <span>Copiar Catálogo Completo</span>
+                      </div>
+                      <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                        Enlace limpio sin ningún parámetro de filtro
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Mobile Verification Bar (< 768px) */}
@@ -432,11 +530,85 @@ export default function SharedCatalogHeader({
             </div>
 
             <div style={{ padding: '12px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <QRCodeSVG value={activeShareUrl} size={200} level="H" />
+              <QRCodeSVG value={activeQrUrl} size={200} level="H" />
             </div>
+
+            {hasActiveFilters && (
+              <label style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '0.76rem',
+                color: '#003666',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                userSelect: 'none'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={includeFiltersInQr}
+                  onChange={(e) => setIncludeFiltersInQr(e.target.checked)}
+                />
+                <span>Incluir filtros actuales en el código QR y enlace</span>
+              </label>
+            )}
 
             <div style={{ fontSize: '0.80rem', color: '#475569', lineHeight: 1.4 }}>
               Scan with mobile camera to open and synchronize this real-time catalog.
+            </div>
+
+            {/* Dual Copy Buttons inside Modal */}
+            <div style={{ display: 'flex', gap: '8px', width: '100%', flexWrap: 'wrap', marginTop: '4px' }}>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={() => handleCopy('filtered')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    background: '#003666',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Filter size={13} />
+                  <span>{copiedType === 'filtered' ? 'Enlace con Filtros Copiado ✓' : 'Copiar con Filtros'}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => handleCopy('base')}
+                style={{
+                  flex: 1,
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  background: '#f8fafc',
+                  color: '#334155',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Copy size={13} />
+                <span>{copiedType === 'base' ? 'Enlace Base Copiado ✓' : 'Copiar Catálogo Base'}</span>
+              </button>
             </div>
 
             <div style={{
@@ -447,7 +619,8 @@ export default function SharedCatalogHeader({
               fontSize: '0.78rem',
               fontFamily: 'monospace',
               fontWeight: 800,
-              color: '#003666'
+              color: '#003666',
+              marginTop: '4px'
             }}>
               {verifiedCode}
             </div>

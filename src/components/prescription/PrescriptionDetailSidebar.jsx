@@ -19,7 +19,8 @@ import {
   Calendar,
   Layers,
   ArrowUp,
-  Printer
+  Printer,
+  FileSpreadsheet
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import '@/components/product/PublicDatasheetTableOfContents.css';
@@ -44,6 +45,7 @@ export default function PrescriptionDetailSidebar({
   doctorPhone = '+971 50 354 6123',
   publicUrl = '',
   onOpenPdf = null,
+  onExportExcel = null,
   lang = 'en'
 }) {
   const isEs = lang === 'es';
@@ -311,6 +313,35 @@ export default function PrescriptionDetailSidebar({
             <Printer size={13} color="#003666" />
             <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
           </button>
+
+          {onExportExcel && (
+            <button
+              type="button"
+              onClick={onExportExcel}
+              className="rx-excel-btn"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '0.55rem',
+                borderRadius: '8px',
+                background: '#f0fdf4',
+                color: '#15803d',
+                border: '1px solid #bbf7d0',
+                fontWeight: 700,
+                fontSize: '0.76rem',
+                cursor: 'pointer',
+                marginTop: '6px',
+                transition: 'all 0.15s ease'
+              }}
+              title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}
+            >
+              <FileSpreadsheet size={13} color="#15803d" />
+              <span>{isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}</span>
+            </button>
+          )}
         </div>
 
       </div>

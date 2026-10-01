@@ -41,14 +41,15 @@ export const NAVIGATION_REGISTRY = [
     id: 'clinical',
     label: 'Clinical',
     icon: Stethoscope,
-    roles: ['admin', 'medical_director', 'doctor', 'clinic_manager', 'pharmacist'],
+    roles: ['admin', 'medical_director', 'doctor', 'clinic_manager', 'pharmacist', 'account_manager'],
     items: [
-      { id: 'patients',      label: 'Patients',      icon: Users,         roles: ['admin', 'medical_director', 'doctor', 'clinic_manager'] },
-      { id: 'doctors',       label: 'Doctors',       icon: Stethoscope,   roles: ['admin', 'medical_director', 'clinic_manager'] },
-      { id: 'protocols',     label: 'Protocols',     icon: ClipboardList, roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
-      { id: 'prescriptions', label: 'Prescriptions', icon: FileText,      roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
-      { id: 'treatments',    label: 'Treatments',    icon: HeartPulse,    roles: ['admin', 'medical_director', 'doctor', 'patient'] },
-      { id: 'appointments',  label: 'Appointments',  icon: Calendar,      roles: ['admin', 'medical_director'] },
+      { id: 'prescriptions',        label: 'Prescriptions',        icon: FileText,      roles: ['admin', 'medical_director', 'doctor', 'pharmacist', 'account_manager'] },
+      { id: 'prescription-intake', label: 'Prescription Intake',  icon: FileText,      roles: ['admin', 'medical_director', 'doctor', 'pharmacist', 'account_manager'] },
+      { id: 'patients',             label: 'Patients',             icon: Users,         roles: ['admin', 'medical_director', 'doctor', 'clinic_manager'] },
+      { id: 'doctors',              label: 'Doctors',              icon: Stethoscope,   roles: ['admin', 'medical_director', 'clinic_manager'] },
+      { id: 'protocols',            label: 'Protocols',            icon: ClipboardList, roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
+      { id: 'treatments',           label: 'Treatments',           icon: HeartPulse,    roles: ['admin', 'medical_director', 'doctor', 'patient'] },
+      { id: 'appointments',         label: 'Appointments',         icon: Calendar,      roles: ['admin', 'medical_director'] },
     ]
   },
 
