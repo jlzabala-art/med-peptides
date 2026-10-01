@@ -4,7 +4,15 @@ import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from
 import { sanitizeText } from '@/utils/apiValidator';
 import { logger } from '@/utils/logger';
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+function getGeminiApiKey() {
+  return (
+    process.env.GEMINI_API_KEY ||
+    process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    process.env.GOOGLE_GENAI_API_KEY ||
+    ''
+  );
+}
 const RATE_LIMIT_OPTIONS = { limit: 30, windowMs: 60 * 1000, tier: 'ai-enrich-product' };
 
 export async function POST(request) {
@@ -15,6 +23,7 @@ export async function POST(request) {
   }
 
   try {
+    const apiKey = getGeminiApiKey();
     if (!apiKey) {
       logger.error('[AI Enrich Product] Missing GEMINI_API_KEY');
       return NextResponse.json(

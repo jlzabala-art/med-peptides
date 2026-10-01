@@ -602,20 +602,21 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '7px 12px',
+                padding: '7px 14px',
                 borderRadius: '8px',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                color: '#15803d',
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#0f172a',
                 fontWeight: 700,
                 fontSize: '0.84rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
               }}
-              title="Enviar enlace público para subir recetas o informes Fagron por WhatsApp"
+              title="Compartir enlace público para subir recetas (WhatsApp, Enlace directo, QR con atribución)"
             >
-              <Phone size={14} style={{ color: '#25D366' }} />
-              <span>Enviar Portal (WhatsApp)</span>
+              <Share2 size={14} style={{ color: '#0284c7' }} />
+              <span>Compartir Portal Público</span>
             </button>
             <PrimarySplitButton 
               mainAction={{

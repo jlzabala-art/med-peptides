@@ -25,8 +25,9 @@ export default function PeptideMonographHeader({
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   // Clean primary and generic names to prevent duplicate printing like "PT-141 (Bremelanotide) Bremelanotide"
-  const rawName = product.canonicalName || product.name || 'PT-141';
-  const rawScientific = product.scientificName || product.chemical_name || 'Bremelanotide';
+  const rawName = product.canonicalName || product.name || 'Peptide';
+  const isPt141 = slug?.toLowerCase().includes('pt-141') || slug?.toLowerCase().includes('pt141') || rawName?.toLowerCase().includes('pt-141');
+  const rawScientific = product.scientificName || product.chemical_name || product.genericName || (isPt141 ? 'Bremelanotide' : '');
 
   let primaryName = rawName;
   let cleanScientific = rawScientific;
@@ -40,8 +41,6 @@ export default function PeptideMonographHeader({
   } else if (rawName.toLowerCase() === rawScientific.toLowerCase()) {
     cleanScientific = '';
   }
-
-  const isPt141 = slug?.toLowerCase().includes('pt-141') || slug?.toLowerCase().includes('pt141') || primaryName?.toLowerCase().includes('pt-141');
 
   // FDA reference formulation details (Vyleesi)
   const hasFdaRef = isPt141 || product.hasFdaReference;

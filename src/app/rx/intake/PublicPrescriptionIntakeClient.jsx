@@ -2,12 +2,14 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useSearchParams } from 'next/navigation';
 import {
   Upload, X, CheckCircle2, AlertCircle, FileText,
   Sparkles, RefreshCw, ExternalLink, Download, ArrowLeft,
-  Eye, Phone, Stethoscope, Copy, Check, Camera, FileSpreadsheet, ShieldAlert
+  Eye, Phone, Stethoscope, Copy, Check, Camera, FileSpreadsheet, ShieldAlert, User
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicPrescriptionClient from '../[code]/PublicPrescriptionClient';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
@@ -38,6 +40,15 @@ const PUBLIC_INTAKE_STYLES = `
 `;
 
 export default function PublicPrescriptionIntakeClient() {
+  const { user, userProfile } = useAuth();
+  const searchParams = useSearchParams();
+  const referralAm = searchParams?.get('am') || '';
+
+  const activeAmEmail = user?.email || referralAm || '';
+  const activeAmName = user?.displayName || userProfile?.name || (activeAmEmail ? activeAmEmail.split('@')[0] : '');
+  const activeAmId = user?.uid || null;
+  const isUserLoggedIn = Boolean(user?.email);
+
   // English by default
   const [lang, setLang] = useState('en');
   const isEs = lang === 'es';
@@ -84,7 +95,7 @@ export default function PublicPrescriptionIntakeClient() {
       // 2. Normalization & Ingredient Resolution
       setProcessingStep(isEs ? 'Mapeando fórmulas y vehículos contra catálogo farmacológico...' : 'Resolving compounded active ingredients and excipients...');
       const normalizedList = await normalizeExtractedPrescriptions(aiData, {
-        currentUser: null,
+        currentUser: user || null,
       });
 
       if (!normalizedList || normalizedList.length === 0) {
@@ -93,6 +104,20 @@ export default function PublicPrescriptionIntakeClient() {
 
       // 3. Instant Firestore Publication
       setProcessingStep(isEs ? 'Publicando prescripción médica electrónica oficial...' : 'Publishing official electronic prescription dossier...');
+      
+      const accountManagerPayload = activeAmEmail ? {
+        email: activeAmEmail,
+        name: activeAmName,
+        id: activeAmId,
+      } : null;
+
+      const uploadedByPayload = user?.email ? {
+        email: user.email,
+        name: user.displayName || userProfile?.name || user.email.split('@')[0],
+        id: user.uid,
+        role: userProfile?.role || 'user'
+      } : null;
+
       const res = await fetch('/api/prescriptions/public-intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,6 +126,8 @@ export default function PublicPrescriptionIntakeClient() {
           createPatientRecord: true,
           source: 'public_scan_publish',
           allowDuplicateOverride: false,
+          accountManager: accountManagerPayload,
+          uploadedBy: uploadedByPayload,
         })
       });
 
@@ -164,6 +191,19 @@ export default function PublicPrescriptionIntakeClient() {
     toast.loading(isEs ? 'Guardando prescripción...' : 'Saving prescription...', { id: 'ai-intake-step' });
 
     try {
+      const accountManagerPayload = activeAmEmail ? {
+        email: activeAmEmail,
+        name: activeAmName,
+        id: activeAmId,
+      } : null;
+
+      const uploadedByPayload = user?.email ? {
+        email: user.email,
+        name: user.displayName || userProfile?.name || user.email.split('@')[0],
+        id: user.uid,
+        role: userProfile?.role || 'user'
+      } : null;
+
       const res = await fetch('/api/prescriptions/public-intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -172,6 +212,8 @@ export default function PublicPrescriptionIntakeClient() {
           createPatientRecord: true,
           source: 'public_scan_publish_override',
           allowDuplicateOverride: true,
+          accountManager: accountManagerPayload,
+          uploadedBy: uploadedByPayload,
         })
       });
 
@@ -511,6 +553,97 @@ export default function PublicPrescriptionIntakeClient() {
               : 'Scan or upload your Fagron Genomics report (TrichoTest™, NutriGen™) or medical prescription. Atlas AI will extract the compounded formula and instantly publish the official electronic prescription.'}
           </p>
         </div>
+
+        {/* Account Manager Status Banner */}
+        {isUserLoggedIn && (
+          <div style={{
+            maxWidth: '680px',
+            margin: '0 auto 1.5rem',
+            padding: '12px 18px',
+            background: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 2px 8px rgba(22, 163, 74, 0.08)'
+          }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: '#dcfce7',
+              color: '#16a34a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <CheckCircle2 size={20} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#166534' }}>
+                {isEs ? 'Modo Account Manager Conectado' : 'Connected Account Manager Mode'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#15803d', marginTop: '1px' }}>
+                {isEs 
+                  ? `Sesión activa: ${user.email}. Todas las prescripciones digitalizadas se atribuirán a tu cuenta.` 
+                  : `Active session: ${user.email}. All digitized prescriptions will be automatically linked to your account.`}
+              </div>
+            </div>
+            <span style={{
+              padding: '4px 8px',
+              background: '#ffffff',
+              borderRadius: '6px',
+              border: '1px solid #bbf7d0',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#16a34a',
+              whiteSpace: 'nowrap'
+            }}>
+              Account Manager
+            </span>
+          </div>
+        )}
+
+        {!isUserLoggedIn && referralAm && (
+          <div style={{
+            maxWidth: '680px',
+            margin: '0 auto 1.5rem',
+            padding: '12px 18px',
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.08)'
+          }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: '#dbeafe',
+              color: '#2563eb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <User size={20} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+              <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1e40af' }}>
+                {isEs ? 'Canalizado por Account Manager' : 'Referred by Account Manager'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#1d4ed8', marginTop: '1px' }}>
+                {isEs 
+                  ? `Gestor asignado: ${referralAm}. Su solicitud será atendida directamente por este gestor.` 
+                  : `Assigned manager: ${referralAm}. Your request will be directly handled by this manager.`}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Dropzone Upload & Scan Area */}
         <div style={{

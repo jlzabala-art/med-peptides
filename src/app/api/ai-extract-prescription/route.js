@@ -2,7 +2,15 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
 import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+function getGeminiApiKey() {
+  return (
+    process.env.GEMINI_API_KEY ||
+    process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    process.env.GOOGLE_GENAI_API_KEY ||
+    ''
+  );
+}
 
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB
 const ALLOWED_MIME_TYPES = new Set([
@@ -20,6 +28,7 @@ export async function POST(request) {
   }
 
   try {
+    const apiKey = getGeminiApiKey();
     if (!apiKey) {
       return NextResponse.json(
         { error: 'GEMINI_API_KEY is not configured on the server environment.' },

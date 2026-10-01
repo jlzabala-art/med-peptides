@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   FlaskConical, 
   Clock, 
@@ -1951,11 +1951,11 @@ export default function ProtocolWorkspaceTab({
                 padding: '1px'
               }}>
                 {[
-                  { label: 'Active Compound', value: `${product.canonicalName || 'PT-141'} (${product.scientificName || 'Bremelanotide'})` },
+                  { label: 'Active Compound', value: `${product.canonicalName || product.name || 'Peptide'}${product.scientificName ? ` (${product.scientificName})` : ''}` },
                   { label: 'Selected Protocol', value: activeProtocol.name },
                   { label: 'Treatment Duration', value: `${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} administrations)` },
                   { label: 'Dose per Administration', value: `${physicianDoseMg} mg per SubQ injection` },
-                  { label: 'Selected Presentation', value: `${selectedVialStrength} mg Lyophilized Vial (Lotusland)` },
+                  { label: 'Selected Presentation', value: `${selectedVialStrength} mg Lyophilized Vial (${product.supplierName || 'Verified Laboratory'})` },
                   { label: 'Reconstitution Diluent', value: `${selectedBacVolume.toFixed(1)} mL Bacteriostatic Water` },
                   { label: 'Solution Concentration', value: reconCalc.concentrationDisplay },
                   { label: 'Draw per Administration', value: `${reconCalc.injectionVolumeDisplay} / ${reconCalc.syringeUnitsDisplay}` },

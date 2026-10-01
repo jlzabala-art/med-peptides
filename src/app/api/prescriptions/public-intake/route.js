@@ -25,7 +25,9 @@ export async function POST(request) {
       prescriptions, 
       createPatientRecord = true, 
       source = 'public_rx_intake', 
-      allowDuplicateOverride = false 
+      allowDuplicateOverride = false,
+      accountManager = null,
+      uploadedBy = null
     } = body || {};
 
     if (!Array.isArray(prescriptions) || prescriptions.length === 0) {
@@ -135,8 +137,22 @@ export async function POST(request) {
 
             if (existingPatientSnap && !existingPatientSnap.empty) {
               patientId = existingPatientSnap.docs[0].id;
+              if (accountManager?.email || uploadedBy?.email) {
+                const existingPData = existingPatientSnap.docs[0].data();
+                if (!existingPData.accountManagerEmail) {
+                  await adminDb.collection('patients').doc(patientId).update({
+                    accountManager: {
+                      email: accountManager?.email || uploadedBy?.email,
+                      name: accountManager?.name || uploadedBy?.name || '',
+                      id: accountManager?.id || uploadedBy?.id || null
+                    },
+                    accountManagerEmail: accountManager?.email || uploadedBy?.email,
+                    updatedAt: new Date().toISOString()
+                  }).catch(() => null);
+                }
+              }
             } else {
-              const newPatientRef = await adminDb.collection('patients').add({
+              const newPatientDoc = {
                 name: patientNameClean,
                 dob: rx.patient.dob || '',
                 gender: rx.patient.gender || '',
@@ -146,7 +162,18 @@ export async function POST(request) {
                 status: 'unverified',
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-              });
+              };
+
+              if (accountManager?.email || uploadedBy?.email) {
+                newPatientDoc.accountManager = {
+                  email: accountManager?.email || uploadedBy?.email,
+                  name: accountManager?.name || uploadedBy?.name || '',
+                  id: accountManager?.id || uploadedBy?.id || null
+                };
+                newPatientDoc.accountManagerEmail = accountManager?.email || uploadedBy?.email;
+              }
+
+              const newPatientRef = await adminDb.collection('patients').add(newPatientDoc);
               patientId = newPatientRef.id;
             }
           } catch (pErr) {
@@ -169,6 +196,23 @@ export async function POST(request) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
+
+        if (accountManager?.email || uploadedBy?.email) {
+          const amEmail = accountManager?.email || uploadedBy?.email;
+          const amName = accountManager?.name || uploadedBy?.name || (amEmail ? amEmail.split('@')[0] : '');
+          const amId = accountManager?.id || uploadedBy?.id || null;
+
+          payload.accountManager = {
+            email: amEmail,
+            name: amName,
+            id: amId
+          };
+          payload.accountManagerEmail = amEmail;
+          payload.accountManagerName = amName;
+          payload.accountManagerId = amId;
+          payload.isAccountManagerAssigned = true;
+          payload.uploadedBy = uploadedBy || { email: amEmail, name: amName, id: amId };
+        }
 
         if (allowDuplicateOverride) {
           payload.duplicateOverride = true;

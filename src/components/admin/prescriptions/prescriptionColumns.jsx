@@ -121,6 +121,24 @@ export const getPrescriptionColumns = (options = {}) => {
               <span>{formatDoctorName(doctor)}</span>
               {doctorId && <CopyableId value={doctorId} iconOnly={true} />}
             </div>
+            {(rx.accountManagerEmail || rx.accountManager?.name || rx.accountManager?.email) && (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                fontSize: '0.72rem',
+                color: '#0284c7',
+                fontWeight: 700,
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                width: 'fit-content',
+                marginTop: '1px'
+              }}>
+                <span>👔 AM: {rx.accountManager?.name || rx.accountManagerName || rx.accountManagerEmail?.split('@')[0]}</span>
+              </div>
+            )}
           </div>
         );
       },

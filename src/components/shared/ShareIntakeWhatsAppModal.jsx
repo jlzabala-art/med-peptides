@@ -18,8 +18,10 @@ import {
   Stethoscope
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
+  const { user, userProfile } = useAuth();
   const [recipientPhone, setRecipientPhone] = useState('');
   const [recipientType, setRecipientType] = useState('patient'); // 'patient' | 'doctor' | 'general'
   const [lang, setLang] = useState('es');
@@ -28,9 +30,14 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const isEs = lang === 'es';
-  const intakeUrl = typeof window !== 'undefined' 
+  const baseUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/rx/intake` 
     : 'https://med-peptides.com/rx/intake';
+
+  const userEmail = user?.email || userProfile?.email || '';
+  const intakeUrl = userEmail 
+    ? `${baseUrl}?am=${encodeURIComponent(userEmail)}`
+    : baseUrl;
 
   // Customized clinical message templates
   const getMessage = () => {
@@ -131,23 +138,23 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              background: '#dcfce7',
-              color: '#16a34a',
+              background: '#e0f2fe',
+              color: '#0284c7',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0
             }}>
-              <Phone size={24} />
+              <Share2 size={24} />
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Enviar Portal de Subida por WhatsApp' : 'Share Intake Portal via WhatsApp'}
+                {isEs ? 'Compartir Portal Público de Prescripciones' : 'Share Public Prescription Intake Portal'}
               </h3>
               <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
                 {isEs 
-                  ? 'Permite a pacientes o médicos subir sus prescripciones y Fagron TrichoTest sin registro' 
-                  : 'Allow patients or doctors to upload prescriptions & Fagron TrichoTest without account'}
+                  ? 'Permite a pacientes o médicos subir sus recetas y análisis genéticos para su digitalización con IA' 
+                  : 'Allow patients or doctors to upload prescriptions & genomics reports for AI processing'}
               </p>
             </div>
           </div>
@@ -167,6 +174,26 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
             <X size={20} />
           </button>
         </div>
+
+        {/* Account Manager attribution notice */}
+        {userEmail && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            fontSize: '0.8rem',
+            color: '#166534'
+          }}>
+            <ShieldCheck size={18} style={{ color: '#16a34a', flexShrink: 0 }} />
+            <div>
+              <strong>Atribución de Account Manager Activa:</strong> Las recetas enviadas o cargadas a través de este enlace se vincularán automáticamente a tu usuario <strong>({userEmail})</strong>.
+            </div>
+          </div>
+        )}
 
         {/* Options Row: Target recipient & Language */}
         <div style={{
@@ -391,6 +418,24 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
                 <Download size={12} />
                 <span>{isEs ? 'Descargar QR' : 'Download QR'}</span>
               </button>
+              <span style={{ color: '#cbd5e1' }}>•</span>
+              <a
+                href={intakeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: '#0284c7',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <ExternalLink size={12} />
+                <span>{isEs ? 'Abrir Portal' : 'Open Portal'}</span>
+              </a>
             </div>
           </div>
         </div>
@@ -401,7 +446,7 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
             type="button"
             onClick={handleLaunchWhatsApp}
             style={{
-              flex: '1 1 200px',
+              flex: '1 1 180px',
               padding: '0.75rem 1.25rem',
               borderRadius: '12px',
               background: '#25D366',
@@ -418,16 +463,40 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
             }}
           >
             <Phone size={18} />
-            <span>{isEs ? 'Abrir en WhatsApp' : 'Open in WhatsApp'}</span>
+            <span>{isEs ? 'Enviar WhatsApp' : 'Send WhatsApp'}</span>
           </button>
 
           <button
             type="button"
-            onClick={() => handleCopy('all')}
+            onClick={() => handleCopy('link')}
+            style={{
+              flex: '1 1 140px',
+              padding: '0.75rem 1rem',
+              borderRadius: '12px',
+              background: '#0284c7',
+              border: '1px solid #0284c7',
+              color: '#ffffff',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 6px rgba(2, 132, 199, 0.2)'
+            }}
+          >
+            {copiedType === 'link' ? <Check size={16} style={{ color: '#ffffff' }} /> : <Copy size={16} />}
+            <span>{copiedType === 'link' ? (isEs ? '¡Enlace Copiado!' : 'Copied!') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => window.open(intakeUrl, '_blank', 'noopener,noreferrer')}
             style={{
               padding: '0.75rem 1rem',
               borderRadius: '12px',
-              background: '#f1f5f9',
+              background: '#f8fafc',
               border: '1px solid #cbd5e1',
               color: '#334155',
               fontSize: '0.88rem',
@@ -435,11 +504,13 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '6px'
             }}
+            title="Abrir el portal de subida en una nueva pestaña"
           >
-            {copiedType === 'all' ? <Check size={16} style={{ color: '#16a34a' }} /> : <Copy size={16} />}
-            <span>{copiedType === 'all' ? (isEs ? '¡Mensaje Copiado!' : 'Copied!') : (isEs ? 'Copiar Mensaje' : 'Copy Message')}</span>
+            <ExternalLink size={16} />
+            <span>{isEs ? 'Abrir Portal' : 'Open Portal'}</span>
           </button>
         </div>
 

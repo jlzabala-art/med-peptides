@@ -33,15 +33,17 @@ import { toast } from 'react-hot-toast';
 export default function PeptideMonographTopStrip({
   activeTab = 'protocols',
   product = {},
-  slug = 'pt-141',
-  effectiveBatch = 'AS-LOT-PT05-2609',
+  slug = '',
+  effectiveBatch = '',
   protocolContext = null,
   onOpenCoaModal
 }) {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const pageUrl = `https://med-peptides.com/p/${slug}`;
+  const cleanSlug = slug || product.slug || 'product';
+  const pageUrl = `https://med-peptides.com/p/${cleanSlug}`;
+  const isPt141 = cleanSlug.toLowerCase().includes('pt-141') || (product.canonicalName || product.name || '').toLowerCase().includes('pt-141');
 
   const handleCopyUrl = () => {
     triggerHaptic('light');
@@ -92,7 +94,7 @@ export default function PeptideMonographTopStrip({
                     Active Protocol Focus
                   </span>
                   <strong style={{ fontSize: '0.82rem', color: '#003666', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
-                    {protocolContext?.activeProtocol?.cleanTitle || protocolContext?.activeProtocol?.name || 'On-Demand Libido Enhancement'}
+                    {protocolContext?.activeProtocol?.cleanTitle || protocolContext?.activeProtocol?.name || (isPt141 ? 'On-Demand Libido Enhancement' : 'Clinical Titration Pathway')}
                   </strong>
                 </div>
 

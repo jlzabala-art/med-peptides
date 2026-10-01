@@ -19,12 +19,13 @@ export default function OverviewTab({
   product = {},
   onNavigateToProtocols
 }) {
-  const genericName = product.scientificName || product.chemical_name || 'Bremelanotide';
-  const targetReceptor = product.targetSystem || 'Central Melanocortin MC3R / MC4R Receptors';
+  const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
+  const genericName = product.scientificName || product.chemical_name || product.genericName || (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || ''));
+  const targetReceptor = product.targetSystem || product.mechanism_of_action || (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway');
   const pharmacologicalSummary = product.overview_summary || product.summary || product.description || 
-    'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.';
+    (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.');
 
-  const fdaRefProduct = 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)';
+  const fdaRefProduct = product.referenceBrand ? `${product.referenceBrand} ${product.referenceApprovalYear ? `(Approved ${product.referenceApprovalYear})` : ''}` : (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null);
 
   const clinicalConsiderations = [
     {
