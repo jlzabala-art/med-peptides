@@ -2026,7 +2026,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     {isEs ? `Documentos Oficiales Adjuntos (${docs.length})` : `Official Attached Clinical Documents (${docs.length})`}
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                    {isEs ? 'Previsualización de la receta médica oficial y la ficha de formulación Fagron' : 'Preview official signed prescription pad and Fagron compounding records'}
+                    {isEs ? 'Previsualización de la receta médica oficial y la ficha técnica de formulación magistral' : 'Preview official signed prescription pad and compounding technical records'}
                   </p>
                 </div>
               </div>
@@ -2050,8 +2050,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     }}
                   >
                     {d.category === 'signed_rx' 
-                      ? (isEs ? '📄 Receta Bedaya Pad' : '📄 Bedaya Signed Pad') 
-                      : (isEs ? '🖼️ Plantilla Fagron' : '🖼️ Fagron Formulation')}
+                      ? (isEs ? '📄 Receta Médica Oficial' : '📄 Official Signed Pad') 
+                      : (isEs ? '🖼️ Ficha de Formulación' : '🖼️ Compounding Record')}
                   </button>
                 ))}
               </div>
@@ -2603,7 +2603,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 color: '#64748b',
                 marginTop: '4px'
               }}>
-                🔒 <strong>Segregación Clínica:</strong> La tramitación de fabricación con Fagron se mantiene internamente bajo la firma del Dr. Miguel Ángel López Aranda. Este formulario solo actualiza los datos clínicos expuestos al paciente.
+                🔒 <strong>Segregación Clínica:</strong> La tramitación de formulación y fabricación se mantiene internamente bajo la supervisión del director médico asignado. Este formulario actualiza los datos del médico tratante expuestos al paciente y en el dossier.
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
