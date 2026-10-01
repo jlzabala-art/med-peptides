@@ -339,10 +339,10 @@ export default function SharedCatalogHeader({
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, color: '#166534' }}>
                         <Filter size={13} />
-                        <span>Copiar con Filtros Activos</span>
+                        <span>Copy with Active Filters</span>
                       </div>
                       <span style={{ fontSize: '0.68rem', color: '#15803d' }}>
-                        Conserva dosis, FDA, búsqueda y objetivos actuales
+                        Preserves dosage, FDA, search, and active clinical goals
                       </span>
                     </button>
 
@@ -364,10 +364,10 @@ export default function SharedCatalogHeader({
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
                         <Copy size={13} />
-                        <span>Copiar Catálogo Completo</span>
+                        <span>Copy Complete Catalog</span>
                       </div>
                       <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                        Enlace limpio sin ningún parámetro de filtro
+                        Clean link without any applied filter parameters
                       </span>
                     </button>
                   </div>
