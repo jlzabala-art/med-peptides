@@ -228,7 +228,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       phase: 'Weeks 9 - 12',
       title: 'Shaft Thickening, Density & Consolidation',
       badge: 'Month 3',
-      description: 'Measurable caliber increase in hair shafts and visible density coverage. Completion of the 3-bottle course (300  // ── Compounded Formulations Architecture (Grouped by Vehicle & Route with Dedicated Posology) ──
+      description: 'Measurable caliber increase in hair shafts and visible density coverage. Completion of the 3-bottle course (300 ml). Follow-up clinical review with Dr. Hanieh Erdmann.'
+    }
+  ];
+
+  // ── Compounded Formulations Architecture (Grouped by Vehicle & Route with Dedicated Posology) ──
   const rawLines = rx.prescriptionLines || rx.items || rx.compounds || [];
 
   const compoundedFormulations = React.useMemo(() => {
