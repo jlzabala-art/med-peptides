@@ -445,7 +445,7 @@ async function getAssociatedProtocols(productId, productSlug, productName) {
     matched.sort((a, b) => b.clinicalScore - a.clinicalScore);
 
     // Flag the top protocol as the Primary Reference Blueprint
-    return matched.slice(0, 5).map((item, idx) => ({
+    return matched.slice(0, 20).map((item, idx) => ({
       ...item,
       isPrimary: idx === 0
     }));

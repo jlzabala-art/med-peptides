@@ -135,18 +135,22 @@ function sanitizeProtocolTitle(rawName = '', canonicalCompound = '') {
   return cleaned || rawName;
 }
 
-export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
+export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141', format = 'vial') {
   const bm = matchClinicalBenchmark(canonicalName);
   const name = bm?.canonicalName || canonicalName || 'Peptide';
   const isPt141 = name.toLowerCase().includes('pt-141') || name.toLowerCase().includes('bremelanotide');
   if (isPt141) return CANONICAL_PT141_PROTOCOLS;
 
+  const isNasalFormat = String(format).toLowerCase().includes('nasal') || String(format).toLowerCase().includes('spray');
+  const isPenFormat = String(format).toLowerCase().includes('pen') || String(format).toLowerCase().includes('cartridge');
+  const defaultRoute = isNasalFormat ? 'Intranasal' : isPenFormat ? 'Subcutaneous (Pen)' : 'Subcutaneous';
+
   const unit = bm?.unit || 'mg';
   const steps = bm?.steps || [2.5, 5.0, 7.5];
-  const cadence = bm?.cadence || 'Once weekly';
-  const shortCadence = bm?.shortCadence || '1x/wk';
-  const timesPerWeek = bm?.timesPerWeek || 1;
-  const route = bm?.route || 'Subcutaneous';
+  const cadence = bm?.cadence || (isNasalFormat ? 'Daily (morning or BID)' : 'Once weekly');
+  const shortCadence = bm?.shortCadence || (isNasalFormat ? 'Daily' : '1x/wk');
+  const timesPerWeek = bm?.timesPerWeek || (isNasalFormat ? 7 : 1);
+  const route = defaultRoute;
   const isWeekly = timesPerWeek === 1;
 
   const stepMg = (st) => (unit === 'mcg' && st >= 100 ? st / 1000 : st);
@@ -182,15 +186,27 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
         ? 'Weight Management & Metabolic Optimization'
         : (timesPerWeek >= 5 ? 'Tissue Regeneration & Healing' : 'Clinical Optimization'));
 
+  const primaryProtoTitle = isNasalFormat
+    ? `${name} Intranasal Metered Spray Protocol`
+    : isPenFormat
+      ? `${name} Subcutaneous Pen Titration Protocol`
+      : `${name} Subcutaneous Reconstitution Protocol`;
+
+  const primaryProtoObjective = isNasalFormat
+    ? `Gradual intranasal metered mucosal titration of ${name} (${initialDose} mg initiation up to ${maxDose} mg peak) for direct olfactory central nervous system uptake and zero reconstitution requirements.`
+    : isPenFormat
+      ? `Multi-dose calibrated pen titration of ${name} (${initialDose} mg initiation up to ${maxDose} mg peak) for convenient subcutaneous administration with dial precision.`
+      : `Gradual physiological subcutaneous titration of ${name} (${initialDose} mg initiation up to ${maxDose} mg peak) utilizing reconstituted lyophilized vials to ensure steady bioavailability and minimal side effects.`;
+
   return [
     {
       id: `proto-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-standard`,
       slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-standard-titration`,
-      name: `${name} Standard Titration Protocol`,
+      name: primaryProtoTitle,
       durationWeeks: proto1Weeks,
       difficulty: 'Standard Clinical',
       category,
-      objective: `Gradual physiological titration of ${name} (${initialDose} mg initiation up to ${maxDose} mg peak) to ensure optimal cellular receptor adaptation and minimize side effects.`,
+      objective: primaryProtoObjective,
       route,
       defaultDoseMg: initialDose,
       defaultDosesPerWeek: timesPerWeek,
@@ -200,11 +216,19 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
     {
       id: `proto-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-moderate`,
       slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-moderate-maintenance`,
-      name: `${name} Moderate Maintenance Protocol`,
+      name: isNasalFormat
+        ? `${name} Intranasal Maintenance Protocol`
+        : isPenFormat
+          ? `${name} Subcutaneous Pen Maintenance Protocol`
+          : `${name} Moderate Maintenance Protocol`,
       durationWeeks: 12,
       difficulty: 'Intermediate',
       category,
-      objective: `Structured 12-week clinical program establishing stable therapeutic levels of ${name} at ${midDose} mg with steady long-term maintenance.`,
+      objective: isNasalFormat
+        ? `Structured 12-week clinical program establishing stable intranasal therapeutic levels of ${name} at ${midDose} mg with steady long-term maintenance.`
+        : isPenFormat
+          ? `Structured 12-week clinical program establishing stable therapeutic levels of ${name} at ${midDose} mg utilizing calibrated multi-dose pens.`
+          : `Structured 12-week clinical program establishing stable therapeutic levels of ${name} at ${midDose} mg with steady long-term maintenance.`,
       route,
       defaultDoseMg: initialDose,
       defaultDosesPerWeek: timesPerWeek,
@@ -214,11 +238,19 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
     {
       id: `proto-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}-intensive`,
       slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-intensive-response`,
-      name: `${name} Intensive Response Protocol`,
+      name: isNasalFormat
+        ? `${name} Intranasal Intensive Response Protocol`
+        : isPenFormat
+          ? `${name} Subcutaneous Pen Intensive Protocol`
+          : `${name} Intensive Response Protocol`,
       durationWeeks: 12,
       difficulty: 'Comprehensive',
       category,
-      objective: `Rapid therapeutic ramp reaching steady-state levels of ${name} (${maxDose} mg) for intensive therapeutic targets and verified tolerance.`,
+      objective: isNasalFormat
+        ? `Intranasal therapeutic titration reaching steady-state levels of ${name} (${maxDose} mg) for intensive therapeutic targets and verified tolerance.`
+        : isPenFormat
+          ? `Subcutaneous multi-dose pen ramp reaching steady-state levels of ${name} (${maxDose} mg) for intensive therapeutic targets and verified tolerance.`
+          : `Rapid therapeutic ramp reaching steady-state levels of ${name} (${maxDose} mg) for intensive therapeutic targets and verified tolerance.`,
       route,
       defaultDoseMg: initialDose,
       defaultDosesPerWeek: timesPerWeek,
@@ -228,7 +260,7 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
   ];
 }
 
-function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false, isPen = false) {
+function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false, isPen = false, isVial = true) {
   const phases = Array.isArray(p.phases) && p.phases.length > 0
     ? p.phases
     : (Array.isArray(p.phase_blueprints) ? p.phase_blueprints : []);
@@ -238,14 +270,7 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false
   let extractedDoseMg = null;
   let extractedFreqPerWeek = null;
   let extractedFreqDesc = '';
-  let extractedRoute = p.route || benchmark?.route || 'Subcutaneous';
-  if (isNasal) {
-    extractedRoute = 'Intranasal';
-  } else if (isPen) {
-    extractedRoute = 'Subcutaneous (Pen)';
-  } else if (p.route) {
-    extractedRoute = p.route;
-  }
+  let extractedRoute = isNasal ? 'Intranasal' : isPen ? 'Subcutaneous (Pen)' : 'Subcutaneous';
   let totalWeeks = 0;
 
   const mappedPhases = phases.map((ph, idx) => {
@@ -390,6 +415,27 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false
     cleanedObjective = cleanedObjective.replace(/\b8-week\b/gi, `${calculatedDuration}-week`);
   }
 
+  // Intelligently adapt legacy objective text to match current physical presentation
+  if (isPen) {
+    if (cleanedObjective.toLowerCase().includes('intranasal') || cleanedObjective.toLowerCase().includes('nasal spray')) {
+      cleanedObjective = cleanedObjective
+        .replace(/intranasal\s+(?:protocol|administration|spray)/gi, 'subcutaneous multi-dose pen protocol')
+        .replace(/intranasal/gi, 'subcutaneous (via multi-dose pen)')
+        .replace(/nasal mucosa/gi, 'subcutaneous adipose tissue');
+    }
+  } else if (isVial) {
+    if (cleanedObjective.toLowerCase().includes('intranasal') || cleanedObjective.toLowerCase().includes('nasal spray')) {
+      cleanedObjective = cleanedObjective
+        .replace(/intranasal\s+(?:protocol|administration|spray)/gi, 'subcutaneous reconstitution protocol')
+        .replace(/intranasal/gi, 'subcutaneous')
+        .replace(/nasal mucosa/gi, 'subcutaneous tissue');
+    }
+  } else if (isNasal) {
+    if (cleanedObjective.toLowerCase().includes('reconstitution') || cleanedObjective.toLowerCase().includes('bacteriostatic water')) {
+      cleanedObjective = `Clinical intranasal metered spray protocol for ${canonicalCompound || 'peptide'} administration, providing direct mucosal absorption with zero reconstitution requirements.`;
+    }
+  }
+
   return {
     durationWeeks: calculatedDuration,
     defaultDoseMg: extractedDoseMg,
@@ -438,42 +484,127 @@ export default function ProtocolWorkspaceTab({
   const router = useRouter();
   const canonicalName = product.canonicalName || product.name || 'PT-141';
 
-  const currentFormat = activeFormat || product.presentation || product.format || 'vial';
-  const isNasal = String(currentFormat).toLowerCase().includes('nasal') || String(currentFormat).toLowerCase().includes('spray');
-  const isPen = String(currentFormat).toLowerCase().includes('pen') || String(currentFormat).toLowerCase().includes('cartridge');
-  const isVial = !isNasal && !isPen;
+  // Format detection supporting both string format and object format ({ id, name })
+  const formatStr = (
+    typeof activeFormat === 'string'
+      ? activeFormat
+      : (activeFormat?.id || activeFormat?.name || product.presentation || product.format || 'vial')
+  ).toLowerCase();
 
-  // Normalize protocols list: use provided or fallback to canonical compound protocols
+  const isNasal = formatStr.includes('nasal') || formatStr.includes('spray');
+  const isPen = formatStr.includes('pen') || formatStr.includes('cartridge');
+  const isVial = !isNasal && !isPen;
+  const currentFormat = isNasal ? 'nasal_spray' : isPen ? 'prefilled_pen' : 'vial';
+
+  // Normalize protocols list: strictly filter by presentation format and map into canonical structure
   const availableProtocols = useMemo(() => {
-    if (Array.isArray(associatedProtocols) && associatedProtocols.length > 0) {
-      // Map Firestore/Repository protocols into canonical structure using extractProtocolClinicalSpecs
-      return associatedProtocols.map(p => {
-        const specs = extractProtocolClinicalSpecs(p, canonicalName, isNasal, isPen);
-        return {
-          id: p.id || p.slug,
-          slug: p.slug || p.id,
-          name: sanitizeProtocolTitle(p.name || p.title, canonicalName),
-          fullName: p.name || p.title || 'Clinical Protocol',
-          durationWeeks: specs.durationWeeks,
-          difficulty: p.difficulty || p.difficulty_level || 'Clinical',
-          category: p.category || (specs.defaultDosesPerWeek === 1 ? 'Weight Management' : 'Clinical Protocol'),
-          objective: specs.objective,
-          route: specs.route,
-          defaultDoseMg: specs.defaultDoseMg,
-          defaultDosesPerWeek: specs.defaultDosesPerWeek,
-          frequencyDescription: specs.frequencyDescription,
-          phases: specs.phases,
-          _raw: p
-        };
-      });
-    }
-    return buildCanonicalCompoundProtocols(canonicalName);
-  }, [associatedProtocols, canonicalName, isNasal, isPen]);
+    let list = Array.isArray(associatedProtocols) && associatedProtocols.length > 0
+      ? associatedProtocols
+      : [];
+
+    // Filter list according to the active presentation
+    const filtered = list.filter(p => {
+      const pName = String(p.name || p.title || '').toLowerCase();
+      const pRoute = String(p.route || p.administrationRoute || '').toLowerCase();
+      const pFormat = String(p.format || p.presentation || '').toLowerCase();
+      const pDesc = String(p.summary || p.overview_summary || p.description || '').toLowerCase();
+
+      if (isNasal) {
+        // Exclude protocols explicitly labeled as pen or reconstitution vial
+        if (pName.includes('pen') || pRoute.includes('pen') || pFormat.includes('pen')) return false;
+        if (pName.includes('reconstitution') || pName.includes('subcutaneous') || pFormat.includes('vial')) {
+          if (!pName.includes('nasal') && !pRoute.includes('nasal')) return false;
+        }
+        // Include if matches nasal signals or is a compatible neurological/nootropic protocol
+        const hasNasalSignal = pName.includes('nasal') || pName.includes('spray') || pRoute.includes('nasal') || pRoute.includes('intranasal') || pDesc.includes('nasal');
+        const isCompatibleNootropic = (pName.includes('semax') || pName.includes('selank') || pName.includes('dsip') || pName.includes('pinealon')) && !pName.includes('reconstitution') && !pName.includes('subcutaneous');
+        return hasNasalSignal || isCompatibleNootropic;
+      }
+
+      if (isPen) {
+        // Exclude protocols explicitly labeled as nasal or reconstitution vial
+        if (pName.includes('nasal') || pRoute.includes('nasal') || pRoute.includes('intranasal') || pDesc.includes('nasal mucosa')) return false;
+        if (pName.includes('reconstitution') || pDesc.includes('bacteriostatic water')) {
+          if (!pName.includes('pen')) return false;
+        }
+        // Include if matches pen signals or subcutaneous routes
+        const hasPenSignal = pName.includes('pen') || pRoute.includes('pen') || pFormat.includes('pen');
+        const isSubQ = pRoute.includes('subcutaneous') || pRoute.includes('subq') || (!pRoute && !pName.includes('nasal'));
+        return hasPenSignal || isSubQ;
+      }
+
+      if (isVial) {
+        // Exclude protocols explicitly labeled as nasal or pre-filled pen
+        if (pName.includes('nasal') || pRoute.includes('nasal') || pRoute.includes('intranasal')) return false;
+        if (pName.includes('pen') || pRoute.includes('pen') || pFormat.includes('pen')) return false;
+        return true;
+      }
+
+      return true;
+    });
+
+    // If no associated protocol passed the filter, fallback to canonical protocols tailored for this format
+    const sourceList = filtered.length > 0 ? filtered : buildCanonicalCompoundProtocols(canonicalName, currentFormat);
+
+    // Map into standard structure using extractProtocolClinicalSpecs
+    const mapped = sourceList.map(p => {
+      const specs = extractProtocolClinicalSpecs(p, canonicalName, isNasal, isPen, isVial);
+      return {
+        id: p.id || p.slug,
+        slug: p.slug || p.id,
+        name: sanitizeProtocolTitle(p.name || p.title, canonicalName),
+        fullName: p.name || p.title || 'Clinical Protocol',
+        durationWeeks: specs.durationWeeks,
+        difficulty: p.difficulty || p.difficulty_level || 'Clinical',
+        category: p.category || (specs.defaultDosesPerWeek === 1 ? 'Weight Management' : 'Clinical Protocol'),
+        objective: specs.objective,
+        route: specs.route,
+        defaultDoseMg: specs.defaultDoseMg,
+        defaultDosesPerWeek: specs.defaultDosesPerWeek,
+        frequencyDescription: specs.frequencyDescription,
+        phases: specs.phases,
+        _raw: p
+      };
+    });
+
+    // Prioritize the flagship protocol matching the presentation to position 0
+    return mapped.sort((a, b) => {
+      const aName = (a.fullName || a.name).toLowerCase();
+      const bName = (b.fullName || b.name).toLowerCase();
+      if (isNasal) {
+        const aNasal = aName.includes('nasal');
+        const bNasal = bName.includes('nasal');
+        if (aNasal && !bNasal) return -1;
+        if (!aNasal && bNasal) return 1;
+      } else if (isPen) {
+        const aPen = aName.includes('pen');
+        const bPen = bName.includes('pen');
+        if (aPen && !bPen) return -1;
+        if (!aPen && bPen) return 1;
+      } else if (isVial) {
+        const aRecon = aName.includes('reconstitution') || aName.includes('subcutaneous');
+        const bRecon = bName.includes('reconstitution') || bName.includes('subcutaneous');
+        if (aRecon && !bRecon) return -1;
+        if (!aRecon && bRecon) return 1;
+      }
+      return 0;
+    });
+  }, [associatedProtocols, canonicalName, currentFormat, isNasal, isPen, isVial]);
 
   // ── Selected Protocol State ──
   const [selectedProtocolId, setSelectedProtocolId] = useState(
     availableProtocols[0]?.id || 'proto-standard'
   );
+
+  // Synchronize selected protocol when availableProtocols changes due to format switch
+  useEffect(() => {
+    if (availableProtocols.length > 0) {
+      const exists = availableProtocols.some(p => p.id === selectedProtocolId);
+      if (!exists) {
+        setSelectedProtocolId(availableProtocols[0].id);
+      }
+    }
+  }, [availableProtocols, selectedProtocolId]);
 
   const activeProtocol = useMemo(() => {
     return availableProtocols.find(p => p.id === selectedProtocolId) || availableProtocols[0];
@@ -2710,11 +2841,11 @@ export default function ProtocolWorkspaceTab({
                   type="button"
                   onClick={handleAddRequirementsToCart}
                   className={`gcp-action-btn ${user ? 'success' : 'primary'}`}
-                  title={user ? "Request quote and order vials for this protocol" : "Sign in required to request quotation"}
+                  title={user ? `Request quote and order ${isNasal ? 'sprays' : isPen ? 'pens' : 'vials'} for this protocol` : "Sign in required to request quotation"}
                 >
                   {user ? (
                     <>
-                      <ShoppingCart size={15} /> <span>Request Quote / Order Vials</span>
+                      <ShoppingCart size={15} /> <span>Request Quote / Order {isNasal ? 'Sprays' : isPen ? 'Pens' : 'Vials'}</span>
                     </>
                   ) : (
                     <>
