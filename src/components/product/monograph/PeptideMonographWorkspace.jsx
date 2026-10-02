@@ -193,6 +193,10 @@ export default function PeptideMonographWorkspace({
               <ProtocolWorkspaceTab
                 product={product}
                 associatedProtocols={associatedProtocols}
+                activeFormat={activeFormat}
+                selectedStrength={selectedStrength}
+                availableFormats={availableFormats}
+                onFormatChange={onFormatChange}
                 onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
                 onAddToCart={onAddToCart}
                 onProtocolChange={setProtocolContext}
@@ -356,6 +360,10 @@ export default function PeptideMonographWorkspace({
                 <ProtocolWorkspaceTab
                   product={product}
                   associatedProtocols={associatedProtocols}
+                  activeFormat={activeFormat}
+                  selectedStrength={selectedStrength}
+                  availableFormats={availableFormats}
+                  onFormatChange={onFormatChange}
                   onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
                   onAddToCart={onAddToCart}
                   onProtocolChange={setProtocolContext}

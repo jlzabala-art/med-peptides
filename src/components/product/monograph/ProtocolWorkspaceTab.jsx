@@ -176,9 +176,11 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
     { phaseIndex: 3, title: 'Phase 3: Peak Plateau', weeks: 'Weeks 7–12', doseMg: maxDose, frequency: cadence }
   ];
 
-  const category = isWeekly
-    ? 'Weight Management & Metabolic Optimization'
-    : (timesPerWeek >= 5 ? 'Tissue Regeneration & Healing' : 'Clinical Optimization');
+  const category = (name.toLowerCase().includes('selank') || name.toLowerCase().includes('semax') || name.toLowerCase().includes('pinealon'))
+    ? 'Cognitive & Neurological'
+    : (isWeekly
+        ? 'Weight Management & Metabolic Optimization'
+        : (timesPerWeek >= 5 ? 'Tissue Regeneration & Healing' : 'Clinical Optimization'));
 
   return [
     {
@@ -226,7 +228,7 @@ export function buildCanonicalCompoundProtocols(canonicalName = 'PT-141') {
   ];
 }
 
-function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
+function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false, isPen = false) {
   const phases = Array.isArray(p.phases) && p.phases.length > 0
     ? p.phases
     : (Array.isArray(p.phase_blueprints) ? p.phase_blueprints : []);
@@ -237,6 +239,13 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
   let extractedFreqPerWeek = null;
   let extractedFreqDesc = '';
   let extractedRoute = p.route || benchmark?.route || 'Subcutaneous';
+  if (isNasal) {
+    extractedRoute = 'Intranasal';
+  } else if (isPen) {
+    extractedRoute = 'Subcutaneous (Pen)';
+  } else if (p.route) {
+    extractedRoute = p.route;
+  }
   let totalWeeks = 0;
 
   const mappedPhases = phases.map((ph, idx) => {
@@ -376,7 +385,7 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
   }
 
   const calculatedDuration = totalWeeks > 0 ? totalWeeks : (Number(p.durationWeeks) || parseInt(p.duration, 10) || 12);
-  let cleanedObjective = p.description || p.clinicalRationale || p.summary || 'Clinical administration protocol.';
+  let cleanedObjective = p.objective || p.overview_summary || p.description || p.clinicalRationale || p.summary || 'Clinical administration protocol.';
   if (calculatedDuration > 8 && cleanedObjective.includes('8-week')) {
     cleanedObjective = cleanedObjective.replace(/\b8-week\b/gi, `${calculatedDuration}-week`);
   }
@@ -403,6 +412,10 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
 export default function ProtocolWorkspaceTab({
   product = {},
   associatedProtocols = [],
+  activeFormat = null,
+  selectedStrength = null,
+  availableFormats = [],
+  onFormatChange,
   onOpenPreviewModal,
   onAddToCart,
   onProtocolChange
@@ -411,12 +424,17 @@ export default function ProtocolWorkspaceTab({
   const router = useRouter();
   const canonicalName = product.canonicalName || product.name || 'PT-141';
 
+  const currentFormat = activeFormat || product.presentation || product.format || 'vial';
+  const isNasal = String(currentFormat).toLowerCase().includes('nasal') || String(currentFormat).toLowerCase().includes('spray');
+  const isPen = String(currentFormat).toLowerCase().includes('pen') || String(currentFormat).toLowerCase().includes('cartridge');
+  const isVial = !isNasal && !isPen;
+
   // Normalize protocols list: use provided or fallback to canonical compound protocols
   const availableProtocols = useMemo(() => {
     if (Array.isArray(associatedProtocols) && associatedProtocols.length > 0) {
       // Map Firestore/Repository protocols into canonical structure using extractProtocolClinicalSpecs
       return associatedProtocols.map(p => {
-        const specs = extractProtocolClinicalSpecs(p, canonicalName);
+        const specs = extractProtocolClinicalSpecs(p, canonicalName, isNasal, isPen);
         return {
           id: p.id || p.slug,
           slug: p.slug || p.id,
@@ -436,7 +454,7 @@ export default function ProtocolWorkspaceTab({
       });
     }
     return buildCanonicalCompoundProtocols(canonicalName);
-  }, [associatedProtocols, canonicalName]);
+  }, [associatedProtocols, canonicalName, isNasal, isPen]);
 
   // ── Selected Protocol State ──
   const [selectedProtocolId, setSelectedProtocolId] = useState(
@@ -556,21 +574,24 @@ export default function ProtocolWorkspaceTab({
       durationWeeks: physicianDurationWeeks,
       administrationsPerWeek: physicianFreqPerWeek,
       dosePerAdminMg: physicianDoseMg,
-      preferredVialStrength: selectedVialStrength
+      preferredVialStrength: selectedVialStrength,
+      presentation: currentFormat,
+      selectedStrength: selectedStrength || product.dose
     });
-  }, [physicianDurationWeeks, physicianFreqPerWeek, physicianDoseMg, selectedVialStrength]);
+  }, [physicianDurationWeeks, physicianFreqPerWeek, physicianDoseMg, selectedVialStrength, currentFormat, selectedStrength, product.dose]);
 
   const handleCopyProcurement = () => {
     triggerHaptic('light');
+    const doseDisplay = physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`;
     const text = [
-      `PATIENT TREATMENT REQUIREMENTS — ${product.canonicalName || 'PT-141'}`,
+      `PATIENT TREATMENT REQUIREMENTS — ${product.canonicalName || 'Peptide'}`,
       `Protocol: ${activeProtocol.name}`,
       `Duration: ${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} total doses)`,
-      `Dose per administration: ${physicianDoseMg} mg (${reconCalc.injectionVolumeMl} mL / ${reconCalc.syringeUnitsU100} U)`,
+      `Dose per administration: ${doseDisplay} (${isNasal ? '1 metered spray' : isPen ? 'SubQ Multi-Dose Pen' : `${reconCalc.injectionVolumeMl} mL / ${reconCalc.syringeUnitsU100} U`})`,
       `Total API Required: ${procCalc.totalApiRequiredMg} mg`,
       `Recommended Procurement: ${procCalc.procurementSummary}`,
       `Total Supply: ${procCalc.totalProvidedApiMg} mg API (${procCalc.expectedUnusedMg} mg buffer)`,
-      `Dispensed by: Lotusland / Atlas Health Services`
+      `Dispensed by: ${product.supplierName || 'Lotusland / Bioblend / Atlas Health Services'}`
     ].join('\n');
 
     navigator.clipboard?.writeText(text);
@@ -586,16 +607,36 @@ export default function ProtocolWorkspaceTab({
       return;
     }
     triggerHaptic('medium');
-    procCalc.recommendedVials.forEach(v => {
+    if (isNasal) {
       onAddToCart?.({
-        id: `${product.id || 'pt-141'}-${v.strength}mg`,
-        productId: product.id || 'pt-141',
-        name: `${product.name || 'PT-141'} ${v.strength} mg Lyophilized Vial`,
-        dosage: `${v.strength} mg`,
-        format: 'vial',
-        price: v.strength === 5 ? 24.00 : v.strength === 10 ? 38.00 : 65.00
-      }, v.count);
-    });
+        id: `${product.id || 'selank'}-${procCalc.unitStrengthMg || 30}mg-nasal`,
+        productId: product.id || 'selank',
+        name: `${product.name || 'Selank'} ${procCalc.unitStrengthMg || 30} mg Nasal Spray (10 mL)`,
+        dosage: `${procCalc.unitStrengthMg || 30} mg`,
+        format: 'nasal_spray',
+        price: product.price || 48.00
+      }, procCalc.totalUnitsCount || 1);
+    } else if (isPen) {
+      onAddToCart?.({
+        id: `${product.id || 'selank'}-${procCalc.unitStrengthMg || 6}mg-pen`,
+        productId: product.id || 'selank',
+        name: `${product.name || 'Selank'} ${procCalc.unitStrengthMg || 6} mg Pre-filled Multi-Dose Pen (3 mL)`,
+        dosage: `${procCalc.unitStrengthMg || 6} mg`,
+        format: 'prefilled_pen',
+        price: product.price || 62.00
+      }, procCalc.totalUnitsCount || 1);
+    } else {
+      (procCalc.recommendedVials || []).forEach(v => {
+        onAddToCart?.({
+          id: `${product.id || 'peptide'}-${v.strength}mg`,
+          productId: product.id || 'peptide',
+          name: `${product.name || 'Peptide'} ${v.strength} mg Lyophilized Vial`,
+          dosage: `${v.strength} mg`,
+          format: 'vial',
+          price: v.strength === 5 ? 24.00 : v.strength === 10 ? 38.00 : 65.00
+        }, v.count);
+      });
+    }
     toast.success(`Added ${procCalc.procurementSummary} to quotation / order ✓`);
   };
 
@@ -611,15 +652,17 @@ export default function ProtocolWorkspaceTab({
       selectedVialStrength,
       physicianDurationWeeks,
       physicianDoseMg,
-      currentStep
+      currentStep,
+      formatType: currentFormat,
+      route: activeProtocol.route
     });
-  }, [activeProtocol, procCalc, reconCalc, selectedVialStrength, physicianDurationWeeks, physicianDoseMg, currentStep, canonicalName, onProtocolChange]);
+  }, [activeProtocol, procCalc, reconCalc, selectedVialStrength, physicianDurationWeeks, physicianDoseMg, currentStep, canonicalName, currentFormat, onProtocolChange]);
 
   const stepsList = [
     { number: 1, label: 'Protocol' },
     { number: 2, label: 'Treatment Plan' },
-    { number: 3, label: 'Vials' },
-    { number: 4, label: 'Preparation' },
+    { number: 3, label: isNasal ? 'Supply (Sprays)' : isPen ? 'Supply (Pens)' : 'Vials' },
+    { number: 4, label: isNasal ? 'Nasal Spray Guide' : isPen ? 'Pen Calibration' : 'Preparation' },
     { number: 5, label: 'Review' }
   ];
 
@@ -960,7 +1003,7 @@ export default function ProtocolWorkspaceTab({
               fontSize: '0.72rem',
               fontWeight: 700
             }}>
-              {physicianDoseMg} mg / admin
+              {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg / admin` : `${physicianDoseMg} mg / admin`}
             </span>
             <span style={{
               background: '#eff6ff',
@@ -983,7 +1026,7 @@ export default function ProtocolWorkspaceTab({
               <Info size={15} color="#0284c7" />
             </div>
             <div className="pds-protocol-summary-text">
-              <strong style={{ color: '#003666' }}>Clinical Blueprint Overview:</strong> Active blueprint: <strong style={{ color: '#0369a1' }}>{sanitizeProtocolTitle(activeProtocol.name, canonicalName)}</strong> ({physicianDurationWeeks} Weeks, {physicianDoseMg} mg/admin, {activeProtocol.route || 'Subcutaneous'}). Interactive physician calculator for rapid vial reconstitution, syringe calibration, and compounding procurement.
+              <strong style={{ color: '#003666' }}>Clinical Blueprint Overview:</strong> Active blueprint: <strong style={{ color: '#0369a1' }}>{sanitizeProtocolTitle(activeProtocol.name, canonicalName)}</strong> ({physicianDurationWeeks} Weeks, {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`}/admin, {activeProtocol.route || 'Subcutaneous'}). Interactive physician calculator for rapid {isNasal ? 'nasal spray dosing, pump calibration, and clinical supply forecasting' : isPen ? 'pen dial calibration, dose titration, and device procurement' : 'vial reconstitution, syringe calibration, and compounding procurement'}.
             </div>
           </div>
 
@@ -1109,7 +1152,7 @@ export default function ProtocolWorkspaceTab({
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '10px 12px', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Target Dose</span>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#166534', marginTop: '2px' }}>
-                  {activeProtocol.defaultDoseMg} mg
+                  {activeProtocol.defaultDoseMg < 1 ? `${Math.round(activeProtocol.defaultDoseMg * 1000)} mcg` : `${activeProtocol.defaultDoseMg} mg`}
                 </div>
               </div>
 
@@ -1145,7 +1188,9 @@ export default function ProtocolWorkspaceTab({
                       <span style={{ marginLeft: '8px', fontSize: '0.74rem', color: '#64748b' }}>({ph.weeks})</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '0.76rem', fontWeight: 750, color: '#166534' }}>{ph.doseMg} mg</span>
+                      <span style={{ fontSize: '0.76rem', fontWeight: 750, color: '#166534' }}>
+                        {ph.doseMg < 1 ? `${Math.round(ph.doseMg * 1000)} mcg` : `${ph.doseMg} mg`}
+                      </span>
                       <span style={{ fontSize: '0.72rem', color: '#64748b' }}>• {ph.frequency}</span>
                     </div>
                   </div>
@@ -1162,7 +1207,7 @@ export default function ProtocolWorkspaceTab({
               marginTop: '0.5rem'
             }}>
               <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                Step 1 of 5: Defines clinical treatment intent. Reconstitution & units are computed in Step 4.
+                Step 1 of 5: Defines clinical treatment intent. {isNasal ? 'Metered spray delivery & bottle requirements are computed in Steps 3 and 4.' : isPen ? 'Pre-filled pens & dial calibration are configured in Steps 3 and 4.' : 'Reconstitution & units are computed in Step 4.'}
               </span>
               <button
                 type="button"
@@ -1548,7 +1593,7 @@ export default function ProtocolWorkspaceTab({
               <div>
                 <strong style={{ fontSize: '0.84rem', color: '#0f172a' }}>Direct Clinical Procurement</strong>
                 <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b' }}>
-                  Add verified laboratory vials directly to quotation or export itemized BOM.
+                  Add verified clinical {isNasal ? 'nasal spray bottles' : isPen ? 'pre-filled multi-dose pens' : 'laboratory vials'} directly to quotation or export itemized BOM.
                 </p>
               </div>
 
@@ -1590,7 +1635,7 @@ export default function ProtocolWorkspaceTab({
                     cursor: 'pointer',
                     boxShadow: user ? '0 2px 4px rgba(22, 163, 74, 0.2)' : '0 2px 4px rgba(0, 54, 102, 0.2)'
                   }}
-                  title={user ? "Add vial requirements to quotation" : "Sign in required to request quotation"}
+                  title={user ? `Add ${isNasal ? 'spray' : isPen ? 'pen' : 'vial'} requirements to quotation` : "Sign in required to request quotation"}
                 >
                   {user ? (
                     <>
@@ -1653,7 +1698,7 @@ export default function ProtocolWorkspaceTab({
                   cursor: 'pointer'
                 }}
               >
-                <span>Proceed to Preparation & Syringe Calibration</span>
+                <span>Proceed to {isNasal ? 'Nasal Spray Guide' : isPen ? 'Pen Calibration Guide' : 'Preparation & Syringe Calibration'}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -1666,234 +1711,633 @@ export default function ProtocolWorkspaceTab({
         {currentStep === 4 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             
-            {/* Two-Column Layout: Left Configuration, Right Calculated Administration */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1rem'
-            }}>
-              {/* LEFT: Configuration */}
-              <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '12px 14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem'
-              }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#003666', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
-                  1. Reconstitution Configuration
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                    Vial Strength:
-                  </label>
-                  <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                    {[5, 10, 20].map(s => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('selection');
-                          setSelectedVialStrength(s);
-                          setSelectedBacVolume(s === 5 ? 1.0 : s === 10 ? 2.0 : 4.0);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: selectedVialStrength === s ? '1.5px solid #003666' : '1px solid #cbd5e1',
-                          background: selectedVialStrength === s ? '#003666' : '#f8fafc',
-                          color: selectedVialStrength === s ? '#ffffff' : '#334155',
-                          fontSize: '0.78rem',
-                          fontWeight: selectedVialStrength === s ? 800 : 600,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {s} mg
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                    BAC Water Volume:
-                  </label>
-                  <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                    {[1.0, 2.0, 4.0].map(v => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('selection');
-                          setSelectedBacVolume(v);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: selectedBacVolume === v ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
-                          background: selectedBacVolume === v ? '#0284c7' : '#f8fafc',
-                          color: selectedBacVolume === v ? '#ffffff' : '#334155',
-                          fontSize: '0.78rem',
-                          fontWeight: selectedBacVolume === v ? 800 : 600,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {v.toFixed(1)} mL
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700 }}>Target Clinical Dose:</div>
-                  <strong style={{ fontSize: '0.92rem', color: '#003666' }}>{physicianDoseMg} mg</strong>
-                </div>
-              </div>
-
-              {/* RIGHT: Calculated Administration */}
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '12px 14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem'
-              }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#0284c7', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>
-                  2. Calculated Administration Results
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Concentration</span>
-                    <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#166534', fontFamily: 'monospace' }}>
-                      {reconCalc.concentrationDisplay}
+            {/* ─── 4A: NASAL SPRAY METERED DOSE & ADMINISTRATION GUIDE ─── */}
+            {isNasal && (
+              <>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '1rem'
+                }}>
+                  {/* LEFT: Nasal Device & Dose Calibration */}
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '14px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#003666', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                      1. Metered Device & Dose Configuration
                     </div>
-                  </div>
 
-                  <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Injection Volume</span>
-                    <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666', fontFamily: 'monospace' }}>
-                      {reconCalc.injectionVolumeDisplay}
-                    </div>
-                  </div>
-
-                  <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>U-100 Syringe Draw</span>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0284c7', fontFamily: 'monospace' }}>
-                      {reconCalc.syringeUnitsDisplay}
-                    </div>
-                  </div>
-
-                  <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Doses per Vial</span>
-                    <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#334155', fontFamily: 'monospace' }}>
-                      {reconCalc.dosesPerVial} Doses
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Precision Syringe Visualizer Subordinate to calculated values */}
-            <PrecisionSyringeVisualizer
-              targetDoseMg={physicianDoseMg}
-              injectionVolumeMl={reconCalc.injectionVolumeMl}
-              syringeUnitsU100={reconCalc.syringeUnitsU100}
-            />
-
-            {/* Concise 6-Step Administration Guide (Progressive Disclosure) */}
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              padding: '12px 14px'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '0.65rem'
-              }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Clinical Handling & Administration Procedure
-                </span>
-                <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                  Click step to expand instructions
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                {[
-                  { step: 1, title: 'Disinfect', summary: 'Swab rubber stopper with 70% IPA wipe', detail: 'Allow stopper to air-dry for 30 seconds. Do not touch or blow on the sterile rubber septum.' },
-                  { step: 2, title: 'Reconstitute', summary: `Add ${selectedBacVolume.toFixed(1)} mL Bacteriostatic Water along inside vial wall`, detail: 'Use a 21–25G sterile syringe. Aim needle stream against the inner glass wall so the liquid flows gently over the cake.' },
-                  { step: 3, title: 'Dissolve gently', summary: 'Swirl smoothly — never shake vigorously', detail: 'Peptide secondary and tertiary bonds are shear-sensitive. Swirl in slow circular motion until solution is clear and particle-free.' },
-                  { step: 4, title: 'Draw dose', summary: `Draw exactly ${reconCalc.syringeUnitsU100} U (${reconCalc.injectionVolumeMl} mL) in U-100 syringe`, detail: 'Invert vial vertically. Inject air volume equivalent to dose, then withdraw plunger until top of black stopper aligns with tick mark.' },
-                  { step: 5, title: 'Administer', summary: 'SubQ injection in abdomen or thigh at 45–90°', detail: 'Pinch a 2-inch fold of skin. Insert 31G needle fully, depress plunger steadily over 5 seconds, hold for 5 seconds before withdrawing.' },
-                  { step: 6, title: 'Store', summary: 'Refrigerate (2°C–8°C) • Beyond-Use Date: 28 Days', detail: 'Store reconstituted vial upright in original light-shielding carton. Discard after 28 days of initial needle puncture.' },
-                ].map(item => {
-                  const isExp = expandedSteps[item.step];
-                  return (
-                    <div
-                      key={item.step}
-                      style={{
-                        border: '1px solid #f1f5f9',
-                        borderRadius: '6px',
-                        overflow: 'hidden',
-                        background: isExp ? '#f8fafc' : '#ffffff'
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setExpandedSteps(prev => ({ ...prev, [item.step]: !prev[item.step] }))}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '8px 12px',
-                          border: 'none',
-                          background: 'transparent',
-                          cursor: 'pointer',
-                          textAlign: 'left'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '50%',
-                            background: '#e0f2fe',
-                            color: '#0369a1',
-                            fontSize: '0.68rem',
-                            fontWeight: 800,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}>
-                            {item.step}
-                          </span>
-                          <strong style={{ fontSize: '0.78rem', color: '#0f172a' }}>{item.title}</strong>
-                          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>• {item.summary}</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Bottle Strength</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666' }}>
+                          {procCalc.unitStrengthMg || 30} mg / 10 mL
                         </div>
-                        {isExp ? <ChevronUp size={14} color="#64748b" /> : <ChevronDown size={14} color="#64748b" />}
-                      </button>
-                      {isExp && (
-                        <div style={{ padding: '4px 12px 10px 40px', fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
-                          {item.detail}
+                      </div>
+
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Actuation Output</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#0284c7' }}>
+                          0.10 mL / puff
                         </div>
-                      )}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+
+                    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.70rem', color: '#1e40af', fontWeight: 700, textTransform: 'uppercase' }}>Target Clinical Dose</div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#003666', marginTop: '2px' }}>
+                        {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`} ({physicianFreqPerWeek}× daily)
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#1e3a8a', marginTop: '4px' }}>
+                        Standard intranasal protocol: 1 metered spray in each nostril daily.
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.70rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>Zero Reconstitution Required</div>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#14532d', lineHeight: 1.4 }}>
+                        Factory pre-solubilized in isotonic nasal saline buffer. No BAC water mixing or needle manipulation is necessary.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: Pharmacokinetics & Delivery Advantages */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '14px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#0284c7', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>
+                      2. Intranasal Mucosal Bioavailability
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Onset of Action</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#166534' }}>
+                          3–5 Minutes
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Direct BBB Bypass</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666' }}>
+                          Olfactory Route
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Doses per Bottle</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#0284c7' }}>
+                          ~60–70 Sprays
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Storage Post-Open</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#334155' }}>
+                          2°C–8°C Cold Chain
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666' }}>Clinical Mechanism:</span>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
+                        Intranasal administration allows peptide transport along olfactory and trigeminal nerve pathways directly to the central nervous system, avoiding first-pass hepatic metabolism and enzymatic GI degradation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step-by-Step Intranasal Administration Guide */}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '12px 14px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.65rem'
+                  }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Intranasal Administration Procedure & Handling
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                      Click step to expand instructions
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    {[
+                      { step: 1, title: 'Prime Pump', summary: 'Depress pump 2–3 times into air before first usage', detail: 'On first use or after periods of storage, actuate pump until a fine aerosolized mist is produced. Ensure nozzle is directed away from face.' },
+                      { step: 2, title: 'Clear Passageways', summary: 'Blow nose gently to clear nasal airways', detail: 'Clean nostrils ensure direct mucosal contact and optimal trans-mucosal absorption.' },
+                      { step: 3, title: 'Nozzle Alignment', summary: 'Insert tip into nostril, aim slightly outward towards ear', detail: 'Tilt head slightly forward. Aim nozzle slightly outward towards the outer ear, away from the central nasal septum to avoid irritation and maximize olfactory mucosal delivery.' },
+                      { step: 4, title: 'Actuate & Inhale', summary: 'Press pump firmly while breathing in gently through nose', detail: 'Depress actuator fully with index and middle fingers. Inhale gently through the nostril. Avoid vigorous sniffing, which can draw solution into the throat.' },
+                      { step: 5, title: 'Clean & Refrigerate', summary: 'Wipe nozzle clean and store upright at 2°C–8°C', detail: 'Wipe tip with a clean tissue, replace safety dust cap, and store refrigerated (2°C–8°C) to maintain peptide chain stability throughout the cycle.' }
+                    ].map(item => {
+                      const isExp = expandedSteps[item.step];
+                      return (
+                        <div
+                          key={item.step}
+                          style={{
+                            border: '1px solid #f1f5f9',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            background: isExp ? '#f8fafc' : '#ffffff'
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setExpandedSteps(prev => ({ ...prev, [item.step]: !prev[item.step] }))}
+                            style={{
+                              width: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              cursor: 'pointer',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: '#e0f2fe',
+                                color: '#0369a1',
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyCenter: 'center'
+                              }}>
+                                {item.step}
+                              </span>
+                              <strong style={{ fontSize: '0.78rem', color: '#0f172a' }}>{item.title}</strong>
+                              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>• {item.summary}</span>
+                            </div>
+                            {isExp ? <ChevronUp size={14} color="#64748b" /> : <ChevronDown size={14} color="#64748b" />}
+                          </button>
+                          {isExp && (
+                            <div style={{ padding: '4px 12px 10px 40px', fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                              {item.detail}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ─── 4B: PRE-FILLED PEN DIAL CALIBRATION & ADMINISTRATION GUIDE ─── */}
+            {isPen && (
+              <>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '1rem'
+                }}>
+                  {/* LEFT: Pen Device Configuration */}
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '14px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#003666', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                      1. Pre-Filled Multi-Dose Pen Configuration
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Cartridge Volume</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666' }}>
+                          3.0 mL ({procCalc.unitStrengthMg || 6} mg API)
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Needle System</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#0284c7' }}>
+                          31G / 32G 4mm Nano
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.70rem', color: '#1e40af', fontWeight: 700, textTransform: 'uppercase' }}>Target Clinical Dose</div>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#003666', marginTop: '2px' }}>
+                        {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`} SubQ
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#1e3a8a', marginTop: '4px' }}>
+                        Rotate dose selector dial to click setting corresponding to {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`}.
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '10px 12px' }}>
+                      <div style={{ fontSize: '0.70rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>Factory Pre-Formulated Solution</div>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#14532d', lineHeight: 1.4 }}>
+                        Factory pre-constituted sterile multi-dose cartridge with antibacterial preservation. Zero vial drawing or mixing.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: Pen Parameters */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '14px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
+                  }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#0284c7', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>
+                      2. Injection Calibration & Yield
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Concentration</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#166534' }}>
+                          {((procCalc.unitStrengthMg || 6) / 3).toFixed(1)} mg/mL
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Yield per Pen</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666' }}>
+                          ~{Math.floor((procCalc.unitStrengthMg || 6) / physicianDoseMg)} Doses
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Total Required</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#0284c7' }}>
+                          {procCalc.procurementSummary}
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Cold-Chain</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#334155' }}>
+                          Refrigerate (2°C–8°C)
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#003666' }}>Injection Site Rotation:</span>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
+                        Administer into lower abdominal subcutaneous tissue (at least 2 inches away from navel) or outer anterior thigh. Rotate injection quadrants with each administration.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step-by-Step Pen Guide */}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '12px 14px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.65rem'
+                  }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Pre-Filled Multi-Dose Pen Administration Guide
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                      Click step to expand instructions
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    {[
+                      { step: 1, title: 'Check Solution', summary: 'Inspect cartridge window for clear, colorless fluid', detail: 'Ensure solution is clear and particle-free. Allow pen to reach room temperature for 15 minutes before injection for maximum comfort.' },
+                      { step: 2, title: 'Attach Nano-Needle', summary: 'Peel seal and screw sterile 31G/32G needle straight onto pen', detail: 'Screw on clockwise until firm. Remove outer and inner needle caps. Keep outer cap for safe disposal.' },
+                      { step: 3, title: 'Prime / Air-Shot', summary: 'Turn dial to 1 unit, hold point up, press button until drop appears', detail: 'Eliminates air bubbles and confirms unobstructed fluid flow through the nano-needle.' },
+                      { step: 4, title: 'Dial Prescribed Dose', summary: 'Rotate dose selector to target dose marking', detail: 'Turn dial clockwise to the prescribed dose setting. If dial is turned past dose, rotate backward to correct.' },
+                      { step: 5, title: 'Inject SubQ & Hold', summary: 'Insert needle at 90°, press button fully, hold 5 seconds', detail: 'Clean skin with 70% IPA swab. Insert needle at 90°, press button completely, count slowly to 5 before withdrawing needle. Unscrew and discard needle in sharps container.' }
+                    ].map(item => {
+                      const isExp = expandedSteps[item.step];
+                      return (
+                        <div
+                          key={item.step}
+                          style={{
+                            border: '1px solid #f1f5f9',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            background: isExp ? '#f8fafc' : '#ffffff'
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setExpandedSteps(prev => ({ ...prev, [item.step]: !prev[item.step] }))}
+                            style={{
+                              width: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              cursor: 'pointer',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: '#e0f2fe',
+                                color: '#0369a1',
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyCenter: 'center'
+                              }}>
+                                {item.step}
+                              </span>
+                              <strong style={{ fontSize: '0.78rem', color: '#0f172a' }}>{item.title}</strong>
+                              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>• {item.summary}</span>
+                            </div>
+                            {isExp ? <ChevronUp size={14} color="#64748b" /> : <ChevronDown size={14} color="#64748b" />}
+                          </button>
+                          {isExp && (
+                            <div style={{ padding: '4px 12px 10px 40px', fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                              {item.detail}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ─── 4C: LYOPHILIZED VIAL RECONSTITUTION & SYRINGE CALIBRATION ─── */}
+            {isVial && (
+              <>
+                {/* Two-Column Layout: Left Configuration, Right Calculated Administration */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '1rem'
+                }}>
+                  {/* LEFT: Configuration */}
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#003666', borderBottom: '1px solid #f1f5f9', paddingBottom: '4px' }}>
+                      1. Reconstitution Configuration
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        Vial Strength:
+                      </label>
+                      <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                        {[5, 10, 20].map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('selection');
+                              setSelectedVialStrength(s);
+                              setSelectedBacVolume(s === 5 ? 1.0 : s === 10 ? 2.0 : 4.0);
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '6px 8px',
+                              borderRadius: '6px',
+                              border: selectedVialStrength === s ? '1.5px solid #003666' : '1px solid #cbd5e1',
+                              background: selectedVialStrength === s ? '#003666' : '#f8fafc',
+                              color: selectedVialStrength === s ? '#ffffff' : '#334155',
+                              fontSize: '0.78rem',
+                              fontWeight: selectedVialStrength === s ? 800 : 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {s} mg
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                        BAC Water Volume:
+                      </label>
+                      <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                        {[1.0, 2.0, 4.0].map(v => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('selection');
+                              setSelectedBacVolume(v);
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '6px 8px',
+                              borderRadius: '6px',
+                              border: selectedBacVolume === v ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
+                              background: selectedBacVolume === v ? '#0284c7' : '#f8fafc',
+                              color: selectedBacVolume === v ? '#ffffff' : '#334155',
+                              fontSize: '0.78rem',
+                              fontWeight: selectedBacVolume === v ? 800 : 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {v.toFixed(1)} mL
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700 }}>Target Clinical Dose:</div>
+                      <strong style={{ fontSize: '0.92rem', color: '#003666' }}>{physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`}</strong>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: Calculated Administration */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.75rem'
+                  }}>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#0284c7', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}>
+                      2. Calculated Administration Results
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Concentration</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#166534', fontFamily: 'monospace' }}>
+                          {reconCalc.concentrationDisplay}
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Injection Volume</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666', fontFamily: 'monospace' }}>
+                          {reconCalc.injectionVolumeDisplay}
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>U-100 Syringe Draw</span>
+                        <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0284c7', fontFamily: 'monospace' }}>
+                          {reconCalc.syringeUnitsDisplay}
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+                        <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Doses per Vial</span>
+                        <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#334155', fontFamily: 'monospace' }}>
+                          {reconCalc.dosesPerVial} Doses
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Precision Syringe Visualizer Subordinate to calculated values */}
+                <PrecisionSyringeVisualizer
+                  targetDoseMg={physicianDoseMg}
+                  injectionVolumeMl={reconCalc.injectionVolumeMl}
+                  syringeUnitsU100={reconCalc.syringeUnitsU100}
+                />
+
+                {/* Concise 6-Step Administration Guide (Progressive Disclosure) */}
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '12px 14px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.65rem'
+                  }}>
+                    <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Clinical Handling & Administration Procedure
+                    </span>
+                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                      Click step to expand instructions
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    {[
+                      { step: 1, title: 'Disinfect', summary: 'Swab rubber stopper with 70% IPA wipe', detail: 'Allow stopper to air-dry for 30 seconds. Do not touch or blow on the sterile rubber septum.' },
+                      { step: 2, title: 'Reconstitute', summary: `Add ${selectedBacVolume.toFixed(1)} mL Bacteriostatic Water along inside vial wall`, detail: 'Use a 21–25G sterile syringe. Aim needle stream against the inner glass wall so the liquid flows gently over the cake.' },
+                      { step: 3, title: 'Dissolve gently', summary: 'Swirl smoothly — never shake vigorously', detail: 'Peptide secondary and tertiary bonds are shear-sensitive. Swirl in slow circular motion until solution is clear and particle-free.' },
+                      { step: 4, title: 'Draw dose', summary: `Draw exactly ${reconCalc.syringeUnitsU100} U (${reconCalc.injectionVolumeMl} mL) in U-100 syringe`, detail: 'Invert vial vertically. Inject air volume equivalent to dose, then withdraw plunger until top of black stopper aligns with tick mark.' },
+                      { step: 5, title: 'Administer', summary: 'SubQ injection in abdomen or thigh at 45–90°', detail: 'Pinch a 2-inch fold of skin. Insert 31G needle fully, depress plunger steadily over 5 seconds, hold for 5 seconds before withdrawing.' },
+                      { step: 6, title: 'Store', summary: 'Refrigerate (2°C–8°C) • Beyond-Use Date: 28 Days', detail: 'Store reconstituted vial upright in original light-shielding carton. Discard after 28 days of initial needle puncture.' },
+                    ].map(item => {
+                      const isExp = expandedSteps[item.step];
+                      return (
+                        <div
+                          key={item.step}
+                          style={{
+                            border: '1px solid #f1f5f9',
+                            borderRadius: '6px',
+                            overflow: 'hidden',
+                            background: isExp ? '#f8fafc' : '#ffffff'
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setExpandedSteps(prev => ({ ...prev, [item.step]: !prev[item.step] }))}
+                            style={{
+                              width: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '8px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              cursor: 'pointer',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: '#e0f2fe',
+                                color: '#0369a1',
+                                fontSize: '0.68rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                {item.step}
+                              </span>
+                              <strong style={{ fontSize: '0.78rem', color: '#0f172a' }}>{item.title}</strong>
+                              <span style={{ fontSize: '0.74rem', color: '#64748b' }}>• {item.summary}</span>
+                            </div>
+                            {isExp ? <ChevronUp size={14} color="#64748b" /> : <ChevronDown size={14} color="#64748b" />}
+                          </button>
+                          {isExp && (
+                            <div style={{ padding: '4px 12px 10px 40px', fontSize: '0.74rem', color: '#475569', lineHeight: 1.4 }}>
+                              {item.detail}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
 
             <div style={{
               display: 'flex',
@@ -1991,14 +2435,28 @@ export default function ProtocolWorkspaceTab({
                 {[
                   { label: 'Active Compound', value: `${product.canonicalName || product.name || 'Peptide'}${product.scientificName ? ` (${product.scientificName})` : ''}` },
                   { label: 'Selected Protocol', value: activeProtocol.name },
-                  { label: 'Treatment Duration', value: `${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} administrations)` },
-                  { label: 'Dose per Administration', value: `${physicianDoseMg} mg per SubQ injection` },
-                  { label: 'Selected Presentation', value: `${selectedVialStrength} mg Lyophilized Vial (${product.supplierName || 'Verified Laboratory'})` },
-                  { label: 'Reconstitution Diluent', value: `${selectedBacVolume.toFixed(1)} mL Bacteriostatic Water` },
-                  { label: 'Solution Concentration', value: reconCalc.concentrationDisplay },
-                  { label: 'Draw per Administration', value: `${reconCalc.injectionVolumeDisplay} / ${reconCalc.syringeUnitsDisplay}` },
-                  { label: 'Yield per Vial', value: `${reconCalc.dosesPerVial} administrations` },
-                  { label: 'Total Vials Required', value: procCalc.procurementSummary },
+                  { label: 'Treatment Duration', value: `${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} ${isNasal ? 'metered sprays' : isPen ? 'injections' : 'administrations'})` },
+                  { label: 'Dose per Administration', value: `${physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`} per ${isNasal ? 'intranasal puff' : isPen ? 'SubQ injection (Pen)' : 'SubQ injection'}` },
+                  { label: 'Selected Presentation', value: isNasal ? `${procCalc.unitStrengthMg || 30} mg Nasal Spray Bottle (10 mL)` : isPen ? `${procCalc.unitStrengthMg || 6} mg Multi-Dose Pen (3 mL)` : `${selectedVialStrength} mg Lyophilized Vial (${product.supplierName || 'Verified Laboratory'})` },
+                  ...(isNasal ? [
+                    { label: 'Delivery Vehicle', value: 'Pre-mixed isotonic nasal saline solution' },
+                    { label: 'Actuator Output', value: '0.10 mL per metered puff (~60-70 total sprays)' },
+                    { label: 'Administration Method', value: '1 spray in each nostril daily' },
+                    { label: 'Storage Condition', value: 'Refrigerated 2°C–8°C once opened' },
+                    { label: 'Total Supply Required', value: procCalc.procurementSummary },
+                  ] : isPen ? [
+                    { label: 'Cartridge Type', value: '3 mL Factory Pre-filled sterile cartridge' },
+                    { label: 'Needle Specification', value: '31G / 32G 4mm Sterile Nano-Needles' },
+                    { label: 'Administration Method', value: 'Subcutaneous injection via calibrated dial' },
+                    { label: 'Storage Condition', value: 'Refrigerated 2°C–8°C' },
+                    { label: 'Total Pens Required', value: procCalc.procurementSummary },
+                  ] : [
+                    { label: 'Reconstitution Diluent', value: `${selectedBacVolume.toFixed(1)} mL Bacteriostatic Water` },
+                    { label: 'Solution Concentration', value: reconCalc.concentrationDisplay },
+                    { label: 'Draw per Administration', value: `${reconCalc.injectionVolumeDisplay} / ${reconCalc.syringeUnitsDisplay}` },
+                    { label: 'Yield per Vial', value: `${reconCalc.dosesPerVial} administrations` },
+                    { label: 'Total Vials Required', value: procCalc.procurementSummary },
+                  ])
                 ].map((row, idx) => (
                   <div key={idx} style={{ background: '#ffffff', padding: '10px 14px' }}>
                     <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>

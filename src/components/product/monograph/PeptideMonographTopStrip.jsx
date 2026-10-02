@@ -116,7 +116,14 @@ export default function PeptideMonographTopStrip({
                     Administration Dose
                   </span>
                   <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 750, whiteSpace: 'nowrap' }}>
-                    {protocolContext?.physicianDoseMg || 1.25} mg / admin • SubQ
+                    {protocolContext?.physicianDoseMg 
+                      ? (protocolContext.physicianDoseMg < 1 
+                          ? `${Math.round(protocolContext.physicianDoseMg * 1000)} mcg / admin`
+                          : `${protocolContext.physicianDoseMg} mg / admin`)
+                      : '1.25 mg / admin'} • {
+                        protocolContext?.activeProtocol?.route || 
+                        ((protocolContext?.procCalc?.formatType || product?.presentation || '').includes('nasal') ? 'Intranasal' : 'SubQ')
+                      }
                   </span>
                 </div>
 
