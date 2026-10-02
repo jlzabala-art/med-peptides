@@ -18,12 +18,13 @@ import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
  */
 export default function OverviewTab({
   product = {},
+  presentationMatrixRows = [],
   onNavigateToProtocols
 }) {
   const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
   const genericName = product.scientificName || product.chemical_name || product.genericName || (isPt141 ? 'Bremelanotide' : (product.canonicalName || product.name || ''));
   const targetReceptor = product.targetSystem || product.mechanism_of_action || (isPt141 ? 'Central Melanocortin MC3R / MC4R Receptors' : 'Target Receptor / Biomolecular Pathway');
-  const pharmacologicalSummary = product.overview_summary || product.summary || product.description || 
+  const pharmacologicalSummary = product.overview_summary || product.summary || product.description || product.desc || 
     (isPt141 ? 'Synthetic cyclic heptapeptide analogue of alpha-melanocyte-stimulating hormone (α-MSH). Acts centrally across the blood-brain barrier to stimulate hypothalamic melanocortin receptors (primarily MC3R and MC4R), promoting dopamine release in the medial preoptic area to restore sexual desire and arousal without vascular dependency.' : 'Authoritative pharmaceutical technical profile and clinical reference data for therapeutic peptides.');
 
   const fdaStatusObj = getFdaPeptideStatus(product.slug || product.canonicalName || product.name || '');
@@ -32,25 +33,51 @@ export default function OverviewTab({
     : (fdaStatusObj?.referenceBrand || (isPt141 ? 'Vyleesi® (bremelanotide injection 1.75 mg/0.3 mL, NDA 210583, FDA Approved June 2019)' : null));
   const fdaRefProduct = rawRef && String(rawRef).trim().length > 0 ? String(rawRef).trim() : null;
 
+  // Determine dominant format
+  const rawFmt = String(product.format || product.presentation || product.variants?.[0]?.format || '').toLowerCase();
+  const isSpray = rawFmt.includes('spray') || rawFmt.includes('nasal');
+  const isSublingual = rawFmt.includes('sublingual') || rawFmt.includes('drop');
+  const isPen = rawFmt.includes('pen') || rawFmt.includes('cartridge');
+
+  const defaultIndication = isPt141 
+    ? 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction'
+    : (product.primaryIndication || product.indication || product.category || product.targetSystem || 'Targeted Physiological & Cellular Optimization');
+
+  const defaultRoute = isSpray
+    ? 'Intranasal Mucosal (Metered needle-free spray, 1–2 sprays per nostril)'
+    : isSublingual
+      ? 'Sublingual (Drops held under tongue for 60–90 seconds prior to swallowing)'
+      : isPen
+        ? 'Subcutaneous injection via calibrated multi-dose pen (lower abdomen or anterolateral thigh)'
+        : 'Subcutaneous injection (lower abdomen or anterolateral thigh)';
+
+  const defaultPk = isPt141
+    ? 'Tmax: 45–60 min • Terminal t½: ~2.7 hours • On-demand duration: 8–12 hours'
+    : (product.pharmacokineticsSummary || (product.eliminationHalfLife ? `Elimination t½: ${product.eliminationHalfLife} • Rapid target bioavailability` : 'High bioavailability across mucosal/subcutaneous administration routes'));
+
+  const defaultDosing = isPt141
+    ? 'Administer at least 45 minutes prior to anticipated activity (max 1 dose/24h, max 8 doses/month)'
+    : (product.clinicalDosingWindow || (isSpray ? 'Daily morning administration or split protocol as directed by physician' : 'Follow physician clinical protocol and titration guidelines'));
+
   const clinicalConsiderations = [
     {
-      label: 'Primary Indication',
-      value: 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction',
+      label: 'Primary Indication / Axis',
+      value: defaultIndication,
       icon: Target
     },
     {
       label: 'Administration Route',
-      value: 'Subcutaneous injection (lower abdomen or anterolateral thigh)',
+      value: defaultRoute,
       icon: Syringe
     },
     {
       label: 'Pharmacokinetics',
-      value: 'Tmax: 45–60 min • Terminal t½: ~2.7 hours • On-demand duration: 8–12 hours',
+      value: defaultPk,
       icon: Clock
     },
     {
       label: 'Clinical Dosing Window',
-      value: 'Administer at least 45 minutes prior to anticipated activity (max 1 dose/24h, max 8 doses/month)',
+      value: defaultDosing,
       icon: Activity
     }
   ];
@@ -59,12 +86,15 @@ export default function OverviewTab({
     {
       header: 'Strength',
       field: 'strengthMg',
-      width: '18%',
-      render: (row) => (
-        <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
-          {row.strengthMg} mg
-        </span>
-      )
+      width: '20%',
+      render: (row) => {
+        const val = String(row.strengthMg || '');
+        return (
+          <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
+            {val.toLowerCase().includes('mg') || val.toLowerCase().includes('mcg') || val.toLowerCase().includes('g') ? val : `${val} mg`}
+          </span>
+        );
+      }
     },
     {
       header: 'Format',
@@ -73,16 +103,16 @@ export default function OverviewTab({
       render: (row) => <span style={{ color: '#475569', fontWeight: 600 }}>{row.format}</span>
     },
     {
-      header: 'Recommended Diluent',
-      field: 'recommendedBacMl',
+      header: 'Recommended Diluent / Vehicle',
+      field: 'recommendedDiluent',
       width: '24%',
-      render: (row) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{row.recommendedBacMl.toFixed(1)} mL BAC Water</span>
+      render: (row) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{row.recommendedDiluent}</span>
     },
     {
       header: 'Resulting Concentration',
       field: 'concentrationMgMl',
-      width: '22%',
-      render: (row) => <span style={{ color: '#166534', fontWeight: 800, fontFamily: 'monospace' }}>{row.concentrationMgMl.toFixed(1)} mg/mL</span>
+      width: '20%',
+      render: (row) => <span style={{ color: '#166534', fontWeight: 800, fontFamily: 'monospace' }}>{row.concentrationMgMl}</span>
     },
     {
       header: 'Route',
@@ -92,10 +122,39 @@ export default function OverviewTab({
     }
   ];
 
-  const presentationData = STANDARD_PRESENTATIONS.map((row) => ({
-    ...row,
-    id: `strength-${row.strengthMg}`
-  }));
+  const presentationData = (presentationMatrixRows && presentationMatrixRows.length > 0)
+    ? presentationMatrixRows.map((row, idx) => ({
+        id: row.key || `row-${idx}`,
+        strengthMg: row.strengthName,
+        format: row.formatName,
+        recommendedDiluent: row.diluentText,
+        concentrationMgMl: row.concText,
+        route: row.adminText
+      }))
+    : (product.variants && product.variants.length > 0)
+      ? product.variants.map((v, idx) => {
+          const vFmt = String(v.format || v.presentation || '').toLowerCase();
+          const isVial = !vFmt.includes('spray') && !vFmt.includes('sublingual') && !vFmt.includes('pen');
+          const isVialSpray = vFmt.includes('spray') || vFmt.includes('nasal');
+          const isVialSublingual = vFmt.includes('sublingual') || vFmt.includes('drop');
+          const isVialPen = vFmt.includes('pen') || vFmt.includes('cartridge');
+          return {
+            id: v.id || `var-${idx}`,
+            strengthMg: v.dosage || v.dose || v.strength || 'Standard',
+            format: isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
+            recommendedDiluent: isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
+            concentrationMgMl: isVialSpray ? '10 mL (~100 sprays)' : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
+            route: isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous'
+          };
+        })
+      : STANDARD_PRESENTATIONS.map((row) => ({
+          id: `strength-${row.strengthMg}`,
+          strengthMg: `${row.strengthMg} mg`,
+          format: row.format,
+          recommendedDiluent: `${row.recommendedBacMl.toFixed(1)} mL BAC Water`,
+          concentrationMgMl: `${row.concentrationMgMl.toFixed(1)} mg/mL`,
+          route: row.route
+        }));
 
   return (
     <div className="pds-tab-content pds-overview-tab" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

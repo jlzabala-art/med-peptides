@@ -42,6 +42,7 @@ export default function PeptideMonographWorkspace({
   selectedStrength,
   availableFormats = [],
   sortedStrengths = [],
+  presentationMatrixRows = [],
   dynamicPublicUrl,
   versionInfo,
   labelQueryString
@@ -128,6 +129,10 @@ export default function PeptideMonographWorkspace({
         product={product}
         slug={slug}
         effectiveBatch={effectiveBatch}
+        supplierName={supplierName}
+        activeFormat={activeFormat}
+        availableFormats={availableFormats}
+        sortedStrengths={sortedStrengths}
         onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
         onOpenCoaModal={() => setIsCoaModalOpen(true)}
         onOpenShare={() => {
@@ -164,6 +169,7 @@ export default function PeptideMonographWorkspace({
             {activeTab === 'overview' && (
               <OverviewTab
                 product={product}
+                presentationMatrixRows={presentationMatrixRows}
                 onNavigateToProtocols={() => handleTabChange('protocols')}
               />
             )}
@@ -259,6 +265,7 @@ export default function PeptideMonographWorkspace({
               <div className="pds-mobile-accordion-body">
                 <OverviewTab
                   product={product}
+                  presentationMatrixRows={presentationMatrixRows}
                   onNavigateToProtocols={() => handleTabChange('protocols')}
                 />
               </div>

@@ -17,6 +17,10 @@ export default function PeptideMonographHeader({
   product = {},
   slug = 'pt-141',
   effectiveBatch = 'AS-LOT-PT05-2609',
+  supplierName = '',
+  activeFormat = null,
+  availableFormats = [],
+  sortedStrengths = [],
   onOpenPreviewModal,
   onOpenCoaModal,
   onOpenShare
@@ -47,11 +51,44 @@ export default function PeptideMonographHeader({
   const fdaRefBrand = product.referenceBrand || 'Vyleesi® (bremelanotide)';
   const fdaRefYear = product.referenceApprovalYear || '2019';
 
-  // Quality & Presentation metadata
-  const availableStrengths = product.availableStrengths || '5 mg | 10 mg | 20 mg';
-  const presentation = product.presentationFormat || 'Lyophilized vial';
+  // Dynamic Strengths Resolution
+  const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
+  const variantDoses = (product.variants || []).map(v => v.dosage || v.dose || v.strength).filter(Boolean);
+  const uniqueVariantDoses = [...new Set(variantDoses)];
+  const availableStrengths = strengthsList.length > 0 
+    ? strengthsList.join(' | ') 
+    : uniqueVariantDoses.length > 0 
+      ? uniqueVariantDoses.join(' | ') 
+      : (product.availableStrengths || 'Standard Formulation');
+
+  // Dynamic Presentation Format Resolution
+  const rawFormat = String(
+    activeFormat?.name || 
+    activeFormat?.id || 
+    product.format || 
+    product.presentation || 
+    (product.variants?.[0]?.format) || 
+    (product.variants?.[0]?.presentation) || 
+    ''
+  ).toLowerCase();
+
+  const isNasalSpray = rawFormat.includes('spray') || rawFormat.includes('nasal');
+  const isSublingual = rawFormat.includes('sublingual') || rawFormat.includes('drop');
+  const isPen = rawFormat.includes('pen') || rawFormat.includes('cartridge');
+  const isOral = rawFormat.includes('capsule') || rawFormat.includes('tablet') || rawFormat.includes('oral');
+
+  const presentation = isNasalSpray 
+    ? 'Nasal Spray (Intranasal)' 
+    : isSublingual 
+      ? 'Sublingual Dropper' 
+      : isPen 
+        ? 'Multi-Dose Pen (SubQ)' 
+        : isOral 
+          ? 'Oral Capsules' 
+          : (product.presentationFormat || product.presentation || 'Lyophilized sterile vial');
+
   const verifiedPurity = product.purity || '≥99% (99.4% HPLC verified)';
-  const supplier = product.supplierName || 'Lotusland';
+  const supplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || 'Lotusland';
   const batchCode = effectiveBatch || product.batchNumber || 'AS-LOT-PT05-2609';
 
   const handleCopySpec = () => {

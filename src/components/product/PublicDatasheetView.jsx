@@ -1442,6 +1442,7 @@ export default function PublicDatasheetView({
           selectedStrength={selectedStrength}
           availableFormats={availableFormats}
           sortedStrengths={sortedStrengths}
+          presentationMatrixRows={presentationMatrixRows}
           dynamicPublicUrl={dynamicPublicUrl}
           versionInfo={versionInfo}
           labelQueryString={labelQueryString}
