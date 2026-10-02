@@ -1409,6 +1409,8 @@ export default function PublicDatasheetView({
         lang={lang}
         onLangChange={setLang}
         copyUrl={shortMonographUrl || dynamicPublicUrl}
+        supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || 'Lotusland'}
+        currentSlug={slug}
         inquiryContextType="product"
         inquiryEntity={{
           name: product?.name || name,

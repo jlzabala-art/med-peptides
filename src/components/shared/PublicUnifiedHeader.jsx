@@ -11,7 +11,8 @@ import {
   ShieldCheck,
   ChevronRight,
   Activity,
-  FileText
+  FileText,
+  Search
 } from '@/lib/icons';
 import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -20,6 +21,7 @@ import { useAuth } from '../../context/AuthContext';
 import PublicInstitutionalInquiryDrawer from './PublicInstitutionalInquiryDrawer';
 import PublicProviderCTA from './public/PublicProviderCTA';
 import BrandLogo from '../common/BrandLogo';
+import DatasheetQuickSearchModal from './DatasheetQuickSearchModal';
 import '../../styles/publicStickyHeader.css';
 
 export const SUPPORTED_LANGUAGES = [
@@ -36,6 +38,9 @@ export default function PublicUnifiedHeader({
   // Custom canonical URL to copy, if any
   copyUrl,
   shortUrl,
+  // Current supplier & slug for quick search switcher
+  supplierName = null,
+  currentSlug = '',
   // Institutional inquiry drawer parameters
   inquiryContextType = 'general', // 'product' | 'protocol' | 'catalog' | 'protocols_directory' | 'general'
   inquiryEntity = null,           // { name, slug, code, strength, category }
@@ -61,11 +66,24 @@ export default function PublicUnifiedHeader({
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [internalInquiryOpen, setInternalInquiryOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeAnchor, setActiveAnchor] = useState(controlledActiveAnchorId || anchorTabs[0]?.id || '');
   const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
   const tabsContainerRef = useRef(null);
   const authDropdownRef = useRef(null);
+
+  // Global ⌘K / Ctrl+K keyboard shortcut for instant datasheet search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Sync controlled anchor ID if passed
   useEffect(() => {
@@ -221,8 +239,23 @@ export default function PublicUnifiedHeader({
               </Link>
             </div>
 
-            {/* Right: Unified Controls (Language + Tools + Auth) */}
-            <div className="puh-account-group">
+            {/* Right: Actions & Tools */}
+            <div className="puh-actions-group">
+              {/* Quick Datasheet Search Trigger (Algolia Spotlight Switcher) */}
+              <button
+                type="button"
+                className="puh-btn puh-btn-search"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setIsSearchModalOpen(true);
+                }}
+                title={isSpanish ? 'Buscar otros péptidos en el catálogo (⌘K)' : 'Search other peptides in catalog (⌘K)'}
+              >
+                <Search size={14} />
+                <span className="puh-btn-label">{isSpanish ? 'Buscar' : 'Search'}</span>
+                <kbd className="puh-kbd-hint">⌘K</kbd>
+              </button>
+
               {/* Language Selector */}
               <select
                 className="puh-lang-select"
@@ -252,10 +285,10 @@ export default function PublicUnifiedHeader({
                 </span>
               </button>
 
-              {/* Clinical AI Copilot Global Trigger */}
+              {/* Clinical AI Copilot Global Trigger (Hidden on Mobile Header to prioritize Search & Auth) */}
               <button
                 type="button"
-                className="puh-btn puh-btn-ai hide-on-extra-narrow"
+                className="puh-btn puh-btn-ai hide-on-extra-narrow hide-on-mobile-header"
                 onClick={() => {
                   triggerHaptic('selection');
                   window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
@@ -445,6 +478,15 @@ export default function PublicUnifiedHeader({
           lang={lang}
         />
       )}
+
+      {/* Quick Datasheet Search Spotlight Modal (Algolia Federated Search) */}
+      <DatasheetQuickSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        currentSupplier={supplierName}
+        currentSlug={currentSlug}
+        lang={lang}
+      />
     </>
   );
 }

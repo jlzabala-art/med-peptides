@@ -131,25 +131,53 @@ export default function VariantAccordion({
   const [groupBy, setGroupBy] = useState('supplier'); // 'supplier' | 'none'
   const [selectedSupplierFilter, setSelectedSupplierFilter] = useState('all');
   const [variantTypeFilter, setVariantTypeFilter] = useState('all'); // 'all' | 'finished' | 'raw_material'
+  const [compositionFilter, setCompositionFilter] = useState('pure'); // 'pure' | 'blends' | 'all'
   const [collapsedSuppliers, setCollapsedSuppliers] = useState({});
 
   const isVariantRaw = (v) => {
     return v.unitOfMeasure === 'g' || v.unitOfMeasure === 'kg' || v.supplierPricing?.unitOfMeasure === 'g' || v.type === 'raw_material' || v.format === 'raw_api' || (v.moq && v.moq > 50);
   };
 
-  const rawCount = sortedVariants.filter(isVariantRaw).length;
-  const finishedCount = sortedVariants.filter(v => !isVariantRaw(v)).length;
+  const isVariantCombination = (v) => {
+    if (!v) return false;
+    if (v.isCombination || v.isBlend || v.type === 'blend' || v.type === 'combination' || v.category === 'combinations') return true;
+    const str = `${v.dosage || ''} ${v.dose || ''} ${v.strength || ''} ${v.name || ''} ${v.title || ''} ${v.sku || ''}`;
+    if (/\s*\+\s*/.test(str)) return true;
+    if (Array.isArray(v.ingredients) && v.ingredients.length > 1) return true;
+    if (Array.isArray(v.activeIngredients) && v.activeIngredients.length > 1) return true;
+    return false;
+  };
+
+  const isParentPureSingle = useMemo(() => {
+    const name = String(selectedProduct?.canonicalName || selectedProduct?.name || '').trim();
+    return !/\s*\+\s*/.test(name) && !/blend|combination|stack/i.test(name) && selectedProduct?.category !== 'combinations';
+  }, [selectedProduct]);
+
+  const pureVariantsCount = useMemo(() => sortedVariants.filter(v => !isVariantCombination(v)).length, [sortedVariants]);
+  const blendVariantsCount = useMemo(() => sortedVariants.filter(isVariantCombination).length, [sortedVariants]);
+  const hasBlendsAndPure = pureVariantsCount > 0 && blendVariantsCount > 0;
+
+  // 1. Filter by composition (pure single molecule vs multi-peptide combinations)
+  const compositionFilteredVariants = useMemo(() => {
+    if (!isParentPureSingle) return sortedVariants;
+    if (compositionFilter === 'pure') return sortedVariants.filter(v => !isVariantCombination(v));
+    if (compositionFilter === 'blends') return sortedVariants.filter(isVariantCombination);
+    return sortedVariants;
+  }, [sortedVariants, compositionFilter, isParentPureSingle]);
+
+  const rawCount = compositionFilteredVariants.filter(isVariantRaw).length;
+  const finishedCount = compositionFilteredVariants.filter(v => !isVariantRaw(v)).length;
   const hasMixedTypes = rawCount > 0 && finishedCount > 0;
 
   // Active nature (API in Grams vs Clinical Units)
   const activeIsApi = variantTypeFilter === 'raw_material' || (variantTypeFilter === 'all' && rawCount > 0 && finishedCount === 0) || isApi;
 
-  // Filter variants by type first
+  // 2. Filter variants by physical type (finished vs raw_material)
   const typeFilteredVariants = useMemo(() => {
-    if (variantTypeFilter === 'finished') return sortedVariants.filter(v => !isVariantRaw(v));
-    if (variantTypeFilter === 'raw_material') return sortedVariants.filter(isVariantRaw);
-    return sortedVariants;
-  }, [sortedVariants, variantTypeFilter]);
+    if (variantTypeFilter === 'finished') return compositionFilteredVariants.filter(v => !isVariantRaw(v));
+    if (variantTypeFilter === 'raw_material') return compositionFilteredVariants.filter(isVariantRaw);
+    return compositionFilteredVariants;
+  }, [compositionFilteredVariants, variantTypeFilter]);
 
   const toggleSupplierCollapse = (suppKey) => {
     setCollapsedSuppliers(prev => ({
@@ -395,6 +423,39 @@ export default function VariantAccordion({
             </div>
           </div>
         </div>
+
+        {/* Tier 1.5: Formula Composition Selector (Pure Single Peptide vs Combos & Blends) */}
+        {hasBlendsAndPure && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            paddingTop: '0.5rem',
+            borderTop: '1px solid #edf2f7',
+            flexWrap: 'wrap'
+          }}>
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              color: '#003666',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              whiteSpace: 'nowrap'
+            }}>
+              Composition:
+            </span>
+            <SegmentedControl
+              value={compositionFilter}
+              onChange={setCompositionFilter}
+              options={[
+                { id: 'pure', label: `✨ Pure Single Peptide (${pureVariantsCount})` },
+                { id: 'blends', label: `🧬 Combos & Blends (${blendVariantsCount})` },
+                { id: 'all', label: `All (${sortedVariants.length})` }
+              ]}
+              layoutIdPrefix="variant-composition-selector"
+            />
+          </div>
+        )}
 
         {/* Tier 2: Type Selector for Dual Products (Finished Formulations vs Bulk Raw Materials) */}
         {hasMixedTypes && (

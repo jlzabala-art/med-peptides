@@ -20,6 +20,7 @@ import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import IntakeStepperHeader from './components/IntakeStepperHeader';
 import IntakePhase3Deliver from './components/IntakePhase3Deliver';
 import IntakePatientQrModal from './components/IntakePatientQrModal';
+import IntakeDoctorSelector from './components/IntakeDoctorSelector';
 import {
   extractPrescriptionFromDocument,
   normalizeExtractedPrescriptions
@@ -701,7 +702,6 @@ export default function PublicPrescriptionIntakeClient() {
         };
       });
 
-      toast.success(`${newEntries.length} document(s) added to staging`);
       return [...prev, ...newEntries];
     });
   }, []);
@@ -740,7 +740,6 @@ export default function PublicPrescriptionIntakeClient() {
         // Step 1 of 3: Multimodal AI Extraction
         setCurrentStepIndex(1);
         setProcessingStep(`[Document ${docNum}/${totalDocs}: ${currentFile.name}] Scanning prescription with Atlas Clinical AI...`);
-        toast.loading(`[${docNum}/${totalDocs}] Scanning: ${currentFile.name}...`, { id: 'ai-intake-step' });
 
         const [aiData, storageResult] = await Promise.all([
           extractPrescriptionFromDocument(currentFile),
@@ -753,7 +752,6 @@ export default function PublicPrescriptionIntakeClient() {
         // Step 2 of 3: Normalization & Ingredient Matching
         setCurrentStepIndex(2);
         setProcessingStep(`[Document ${docNum}/${totalDocs}] Matching active ingredients against clinical pharmacopeia...`);
-        toast.loading(`[${docNum}/${totalDocs}] Matching formulas...`, { id: 'ai-intake-step' });
 
         const normalizedList = await normalizeExtractedPrescriptions(aiData, {
           currentUser: user || null,
@@ -788,7 +786,6 @@ export default function PublicPrescriptionIntakeClient() {
       // Step 3 of 3: Dosimetry & Clinical Validation
       setCurrentStepIndex(3);
       setProcessingStep('Validating standard therapeutic ranges, molecular targets and vehicle compatibility...');
-      toast.loading('Validating dosimetry and compatibility...', { id: 'ai-intake-step' });
 
       const accountManagerPayload = activeAmEmail ? {
         email: activeAmEmail,
@@ -830,7 +827,6 @@ export default function PublicPrescriptionIntakeClient() {
       setBatchMeta({ batchId, accountManagerPayload, uploadedByPayload });
 
       if (incompleteApis.length > 0) {
-        toast.dismiss('ai-intake-step');
         setEnrichmentAuditModal({
           incompleteApis,
           allNormalized,
@@ -842,11 +838,9 @@ export default function PublicPrescriptionIntakeClient() {
       }
 
       // Transition smoothly into Phase 2 (Verification & Completion)
-      toast.dismiss('ai-intake-step');
       setDraftRxList(allNormalized);
       setActiveDraftIndex(0);
       setCurrentPhase(2);
-      toast.success('Prescription scanned successfully! Please verify details in Phase 2.');
     } catch (err) {
       console.error('[PublicPrescriptionIntake] Error:', err);
       let rawMsg = String(err?.message || '');
@@ -1150,108 +1144,102 @@ export default function PublicPrescriptionIntakeClient() {
       {/* PHASE 1: SCAN / UPLOAD DOCUMENT & MULTI-FILE STAGING AREA (MAX 3)           */}
       {/* ─────────────────────────────────────────────────────────────────────────── */}
       {currentPhase === 1 && (
-        <div className="pds-page-shell-inner" style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.25rem 5rem' }}>
+        <div className="pds-page-shell-inner" style={{ maxWidth: '1040px', margin: '0 auto', padding: '1rem 1.25rem 2rem' }}>
           
-          {/* GCP Autonomous Presentation Header */}
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          {/* GCP Autonomous Presentation Header (Compact, 1-Screen Density) */}
+          <div style={{ textAlign: 'center', marginBottom: '1.15rem' }}>
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '6px 14px',
+              gap: '6px',
+              padding: '3px 10px',
               background: 'linear-gradient(135deg, #e0f2fe 0%, #ede9fe 100%)',
               border: '1px solid #c7d2fe',
               borderRadius: '9999px',
-              fontSize: '0.78rem',
+              fontSize: '0.72rem',
               fontWeight: 700,
               color: '#4338ca',
-              marginBottom: '1rem',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+              marginBottom: '0.4rem',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
             }}>
-              <Sparkles size={14} style={{ color: '#6366f1' }} />
-              <span>AUTONOMOUS CLINICAL PRESCRIPTION INGESTION ENGINE</span>
+              <Sparkles size={13} style={{ color: '#6366f1' }} />
+              <span>AUTONOMOUS CLINICAL INTAKE</span>
             </div>
 
             <h1 className="intake-hero-title" style={{
-              fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)',
-              fontWeight: 900,
+              fontSize: 'clamp(1.25rem, 2.5vw, 1.55rem)',
+              fontWeight: 800,
               color: '#0f172a',
               lineHeight: 1.2,
-              margin: '0 0 0.65rem'
+              margin: '0 0 0.35rem'
             }}>
-              Autonomous Clinical Prescription Intake Engine
+              Clinical Prescription Ingestion Engine
             </h1>
 
             <p className="intake-hero-desc" style={{
               maxWidth: '680px',
-              margin: '0 auto 1.5rem',
-              fontSize: '0.90rem',
-              color: '#475569',
-              lineHeight: 1.55
+              margin: '0 auto 0.75rem',
+              fontSize: '0.82rem',
+              color: '#64748b',
+              lineHeight: 1.45
             }}>
-              Autonomous AI engine trained to identify, standardize, and extract complex medical prescriptions across multiple clinical disciplines — including custom compounding formulations, trichology regimens, dermatological treatments, peptide protocols, and galenic orders.
+              Multimodal AI trained to identify, standardize, and extract complex medical prescriptions, compounding magistral formulas, and genetic reports.
             </p>
 
-            {/* 3 GCP Feature Capability Cards */}
-            <div className="intake-capabilities-grid">
+            {/* 3 Compact GCP Feature Badges */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              flexWrap: 'wrap'
+            }}>
               <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '14px 16px',
-                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: '#1e40af'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FileText size={16} />
-                  </div>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                    Multi-Format Clinical Ingestion
-                  </div>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Trained on standard clinical Rx, compounding magistral formulas, topical and oral regimens from PDFs, photos, or scans.
-                </p>
+                <FileText size={13} />
+                <span>Multi-Format Ingestion (PDF & Photos)</span>
               </div>
 
               <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '14px 16px',
-                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: '#15803d'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Dna size={16} />
-                  </div>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                    Automated API & Dosage Mapping
-                  </div>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Matches active ingredients, therapeutic ranges, molecular targets, and galenic vehicles against clinical pharmacopeias.
-                </p>
+                <Dna size={13} />
+                <span>Pharmacopeia & API Matching</span>
               </div>
 
               <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '14px 16px',
-                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)'
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: '#faf5ff',
+                border: '1px solid #e9d5ff',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: '#7e22ce'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#faf5ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Factory size={16} />
-                  </div>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-                    Compounding Quotes & Production
-                  </div>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Instantly request official compounding quotations, batch timelines, and generate secure QR codes for patient posology.
-                </p>
+                <Factory size={13} />
+                <span>Compounding Quotes & QR</span>
               </div>
             </div>
           </div>
@@ -1259,25 +1247,25 @@ export default function PublicPrescriptionIntakeClient() {
           {/* Staging & Dropzone Container */}
           <div style={{
             background: '#ffffff',
-            borderRadius: '16px',
+            borderRadius: '14px',
             border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06)',
-            padding: '1.75rem',
-            marginBottom: '2rem'
+            boxShadow: '0 2px 12px -2px rgba(0,0,0,0.05)',
+            padding: '1.25rem 1.25rem',
+            marginBottom: '1rem'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Upload size={18} style={{ color: '#003666' }} />
-                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                <Upload size={17} style={{ color: '#003666' }} />
+                <h2 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
                   Upload Prescriptions & Reports (Max 3 files)
                 </h2>
               </div>
               <span style={{
-                fontSize: '0.74rem',
+                fontSize: '0.72rem',
                 fontWeight: 700,
                 color: stagedFiles.length >= 3 ? '#dc2626' : '#64748b',
                 background: stagedFiles.length >= 3 ? '#fef2f2' : '#f1f5f9',
-                padding: '3px 10px',
+                padding: '2px 8px',
                 borderRadius: '9999px',
                 border: `1px solid ${stagedFiles.length >= 3 ? '#fecaca' : '#cbd5e1'}`
               }}>
@@ -1285,49 +1273,65 @@ export default function PublicPrescriptionIntakeClient() {
               </span>
             </div>
 
-            {/* Dropzone */}
-            <div
-              {...getRootProps()}
-              style={{
-                border: `2px dashed ${isDragActive ? '#2563eb' : '#cbd5e1'}`,
-                borderRadius: '12px',
-                padding: '2.5rem 1.5rem',
-                textAlign: 'center',
-                background: isDragActive ? '#eff6ff' : '#f8fafc',
-                cursor: stagedFiles.length >= 3 ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: stagedFiles.length >= 3 ? 0.6 : 1
-              }}
-            >
-              <input {...getInputProps()} disabled={stagedFiles.length >= 3 || isProcessing} />
-              
-              <div style={{
-                width: '48px', height: '48px', borderRadius: '50%',
-                background: '#eff6ff', color: '#2563eb',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 1rem'
-              }}>
-                <FileText size={24} />
-              </div>
+            {/* Layout: Adaptive Split if files are staged, Full Dropzone if empty */}
+            <div style={{
+              display: stagedFiles.length > 0 ? 'grid' : 'block',
+              gridTemplateColumns: stagedFiles.length > 0 ? 'repeat(auto-fit, minmax(280px, 1fr))' : '1fr',
+              gap: '14px',
+              alignItems: 'stretch'
+            }}>
+              {/* Dropzone */}
+              <div
+                {...getRootProps()}
+                style={{
+                  border: `2px dashed ${isDragActive ? '#2563eb' : '#cbd5e1'}`,
+                  borderRadius: '10px',
+                  padding: stagedFiles.length > 0 ? '1.15rem 1rem' : '1.85rem 1.25rem',
+                  textAlign: 'center',
+                  background: isDragActive ? '#eff6ff' : '#f8fafc',
+                  cursor: stagedFiles.length >= 3 ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: stagedFiles.length >= 3 ? 0.6 : 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: stagedFiles.length > 0 ? '130px' : '160px'
+                }}
+              >
+                <input {...getInputProps()} disabled={stagedFiles.length >= 3 || isProcessing} />
+                
+                <div style={{
+                  width: stagedFiles.length > 0 ? '36px' : '42px',
+                  height: stagedFiles.length > 0 ? '36px' : '42px',
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '0.5rem'
+                }}>
+                  <FileText size={stagedFiles.length > 0 ? 18 : 22} />
+                </div>
 
-              <h3 style={{ margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                {isDragActive ? 'Drop files here...' : 'Drag & drop prescription files here'}
-              </h3>
-              
-              <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#64748b' }}>
-                Supports medical prescriptions (PDF, JPEG, PNG, WebP) up to 25MB each
-              </p>
+                <h3 style={{ margin: '0 0 0.25rem', fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                  {isDragActive ? 'Drop files here...' : (stagedFiles.length > 0 ? 'Add more files...' : 'Drag & drop prescription files here')}
+                </h3>
+                
+                <p style={{ margin: '0 0 0.65rem', fontSize: '0.74rem', color: '#64748b' }}>
+                  PDF, JPEG, PNG, WebP up to 25MB
+                </p>
 
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   disabled={stagedFiles.length >= 3 || isProcessing}
                   style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
                     background: '#003666',
                     color: '#ffffff',
-                    fontSize: '0.82rem',
+                    fontSize: '0.76rem',
                     fontWeight: 700,
                     border: 'none',
                     cursor: stagedFiles.length >= 3 ? 'not-allowed' : 'pointer'
@@ -1336,101 +1340,103 @@ export default function PublicPrescriptionIntakeClient() {
                   Browse Files
                 </button>
               </div>
-            </div>
 
-            {/* Staged File Cards */}
-            {stagedFiles.length > 0 && (
-              <div style={{ marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
-                    Staged Documents for Scanning:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleClearAllStaged}
-                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    Clear All
-                  </button>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
-                  {stagedFiles.map((staged, sIdx) => (
-                    <div key={staged.id} style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '10px',
-                      padding: '10px 12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '10px'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                        <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#e0f2fe', color: '#0369a1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <FileText size={14} />
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {staged.name}
-                          </div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                            {formatFileSize(staged.size)} · Doc #{sIdx + 1}
-                          </div>
-                        </div>
-                      </div>
-
+              {/* Staged File Cards & Action Column */}
+              {stagedFiles.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155' }}>
+                        Staged for Scanning ({stagedFiles.length}):
+                      </span>
                       <button
                         type="button"
-                        onClick={() => handleRemoveStagedFile(staged.id)}
-                        disabled={isProcessing}
-                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                        onClick={handleClearAllStaged}
+                        style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
                       >
-                        <Trash2 size={15} />
+                        Clear All
                       </button>
                     </div>
-                  ))}
-                </div>
 
-                {/* Main Scan Trigger */}
-                <div style={{ marginTop: '1.25rem' }}>
-                  <button
-                    type="button"
-                    onClick={handleProcessAllStagedFiles}
-                    disabled={isProcessing}
-                    style={{
-                      width: '100%',
-                      padding: '12px 20px',
-                      borderRadius: '10px',
-                      background: isProcessing ? '#64748b' : 'linear-gradient(135deg, #003666 0%, #002244 100%)',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.92rem',
-                      fontWeight: 800,
-                      cursor: isProcessing ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(0, 54, 102, 0.25)',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <RefreshCw size={16} className="animate-spin" />
-                        <span>Processing with Atlas AI...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={16} />
-                        <span>Scan & Extract {stagedFiles.length} Prescription(s) with Atlas AI ➔</span>
-                      </>
-                    )}
-                  </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '140px', overflowY: 'auto' }}>
+                      {stagedFiles.map((staged, sIdx) => (
+                        <div key={staged.id} style={{
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '7px 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '5px', background: '#e0f2fe', color: '#0369a1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <FileText size={12} />
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {staged.name}
+                              </div>
+                              <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                                {formatFileSize(staged.size)} · Doc #{sIdx + 1}
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStagedFile(staged.id)}
+                            disabled={isProcessing}
+                            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '3px' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Main Scan Trigger */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleProcessAllStagedFiles}
+                      disabled={isProcessing}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        borderRadius: '8px',
+                        background: isProcessing ? '#64748b' : 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontSize: '0.86rem',
+                        fontWeight: 800,
+                        cursor: isProcessing ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        boxShadow: '0 2px 8px rgba(0, 54, 102, 0.22)',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <RefreshCw size={15} className="animate-spin" />
+                          <span>Processing with Atlas AI...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={15} />
+                          <span>Scan & Extract {stagedFiles.length} Prescription(s) with Atlas AI ➔</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Real-Time Processing Status Banner */}
             {isProcessing && (
@@ -1665,7 +1671,7 @@ export default function PublicPrescriptionIntakeClient() {
             {/* Right Column: Doctor & Patient Verification Form */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               
-              {/* Doctor Details Verification Card */}
+              {/* Doctor Details Verification Card (Algolia & Firestore Integrated) */}
               <div style={{
                 background: '#ffffff',
                 borderRadius: '14px',
@@ -1686,104 +1692,17 @@ export default function PublicPrescriptionIntakeClient() {
                     </span>
                   ) : (
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b45309', background: '#fffbeb', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fde68a' }}>
-                      Complete Email & Name
+                      Search Doctor or Complete Fields
                     </span>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                      Physician Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={physicianForm.name}
-                      onChange={(e) => setPhysicianForm({ ...physicianForm, name: e.target.value })}
-                      placeholder="e.g. Dr. Jane Doe"
-                      style={{
-                        width: '100%', padding: '8px 12px', borderRadius: '6px',
-                        border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                        Medical License / No. *
-                      </label>
-                      <input
-                        type="text"
-                        value={physicianForm.licenseNumber}
-                        onChange={(e) => setPhysicianForm({ ...physicianForm, licenseNumber: e.target.value })}
-                        placeholder="e.g. MD-982314"
-                        style={{
-                          width: '100%', padding: '8px 12px', borderRadius: '6px',
-                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                          boxSizing: 'border-box', fontFamily: 'monospace'
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                        Practice / Clinic
-                      </label>
-                      <input
-                        type="text"
-                        value={physicianForm.clinic}
-                        onChange={(e) => setPhysicianForm({ ...physicianForm, clinic: e.target.value })}
-                        placeholder="e.g. Dermatology Clinic"
-                        style={{
-                          width: '100%', padding: '8px 12px', borderRadius: '6px',
-                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '8px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                        Physician Email (For Compounding Quotes) *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={physicianForm.email}
-                        onChange={(e) => {
-                          setPhysicianForm({ ...physicianForm, email: e.target.value });
-                          setQuotationEmail(e.target.value);
-                        }}
-                        placeholder="doctor@clinic.com"
-                        style={{
-                          width: '100%', padding: '8px 12px', borderRadius: '6px',
-                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        value={physicianForm.phone}
-                        onChange={(e) => setPhysicianForm({ ...physicianForm, phone: e.target.value })}
-                        placeholder="+34 600 000 000"
-                        style={{
-                          width: '100%', padding: '8px 12px', borderRadius: '6px',
-                          border: '1px solid #cbd5e1', fontSize: '0.84rem', color: '#0f172a',
-                          boxSizing: 'border-box'
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <IntakeDoctorSelector
+                  physicianForm={physicianForm}
+                  setPhysicianForm={setPhysicianForm}
+                  setQuotationEmail={setQuotationEmail}
+                  isPhysicianValid={isPhysicianValid}
+                />
               </div>
 
               {/* Patient Details Card */}

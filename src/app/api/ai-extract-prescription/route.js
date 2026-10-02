@@ -216,7 +216,15 @@ CRITICAL PARSING RULES:
    - Calculate an overall legibility/completeness score (0-100).
    - List any critical missing fields in 'missing' (e.g., "Doctor License", "Patient DOB", "Quantity").`;
 
-    const CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
+    const CANDIDATE_MODELS = [
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-pro',
+      'gemini-1.5-pro',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash'
+    ];
     let response = null;
     let lastError = null;
 

@@ -353,29 +353,37 @@ export default function SharedCatalogProductCard({
                     {/* Single Unit (1-9) Box */}
                     {showUnits && (
                       <div className="single-unit-box">
-                        <div>
-                          <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Single (1–9)</div>
-                          <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666' }}>
-                            {currencySymbol}{displayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{currentCurrency}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                          <div style={{ fontSize: '0.64rem', color: '#64748b', fontWeight: 750, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                            Single (1–9)
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '1.02rem', fontWeight: 800, color: '#003666', lineHeight: 1.1 }}>
+                              {currencySymbol}{displayPrice.toFixed(2)}
+                            </span>
+                            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
+                              / {unitSingular}
+                            </span>
                           </div>
                         </div>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '1px', marginLeft: '2px' }}>
+
+                        <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '1px', flexShrink: 0, height: '34px', boxSizing: 'border-box' }}>
                           <button
                             type="button"
                             onClick={() => updateQuantity(v, prod, -1)}
                             disabled={!cart[v.id]?.quantity}
-                            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: cart[v.id]?.quantity ? 'pointer' : 'default', fontWeight: 800, fontSize: '1rem', color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1' }}
+                            style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: cart[v.id]?.quantity ? 'pointer' : 'default', fontWeight: 800, fontSize: '1rem', color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1' }}
                             title="Decrease 1 Unit"
                           >
                             -
                           </button>
-                          <span style={{ minWidth: '28px', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
+                          <span style={{ minWidth: '32px', textAlign: 'center', fontWeight: 800, fontSize: '0.84rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
                             {cart[v.id]?.quantity || 0}
                           </span>
                           <button
                             type="button"
                             onClick={() => updateQuantity(v, prod, 1)}
-                            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#003666', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
+                            style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#003666', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
                             title="Add 1 Unit"
                           >
                             +
@@ -384,44 +392,49 @@ export default function SharedCatalogProductCard({
                       </div>
                     )}
 
-                    {/* 10-Unit Pack */}
+                    {/* 10-Unit Pack Box */}
                     {showKits && (
                       <div className="kit-pack-box">
-                        <div>
-                          <div style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                          <div style={{ fontSize: '0.64rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.03em', display: 'flex', alignItems: 'center', gap: '5px' }}>
                             <span>📦 Pack ×10 {unitPlural}</span>
                             {savingsPct > 0 && (
-                              <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.6rem', padding: '1px 4px', borderRadius: '4px', fontWeight: 800 }}>
+                              <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.58rem', padding: '1px 4px', borderRadius: '4px', fontWeight: 800 }}>
                                 -{savingsPct}%
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#15803d', marginTop: '1px' }}>
-                            {currencySymbol}{kitDisplayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#166534' }}>/ pack</span>
-                          </div>
-                          <div style={{ fontSize: '0.68rem', color: '#166534', fontWeight: 600 }}>
-                            ({currencySymbol}{tier10Rate.toFixed(2)} / unit)
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '1.02rem', fontWeight: 800, color: '#15803d', lineHeight: 1.1 }}>
+                              {currencySymbol}{kitDisplayPrice.toFixed(2)}
+                            </span>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#166534' }}>
+                              / pack
+                            </span>
+                            <span style={{ fontSize: '0.68rem', color: '#15803d', fontWeight: 700 }}>
+                              ({currencySymbol}{tier10Rate.toFixed(2)}/ea)
+                            </span>
                           </div>
                         </div>
 
-                        <div>
+                        <div style={{ flexShrink: 0 }}>
                           {kitsInCart >= 1 ? (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #86efac', padding: '1px' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #86efac', padding: '1px', height: '34px', boxSizing: 'border-box' }}>
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(v, prod, -10)}
-                                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#166534', fontSize: '1rem' }}
+                                style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#166534', fontSize: '1rem' }}
                                 title="Remove 1 Kit (-10)"
                               >
                                 -
                               </button>
-                              <span style={{ minWidth: '48px', textAlign: 'center', fontWeight: 800, fontSize: '0.78rem', color: '#15803d' }}>
+                              <span style={{ minWidth: '42px', textAlign: 'center', fontWeight: 800, fontSize: '0.78rem', color: '#15803d' }}>
                                 {kitsInCart} Kit{kitsInCart > 1 ? 's' : ''}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(v, prod, 10)}
-                                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
+                                style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}
                                 title="Add 1 Kit (+10)"
                               >
                                 +
@@ -432,7 +445,7 @@ export default function SharedCatalogProductCard({
                               type="button"
                               onClick={() => updateQuantity(v, prod, 10)}
                               className="add-kit-btn"
-                              style={{ minHeight: '34px', padding: '6px 14px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: '6px' }}
+                              style={{ height: '34px', minWidth: '104px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px', borderRadius: '6px', boxSizing: 'border-box' }}
                             >
                               + Add Kit (10)
                             </button>

@@ -34,7 +34,9 @@ import {
   Layers,
   Dna,
   Factory,
-  QrCode
+  QrCode,
+  ChevronDown,
+  ChevronUp
 } from '@/lib/icons';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
@@ -88,6 +90,34 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [activeDocTab, setActiveDocTab] = useState(0);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [activeGcpTab, setActiveGcpTab] = useState('all'); // 'all' | 'formulations' | 'genomics' | 'posology' | 'traceability'
+  const [expandedSections, setExpandedSections] = useState({
+    formulations: true,
+    posology: true,
+    traceability: true,
+    genomics: true
+  });
+
+  const toggleSection = (key) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const expandAllSections = () => {
+    setExpandedSections({
+      formulations: true,
+      posology: true,
+      traceability: true,
+      genomics: true
+    });
+  };
+
+  const collapseAllSections = () => {
+    setExpandedSections({
+      formulations: false,
+      posology: false,
+      traceability: false,
+      genomics: false
+    });
+  };
 
   // Global smooth jump listener from sidebar
   React.useEffect(() => {
@@ -95,6 +125,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       const targetId = e.detail?.id;
       if (!targetId) return;
       setActiveGcpTab('all');
+      expandAllSections();
     };
     window.addEventListener('OPEN_RX_SECTION', handleSectionJump);
     return () => window.removeEventListener('OPEN_RX_SECTION', handleSectionJump);
@@ -1244,73 +1275,164 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             <div className="gcp-subtabs-strip" style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              justifyContent: 'space-between',
+              gap: '8px',
               borderBottom: '1px solid #e2e8f0',
               background: '#ffffff',
               borderRadius: '12px',
               padding: '6px 10px',
-              overflowX: 'auto',
               boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
               position: 'sticky',
               top: '72px',
               zIndex: 30,
               backdropFilter: 'blur(8px)',
-              marginBottom: '0.5rem'
+              marginBottom: '0.75rem',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch'
             }}>
-              {[
-                { id: 'all', label: isEs ? 'Todo el Dossier' : 'Full Dossier', icon: Layers },
-                { id: 'formulations', label: isEs ? 'Fórmulas & Galénica' : 'Formulations', icon: FlaskConical, count: compoundedFormulations.length },
-                { id: 'genomics', label: isEs ? 'Farmacogenómica' : 'Genomics', icon: Dna },
-                { id: 'posology', label: isEs ? 'Posología & Régimen' : 'Posology', icon: Clock },
-                { id: 'traceability', label: isEs ? 'Laboratorio & Lote UE' : 'Lab & Traceability', icon: Factory }
-              ].map(tab => {
-                const isActive = activeGcpTab === tab.id;
-                const IconCmp = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveGcpTab(tab.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      padding: '8px 14px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: isActive ? '#e0f2fe' : 'transparent',
-                      color: isActive ? '#0369a1' : '#64748b',
-                      fontWeight: isActive ? 700 : 500,
-                      fontSize: '0.82rem',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      transition: 'all 0.15s ease',
-                      borderBottom: isActive ? '2px solid #0284c7' : '2px solid transparent'
-                    }}
-                  >
-                    <IconCmp size={15} style={{ color: isActive ? '#0284c7' : '#64748b' }} />
-                    <span>{tab.label}</span>
-                    {tab.count !== undefined && (
-                      <span style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        padding: '1px 6px',
-                        borderRadius: '10px',
-                        background: isActive ? '#0284c7' : '#f1f5f9',
-                        color: isActive ? '#ffffff' : '#64748b'
-                      }}>
-                        {tab.count}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                {[
+                  { id: 'all', label: isEs ? 'Todo el Dossier' : 'Full Dossier', icon: Layers },
+                  { id: 'formulations', label: isEs ? 'Fórmulas & Galénica' : 'Formulations', icon: FlaskConical, count: compoundedFormulations.length },
+                  { id: 'posology', label: isEs ? 'Posología & Régimen' : 'Posology', icon: Clock },
+                  { id: 'traceability', label: isEs ? 'Laboratorio & Lote UE' : 'Lab & Traceability', icon: Factory },
+                  ...(genomicsData ? [{ id: 'genomics', label: isEs ? 'Farmacogenómica' : 'Genomics', icon: Dna }] : [])
+                ].map(tab => {
+                  const isActive = activeGcpTab === tab.id;
+                  const IconCmp = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveGcpTab(tab.id);
+                        if (tab.id !== 'all') {
+                          setExpandedSections(prev => ({ ...prev, [tab.id]: true }));
+                        }
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 12px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: isActive ? '#e0f2fe' : 'transparent',
+                        color: isActive ? '#0369a1' : '#64748b',
+                        fontWeight: isActive ? 750 : 550,
+                        fontSize: '0.80rem',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                        transition: 'all 0.15s ease',
+                        borderBottom: isActive ? '2px solid #0284c7' : '2px solid transparent'
+                      }}
+                    >
+                      <IconCmp size={15} style={{ color: isActive ? '#0284c7' : '#64748b', flexShrink: 0 }} />
+                      <span>{tab.label}</span>
+                      {tab.count !== undefined && (
+                        <span style={{
+                          fontSize: '0.66rem',
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: '10px',
+                          background: isActive ? '#0284c7' : '#f1f5f9',
+                          color: isActive ? '#ffffff' : '#64748b'
+                        }}>
+                          {tab.count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick Accordion Expand/Collapse Switcher */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={expandAllSections}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid #e2e8f0',
+                    background: '#f8fafc',
+                    color: '#475569',
+                    fontSize: '0.70rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title={isEs ? 'Expandir todas las secciones' : 'Expand all sections'}
+                >
+                  {isEs ? 'Expandir Todo' : 'Expand All'}
+                </button>
+                <button
+                  type="button"
+                  onClick={collapseAllSections}
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid #e2e8f0',
+                    background: '#f8fafc',
+                    color: '#475569',
+                    fontSize: '0.70rem',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title={isEs ? 'Colapsar todas las secciones' : 'Collapse all sections'}
+                >
+                  {isEs ? 'Colapsar Todo' : 'Collapse All'}
+                </button>
+              </div>
             </div>
 
         {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'formulations') && (
-        <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
-          {compoundedFormulations.map((formulation, fIdx) => (
+        <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+          
+          {/* Section Accordion Trigger Header */}
+          <div
+            onClick={() => toggleSection('formulations')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 14px',
+              background: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
+              userSelect: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <FlaskConical size={16} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                    {isEs ? '1. Fórmulas Magistrales & Galénica' : '1. Compounded Formulations & Galenics'}
+                  </span>
+                  <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#0284c7', color: '#ffffff' }}>
+                    {compoundedFormulations.length}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {isEs ? 'Preparaciones magistrales calibradas al perfil del paciente' : 'Compounded preparations calibrated to patient clinical profile'}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.72rem', fontWeight: 650 }}>
+              <span>{expandedSections.formulations ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
+              {expandedSections.formulations ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </div>
+
+          {expandedSections.formulations && compoundedFormulations.map((formulation, fIdx) => (
             <div
               key={formulation.id}
               id={formulation.id}
@@ -1700,38 +1822,80 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'posology') && (
-        <div id="milestones-card" className="rx-card" style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          padding: '1.5rem',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-          marginBottom: '1.5rem',
-          scrollMarginTop: '100px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #0d9488, #0f766e)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff'
-              }}>
-                <Activity size={20} />
+        <div id="milestones-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
+          
+          {/* Section Accordion Trigger Header */}
+          <div
+            onClick={() => toggleSection('posology')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 14px',
+              background: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
+              userSelect: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#f0fdfa', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Clock size={16} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Evolución Clínica & Cronograma de Resultados' : 'Clinical Evolution & Results Timeline'}
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  {isEs ? 'Hitos biológicos esperados durante el ciclo de tratamiento de 90 días' : 'Expected biological milestones across the 90-day treatment cycle'}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                    {isEs ? '2. Posología, Régimen & Evolución Clínica' : '2. Posology, Regimen & Clinical Evolution'}
+                  </span>
+                  <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#0f766e', color: '#ffffff' }}>
+                    90 Days
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {isEs ? 'Hitos biológicos esperados y pauta de aplicación diaria' : 'Expected biological milestones and daily administration pathway'}
+                </div>
               </div>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f766e', fontSize: '0.72rem', fontWeight: 650 }}>
+              <span>{expandedSections.posology ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
+              {expandedSections.posology ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </div>
+
+          {expandedSections.posology && (
+          <div className="rx-card" style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            padding: '1.5rem',
+            boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
+            marginBottom: '0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #0d9488, #0f766e)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff'
+                }}>
+                  <Activity size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                    {isEs ? 'Evolución Clínica & Cronograma de Resultados' : 'Clinical Evolution & Results Timeline'}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                    {isEs ? 'Hitos biológicos esperados durante el ciclo de tratamiento de 90 días' : 'Expected biological milestones across the 90-day treatment cycle'}
+                  </p>
+                </div>
+              </div>
 
             <span style={{ 
               background: '#f0fdfa', 
@@ -1816,45 +1980,90 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
             ))}
           </div>
+          </div>
+          )}
         </div>
         )}
 
-        {/* ── Patient Mobile Access Portal (Private Patient Dossier) ──────────────── */}
+        {/* ── Patient Mobile Access Portal (Private Patient Dossier & Traceability) ──────────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'traceability') && (
-        <React.Fragment>
-        <div id="qr-card" style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          padding: '1.5rem',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff'
-              }}>
-                <ShieldCheck size={20} />
+        <div id="qr-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+          
+          {/* Section Accordion Trigger Header */}
+          <div
+            onClick={() => toggleSection('traceability')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 14px',
+              background: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
+              userSelect: 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Factory size={16} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                  {isEs ? 'Portal de Acceso Móvil del Paciente' : 'Patient Mobile Access Portal'}
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                  {isEs 
-                    ? 'Acceda confidencialmente a su pauta posológica personalizada y guía de administración' 
-                    : 'Confidential mobile access to your personalized posology regimen and daily administration guide'}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                    {isEs ? '3. Laboratorio, Calidad & Trazabilidad UE' : '3. Quality, Laboratory & EU Traceability'}
+                  </span>
+                  <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#0284c7', color: '#ffffff' }}>
+                    CoA 100%
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {isEs ? 'Certificado analítico de liberación, control de lote y verificación' : 'Certificate of analysis, batch release assays and mobile verification'}
+                </div>
               </div>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.72rem', fontWeight: 650 }}>
+              <span>{expandedSections.traceability ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
+              {expandedSections.traceability ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </div>
+
+          {expandedSections.traceability && (
+          <React.Fragment>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            padding: '1.5rem',
+            boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
+            marginBottom: '0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff'
+                }}>
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+                    {isEs ? 'Portal de Acceso Móvil del Paciente' : 'Patient Mobile Access Portal'}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                    {isEs 
+                      ? 'Acceda confidencialmente a su pauta posológica personalizada y guía de administración' 
+                      : 'Confidential mobile access to your personalized posology regimen and daily administration guide'}
+                  </p>
+                </div>
+              </div>
 
             <span style={{ 
               background: '#e0f2fe', 
@@ -2158,13 +2367,59 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
         </React.Fragment>
         )}
+        </div>
+        )}
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'genomics') && genomicsData && (
-          <GenomicsPrescriptionGuidanceCard
-            genomicsData={genomicsData}
-            lang={lang}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+            {/* Section Accordion Trigger Header */}
+            <div
+              onClick={() => toggleSection('genomics')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                background: '#ffffff',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
+                userSelect: 'none'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#fdf4ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Dna size={16} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                      {isEs ? '4. Análisis Farmacogenómico (TrichoTest™)' : '4. Pharmacogenomics Analysis (TrichoTest™)'}
+                    </span>
+                    <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#9333ea', color: '#ffffff' }}>
+                      Fagron Genomics
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                    {isEs ? 'Correlación de biomarcadores genéticos y respuesta terapéutica' : 'Genetic biomarkers correlation and metabolic response'}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9333ea', fontSize: '0.72rem', fontWeight: 650 }}>
+                <span>{expandedSections.genomics ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
+                {expandedSections.genomics ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
+            </div>
+
+            {expandedSections.genomics && (
+              <GenomicsPrescriptionGuidanceCard
+                genomicsData={genomicsData}
+                lang={lang}
+              />
+            )}
+          </div>
         )}
 
             {/* Standardized Institutional Footer with Reference */}
@@ -2741,7 +2996,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           }}
         >
           <QrCode size={16} />
-          <span>QR Lote</span>
+          <span>{isEs ? 'QR Lote' : 'Batch QR'}</span>
         </button>
       </div>
       )}

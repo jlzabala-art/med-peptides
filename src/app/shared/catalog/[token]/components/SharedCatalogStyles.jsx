@@ -864,27 +864,43 @@ export default function SharedCatalogStyles() {
         }
         .variant-pricing-actions {
           display: flex;
-          align-items: center;
+          align-items: stretch;
           gap: 10px;
           flex-wrap: wrap;
         }
         .single-unit-box {
           display: flex;
           align-items: center;
-          gap: 10px;
+          justify-content: space-between;
+          gap: 12px;
           background-color: #f8fafc;
-          border: 1px solid #e2e8f0;
+          border: 1px solid #cbd5e1;
           border-radius: 8px;
-          padding: 6px 10px;
+          padding: 8px 12px;
+          min-height: 56px;
+          box-sizing: border-box;
+          flex: 1 1 210px;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .single-unit-box:hover {
+          border-color: #94a3b8;
         }
         .kit-pack-box {
           display: flex;
           align-items: center;
-          gap: 10px;
+          justify-content: space-between;
+          gap: 12px;
           background-color: #f0fdf4;
-          border: 1px solid #bbf7d0;
+          border: 1px solid #86efac;
           border-radius: 8px;
-          padding: 6px 12px;
+          padding: 8px 12px;
+          min-height: 56px;
+          box-sizing: border-box;
+          flex: 1 1 210px;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .kit-pack-box:hover {
+          border-color: #4ade80;
         }
 
         @media (max-width: 768px) {
@@ -989,19 +1005,23 @@ export default function SharedCatalogStyles() {
           }
           .single-unit-box {
             width: 100% !important;
+            min-height: 56px !important;
             box-sizing: border-box !important;
-            padding: 8px 10px !important;
+            padding: 8px 12px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
+            border-radius: 8px !important;
           }
           .kit-pack-box {
             width: 100% !important;
+            min-height: 56px !important;
             box-sizing: border-box !important;
-            padding: 8px 10px !important;
+            padding: 8px 12px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
+            border-radius: 8px !important;
           }
           .catalog-filter-row {
             display: flex;
