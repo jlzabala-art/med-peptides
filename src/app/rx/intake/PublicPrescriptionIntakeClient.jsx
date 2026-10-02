@@ -925,6 +925,7 @@ export default function PublicPrescriptionIntakeClient() {
 
       if (data.duplicateDetected) {
         toast.dismiss('publish-rx');
+        toast('Prescripción ya registrada en Atlas. Revisa el aviso en pantalla.', { icon: 'ℹ️', duration: 4500 });
         setPendingExtractedList(updatedDraftList);
         setDuplicateWarning(data);
         return;
@@ -952,6 +953,80 @@ export default function PublicPrescriptionIntakeClient() {
     } catch (err) {
       console.error('[PublicIntake] Publish error:', err);
       toast.error(err.message || 'Error publishing prescription', { id: 'publish-rx' });
+    } finally {
+      setIsSavingPhysician(false);
+    }
+  };
+
+  const handleValidateAndPublishOverride = async () => {
+    setIsSavingPhysician(true);
+    toast.loading('Actualizando prescripción oficial con los nuevos datos...', { id: 'publish-rx' });
+    try {
+      const listToSave = (pendingExtractedList && pendingExtractedList.length > 0) ? pendingExtractedList : draftRxList.map((item, idx) => {
+        if (idx === activeDraftIndex) {
+          return {
+            ...item,
+            doctorName: physicianForm.name.trim(),
+            prescribingDoctor: physicianForm.name.trim(),
+            doctorLicenseNumber: physicianForm.licenseNumber.trim(),
+            licenseNumber: physicianForm.licenseNumber.trim(),
+            clinic: physicianForm.clinic.trim() || 'Clinical Practice',
+            doctorEmail: physicianForm.email.trim().toLowerCase(),
+            doctorPhone: physicianForm.phone.trim(),
+            treatingDoctor: {
+              name: physicianForm.name.trim(),
+              licenseNumber: physicianForm.licenseNumber.trim(),
+              clinic: physicianForm.clinic.trim() || 'Clinical Practice',
+              email: physicianForm.email.trim().toLowerCase(),
+              phone: physicianForm.phone.trim(),
+              specialty: physicianForm.specialty || 'Physician Specialist'
+            },
+            patientName: patientForm.name.trim() || item.patientName || 'Clinical Patient',
+            patientAge: patientForm.age.trim() || item.patientAge || '',
+            patientGender: patientForm.gender.trim() || item.patientGender || '',
+            clinicalNotes: patientForm.clinicalNotes.trim() || item.clinicalNotes || ''
+          };
+        }
+        return item;
+      });
+
+      const res = await fetch('/api/prescriptions/public-intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptions: listToSave,
+          createPatientRecord: true,
+          source: 'public_scan_publish_batch',
+          batchId: batchMeta?.batchId || `BATCH-${Date.now()}`,
+          allowDuplicateOverride: true,
+          accountManager: batchMeta?.accountManagerPayload || null,
+          uploadedBy: batchMeta?.uploadedByPayload || null,
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.savedPrescriptions?.length) {
+        throw new Error(data.error || 'Failed to update electronic prescription');
+      }
+
+      const savedList = data.savedPrescriptions.map((saved, idx) => {
+        return saved.rxData || {
+          ...listToSave[idx],
+          id: saved.id,
+          prescriptionNumber: saved.prescriptionNumber,
+          status: 'approved'
+        };
+      });
+
+      setDuplicateWarning(null);
+      setPublishedRxList(savedList);
+      setActiveRxIndex(0);
+      setQuotationEmail(physicianForm.email.trim().toLowerCase());
+      setCurrentPhase(3);
+      toast.success(`Prescripción oficial actualizada con éxito en Atlas!`, { id: 'publish-rx' });
+    } catch (err) {
+      console.error('[PublicIntake] Override error:', err);
+      toast.error(err.message || 'Error updating prescription', { id: 'publish-rx' });
     } finally {
       setIsSavingPhysician(false);
     }
@@ -1967,6 +2042,144 @@ export default function PublicPrescriptionIntakeClient() {
           title={activeRx?.fileName || activeRx?.prescriptionNumber || 'Scanned Document'}
           onClose={() => setShowOriginalModal(false)}
         />
+      )}
+
+      {/* ── DUPLICATE DETECTION & OVERRIDE MODAL (GCP COMPLIANT) ── */}
+      {duplicateWarning && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 99999,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          animation: 'fadeIn 0.15s ease-out'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            maxWidth: '560px',
+            width: '100%',
+            padding: '1.75rem',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid #cbd5e1',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.25rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '12px',
+                background: '#eff6ff',
+                color: '#0284c7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  Prescripción Ya Registrada en Atlas
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                  {duplicateWarning.matchReason || 'Se ha detectado un registro existente para esta muestra o paciente.'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '10px',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+              fontSize: '0.84rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontWeight: 650 }}>Código Oficial:</span>
+                <strong style={{ color: '#003666', fontFamily: 'monospace', fontSize: '0.92rem' }}>
+                  {duplicateWarning.existingPrescription?.prescriptionNumber}
+                </strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontWeight: 650 }}>Paciente:</span>
+                <strong style={{ color: '#0f172a' }}>
+                  {duplicateWarning.existingPrescription?.patientName}
+                </strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#64748b', fontWeight: 650 }}>Médico Prescriptor:</span>
+                <strong style={{ color: '#0f172a' }}>
+                  {duplicateWarning.existingPrescription?.doctorName}
+                </strong>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setDuplicateWarning(null)}
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  fontSize: '0.84rem',
+                  fontWeight: 650,
+                  cursor: 'pointer'
+                }}
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleValidateAndPublishOverride()}
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #bfdbfe',
+                  background: '#eff6ff',
+                  color: '#1d4ed8',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Actualizar con Nuevos Datos ↺
+              </button>
+              <a
+                href={duplicateWarning.existingPrescription?.rxUrl || `/rx/${duplicateWarning.existingPrescription?.prescriptionNumber}`}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#003666',
+                  color: '#ffffff',
+                  fontSize: '0.84rem',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Ver Prescripción Oficial ➔
+              </a>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

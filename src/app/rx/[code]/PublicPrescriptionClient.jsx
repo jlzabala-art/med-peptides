@@ -29,6 +29,7 @@ import {
   Printer,
   FileSpreadsheet,
   Box,
+  Pill,
   Edit3,
   X,
   Layers,
@@ -492,8 +493,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       const isOral = routeLower.includes('oral') || 
                      titleLower.includes('oral') || 
                      titleLower.includes('capsule') || 
+                     titleLower.includes('cápsula') || 
                      vNameLower.includes('capsule') || 
-                     vNameLower.includes('tablet');
+                     vNameLower.includes('cápsula') || 
+                     vNameLower.includes('tablet') ||
+                     isNutrigen ||
+                     isEntirelyOral;
 
       const isTrichoFoam = vNameLower.includes('trichofoam') || vNameLower.includes('foam') || titleLower.includes('foam');
 
@@ -503,7 +508,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       let badgeText = isEs ? `PREPARACIÓN ${index} DE ${totalCount}` : `PREPARATION ${index} OF ${totalCount}`;
       let resolvedTitle = treatmentTitle || (isEs ? `Fórmula Magistral ${index}` : `Compounded Formulation ${index}`);
       let resolvedRoute = route || (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application');
-      let resolvedVolume = volume || (isTrichoOil ? '30 mL' : (isOral ? '30 Capsules' : '100 mL'));
+      let resolvedVolume = volume || (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL'));
       let resolvedContainer = containerType;
 
       let vehicleObj = {
@@ -572,46 +577,61 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           }
         ];
       } else if (isOral) {
-        accentColor = '#7c3aed'; // Purple for Oral
-        accentBg = '#ede9fe';
-        badgeText += isEs ? ' · VÍA ORAL' : ' · ORAL COMPOUND';
-        resolvedTitle = treatmentTitle || (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Nutraceutical Support (Capsules)');
-        resolvedRoute = isEs ? 'Vía Oral' : 'Oral Administration';
-        resolvedVolume = volume || (isEs ? '30 Cápsulas' : '30 Compounded Capsules');
-        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Topacio Hermético con Cierre de Seguridad' : 'Safety-Sealed Amber Bottle with Desiccant Cap');
-        vehicleObj.tag = isEs ? 'VEHÍCULO ORAL' : 'ORAL VEHICLE BASE';
-        vehicleObj.name = vehicleName || (isEs ? 'Cápsulas de Gelatina / Celulosa Micronizada' : 'Micronized Compounded Hard Capsules Base');
+        accentColor = isNutrigen ? '#059669' : '#7c3aed'; // Emerald Green for NutriGen / Purple for general oral
+        accentBg = isNutrigen ? '#ecfdf5' : '#ede9fe';
+        badgeText += isNutrigen 
+          ? (isEs ? ' · CÁPSULAS MAGISTRALES ORALES (NUTRIGEN™)' : ' · ORAL COMPOUNDED CAPSULES (NUTRIGEN™)')
+          : (isEs ? ' · CÁPSULAS MAGISTRALES ORALES' : ' · ORAL COMPOUNDED CAPSULES');
+        resolvedTitle = isNutrigen
+          ? (isEs ? 'Fórmula Magistral Personalizada en Cápsulas (NutriGen™)' : 'NutriGen™ Personalized Compounded Oral Capsules')
+          : (treatmentTitle || (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Nutraceutical Support (Capsules)'));
+        resolvedRoute = isEs ? 'Vía Oral (Cápsulas Vegetales Micronizadas)' : 'Oral Route (Micronized Plant-Based Capsules)';
+        resolvedVolume = volume || rx.volume || (isEs ? '90 Cápsulas (Tratamiento 3 Meses)' : '90 Capsules (3-Month Protocol)');
+        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Farmacéutico de Seguridad con Sello Hermético y Desecante (90 Cápsulas)' : 'Safety-Sealed Pharmaceutical Bottle with Hermetic Cap & Desiccant (90 Capsules)');
+        vehicleObj.tag = isEs ? 'FORMA FARMACÉUTICA: CÁPSULAS ORALES' : 'DOSAGE FORM: ORAL CAPSULES';
+        vehicleObj.name = vehicleName || (isEs ? 'Cápsulas Vegetales HPMC / Base Excipiente Micronizada' : 'Vegetarian HPMC Capsules / Micronized Powder Base Carrier');
         vehicleObj.specs = isEs
-          ? 'Base micronizada de grado farmacéutico para dispersión entérica homogénea sin irritación gástrica.'
-          : 'Pharmaceutical-grade micronized powder excipient designed for consistent gastrointestinal absorption without gastric irritation.';
+          ? 'Cápsulas vegetales de hidroxipropilmetilcelulosa (HPMC) de liberación entérica fisiológica, 100% libres de alérgenos y dióxido de titanio. Contienen la mezcla micronizada homogénea de los principios activos farmacogenómicos para una absorción y biodisponibilidad celular superior sin causar irritación gástrica.'
+          : 'Allergen-free and titanium dioxide-free vegetarian HPMC enteric capsules. Engineered for uniform dispersion and maximum systemic bioavailability of micronized botanical extracts and metabolic cofactors.';
         
-        posologyObj.title = isEs ? 'Pauta de Administración Oral' : 'Oral Administration Regimen';
-        posologyObj.regimen = customPosology || (isEs ? '1 Cápsula Diaria con la Cena / Noche' : '1 Capsule Daily with Dinner / Bedtime');
-        posologyObj.timing = isEs ? 'Junto con alimentos y un vaso de agua' : 'With food and a full glass of water';
+        posologyObj.title = isNutrigen 
+          ? (isEs ? 'Pauta de Administración Diaria NutriGen™ (Cápsulas)' : 'NutriGen™ Daily Oral Capsule Administration Regimen')
+          : (isEs ? 'Pauta de Administración Oral (Cápsulas)' : 'Oral Capsule Administration Regimen');
+        posologyObj.regimen = customPosology || (isEs ? '1 Cápsula Diaria por la Mañana con el Desayuno' : '1 Capsule Daily in the Morning with Breakfast');
+        posologyObj.timing = isEs ? 'Por la mañana con el desayuno y un vaso lleno de agua' : 'Morning with breakfast and a full glass of water';
+        posologyObj.duration = rx.duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)');
         posologyObj.steps = [
           {
             step: 1,
-            title: isEs ? 'Toma Diaria con Agua' : 'Daily Oral Ingestion',
-            timing: isEs ? '1 Cápsula' : '1 Capsule',
+            title: isEs ? 'Ingesta Diaria de la Cápsula' : 'Daily Oral Ingestion',
+            timing: isEs ? '1 Cápsula / Día' : '1 Capsule / Day',
             instruction: isEs 
-              ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL).' 
-              : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL).'
+              ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL), preferentemente junto con el desayuno o la comida principal para facilitar la absorción de los nutrientes.' 
+              : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL), ideally alongside breakfast or lunch to enhance absorption.'
           },
           {
             step: 2,
-            title: isEs ? 'Momento de Administración' : 'Optimal Timing',
-            timing: isEs ? 'Cena / Antes de Dormir' : 'Dinner / Bedtime',
+            title: isEs ? 'Momento de Administración y Cronobiología' : 'Optimal Chronobiological Timing',
+            timing: isEs ? 'Mañana / Mediodía' : 'Morning / Midday',
             instruction: isEs 
-              ? 'Se recomienda tomar durante la cena o antes de dormir para optimizar la biodisponibilidad y tolerancia gástrica.' 
-              : 'Best taken with evening dinner or at bedtime to optimize absorption and tolerance.'
+              ? 'Para fórmulas metabólicas y energizantes (Ginseng, Antioxidantes, Vitaminas), se recomienda tomar por la mañana. Si contiene inductores de descanso (Melatonina), tomar preferentemente 30 minutos antes de dormir.' 
+              : 'For metabolic and revitalizing botanicals (Ginseng, Antioxidants, Vitamins), ingest in the morning. If formulated with nighttime modulators like Melatonin, take 30 minutes before sleep.'
           },
           {
             step: 3,
-            title: isEs ? 'Conservación' : 'Storage Conditions',
+            title: isEs ? 'Conservación y Estabilidad del Frasco' : 'Storage Conditions & Protection',
             timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
             instruction: isEs 
-              ? 'Mantener en lugar fresco y seco (inferior a 25°C), protegido de la luz solar directa.' 
-              : 'Store in a cool, dry place below 25°C (77°F), securely closed and protected from direct sunlight.'
+              ? 'Mantener el frasco herméticamente cerrado con su cápsula desecante original, en lugar seco y fresco (< 25°C), protegido de la luz solar directa y la humedad ambiental.' 
+              : 'Store in a cool, dry place below 25°C (77°F), securely closed with original desiccant, protected from direct sunlight and ambient humidity.'
+          },
+          {
+            step: 4,
+            title: isEs ? 'Duración del Ciclo Terapéutico' : 'Treatment Cycle Duration',
+            timing: isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)',
+            instruction: isEs 
+              ? 'Tratamiento planificado para un ciclo completo de 90 días (90 cápsulas). Se recomienda seguimiento médico y reevaluación al completar el período.' 
+              : 'Protocol spans a full 90-day cycle (90 capsules). Medical follow-up and clinical review are recommended upon cycle completion.'
           }
         ];
       } else if (isTrichoFoam) {
@@ -704,6 +724,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       return {
         id: `formulation-${index}`,
         index,
+        isOral,
         accentColor,
         accentBg,
         badge: badgeText,
@@ -1607,7 +1628,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     flexShrink: 0,
                     boxShadow: `0 4px 12px ${(formulation.accentColor || '#0284c7')}33`
                   }}>
-                    {formulation.id.includes('oral') ? <Box size={22} /> : <FlaskConical size={22} />}
+                    {formulation.isOral || formulation.route?.toLowerCase().includes('oral') || formulation.title?.toLowerCase().includes('cápsula') || formulation.title?.toLowerCase().includes('capsule') ? (
+                      <Pill size={22} />
+                    ) : (formulation.id.includes('oil') || formulation.title?.toLowerCase().includes('oil')) ? (
+                      <Droplets size={22} />
+                    ) : (
+                      <FlaskConical size={22} />
+                    )}
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
@@ -1701,7 +1728,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </div>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <CheckCircle2 size={13} />
-                    <span>{formulation.id.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder'}</span>
+                    <span>{formulation.isOral ? (isEs ? '100% Cápsulas Vegetales HPMC · Sin Gluten · Sin Alérgenos' : '100% Plant-Based HPMC Capsules · Gluten-Free · Allergen-Free') : (formulation.id.includes('topical') ? 'Alcohol-Free & Non-Irritating' : 'Enteric Bioavailable Powder')}</span>
                   </div>
                 </div>
 
@@ -1762,14 +1789,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           <span style={{
                             fontSize: '0.78rem',
                             fontWeight: 800,
-                            color: '#0284c7',
-                            background: '#f0f9ff',
-                            border: '1px solid #bae6fd',
+                            color: formulation.isOral ? '#047857' : '#0284c7',
+                            background: formulation.isOral ? '#ecfdf5' : '#f0f9ff',
+                            border: `1px solid ${formulation.isOral ? '#a7f3d0' : '#bae6fd'}`,
                             padding: '2px 8px',
                             borderRadius: '6px',
-                            fontFamily: 'monospace'
+                            fontFamily: 'monospace',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
                           }}>
-                            {api.dosage}
+                            {formulation.isOral ? `💊 ${api.dosage} / cápsula` : api.dosage}
                           </span>
                           {api.dosageSafety?.evaluated && (
                             <span 
@@ -2817,25 +2847,25 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <button
                   type="button"
                   onClick={() => setDocForm({
-                    name: 'Dr. Heytham',
+                    name: 'Dr. Haytham Salem',
                     specialty: 'Consultant Regenerative Medicine & Nutrigenomics',
                     license: 'DHA-P-0319842',
-                    clinic: 'Bedaya Polyclinic / Fagron Genomics',
-                    phone: '+971 4 395 5599',
-                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                    clinic: 'Hortman Clinics',
+                    phone: '+971 50 185 2160',
+                    address: 'Hortman Clinics, Dubai, UAE'
                   })}
                   style={{
                     padding: '4px 10px',
                     borderRadius: '6px',
                     border: '1px solid #cbd5e1',
-                    background: docForm.name.includes('Heytham') ? '#eff6ff' : '#f8fafc',
-                    color: docForm.name.includes('Heytham') ? '#0284c7' : '#334155',
+                    background: (docForm.name.includes('Haytham') || docForm.name.includes('Heytham')) ? '#eff6ff' : '#f8fafc',
+                    color: (docForm.name.includes('Haytham') || docForm.name.includes('Heytham')) ? '#0284c7' : '#334155',
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
-                  🩺 Dr. Heytham (Nutrigenomics)
+                  🩺 Dr. Haytham Salem (Hortman Clinics)
                 </button>
                 <button
                   type="button"
