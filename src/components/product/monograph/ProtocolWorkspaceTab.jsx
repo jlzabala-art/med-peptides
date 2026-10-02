@@ -24,7 +24,8 @@ import {
   Plus,
   Lock,
   ExternalLink,
-  X
+  X,
+  Sparkles
 } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
@@ -33,6 +34,7 @@ import { useRouter } from 'next/navigation';
 import { resolveVialSizeMg } from '@/utils/supplyMath';
 import { calculateReconstitution, calculateProtocolProcurement } from './monographCalculationEngine';
 import { matchClinicalBenchmark, CLINICAL_BENCHMARKS } from '@/utils/clinicalDosingEngine';
+import PrecisionSyringeVisualizer from './PrecisionSyringeVisualizer';
 
 /**
  * Built-in canonical protocol definitions for PT-141 & Peptide compounds
