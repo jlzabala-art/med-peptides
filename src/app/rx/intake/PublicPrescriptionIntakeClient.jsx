@@ -358,28 +358,86 @@ const PUBLIC_INTAKE_STYLES = `
     line-height: 1.3;
   }
 
-  /* Responsive for Mobile Devices (< 768px) */
+  .gcp-stepper-mobile-progress {
+    display: none;
+  }
+
+  .intake-capabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    text-align: left;
+    max-width: 880px;
+    margin: 0 auto 1.5rem;
+  }
+
+  /* Responsive for Mobile Devices (< 768px / < 640px) */
   @media (max-width: 768px) {
     .gcp-stepper-wrapper {
-      padding: 8px 10px;
+      padding: 8px 12px;
+    }
+    .gcp-stepper-container {
+      gap: 6px;
     }
     .gcp-stepper-step {
       padding: 4px 6px;
       gap: 6px;
+      flex: 0 0 auto;
     }
-    .gcp-stepper-circle {
-      width: 22px;
-      height: 22px;
-      font-size: 0.7rem;
+    .gcp-stepper-step.active {
+      flex: 1 1 auto;
+      background: #eff6ff;
+      border-color: #bfdbfe;
     }
-    .gcp-stepper-desc {
-      display: none;
+    .gcp-stepper-step:not(.active) .gcp-stepper-info {
+      display: none !important;
     }
-    .gcp-stepper-title {
-      font-size: 0.72rem;
+    .gcp-stepper-step.active .gcp-stepper-info {
+      display: flex !important;
+    }
+    .gcp-stepper-step.active .gcp-stepper-title {
+      font-size: 0.76rem;
+      white-space: normal;
+    }
+    .gcp-stepper-step.active .gcp-stepper-desc {
+      display: none !important;
     }
     .gcp-stepper-divider {
-      flex: 0 0 8px;
+      flex: 0 0 10px;
+    }
+    .gcp-stepper-circle {
+      width: 24px;
+      height: 24px;
+      font-size: 0.72rem;
+    }
+    .gcp-stepper-mobile-progress {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+      height: 3px;
+    }
+    .gcp-progress-segment {
+      flex: 1;
+      height: 100%;
+      border-radius: 2px;
+      background: #e2e8f0;
+      transition: background 0.2s ease;
+    }
+    .gcp-progress-segment.active {
+      background: #003666;
+    }
+
+    .intake-capabilities-grid {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+    .intake-hero-title {
+      font-size: 1.35rem !important;
+    }
+    .intake-hero-desc {
+      font-size: 0.82rem !important;
+      line-height: 1.45 !important;
+      margin-bottom: 1rem !important;
     }
 
     .gcp-intake-topbar {
@@ -1114,35 +1172,28 @@ export default function PublicPrescriptionIntakeClient() {
               <span>AUTONOMOUS CLINICAL PRESCRIPTION INGESTION ENGINE</span>
             </div>
 
-            <h1 style={{
-              fontSize: 'clamp(1.75rem, 4vw, 2.3rem)',
+            <h1 className="intake-hero-title" style={{
+              fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)',
               fontWeight: 900,
               color: '#0f172a',
               lineHeight: 1.2,
-              margin: '0 0 0.75rem'
+              margin: '0 0 0.65rem'
             }}>
               Autonomous Clinical Prescription Intake Engine
             </h1>
 
-            <p style={{
+            <p className="intake-hero-desc" style={{
               maxWidth: '680px',
               margin: '0 auto 1.5rem',
-              fontSize: '0.94rem',
+              fontSize: '0.90rem',
               color: '#475569',
-              lineHeight: 1.6
+              lineHeight: 1.55
             }}>
               Autonomous AI engine trained to identify, standardize, and extract complex medical prescriptions across multiple clinical disciplines — including custom compounding formulations, trichology regimens, dermatological treatments, peptide protocols, and galenic orders.
             </p>
 
             {/* 3 GCP Feature Capability Cards */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '12px',
-              textAlign: 'left',
-              maxWidth: '880px',
-              margin: '0 auto 1.5rem'
-            }}>
+            <div className="intake-capabilities-grid">
               <div style={{
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',

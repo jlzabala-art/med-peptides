@@ -14,11 +14,13 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { SHIPPING_DESTINATIONS } from '../../../../../hooks/data/useSharedCatalogState';
+import BrandLogo from '../../../../../components/common/BrandLogo';
 import '@/styles/publicStickyHeader.css';
 
 /**
  * SharedCatalogTopNav — Sandboxed institutional topbar matching Google Cloud UX standards.
  * Supports:
+ *  - Official Atlas Health Services BrandLogo icon & typography
  *  - Neutral, compact destination selector (no upfront freight cost in header)
  *  - Standardized GCP Unified Auth Pill (Single Sign In CTA when unauth, Avatar Dropdown when auth)
  *  - Currency & Language dropdowns
@@ -79,10 +81,10 @@ export default function SharedCatalogTopNav({
   return (
     <header className="institutional-topbar">
       <div className="topbar-inner">
-        {/* Brand & Badge Group */}
+        {/* Brand Logo & Badges */}
         <div className="topbar-brand">
-          <Link href="/" className="topbar-brand-title" style={{ textDecoration: 'none', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>Atlas Health Services</span>
+          <Link href="/" className="topbar-brand-title" style={{ textDecoration: 'none', color: '#ffffff', display: 'inline-flex', alignItems: 'center' }} title="Atlas Health Services">
+            <BrandLogo variant="light" size="compact" />
           </Link>
           <span className="topbar-brand-divider" aria-hidden="true" />
           <span className="topbar-badge-pill">

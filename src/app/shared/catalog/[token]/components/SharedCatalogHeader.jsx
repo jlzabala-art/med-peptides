@@ -477,15 +477,21 @@ export default function SharedCatalogHeader({
           }
           @media (max-width: 640px) {
             .catalog-actions-group {
-              width: 100%;
-              display: flex;
-              flex-wrap: wrap;
-              gap: 4px;
+              width: 100% !important;
+              display: grid !important;
+              grid-template-columns: 1fr 1fr !important;
+              gap: 6px !important;
             }
             .catalog-actions-group > button,
             .catalog-actions-group > div {
-              flex: 1 1 auto;
-              justify-content: center;
+              width: 100% !important;
+              margin: 0 !important;
+              justify-content: center !important;
+              box-sizing: border-box !important;
+            }
+            .catalog-actions-group > div > button {
+              width: 100% !important;
+              justify-content: center !important;
             }
           }
         `}</style>

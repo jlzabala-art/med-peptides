@@ -300,13 +300,13 @@ export default function SharedCatalogStyles() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
+          gap: 5px;
           background-color: rgba(255, 255, 255, 0.10);
           border: 1px solid rgba(255, 255, 255, 0.25);
           color: #ffffff;
-          padding: 0 12px;
+          padding: 0 8px;
           border-radius: 6px;
-          font-size: 0.76rem;
+          font-size: 0.72rem;
           font-weight: 700;
           text-decoration: none;
           cursor: pointer;
@@ -317,6 +317,42 @@ export default function SharedCatalogStyles() {
         .topbar-signin-btn:hover {
           background-color: rgba(255, 255, 255, 0.18);
           border-color: rgba(255, 255, 255, 0.40);
+        }
+        @media (max-width: 640px) {
+          .topbar-inner {
+            padding: 0.28rem 0.50rem !important;
+            gap: 4px !important;
+          }
+          .topbar-brand {
+            gap: 3px !important;
+          }
+          .topbar-actions {
+            gap: 3px !important;
+          }
+          .topbar-destination-compact {
+            padding: 0 4px !important;
+            height: 26px !important;
+            font-size: 0.68rem !important;
+          }
+          .topbar-dest-compact-select {
+            font-size: 0.68rem !important;
+          }
+          .topbar-select {
+            padding: 0 4px !important;
+            height: 26px !important;
+            font-size: 0.68rem !important;
+          }
+          .topbar-contact-btn {
+            padding: 0 6px !important;
+            height: 26px !important;
+          }
+          .puh-btn-signin,
+          .puh-btn-auth-user,
+          .topbar-signin-btn {
+            height: 26px !important;
+            padding: 0 6px !important;
+            font-size: 0.68rem !important;
+          }
         }
         .topbar-apply-btn {
           height: 32px;
