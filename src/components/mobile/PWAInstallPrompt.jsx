@@ -23,8 +23,11 @@ export default function PWAInstallPrompt() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/shared/')) {
-      return;
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.startsWith('/shared/') || path.startsWith('/p/') || path.startsWith('/rx/') || path.startsWith('/proto') || path.startsWith('/admin')) {
+        return;
+      }
     }
 
     // Check if already in standalone mode (already installed)

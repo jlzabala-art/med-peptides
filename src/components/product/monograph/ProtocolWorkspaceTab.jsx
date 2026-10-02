@@ -1857,43 +1857,80 @@ export default function ProtocolWorkspaceTab({
             </div>
 
             {/* Procurement Action CTAs (Separated from reconstitution) */}
+            {/* Direct Clinical Procurement Card (GCP Standard Card) */}
             <div style={{
-              background: '#f8fafc',
+              background: '#ffffff',
               border: '1px solid #e2e8f0',
               borderRadius: '8px',
-              padding: '1rem',
+              padding: '1.15rem',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '0.75rem'
+              flexDirection: 'column',
+              gap: '0.85rem',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
             }}>
-              <div>
-                <strong style={{ fontSize: '0.84rem', color: '#0f172a' }}>Direct Clinical Procurement</strong>
-                <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b' }}>
-                  Add verified clinical {isNasal ? 'nasal spray bottles' : isPen ? 'pre-filled multi-dose pens' : 'laboratory vials'} directly to quotation or export itemized BOM.
-                </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{
+                    width: '26px',
+                    height: '26px',
+                    borderRadius: '6px',
+                    background: '#eff6ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#003666'
+                  }}>
+                    <ShoppingCart size={14} />
+                  </div>
+                  <strong style={{ fontSize: '0.86rem', color: '#0f172a', fontWeight: 800 }}>
+                    Direct Clinical Procurement
+                  </strong>
+                </div>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#0284c7',
+                  background: '#e0f2fe',
+                  border: '1px solid #bae6fd',
+                  padding: '1px 7px',
+                  borderRadius: '10px'
+                }}>
+                  {isNasal ? 'Intranasal Supply' : isPen ? 'Multi-Dose Pen Supply' : 'Vial Procurement'}
+                </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b', lineHeight: 1.45 }}>
+                Add verified clinical {isNasal ? 'nasal spray bottles' : isPen ? 'pre-filled multi-dose pens' : 'laboratory vials'} directly to patient quotation or export itemized BOM.
+              </p>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexWrap: 'wrap',
+                paddingTop: '4px'
+              }}>
                 <button
                   type="button"
                   onClick={handleCopyProcurement}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
                     background: '#ffffff',
                     border: '1px solid #cbd5e1',
                     color: '#334155',
-                    padding: '8px 14px',
+                    padding: '9px 14px',
                     borderRadius: '6px',
                     fontSize: '0.78rem',
                     fontWeight: 700,
-                    cursor: 'pointer'
+                    minHeight: '42px',
+                    cursor: 'pointer',
+                    flex: '1 1 auto'
                   }}
                 >
-                  <Copy size={13} /> Copy Procurement List
+                  <Copy size={13} /> Copy Specifications / BOM
                 </button>
 
                 <button
@@ -1902,16 +1939,19 @@ export default function ProtocolWorkspaceTab({
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
                     background: user ? '#16a34a' : '#003666',
                     color: '#ffffff',
                     border: 'none',
-                    padding: '8px 16px',
+                    padding: '9px 16px',
                     borderRadius: '6px',
                     fontSize: '0.80rem',
                     fontWeight: 800,
+                    minHeight: '42px',
                     cursor: 'pointer',
-                    boxShadow: user ? '0 2px 4px rgba(22, 163, 74, 0.2)' : '0 2px 4px rgba(0, 54, 102, 0.2)'
+                    boxShadow: user ? '0 1px 3px rgba(22, 163, 74, 0.25)' : '0 1px 3px rgba(0, 54, 102, 0.25)',
+                    flex: '2 1 auto'
                   }}
                   title={user ? `Add ${isNasal ? 'spray' : isPen ? 'pen' : 'vial'} requirements to quotation` : "Sign in required to request quotation"}
                 >
@@ -1928,13 +1968,16 @@ export default function ProtocolWorkspaceTab({
               </div>
             </div>
 
+            {/* Google Cloud Wizard Navigation Bar */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderTop: '1px solid #f1f5f9',
+              gap: '10px',
+              borderTop: '1px solid #e2e8f0',
               paddingTop: '1rem',
-              marginTop: '0.5rem'
+              marginTop: '0.75rem',
+              flexWrap: 'wrap'
             }}>
               <button
                 type="button"
@@ -1942,15 +1985,18 @@ export default function ProtocolWorkspaceTab({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px',
                   background: '#ffffff',
                   border: '1px solid #cbd5e1',
                   color: '#475569',
-                  padding: '8px 14px',
+                  padding: '9px 16px',
                   borderRadius: '6px',
                   fontSize: '0.80rem',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  minHeight: '44px',
+                  cursor: 'pointer',
+                  flex: '0 0 auto'
                 }}
               >
                 <ArrowLeft size={14} /> Back
@@ -1965,18 +2011,23 @@ export default function ProtocolWorkspaceTab({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: '6px',
                   background: '#003666',
                   color: '#ffffff',
                   border: 'none',
-                  padding: '8px 16px',
+                  padding: '9px 18px',
                   borderRadius: '6px',
                   fontSize: '0.80rem',
                   fontWeight: 750,
-                  cursor: 'pointer'
+                  minHeight: '44px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(0, 54, 102, 0.2)',
+                  flex: '1 1 auto',
+                  textAlign: 'center'
                 }}
               >
-                <span>Proceed to {isNasal ? 'Nasal Spray Guide' : isPen ? 'Pen Calibration Guide' : 'Preparation & Syringe Calibration'}</span>
+                <span>Proceed to {isNasal ? 'Nasal Spray Guide' : isPen ? 'Pen Calibration Guide' : 'Preparation Guide'}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -2906,81 +2957,180 @@ export default function ProtocolWorkspaceTab({
           </div>
         )}
 
-        {/* ── Google Cloud Alternative Protocol Blueprints Section ── */}
+        {/* ── Google Cloud Alternative Protocol Blueprints Section (Progressive Disclosure) ── */}
         {otherProtocols.length > 0 && (
           <section className="pds-other-protocols-section" aria-label="Alternative Clinical Protocols">
-            <div className="pds-other-protocols-header">
-              <div className="pds-other-protocols-title-group">
-                <div className="pds-other-protocols-icon-box">
-                  <FlaskConical size={18} />
-                </div>
-                <div>
-                  <h4 className="pds-other-protocols-title">
-                    Alternative Clinical Protocols for {canonicalName}
-                  </h4>
-                  <p className="pds-other-protocols-subtitle">
-                    Select an alternative blueprint below to re-titrate vial requirements and administration schedules.
+            {currentStep > 1 ? (
+              <details className="pds-other-protocols-details" style={{ width: '100%', cursor: 'pointer' }}>
+                <summary style={{
+                  padding: '10px 14px',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  fontSize: '0.80rem',
+                  fontWeight: 750,
+                  color: '#003666',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  userSelect: 'none',
+                  outline: 'none'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '6px',
+                      background: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#003666'
+                    }}>
+                      <FlaskConical size={14} />
+                    </div>
+                    <span>Alternative Clinical Blueprints for {canonicalName} ({otherProtocols.length} other {otherProtocols.length === 1 ? 'option' : 'options'})</span>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 700 }}>
+                    View Alternatives ▾
+                  </span>
+                </summary>
+
+                <div style={{ marginTop: '1rem' }}>
+                  <p style={{ margin: '0 0 0.85rem 0', fontSize: '0.76rem', color: '#64748b' }}>
+                    Select an alternative blueprint below to re-titrate {isNasal ? 'metered spray supply' : isPen ? 'pre-filled pen supply' : 'vial requirements'} and administration schedules.
                   </p>
-                </div>
-              </div>
-              <span className="pds-other-protocols-count-badge">
-                {otherProtocols.length} other {otherProtocols.length === 1 ? 'option' : 'options'}
-              </span>
-            </div>
+                  <div className="pds-other-protocols-grid">
+                    {otherProtocols.map(other => (
+                      <div key={other.id} className="pds-other-protocol-card">
+                        <div>
+                          <div className="pds-other-card-meta">
+                            <span className="pds-other-card-category">{other.category || 'Clinical'}</span>
+                            <span className="pds-other-card-duration">
+                              <Clock size={11} /> {other.durationWeeks} Weeks
+                            </span>
+                          </div>
 
-            <div className="pds-other-protocols-grid">
-              {otherProtocols.map(other => (
-                <div key={other.id} className="pds-other-protocol-card">
-                  <div>
-                    <div className="pds-other-card-meta">
-                      <span className="pds-other-card-category">{other.category || 'Clinical'}</span>
-                      <span className="pds-other-card-duration">
-                        <Clock size={11} /> {other.durationWeeks} Weeks
-                      </span>
-                    </div>
+                          <h5 className="pds-other-card-title">
+                            {sanitizeProtocolTitle(other.name, canonicalName)}
+                          </h5>
 
-                    <h5 className="pds-other-card-title">
-                      {sanitizeProtocolTitle(other.name, canonicalName)}
-                    </h5>
+                          <p className="pds-other-card-objective">
+                            {other.objective}
+                          </p>
 
-                    <p className="pds-other-card-objective">
-                      {other.objective}
-                    </p>
+                          <div className="pds-other-card-specs">
+                            <span className="pds-other-spec-pill dose">
+                              {other.defaultDoseMg || 1.25} mg / admin
+                            </span>
+                            <span className="pds-other-spec-pill cadence">
+                              • {other.defaultDosesPerWeek || 2}× per week
+                            </span>
+                          </div>
+                        </div>
 
-                    <div className="pds-other-card-specs">
-                      <span className="pds-other-spec-pill dose">
-                        {other.defaultDoseMg || 1.25} mg / admin
-                      </span>
-                      <span className="pds-other-spec-pill cadence">
-                        • {other.defaultDosesPerWeek || 2}× per week
-                      </span>
-                    </div>
-                  </div>
+                        <div className="pds-other-card-actions">
+                          <button
+                            type="button"
+                            onClick={() => handleSelectProtocol(other.id)}
+                            className="pds-other-switch-btn"
+                          >
+                            <RotateCcw size={13} />
+                            <span>Switch to this Protocol</span>
+                          </button>
 
-                  <div className="pds-other-card-actions">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectProtocol(other.id)}
-                      className="pds-other-switch-btn"
-                    >
-                      <RotateCcw size={13} />
-                      <span>Switch to this Protocol</span>
-                    </button>
-
-                    <a
-                      href={other.slug ? `/proto/${other.slug}` : (other.id ? `/proto/${other.id}` : `/proto/${product.slug || 'protocol'}`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pds-other-link-btn"
-                      title="View full protocol in new window"
-                    >
-                      <span>Full Blueprint</span>
-                      <ExternalLink size={12} />
-                    </a>
+                          <a
+                            href={other.slug ? `/proto/${other.slug}` : (other.id ? `/proto/${other.id}` : `/proto/${product.slug || 'protocol'}`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="pds-other-link-btn"
+                            title="View full protocol in new window"
+                          >
+                            <span>Full Blueprint</span>
+                            <ExternalLink size={12} />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </details>
+            ) : (
+              <>
+                <div className="pds-other-protocols-header">
+                  <div className="pds-other-protocols-title-group">
+                    <div className="pds-other-protocols-icon-box">
+                      <FlaskConical size={18} />
+                    </div>
+                    <div>
+                      <h4 className="pds-other-protocols-title">
+                        Alternative Clinical Protocols for {canonicalName}
+                      </h4>
+                      <p className="pds-other-protocols-subtitle">
+                        Select an alternative blueprint below to re-titrate {isNasal ? 'metered spray supply' : isPen ? 'pre-filled pen supply' : 'vial requirements'} and administration schedules.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="pds-other-protocols-count-badge">
+                    {otherProtocols.length} other {otherProtocols.length === 1 ? 'option' : 'options'}
+                  </span>
+                </div>
+
+                <div className="pds-other-protocols-grid">
+                  {otherProtocols.map(other => (
+                    <div key={other.id} className="pds-other-protocol-card">
+                      <div>
+                        <div className="pds-other-card-meta">
+                          <span className="pds-other-card-category">{other.category || 'Clinical'}</span>
+                          <span className="pds-other-card-duration">
+                            <Clock size={11} /> {other.durationWeeks} Weeks
+                          </span>
+                        </div>
+
+                        <h5 className="pds-other-card-title">
+                          {sanitizeProtocolTitle(other.name, canonicalName)}
+                        </h5>
+
+                        <p className="pds-other-card-objective">
+                          {other.objective}
+                        </p>
+
+                        <div className="pds-other-card-specs">
+                          <span className="pds-other-spec-pill dose">
+                            {other.defaultDoseMg || 1.25} mg / admin
+                          </span>
+                          <span className="pds-other-spec-pill cadence">
+                            • {other.defaultDosesPerWeek || 2}× per week
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pds-other-card-actions">
+                        <button
+                          type="button"
+                          onClick={() => handleSelectProtocol(other.id)}
+                          className="pds-other-switch-btn"
+                        >
+                          <RotateCcw size={13} />
+                          <span>Switch to this Protocol</span>
+                        </button>
+
+                        <a
+                          href={other.slug ? `/proto/${other.slug}` : (other.id ? `/proto/${other.id}` : `/proto/${product.slug || 'protocol'}`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="pds-other-link-btn"
+                          title="View full protocol in new window"
+                        >
+                          <span>Full Blueprint</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
         )}
       </main>
