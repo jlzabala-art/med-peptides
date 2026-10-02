@@ -37,7 +37,8 @@ export default function PeptideMonographTopStrip({
   effectiveBatch = '',
   protocolContext = null,
   onOpenCoaModal,
-  dynamicPublicUrl = null
+  dynamicPublicUrl = null,
+  shortUrl = null
 }) {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -46,11 +47,24 @@ export default function PeptideMonographTopStrip({
   const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${cleanSlug}`);
   const isPt141 = cleanSlug.toLowerCase().includes('pt-141') || (product.canonicalName || product.name || '').toLowerCase().includes('pt-141');
 
-  const handleCopyUrl = () => {
+  const handleCopyUrl = async () => {
     triggerHaptic('light');
-    navigator.clipboard?.writeText(pageUrl);
+    let targetToCopy = shortUrl;
+    if (!targetToCopy && pageUrl) {
+      try {
+        const res = await fetch('/api/short-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUrl: pageUrl, slug: cleanSlug, recipient: { type: 'public' } })
+        });
+        const data = await res.json();
+        if (data?.shortUrl) targetToCopy = data.shortUrl;
+      } catch {}
+    }
+    const finalUrl = targetToCopy || pageUrl;
+    navigator.clipboard?.writeText(finalUrl);
     setCopiedLink(true);
-    toast.success('Direct monograph link copied ✓');
+    toast.success('Short monograph link copied ✓');
     setTimeout(() => setCopiedLink(false), 2000);
   };
 

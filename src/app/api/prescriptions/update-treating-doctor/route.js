@@ -70,6 +70,7 @@ export async function POST(request) {
       treatingDoctor: cleanTreatingDoc,
       doctor: cleanTreatingDoc,
       doctorName: cleanTreatingDoc.name,
+      prescribingDoctor: cleanTreatingDoc.name,
       doctorLicense: cleanTreatingDoc.license,
       doctorSpecialty: cleanTreatingDoc.specialty,
       hasTreatingDoctor: true,

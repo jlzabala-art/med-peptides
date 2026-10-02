@@ -19,7 +19,6 @@ export default function DatasheetQuickSearchModal({
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [filterOnlyCurrentSupplier, setFilterOnlyCurrentSupplier] = useState(Boolean(currentSupplier));
   const [initialCatalog, setInitialCatalog] = useState([]);
   const inputRef = useRef(null);
   const listRef = useRef(null);
@@ -78,17 +77,13 @@ export default function DatasheetQuickSearchModal({
         }
       }
 
-      // Filter by supplier if toggle is enabled and currentSupplier exists
+      // Strictly filter by supplier when currentSupplier exists
       let finalResults = rawProducts;
-      if (filterOnlyCurrentSupplier && cleanCurrentSupplier) {
-        const filtered = rawProducts.filter((p) => {
+      if (cleanCurrentSupplier) {
+        finalResults = rawProducts.filter((p) => {
           const sup = (p.supplierName || p.sourceSupplier || p.supplier || '').toLowerCase().replace(/[\s-_]/g, '');
           return sup.includes(cleanCurrentSupplier) || cleanCurrentSupplier.includes(sup);
         });
-        // If supplier filter matched items, use them; otherwise keep all to avoid blank results
-        if (filtered.length > 0) {
-          finalResults = filtered;
-        }
       }
 
       // Deduplicate by slug / id
@@ -109,7 +104,7 @@ export default function DatasheetQuickSearchModal({
     } finally {
       setLoading(false);
     }
-  }, [cleanCurrentSupplier, filterOnlyCurrentSupplier, initialCatalog]);
+  }, [cleanCurrentSupplier, initialCatalog]);
 
   // Open & Focus Management
   useEffect(() => {
@@ -120,13 +115,6 @@ export default function DatasheetQuickSearchModal({
       setTimeout(() => inputRef.current?.focus(), 80);
     }
   }, [isOpen, performSearch]);
-
-  // Re-run search when supplier toggle changes
-  useEffect(() => {
-    if (isOpen) {
-      performSearch(searchTerm);
-    }
-  }, [filterOnlyCurrentSupplier, isOpen, performSearch, searchTerm]);
 
   // Keyboard Navigation: Esc, ArrowUp, ArrowDown, Enter
   useEffect(() => {
@@ -169,7 +157,12 @@ export default function DatasheetQuickSearchModal({
     const targetSlug = product.slug || product.id;
     if (targetSlug) {
       onClose();
-      router.push(`/p/${encodeURIComponent(targetSlug)}`);
+      const queryParams = new URLSearchParams();
+      if (currentSupplier) {
+        queryParams.set('supplier', currentSupplier.toLowerCase());
+      }
+      const qs = queryParams.toString() ? `?${queryParams.toString()}` : '';
+      router.push(`/p/${encodeURIComponent(targetSlug)}${qs}`);
     }
   };
 
@@ -277,60 +270,6 @@ export default function DatasheetQuickSearchModal({
             ESC
           </div>
         </div>
-
-        {/* Filter / Scope Toolbar */}
-        {currentSupplier && (
-          <div style={{
-            padding: '8px 16px',
-            background: '#f1f5f9',
-            borderBottom: '1px solid #e2e8f0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Building2 size={13} style={{ color: '#003666' }} />
-              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155' }}>
-                {isSpanish ? 'Proveedor activo:' : 'Active catalog:'}
-              </span>
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                color: '#003666',
-                background: '#e0f2fe',
-                padding: '1px 7px',
-                borderRadius: '9999px',
-                border: '1px solid #bae6fd'
-              }}>
-                {currentSupplier}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setFilterOnlyCurrentSupplier((v) => !v)}
-              style={{
-                background: filterOnlyCurrentSupplier ? '#003666' : '#ffffff',
-                color: filterOnlyCurrentSupplier ? '#ffffff' : '#475569',
-                border: `1px solid ${filterOnlyCurrentSupplier ? '#003666' : '#cbd5e1'}`,
-                borderRadius: '6px',
-                padding: '3px 8px',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {filterOnlyCurrentSupplier && <Check size={12} />}
-              <span>{isSpanish ? `Solo ${currentSupplier}` : `Only ${currentSupplier}`}</span>
-            </button>
-          </div>
-        )}
 
         {/* Results List */}
         <div

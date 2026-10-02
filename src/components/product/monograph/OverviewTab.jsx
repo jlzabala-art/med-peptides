@@ -23,6 +23,7 @@ export default function OverviewTab({
   activeFormat = null,
   availableFormats = [],
   onFormatChange,
+  onSelectVariant,
   onNavigateToProtocols
 }) {
   const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
@@ -88,6 +89,18 @@ export default function OverviewTab({
 
   const [formatFilter, setFormatFilter] = useState('all');
 
+  const handleRowClick = (row) => {
+    triggerHaptic('selection');
+    if (onSelectVariant) {
+      onSelectVariant({
+        strengthId: row.strengthId,
+        formatId: row.formatId,
+        supplierId: row.supplierId,
+        strengthName: row.strengthMg
+      });
+    }
+  };
+
   const presentationColumns = [
     {
       header: 'Strength',
@@ -101,19 +114,53 @@ export default function OverviewTab({
             <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
               {displayDose}
             </span>
-            {row.isCurrentlyActive && (
+            {row.isCurrentlyActive ? (
               <span style={{
                 background: '#ecfdf5',
                 color: '#065f46',
                 border: '1px solid #a7f3d0',
-                padding: '1px 5px',
+                padding: '2px 6px',
                 borderRadius: '4px',
-                fontSize: '0.60rem',
+                fontSize: '0.62rem',
                 fontWeight: 800,
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
               }}>
                 Active ✓
               </span>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRowClick(row);
+                }}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  color: '#475569',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontSize: '0.62rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#003666';
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.borderColor = '#003666';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.color = '#475569';
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                }}
+              >
+                Set Active
+              </button>
             )}
           </div>
         );
@@ -172,12 +219,15 @@ export default function OverviewTab({
     ? presentationMatrixRows.map((row, idx) => ({
         id: row.key || `row-${idx}`,
         formatId: row.formatId,
+        strengthId: row.strengthId,
+        supplierId: row.supplierId,
         strengthMg: row.strengthName,
         format: row.formatName,
         recommendedDiluent: row.diluentText,
         concentrationMgMl: row.concText,
         route: row.adminText,
-        isCurrentlyActive: row.isCurrentlyActive
+        isCurrentlyActive: row.isCurrentlyActive,
+        rawRow: row
       }))
     : (product.variants && product.variants.length > 0)
       ? product.variants.map((v, idx) => {
@@ -189,6 +239,8 @@ export default function OverviewTab({
           return {
             id: v.id || `var-${idx}`,
             formatId: v.format || v.presentation,
+            strengthId: v.id || v.strength,
+            supplierId: v.supplierId || null,
             strengthMg: v.dosage || v.dose || v.strength || 'Standard',
             format: isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
             recommendedDiluent: isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
@@ -480,6 +532,7 @@ export default function OverviewTab({
           data={filteredPresentationData}
           keyField="id"
           hideExpandColumn
+          onRowClick={handleRowClick}
         />
       </section>
 

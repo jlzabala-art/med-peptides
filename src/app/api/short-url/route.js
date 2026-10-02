@@ -71,9 +71,20 @@ export async function POST(req) {
       cleanTargetUrl = `${appUrl}/p/${encodeURIComponent(slug)}${qStr ? `?${qStr}` : ''}`;
     }
 
-    // Always generate a unique cryptographic tracking code for this share event
+    // Always generate a unique cryptographic tracking code for this share event,
+    // or a deterministic deduplicated code for public monograph shares
     const recipientType = recipient.type || 'wholesaler';
-    const code = generateUniqueCode(recipientType);
+    const isPublicMonograph = !recipient?.id && !recipient?.email && 
+      (recipientType === 'wholesaler' || recipientType === 'general' || recipientType === 'public');
+
+    let code;
+    if (isPublicMonograph && cleanTargetUrl) {
+      const hash = crypto.createHash('sha256').update(cleanTargetUrl).digest('hex').slice(0, 8);
+      code = `ms-${hash}`;
+    } else {
+      code = generateUniqueCode(recipientType);
+    }
+
     const shortUrl = `${appUrl}/d/${code}`;
     const now = new Date().toISOString();
 
@@ -129,8 +140,22 @@ export async function POST(req) {
         createdAt: now,
       };
 
-      // 1. Primary datasheet lookup record
-      await adminDb.collection('datasheet_short_links').doc(code).set(docPayload);
+      // 1. Primary datasheet lookup record (preserve metrics if already exists)
+      const existingSnap = await adminDb.collection('datasheet_short_links').doc(code).get().catch(() => null);
+      if (existingSnap && existingSnap.exists) {
+        await adminDb.collection('datasheet_short_links').doc(code).set({
+          targetUrl: cleanTargetUrl,
+          slug: slug || '',
+          dose: dose || '',
+          format: format || '',
+          supplier: supplier || '',
+          batch: batch || '',
+          variant: variantData,
+          updatedAt: now
+        }, { merge: true });
+      } else {
+        await adminDb.collection('datasheet_short_links').doc(code).set(docPayload);
+      }
 
       // 2. Central cross-platform audit record (for CRM and User360Drawer tracking)
       try {

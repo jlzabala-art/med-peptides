@@ -44,9 +44,11 @@ export default function PeptideMonographWorkspace({
   sortedStrengths = [],
   presentationMatrixRows = [],
   dynamicPublicUrl,
+  shortUrl,
   versionInfo,
   labelQueryString,
-  onFormatChange
+  onFormatChange,
+  onSelectVariant
 }) {
   const searchParams = useSearchParams();
 
@@ -176,6 +178,7 @@ export default function PeptideMonographWorkspace({
           effectiveBatch={effectiveBatch}
           protocolContext={protocolContext}
           dynamicPublicUrl={dynamicPublicUrl}
+          shortUrl={shortUrl}
           onOpenCoaModal={() => setIsCoaModalOpen(true)}
         />
 
@@ -188,6 +191,7 @@ export default function PeptideMonographWorkspace({
                 activeFormat={activeFormat}
                 availableFormats={availableFormats}
                 onFormatChange={onFormatChange}
+                onSelectVariant={onSelectVariant}
                 onNavigateToProtocols={() => handleTabChange('protocols')}
               />
             )}

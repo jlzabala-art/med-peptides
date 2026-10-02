@@ -159,7 +159,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   // 2) Production Physician (productionDoctor):
   //    Dr. Miguel Ángel López Aranda (España, Lic. 282869584, no DHA).
   //    Strictly internal for compounding pharmacy / Fagron manufacture. NEVER shown to patient.
-  const rawCandidate = customTreatingDoctor || rx.treatingDoctor || (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
+  const rawCandidate = customTreatingDoctor || 
+    rx.treatingDoctor || 
+    (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !String(rx.doctor.name).includes('Miguel Ángel') ? rx.doctor : null) ||
+    (rx.doctorName && !String(rx.doctorName).includes('Miguel Ángel') ? { name: rx.doctorName, clinic: rx.clinic, specialty: rx.doctorSpecialty || 'Prescribing Physician' } : null) ||
+    (rx.prescribingDoctor && !String(rx.prescribingDoctor).includes('Miguel Ángel') ? { name: rx.prescribingDoctor, clinic: rx.clinic, specialty: 'Prescribing Physician' } : null) ||
+    (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
   const isCandidateMiguelAngel = Boolean(rawCandidate && String(rawCandidate.name || '').includes('Miguel Ángel'));
   const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateMiguelAngel);
 
@@ -171,6 +176,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const doctorPhone = treatingDoc.phone || '';
   const doctorLicense = treatingDoc.license || treatingDoc.licenseNumber || '';
   const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
+
+  const openDoctorModal = () => {
+    setDocForm({
+      name: treatingDoc.name || doctorName || '',
+      specialty: treatingDoc.specialty || doctorSpecialty || '',
+      license: doctorLicense || '',
+      clinic: treatingDoc.clinic || clinic || '',
+      phone: doctorPhone || '',
+      address: doctorAddress || ''
+    });
+    setShowDoctorModal(true);
+  };
 
   const handleSaveTreatingDoctor = async (doctorData) => {
     setIsSavingDoctor(true);
@@ -199,15 +216,50 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     }
   };
 
-  // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™)
+  // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™, NutriGen™)
   const genomicsData = detectFagronGenomicsTest(rx);
   const docs = rx.documents || rx.attachedDocuments || [];
+
+  const rxProgLower = String(rx.treatmentProgram || rx.program || '').toLowerCase();
+  const rxTypeLower = String(rx.treatmentType || '').toLowerCase();
+  const rxDispLower = String(rx.dispensingForm || '').toLowerCase();
+  const isNutrigen = rxProgLower.includes('nutri') || rxTypeLower.includes('nutri') || String(rx.fagron?.testName || '').toLowerCase().includes('nutri');
+  const isEntirelyOral = isNutrigen || rxDispLower.includes('capsule') || rxDispLower.includes('oral') || (Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0 && rx.prescriptionLines.every(i => (i.route || '').toLowerCase().includes('oral')));
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
 
-  // Localized clinical steps (English default)
-  const steps = isEs ? (posology.applicationSteps || [
+  // Localized clinical steps (English default) - tailored for oral or topical routes
+  const steps = isEs ? (posology.applicationSteps || (isEntirelyOral ? [
+    {
+      step: 1,
+      title: 'Ingesta Diaria de la Cápsula',
+      timing: rx.posology?.toLowerCase().includes('night') ? 'Por la Noche' : 'Dosis Diaria',
+      badge: 'Vía Oral',
+      instruction: 'Tomar la cápsula prescrita acompañada de un vaso de agua abundante (200-250 ml).'
+    },
+    {
+      step: 2,
+      title: 'Tolerancia y Absorción Óptima',
+      timing: 'Con Alimentos',
+      badge: 'Máxima Biodisponibilidad',
+      instruction: 'Se aconseja administrar junto con alimentos para favorecer la tolerancia gastrointestinal y la óptima asimilación de los nutrientes y cofactores.'
+    },
+    {
+      step: 3,
+      title: 'Conservación Farmacéutica',
+      timing: '< 25°C Ambiente',
+      badge: 'Lugar Fresco y Seco',
+      instruction: 'Mantener el envase herméticamente cerrado en lugar fresco y seco, protegido de la luz solar directa y la humedad.'
+    },
+    {
+      step: 4,
+      title: 'Pauta y Seguimiento Clínico',
+      timing: rx.duration || '3 a 6 Meses',
+      badge: 'Supervisión Médica',
+      instruction: `Mantener la continuidad del tratamiento durante el periodo prescrito (${rx.duration || '3-6 meses'}). Revisión y control evolutivo con ${doctorName || 'el médico prescriptor'}.`
+    }
+  ] : [
     {
       step: 1,
       title: 'Preparación del Cuero Cabelludo',
@@ -250,7 +302,36 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       badge: 'Champú Fisiológico pH 5.5',
       instruction: 'Lavar el cabello a la mañana siguiente con un champú neutro suave (pH 5.5 sin sulfatos agresivos).'
     }
-  ]) : [
+  ])) : (posology.applicationSteps || (isEntirelyOral ? [
+    {
+      step: 1,
+      title: 'Daily Oral Administration',
+      timing: rx.posology?.toLowerCase().includes('night') ? 'Bedtime / Evening' : 'Daily Dose',
+      badge: 'Oral Route',
+      instruction: 'Take the prescribed compounded capsule with a full glass of water (approx. 200–250 mL).'
+    },
+    {
+      step: 2,
+      title: 'Optimal Absorption & Timing',
+      timing: 'With Meals',
+      badge: 'Peak Bioavailability',
+      instruction: 'Administer with food or during dinner to enhance gastrointestinal tolerance and maximize cofactor bioavailability.'
+    },
+    {
+      step: 3,
+      title: 'Pharmaceutical Storage',
+      timing: 'Room Temp < 25°C',
+      badge: 'Cool & Dry',
+      instruction: 'Keep container tightly sealed in a cool, dry area below 25°C (77°F), shielded from direct sunlight and moisture.'
+    },
+    {
+      step: 4,
+      title: 'Course Duration & Follow-Up',
+      timing: rx.duration || '3 to 6 Months',
+      badge: 'Clinical Review',
+      instruction: `Maintain therapy continuity throughout the prescribed cycle (${rx.duration || '3-6 months'}). Follow-up review with ${doctorName || 'the prescribing physician'}.`
+    }
+  ] : [
     {
       step: 1,
       title: 'Scalp Preparation',
@@ -293,10 +374,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       badge: 'pH 5.5 Gentle Cleanse',
       instruction: 'Cleanse hair the following morning using a gentle physiological shampoo (pH 5.5, free of harsh aggressive sulfates).'
     }
-  ];
+  ]));
 
   // Localized clinical milestones (English default)
-  const timeline = isEs ? (posology.timeline || [
+  const timeline = isEs ? (posology.timeline || (isEntirelyOral ? [
+    {
+      phase: 'Mes 1',
+      title: 'Restablecimiento Metabólico & Absorción Inicial',
+      badge: 'Fase Inicial',
+      description: 'Asimilación celular de micronutrientes y cofactores esenciales. Normalización de vías metabólicas basales.'
+    },
+    {
+      phase: 'Mes 2 - 3',
+      title: 'Optimización Tisular & Regulación Celular',
+      badge: 'Consolidación',
+      description: 'Equilibrio de biomarcadores celulares, reducción del estrés oxidativo y mejora del tono funcional sistémico.'
+    },
+    {
+      phase: rx.duration || 'Mes 3 - 6',
+      title: 'Mantenimiento & Evaluación de Resultados',
+      badge: 'Revisión Clínica',
+      description: `Consolidación de las respuestas nutrigenéticas individuales. Control clínico evolutivo con ${doctorName || 'el médico prescriptor'}.`
+    }
+  ] : [
     {
       phase: 'Semanas 1 - 3',
       title: 'Fase de Adaptación & Estabilización',
@@ -313,9 +413,28 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       phase: 'Semanas 9 - 12',
       title: 'Engrosamiento, Densidad & Consolidación',
       badge: 'Mes 3',
-      description: 'Incremento del calibre folicular y mayor cobertura visual. Finalización de los 3 frascos (300 ml). Revisión clínica con la Dra. Hanieh Erdmann.'
+      description: `Incremento del calibre folicular y mayor cobertura visual. Finalización del tratamiento. Revisión clínica con ${doctorName || 'el médico prescriptor'}.`
     }
-  ]) : [
+  ])) : (posology.timeline || (isEntirelyOral ? [
+    {
+      phase: 'Month 1',
+      title: 'Metabolic Priming & Initial Bio-assimilation',
+      badge: 'Initial Phase',
+      description: 'Cellular uptake of key micronutrients and cofactors. Normalization of basal biochemical pathways.'
+    },
+    {
+      phase: 'Months 2 - 3',
+      title: 'Tissue Optimization & Cellular Regulation',
+      badge: 'Consolidation',
+      description: 'Biomarker stabilization, mitigation of oxidative stress, and enhancement of systemic vitality.'
+    },
+    {
+      phase: rx.duration || 'Months 3 - 6',
+      title: 'Maintenance & Clinical Outcome Evaluation',
+      badge: 'Follow-up',
+      description: `Long-term consolidation of individualized nutrigenetic adaptations. Follow-up consultation with ${doctorName || 'the prescribing physician'}.`
+    }
+  ] : [
     {
       phase: 'Weeks 1 - 3',
       title: 'Adaptation & Follicular Stabilization',
@@ -332,9 +451,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       phase: 'Weeks 9 - 12',
       title: 'Shaft Thickening, Density & Consolidation',
       badge: 'Month 3',
-      description: 'Measurable caliber increase in hair shafts and visible density coverage. Completion of the 3-bottle course (300 ml). Follow-up clinical review with Dr. Hanieh Erdmann.'
+      description: `Measurable caliber increase in hair shafts and visible density coverage. Completion of course. Follow-up clinical review with ${doctorName || 'the prescribing physician'}.`
     }
-  ];
+  ]));
 
   // ── Compounded Formulations Architecture (Grouped by Vehicle & Route with Dedicated Posology) ──
   const rawLines = rx.prescriptionLines || rx.items || rx.compounds || [];
@@ -724,6 +843,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     const oralItems = [];
     const generalItems = [];
 
+    // If prescription is entirely oral / NutriGen / capsules, preserve single unified formulation block
+    if (isEntirelyOral) {
+      const activeApis = rawLines.filter(i => {
+        const n = (i.name || i.productName || i.activeIngredient || '').toLowerCase();
+        return !i.isVehicleOrBase && !i._isVehicleOrBase && !i.isVehicle && !n.includes('vehicle');
+      });
+      const vehicleName = isEs ? 'Base de Cápsula Magistral / Excipiente de Celulosa' : 'Micronized Compounded Hard Capsules Base';
+      const title = rx.treatmentType || (isNutrigen ? (isEs ? 'Fórmula Magistral NutriGen (Cápsulas)' : 'NutriGen Supplementation Formulation') : (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Compounded Oral Formulation'));
+      const routeText = rx.dispensingForm ? `${rx.dispensingForm} (Vía Oral)` : (isEs ? 'Vía Oral' : 'Oral Administration');
+      const volText = rx.volume || (isEs ? '90 Cápsulas' : '90 Capsules');
+      const posologyText = rx.posology || (isEs ? '1 Cápsula Diaria' : '1 Capsule Daily');
+
+      return [
+        buildVehicleData({
+          index: 1,
+          totalCount: 1,
+          vehicleName,
+          treatmentTitle: title,
+          route: routeText,
+          volume: volText,
+          customPosology: posologyText,
+          apis: activeApis.length > 0 ? activeApis : rawLines
+        })
+      ];
+    }
+
     rawLines.forEach((item) => {
       const nameLower = (item.name || item.productName || item.activeIngredient || '').toLowerCase();
       const formLower = (item.dosageForm || item.form || '').toLowerCase();
@@ -748,20 +893,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         return;
       }
 
-      // Check if item belongs to Scalp care / TrichoOil
-      const isOilItem = blockLower.includes('trichooil') || 
+      // Check if item belongs to Scalp care / TrichoOil (must NOT be oral)
+      const isOralRoute = routeLower.includes('oral') || formLower.includes('capsule') || formLower.includes('tablet');
+      const isOilItem = !isOralRoute && (
+                        blockLower.includes('trichooil') || 
                         blockLower.includes('scalp care') || 
                         blockLower.includes('higiene') || 
                         blockLower.includes('hygiene') ||
-                        nameLower.includes('ginseng') || 
-                        nameLower.includes('ginkgo') || 
-                        (nameLower.includes('vitamin e') && !routeLower.includes('oral')) ||
-                        (nameLower.includes('tocopherol') && !routeLower.includes('oral'));
+                        nameLower.includes('trichooil') ||
+                        (nameLower.includes('ginseng') && !isOralRoute) || 
+                        (nameLower.includes('ginkgo') && !isOralRoute) || 
+                        (nameLower.includes('vitamin e') && !isOralRoute) ||
+                        (nameLower.includes('tocopherol') && !isOralRoute));
 
       // Check if oral
-      const isOralItem = routeLower.includes('oral') ||
-                         formLower.includes('capsule') || 
-                         formLower.includes('tablet') ||
+      const isOralItem = isOralRoute ||
                          blockLower.includes('oral') ||
                          blockLower.includes('capsule');
 
@@ -835,8 +981,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         vehicleName: isEs ? 'Cápsulas de Gelatina / Celulosa Micronizada' : 'Micronized Compounded Hard Capsules Base',
         treatmentTitle: isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Capsules)',
         route: isEs ? 'Vía Oral' : 'Oral Administration',
-        volume: isEs ? '30 Cápsulas' : '30 Compounded Capsules',
-        customPosology: isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime',
+        volume: rx.volume || (isEs ? '30 Cápsulas' : '30 Compounded Capsules'),
+        customPosology: rx.posology || (isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime'),
         apis: oralItems
       });
     }
@@ -999,24 +1145,42 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     }
   };
 
+  // Dynamic formula & dosage summaries based on active prescription type (NutriGen oral capsules vs TrichoTest topical)
+  const resolvedFormulaSummary = React.useMemo(() => {
+    if (rx.formulaName || rx.title) return rx.formulaName || rx.title;
+    if (rawLines.length > 0) {
+      const activeItems = rawLines
+        .filter(i => !i._isVehicleOrBase && !i.isVehicle)
+        .map(i => `${i.name || i.productName || i.activeIngredient || ''}${i.dose || i.dosage || i.concentration ? ` ${i.dose || i.dosage || i.concentration}` : ''}`.trim());
+      if (activeItems.length > 0) {
+        return activeItems.join(' + ') + (rx.volume ? ` (${rx.volume})` : '');
+      }
+    }
+    return rx.treatmentType || 'Compounded Prescription Formulation';
+  }, [rx, rawLines]);
+
+  const resolvedDosageSummary = React.useMemo(() => {
+    return posology.summary || rx.posology || rx.dosageSchedule || (isEs ? 'Según prescripción médica' : 'As directed by healthcare professional');
+  }, [posology, rx, isEs]);
+
   // WhatsApp share message: clean English format by default
   const shareTextWhatsApp = encodeURIComponent(
     isEs
       ? `*Atlas Services — Ficha Técnica y Posología Médica*\n` +
         `📋 *Prescripción:* ${rxId}\n` +
         `👤 *Paciente:* ${patientName}${patientAlias}\n` +
-        `🩺 *Médica Prescriptora:* ${doctorName}\n` +
-        `🧪 *Fórmula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% en TrichoSol™ (3x 100ml)\n` +
+        `🩺 *Médico Prescriptor:* ${doctorName} (${clinic})\n` +
+        `🧪 *Fórmula:* ${resolvedFormulaSummary}\n` +
         (genomicsData ? `🧬 *Guía Genómica:* Formulada según recomendaciones de ${genomicsData.test.shortName}.\n` : '') +
-        `🕒 *Posología:* 1.0 ml tópico diario antes de acostarse sobre cuero cabelludo seco. Dejar actuar toda la noche.\n\n` +
+        `🕒 *Posología:* ${resolvedDosageSummary}\n\n` +
         `🔗 *Ver Ficha y Posología Digital:* ${publicUrl}`
       : `*Atlas Services — Medical Prescription & Posology Regimen*\n` +
         `📋 *Prescription Ref:* ${rxId}\n` +
         `👤 *Patient:* ${patientName}${patientAlias}\n` +
         `🩺 *Prescribing Physician:* ${doctorName} (${clinic})\n` +
-        `🧪 *Formula:* Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)\n` +
+        `🧪 *Formula:* ${resolvedFormulaSummary}\n` +
         (genomicsData ? `🧬 *Genomics Guidance:* Formulated based on ${genomicsData.test.shortName} recommendations.\n` : '') +
-        `🕒 *Dosage:* 1.0 ml topical daily at bedtime to dry scalp. Leave on overnight.\n\n` +
+        `🕒 *Dosage:* ${resolvedDosageSummary}\n\n` +
         `🔗 *Digital Prescription & Dosage Regimen:* ${publicUrl}`
   );
 
@@ -1048,8 +1212,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             patientName,
             doctorName,
             clinic,
-            formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
-            dosage: '1.0 ml Once Daily at Night on Dry Scalp',
+            formula: resolvedFormulaSummary,
+            dosage: resolvedDosageSummary,
             category: 'prescription',
             genomicsTest: genomicsData?.test?.shortName || null
           }}
@@ -1104,17 +1268,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         )}
                       </div>
                       <button
-                        onClick={() => {
-                          setDocForm({
-                            name: treatingDoc.name || '',
-                            specialty: treatingDoc.specialty || '',
-                            license: treatingDoc.license || treatingDoc.licenseNumber || '',
-                            clinic: treatingDoc.clinic || '',
-                            phone: treatingDoc.phone || '',
-                            address: treatingDoc.address || ''
-                          });
-                          setShowDoctorModal(true);
-                        }}
+                        onClick={openDoctorModal}
                         style={{
                           background: 'none',
                           border: 'none',
@@ -1159,17 +1313,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           {isEs ? 'Sin médico asignado.' : 'No physician assigned.'}
                         </span>
                         <button
-                          onClick={() => {
-                            setDocForm({
-                              name: treatingDoc.name || '',
-                              specialty: treatingDoc.specialty || '',
-                              license: treatingDoc.license || treatingDoc.licenseNumber || '',
-                              clinic: treatingDoc.clinic || '',
-                              phone: treatingDoc.phone || '',
-                              address: treatingDoc.address || ''
-                            });
-                            setShowDoctorModal(true);
-                          }}
+                          onClick={openDoctorModal}
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -2396,7 +2540,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
-                      {isEs ? '4. Análisis Farmacogenómico (TrichoTest™)' : '4. Pharmacogenomics Analysis (TrichoTest™)'}
+                      {isEs 
+                        ? `4. Análisis Farmacogenómico (${genomicsData?.test?.shortName || 'Fagron Genomics'})` 
+                        : `4. Pharmacogenomics Analysis (${genomicsData?.test?.shortName || 'Fagron Genomics'})`}
                     </span>
                     <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#9333ea', color: '#ffffff' }}>
                       Fagron Genomics
@@ -2468,17 +2614,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             publicUrl={publicUrl}
             onOpenPdf={handleDownloadQrPng}
             onExportExcel={handleExportExcel}
-            onAssignDoctor={() => {
-              setDocForm({
-                name: treatingDoc.name || '',
-                specialty: treatingDoc.specialty || '',
-                license: treatingDoc.license || treatingDoc.licenseNumber || '',
-                clinic: treatingDoc.clinic || '',
-                phone: treatingDoc.phone || '',
-                address: treatingDoc.address || ''
-              });
-              setShowDoctorModal(true);
-            }}
+            onAssignDoctor={openDoctorModal}
             lang={lang}
           />
         </div>
@@ -2675,9 +2811,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             {/* Quick Presets */}
             <div style={{ marginBottom: '1rem' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
-                {isEs ? 'Plantillas Rápidas' : 'Quick Presets'}
+                {isEs ? 'Plantillas Rápidas de Médicos' : 'Physician Presets'}
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({
+                    name: 'Dr. Heytham',
+                    specialty: 'Consultant Regenerative Medicine & Nutrigenomics',
+                    license: 'DHA-P-0319842',
+                    clinic: 'Bedaya Polyclinic / Fagron Genomics',
+                    phone: '+971 4 395 5599',
+                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                  })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: docForm.name.includes('Heytham') ? '#eff6ff' : '#f8fafc',
+                    color: docForm.name.includes('Heytham') ? '#0284c7' : '#334155',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🩺 Dr. Heytham (Nutrigenomics)
+                </button>
                 <button
                   type="button"
                   onClick={() => setDocForm({
@@ -2723,6 +2882,75 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   }}
                 >
                   🩺 Dr. Sezgin Cagatay (DHA)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({
+                    name: 'Dr. Valentina Ghorashi',
+                    specialty: 'Consultant Aesthetic & Anti-Aging Medicine',
+                    license: 'DHA-P-0199411',
+                    clinic: 'Bedaya Polyclinic',
+                    phone: '+971 4 395 5599',
+                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                  })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: docForm.name.includes('Valentina') ? '#eff6ff' : '#f8fafc',
+                    color: docForm.name.includes('Valentina') ? '#0284c7' : '#334155',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🩺 Dr. Valentina Ghorashi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({
+                    name: 'Dr. Nahla ElAwady',
+                    specialty: 'Specialist Regenerative Medicine',
+                    license: 'DHA-P-0284102',
+                    clinic: 'Bedaya Polyclinic',
+                    phone: '+971 4 395 5599',
+                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
+                  })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    background: docForm.name.includes('Nahla') ? '#eff6ff' : '#f8fafc',
+                    color: docForm.name.includes('Nahla') ? '#0284c7' : '#334155',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🩺 Dr. Nahla ElAwady
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({
+                    name: '',
+                    specialty: '',
+                    license: '',
+                    clinic: '',
+                    phone: '',
+                    address: ''
+                  })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px dashed #cbd5e1',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✏️ {isEs ? 'Limpiar / Personalizado' : 'Clear / Custom'}
                 </button>
               </div>
             </div>

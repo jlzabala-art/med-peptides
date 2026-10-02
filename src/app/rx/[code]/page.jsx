@@ -129,8 +129,8 @@ export async function generateMetadata({ params }) {
   const rx = await getPrescriptionData(code);
 
   const patientName = rx?.patient?.name || rx?.patientName || 'Paciente';
-  const doctor = rx?.doctorName || rx?.doctor?.name || 'Dra. Hanieh Erdmann';
-  let clinic = rx?.clinic || 'Atlas Health Services';
+  const doctor = rx?.doctorName || rx?.prescribingDoctor || rx?.treatingDoctor?.name || rx?.doctor?.name || 'Dr. Heytham';
+  let clinic = rx?.clinic || rx?.treatingDoctor?.clinic || 'Atlas Health Services';
   if (clinic.toLowerCase().includes('mediluxe') || clinic.toLowerCase().includes('bedaya')) {
     clinic = 'Atlas Health Services';
   }

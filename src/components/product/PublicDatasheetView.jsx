@@ -850,6 +850,29 @@ export default function PublicDatasheetView({
     }
   };
 
+  const handleSelectVariant = useCallback(({ strengthId, formatId, supplierId, strengthName }) => {
+    triggerHaptic('selection');
+    if (supplierId && supplierId !== 'all') {
+      setActiveSupplierId(supplierId);
+    }
+    if (formatId) {
+      setActiveFormatId(formatId);
+    }
+    if (strengthId) {
+      setSelectedStrengthId(strengthId);
+    } else if (strengthName) {
+      const cleanS = String(strengthName).toLowerCase().replace(/[-_\s]+/g, '');
+      const found = sortedStrengths.find(s => {
+        const sc = String(s.name || s.id).toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+      });
+      if (found) {
+        setSelectedStrengthId(found.id);
+      }
+    }
+    toast.success(lang === 'es' ? 'Presentación clínica activa actualizada ✓' : 'Active clinical presentation updated ✓');
+  }, [sortedStrengths, lang]);
+
   const filteredStrengths = useMemo(() => {
     if (activeSupplierId !== 'all' && activeSupplierObj?.formatStrengths) {
       const allowedStrengthIds = activeSupplierObj.formatStrengths[activeFormatId] || [];
@@ -1087,6 +1110,31 @@ export default function PublicDatasheetView({
     }
   }, [dynamicPublicUrl]);
 
+  // 🔗 Reactive Short Monograph URL (Deterministic share link preserving dose, presentation, supplier, batch)
+  const [shortMonographUrl, setShortMonographUrl] = useState('');
+
+  useEffect(() => {
+    if (!dynamicPublicUrl) return;
+    let isMounted = true;
+    fetch('/api/short-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        targetUrl: dynamicPublicUrl,
+        slug,
+        recipient: { type: 'public' }
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (isMounted && data?.shortUrl) {
+          setShortMonographUrl(data.shortUrl);
+        }
+      })
+      .catch(() => {});
+    return () => { isMounted = false; };
+  }, [dynamicPublicUrl, slug]);
+
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
     const targetDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
@@ -1193,8 +1241,10 @@ export default function PublicDatasheetView({
 
   const handleCopyUrl = async () => {
     triggerHaptic('copy');
-    await navigator.clipboard.writeText(dynamicPublicUrl).catch(() => {});
+    const targetUrl = shortMonographUrl || dynamicPublicUrl;
+    await navigator.clipboard.writeText(targetUrl).catch(() => {});
     setCopied(true);
+    toast.success(lang === 'es' ? 'Enlace corto copiado al portapapeles ✓' : 'Short link copied to clipboard ✓');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -1405,6 +1455,7 @@ export default function PublicDatasheetView({
         lang={lang}
         onLangChange={setLang}
         copyUrl={dynamicPublicUrl}
+        shortUrl={shortMonographUrl}
         supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || 'Lotusland'}
         currentSlug={slug}
         inquiryContextType="product"
@@ -1440,9 +1491,11 @@ export default function PublicDatasheetView({
           sortedStrengths={filteredStrengths}
           presentationMatrixRows={matrixRows}
           dynamicPublicUrl={dynamicPublicUrl}
+          shortUrl={shortMonographUrl}
           versionInfo={versionInfo}
           labelQueryString={labelQueryString}
           onFormatChange={handleSelectFormat}
+          onSelectVariant={handleSelectVariant}
         />
       ) : (
         <PublicPageShell>

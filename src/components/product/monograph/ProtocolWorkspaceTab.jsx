@@ -552,6 +552,16 @@ export default function ProtocolWorkspaceTab({
     }
   }, [activeProtocol?.id, activeProtocol?.defaultDoseMg, activeProtocol?.defaultDosesPerWeek, activeProtocol?.durationWeeks]);
 
+  // Synchronize vial / unit strength when active strength changes in parent
+  useEffect(() => {
+    if (selectedStrength?.name) {
+      const match = String(selectedStrength.name).match(/(\d+(\.\d+)?)/);
+      if (match) {
+        setSelectedVialStrength(parseFloat(match[1]));
+      }
+    }
+  }, [selectedStrength?.name, selectedStrength?.id]);
+
   // Expanded stepper items for progressive disclosure in Step 4
   const [expandedSteps, setExpandedSteps] = useState({ 1: true, 2: false, 3: false, 4: false, 5: false, 6: false });
 

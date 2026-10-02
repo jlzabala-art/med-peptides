@@ -158,7 +158,31 @@ export default function PublicUnifiedHeader({
   // Copy link (prefers clean shortUrl for discreet WhatsApp & social sharing)
   const handleCopyLink = async () => {
     triggerHaptic('selection');
-    const targetUrl = shortUrl || copyUrl || (typeof window !== 'undefined' ? window.location.href : '');
+    let effectiveShortUrl = shortUrl;
+    const baseTarget = copyUrl || (typeof window !== 'undefined' ? window.location.href : '');
+
+    // If shortUrl is not yet available, resolve it on-the-fly via API
+    if (!effectiveShortUrl && baseTarget) {
+      try {
+        const res = await fetch('/api/short-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            targetUrl: baseTarget,
+            slug: currentSlug,
+            recipient: { type: 'public' }
+          })
+        });
+        const data = await res.json();
+        if (data?.shortUrl) {
+          effectiveShortUrl = data.shortUrl;
+        }
+      } catch (e) {
+        console.warn('Failed to resolve short URL on the fly:', e);
+      }
+    }
+
+    const targetUrl = effectiveShortUrl || baseTarget;
     if (!targetUrl) return;
 
     try {
@@ -175,7 +199,7 @@ export default function PublicUnifiedHeader({
         document.body.removeChild(textarea);
       }
       setCopied(true);
-      if (shortUrl) {
+      if (effectiveShortUrl) {
         toast.success(lang === 'es' ? 'Enlace corto copiado (sin marcas, ideal para WhatsApp) ✓' : 'Short link copied (clean preview for WhatsApp) ✓');
       } else {
         toast.success(lang === 'es' ? 'Enlace copiado al portapapeles' : 'Link copied to clipboard');
