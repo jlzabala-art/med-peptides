@@ -66,7 +66,10 @@ export const SHIPPING_DESTINATIONS = [
 // ── Administration route keyword map ─────────────────────────────────────────
 const ROUTE_MAP = {
   injectable: ['vial', 'pre-filled pen', 'pen', 'subq'],
+  vial:       ['vial', 'lyophilized', 'powder'],
+  pen:        ['pre-filled pen', 'pen', 'cartridge'],
   nasal:      ['nasal spray', 'nasal', 'spray'],
+  sublingual: ['sublingual', 'drop', 'dropper'],
   oral:       ['capsule', 'capsules', 'tablet', 'oral'],
   topical:    ['topical', 'serum', 'gel', 'cream'],
   longevity:  ['longevity', 'anti-aging', 'regeneration', 'antiaging'],
@@ -596,7 +599,13 @@ export function useSharedCatalogState({
           matchPackaging = p.variants.some(v => {
             const pres = (v.presentation || v.format || '').toLowerCase();
             const vName = (v.name || '').toLowerCase();
-            return pres.includes('capsule') || pres.includes('tablet') || pres.includes('oral') || pres.includes('sublingual') || vName.includes('capsule');
+            return (pres.includes('capsule') || pres.includes('tablet') || pres.includes('oral') || vName.includes('capsule')) && !pres.includes('sublingual');
+          });
+        } else if (packagingMode === 'sublingual') {
+          matchPackaging = p.variants.some(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('sublingual') || pres.includes('dropper') || pres.includes('drop') || vName.includes('sublingual');
           });
         }
 
@@ -665,7 +674,13 @@ export function useSharedCatalogState({
           activeVariants = activeVariants.filter(v => {
             const pres = (v.presentation || v.format || '').toLowerCase();
             const vName = (v.name || '').toLowerCase();
-            return pres.includes('capsule') || pres.includes('tablet') || pres.includes('oral') || pres.includes('sublingual') || vName.includes('capsule');
+            return (pres.includes('capsule') || pres.includes('tablet') || pres.includes('oral') || vName.includes('capsule')) && !pres.includes('sublingual');
+          });
+        } else if (packagingMode === 'sublingual') {
+          activeVariants = activeVariants.filter(v => {
+            const pres = (v.presentation || v.format || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            return pres.includes('sublingual') || pres.includes('dropper') || pres.includes('drop') || vName.includes('sublingual');
           });
         }
 

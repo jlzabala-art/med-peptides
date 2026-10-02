@@ -189,6 +189,12 @@ export default function PeptideMonographWorkspace({
                 product={product}
                 slug={slug}
                 effectiveBatch={effectiveBatch}
+                activeFormat={activeFormat}
+                selectedStrength={selectedStrength}
+                availableFormats={availableFormats}
+                sortedStrengths={sortedStrengths}
+                presentationMatrixRows={presentationMatrixRows}
+                supplierName={supplierName}
               />
             )}
 
@@ -396,6 +402,12 @@ export default function PeptideMonographWorkspace({
                   product={product}
                   slug={slug}
                   effectiveBatch={effectiveBatch}
+                  activeFormat={activeFormat}
+                  selectedStrength={selectedStrength}
+                  availableFormats={availableFormats}
+                  sortedStrengths={sortedStrengths}
+                  presentationMatrixRows={presentationMatrixRows}
+                  supplierName={supplierName}
                 />
               </div>
             )}

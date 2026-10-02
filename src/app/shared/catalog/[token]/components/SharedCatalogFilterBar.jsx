@@ -39,9 +39,12 @@ export default function SharedCatalogFilterBar({
 }) {
   const ROUTE_LABELS = {
     injectable: { label: 'Injectable / SubQ', icon: '💉' },
+    vial:       { label: 'Lyophilized Vials', icon: '💉' },
+    pen:        { label: 'Pre-filled Pens', icon: '🖊️' },
     nasal:      { label: 'Nasal Spray', icon: '👃' },
+    sublingual: { label: 'Sublingual Drops', icon: '💧' },
     oral:       { label: 'Oral / Capsules', icon: '💊' },
-    topical:    { label: 'Topical / Hair', icon: '💧' },
+    topical:    { label: 'Topical / Hair', icon: '🧴' },
   };
 
   const FDA_LABELS = {
@@ -73,14 +76,15 @@ export default function SharedCatalogFilterBar({
 
   const formatButtonLabel = () => {
     if (dosageFilter === 'high_dose') return 'High Dose (≥10mg)';
-    if (packagingMode === 'vials') return 'Lyophilized Vials';
-    if (packagingMode === 'pens') return 'Pens & Cartridges';
-    if (packagingMode === 'sprays') return 'Nasal Sprays';
-    if (packagingMode === 'oral') return 'Oral & Sublingual';
-    if (packagingMode === 'kits') return '10-Vial Kits';
+    if (packagingMode === 'vials') return '💉 Lyophilized Vials';
+    if (packagingMode === 'pens') return '🖊️ Pre-filled Pens';
+    if (packagingMode === 'sprays') return '👃 Nasal Sprays';
+    if (packagingMode === 'sublingual') return '💧 Sublingual Droppers';
+    if (packagingMode === 'oral') return '💊 Oral Capsules / Tablets';
+    if (packagingMode === 'kits') return '📦 10-Vial Kits';
     if (packagingMode === 'units') return 'Single Vials';
     if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
-      return ROUTE_LABELS[routeFilter].label;
+      return `${ROUTE_LABELS[routeFilter].icon} ${ROUTE_LABELS[routeFilter].label}`;
     }
     return 'All Formats';
   };
@@ -199,7 +203,8 @@ export default function SharedCatalogFilterBar({
                   { id: 'vials', label: '💉 Lyophilized Vials', action: () => setPackagingMode(packagingMode === 'vials' ? 'all' : 'vials') },
                   { id: 'pens', label: '🖊️ Pre-filled Pens', action: () => setPackagingMode(packagingMode === 'pens' ? 'all' : 'pens') },
                   { id: 'sprays', label: '👃 Nasal Sprays', action: () => setPackagingMode(packagingMode === 'sprays' ? 'all' : 'sprays') },
-                  { id: 'oral', label: '💊 Oral Formulations', action: () => setPackagingMode(packagingMode === 'oral' ? 'all' : 'oral') },
+                  { id: 'oral', label: '💊 Oral Capsules / Tablets', action: () => setPackagingMode(packagingMode === 'oral' ? 'all' : 'oral') },
+                  { id: 'sublingual', label: '💧 Sublingual Droppers', action: () => setPackagingMode(packagingMode === 'sublingual' ? 'all' : 'sublingual') },
                   { id: 'kits', label: '📦 10-Vial Kits', action: () => setPackagingMode(packagingMode === 'kits' ? 'all' : 'kits') },
                 ].map(item => (
                   <button
@@ -400,7 +405,15 @@ export default function SharedCatalogFilterBar({
               fontSize: '0.74rem'
             }}>
               <Package size={12} color="#15803d" />
-              <span>Format: {packagingMode}</span>
+              <span>Format: {
+                packagingMode === 'vials' ? 'Lyophilized Vials' :
+                packagingMode === 'pens' ? 'Pre-filled Pens' :
+                packagingMode === 'sprays' ? 'Nasal Sprays' :
+                packagingMode === 'sublingual' ? 'Sublingual Droppers' :
+                packagingMode === 'oral' ? 'Oral Capsules' :
+                packagingMode === 'kits' ? '10-Vial Kits' :
+                packagingMode
+              }</span>
               <button
                 type="button"
                 onClick={() => setPackagingMode('all')}
