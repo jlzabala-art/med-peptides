@@ -236,6 +236,8 @@ export default function OverviewTab({
           const isVialSpray = vFmt.includes('spray') || vFmt.includes('nasal');
           const isVialSublingual = vFmt.includes('sublingual') || vFmt.includes('drop');
           const isVialPen = vFmt.includes('pen') || vFmt.includes('cartridge');
+          const sprayVol = String(v.fill_volume || v.pack_size || v.name || v.id || '').match(/(\d+(?:\.\d+)?)\s*m[lL]/i)?.[1] || (String(v.dosage || v.dose).includes('30') ? '4' : '10');
+          const sprayCount = Math.round(Number(sprayVol) / 0.1);
           return {
             id: v.id || `var-${idx}`,
             formatId: v.format || v.presentation,
@@ -244,7 +246,7 @@ export default function OverviewTab({
             strengthMg: v.dosage || v.dose || v.strength || 'Standard',
             format: isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
             recommendedDiluent: isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
-            concentrationMgMl: isVialSpray ? '10 mL (~100 sprays)' : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
+            concentrationMgMl: isVialSpray ? `${sprayVol} mL (~${sprayCount} sprays)` : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
             route: isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous',
             isCurrentlyActive: false
           };

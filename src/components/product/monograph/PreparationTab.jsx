@@ -87,7 +87,7 @@ export default function PreparationTab({
         };
       });
     }
-    if (isSpray) return [{ id: '30mg', name: '30 mg (10 mL)', mg: 30 }, { id: '75mg', name: '75 mg (10 mL)', mg: 75 }];
+    if (isSpray) return [{ id: '30mg', name: '30 mg (4 mL)', mg: 30 }, { id: '75mg', name: '75 mg (10 mL)', mg: 75 }];
     if (isPen) return [{ id: '6mg', name: '6 mg (3 mL)', mg: 6 }, { id: '10mg', name: '10 mg (3 mL)', mg: 10 }];
     if (isSublingual) return [{ id: '30mg', name: '30 mg (30 mL)', mg: 30 }, { id: '60mg', name: '60 mg (30 mL)', mg: 60 }];
     if (isOral) return [{ id: '250mcg', name: '250 mcg', mg: 0.25 }, { id: '500mcg', name: '500 mcg', mg: 0.5 }, { id: '5mg', name: '5 mg', mg: 5 }];
@@ -146,8 +146,25 @@ export default function PreparationTab({
 
   // Calculations for Nasal Spray (0.1 mL per spray, bottle 10 mL or 4 mL)
   const sprayCalc = useMemo(() => {
-    const is4ml = String(product.name || '').toLowerCase().includes('4ml') || String(selectedStrength?.name || '').toLowerCase().includes('4ml');
-    const bottleVolumeMl = is4ml ? 4.0 : 10.0;
+    let bottleVolumeMl = 10.0;
+    const volMatch = String(
+      selectedStrength?.fill_volume || 
+      selectedStrength?.pack_size || 
+      selectedStrength?.volume || 
+      selectedStrength?.name || 
+      selectedStrength?.id || 
+      product?.name || 
+      ''
+    ).match(/(\d+(?:\.\d+)?)\s*m[lL]/i);
+
+    if (volMatch) {
+      bottleVolumeMl = parseFloat(volMatch[1]);
+    } else if (selectedSprayStrength === 30) {
+      bottleVolumeMl = 4.0;
+    } else if (selectedSprayStrength === 75) {
+      bottleVolumeMl = 10.0;
+    }
+
     const concentration = selectedSprayStrength / bottleVolumeMl;
     const dosePerSprayMg = concentration * 0.1;
     const totalDoseDeliveredMg = dosePerSprayMg * numSprays;

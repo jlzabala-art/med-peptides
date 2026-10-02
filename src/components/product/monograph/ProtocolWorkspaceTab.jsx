@@ -636,10 +636,10 @@ export default function ProtocolWorkspaceTab({
       onAddToCart?.({
         id: `${product.id || 'selank'}-${procCalc.unitStrengthMg || 30}mg-nasal`,
         productId: product.id || 'selank',
-        name: `${product.name || 'Selank'} ${procCalc.unitStrengthMg || 30} mg Nasal Spray (10 mL)`,
+        name: `${product.name || 'Selank'} ${procCalc.unitStrengthMg || 30} mg Nasal Spray (${procCalc.containerVolumeMl || (procCalc.unitStrengthMg === 30 ? 4 : 10)} mL)`,
         dosage: `${procCalc.unitStrengthMg || 30} mg`,
         format: 'nasal_spray',
-        price: product.price || 48.00
+        price: selectedStrength?.price || product.price || 134.79
       }, procCalc.totalUnitsCount || 1);
     } else if (isPen) {
       onAddToCart?.({
@@ -1570,12 +1570,12 @@ export default function ProtocolWorkspaceTab({
                     </span>
                   </div>
                   <div style={{ fontSize: '0.96rem', fontWeight: 850, color: '#14532d', marginTop: '4px' }}>
-                    {physicianDoseMg <= 0.15 ? '1 Spray (Alternate Nostril Daily)' : '1 Spray Left + 1 Spray Right'}
+                    {procCalc.spraysPerDose <= 1 ? '1 Spray (Alternate Nostril Daily)' : `${Math.ceil(procCalc.spraysPerDose / 2)} Spray Left + ${Math.floor(procCalc.spraysPerDose / 2)} Spray Right`}
                   </div>
                   <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#166534', lineHeight: 1.4 }}>
-                    {physicianDoseMg <= 0.15
-                      ? `Deliver ${formatClinicalDose(physicianDoseMg)} in a single nostril, alternating nostrils every day.`
-                      : `Divide ${formatClinicalDose(physicianDoseMg)} equally into 2 metered sprays (~${formatClinicalDose(physicianDoseMg / 2)} per nostril). Wait 30–60 seconds between nostrils to prevent mucosal saturation and swallowing.`}
+                    {procCalc.spraysPerDose <= 1
+                      ? `Deliver ${formatClinicalDose(physicianDoseMg)} in a single metered puff (${procCalc.dosePerSprayDisplay || '750 mcg'}/actuation), alternating nostrils daily.`
+                      : `Administer ${procCalc.spraysPerDose} metered sprays (~${procCalc.dosePerSprayDisplay || '750 mcg'}/spray) divided between nostrils. Wait 30–60 seconds between actuations to maximize olfactory mucosal absorption and prevent throat runoff.`}
                   </p>
                 </div>
 
@@ -1884,14 +1884,14 @@ export default function ProtocolWorkspaceTab({
                       <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
                         <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Bottle Strength</span>
                         <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#003666' }}>
-                          {procCalc.unitStrengthMg || 30} mg / 10 mL
+                          {procCalc.unitStrengthMg || 30} mg / {procCalc.containerVolumeMl || (procCalc.unitStrengthMg === 30 ? 4 : 10)} mL
                         </div>
                       </div>
 
                       <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
                         <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Actuation Output</span>
                         <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#0284c7' }}>
-                          0.10 mL / puff
+                          0.10 mL / puff ({procCalc.dosePerSprayDisplay || '750 mcg'})
                         </div>
                       </div>
                     </div>
@@ -1902,7 +1902,7 @@ export default function ProtocolWorkspaceTab({
                         {formatClinicalDose(physicianDoseMg)} ({physicianFreqPerWeek}× daily)
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#1e3a8a', marginTop: '4px' }}>
-                        Standard intranasal protocol: {physicianDoseMg <= 0.15 ? '1 metered spray daily (alternate nostrils daily).' : '1 metered spray in each nostril daily (30s interval).'}
+                        Standard intranasal protocol: {procCalc.spraysPerDose <= 1 ? '1 metered spray daily (alternate nostrils daily).' : `${Math.ceil(procCalc.spraysPerDose / 2)} metered spray left + ${Math.floor(procCalc.spraysPerDose / 2)} spray right nostril daily (30s interval).`}
                       </div>
                     </div>
 
@@ -1946,7 +1946,7 @@ export default function ProtocolWorkspaceTab({
                       <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
                         <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Doses per Bottle</span>
                         <div style={{ fontSize: '0.90rem', fontWeight: 850, color: '#0284c7' }}>
-                          ~60–70 Sprays
+                          ~{procCalc.totalSpraysPerBottle || (procCalc.unitStrengthMg === 30 ? 40 : 100)} Sprays
                         </div>
                       </div>
 
@@ -2651,11 +2651,11 @@ export default function ProtocolWorkspaceTab({
                   { label: 'Selected Protocol', value: activeProtocol.name },
                   { label: 'Treatment Duration', value: `${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} ${isNasal ? 'metered sprays' : isPen ? 'injections' : 'administrations'})` },
                   { label: 'Dose per Administration', value: `${formatClinicalDose(physicianDoseMg)} per ${isNasal ? 'intranasal dose' : isPen ? 'SubQ injection (Pen)' : 'SubQ injection'}` },
-                  { label: 'Selected Presentation', value: isNasal ? `${procCalc.unitStrengthMg || 30} mg Nasal Spray Bottle (10 mL)` : isPen ? `${procCalc.unitStrengthMg || 6} mg Multi-Dose Pen (3 mL)` : `${selectedVialStrength} mg Lyophilized Vial (${product.supplierName || 'Verified Laboratory'})` },
+                  { label: 'Selected Presentation', value: isNasal ? `${procCalc.unitStrengthMg || 30} mg Nasal Spray Bottle (${procCalc.containerVolumeMl || (procCalc.unitStrengthMg === 30 ? 4 : 10)} mL)` : isPen ? `${procCalc.unitStrengthMg || 6} mg Multi-Dose Pen (3 mL)` : `${selectedVialStrength} mg Lyophilized Vial (${product.supplierName || 'Verified Laboratory'})` },
                   ...(isNasal ? [
                     { label: 'Delivery Vehicle', value: 'Pre-mixed isotonic nasal saline solution' },
-                    { label: 'Actuator Output', value: '0.10 mL per metered puff (~60-70 total sprays)' },
-                    { label: 'Administration Method', value: physicianDoseMg <= 0.15 ? '1 spray daily (alternate nostrils daily)' : '1 spray left + 1 spray right nostril daily (30s gap)' },
+                    { label: 'Actuator Output', value: `0.10 mL per metered puff (~${procCalc.totalSpraysPerBottle || 40} total sprays, ${procCalc.dosePerSprayDisplay || '750 mcg'}/puff)` },
+                    { label: 'Administration Method', value: procCalc.spraysPerDose <= 1 ? '1 spray daily (alternate nostrils daily)' : `${Math.ceil(procCalc.spraysPerDose / 2)} spray left + ${Math.floor(procCalc.spraysPerDose / 2)} spray right nostril daily (30s gap)` },
                     { label: 'Clinical Technique', value: 'Contralateral cross-hand (aim towards ear, 15° forward tilt)' },
                     { label: 'Chronobiology Window', value: 'Morning / Midday (08:00–13:00)' },
                     { label: 'Storage Condition', value: 'Refrigerated 2°C–8°C once opened (do not freeze)' },

@@ -85,34 +85,73 @@ export function calculateProtocolProcurement({
   // ── NASAL SPRAY PROCUREMENT CALCULATION ──
   if (isNasal) {
     let bottleMg = 30;
-    const strMatch = String(selectedStrength || '').match(/(\d+)/);
+    const strMatch = String(selectedStrength?.name || selectedStrength?.dosage || selectedStrength || '').match(/(\d+)/);
     if (strMatch) {
       const parsed = parseInt(strMatch[1], 10);
-      if (parsed === 30 || parsed === 75) bottleMg = parsed;
+      if (parsed > 0) bottleMg = parsed;
     }
 
-    const bottleCount = Math.max(1, Math.ceil(totalApiRequiredMg / bottleMg));
+    // Determine actual container fill volume (e.g. 4 mL for 30 mg vs 10 mL for 75 mg)
+    let containerVolumeMl = 10;
+    const volMatch = String(
+      selectedStrength?.fill_volume || 
+      selectedStrength?.pack_size || 
+      selectedStrength?.volume || 
+      selectedStrength?.name || 
+      selectedStrength?.id || 
+      ''
+    ).match(/(\d+(?:\.\d+)?)\s*m[lL]/i);
+
+    if (volMatch) {
+      containerVolumeMl = parseFloat(volMatch[1]);
+    } else if (bottleMg === 30) {
+      containerVolumeMl = 4; // Clinical standard for Magenta 30 mg nasal spray
+    } else if (bottleMg === 75) {
+      containerVolumeMl = 10;
+    }
+
+    const actuationVolumeMl = 0.10;
+    const totalSpraysPerBottle = Math.max(10, Math.round(containerVolumeMl / actuationVolumeMl));
+    const concentrationMgPerMl = Number((bottleMg / containerVolumeMl).toFixed(2));
+    const dosePerSprayMg = Number((concentrationMgPerMl * actuationVolumeMl).toFixed(3));
+    const dosePerSprayDisplay = dosePerSprayMg < 1 ? `${Math.round(dosePerSprayMg * 1000)} mcg` : `${dosePerSprayMg.toFixed(2)} mg`;
+
+    // Sprays per dose based on target clinical dose vs potency per actuation
+    const spraysPerDose = Math.max(1, Math.round(dose / Math.max(0.01, dosePerSprayMg)));
+    const totalSpraysRequired = totalAdministrations * spraysPerDose;
+
+    // Must satisfy both API requirements and total physical actuation count
+    const bottlesByApi = Math.ceil(totalApiRequiredMg / bottleMg);
+    const bottlesBySprays = Math.ceil(totalSpraysRequired / totalSpraysPerBottle);
+    const bottleCount = Math.max(1, Math.max(bottlesByApi, bottlesBySprays));
+
     const totalProvidedApiMg = bottleCount * bottleMg;
     const expectedUnusedMg = Number((totalProvidedApiMg - totalApiRequiredMg).toFixed(2));
-    const procurementSummary = `${bottleCount} × ${bottleMg} mg Nasal Spray Bottle${bottleCount > 1 ? 's' : ''} (10 mL)`;
+    const procurementSummary = `${bottleCount} × ${bottleMg} mg Nasal Spray Bottle${bottleCount > 1 ? 's' : ''} (${containerVolumeMl} mL)`;
 
     return {
       durationWeeks: weeks,
       administrationsPerWeek: freq,
       dosePerAdminMg: dose,
       totalAdministrations,
+      totalSpraysRequired,
+      spraysPerDose,
       totalApiRequiredMg,
       formatType: 'nasal_spray',
       unitStrengthMg: bottleMg,
-      containerVolumeMl: 10,
+      containerVolumeMl,
+      totalSpraysPerBottle,
+      concentrationMgPerMl,
+      dosePerSprayMg,
+      dosePerSprayDisplay,
       totalUnitsCount: bottleCount,
       totalProvidedApiMg,
       expectedUnusedMg,
       procurementSummary,
-      recommendedUnits: [{ type: 'nasal_spray', strength: bottleMg, count: bottleCount, volumeMl: 10 }],
+      recommendedUnits: [{ type: 'nasal_spray', strength: bottleMg, count: bottleCount, volumeMl: containerVolumeMl }],
       recommendedVials: [{ strength: bottleMg, count: bottleCount }], // Backward compatibility
       totalVialCount: bottleCount,
-      reasoningText: `${weeks}-week intranasal protocol at ${freq} doses/week (${totalAdministrations} total sprays × ${dose >= 1 ? `${dose} mg` : `${Math.round(dose * 1000)} mcg`}) requires ${totalApiRequiredMg} mg total API. Fulfilled by ${procurementSummary} (${totalProvidedApiMg} mg total supply${expectedUnusedMg > 0 ? `, ${expectedUnusedMg} mg buffer` : ', exact requirement'}). Zero reconstitution required.`
+      reasoningText: `${weeks}-week intranasal protocol at ${freq} doses/week (${totalAdministrations} administrations, ~${totalSpraysRequired} metered puffs × ${dosePerSprayDisplay}) requires ${totalApiRequiredMg} mg total API. Fulfilled by ${procurementSummary} (${totalProvidedApiMg} mg total supply${expectedUnusedMg > 0 ? `, ${expectedUnusedMg} mg buffer` : ', exact requirement'}). Zero reconstitution required.`
     };
   }
 
