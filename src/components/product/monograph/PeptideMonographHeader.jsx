@@ -25,7 +25,8 @@ export default function PeptideMonographHeader({
   onFormatChange,
   onOpenPreviewModal,
   onOpenCoaModal,
-  onOpenShare
+  onOpenShare,
+  dynamicPublicUrl = null
 }) {
   const [copied, setCopied] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
@@ -104,6 +105,7 @@ export default function PeptideMonographHeader({
 
   const handleCopySpec = () => {
     triggerHaptic('light');
+    const resolvedMonographUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${slug}`);
     const text = [
       `Product: ${primaryName}${cleanScientific ? ` (${cleanScientific})` : ''}`,
       `Classification: Peptide • Clinical monograph`,
@@ -113,7 +115,7 @@ export default function PeptideMonographHeader({
       `Verified Purity: ${verifiedPurity}`,
       `Supplier / Laboratory: ${supplier}`,
       `Verified Batch: ${batchCode}`,
-      `URL: https://med-peptides.com/p/${slug}`
+      `URL: ${resolvedMonographUrl}`
     ].filter(Boolean).join('\n');
 
     navigator.clipboard?.writeText(text);

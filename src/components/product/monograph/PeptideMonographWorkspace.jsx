@@ -144,14 +144,16 @@ export default function PeptideMonographWorkspace({
         activeFormat={activeFormat}
         availableFormats={availableFormats}
         sortedStrengths={sortedStrengths}
+        dynamicPublicUrl={dynamicPublicUrl}
         onFormatChange={onFormatChange}
         onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
         onOpenCoaModal={() => setIsCoaModalOpen(true)}
         onOpenShare={() => {
+          const shareTargetUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : '');
           if (navigator.share) {
             navigator.share({
-              title: `${product.canonicalName || 'PT-141'} — Clinical Monograph`,
-              url: window.location.href
+              title: `${product.canonicalName || 'Peptide'} — Clinical Monograph`,
+              url: shareTargetUrl
             }).catch(() => {});
           } else {
             setIsPreviewModalOpen(true);
@@ -173,6 +175,7 @@ export default function PeptideMonographWorkspace({
           slug={slug}
           effectiveBatch={effectiveBatch}
           protocolContext={protocolContext}
+          dynamicPublicUrl={dynamicPublicUrl}
           onOpenCoaModal={() => setIsCoaModalOpen(true)}
         />
 

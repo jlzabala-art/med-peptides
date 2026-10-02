@@ -193,22 +193,7 @@ export default function PublicDatasheetView({
     return isSpainResidency || isUaeCorporateService || isCompoundingService || isPeptideSupplyService || product?.isCorporateService === true || product?.category === 'corporate_services' || product?.type === 'service';
   }, [isSpainResidency, isUaeCorporateService, isCompoundingService, isPeptideSupplyService, product]);
 
-  const [shortMonographUrl, setShortMonographUrl] = useState('');
 
-  useEffect(() => {
-    if (!slug) return;
-    const fullUrl = `https://med-peptides.com/p/${slug}`;
-    fetch('/api/short-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetUrl: fullUrl, entityType: 'datasheet', slug })
-    })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data?.shortUrl) setShortMonographUrl(data.shortUrl);
-      })
-      .catch(() => {});
-  }, [slug]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -1419,7 +1404,7 @@ export default function PublicDatasheetView({
         track="peptides"
         lang={lang}
         onLangChange={setLang}
-        copyUrl={shortMonographUrl || dynamicPublicUrl}
+        copyUrl={dynamicPublicUrl}
         supplierName={supplierName || product?.sourceSupplier || product?.supplierName || product?.supplier || 'Lotusland'}
         currentSlug={slug}
         inquiryContextType="product"

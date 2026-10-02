@@ -268,6 +268,11 @@ export default async function ShortDatasheetPage({ params }) {
   const userAgent = headersList.get('user-agent') || '';
   const isSocialCrawler = /whatsapp|facebookexternalhit|telegrambot|twitterbot|linkedinbot|slackbot|applebot/i.test(userAgent);
 
+  // Modernize legacy URLs: seamlessly route /product/ to /p/ for clinical monograph
+  if (targetUrl && targetUrl.includes('/product/')) {
+    targetUrl = targetUrl.replace('/product/', '/p/');
+  }
+
   if (isSocialCrawler) {
     return (
       <html lang="en">

@@ -853,7 +853,7 @@ export default function PublicPrescriptionIntakeClient() {
       }
 
       setError(cleanMsg);
-      toast.error(cleanMsg, { id: 'ai-intake-step' });
+      // Inline red banner under the scan button provides clean, non-intrusive feedback without top popup toast
     } finally {
       setIsProcessing(false);
       setProcessingStep('');

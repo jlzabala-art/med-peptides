@@ -36,13 +36,14 @@ export default function PeptideMonographTopStrip({
   slug = '',
   effectiveBatch = '',
   protocolContext = null,
-  onOpenCoaModal
+  onOpenCoaModal,
+  dynamicPublicUrl = null
 }) {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   const cleanSlug = slug || product.slug || 'product';
-  const pageUrl = `https://med-peptides.com/p/${cleanSlug}`;
+  const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${cleanSlug}`);
   const isPt141 = cleanSlug.toLowerCase().includes('pt-141') || (product.canonicalName || product.name || '').toLowerCase().includes('pt-141');
 
   const handleCopyUrl = () => {
