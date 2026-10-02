@@ -755,6 +755,7 @@ export default function PublicPrescriptionIntakeClient() {
 
         const normalizedList = await normalizeExtractedPrescriptions(aiData, {
           currentUser: user || null,
+          splitBlocksIntoSeparatePrescriptions: true,
         });
 
         if (!normalizedList || normalizedList.length === 0) {
@@ -826,15 +827,15 @@ export default function PublicPrescriptionIntakeClient() {
 
       setBatchMeta({ batchId, accountManagerPayload, uploadedByPayload });
 
+      // Asynchronously trigger background enrichment for unmapped active ingredients without blocking the user
       if (incompleteApis.length > 0) {
-        setEnrichmentAuditModal({
-          incompleteApis,
-          allNormalized,
-          batchId,
-          accountManagerPayload,
-          uploadedByPayload
+        fetch('/api/prescriptions/enrich-apis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients: incompleteApis })
+        }).catch((enrichErr) => {
+          console.warn('[PublicPrescriptionIntake] Non-blocking enrichment info:', enrichErr?.message);
         });
-        return;
       }
 
       // Transition smoothly into Phase 2 (Verification & Completion)
