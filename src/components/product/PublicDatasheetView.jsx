@@ -3,7 +3,7 @@
 import './PublicDatasheetView.css';
 import './InteractiveReconstitutionGuide.css';
 import './PeptideAnalyticalSpecsCard.css';
-import React, { useState, useEffect, useTransition, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useTransition, useRef, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   FileText, 
