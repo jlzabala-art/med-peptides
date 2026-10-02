@@ -126,16 +126,16 @@ export default function OverviewTab({
       render: (row) => <span style={{ color: '#475569', fontWeight: 600 }}>{row.format}</span>
     },
     {
-      header: 'Recommended Diluent / Vehicle',
+      header: 'Vehicle / Diluent',
       field: 'recommendedDiluent',
       width: '24%',
       render: (row) => <span style={{ color: '#0284c7', fontWeight: 700 }}>{row.recommendedDiluent}</span>
     },
     {
-      header: 'Resulting Concentration',
+      header: 'Concentration / Volume',
       field: 'concentrationMgMl',
       width: '18%',
-      render: (row) => <span style={{ color: '#166534', fontWeight: 800, fontFamily: 'monospace' }}>{row.concentrationMgMl}</span>
+      render: (row) => <span style={{ color: '#003666', fontWeight: 750 }}>{row.concentrationMgMl}</span>
     },
     {
       header: 'Route & Delivery',
@@ -207,6 +207,14 @@ export default function OverviewTab({
           route: 'Subcutaneous Injection',
           isCurrentlyActive: false
         }));
+
+  const hasVials = useMemo(() => {
+    return presentationData.some(r => {
+      const f = String(r.formatId || r.format || '').toLowerCase();
+      return f.includes('vial') || (!f.includes('pen') && !f.includes('spray') && !f.includes('sublingual') && !f.includes('oral'));
+    });
+  }, [presentationData]);
+  const allAreReadyToUse = presentationData.length > 0 && !hasVials;
 
   const filteredPresentationData = useMemo(() => {
     if (formatFilter === 'all') return presentationData;
@@ -316,7 +324,7 @@ export default function OverviewTab({
         </div>
       </section>
 
-      {/* ── B. Available Presentations: ONE Compact Table ── */}
+      {/* ── B. Available Presentations: ONE Compact Table (GCP Context-Aware Standard) ── */}
       <section style={{
         background: '#ffffff',
         border: '1px solid #e2e8f0',
@@ -343,101 +351,126 @@ export default function OverviewTab({
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
-              B. Available Presentations & Reconstitution Matrix
+              {allAreReadyToUse ? 'B. Available Formulations & Delivery Dosimetry' : 'B. Available Presentations & Reconstitution Matrix'}
             </h2>
             <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#64748b' }}>
-              Standard reconstitution parameters targeting standard 5.0 mg/mL clinical concentration.
+              {allAreReadyToUse 
+                ? 'Pre-formulated ready-to-use clinical presentations with calibrated delivery mechanisms.'
+                : 'Standard reconstitution parameters targeting standard 5.0 mg/mL clinical concentration.'}
             </p>
           </div>
 
           <span style={{
             fontSize: '0.70rem',
             fontWeight: 700,
-            background: '#f0fdf4',
-            color: '#166534',
-            border: '1px solid #bbf7d0',
+            background: allAreReadyToUse ? '#eff6ff' : '#f0fdf4',
+            color: allAreReadyToUse ? '#1e40af' : '#166534',
+            border: allAreReadyToUse ? '1px solid #bfdbfe' : '1px solid #bbf7d0',
             padding: '2px 8px',
             borderRadius: '4px'
           }}>
-            ISO 11137 Sterile Lyophilized
+            {allAreReadyToUse ? 'Pre-Formulated Sterile Solution' : 'ISO 11137 Sterile Lyophilized'}
           </span>
         </div>
 
-        {/* Route / Presentation Segmented Filter Bar */}
+        {/* Route / Presentation Fluid Segmented Filter Bar (GCP Standard) */}
         {availableFormats && availableFormats.length > 1 && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
             marginBottom: '1rem',
-            padding: '8px 12px',
-            background: '#f8fafc',
+            padding: '4px 6px',
+            background: '#f1f5f9',
             border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            flexWrap: 'wrap'
+            borderRadius: '8px'
           }}>
-            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '4px' }}>
-              Filter By Route:
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setFormatFilter('all');
-              }}
-              style={{
-                background: formatFilter === 'all' ? '#003666' : '#ffffff',
-                color: formatFilter === 'all' ? '#ffffff' : '#334155',
-                border: formatFilter === 'all' ? '1px solid #003666' : '1px solid #cbd5e1',
-                borderRadius: '4px',
-                padding: '3px 9px',
-                fontSize: '0.72rem',
-                fontWeight: formatFilter === 'all' ? 800 : 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              All Formats ({presentationData.length})
-            </button>
-            {availableFormats.map(fmt => {
-              const fId = fmt.id;
-              const isSelected = formatFilter === fId;
-              const isSpray = fId.includes('spray') || fId.includes('nasal');
-              const isPen = fId.includes('pen') || fId.includes('cartridge');
-              const isVial = fId.includes('vial');
-              const count = presentationData.filter(r => {
-                const rf = String(r.formatId || r.format || '').toLowerCase();
-                return rf.includes(fId.toLowerCase()) || fId.toLowerCase().includes(rf);
-              }).length;
-              return (
-                <button
-                  key={fId}
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('selection');
-                    setFormatFilter(fId);
-                  }}
-                  style={{
-                    background: isSelected ? '#003666' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#334155',
-                    border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
-                    borderRadius: '4px',
-                    padding: '3px 9px',
-                    fontSize: '0.72rem',
-                    fontWeight: isSelected ? 800 : 600,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <span>{isSpray ? '👃' : isPen ? '💉' : isVial ? '🧪' : '💊'}</span>
-                  <span>{fmt.name || fId}</span>
-                  {count > 0 && <span style={{ opacity: 0.75, fontSize: '0.66rem' }}>({count})</span>}
-                </button>
-              );
-            })}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setFormatFilter('all');
+                }}
+                style={{
+                  flex: '1 1 auto',
+                  minWidth: 'fit-content',
+                  whiteSpace: 'nowrap',
+                  background: formatFilter === 'all' ? '#003666' : '#ffffff',
+                  color: formatFilter === 'all' ? '#ffffff' : '#334155',
+                  border: formatFilter === 'all' ? '1px solid #003666' : '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  fontSize: '0.74rem',
+                  fontWeight: formatFilter === 'all' ? 800 : 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: formatFilter === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                }}
+              >
+                All Formats ({presentationData.length})
+              </button>
+              {availableFormats.map(fmt => {
+                const fId = fmt.id;
+                const isSelected = formatFilter === fId;
+                const isSpray = fId.includes('spray') || fId.includes('nasal');
+                const isPen = fId.includes('pen') || fId.includes('cartridge');
+                const isVial = fId.includes('vial');
+                const count = presentationData.filter(r => {
+                  const rf = String(r.formatId || r.format || '').toLowerCase();
+                  return rf.includes(fId.toLowerCase()) || fId.toLowerCase().includes(rf);
+                }).length;
+                return (
+                  <button
+                    key={fId}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setFormatFilter(fId);
+                    }}
+                    style={{
+                      flex: '1 1 auto',
+                      minWidth: 'fit-content',
+                      whiteSpace: 'nowrap',
+                      background: isSelected ? '#003666' : '#ffffff',
+                      color: isSelected ? '#ffffff' : '#334155',
+                      border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      fontSize: '0.74rem',
+                      fontWeight: isSelected ? 800 : 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
+                      transition: 'all 0.15s ease',
+                      boxShadow: isSelected ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                    }}
+                  >
+                    <span>{isSpray ? '👃' : isPen ? '💉' : isVial ? '🧪' : '💊'}</span>
+                    <span>{fmt.name || fId}</span>
+                    {count > 0 && (
+                      <span style={{
+                        opacity: isSelected ? 0.95 : 0.75,
+                        fontSize: '0.68rem',
+                        background: isSelected ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+                        color: isSelected ? '#ffffff' : '#475569',
+                        padding: '1px 5px',
+                        borderRadius: '10px',
+                        fontWeight: 700
+                      }}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 

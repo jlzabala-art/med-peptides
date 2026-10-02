@@ -143,29 +143,30 @@
   letter-spacing: 0.02em;
 }
 
-/* Clinical AI Button */
+/* Clinical AI Button — Google Cloud Secondary Tonal Action Standard */
 .public-sticky-action-bar__ai-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, #0f172a 0%, #002244 100%);
-  color: #ffffff;
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: #eff6ff;
+  color: #003666;
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 54, 102, 0.05);
 }
 
 .public-sticky-action-bar__ai-btn:hover {
-  background: linear-gradient(135deg, #0f172a 0%, #003666 100%);
-  border-color: #38bdf8;
-  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #002244;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
   transform: translateY(-1px);
 }
 
@@ -174,7 +175,7 @@
 }
 
 .public-sticky-action-bar__sparkle-icon {
-  color: #38bdf8;
+  color: #0284c7;
   flex-shrink: 0;
   animation: pulse-sparkle 3s ease-in-out infinite;
 }
@@ -187,7 +188,7 @@
   50% {
     transform: scale(1.15);
     opacity: 1;
-    filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+    filter: drop-shadow(0 0 3px rgba(2, 132, 199, 0.5));
   }
 }
 
@@ -195,14 +196,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(56, 189, 248, 0.16);
-  color: #38bdf8;
+  background: #dbeafe;
+  color: #1e40af;
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 750;
   padding: 1px 6px;
   border-radius: 999px;
   letter-spacing: 0.02em;
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  border: 1px solid #bfdbfe;
 }
 
 /* Inquire CTA Button */
