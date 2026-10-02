@@ -48,6 +48,12 @@ export const KNOWN_CANONICAL_PEPTIDES = {
     aliases: ['cagrisema', 'cagrilintide + semaglutide', 'cagrilintide + semaglutide (cagrisema)'],
     category: 'Peptide Blend'
   },
+  'semax-selank': {
+    canonicalKey: 'semax-selank',
+    canonicalName: 'Semax + Selank',
+    aliases: ['semax + selank', 'semax/selank', 'semax selank', 'semax-selank', 'semax and selank'],
+    category: 'Peptide Blend'
+  },
 
   // Single Peptides
   'bpc-157': {
@@ -303,6 +309,14 @@ export function deriveCanonicalIdentity(product = {}) {
     return {
       canonicalKey: 'bpc-157-tb-500',
       canonicalName: KNOWN_CANONICAL_PEPTIDES['bpc-157-tb-500'].canonicalName,
+      isRecognized: true
+    };
+  }
+
+  if ((lower.includes('semax') && lower.includes('selank')) || lower === 'semax-selank' || lower === 'semax_selank') {
+    return {
+      canonicalKey: 'semax-selank',
+      canonicalName: KNOWN_CANONICAL_PEPTIDES['semax-selank'].canonicalName,
       isRecognized: true
     };
   }
