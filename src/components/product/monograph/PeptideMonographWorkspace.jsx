@@ -45,7 +45,8 @@ export default function PeptideMonographWorkspace({
   presentationMatrixRows = [],
   dynamicPublicUrl,
   versionInfo,
-  labelQueryString
+  labelQueryString,
+  onFormatChange
 }) {
   const searchParams = useSearchParams();
 
@@ -143,6 +144,7 @@ export default function PeptideMonographWorkspace({
         activeFormat={activeFormat}
         availableFormats={availableFormats}
         sortedStrengths={sortedStrengths}
+        onFormatChange={onFormatChange}
         onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
         onOpenCoaModal={() => setIsCoaModalOpen(true)}
         onOpenShare={() => {
@@ -180,6 +182,9 @@ export default function PeptideMonographWorkspace({
               <OverviewTab
                 product={product}
                 presentationMatrixRows={presentationMatrixRows}
+                activeFormat={activeFormat}
+                availableFormats={availableFormats}
+                onFormatChange={onFormatChange}
                 onNavigateToProtocols={() => handleTabChange('protocols')}
               />
             )}
@@ -282,6 +287,9 @@ export default function PeptideMonographWorkspace({
                 <OverviewTab
                   product={product}
                   presentationMatrixRows={presentationMatrixRows}
+                  activeFormat={activeFormat}
+                  availableFormats={availableFormats}
+                  onFormatChange={onFormatChange}
                   onNavigateToProtocols={() => handleTabChange('protocols')}
                 />
               </div>

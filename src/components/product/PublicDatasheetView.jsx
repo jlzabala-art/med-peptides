@@ -855,6 +855,16 @@ export default function PublicDatasheetView({
   const activeFormat = availableFormats.find(f => f.id === activeFormatId) || availableFormats[0];
   const activeFormatStrengthIds = Array.isArray(activeFormat?.strengths) ? activeFormat.strengths : [];
 
+  const handleSelectFormat = (formatId) => {
+    setActiveFormatId(formatId);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('presentation', formatId);
+      url.searchParams.delete('dose');
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
   const filteredStrengths = useMemo(() => {
     if (activeSupplierId !== 'all' && activeSupplierObj?.formatStrengths) {
       const allowedStrengthIds = activeSupplierObj.formatStrengths[activeFormatId] || [];
@@ -1447,6 +1457,7 @@ export default function PublicDatasheetView({
           dynamicPublicUrl={dynamicPublicUrl}
           versionInfo={versionInfo}
           labelQueryString={labelQueryString}
+          onFormatChange={handleSelectFormat}
         />
       ) : (
         <PublicPageShell>

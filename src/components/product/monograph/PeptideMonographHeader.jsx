@@ -22,6 +22,7 @@ export default function PeptideMonographHeader({
   activeFormat = null,
   availableFormats = [],
   sortedStrengths = [],
+  onFormatChange,
   onOpenPreviewModal,
   onOpenCoaModal,
   onOpenShare
@@ -290,10 +291,54 @@ export default function PeptideMonographHeader({
         {/* Row 2: Unified Google Cloud Resource Summary Panel (No Ragged Chips) */}
         <div className="pds-header-summary-panel">
           <div className="pds-summary-panel-grid">
-            {/* Field 1: Presentation */}
+            {/* Field 1: Presentation (Interactive Segmented Switcher if multi-format) */}
             <div className="pds-summary-cell">
               <span className="pds-summary-label">Presentation</span>
-              <strong className="pds-summary-value">{presentation}</strong>
+              {availableFormats && availableFormats.length > 1 ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
+                  {availableFormats.map(fmt => {
+                    const fmtId = fmt.id;
+                    const isActive = fmtId === (activeFormat?.id || activeFormat);
+                    const isFmtSpray = fmtId.includes('spray') || fmtId.includes('nasal');
+                    const isFmtPen = fmtId.includes('pen') || fmtId.includes('cartridge');
+                    const isFmtVial = fmtId.includes('vial');
+                    const shortLabel = isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : isFmtVial ? 'Lyophilized Vial' : (fmt.name || fmtId);
+                    return (
+                      <button
+                        key={fmtId}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          triggerHaptic('selection');
+                          onFormatChange?.(fmtId);
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          padding: '2px 7px',
+                          borderRadius: '4px',
+                          fontSize: '0.70rem',
+                          fontWeight: isActive ? 800 : 600,
+                          border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
+                          background: isActive ? '#003666' : '#ffffff',
+                          color: isActive ? '#ffffff' : '#475569',
+                          cursor: 'pointer',
+                          touchAction: 'manipulation',
+                          transition: 'all 0.15s ease',
+                          boxShadow: isActive ? '0 1px 2px rgba(0, 54, 102, 0.2)' : 'none'
+                        }}
+                        title={`Switch view to ${shortLabel}`}
+                      >
+                        <span style={{ fontSize: '0.75rem' }}>{isFmtSpray ? '👃' : isFmtPen ? '💉' : '🧪'}</span>
+                        <span>{shortLabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <strong className="pds-summary-value">{presentation}</strong>
+              )}
             </div>
 
             {/* Field 2: Strengths */}

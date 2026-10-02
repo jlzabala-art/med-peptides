@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowRight, Target, ShieldCheck, Activity, Clock, Syringe, Info, Sparkles } from '@/lib/icons';
 import DataTable from '@/components/ui/DataTable';
 import { STANDARD_PRESENTATIONS } from './monographCalculationEngine';
 import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
+import { triggerHaptic } from '@/utils/haptics';
 
 /**
  * OverviewTab
@@ -13,12 +14,15 @@ import { getFdaPeptideStatus } from '@/data/fdaPeptidesRegistry';
  * Answers: "What is this peptide and what presentations are available?"
  * Components:
  * A. Clinical Identity (Generic, Target/Receptor, Pharmacological summary, FDA reference)
- * B. Available Presentations (ONE compact table)
+ * B. Available Presentations (Multi-format segmented matrix with Route badging)
  * C. Key Clinical Considerations (Concise; deep literature deferred to References)
  */
 export default function OverviewTab({
   product = {},
   presentationMatrixRows = [],
+  activeFormat = null,
+  availableFormats = [],
+  onFormatChange,
   onNavigateToProtocols
 }) {
   const isPt141 = (product.slug || product.canonicalName || product.name || '').toLowerCase().includes('pt-141') || (product.slug || '').toLowerCase().includes('pt141');
@@ -82,6 +86,8 @@ export default function OverviewTab({
     }
   ];
 
+  const [formatFilter, setFormatFilter] = useState('all');
+
   const presentationColumns = [
     {
       header: 'Strength',
@@ -89,17 +95,34 @@ export default function OverviewTab({
       width: '20%',
       render: (row) => {
         const val = String(row.strengthMg || '');
+        const displayDose = val.toLowerCase().includes('mg') || val.toLowerCase().includes('mcg') || val.toLowerCase().includes('g') ? val : `${val} mg`;
         return (
-          <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
-            {val.toLowerCase().includes('mg') || val.toLowerCase().includes('mcg') || val.toLowerCase().includes('g') ? val : `${val} mg`}
-          </span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontWeight: 850, color: '#003666', fontFamily: 'monospace', fontSize: '0.90rem' }}>
+              {displayDose}
+            </span>
+            {row.isCurrentlyActive && (
+              <span style={{
+                background: '#ecfdf5',
+                color: '#065f46',
+                border: '1px solid #a7f3d0',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                fontSize: '0.60rem',
+                fontWeight: 800,
+                textTransform: 'uppercase'
+              }}>
+                Active ✓
+              </span>
+            )}
+          </div>
         );
       }
     },
     {
       header: 'Format',
       field: 'format',
-      width: '22%',
+      width: '20%',
       render: (row) => <span style={{ color: '#475569', fontWeight: 600 }}>{row.format}</span>
     },
     {
@@ -111,25 +134,50 @@ export default function OverviewTab({
     {
       header: 'Resulting Concentration',
       field: 'concentrationMgMl',
-      width: '20%',
+      width: '18%',
       render: (row) => <span style={{ color: '#166534', fontWeight: 800, fontFamily: 'monospace' }}>{row.concentrationMgMl}</span>
     },
     {
-      header: 'Route',
+      header: 'Route & Delivery',
       field: 'route',
-      width: '14%',
-      render: (row) => <span style={{ color: '#334155', fontWeight: 600 }}>{row.route}</span>
+      width: '18%',
+      render: (row) => {
+        const r = String(row.route || row.format || '').toLowerCase();
+        const isSpray = r.includes('nasal') || r.includes('spray');
+        const isPen = r.includes('pen');
+        const isVial = r.includes('subcutaneous') && !isPen;
+        const isOral = r.includes('oral') || r.includes('capsule');
+        return (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            fontSize: '0.70rem',
+            fontWeight: 750,
+            background: isSpray ? '#fdf4ff' : isPen ? '#eff6ff' : isOral ? '#fffbeb' : '#f0fdf4',
+            color: isSpray ? '#86198f' : isPen ? '#1d4ed8' : isOral ? '#b45309' : '#166534',
+            border: isSpray ? '1px solid #f0abfc' : isPen ? '1px solid #bfdbfe' : isOral ? '1px solid #fde68a' : '1px solid #bbf7d0',
+            whiteSpace: 'nowrap'
+          }}>
+            {isSpray ? '👃 Intranasal' : isPen ? '💉 SubQ Pen' : isOral ? '💊 Oral Solid' : '🧪 SubQ Injection'}
+          </span>
+        );
+      }
     }
   ];
 
   const presentationData = (presentationMatrixRows && presentationMatrixRows.length > 0)
     ? presentationMatrixRows.map((row, idx) => ({
         id: row.key || `row-${idx}`,
+        formatId: row.formatId,
         strengthMg: row.strengthName,
         format: row.formatName,
         recommendedDiluent: row.diluentText,
         concentrationMgMl: row.concText,
-        route: row.adminText
+        route: row.adminText,
+        isCurrentlyActive: row.isCurrentlyActive
       }))
     : (product.variants && product.variants.length > 0)
       ? product.variants.map((v, idx) => {
@@ -140,21 +188,34 @@ export default function OverviewTab({
           const isVialPen = vFmt.includes('pen') || vFmt.includes('cartridge');
           return {
             id: v.id || `var-${idx}`,
+            formatId: v.format || v.presentation,
             strengthMg: v.dosage || v.dose || v.strength || 'Standard',
             format: isVialSpray ? 'Nasal Spray' : isVialSublingual ? 'Sublingual Dropper' : isVialPen ? 'Pre-filled Pen' : (v.format || 'Lyophilized vial'),
             recommendedDiluent: isVialSpray ? 'Pre-metered Intranasal Solution' : isVialSublingual ? 'Sublingual Vehicle' : isVialPen ? 'Pre-filled Solution' : '1.0–2.0 mL BAC Water',
             concentrationMgMl: isVialSpray ? '10 mL (~100 sprays)' : isVialPen ? '3.0 mL Pen' : '5.0 mg/mL',
-            route: isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous'
+            route: isVialSpray ? 'Intranasal (Needle-Free)' : isVialSublingual ? 'Sublingual' : isVialPen ? 'Subcutaneous Pen' : 'Subcutaneous',
+            isCurrentlyActive: false
           };
         })
       : STANDARD_PRESENTATIONS.map((row) => ({
           id: `strength-${row.strengthMg}`,
-          strengthMg: `${row.strengthMg} mg`,
-          format: row.format,
-          recommendedDiluent: `${row.recommendedBacMl.toFixed(1)} mL BAC Water`,
-          concentrationMgMl: `${row.concentrationMgMl.toFixed(1)} mg/mL`,
-          route: row.route
+          formatId: 'vial',
+          strengthMg: row.strengthMg,
+          format: 'Standard Lyophilized Vial',
+          recommendedDiluent: row.diluentText,
+          concentrationMgMl: row.concText,
+          route: 'Subcutaneous Injection',
+          isCurrentlyActive: false
         }));
+
+  const filteredPresentationData = useMemo(() => {
+    if (formatFilter === 'all') return presentationData;
+    return presentationData.filter(row => {
+      const fId = String(row.formatId || row.format || '').toLowerCase();
+      const target = formatFilter.toLowerCase();
+      return fId.includes(target) || target.includes(fId);
+    });
+  }, [presentationData, formatFilter]);
 
   return (
     <div className="pds-tab-content pds-overview-tab" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -302,10 +363,88 @@ export default function OverviewTab({
           </span>
         </div>
 
+        {/* Route / Presentation Segmented Filter Bar */}
+        {availableFormats && availableFormats.length > 1 && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            marginBottom: '1rem',
+            padding: '8px 12px',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '6px',
+            flexWrap: 'wrap'
+          }}>
+            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: '4px' }}>
+              Filter By Route:
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setFormatFilter('all');
+              }}
+              style={{
+                background: formatFilter === 'all' ? '#003666' : '#ffffff',
+                color: formatFilter === 'all' ? '#ffffff' : '#334155',
+                border: formatFilter === 'all' ? '1px solid #003666' : '1px solid #cbd5e1',
+                borderRadius: '4px',
+                padding: '3px 9px',
+                fontSize: '0.72rem',
+                fontWeight: formatFilter === 'all' ? 800 : 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              All Formats ({presentationData.length})
+            </button>
+            {availableFormats.map(fmt => {
+              const fId = fmt.id;
+              const isSelected = formatFilter === fId;
+              const isSpray = fId.includes('spray') || fId.includes('nasal');
+              const isPen = fId.includes('pen') || fId.includes('cartridge');
+              const isVial = fId.includes('vial');
+              const count = presentationData.filter(r => {
+                const rf = String(r.formatId || r.format || '').toLowerCase();
+                return rf.includes(fId.toLowerCase()) || fId.toLowerCase().includes(rf);
+              }).length;
+              return (
+                <button
+                  key={fId}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setFormatFilter(fId);
+                  }}
+                  style={{
+                    background: isSelected ? '#003666' : '#ffffff',
+                    color: isSelected ? '#ffffff' : '#334155',
+                    border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    padding: '3px 9px',
+                    fontSize: '0.72rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>{isSpray ? '👃' : isPen ? '💉' : isVial ? '🧪' : '💊'}</span>
+                  <span>{fmt.name || fId}</span>
+                  {count > 0 && <span style={{ opacity: 0.75, fontSize: '0.66rem' }}>({count})</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Unified DataTable Component */}
         <DataTable
           columns={presentationColumns}
-          data={presentationData}
+          data={filteredPresentationData}
           keyField="id"
           hideExpandColumn
         />
