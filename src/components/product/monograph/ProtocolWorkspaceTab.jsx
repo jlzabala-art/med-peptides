@@ -409,6 +409,20 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '', isNasal = false
   };
 }
 
+/**
+ * Formats clinical dosages into standardized international units:
+ * Dosages < 1 mg are displayed in micrograms (mcg) to prevent decimal prescription ambiguity,
+ * while dosages >= 1 mg are displayed in milligrams (mg).
+ */
+export function formatClinicalDose(doseMg) {
+  const d = Number(doseMg);
+  if (isNaN(d) || d <= 0) return '0 mg';
+  if (d < 1) {
+    return `${Math.round(d * 1000)} mcg`;
+  }
+  return d % 1 === 0 ? `${d.toFixed(0)} mg` : `${d.toFixed(2)} mg`;
+}
+
 export default function ProtocolWorkspaceTab({
   product = {},
   associatedProtocols = [],
@@ -582,12 +596,13 @@ export default function ProtocolWorkspaceTab({
 
   const handleCopyProcurement = () => {
     triggerHaptic('light');
-    const doseDisplay = physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`;
+    const doseDisplay = formatClinicalDose(physicianDoseMg);
     const text = [
       `PATIENT TREATMENT REQUIREMENTS — ${product.canonicalName || 'Peptide'}`,
       `Protocol: ${activeProtocol.name}`,
       `Duration: ${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} total doses)`,
-      `Dose per administration: ${doseDisplay} (${isNasal ? '1 metered spray' : isPen ? 'SubQ Multi-Dose Pen' : `${reconCalc.injectionVolumeMl} mL / ${reconCalc.syringeUnitsU100} U`})`,
+      `Administration Route: ${isNasal ? 'Intranasal (Metered-dose pump, Ready-to-use, zero reconstitution)' : isPen ? 'Subcutaneous Multi-Dose Pen (31G/32G Nano-Needles)' : 'Subcutaneous Injection (Lyophilized vial + BAC water)'}`,
+      `Dose per administration: ${doseDisplay} (${isNasal ? '1 metered puff per nostril' : isPen ? 'SubQ dial setting' : `${reconCalc.injectionVolumeMl} mL / ${reconCalc.syringeUnitsU100} U`})`,
       `Total API Required: ${procCalc.totalApiRequiredMg} mg`,
       `Recommended Procurement: ${procCalc.procurementSummary}`,
       `Total Supply: ${procCalc.totalProvidedApiMg} mg API (${procCalc.expectedUnusedMg} mg buffer)`,
@@ -1003,7 +1018,7 @@ export default function ProtocolWorkspaceTab({
               fontSize: '0.72rem',
               fontWeight: 700
             }}>
-              {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg / admin` : `${physicianDoseMg} mg / admin`}
+              {formatClinicalDose(physicianDoseMg)} / admin
             </span>
             <span style={{
               background: '#eff6ff',
@@ -1026,7 +1041,7 @@ export default function ProtocolWorkspaceTab({
               <Info size={15} color="#0284c7" />
             </div>
             <div className="pds-protocol-summary-text">
-              <strong style={{ color: '#003666' }}>Clinical Blueprint Overview:</strong> Active blueprint: <strong style={{ color: '#0369a1' }}>{sanitizeProtocolTitle(activeProtocol.name, canonicalName)}</strong> ({physicianDurationWeeks} Weeks, {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`}/admin, {activeProtocol.route || 'Subcutaneous'}). Interactive physician calculator for rapid {isNasal ? 'nasal spray dosing, pump calibration, and clinical supply forecasting' : isPen ? 'pen dial calibration, dose titration, and device procurement' : 'vial reconstitution, syringe calibration, and compounding procurement'}.
+              <strong style={{ color: '#003666' }}>Clinical Blueprint Overview:</strong> Active blueprint: <strong style={{ color: '#0369a1' }}>{sanitizeProtocolTitle(activeProtocol.name, canonicalName)}</strong> ({physicianDurationWeeks} Weeks, {formatClinicalDose(physicianDoseMg)}/admin, {activeProtocol.route || 'Subcutaneous'}). Interactive physician calculator for rapid {isNasal ? 'nasal spray dosing, pump calibration, and clinical supply forecasting' : isPen ? 'pen dial calibration, dose titration, and device procurement' : 'vial reconstitution, syringe calibration, and compounding procurement'}.
             </div>
           </div>
 
@@ -1152,7 +1167,7 @@ export default function ProtocolWorkspaceTab({
               <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '10px 12px', borderRadius: '8px' }}>
                 <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Target Dose</span>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#166534', marginTop: '2px' }}>
-                  {activeProtocol.defaultDoseMg < 1 ? `${Math.round(activeProtocol.defaultDoseMg * 1000)} mcg` : `${activeProtocol.defaultDoseMg} mg`}
+                  {formatClinicalDose(activeProtocol.defaultDoseMg)}
                 </div>
               </div>
 
@@ -1163,6 +1178,55 @@ export default function ProtocolWorkspaceTab({
                 </div>
               </div>
             </div>
+
+            {/* Nose-to-Brain Transcribiform Pharmacokinetic Advantage (Nasal Spray) */}
+            {isNasal && (
+              <div style={{
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                padding: '12px 14px',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  background: '#dcfce7',
+                  border: '1px solid #86efac',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#166534',
+                  flexShrink: 0
+                }}>
+                  <Sparkles size={17} />
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 850, color: '#14532d' }}>
+                      Pharmacokinetic Advantage: Direct Transcribiform Nose-to-Brain Delivery
+                    </span>
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 800,
+                      background: '#dcfce7',
+                      color: '#166534',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid #86efac'
+                    }}>
+                      Bypasses Blood-Brain Barrier (BBB)
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#166534', lineHeight: 1.45 }}>
+                    Intranasal atomization delivers {canonicalName} directly along the olfactory and trigeminal nerve fibers crossing the lamina cribrosa into cerebrospinal fluid (CSF) and limbic/hippocampal structures. Peak neural concentration occurs within 15–30 minutes without hepatic first-pass degradation or systemic peripheral side effects.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Protocol Phases Roadmap */}
             <div>
@@ -1189,7 +1253,7 @@ export default function ProtocolWorkspaceTab({
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span style={{ fontSize: '0.76rem', fontWeight: 750, color: '#166534' }}>
-                        {ph.doseMg < 1 ? `${Math.round(ph.doseMg * 1000)} mcg` : `${ph.doseMg} mg`}
+                        {formatClinicalDose(ph.doseMg)}
                       </span>
                       <span style={{ fontSize: '0.72rem', color: '#64748b' }}>• {ph.frequency}</span>
                     </div>
@@ -1328,7 +1392,7 @@ export default function ProtocolWorkspaceTab({
                   <label style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
                     Target Dose per Admin
                   </label>
-                  <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Default: {activeProtocol.defaultDoseMg} mg</span>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b' }}>Default: {formatClinicalDose(activeProtocol.defaultDoseMg)}</span>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {availableDoseSteps.map(d => (
@@ -1350,7 +1414,7 @@ export default function ProtocolWorkspaceTab({
                         cursor: 'pointer'
                       }}
                     >
-                      {d >= 10 ? d.toFixed(0) : d >= 1 ? (d % 1 === 0 ? d.toFixed(0) : d.toFixed(2)) : d.toFixed(2)} mg {d === activeProtocol.defaultDoseMg ? '(Std)' : ''}
+                      {formatClinicalDose(d)} {d === activeProtocol.defaultDoseMg ? '(Std)' : ''}
                     </button>
                   ))}
                 </div>
@@ -1455,7 +1519,7 @@ export default function ProtocolWorkspaceTab({
                   >
                     <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700 }}>W{i + 1}</div>
                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', marginTop: '2px' }}>
-                      {physicianDoseMg} mg
+                      {formatClinicalDose(physicianDoseMg)}
                     </div>
                     <div style={{ fontSize: '0.65rem', color: '#0284c7', marginTop: '1px' }}>
                       {physicianFreqPerWeek}×
@@ -1464,6 +1528,79 @@ export default function ProtocolWorkspaceTab({
                 ))}
               </div>
             </div>
+
+            {/* Nasal Dosimetry per Nostril & Circadian Timing (Only for Intranasal Spray) */}
+            {isNasal && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '0.85rem'
+              }}>
+                {/* Nostril Division */}
+                <div style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '12px 14px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', color: '#166534' }}>
+                      Intranasal Dosimetry per Nostril
+                    </span>
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 800,
+                      background: '#dcfce7',
+                      color: '#15803d',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid #86efac'
+                    }}>
+                      0.1 mL Metered Pump
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.96rem', fontWeight: 850, color: '#14532d', marginTop: '4px' }}>
+                    {physicianDoseMg <= 0.15 ? '1 Spray (Alternate Nostril Daily)' : '1 Spray Left + 1 Spray Right'}
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#166534', lineHeight: 1.4 }}>
+                    {physicianDoseMg <= 0.15
+                      ? `Deliver ${formatClinicalDose(physicianDoseMg)} in a single nostril, alternating nostrils every day.`
+                      : `Divide ${formatClinicalDose(physicianDoseMg)} equally into 2 metered sprays (~${formatClinicalDose(physicianDoseMg / 2)} per nostril). Wait 30–60 seconds between nostrils to prevent mucosal saturation and swallowing.`}
+                  </p>
+                </div>
+
+                {/* Cronobiology & Administration Window */}
+                <div style={{
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '8px',
+                  padding: '12px 14px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', color: '#1e40af' }}>
+                      Optimal Chronobiology Window
+                    </span>
+                    <span style={{
+                      fontSize: '0.66rem',
+                      fontWeight: 800,
+                      background: '#dbeafe',
+                      color: '#1d4ed8',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid #93c5fd'
+                    }}>
+                      Circadian Peak
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.96rem', fontWeight: 850, color: '#003666', marginTop: '4px' }}>
+                    Morning to Midday (08:00 – 13:00)
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem', color: '#1e3a8a', lineHeight: 1.4 }}>
+                    Administer in the first half of the day to support cognitive focus, anxiolytic resilience, and BDNF synthesis. Avoid late night administration to prevent increased alertness or vivid dream cycles.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div style={{
               display: 'flex',
@@ -1752,10 +1889,10 @@ export default function ProtocolWorkspaceTab({
                     <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '10px 12px' }}>
                       <div style={{ fontSize: '0.70rem', color: '#1e40af', fontWeight: 700, textTransform: 'uppercase' }}>Target Clinical Dose</div>
                       <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#003666', marginTop: '2px' }}>
-                        {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`} ({physicianFreqPerWeek}× daily)
+                        {formatClinicalDose(physicianDoseMg)} ({physicianFreqPerWeek}× daily)
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#1e3a8a', marginTop: '4px' }}>
-                        Standard intranasal protocol: 1 metered spray in each nostril daily.
+                        Standard intranasal protocol: {physicianDoseMg <= 0.15 ? '1 metered spray daily (alternate nostrils daily).' : '1 metered spray in each nostril daily (30s interval).'}
                       </div>
                     </div>
 
@@ -1905,6 +2042,73 @@ export default function ProtocolWorkspaceTab({
                     })}
                   </div>
                 </div>
+
+                {/* Contralateral Technique & Thermal Stability Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '0.85rem'
+                }}>
+                  {/* Contralateral Technique Card */}
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '8px',
+                    padding: '12px 14px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a' }}>
+                        Clinical Technique: Contralateral Administration
+                      </span>
+                      <span style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        background: '#e0f2fe',
+                        color: '#0369a1',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        border: '1px solid #bae6fd'
+                      }}>
+                        Cross-Hand Rule
+                      </span>
+                    </div>
+                    <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.74rem', color: '#334155', lineHeight: 1.45 }}>
+                      <li><strong>Cross Hands:</strong> Use right hand to spray into left nostril, and left hand into right nostril. This mechanically directs the mist outward toward the turbinates and olfactory mucosa, avoiding septal irritation.</li>
+                      <li><strong>Head Position:</strong> Tilt head slightly forward (15° chin-down). <em>Never tilt head backwards</em>, which causes solution to swallow into stomach acid.</li>
+                      <li><strong>Gentle Inhalation:</strong> Breathe in gently through the nose as the pump actuates. Avoid forceful snorting.</li>
+                    </ul>
+                  </div>
+
+                  {/* Thermal Stability & Storage Card */}
+                  <div style={{
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '8px',
+                    padding: '12px 14px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.70rem', fontWeight: 800, textTransform: 'uppercase', color: '#166534' }}>
+                        Thermal Stability & Chain of Custody
+                      </span>
+                      <span style={{
+                        fontSize: '0.64rem',
+                        fontWeight: 800,
+                        background: '#dcfce7',
+                        color: '#15803d',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        border: '1px solid #86efac'
+                      }}>
+                        2°C–8°C Recommended
+                      </span>
+                    </div>
+                    <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.74rem', color: '#14532d', lineHeight: 1.45 }}>
+                      <li><strong>Unopened Storage:</strong> Store in refrigerator at 2°C–8°C away from direct sunlight. Stable until expiration date.</li>
+                      <li><strong>In-Use Viability:</strong> Ambient room temperature (&lt;25°C) stable for up to 30–45 days. Refrigerate to extend integrity up to 60 days.</li>
+                      <li><strong>Do Not Freeze:</strong> Freezing causes ice micro-crystallization that damages the internal gasket and pump calibration.</li>
+                    </ul>
+                  </div>
+                </div>
               </>
             )}
 
@@ -1949,10 +2153,10 @@ export default function ProtocolWorkspaceTab({
                     <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '10px 12px' }}>
                       <div style={{ fontSize: '0.70rem', color: '#1e40af', fontWeight: 700, textTransform: 'uppercase' }}>Target Clinical Dose</div>
                       <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#003666', marginTop: '2px' }}>
-                        {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`} SubQ
+                        {formatClinicalDose(physicianDoseMg)} SubQ
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#1e3a8a', marginTop: '4px' }}>
-                        Rotate dose selector dial to click setting corresponding to {physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`}.
+                        Rotate dose selector dial to click setting corresponding to {formatClinicalDose(physicianDoseMg)}.
                       </div>
                     </div>
 
@@ -2193,7 +2397,7 @@ export default function ProtocolWorkspaceTab({
 
                     <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                       <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 700 }}>Target Clinical Dose:</div>
-                      <strong style={{ fontSize: '0.92rem', color: '#003666' }}>{physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`}</strong>
+                      <strong style={{ fontSize: '0.92rem', color: '#003666' }}>{formatClinicalDose(physicianDoseMg)}</strong>
                     </div>
                   </div>
 
@@ -2436,13 +2640,15 @@ export default function ProtocolWorkspaceTab({
                   { label: 'Active Compound', value: `${product.canonicalName || product.name || 'Peptide'}${product.scientificName ? ` (${product.scientificName})` : ''}` },
                   { label: 'Selected Protocol', value: activeProtocol.name },
                   { label: 'Treatment Duration', value: `${physicianDurationWeeks} Weeks (${procCalc.totalAdministrations} ${isNasal ? 'metered sprays' : isPen ? 'injections' : 'administrations'})` },
-                  { label: 'Dose per Administration', value: `${physicianDoseMg < 1 ? `${Math.round(physicianDoseMg * 1000)} mcg` : `${physicianDoseMg} mg`} per ${isNasal ? 'intranasal puff' : isPen ? 'SubQ injection (Pen)' : 'SubQ injection'}` },
+                  { label: 'Dose per Administration', value: `${formatClinicalDose(physicianDoseMg)} per ${isNasal ? 'intranasal dose' : isPen ? 'SubQ injection (Pen)' : 'SubQ injection'}` },
                   { label: 'Selected Presentation', value: isNasal ? `${procCalc.unitStrengthMg || 30} mg Nasal Spray Bottle (10 mL)` : isPen ? `${procCalc.unitStrengthMg || 6} mg Multi-Dose Pen (3 mL)` : `${selectedVialStrength} mg Lyophilized Vial (${product.supplierName || 'Verified Laboratory'})` },
                   ...(isNasal ? [
                     { label: 'Delivery Vehicle', value: 'Pre-mixed isotonic nasal saline solution' },
                     { label: 'Actuator Output', value: '0.10 mL per metered puff (~60-70 total sprays)' },
-                    { label: 'Administration Method', value: '1 spray in each nostril daily' },
-                    { label: 'Storage Condition', value: 'Refrigerated 2°C–8°C once opened' },
+                    { label: 'Administration Method', value: physicianDoseMg <= 0.15 ? '1 spray daily (alternate nostrils daily)' : '1 spray left + 1 spray right nostril daily (30s gap)' },
+                    { label: 'Clinical Technique', value: 'Contralateral cross-hand (aim towards ear, 15° forward tilt)' },
+                    { label: 'Chronobiology Window', value: 'Morning / Midday (08:00–13:00)' },
+                    { label: 'Storage Condition', value: 'Refrigerated 2°C–8°C once opened (do not freeze)' },
                     { label: 'Total Supply Required', value: procCalc.procurementSummary },
                   ] : isPen ? [
                     { label: 'Cartridge Type', value: '3 mL Factory Pre-filled sterile cartridge' },
