@@ -3,8 +3,8 @@
     "target": "production",
     "source": ".",
     "frameworksBackend": {
-      "memory": "1GiB",
-      "timeoutSeconds": 60,
+      "memory": "2GiB",
+      "timeoutSeconds": 180,
       "maxInstances": 20,
       "concurrency": 80
     },

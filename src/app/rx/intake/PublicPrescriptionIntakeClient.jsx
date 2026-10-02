@@ -848,6 +848,8 @@ export default function PublicPrescriptionIntakeClient() {
 
       if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
         cleanMsg = 'Atlas Clinical AI is experiencing temporary peak demand. Please retry in a few moments.';
+      } else if (/502|504|timeout|gateway|timed out/i.test(rawMsg)) {
+        cleanMsg = 'The clinical genetics report is comprehensive and processing timed out. Please retry with the accelerated engine.';
       } else if (rawMsg && !rawMsg.startsWith('{')) {
         cleanMsg = rawMsg;
       }
@@ -1474,12 +1476,40 @@ export default function PublicPrescriptionIntakeClient() {
                 padding: '12px 16px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                justifyContent: 'space-between',
+                gap: '12px',
                 color: '#991b1b',
                 fontSize: '0.82rem'
               }}>
-                <AlertCircle size={16} style={{ flexShrink: 0 }} />
-                <span>{error}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                  <span>{error}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleStartScanning}
+                  disabled={isProcessing}
+                  style={{
+                    background: '#fee2e2',
+                    border: '1px solid #fca5a5',
+                    color: '#991b1b',
+                    borderRadius: '6px',
+                    padding: '6px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: isProcessing ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexShrink: 0,
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = '#fecaca'; }}
+                  onMouseLeave={(e) => { if (!isProcessing) e.currentTarget.style.background = '#fee2e2'; }}
+                >
+                  <RefreshCw size={13} className={isProcessing ? 'animate-spin' : ''} />
+                  <span>{isProcessing ? 'Retrying...' : 'Retry Extraction'}</span>
+                </button>
               </div>
             )}
           </div>
