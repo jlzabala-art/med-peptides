@@ -90,6 +90,7 @@ import { getHumanFormatName } from '../../utils/productVariantProcessing';
 import { PUBLIC_APP_VERSION, getPublicVersionInfo } from '../../config/publicVersionConfig';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
 
 export default function PublicDatasheetView({ 
   product, 
@@ -691,7 +692,7 @@ export default function PublicDatasheetView({
     if (!raw || raw.toLowerCase().includes('lotusland') || raw.toLowerCase().includes('lotus')) {
       return 'Certified Clinical Synthesis Laboratory';
     }
-    return raw;
+    return formatCommercialSupplierName(raw);
   }, [supplierName]);
 
   const rawFormats = Array.isArray(hierarchy.formats) ? hierarchy.formats : [];
@@ -1437,11 +1438,11 @@ export default function PublicDatasheetView({
           effectiveBatch={effectiveBatchCode}
           associatedProtocols={associatedProtocols}
           baseUrl={baseUrl}
-          supplierName={supplierName}
+          supplierName={displaySupplierName || formatCommercialSupplierName(supplierName)}
           activeFormat={activeFormat}
           selectedStrength={selectedStrength}
           availableFormats={availableFormats}
-          sortedStrengths={sortedStrengths}
+          sortedStrengths={filteredStrengths}
           presentationMatrixRows={matrixRows}
           dynamicPublicUrl={dynamicPublicUrl}
           versionInfo={versionInfo}

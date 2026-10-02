@@ -240,18 +240,24 @@ function extractProtocolClinicalSpecs(p, canonicalCompound = '') {
   let totalWeeks = 0;
 
   const mappedPhases = phases.map((ph, idx) => {
-    // Pick the drug in ph.drugs matching canonical compound
+    // Pick the drug/compound matching canonical compound
     let drug = null;
-    if (Array.isArray(ph.drugs) && ph.drugs.length > 0) {
+    const compoundCandidates = Array.isArray(ph.drugs) && ph.drugs.length > 0
+      ? ph.drugs
+      : (Array.isArray(ph.compounds) && ph.compounds.length > 0
+        ? ph.compounds
+        : (Array.isArray(ph.items) && ph.items.length > 0 ? ph.items : []));
+
+    if (compoundCandidates.length > 0) {
       if (canonicalCompound) {
         const compLower = canonicalCompound.toLowerCase().split(/[\s-]/)[0];
-        drug = ph.drugs.find(d => {
-          const dTitle = (d.product_title || d.product_name || d.name || '').toLowerCase();
-          const dId = (d.product_id || d.productId || '').toLowerCase();
+        drug = compoundCandidates.find(d => {
+          const dTitle = (d.product_title || d.product_name || d.name || d.compound_name || '').toLowerCase();
+          const dId = (d.product_id || d.productId || d.id || '').toLowerCase();
           return dTitle.includes(compLower) || dId.includes(compLower);
-        }) || ph.drugs[0];
+        }) || compoundCandidates[0];
       } else {
-        drug = ph.drugs[0];
+        drug = compoundCandidates[0];
       }
     }
 

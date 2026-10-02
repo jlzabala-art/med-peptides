@@ -168,10 +168,24 @@ export default function QualityBatchTab({
               <button
                 type="button"
                 onClick={handleCopyBatch}
-                style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}
+                style={{
+                  border: 'none',
+                  background: copiedBatch ? '#dcfce7' : 'rgba(226, 232, 240, 0.6)',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '36px',
+                  minHeight: '36px',
+                  touchAction: 'manipulation',
+                  transition: 'all 0.15s ease'
+                }}
                 title="Copy batch code"
+                aria-label="Copy batch code"
               >
-                {copiedBatch ? <Check size={12} color="#16a34a" /> : <Copy size={12} color="#64748b" />}
+                {copiedBatch ? <Check size={14} color="#16a34a" /> : <Copy size={14} color="#475569" />}
               </button>
             </div>
             <div style={{ fontSize: '1.05rem', fontWeight: 850, color: '#003666', marginTop: '2px', fontFamily: 'monospace' }}>
@@ -233,67 +247,33 @@ export default function QualityBatchTab({
         </div>
 
         {/* Certificate of Analysis Action Strip */}
-        <div style={{
-          background: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '8px',
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem'
-        }}>
-          <div>
-            <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1e40af', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="pds-coa-action-strip">
+          <div className="pds-coa-info">
+            <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1e40af', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FileText size={16} /> Official Certificate of Analysis (CoA)
             </div>
-            <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: '#1e3a8a' }}>
+            <p style={{ margin: '3px 0 0 0', fontSize: '0.74rem', color: '#1e3a8a', lineHeight: 1.4 }}>
               Certified analytical report by {labName} including complete HPLC chromatograms, mass spectrometer spectra, and endotoxin assays.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="pds-coa-actions">
             {onOpenCoaModal && (
               <button
                 type="button"
                 onClick={onOpenCoaModal}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#ffffff',
-                  border: '1px solid #93c5fd',
-                  color: '#1e40af',
-                  padding: '7px 14px',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
-                  fontWeight: 750,
-                  cursor: 'pointer'
-                }}
+                className="pds-coa-btn pds-coa-btn--view"
               >
-                <ExternalLink size={13} /> View CoA Document
+                <ExternalLink size={14} /> View CoA Document
               </button>
             )}
 
             <button
               type="button"
               onClick={handleDownloadCoa}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: '#003666',
-                color: '#ffffff',
-                border: 'none',
-                padding: '7px 16px',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 750,
-                cursor: 'pointer'
-              }}
+              className="pds-coa-btn pds-coa-btn--download"
             >
-              <Download size={13} /> Download CoA (PDF)
+              <Download size={14} /> Download CoA (PDF)
             </button>
           </div>
         </div>

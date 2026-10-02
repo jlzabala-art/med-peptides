@@ -236,6 +236,34 @@ export const CLINICAL_BENCHMARKS = Object.freeze({
     storage: 'Refrigerate at 2°C – 8°C.',
     diluentMl: 2.0,
     indications: 'Tripeptide Alpha-MSH Analogue • Mucosal & Systemic Anti-Inflammation'
+  },
+  selank: {
+    canonicalName: 'Selank',
+    steps: [250, 500, 750],
+    unit: 'mcg',
+    defaultVialMg: 5,
+    cadence: 'Daily (morning or BID)',
+    shortCadence: 'Daily',
+    timesPerWeek: 7,
+    route: 'Subcutaneous or Intranasal',
+    timing: 'Morning on empty stomach or prior to cognitive/stress demands',
+    storage: 'Refrigerate at 2°C – 8°C. Aqueous stability: 30 days post-reconstitution.',
+    diluentMl: 2.0,
+    indications: 'Synthetic Heptapeptide • Anxiolytic, Allosteric GABAergic & BDNF Neuromodulation'
+  },
+  semax: {
+    canonicalName: 'Semax',
+    steps: [200, 400, 600],
+    unit: 'mcg',
+    defaultVialMg: 5,
+    cadence: 'Daily morning',
+    shortCadence: 'Daily',
+    timesPerWeek: 7,
+    route: 'Subcutaneous or Intranasal',
+    timing: 'Morning upon waking • Avoid evening use due to alertness',
+    storage: 'Refrigerate at 2°C – 8°C. Aqueous stability: 30 days.',
+    diluentMl: 2.0,
+    indications: 'ACTH(4-10) Analogue • BDNF Expression, Neuroprotection & Cognitive Enhancement'
   }
 });
 
@@ -260,6 +288,8 @@ export function matchClinicalBenchmark(nameOrId = '') {
   if (s.includes('cjc') || s.includes('ipamorelin') || s.includes('sermorelin')) return CLINICAL_BENCHMARKS.cjc;
   if (s.includes('ta1') || s.includes('thymosinalpha') || s.includes('thymosin1') || s.includes('zadaxin')) return CLINICAL_BENCHMARKS.ta1;
   if (s.includes('kpv')) return CLINICAL_BENCHMARKS.kpv;
+  if (s.includes('selank')) return CLINICAL_BENCHMARKS.selank;
+  if (s.includes('semax')) return CLINICAL_BENCHMARKS.semax;
   return null;
 }
 

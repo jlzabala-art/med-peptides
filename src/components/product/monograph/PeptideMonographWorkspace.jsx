@@ -49,8 +49,18 @@ export default function PeptideMonographWorkspace({
 }) {
   const searchParams = useSearchParams();
 
-  // Always start with Module 1 ('overview') open by default as requested
-  const [activeTab, setActiveTab] = useState('overview');
+  const VALID_TABS = ['overview', 'protocols', 'preparation', 'quality', 'references'];
+  const initialTab = searchParams?.get('tab')?.toLowerCase();
+  const [activeTab, setActiveTab] = useState(
+    initialTab && VALID_TABS.includes(initialTab) ? initialTab : 'overview'
+  );
+
+  React.useEffect(() => {
+    const tab = searchParams?.get('tab')?.toLowerCase();
+    if (tab && VALID_TABS.includes(tab) && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // DOM Refs for mobile accordions to auto-scroll into view when opened
   const moduleRefs = {
@@ -208,7 +218,7 @@ export default function PeptideMonographWorkspace({
             )}
 
             {activeTab === 'references' && (
-              <ReferencesTab />
+              <ReferencesTab product={product} slug={slug} />
             )}
           </div>
         </div>
@@ -527,7 +537,7 @@ export default function PeptideMonographWorkspace({
 
             {activeTab === 'references' && (
               <div className="pds-mobile-accordion-body">
-                <ReferencesTab />
+                <ReferencesTab product={product} slug={slug} />
               </div>
             )}
           </div>

@@ -282,29 +282,42 @@
   .public-sticky-action-bar__sections-btn {
     flex: 1 1 0;
     min-width: 0;
-    padding: 9px 8px;
+    min-height: 44px;
+    padding: 10px 8px;
     font-size: 0.78rem;
     gap: 5px;
     justify-content: center;
+    touch-action: manipulation;
   }
 
   .public-sticky-action-bar__ai-btn {
     flex: 1.1 1 0;
     min-width: 0;
-    padding: 9px 8px;
+    min-height: 44px;
+    padding: 10px 8px;
     font-size: 0.78rem;
     gap: 6px;
     justify-content: center;
+    touch-action: manipulation;
   }
 
   .public-sticky-action-bar__inquire-btn {
     flex: 1.6 1 0;
     min-width: 0;
-    padding: 9px 10px;
-    font-size: 0.80rem;
+    min-height: 44px;
+    padding: 10px 10px;
+    font-size: 0.82rem;
+    font-weight: 750;
     gap: 6px;
     justify-content: center;
     white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  .public-sticky-action-bar__sections-btn:active,
+  .public-sticky-action-bar__ai-btn:active,
+  .public-sticky-action-bar__inquire-btn:active {
+    transform: scale(0.98);
   }
 }
 
@@ -323,7 +336,8 @@
 
   .public-sticky-action-bar__sections-btn {
     flex: 0.85 1 0;
-    padding: 9px 6px;
+    min-height: 44px;
+    padding: 10px 6px;
     gap: 4px;
   }
 
@@ -337,12 +351,14 @@
 
   .public-sticky-action-bar__ai-btn {
     flex: 1 1 0;
-    padding: 9px 6px;
+    min-height: 44px;
+    padding: 10px 6px;
   }
 
   .public-sticky-action-bar__inquire-btn {
     flex: 1.5 1 0;
-    padding: 9px 8px;
+    min-height: 44px;
+    padding: 10px 8px;
   }
 }
 

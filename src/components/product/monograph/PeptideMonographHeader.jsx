@@ -5,6 +5,7 @@ import { Copy, Check, Printer, Share2, ShieldCheck, FileText, FlaskConical, Exte
 import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
+import { formatCommercialSupplierName } from '@/utils/supplierCommercialNames';
 
 /**
  * PeptideMonographHeader
@@ -51,10 +52,18 @@ export default function PeptideMonographHeader({
   const fdaRefBrand = product.referenceBrand || 'Vyleesi® (bremelanotide)';
   const fdaRefYear = product.referenceApprovalYear || '2019';
 
-  // Dynamic Strengths Resolution
-  const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
-  const variantDoses = (product.variants || []).map(v => v.dosage || v.dose || v.strength).filter(Boolean);
+  // Dynamic Strengths Resolution (strictly filtered for active format to prevent cross-format contamination)
+  const formatKey = String(activeFormat?.id || activeFormat?.name || '').toLowerCase();
+  const formatMatchedVariants = (product.variants || []).filter(v => {
+    if (!formatKey) return true;
+    const vFmt = String(v.format || v.presentation || '').toLowerCase();
+    return vFmt.includes(formatKey) || formatKey.includes(vFmt);
+  });
+  const variantPool = formatMatchedVariants.length > 0 ? formatMatchedVariants : (product.variants || []);
+  const variantDoses = variantPool.map(v => v.dosage || v.dose || v.strength).filter(Boolean);
   const uniqueVariantDoses = [...new Set(variantDoses)];
+
+  const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
   const availableStrengths = strengthsList.length > 0 
     ? strengthsList.join(' | ') 
     : uniqueVariantDoses.length > 0 
@@ -88,7 +97,8 @@ export default function PeptideMonographHeader({
           : (product.presentationFormat || product.presentation || 'Lyophilized sterile vial');
 
   const verifiedPurity = product.purity || '≥99% (99.4% HPLC verified)';
-  const supplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || 'Lotusland';
+  const rawSupplier = supplierName || product.supplierName || product.supplier || (product.variants?.[0]?.supplierName) || (product.variants?.[0]?.supplier) || 'Lotusland';
+  const supplier = formatCommercialSupplierName(rawSupplier);
   const batchCode = effectiveBatch || product.batchNumber || 'AS-LOT-PT05-2609';
 
   const handleCopySpec = () => {
@@ -301,26 +311,45 @@ export default function PeptideMonographHeader({
               </div>
             </div>
 
-            {/* Field 4: Batch Record */}
+            {/* Field 4: Batch Record (GCP Copy-on-Click Standard) */}
             <div className="pds-summary-cell">
               <span className="pds-summary-label">Verified Batch (CoA)</span>
               <div
-                onClick={onOpenCoaModal}
-                role={onOpenCoaModal ? "button" : undefined}
-                tabIndex={onOpenCoaModal ? 0 : undefined}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  cursor: onOpenCoaModal ? 'pointer' : 'default'
+                  gap: '6px'
                 }}
-                title={onOpenCoaModal ? "Click to view Certificate of Analysis" : undefined}
               >
-                <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#003666', fontSize: '0.80rem' }}>
+                <code 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard?.writeText(batchCode);
+                    toast.success(`Batch code ${batchCode} copied ✓`);
+                  }}
+                  style={{ 
+                    fontFamily: 'monospace', 
+                    fontWeight: 800, 
+                    color: '#003666', 
+                    fontSize: '0.80rem',
+                    cursor: 'pointer',
+                    background: '#f1f5f9',
+                    padding: '2px 5px',
+                    borderRadius: '4px'
+                  }}
+                  title="Click to copy batch code"
+                >
                   {batchCode}
                 </code>
                 {onOpenCoaModal && (
-                  <ExternalLink size={12} color="#003666" style={{ opacity: 0.7 }} />
+                  <button
+                    type="button"
+                    onClick={onOpenCoaModal}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                    title="Click to view Certificate of Analysis"
+                  >
+                    <ExternalLink size={12} color="#003666" style={{ opacity: 0.7 }} />
+                  </button>
                 )}
               </div>
             </div>
