@@ -30,7 +30,16 @@ export default function MonographPreviewModal({
   isCosmetic = false,
 }) {
   const [activeTab, setActiveTab] = useState('monograph'); // 'monograph' | 'shipping' | 'client'
+  const [selectedLabelFormatId, setSelectedLabelFormatId] = useState(activeFormat?.id || availableFormats?.[0]?.id || 'vial');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (activeFormat?.id) {
+      setSelectedLabelFormatId(activeFormat.id);
+    } else if (availableFormats && availableFormats.length > 0) {
+      setSelectedLabelFormatId(availableFormats[0].id);
+    }
+  }, [activeFormat?.id, availableFormats]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -42,7 +51,7 @@ export default function MonographPreviewModal({
 
   // Computed values needed by the second useEffect — must be derived before any hooks
   const _monographPdfUrl = isOpen && product
-    ? `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`
+    ? `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=all`
     : null;
 
   // Low-priority background prefetch for the active tab's PDF
@@ -153,27 +162,57 @@ export default function MonographPreviewModal({
         };
       });
 
-  // Direct PDF Download Endpoints
-  const monographPdfUrl = `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`;
-  const shippingLabelPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`;
-  const shippingSheetPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`;
-  const clientLabelPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`;
-  const clientSheetPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`;
+  const selectedLabelFormatObj = (availableFormats || []).find(f => f.id === selectedLabelFormatId) || activeFormat || { id: selectedLabelFormatId, name: selectedLabelFormatId };
+  const selectedLabelFormatName = selectedLabelFormatObj?.name || 'Vial';
+
+  const isNasalLabel = /spray|nasal/i.test(selectedLabelFormatId) || /spray|nasal/i.test(selectedLabelFormatName);
+  const isPenLabel = !isNasalLabel && (/pen|cartridge/i.test(selectedLabelFormatId) || /pen|cartridge/i.test(selectedLabelFormatName));
+  const isOralLabel = !isNasalLabel && !isPenLabel && (/capsule|tablet|oral/i.test(selectedLabelFormatId) || /capsule|tablet|oral/i.test(selectedLabelFormatName));
+  const isVialLabel = !isNasalLabel && !isPenLabel && !isOralLabel;
+
+  // Compatible strength for this selected label format
+  const labelCompatStrengths = (sortedStrengths || []).filter(s => !selectedLabelFormatObj.strengths || selectedLabelFormatObj.strengths.includes(s.id));
+  const targetLabelStrength = labelCompatStrengths.find(s => s.id === selectedStrength?.id) || labelCompatStrengths[0] || selectedStrength;
+  const targetLabelDoseName = targetLabelStrength?.name || targetLabelStrength?.dosage || doseName;
 
   const clean = (s) => String(s || '').trim().replace(/^supplier[-_]/i, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').toLowerCase();
   const suppCode = supplierName || product?.supplierName || product?.supplier || 'lotusland';
   const vSuffix = `${clean(slug)}_${clean(doseName)}_${clean(formatName)}_${clean(suppCode)}_${clean(lot)}`;
 
+  // Custom label query string parameterized for the chosen presentation
+  const customLabelQuery = (() => {
+    const rawQs = labelQueryString.startsWith('&') ? labelQueryString.slice(1) : labelQueryString;
+    const p = new URLSearchParams(rawQs);
+    p.set('presentation', selectedLabelFormatId);
+    p.set('format', selectedLabelFormatId);
+    p.set('dose', targetLabelDoseName);
+    if (lot) p.set('batch', lot);
+    const qs = p.toString();
+    return qs ? `&${qs}` : '';
+  })();
+
+  // Direct PDF Download Endpoints
+  const monographPdfUrl = `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=all`;
+  const shippingLabelPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`;
+  const shippingSheetPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`;
+  const dynamicClientLabelPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${customLabelQuery}`;
+  const dynamicClientSheetPdfUrl = `/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${customLabelQuery}`;
+
+  // QR URL for the client label reflecting presentation and dose
+  const dynamicClientQrUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/p/${slug}?presentation=${encodeURIComponent(selectedLabelFormatId)}&dose=${encodeURIComponent(targetLabelDoseName)}`
+    : `https://med-peptides.com/p/${slug}?presentation=${encodeURIComponent(selectedLabelFormatId)}&dose=${encodeURIComponent(targetLabelDoseName)}`;
+
   const currentDownloadUrl = activeTab === 'shipping'
     ? shippingLabelPdfUrl
     : activeTab === 'client'
-      ? clientLabelPdfUrl
+      ? dynamicClientLabelPdfUrl
       : monographPdfUrl;
 
   const currentFilename = activeTab === 'shipping'
     ? `shipping_label_${vSuffix}_38x90.pdf`
     : activeTab === 'client'
-      ? `client_vial_label_${vSuffix}_38x90.pdf`
+      ? `client_${clean(selectedLabelFormatId)}_label_${clean(slug)}_${clean(targetLabelDoseName)}_38x90.pdf`
       : `${vSuffix}_monograph_a4.pdf`;
 
   const handlePrint = () => {
@@ -255,11 +294,11 @@ export default function MonographPreviewModal({
                   type="button"
                   onClick={() => { triggerHaptic('selection'); setActiveTab('client'); }}
                   className={`mpm-tab-btn ${activeTab === 'client' ? 'active' : ''}`}
-                  title="Thermal adhesive label applied to the client medication vial"
+                  title={`Thermal adhesive label applied to the client ${isNasalLabel ? 'spray bottle' : isPenLabel ? 'pen' : 'vial'}`}
                 >
                   <Tag size={14} />
-                  <span className="mpm-tab-long">3. Client Vial Label (38×90mm)</span>
-                  <span className="mpm-tab-short">3. Client Vial</span>
+                  <span className="mpm-tab-long">3. Client {isNasalLabel ? 'Spray' : isPenLabel ? 'Pen' : 'Vial'} Label (38×90mm)</span>
+                  <span className="mpm-tab-short">3. {isNasalLabel ? 'Spray' : isPenLabel ? 'Pen' : 'Vial'}</span>
                 </button>
               )}
             </div>
@@ -279,7 +318,7 @@ export default function MonographPreviewModal({
                     ? 'Document: Clinical Technical Monograph (A4 Dossier)'
                     : activeTab === 'shipping'
                       ? 'Document: Outer Courier Shipping Label (38×90 mm)'
-                      : 'Document: Client Reconstituted Vial Label (38×90 mm)'
+                      : `Document: Client ${isNasalLabel ? 'Spray Bottle' : isPenLabel ? 'Pen Cartridge' : 'Reconstituted Vial'} Label (38×90 mm)`
                   }
                 </strong>
                 <span style={{ display: 'block', marginTop: '1px', color: '#475569' }}>
@@ -287,7 +326,7 @@ export default function MonographPreviewModal({
                     ? 'Comprehensive reference dossier for physicians, researchers, and patient records detailing molecular specs, pharmacology, clinical indications, reconstitution, and presentations.'
                     : activeTab === 'shipping'
                       ? 'Applied to outer courier parcel packaging. Features discreet encrypted lot tracking barcode and secure verification QR without exposing compound branding.'
-                      : 'Adhesive thermal label applied directly onto the physical vial. Features prescribed dosage, BAC water diluent volume, reconstitution date blanks, and expiration tracking.'
+                      : `Adhesive thermal label applied directly onto the physical ${isNasalLabel ? 'spray bottle' : isPenLabel ? 'pen cartridge' : 'vial'}. Features prescribed dosage, ${isNasalLabel ? 'metered spray instructions,' : isPenLabel ? 'pre-filled pen dosing directions,' : 'BAC water diluent volume, reconstitution date blanks,'} and expiration tracking.`
                   }
                 </span>
               </div>
@@ -442,35 +481,77 @@ export default function MonographPreviewModal({
                     </div>
                   )}
 
-                  {/* 4. Reconstitution & Administration Directives */}
+                  {/* 4. Reconstitution & Administration Directives — Per Presentation Format */}
                   {!isCosmetic && (
                     <div style={{ margin: '0.75rem 0' }}>
                       <div className="mpm-section-heading">4. Reconstitution &amp; Clinical Administration Directives</div>
-                      <div className="mpm-directives-box">
-                        <div>
-                          <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Aseptic Reconstitution Directive:</strong>
-                          <span style={{ color: '#475569', lineHeight: 1.35 }}>
-                            Reconstitute with 1.0–2.0 mL sterile Bacteriostatic Water (0.9% benzyl alcohol). Inject diluent slowly down the glass wall. Swirl gently in circular motion until crystal clear. Do not shake vigorously.
-                          </span>
-                        </div>
-                        <div>
-                          <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Clinical Administration Window:</strong>
-                          <span style={{ color: '#475569', lineHeight: 1.35 }}>
-                            Administer subcutaneously (SubQ) in lower abdomen or thigh 45–60 min prior to anticipated activity. Maximum 1 dose per 24 hours; do not exceed 8 doses within any consecutive 30-day period.
-                          </span>
-                        </div>
-                        <div>
-                          <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Lyophilized Solid Storage (Unopened):</strong>
-                          <span style={{ color: '#475569', lineHeight: 1.35 }}>
-                            Store in a cool, dry place or 2°C–8°C (stable up to 24 months). Ambient logistics transport is completely safe and cGMP-validated.
-                          </span>
-                        </div>
-                        <div>
-                          <strong style={{ color: '#0f172a', display: 'block', marginBottom: '0.15rem' }}>Reconstituted Solution Storage:</strong>
-                          <span style={{ color: '#475569', lineHeight: 1.35 }}>
-                            Maintain refrigerated at 2°C to 8°C. Protect from light. Do not freeze. Discard remaining solution 28 days post-reconstitution.
-                          </span>
-                        </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                        {(availableFormats && availableFormats.length > 0 ? availableFormats : [{ id: 'vial', name: 'Lyophilized Vial' }]).map((fmt) => {
+                          const fmtId = (fmt.id || '').toLowerCase();
+                          const fmtName = (fmt.name || '').toLowerCase();
+                          const isFmtNasal = /spray|nasal/i.test(fmtId) || /spray|nasal/i.test(fmtName);
+                          const isFmtPen = !isFmtNasal && (/pen|cartridge/i.test(fmtId) || /pen|cartridge/i.test(fmtName));
+                          const isActiveCard = fmt.id === activeFormat?.id;
+
+                          if (isFmtNasal) {
+                            return (
+                              <div key={fmt.id} className={`mpm-directives-card ${isActiveCard ? 'active-highlight' : ''}`}>
+                                <div className="mpm-directives-card-header">
+                                  <span className="mpm-directives-badge nasal">Intranasal Spray</span>
+                                  <span className="mpm-directives-note">{fmt.name}</span>
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#334155', lineHeight: 1.4 }}>
+                                  <strong>Zero Manual Reconstitution:</strong> Pre-metered aqueous solution in multi-dose atomizing bottle. Ready for direct mucosal delivery — no diluent required.
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.35 }}>
+                                  <strong>Administration:</strong> Prime pump 1–2 actuations until fine mist appears. Insert nozzle into nostril aiming laterally (away from septum). Depress pump firmly while inhaling gently.
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 600 }}>
+                                  Storage: 2°C–8°C or &lt;25°C · Discard 30–45 days post-opening · Protect from light &amp; freezing
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (isFmtPen) {
+                            return (
+                              <div key={fmt.id} className={`mpm-directives-card ${isActiveCard ? 'active-highlight' : ''}`}>
+                                <div className="mpm-directives-card-header">
+                                  <span className="mpm-directives-badge pen">Pre-Filled Pen</span>
+                                  <span className="mpm-directives-note">{fmt.name}</span>
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#334155', lineHeight: 1.4 }}>
+                                  <strong>Zero Reconstitution Required:</strong> Pre-formulated sterile solution in 3.0 mL cylindrical cartridge. No manual mixing or diluent required.
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.35 }}>
+                                  <strong>Administration:</strong> Attach sterile 31G/32G pen needle. Prime 1–2 clicks to purge air. Dial prescribed dose on micro-stepper. Inject SubQ at 90° into abdomen/thigh; hold 6–10s.
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 600 }}>
+                                  Storage: Unused pen 2°C–8°C (do not freeze) · In-use pen &lt;25°C or 2°C–8°C for 28–30 days
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          // Default: Lyophilized Vial
+                          return (
+                            <div key={fmt.id} className={`mpm-directives-card ${isActiveCard ? 'active-highlight' : ''}`}>
+                              <div className="mpm-directives-card-header">
+                                <span className="mpm-directives-badge vial">Lyophilized Vial</span>
+                                <span className="mpm-directives-note">{fmt.name}</span>
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: '#334155', lineHeight: 1.4 }}>
+                                <strong>Aseptic Reconstitution:</strong> Clean septum with 70% IPA. Draw 1.0–2.0 mL Bacteriostatic Water (0.9% benzyl alcohol). Direct needle slowly down glass wall. Swirl gently until crystal clear.
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: 1.35 }}>
+                                <strong>Administration:</strong> Administer SubQ in lower abdomen or thigh using sterile 30G/31G insulin syringe. Maximum 1 dose per 24h.
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: '#0f766e', fontWeight: 600 }}>
+                                Storage: Unopened 2°C–8°C (24 months) · Reconstituted 2°C–8°C (28 days) · Do not freeze
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -575,24 +656,43 @@ export default function MonographPreviewModal({
               </div>
             )}
 
-            {/* TAB 3: Client Vial Label (38×90mm) */}
+            {/* TAB 3: Client Presentation Label (38×90mm) — Format-Aware */}
             {activeTab === 'client' && (
               <div className="mpm-label-card-wrap">
                 <div style={{ textAlign: 'center' }}>
                   <span style={{ display: 'inline-block', padding: '0.2rem 0.6rem', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 700, background: '#0f766e', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    🏷️ 38 × 90 mm Client Vial Adhesion Label (PDF)
+                    🏷️ 38 × 90 mm Client {isNasalLabel ? 'Spray' : isPenLabel ? 'Pen' : 'Vial'} Label (PDF)
                   </span>
                   <p style={{ fontSize: '0.74rem', color: '#64748b', margin: '0.35rem 0 0 0' }}>
-                    Adhesive label for customer vial with dose, purity, and reconstitution spaces.
+                    Adhesive label for {isNasalLabel ? 'nasal spray bottle' : isPenLabel ? 'pen cartridge' : 'customer vial'} with dose, purity, and {isNasalLabel ? 'usage instructions' : isPenLabel ? 'pen dosing info' : 'reconstitution spaces'}.
                   </p>
                 </div>
+
+                {/* Format Switcher Toolbar — only when multiple formats exist */}
+                {availableFormats && availableFormats.length > 1 && (
+                  <div className="mpm-format-switch-bar">
+                    <span className="mpm-format-switch-title">Select Label Presentation:</span>
+                    <div className="mpm-format-switch-pills">
+                      {availableFormats.map((fmt) => (
+                        <button
+                          key={fmt.id}
+                          type="button"
+                          className={`mpm-format-pill-btn ${selectedLabelFormatId === fmt.id ? 'active' : ''}`}
+                          onClick={() => { triggerHaptic('selection'); setSelectedLabelFormatId(fmt.id); }}
+                        >
+                          {/spray|nasal/i.test(fmt.id || fmt.name || '') ? '💨' : /pen|cartridge/i.test(fmt.id || fmt.name || '') ? '🖊️' : '💉'} {fmt.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="mpm-label-physical client-mode">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.4rem' }}>
                     <div>
                       <span style={{ fontSize: '0.62rem', fontWeight: 900, color: '#0f766e', letterSpacing: '0.05em', textTransform: 'uppercase' }}>ATLAS CLINICAL LAB</span>
                       <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', display: 'block', lineHeight: 1.1 }}>{name}</span>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#15803d' }}>Dose: {doseName}</span>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#15803d' }}>Dose: {targetLabelDoseName}</span>
                     </div>
 
                     <div style={{ textAlign: 'right', fontSize: '0.65rem' }}>
@@ -604,19 +704,37 @@ export default function MonographPreviewModal({
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', padding: '0.25rem 0' }}>
                     <div style={{ flex: 1, fontSize: '0.65rem', fontFamily: 'monospace', color: '#334155', lineHeight: 1.35 }}>
-                      <div>Reconstitute: 2.0 mL BAC Water</div>
-                      <div>
-                        Conc: {(() => {
-                          const m = doseName.match(/(\d+(?:\.\d+)?)\s*mg/i);
-                          return m ? (parseFloat(m[1]) / 2.0).toFixed(1) : '5.0';
-                        })()} mg/mL · SubQ
-                      </div>
-                      <div>Recon Date: [ ___ / ___ / 2026 ]</div>
-                      <div>Discard: 28 Days post-recon (2-8°C)</div>
+                      {isNasalLabel ? (
+                        <>
+                          <div>Pre-Metered Nasal Solution</div>
+                          <div>Metered Dose · Intranasal</div>
+                          <div>Opened: [ ___ / ___ / 2026 ]</div>
+                          <div>Discard: 45 Days post-opening (2-8°C)</div>
+                        </>
+                      ) : isPenLabel ? (
+                        <>
+                          <div>Pre-filled Cartridge Solution</div>
+                          <div>Pre-formulated · SubQ Pen</div>
+                          <div>First Use: [ ___ / ___ / 2026 ]</div>
+                          <div>Discard: 28 Days in-use (2-8°C)</div>
+                        </>
+                      ) : (
+                        <>
+                          <div>Reconstitute: 2.0 mL BAC Water</div>
+                          <div>
+                            Conc: {(() => {
+                              const m = targetLabelDoseName.match(/(\d+(?:\.\d+)?)\s*mg/i);
+                              return m ? (parseFloat(m[1]) / 2.0).toFixed(1) : '5.0';
+                            })()} mg/mL · SubQ
+                          </div>
+                          <div>Recon Date: [ ___ / ___ / 2026 ]</div>
+                          <div>Discard: 28 Days post-recon (2-8°C)</div>
+                        </>
+                      )}
                     </div>
 
                     <div style={{ padding: '0.35rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '4px', flexShrink: 0 }}>
-                      <QRCodeSVG value={effectivePublicUrl} size={58} level="M" />
+                      <QRCodeSVG value={dynamicClientQrUrl} size={58} level="M" />
                     </div>
                   </div>
 
@@ -627,8 +745,8 @@ export default function MonographPreviewModal({
 
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                   <a
-                    href={clientSheetPdfUrl}
-                    download={`client_sheet_${vSuffix}_a4.pdf`}
+                    href={dynamicClientSheetPdfUrl}
+                    download={`client_${clean(selectedLabelFormatId)}_sheet_${clean(slug)}_${clean(targetLabelDoseName)}_a4.pdf`}
                     className="mpm-btn-download"
                     style={{ background: '#ffffff', color: '#334155', border: '1px solid #cbd5e1' }}
                     title="Download A4 Printable Sheet (×8 Client Labels)"

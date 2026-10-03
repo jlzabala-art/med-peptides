@@ -168,24 +168,31 @@ export async function GET(request, context) {
 
     const isPeptide = !isDevice && !isDiagnostic && !isSmallMolecule && !isCosmetic;
 
-    // ── Delivery Triad Format Resolution (vial, single_cartridge_pen, double_cartridge_pen) ──
+    // ── Delivery Format Resolution (nasal_spray, single_cartridge_pen, double_cartridge_pen, vial, all) ──
     const searchParams = new URL(request.url).searchParams;
     const formatParam = (searchParams.get('format') || '').toLowerCase();
     let selectedFormat = 'vial';
-    if (/double|dual/i.test(formatParam)) {
+    if (/spray|nasal/i.test(formatParam)) {
+      selectedFormat = 'nasal_spray';
+    } else if (/double|dual/i.test(formatParam)) {
       selectedFormat = 'double_cartridge_pen';
     } else if (/single|cartridge|pen/i.test(formatParam)) {
       selectedFormat = 'single_cartridge_pen';
     } else if (formatParam === 'vial') {
       selectedFormat = 'vial';
+    } else if (formatParam === 'all') {
+      selectedFormat = 'all';
     } else {
       const isLotusland = /lotusland/i.test(product.supplierName || product.supplier || product.supplierId || '');
       if (isLotusland) {
         selectedFormat = 'vial';
       } else {
         const variants = product.variants || [];
+        const hasNasalVar = variants.some(v => /spray|nasal/i.test(v.presentation || v.presentationName || v.format || ''));
         const hasDouble = variants.some(v => /double|dual|two.?chamber/i.test(v.presentation || v.format || ''));
-        if (hasDouble || /double|dual|two.?chamber/i.test(nameRaw) || /double|dual|two.?chamber/i.test(presRaw)) {
+        if (hasNasalVar || /spray|nasal/i.test(nameRaw) || /spray|nasal/i.test(presRaw)) {
+          selectedFormat = 'nasal_spray';
+        } else if (hasDouble || /double|dual|two.?chamber/i.test(nameRaw) || /double|dual|two.?chamber/i.test(presRaw)) {
           selectedFormat = 'double_cartridge_pen';
         } else if (isPreFilledPen || variants.some(v => /single|cartridge|\bpen\b/i.test(v.presentation || v.format || '')) || /single|cartridge|\bpen\b/i.test(nameRaw) || /single|cartridge|\bpen\b/i.test(presRaw)) {
           selectedFormat = 'single_cartridge_pen';
@@ -196,7 +203,7 @@ export async function GET(request, context) {
     }
 
     // ⚡ Check Layer 1 Buffer RAM Cache (< 1ms instant binary delivery)
-    const cacheKey = `${id.toLowerCase()}_${selectedFormat}`;
+    const cacheKey = `${id.toLowerCase()}_${selectedFormat}_v2`;
     const cached = PDF_RAM_CACHE.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return new NextResponse(cached.bytes, {
@@ -520,79 +527,126 @@ export async function GET(request, context) {
         y -= 6;
       }
 
-      // ── Clinical Preparation & Delivery Protocol (Format-Tailored) ──
-      if (selectedFormat === 'single_cartridge_pen') {
-        page.drawText('2. SINGLE CARTRIDGE PROTOCOL & MULTIDOSE PEN ADMINISTRATION', { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
-        y -= 4;
-        page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
-        y -= 14;
+      // ── Clinical Preparation, Reconstitution & Delivery Directives (Multi-Format Support) ──
+      const productVariants = variants || [];
+      const prodHasNasal = /spray|nasal/i.test(catRaw) || /spray|nasal/i.test(nameRaw) || /spray|nasal/i.test(presRaw) ||
+                           productVariants.some(v => /spray|nasal/i.test(v.presentation || v.presentationName || v.format || '')) ||
+                           selectedFormat === 'nasal_spray';
+      const prodHasPen = isPreFilledPen || /pen|cartridge/i.test(nameRaw) || /pen|cartridge/i.test(presRaw) ||
+                         productVariants.some(v => /pen|cartridge/i.test(v.presentation || v.presentationName || v.format || '')) ||
+                         selectedFormat === 'single_cartridge_pen' || selectedFormat === 'double_cartridge_pen';
+      const prodHasVial = productVariants.some(v => /vial|lyophilized/i.test(v.presentation || v.presentationName || v.format || '')) ||
+                          /vial|lyophilized/i.test(presRaw) ||
+                          (!prodHasNasal && !prodHasPen);
 
-        const pLines = [
-          'Zero Reconstitution Required: Pre-formulated aqueous sterile solution in 3.0 mL cylindrical cartridge. No manual mixing or diluent required.',
-          'Visual Inspection & Needle Setup: Confirm solution is clear and particulate-free. Screw on new sterile 31G/32G (4mm-6mm) pen needle.',
-          'Priming & Air Purge: Dial 1-2 test units, point needle upward, depress button until steady droplet emerges at tip.',
-          'Subcutaneous Dosing: Dial prescribed units on micro-stepper dial. Inject at 90 deg into abdomen/thigh; hold button for 6-10s before withdrawing.',
-          'Sharps Disposal: Unscrew and safely discard needle into certified sharps container immediately. Never store pen with needle attached.'
-        ];
-        for (const line of pLines) {
-          for (const wl of wrapText(`-  ${line}`, 92)) {
-            page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
-            y -= 11;
+      const activeFormatList = [];
+      if (prodHasNasal) activeFormatList.push('nasal');
+      if (prodHasPen) activeFormatList.push(selectedFormat === 'double_cartridge_pen' ? 'double_pen' : 'pen');
+      if (prodHasVial) activeFormatList.push('vial');
+
+      const isMultiFormat = activeFormatList.length > 1;
+
+      for (let idx = 0; idx < activeFormatList.length; idx++) {
+        const fmt = activeFormatList[idx];
+        const sectionLetter = isMultiFormat ? `${String.fromCharCode(65 + idx)}` : '';
+        const sectionPrefix = isMultiFormat ? `2${sectionLetter}. ` : '2. ';
+
+        if (fmt === 'nasal') {
+          if (y < 130) { page = addPage(); y = H - 76; }
+          page.drawText(`${sectionPrefix}METERED INTRANASAL SPRAY DIRECTIVES (PRE-METERED SOLUTION)`, { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
+          y -= 4;
+          page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
+          y -= 13;
+
+          const nLines = [
+            'Zero Manual Reconstitution: Pre-metered aqueous solution in 10 mL multi-dose atomizing bottle. Ready for direct mucosal delivery without diluent addition.',
+            'Pump Priming & Calibration: Remove protective dust cap. On first use, prime pump 1-2 test actuations into air until a fine uniform micro-mist appears.',
+            'Intranasal Administration Technique: Gently clear nostrils. Hold bottle upright, insert nozzle into nostril aiming laterally towards ear (away from septum). Depress pump firmly while inhaling gently.',
+            'In-Use Storage & Stability: Store at 2C-8C or room temp (<25C). Protect from direct light and freezing. Discard 30-45 days post-opening.'
+          ];
+          for (const line of nLines) {
+            for (const wl of wrapText(`-  ${line}`, 92)) {
+              page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
+              y -= 11;
+            }
           }
-        }
-        y -= 3;
+          y -= 3;
+          page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
+          page.drawText('Store at 2C - 8C or <25C (Protect from light & freezing). Discard 45 days post-opening.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
+          y -= 15;
+        } else if (fmt === 'pen') {
+          if (y < 130) { page = addPage(); y = H - 76; }
+          page.drawText(`${sectionPrefix}PRE-FILLED MULTI-DOSE PEN DIRECTIVES (SUBCUTANEOUS)`, { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
+          y -= 4;
+          page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
+          y -= 13;
 
-        page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
-        page.drawText('Unused pen: 2C - 8C (do not freeze). In-use pen: Controlled room temp (<25C) or 2C - 8C for 30-56 days.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
-        y -= 16;
-      } else if (selectedFormat === 'double_cartridge_pen') {
-        page.drawText('2. DUAL-CHAMBER IN-DEVICE RECONSTITUTION & DELIVERY PROTOCOL', { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
-        y -= 4;
-        page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
-        y -= 14;
-
-        const dLines = [
-          'Dual-Chamber Anatomy: Chamber 1 (front) contains lyophilized peptide powder; Chamber 2 (rear) contains pre-measured bacteriostatic diluent.',
-          'In-Device Mechanical Mixing: Zero external syringes or needles required. Screw cartridge holder clockwise into pen body until locked.',
-          'Automated Bypass: Rear plunger drives diluent through internal bypass channel directly into powder chamber.',
-          'Gentle Dissolution: Invert pen slowly 5-10 times. Wait 3-5 minutes for complete dissolution into clear solution. Avoid vigorous shaking.',
-          'Priming & Delivery: Attach sterile 31G/32G needle, dial 1-2 clicks to purge air, select prescribed dose, and inject subcutaneously (hold 6-10s).'
-        ];
-        for (const line of dLines) {
-          for (const wl of wrapText(`-  ${line}`, 92)) {
-            page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
-            y -= 11;
+          const pLines = [
+            'Zero Reconstitution Required: Pre-formulated aqueous sterile solution in 3.0 mL cylindrical cartridge. No manual mixing or diluent required.',
+            'Visual Inspection & Needle Setup: Confirm solution is clear and particulate-free. Screw on new sterile 31G/32G (4mm-6mm) pen needle.',
+            'Priming & Air Purge: Dial 1-2 test units, point needle upward, depress button until steady droplet emerges at tip.',
+            'Subcutaneous Dosing: Dial prescribed units on micro-stepper dial. Inject at 90 deg into abdomen/thigh; hold button for 6-10s before withdrawing.',
+            'Sharps Disposal: Unscrew and safely discard needle into certified sharps container immediately. Never store pen with needle attached.'
+          ];
+          for (const line of pLines) {
+            for (const wl of wrapText(`-  ${line}`, 92)) {
+              page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
+              y -= 11;
+            }
           }
-        }
-        y -= 3;
+          y -= 3;
+          page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
+          page.drawText('Unused pen: 2C - 8C (do not freeze). In-use pen: Controlled room temp (<25C) or 2C - 8C for 28-30 days.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
+          y -= 15;
+        } else if (fmt === 'double_pen') {
+          if (y < 130) { page = addPage(); y = H - 76; }
+          page.drawText(`${sectionPrefix}DUAL-CHAMBER IN-DEVICE RECONSTITUTION & DELIVERY PROTOCOL`, { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
+          y -= 4;
+          page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
+          y -= 13;
 
-        page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
-        page.drawText('Unmixed cartridge: 2C - 8C. Once mixed in-pen: Refrigerate at 2C - 8C (stable 28-30 days). Protect from freezing.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
-        y -= 16;
-      } else {
-        // Vial (Lyophilized)
-        page.drawText('2. MANUAL RECONSTITUTION PROTOCOL & THERMAL STABILITY', { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
-        y -= 4;
-        page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
-        y -= 14;
-
-        const vLines = [
-          'Aseptic Septum Preparation: Clean vial rubber septum with 70% isopropyl alcohol wipe and allow to air dry completely.',
-          'Diluent Introduction: Aseptically draw 1.0mL - 2.0mL of sterile 0.9% Bacteriostatic Water. Direct needle slowly down inside glass wall.',
-          'Gentle Dissolution: Swirl vial gently in circular motion until crystal clear. Do not shake or vortex violently to prevent protein shearing.',
-          'Subcutaneous Administration: Administer calculated dose using sterile 30G/31G subcutaneous insulin syringe. Discard needle immediately.'
-        ];
-        for (const line of vLines) {
-          for (const wl of wrapText(`-  ${line}`, 92)) {
-            page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
-            y -= 11;
+          const dLines = [
+            'Dual-Chamber Anatomy: Chamber 1 (front) contains lyophilized peptide powder; Chamber 2 (rear) contains pre-measured bacteriostatic diluent.',
+            'In-Device Mechanical Mixing: Zero external syringes or needles required. Screw cartridge holder clockwise into pen body until locked.',
+            'Automated Bypass: Rear plunger drives diluent through internal bypass channel directly into powder chamber.',
+            'Gentle Dissolution: Invert pen slowly 5-10 times. Wait 3-5 minutes for complete dissolution into clear solution. Avoid vigorous shaking.',
+            'Priming & Delivery: Attach sterile 31G/32G needle, dial 1-2 clicks to purge air, select prescribed dose, and inject subcutaneously (hold 6-10s).'
+          ];
+          for (const line of dLines) {
+            for (const wl of wrapText(`-  ${line}`, 92)) {
+              page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
+              y -= 11;
+            }
           }
-        }
-        y -= 3;
+          y -= 3;
+          page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
+          page.drawText('Unmixed cartridge: 2C - 8C. Once mixed in-pen: Refrigerate at 2C - 8C (stable 28-30 days). Protect from freezing.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
+          y -= 15;
+        } else {
+          // Vial (Lyophilized)
+          if (y < 130) { page = addPage(); y = H - 76; }
+          page.drawText(`${sectionPrefix}MANUAL RECONSTITUTION PROTOCOL & THERMAL STABILITY (LYOPHILIZED VIAL)`, { x: MRG, y, size: 8.5, font: fontB, color: BRAND_COLOR });
+          y -= 4;
+          page.drawLine({ start: { x: MRG, y }, end: { x: RIGHT, y }, thickness: 0.8, color: BRAND_COLOR });
+          y -= 13;
 
-        page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
-        page.drawText('Unopened vial: Cool, dry place or 2C - 8C (stable 24 mos). Once reconstituted: 2C - 8C (stable 28 days). Do not freeze.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
-        y -= 16;
+          const vLines = [
+            'Aseptic Septum Preparation: Clean vial rubber septum with 70% isopropyl alcohol wipe and allow to air dry completely.',
+            'Diluent Introduction: Aseptically draw 1.0mL - 2.0mL of sterile 0.9% Bacteriostatic Water. Direct needle slowly down inside glass wall.',
+            'Gentle Dissolution: Swirl vial gently in circular motion until crystal clear. Do not shake or vortex violently to prevent protein shearing.',
+            'Subcutaneous Administration: Administer calculated dose using sterile 30G/31G subcutaneous insulin syringe into lower abdomen or thigh.'
+          ];
+          for (const line of vLines) {
+            for (const wl of wrapText(`-  ${line}`, 92)) {
+              page.drawText(wl, { x: MRG, y, size: 8, font, color: rgb(0.15, 0.2, 0.25) });
+              y -= 11;
+            }
+          }
+          y -= 3;
+          page.drawText('Storage Requirements:', { x: MRG, y, size: 8, font: fontB, color: rgb(0.2, 0.25, 0.3) });
+          page.drawText('Unopened vial: Cool, dry place or 2C - 8C (stable 24 mos). Once reconstituted: 2C - 8C (stable 28 days). Do not freeze.', { x: MRG + 105, y, size: 8, font, color: TEAL_COLOR });
+          y -= 15;
+        }
       }
     }
 

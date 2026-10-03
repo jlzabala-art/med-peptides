@@ -178,41 +178,60 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   const supplierDisplay = toSafePdfText(targetSupplierName || variant.supplierName || variant.supplier || product.supplierName || 'Lotusland Limited');
   const purity = toSafePdfText(variant.purity || variant.grade || '>= 99.0% (HPLC)');
   const rawFormat = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
-  const formatType = rawFormat.toLowerCase().includes('vial') ? rawFormat : `${rawFormat} (Vial)`;
-  // Storage directive: Show practical post-reconstitution temperature (2-8°C).
-  // Avoid confusing -20°C deep-freeze warning on client/patient labels (unreconstituted vials are ambient-shipping stable).
-  const storage = '2-8C once reconstituted (Protect from light)';
+  const formatParam = targetVariant?.presentation || targetVariant?.presentationName || targetVariant?.format || '';
+  const formatStr = `${formatParam} ${rawFormat}`.toLowerCase();
+  const isNasal = /spray|nasal/i.test(formatStr);
+  const isPen = !isNasal && /pen|cartridge/i.test(formatStr);
+  const isOral = !isNasal && !isPen && /capsule|tablet|oral/i.test(formatStr);
+  const isVial = !isNasal && !isPen && !isOral;
 
-  // ── Smart reconstitution volume calculator ────────────────────────────────
-  // Clinical target: 2.5–10 mg/mL concentration for comfortable SubQ injection
+  let formatType = 'Lyophilized Vial';
+  let storage = '2-8C once reconstituted (Protect from light)';
+  let dateLineText = 'Reconst. Date: _______________   Exp: ___________';
+  let diluentText = 'Diluent: 2.0 mL BAC Water (Sterile Water alt.)';
+
   const mgMatch = String(dosage).match(/(\d+(?:\.\d+)?)\s*mg/i);
-  let concText = '2.0 mL BAC Water (Sterile Water alt.)';
-  if (mgMatch) {
-    const mg = parseFloat(mgMatch[1]);
-    let volPrimary = 2.0;
-    if (mg <= 2) {
-      volPrimary = 1.0;
-    } else if (mg <= 5) {
-      volPrimary = 2.0;
-    } else if (mg <= 10) {
-      volPrimary = 2.0;
-    } else if (mg <= 15) {
-      volPrimary = 3.0;
-    } else if (mg <= 20) {
-      volPrimary = 3.0;
-    } else if (mg <= 30) {
-      volPrimary = 4.0;
-    } else if (mg <= 40) {
-      volPrimary = 5.0;
-    } else if (mg <= 50) {
-      volPrimary = 5.0;
+  const mgVal = mgMatch ? parseFloat(mgMatch[1]) : 10;
+
+  if (isNasal) {
+    formatType = 'Metered Nasal Spray (10 mL)';
+    storage = 'Store 2-8C or <25C (Discard 45 days post-opening)';
+    dateLineText = 'Date Opened: _______________   Exp: ___________';
+    const puffEst = mgVal >= 50 ? '~750 mcg/puff' : '~300 mcg/puff';
+    diluentText = `Metered Actuation: ${puffEst} - Intranasal Mucosal`;
+  } else if (isPen) {
+    formatType = 'Multi-Dose Pen (3.0 mL Cartridge)';
+    storage = 'Refrigerate 2-8C once dialed (Discard 28 days post-dial)';
+    dateLineText = 'First Used: _______________   Exp: ___________';
+    diluentText = 'Delivery: Pre-formulated - SubQ (31G/32G nano-needle)';
+  } else if (isOral) {
+    formatType = 'Oral Solid Formulation';
+    storage = 'Store in cool dry place (<25C) protect from moisture';
+    dateLineText = 'Dispensed: _______________   Exp: ___________';
+    diluentText = 'Administration: Oral with water (Zero reconstitution)';
+  } else {
+    // Lyophilized Vial
+    formatType = rawFormat.toLowerCase().includes('vial') ? rawFormat : `${rawFormat} (Vial)`;
+    storage = '2-8C once reconstituted (Protect from light)';
+    dateLineText = 'Reconst. Date: _______________   Exp: ___________';
+    if (mgMatch) {
+      let volPrimary = 2.0;
+      if (mgVal <= 2) volPrimary = 1.0;
+      else if (mgVal <= 5) volPrimary = 2.0;
+      else if (mgVal <= 10) volPrimary = 2.0;
+      else if (mgVal <= 15) volPrimary = 3.0;
+      else if (mgVal <= 20) volPrimary = 3.0;
+      else if (mgVal <= 30) volPrimary = 4.0;
+      else if (mgVal <= 40) volPrimary = 5.0;
+      else if (mgVal <= 50) volPrimary = 5.0;
+      else volPrimary = Math.max(5.0, Math.round((mgVal / 10.0) * 2) / 2);
+      const concPrimary = (mgVal / volPrimary).toFixed(1).replace(/\.0$/, '');
+      const volAlt = volPrimary <= 2.0 ? '1.0' : (volPrimary / 2).toFixed(1).replace(/\.0$/, '');
+      const concAlt = (mgVal / parseFloat(volAlt)).toFixed(1).replace(/\.0$/, '');
+      diluentText = `Diluent: Ref. ${volPrimary.toFixed(1)} mL BAC (${concPrimary} mg/mL) - Alt: ${volAlt} mL (${concAlt} mg/mL)`;
     } else {
-      volPrimary = Math.max(5.0, Math.round((mg / 10.0) * 2) / 2);
+      diluentText = 'Diluent: 2.0 mL BAC Water (Sterile Water alt.)';
     }
-    const concPrimary = (mg / volPrimary).toFixed(1).replace(/\.0$/, '');
-    const volAlt = volPrimary <= 2.0 ? '1.0' : (volPrimary / 2).toFixed(1).replace(/\.0$/, '');
-    const concAlt = (mg / parseFloat(volAlt)).toFixed(1).replace(/\.0$/, '');
-    concText = `Ref. ${volPrimary.toFixed(1)} mL BAC (${concPrimary} mg/mL) - Alt: ${volAlt} mL (${concAlt} mg/mL) · Or per Physician`;
   }
 
   // Generate QR Code PNG Buffer pointing to specific variant/dose/supplier public page
@@ -246,7 +265,13 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: BRAND_COLOR,
   });
 
-  const leftLabelTitle = 'CLINICAL VIAL APPLICATION';
+  const leftLabelTitle = isNasal
+    ? 'CLINICAL NASAL SPRAY APPLICATION'
+    : isPen
+      ? 'CLINICAL MULTI-DOSE PEN APPLICATION'
+      : isOral
+        ? 'CLINICAL ORAL FORMULATION'
+        : 'CLINICAL VIAL APPLICATION';
   const rightLabelTag = `${supplierDisplay.toUpperCase()} QUALIFIED`;
 
   page.drawText(leftLabelTitle, {
@@ -289,7 +314,7 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
 
   currentY -= 7.5;
 
-  // Reconstitution Fill-in Fields (Handwriteable)
+  // Reconstitution / Date Fill-in Fields (Handwriteable)
   page.drawLine({
     start: { x: contentLeft, y: currentY },
     end: { x: originX + widthPt - 86, y: currentY },
@@ -298,7 +323,7 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   });
 
   currentY -= 8.5;
-  page.drawText('Reconst. Date: _______________   Exp: ___________', {
+  page.drawText(dateLineText, {
     x: contentLeft,
     y: currentY,
     size: 5.4,
@@ -307,7 +332,6 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   });
 
   currentY -= 8.0;
-  const diluentText = `Diluent: ${concText}`;
   fitText(page, diluentText, font, 5.2, 4.2, maxContentW, contentLeft, currentY, { color: DARK_GRAY });
 
   // Warning & Storage footer inside label
@@ -534,8 +558,8 @@ export async function GET(request, { params }) {
       });
     }
 
-    // B. Match by supplier + dose
-    if (!targetVariant && (suppParam || doseParam)) {
+    // B. Match by supplier + dose + format
+    if (!targetVariant && (suppParam || doseParam || formatParam)) {
       targetVariant = product.variants?.find(v => {
         let matchSupp = true;
         if (suppParam && suppParam !== 'all') {
@@ -559,7 +583,16 @@ export async function GET(request, { params }) {
       });
     }
 
-    // C. Fallback: Preferred variant or first active variant from product
+    // C. Fallback: Variant matching formatParam or preferred variant
+    if (!targetVariant && formatParam && formatParam !== 'all') {
+      const reqF = String(formatParam).toLowerCase().replace(/[-_\s]+/g, '');
+      targetVariant = product.variants?.find(v => {
+        const f = String(v.presentation || v.presentationName || v.format || '').toLowerCase().replace(/[-_\s]+/g, '');
+        return f.includes(reqF) || reqF.includes(f);
+      });
+    }
+
+    // D. Final Fallback: Preferred variant or first active variant from product
     if (!targetVariant) {
       targetVariant = product.variants?.find(v => v.isPreferred) || product.variants?.[0] || {};
     }

@@ -440,6 +440,123 @@
   }
 }
 
+/* Multi-Format Directives Card */
+.mpm-directives-card {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 0.85rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.mpm-directives-card.active-highlight {
+  border: 1.5px solid #0d9488 !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.08) !important;
+}
+
+.mpm-directives-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding-bottom: 0.4rem !important;
+}
+
+.mpm-directives-badge {
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 4px !important;
+}
+
+.mpm-directives-badge.nasal {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+.mpm-directives-badge.pen {
+  background: #f0fdfa !important;
+  color: #0f766e !important;
+  border: 1px solid #99f6e4 !important;
+}
+
+.mpm-directives-badge.vial {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.mpm-directives-note {
+  font-size: 0.68rem !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+
+/* Presentation Label Switcher Toolbar */
+.mpm-format-switch-bar {
+  width: 100% !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 0.75rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+.mpm-format-switch-title {
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+.mpm-format-switch-pills {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  flex-wrap: wrap !important;
+}
+
+.mpm-format-pill-btn {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 0.35rem 0.65rem !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  transition: all 0.15s ease !important;
+}
+
+.mpm-format-pill-btn:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.mpm-format-pill-btn.active {
+  background: #003666 !important;
+  color: #ffffff !important;
+  border-color: #003666 !important;
+  box-shadow: 0 1px 3px rgba(0, 54, 102, 0.25) !important;
+}
+
 /* Footer / QR */
 .mpm-sheet-footer {
   border-top: 2px solid #0f172a !important;
