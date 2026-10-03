@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
-import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag, Package, RotateCcw, MessageCircle, Eye } from '@/lib/icons';
+import {
+  Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
+  Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
+  ClipboardCheck, Syringe, Send, Receipt
+} from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
+
+// Determines whether a prescription contains injectable peptides / biologics.
+// Used to gate peptide-specific actions (Syringe Guide, Pharmapolis stickers).
+function hasPeptideItems(rx) {
+  const items = rx.items || rx.compounds || rx.products || rx.prescriptionLines || [];
+  if (!items.length) return false;
+  const PEPTIDE_KEYWORDS = /peptide|bpc|ghk|tb-|igf|nad\+?|selank|semax|epithalon|ipamorelin|cjc|sermorelin|semaglutide|tirzepatide|retatrutide|tesamorelin|dsip|pt-141|thymosin|mots|ss-31|humanin|kisspeptin|dihexa|kpv|mgf|melanotan|oxytocin|hcg|syringe|injection|vial|subcutaneous|sc\b/i;
+  return items.some(i => {
+    const name = (i.name || i.productName || i.product_title || '').toLowerCase();
+    const category = (i.category || '').toLowerCase();
+    const route = (i.route || '').toLowerCase();
+    return PEPTIDE_KEYWORDS.test(name) || category.includes('peptide') || category.includes('biologic') || route === 'sc' || route === 'im' || route === 'iv';
+  });
+}
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
 import { normalizeRxStatus, RX_STATUS_LABELS } from '../../../lib/normalizeRxStatus';
@@ -351,357 +369,294 @@ export const getPrescriptionColumns = (options = {}) => {
           );
         }
         
+        const isPeptideRx = hasPeptideItems(rx);
+
         const actions = [
-          // ── PRIMARY QUICK ACTION: View Prescription ─────────────────────
+          // ── PRIMARY ─────────────────────────────────────────────────────
           {
             type: 'action',
-            label: 'View Prescription',
+            label: 'View prescription',
             icon: Eye,
             isPrimary: true,
             onClick: () => {
-              // Dispatches to the parent table's selectedItem state via a custom event
-              // so PrescriptionDetailModal opens (same as row click, but from action menu)
               window.dispatchEvent(new CustomEvent('OPEN_PRESCRIPTION_VIEW', { detail: { rx } }));
             }
           },
-          // ── AI ENRICHMENT QUICK ACTION ──────────────────────────────────
           {
             type: 'action',
-            label: '✨ Enrich with AI (Auto-Repair)',
+            label: 'Enrich with AI',
             icon: Sparkles,
             onClick: () => {
-              if (onEnrich) {
-                onEnrich(rx);
-              } else {
-                toast.error('Enrichment handler not configured');
-              }
+              if (onEnrich) onEnrich(rx);
+              else toast.error('Enrichment handler not configured');
+            }
+          },
+          // ── CLINICAL ────────────────────────────────────────────────────
+          {
+            type: 'action',
+            label: 'AI prescription review',
+            icon: ClipboardCheck,
+            onClick: () => {
+              openPrescriptionAI({
+                id: rx.id,
+                status: rx.status,
+                createdAt: rx.createdAt || rx.dateIssued,
+                patientName: rx.patient?.name || rx.patientName,
+                patientAge: rx.patient?.age || rx.patientAge,
+                patientWeight: rx.patient?.weight,
+                patientGoals: rx.patient?.goals || rx.goals,
+                patientConditions: rx.patient?.conditions,
+                patientAllergies: rx.patient?.allergies,
+                patient: rx.patient,
+                doctorName: rx.doctor?.name || rx.doctorName,
+                doctorSpecialty: rx.doctor?.specialty,
+                doctor: rx.doctor,
+                protocolId: rx.protocolId,
+                protocol: rx.protocol,
+                items: rx.items || rx.compounds || rx.products || [],
+                instructions: rx.instructions || rx.generalNotes,
+                clinicalNotes: rx.clinicalNotes,
+                source: rx.source,
+              }, {
+                autoGenerate: false,
+                displayText: `Rx Review: ${rx.patient?.name || rx.patientName || rx.id}`,
+              });
             }
           },
           {
             type: 'clone',
-            label: 'Clone / Re-emit Prescription',
-              onClick: () => {
-                if (onRefill) {
-                  onRefill(rx);
-                } else {
-                  toast.success('Cloning prescription...');
-                }
-              }
-            },
-            {
-              type: 'sparkles',
-              label: 'AI Prescription Review',
-              onClick: () => {
-                openPrescriptionAI({
-                  id: rx.id,
-                  status: rx.status,
-                  createdAt: rx.createdAt || rx.dateIssued,
-                  patientName: rx.patient?.name || rx.patientName,
-                  patientAge: rx.patient?.age || rx.patientAge,
-                  patientWeight: rx.patient?.weight,
-                  patientGoals: rx.patient?.goals || rx.goals,
-                  patientConditions: rx.patient?.conditions,
-                  patientAllergies: rx.patient?.allergies,
-                  patient: rx.patient,
-                  doctorName: rx.doctor?.name || rx.doctorName,
-                  doctorSpecialty: rx.doctor?.specialty,
-                  doctor: rx.doctor,
-                  protocolId: rx.protocolId,
-                  protocol: rx.protocol,
-                  items: rx.items || rx.compounds || rx.products || [],
-                  instructions: rx.instructions || rx.generalNotes,
-                  clinicalNotes: rx.clinicalNotes,
-                  source: rx.source,
-                }, {
-                  autoGenerate: false,
-                  displayText: `Rx Review: ${rx.patient?.name || rx.patientName || rx.id}`,
-                });
-              }
-            },
-            {
-              type: 'action',
-              label: 'Send Items to Active Workspace',
-              icon: Package,
-              onClick: () => {
-                const rawItems = rx.items || rx.compounds || rx.products || [];
-                const patientName = rx.patient?.name || rx.patientName || 'Patient';
-                const patientId = rx.patientId || rx.patient?.id || '';
-
-                if (!rawItems.length) {
-                  toast.error('This prescription has no items to send');
-                  return;
-                }
-
-                const itemsToAdd = rawItems.map((i, idx) => ({
-                  id: i.id || i.variantId || i.productId || `rx_item_${Date.now()}_${idx}`,
-                  productId: i.productId || i.id,
-                  variantId: i.variantId || i.id,
-                  canonicalName: i.name || i.productName || i.product_title || 'Medication',
-                  sku: i.sku || '',
-                  dosage: i.dosage || i.dose || '',
-                  format: i.format || i.dosage_form || 'Vial',
-                  quantity: parseInt(i.quantity, 10) || 1,
-                  unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                  price: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                  unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                  supplierCost: parseFloat(i.supplierCost || 0),
-                  supplierName: rx.supplierName || 'Pharmapolis Ltd',
-                  category: i.category || 'Prescription Biologics',
-                  prescriptionId: rx.id,
-                  prescriptionCode: rx.prescriptionCode || rx.id,
-                  patientName,
-                  patientId,
-                }));
-
-                const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
-
-                addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
-                setTargetEntity({
-                  type: 'patient',
-                  id: patientId,
-                  name: patientName,
-                  email: rx.patient?.email || rx.patientEmail || '',
-                  phone: rx.patient?.phone || rx.patientPhone || '',
-                  fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
-                }, activeWorkspaceId);
-                setOperationType('sell_prescription', activeWorkspaceId);
-                setWorkspaceIntent('sell', activeWorkspaceId);
-                setDrawerOpen(true);
-                toast.success(`${itemsToAdd.length} compounds sent to workspace (${patientName})`);
-              }
-            },
-            // 🔁 Quick Refill / Repetir Prescripción
-            {
-              type: 'action',
-              label: '🔁 Quick Refill (Renew Rx)',
-              icon: RotateCcw,
-              onClick: () => {
-                if (options.onRefill) {
-                  options.onRefill(rx);
-                  return;
-                }
-                const rawItems = rx.items || rx.compounds || rx.products || [];
-                const patientName = rx.patient?.name || rx.patientName || 'Patient';
-                const patientId = rx.patientId || rx.patient?.id || '';
-
-                if (!rawItems.length) {
-                  toast.error('This prescription has no items to refill');
-                  return;
-                }
-
-                const itemsToAdd = rawItems.map((i, idx) => ({
-                  id: i.id || i.variantId || i.productId || `rx_refill_${Date.now()}_${idx}`,
-                  productId: i.productId || i.id,
-                  variantId: i.variantId || i.id,
-                  canonicalName: i.name || i.productName || i.product_title || 'Medication',
-                  sku: i.sku || '',
-                  dosage: i.dosage || i.dose || '',
-                  format: i.format || i.dosage_form || 'Vial',
-                  quantity: parseInt(i.quantity, 10) || 1,
-                  unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                  price: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                  unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                  supplierCost: parseFloat(i.supplierCost || 0),
-                  supplierName: rx.supplierName || 'Pharmapolis Ltd',
-                  category: i.category || 'Prescription Biologics',
-                  prescriptionId: rx.id,
-                  prescriptionCode: rx.prescriptionCode || rx.id,
-                  patientName,
-                  patientId,
-                }));
-
-                const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
-
-                addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
-                setTargetEntity({
-                  type: 'patient',
-                  id: patientId,
-                  name: patientName,
-                  email: rx.patient?.email || rx.patientEmail || '',
-                  phone: rx.patient?.phone || rx.patientPhone || '',
-                  fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
-                }, activeWorkspaceId);
-                setOperationType('sell_prescription', activeWorkspaceId);
-                setWorkspaceIntent('prescribe', activeWorkspaceId);
-                setDrawerOpen(true);
-                toast.success(`Refill loaded into workspace for ${patientName}`);
-              }
-            },
-            // 📋 Guía de Administración para Paciente
-            {
-              type: 'action',
-              label: '📋 Patient Admin & Syringe Guide',
-              icon: FileText,
-              onClick: () => {
-                if (options.onOpenPatientGuide) {
-                  options.onOpenPatientGuide(rx);
-                } else {
-                  window.dispatchEvent(new CustomEvent('OPEN_PATIENT_GUIDE_MODAL', { detail: { rx } }));
-                }
-              }
-            },
-            // 📲 WhatsApp al Paciente
-            {
-              type: 'action',
-              label: '📲 Send to Patient via WhatsApp',
-              icon: MessageCircle,
-              onClick: () => {
-                const patientName = rx.patient?.name || rx.patientName || 'Patient';
-                const doctorName = rx.doctorName || rx.doctor?.name || 'Physician';
-                const patientPhone = (rx.patientPhone || rx.patient?.phone || '').replace(/[^0-9]/g, '');
-                const rawItems = rx.items || rx.compounds || rx.products || [];
-                const itemNames = rawItems.map(i => i.name || i.productName || 'Compuesto').join(', ');
-                
-                const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
-                const message = `Estimado/a ${patientName}, el ${doctorName} ha emitido su prescripción personalizada para ${itemNames || 'su tratamiento'}. Puede acceder a los detalles y confirmar la entrega desde su portal: ${origin}/patient/prescriptions. Saludos cordiales.`;
-                
-                if (patientPhone) {
-                  const url = `https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`;
-                  window.open(url, '_blank', 'noopener,noreferrer');
-                  toast.success(`Abriendo WhatsApp para ${patientName}…`);
-                } else {
-                  navigator.clipboard.writeText(message);
-                  toast.success('Mensaje copiado al portapapeles (paciente sin teléfono registrado)');
-                }
-              }
-            },
-            ...(!isDoctor ? [{
-              type: 'create_quote',
-              label: 'Create Quotation from Prescription',
-              icon: FileText,
-              onClick: () => {
-                const patient = rx.patient?.name || rx.patientName || 'Patient';
-                window.dispatchEvent(new CustomEvent('open-quotation-wizard', {
-                  detail: {
-                    type: 'prescription',
-                    prescriptionId: rx.id,
-                    rxId: rx.id,
-                    patientId: rx.patientId || rx.patient?.id,
-                    patientName: patient,
-                    doctorId: rx.doctorId || rx.doctor?.id,
-                    doctorName: rx.doctor?.name || rx.doctorName || '',
-                    items: (rx.items || rx.compounds || rx.products || []).map(i => ({
-                      productId: i.productId || i.id,
-                      name: i.name || i.productName || i.product_title || 'Medication',
-                      dosage: i.dosage || i.dose || '',
-                      quantity: parseInt(i.quantity) || 1,
-                      unitRate: parseFloat(i.unitPrice || i.rate || i.price || 150),
-                      supplierCost: parseFloat(i.supplierCost || (i.unitPrice ? i.unitPrice * 0.55 : 85))
-                    }))
-                  }
-                }));
-              }
-            }] : []),
-            {
-              type: 'download',
-              label: 'Download PDF',
-              onClick: async () => {
-                const toastId = toast.loading('Generating Prescription PDF…');
-                try {
-                  const { generateClinicalProtocol } = await import('../../../services/pdfService');
-                  const patient = rx.patient?.name || rx.patientName || 'Patient';
-                  const asProtocol = {
-                    protocol_title: `Prescription: ${patient}`,
-                    metadata: {
-                      scientificName: `Clinical Prescription`,
-                      description: `Personalized prescription for ${patient}. Issued: ${rx.createdAt ? (typeof rx.createdAt.toDate === 'function' ? rx.createdAt.toDate().toLocaleDateString() : new Date(rx.createdAt).toLocaleDateString()) : (rx.dateIssued || 'N/A')}`
-                    },
-                    phases: [{
-                      phase_title: 'Primary Treatment',
-                      start_week: 1,
-                      end_week: parseInt(rx.duration) || 4,
-                      drugs_used: (rx.items || rx.compounds || rx.products || []).map(i => ({
-                        product_title: i.name || i.productName || i.product_title || 'Medication',
-                        product_slug: i.product_slug || i.name || '',
-                        weekly_dose: i.dosage || i.dose || i.quantity || '',
-                        dosing_frequency: i.frequency || '',
-                        route: i.route || 'SC',
-                        vial_strength_used: i.strength || '',
-                        description: i.instructions || ''
-                      }))
-                    }]
-                  };
-                  await generateClinicalProtocol(asProtocol, { user: { name: patient } });
-                  toast.success('Prescription PDF downloaded', { id: toastId });
-                } catch (err) {
-                  console.error('PDF export error:', err);
-                  toast.error('Failed to generate PDF: ' + err.message, { id: toastId });
-                }
-              }
-            },
-            ...(canGenerateLabels ? [
-              {
-                type: 'action',
-                label: 'Pharmapolis A4 Stickers (PDF)',
-                icon: Tag,
-                onClick: async () => {
-                  const toastId = toast.loading('Generating Pharmapolis A4 Stickers…');
-                  try {
-                    const { generatePharmapolisStickersPDF } = await import('../../../services/pharmapolisLabelService');
-                    const patientObj = rx.patient || {
-                      name: rx.patientName || 'Patient',
-                      dob: rx.patientDob || rx.dob || '—',
-                      fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
-                    };
-                    await generatePharmapolisStickersPDF(patientObj, [rx]);
-                    toast.success('Pharmapolis A4 Stickers downloaded!', { id: toastId });
-                  } catch (err) {
-                    console.error('Sticker export error:', err);
-                    toast.error('Failed to generate stickers: ' + err.message, { id: toastId });
-                  }
-                }
-              },
-              {
-                type: 'action',
-                label: 'Pharmapolis Sticker (PNG)',
-                icon: Download,
-                onClick: async () => {
-                  const toastId = toast.loading('Generating Sticker PNG…');
-                  try {
-                    const { generatePharmapolisStickerPNG } = await import('../../../services/pharmapolisLabelService');
-                    const patientObj = rx.patient || {
-                      name: rx.patientName || 'Patient',
-                      dob: rx.patientDob || rx.dob || '—',
-                      fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
-                    };
-                    const dataUrl = await generatePharmapolisStickerPNG(patientObj, rx);
-                    const link = document.createElement('a');
-                    link.href = dataUrl;
-                    const slug = (patientObj.name || 'patient').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                    link.download = `pharmapolis_sticker_${slug}_${rx.id?.slice(0, 6)}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    toast.success('Sticker PNG downloaded!', { id: toastId });
-                  } catch (err) {
-                    console.error('PNG export error:', err);
-                    toast.error('Failed to generate PNG: ' + err.message, { id: toastId });
-                  }
-                }
-              }
-            ] : []),
-            {
-              type: 'delete',
-              label: 'Delete Prescription',
-              onClick: () => {
-                const patient = rx.patient?.name || rx.patientName || 'this patient';
-                notifier.confirmCritical(
-                  `Delete prescription #${rx.id?.slice(0, 6)} for ${patient}? This cannot be undone.`,
-                  async () => {
-                    const toastId = toast.loading('Deleting prescription\u2026');
-                    try {
-                      await prescriptionRepository.deletePrescription(rx.id);
-                      toast.success('Prescription deleted', { id: toastId });
-                      if (onRefresh) onRefresh();
-                    } catch (err) {
-                      console.error('Delete error:', err);
-                      toast.error('Failed to delete: ' + err.message, { id: toastId });
-                    }
-                  }
-                );
+            label: 'Clone / re-emit prescription',
+            onClick: () => {
+              if (onRefill) onRefill(rx);
+              else toast.success('Cloning prescription...');
+            }
+          },
+          {
+            type: 'action',
+            label: 'Quick refill',
+            icon: RotateCcw,
+            onClick: () => {
+              if (options.onRefill) { options.onRefill(rx); return; }
+              const rawItems = rx.items || rx.compounds || rx.products || [];
+              const patientName = rx.patient?.name || rx.patientName || 'Patient';
+              const patientId = rx.patientId || rx.patient?.id || '';
+              if (!rawItems.length) { toast.error('No items to refill'); return; }
+              const itemsToAdd = rawItems.map((i, idx) => ({
+                id: i.id || i.variantId || i.productId || `rx_refill_${Date.now()}_${idx}`,
+                productId: i.productId || i.id, variantId: i.variantId || i.id,
+                canonicalName: i.name || i.productName || i.product_title || 'Medication',
+                sku: i.sku || '', dosage: i.dosage || i.dose || '',
+                format: i.format || i.dosage_form || 'Vial',
+                quantity: parseInt(i.quantity, 10) || 1,
+                unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                supplierCost: parseFloat(i.supplierCost || 0),
+                supplierName: rx.supplierName || 'Pharmapolis Ltd',
+                category: i.category || 'Prescription Biologics',
+                prescriptionId: rx.id,
+                prescriptionCode: rx.prescriptionCode || rx.id,
+                patientName, patientId,
+              }));
+              const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+              addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
+              setTargetEntity({ type: 'patient', id: patientId, name: patientName,
+                email: rx.patient?.email || rx.patientEmail || '',
+                phone: rx.patient?.phone || rx.patientPhone || '',
+                fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
+              }, activeWorkspaceId);
+              setOperationType('sell_prescription', activeWorkspaceId);
+              setWorkspaceIntent('prescribe', activeWorkspaceId);
+              setDrawerOpen(true);
+              toast.success(`Refill loaded into workspace for ${patientName}`);
+            }
+          },
+          // ── PEPTIDE-SPECIFIC (only shown when injectable items detected) ─
+          ...(isPeptideRx && !isDoctor ? [{
+            type: 'action',
+            label: 'Patient administration guide',
+            icon: Syringe,
+            onClick: () => {
+              if (options.onOpenPatientGuide) options.onOpenPatientGuide(rx);
+              else window.dispatchEvent(new CustomEvent('OPEN_PATIENT_GUIDE_MODAL', { detail: { rx } }));
+            }
+          }] : []),
+          // ── PROCUREMENT & COMMUNICATION ─────────────────────────────────
+          {
+            type: 'action',
+            label: 'Send items to workspace',
+            icon: Package,
+            onClick: () => {
+              const rawItems = rx.items || rx.compounds || rx.products || [];
+              const patientName = rx.patient?.name || rx.patientName || 'Patient';
+              const patientId = rx.patientId || rx.patient?.id || '';
+              if (!rawItems.length) { toast.error('No items in this prescription'); return; }
+              const itemsToAdd = rawItems.map((i, idx) => ({
+                id: i.id || i.variantId || i.productId || `rx_item_${Date.now()}_${idx}`,
+                productId: i.productId || i.id, variantId: i.variantId || i.id,
+                canonicalName: i.name || i.productName || i.product_title || 'Medication',
+                sku: i.sku || '', dosage: i.dosage || i.dose || '',
+                format: i.format || i.dosage_form || 'Vial',
+                quantity: parseInt(i.quantity, 10) || 1,
+                unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                supplierCost: parseFloat(i.supplierCost || 0),
+                supplierName: rx.supplierName || 'Pharmapolis Ltd',
+                category: i.category || 'Prescription Biologics',
+                prescriptionId: rx.id, prescriptionCode: rx.prescriptionCode || rx.id,
+                patientName, patientId,
+              }));
+              const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+              addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
+              setTargetEntity({ type: 'patient', id: patientId, name: patientName,
+                email: rx.patient?.email || rx.patientEmail || '',
+                phone: rx.patient?.phone || rx.patientPhone || '',
+                fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
+              }, activeWorkspaceId);
+              setOperationType('sell_prescription', activeWorkspaceId);
+              setWorkspaceIntent('sell', activeWorkspaceId);
+              setDrawerOpen(true);
+              toast.success(`${itemsToAdd.length} items sent to workspace`);
+            }
+          },
+          {
+            type: 'action',
+            label: 'Send to patient via WhatsApp',
+            icon: MessageCircle,
+            onClick: () => {
+              const patientName = rx.patient?.name || rx.patientName || 'Patient';
+              const doctorName = rx.doctorName || rx.doctor?.name || 'Physician';
+              const patientPhone = (rx.patientPhone || rx.patient?.phone || '').replace(/[^0-9]/g, '');
+              const rawItems = rx.items || rx.compounds || rx.products || [];
+              const itemNames = rawItems.map(i => i.name || i.productName || 'Compound').join(', ');
+              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+              const message = `Dear ${patientName}, ${doctorName} has issued your personalised prescription for ${itemNames || 'your treatment'}. Access details at: ${origin}/patient/prescriptions`;
+              if (patientPhone) {
+                window.open(`https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+                toast.success(`Opening WhatsApp for ${patientName}`);
+              } else {
+                navigator.clipboard.writeText(message);
+                toast.success('Message copied — no phone number on file');
               }
             }
-          ];
+          },
+          ...(!isDoctor ? [{
+            type: 'create_quote',
+            label: 'Create quotation from prescription',
+            icon: Receipt,
+            onClick: () => {
+              const patient = rx.patient?.name || rx.patientName || 'Patient';
+              window.dispatchEvent(new CustomEvent('open-quotation-wizard', {
+                detail: {
+                  type: 'prescription', prescriptionId: rx.id, rxId: rx.id,
+                  patientId: rx.patientId || rx.patient?.id,
+                  patientName: patient,
+                  doctorId: rx.doctorId || rx.doctor?.id,
+                  doctorName: rx.doctor?.name || rx.doctorName || '',
+                  items: (rx.items || rx.compounds || rx.products || []).map(i => ({
+                    productId: i.productId || i.id,
+                    name: i.name || i.productName || i.product_title || 'Medication',
+                    dosage: i.dosage || i.dose || '',
+                    quantity: parseInt(i.quantity) || 1,
+                    unitRate: parseFloat(i.unitPrice || i.rate || i.price || 150),
+                    supplierCost: parseFloat(i.supplierCost || (i.unitPrice ? i.unitPrice * 0.55 : 85))
+                  }))
+                }
+              }));
+            }
+          }] : []),
+          // ── EXPORTS ─────────────────────────────────────────────────────
+          {
+            type: 'download',
+            label: 'Download PDF',
+            onClick: async () => {
+              const toastId = toast.loading('Generating prescription PDF…');
+              try {
+                const { generateClinicalProtocol } = await import('../../../services/pdfService');
+                const patient = rx.patient?.name || rx.patientName || 'Patient';
+                const asProtocol = {
+                  protocol_title: `Prescription: ${patient}`,
+                  metadata: { scientificName: 'Clinical Prescription', description: `Personalised prescription for ${patient}. Issued: ${rx.createdAt ? (typeof rx.createdAt.toDate === 'function' ? rx.createdAt.toDate().toLocaleDateString() : new Date(rx.createdAt).toLocaleDateString()) : (rx.dateIssued || 'N/A')}` },
+                  phases: [{ phase_title: 'Primary Treatment', start_week: 1, end_week: parseInt(rx.duration) || 4,
+                    drugs_used: (rx.items || rx.compounds || rx.products || []).map(i => ({
+                      product_title: i.name || i.productName || i.product_title || 'Medication',
+                      product_slug: i.product_slug || i.name || '',
+                      weekly_dose: i.dosage || i.dose || i.quantity || '',
+                      dosing_frequency: i.frequency || '', route: i.route || 'SC',
+                      vial_strength_used: i.strength || '', description: i.instructions || ''
+                    }))
+                  }]
+                };
+                await generateClinicalProtocol(asProtocol, { user: { name: patient } });
+                toast.success('PDF downloaded', { id: toastId });
+              } catch (err) {
+                toast.error('Failed to generate PDF: ' + err.message, { id: toastId });
+              }
+            }
+          },
+          // Pharmapolis sticker exports — only relevant for compounding/injectable prescriptions
+          ...(isPeptideRx && canGenerateLabels ? [
+            {
+              type: 'action',
+              label: 'Pharmapolis A4 stickers (PDF)',
+              icon: Tag,
+              onClick: async () => {
+                const toastId = toast.loading('Generating A4 stickers…');
+                try {
+                  const { generatePharmapolisStickersPDF } = await import('../../../services/pharmapolisLabelService');
+                  const patientObj = rx.patient || { name: rx.patientName || 'Patient', dob: rx.patientDob || rx.dob || '—', fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8) };
+                  await generatePharmapolisStickersPDF(patientObj, [rx]);
+                  toast.success('Stickers downloaded', { id: toastId });
+                } catch (err) {
+                  toast.error('Failed: ' + err.message, { id: toastId });
+                }
+              }
+            },
+            {
+              type: 'action',
+              label: 'Pharmapolis sticker (PNG)',
+              icon: Download,
+              onClick: async () => {
+                const toastId = toast.loading('Generating sticker PNG…');
+                try {
+                  const { generatePharmapolisStickerPNG } = await import('../../../services/pharmapolisLabelService');
+                  const patientObj = rx.patient || { name: rx.patientName || 'Patient', dob: rx.patientDob || rx.dob || '—', fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8) };
+                  const dataUrl = await generatePharmapolisStickerPNG(patientObj, rx);
+                  const link = document.createElement('a');
+                  link.href = dataUrl;
+                  const slug = (patientObj.name || 'patient').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                  link.download = `pharmapolis_${slug}_${rx.id?.slice(0, 6)}.png`;
+                  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                  toast.success('PNG downloaded', { id: toastId });
+                } catch (err) {
+                  toast.error('Failed: ' + err.message, { id: toastId });
+                }
+              }
+            }
+          ] : []),
+          // ── DESTRUCTIVE ─────────────────────────────────────────────────
+          {
+            type: 'delete',
+            label: 'Delete prescription',
+            onClick: () => {
+              const patient = rx.patient?.name || rx.patientName || 'this patient';
+              notifier.confirmCritical(
+                `Delete prescription #${rx.id?.slice(0, 6)} for ${patient}? This cannot be undone.`,
+                async () => {
+                  const toastId = toast.loading('Deleting…');
+                  try {
+                    await prescriptionRepository.deletePrescription(rx.id);
+                    toast.success('Prescription deleted', { id: toastId });
+                    if (onRefresh) onRefresh();
+                  } catch (err) {
+                    toast.error('Failed to delete: ' + err.message, { id: toastId });
+                  }
+                }
+              );
+            }
+          }
+        ];
 
           return (
             <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
