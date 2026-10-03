@@ -343,10 +343,9 @@
   font-size: 0.92rem;
   font-weight: 850;
   color: #003666;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 260px;
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.3;
 }
 
 .pds-gcp-switcher-pill {
@@ -1397,6 +1396,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Compact inline format selector in the header summary panel */
+.pds-header-format-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pds-header-format-select-wrap select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .pds-summary-fda-strip {

@@ -297,46 +297,55 @@ export default function PeptideMonographHeader({
             <div className="pds-summary-cell">
               <span className="pds-summary-label">Presentation</span>
               {availableFormats && availableFormats.length > 1 ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
-                  {availableFormats.map(fmt => {
-                    const fmtId = fmt.id;
-                    const isActive = fmtId === (activeFormat?.id || activeFormat);
-                    const isFmtSpray = fmtId.includes('spray') || fmtId.includes('nasal');
-                    const isFmtPen = fmtId.includes('pen') || fmtId.includes('cartridge');
-                    const isFmtVial = fmtId.includes('vial');
-                    const shortLabel = isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : isFmtVial ? 'Lyophilized Vial' : (fmt.name || fmtId);
-                    return (
-                      <button
-                        key={fmtId}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          triggerHaptic('selection');
-                          onFormatChange?.(fmtId);
-                        }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px',
-                          padding: '2px 7px',
-                          borderRadius: '4px',
-                          fontSize: '0.70rem',
-                          fontWeight: isActive ? 800 : 600,
-                          border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
-                          background: isActive ? '#003666' : '#ffffff',
-                          color: isActive ? '#ffffff' : '#475569',
-                          cursor: 'pointer',
-                          touchAction: 'manipulation',
-                          transition: 'all 0.15s ease',
-                          boxShadow: isActive ? '0 1px 2px rgba(0, 54, 102, 0.2)' : 'none'
-                        }}
-                        title={`Switch view to ${shortLabel}`}
-                      >
-                        <span style={{ fontSize: '0.75rem' }}>{isFmtSpray ? '👃' : isFmtPen ? '💉' : '🧪'}</span>
-                        <span>{shortLabel}</span>
-                      </button>
-                    );
-                  })}
+                <div className="pds-header-format-select-wrap" style={{ marginTop: '4px' }}>
+                  <span style={{ fontSize: '0.9rem', lineHeight: 1, pointerEvents: 'none', position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)' }}>
+                    {(() => {
+                      const af = availableFormats.find(f => f.id === (activeFormat?.id || activeFormat));
+                      if (!af) return '🧪';
+                      const id = af.id;
+                      if (id.includes('spray') || id.includes('nasal')) return '💨';
+                      if (id.includes('pen') || id.includes('cartridge')) return '🖊️';
+                      return '🧪';
+                    })()}
+                  </span>
+                  <select
+                    value={activeFormat?.id || activeFormat || ''}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      triggerHaptic('selection');
+                      onFormatChange?.(e.target.value);
+                    }}
+                    style={{
+                      appearance: 'none',
+                      WebkitAppearance: 'none',
+                      border: '1.5px solid #003666',
+                      borderRadius: '6px',
+                      background: '#ffffff',
+                      color: '#003666',
+                      fontWeight: 700,
+                      fontSize: '0.72rem',
+                      padding: '3px 22px 3px 26px',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width%3D'12' height%3D'12' viewBox%3D'0 0 24 24' fill%3D'none' stroke%3D'%23003666' stroke-width%3D'2.5' stroke-linecap%3D'round' stroke-linejoin%3D'round'%3E%3Cpolyline points%3D'6 9 12 15 18 9'%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 5px center',
+                      backgroundSize: '10px',
+                      fontFamily: 'inherit',
+                      minWidth: '130px',
+                      boxShadow: '0 1px 3px rgba(0, 54, 102, 0.12)',
+                    }}
+                  >
+                    {availableFormats.map(fmt => {
+                      const id = fmt.id;
+                      const isFmtSpray = id.includes('spray') || id.includes('nasal');
+                      const isFmtPen = id.includes('pen') || id.includes('cartridge');
+                      const shortLabel = isFmtSpray ? 'Nasal Spray' : isFmtPen ? 'Pre-filled Pen' : (fmt.name || id);
+                      return (
+                        <option key={id} value={id}>{shortLabel}</option>
+                      );
+                    })}
+                  </select>
                 </div>
               ) : (
                 <strong className="pds-summary-value">{presentation}</strong>

@@ -44,9 +44,10 @@ export default function OverviewTab({
   const isSublingual = rawFmt.includes('sublingual') || rawFmt.includes('drop');
   const isPen = rawFmt.includes('pen') || rawFmt.includes('cartridge');
 
-  const defaultIndication = isPt141 
+  // Note: product.category is intentionally excluded — it stores type ('peptide'), not a clinical indication.
+  const defaultIndication = isPt141
     ? 'Hypoactive Sexual Desire Disorder (HSDD) & Non-vascular Erectile Dysfunction'
-    : (product.primaryIndication || product.indication || product.category || product.targetSystem || 'Targeted Physiological & Cellular Optimization');
+    : (product.primaryIndication || product.indication || product.targetSystem || product.clinicalCategory || 'Targeted Physiological & Cellular Optimization');
 
   const defaultRoute = isSpray
     ? 'Intranasal Mucosal (Metered needle-free spray, 1–2 sprays per nostril)'
