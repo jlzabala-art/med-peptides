@@ -7,7 +7,7 @@ import {
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
 // Determines whether a prescription contains injectable peptides / biologics.
-// Used to gate peptide-specific actions (Syringe Guide, Pharmapolis stickers).
+// Used only to gate the clinical 'Patient administration guide' action.
 function hasPeptideItems(rx) {
   const items = rx.items || rx.compounds || rx.products || rx.prescriptionLines || [];
   if (!items.length) return false;
@@ -18,6 +18,18 @@ function hasPeptideItems(rx) {
     const route = (i.route || '').toLowerCase();
     return PEPTIDE_KEYWORDS.test(name) || category.includes('peptide') || category.includes('biologic') || route === 'sc' || route === 'im' || route === 'iv';
   });
+}
+
+// Determines whether a prescription is fulfilled by Pharmapolis (any known alias).
+// Used to gate Pharmapolis A4 sticker and PNG label exports — independent of product type.
+const PHARMAPOLIS_ALIASES = /pharmapolis/i;
+function isPharmopolisRx(rx) {
+  // Check top-level supplier field
+  const topSupplier = rx.supplierName || rx.supplier || rx.pharmacy || '';
+  if (PHARMAPOLIS_ALIASES.test(topSupplier)) return true;
+  // Check individual line items
+  const items = rx.items || rx.compounds || rx.products || rx.prescriptionLines || [];
+  return items.some(i => PHARMAPOLIS_ALIASES.test(i.supplierName || i.supplier || ''));
 }
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
@@ -370,6 +382,7 @@ export const getPrescriptionColumns = (options = {}) => {
         }
         
         const isPeptideRx = hasPeptideItems(rx);
+        const isPharmopolisSupplier = isPharmopolisRx(rx);
 
         const actions = [
           // ── PRIMARY ─────────────────────────────────────────────────────
@@ -596,7 +609,7 @@ export const getPrescriptionColumns = (options = {}) => {
             }
           },
           // Pharmapolis sticker exports — only relevant for compounding/injectable prescriptions
-          ...(isPeptideRx && canGenerateLabels ? [
+          ...(isPharmopolisSupplier && canGenerateLabels ? [
             {
               type: 'action',
               label: 'Pharmapolis A4 stickers (PDF)',
