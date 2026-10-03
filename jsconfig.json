@@ -19,5 +19,13 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.js", "**/*.jsx"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".firebase",
+    "out",
+    "build",
+    "functions/node_modules",
+    "functions-*/node_modules"
+  ]
 }

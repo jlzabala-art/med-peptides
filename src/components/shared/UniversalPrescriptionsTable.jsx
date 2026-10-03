@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone, Sparkles } from 'lucide-react';
+import { FileText, FilePlus, ScanText, Stethoscope, Box, Download, RefreshCw, Share2, Phone, Sparkles, Merge } from 'lucide-react';
 import PrescriptionDetailModal from '../../features/prescriptions/components/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../admin/protocols/ProtocolDrawerContent';
 import ProductDetailsDrawer from '../admin/products/ProductDetailsDrawer';
 import StandardDrawer from '../ui/StandardDrawer';
 import { useFirestorePaginatedCollection } from '../../hooks/data/useFirestorePaginatedCollection';
+import { usePrescriptionsRealtimeSync } from '../../hooks/data/usePrescriptionsRealtimeSync';
 import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
 import PageHeader from '../ui/PageHeader';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
@@ -150,6 +151,17 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     initialData: initialData?.length > 0 ? initialData : undefined,
   });
 
+  // Real-time synchronization (GCP UX standard: replaces manual Refresh button)
+  const { hasNewData, clearNewData } = usePrescriptionsRealtimeSync({
+    whereConditions: useMemo(() => {
+      const conds = [];
+      if (effectiveDoctorId) conds.push(['doctorId', '==', effectiveDoctorId]);
+      if (patientId) conds.push(['patientId', '==', patientId]);
+      return conds;
+    }, [effectiveDoctorId, patientId]),
+    enabled: !isAlgoliaActive,
+  });
+
   const displayPrescriptions = paginatedPrescriptions;
 
   const algoliaFacetFilters = useMemo(() => {
@@ -222,25 +234,34 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     const result = [];
     
     for (const rx of rawData) {
-      if (rx.sessionId) {
-        if (!groups[rx.sessionId]) {
-          groups[rx.sessionId] = [];
+      const groupKey = rx.rxGroupId || rx.sessionId || rx.groupCode || (rx.fagron?.boxId ? `box_${rx.fagron.boxId}` : null);
+      if (groupKey) {
+        if (!groups[groupKey]) {
+          groups[groupKey] = [];
         }
-        groups[rx.sessionId].push(rx);
+        groups[groupKey].push(rx);
       } else {
         result.push(rx);
       }
     }
     
-    for (const sessionId in groups) {
-      const members = groups[sessionId];
+    for (const groupKey in groups) {
+      const members = groups[groupKey];
       if (members.length === 1) {
         result.push(members[0]);
       } else {
+        // Sort parts by partNumber or createdAt asc
+        members.sort((a, b) => {
+          if (a.partNumber && b.partNumber) return a.partNumber - b.partNumber;
+          const ta = a.createdAt?.seconds || (a.createdAt ? new Date(a.createdAt).getTime() / 1000 : 0);
+          const tb = b.createdAt?.seconds || (b.createdAt ? new Date(b.createdAt).getTime() / 1000 : 0);
+          return ta - tb;
+        });
+
         const first = members[0];
         result.push({
           ...first,
-          id: `session_group_${sessionId}`,
+          id: `multipart_${groupKey}`,
           _isSessionGroup: true,
           _sessionCount: members.length,
           _sessionMembers: members,
@@ -281,37 +302,76 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   }, [loadProductsLazy]);
 
   const prescriptionExpandableRender = useCallback((row) => {
-    // ── SESSION GROUP: list each formulation member ─────────────────────────────────
+    // ── MULTI-PART / SESSION GROUP: list each sequential formulation/part ───────────
     if (row._isSessionGroup) {
       return (
-        <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderTop: '1px dashed #cbd5e1' }}>
-          <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', color: '#475569' }}>Formulations in Session</h4>
+        <div style={{ padding: '1rem 1.25rem', backgroundColor: '#f8fafc', borderTop: '1px dashed #cbd5e1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 600 }}>
+              Prescription Parts & Formulations ({row._sessionMembers.length} parts)
+            </h4>
+            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              Linked multi-part patient treatment sequence
+            </span>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {row._sessionMembers.map(member => (
+            {row._sessionMembers.map((member, idx) => (
               <div
                 key={member.id}
                 style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '0.75rem', backgroundColor: '#ffffff',
-                  border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer'
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
                 onClick={() => { setSelectedItem(member); loadProductsLazy(); }}
               >
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
-                    {member.treatmentType || 'Formulation'}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    {(member.items || []).map(i => i.name).join(', ') || 'No items'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: '#e0f2fe',
+                    color: '#0369a1',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}>
+                    {member.partNumber || idx + 1}
+                  </span>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}>
+                      {member.treatmentType || `Part ${member.partNumber || idx + 1}`}
+                      <span style={{ fontWeight: 400, color: '#64748b', fontSize: '0.75rem', marginLeft: '8px' }}>
+                        #{member.prescriptionCode || member.id?.slice(0, 8)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                      {(member.items || member.compounds || []).map(i => i.name || i.productName).filter(Boolean).join(', ') || 'No compounds listed'}
+                    </div>
                   </div>
                 </div>
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <button style={{
-                    padding: '4px 8px', backgroundColor: '#f1f5f9', color: '#475569',
-                    border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
+                    padding: '4px 10px',
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
                     cursor: 'pointer'
                   }}>
-                    View Details
+                    View Part
                   </button>
                 </div>
               </div>
@@ -564,6 +624,81 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         }
       },
       {
+        label: 'Merge Prescriptions',
+        icon: Merge,
+        onClick: async (selectedRows) => {
+          if (!selectedRows || selectedRows.length < 2) {
+            toast.error('Select at least 2 prescriptions to merge');
+            return;
+          }
+
+          const patientNames = Array.from(new Set(selectedRows.map(r => (r.patient?.name || r.patientName || '').toLowerCase().trim()).filter(Boolean)));
+          if (patientNames.length > 1) {
+            const confirmed = window.confirm(`The selected prescriptions belong to different patient names (${patientNames.join(', ')}). Are you sure you want to merge them into one?`);
+            if (!confirmed) return;
+          }
+
+          const toastId = toast.loading(`Merging ${selectedRows.length} prescriptions...`);
+          try {
+            const sorted = [...selectedRows].sort((a, b) => {
+              const ta = a.createdAt?.seconds || (a.createdAt ? new Date(a.createdAt).getTime() / 1000 : 0);
+              const tb = b.createdAt?.seconds || (b.createdAt ? new Date(b.createdAt).getTime() / 1000 : 0);
+              return ta - tb;
+            });
+
+            const targetRx = sorted[0];
+            const secondaryRxs = sorted.slice(1);
+
+            const existingItems = targetRx.items || targetRx.prescriptionLines || [];
+            const mergedItems = [...existingItems];
+
+            secondaryRxs.forEach(sec => {
+              const secItems = sec.items || sec.prescriptionLines || [];
+              secItems.forEach(sItem => {
+                const sName = (sItem.name || sItem.productName || '').toLowerCase().trim();
+                const sDose = (sItem.dosage || sItem.dose || '').toLowerCase().trim();
+                const alreadyExists = mergedItems.some(m => {
+                  const mName = (m.name || m.productName || '').toLowerCase().trim();
+                  const mDose = (m.dosage || m.dose || '').toLowerCase().trim();
+                  return mName === sName && (!sDose || mDose === sDose);
+                });
+                if (!alreadyExists) {
+                  mergedItems.push(sItem);
+                }
+              });
+            });
+
+            const { doc, updateDoc, serverTimestamp } = await import('firebase/firestore');
+            const { db } = await import('../../firebase');
+
+            await updateDoc(doc(db, 'prescriptions', targetRx.id), {
+              items: mergedItems,
+              prescriptionLines: mergedItems,
+              mergedFrom: secondaryRxs.map(s => s.id),
+              updatedAt: serverTimestamp(),
+              notes: `${targetRx.notes || ''}\n[Merged with duplicates: ${secondaryRxs.map(s => '#' + s.id.slice(0, 6)).join(', ')}]`.trim()
+            });
+
+            for (const sec of secondaryRxs) {
+              await updateDoc(doc(db, 'prescriptions', sec.id), {
+                status: 'cancelled',
+                mergedInto: targetRx.id,
+                updatedAt: serverTimestamp(),
+                internalNotes: `Merged into prescription #${targetRx.id}`
+              });
+            }
+
+            toast.success(`Successfully merged into Rx #${targetRx.id.slice(-6)}`, { id: toastId });
+            setSelectedIds(new Set());
+            clearNewData();
+            refresh && refresh();
+          } catch (err) {
+            console.error('Merge prescriptions error:', err);
+            toast.error('Failed to merge prescriptions: ' + err.message, { id: toastId });
+          }
+        }
+      },
+      {
         label: '📄 Export CSV',
         icon: Download,
         onClick: (selectedRows) => {
@@ -732,8 +867,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           { label: 'Import with AI', icon: Sparkles, onClick: () => setIsIntakeOpen(true) },
           { label: 'New Prescription', icon: FilePlus, onClick: () => openDrawer('rx-builder', 'new') },
           { label: 'From Clinical Protocol', icon: Stethoscope, onClick: () => setIsProtocolSearchOpen(true) },
-          { label: 'Export CSV', icon: Download, onClick: handleExportCsv },
-          { label: 'Refresh', icon: RefreshCw, onClick: () => refresh?.() }
+          { label: 'Export CSV', icon: Download, onClick: handleExportCsv }
         ]}
         actions={!readOnly ? (
           <div className="prescriptions-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -840,12 +974,59 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         resultCount={!loading && !algoliaLoading ? finalData.length : undefined}
         searchLoading={algoliaLoading}
         kpis={
-          <PrescriptionsKPIs 
-            serverKPIs={serverKPIs} 
-            filteredCount={finalData.length} 
-            isFiltered={isAlgoliaActive || (filterStatus && filterStatus.length > 0) || activeChips.length > 0} 
-            doctorId={effectiveDoctorId}
-          />
+          <>
+            {hasNewData && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '9px 16px',
+                  marginBottom: '12px',
+                  borderRadius: '8px',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  color: '#1e40af',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  boxShadow: '0 1px 3px rgba(37,99,235,0.06)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#2563eb', display: 'inline-block' }} />
+                  <span><strong>New Prescriptions Available:</strong> A new prescription was recently saved or imported.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearNewData();
+                    refresh?.();
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '5px 12px',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Update view
+                </button>
+              </div>
+            )}
+            <PrescriptionsKPIs 
+              serverKPIs={serverKPIs} 
+              filteredCount={finalData.length} 
+              isFiltered={isAlgoliaActive || (filterStatus && filterStatus.length > 0) || activeChips.length > 0} 
+              doctorId={effectiveDoctorId}
+            />
+          </>
         }
         filters={activeChips}
         data={finalData}
@@ -1100,7 +1281,10 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           <PrescriptionIntakeWorkspace
             isOpen={true}
             onClose={() => setIsIntakeOpen(false)}
-            onSaveSuccess={() => refresh?.()}
+            onSaveSuccess={() => {
+              clearNewData();
+              refresh?.();
+            }}
           />
         )}
 
