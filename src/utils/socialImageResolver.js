@@ -255,8 +255,11 @@ export function resolveSocialContent({ product, variant, code, recipient }) {
     title = spec ? `${pName} (${spec}) — Aesthetic Medicine Monograph` : `${pName} — Clinical Aesthetics Monograph`;
   } else {
     // Standard Peptides / API Compounds
-    const specDetails = [rawDose, rawFormat].filter(Boolean).join(' · ');
-    title = specDetails 
+    // NOTE: rawDose intentionally excluded from page <title>.
+    // Dose can change when the user selects a different presentation.
+    // Dose is still included in OG/social titles below for WhatsApp unfurling.
+    const specDetails = [rawFormat].filter(Boolean).join(' · ');
+    title = specDetails
       ? `${pName} (${specDetails}) — Clinical Monograph`
       : `${pName} — Clinical Technical Monograph`;
   }

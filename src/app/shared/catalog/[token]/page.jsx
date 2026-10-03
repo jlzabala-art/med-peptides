@@ -218,7 +218,8 @@ async function fetchCatalogData(supplierId, category, catalogueFilter) {
   }
 
   let productsQuery = adminDb.collection('products')
-    .where('status', 'in', ['active', 'published', 'out of stock']);
+    .where('status', 'in', ['active', 'published', 'out of stock'])
+    .limit(200); // Safety ceiling: prevents full-collection scans that hang the catalog
 
   const rawList = Array.isArray(supplierId)
     ? supplierId
@@ -250,21 +251,27 @@ async function fetchCatalogData(supplierId, category, catalogueFilter) {
     ]);
   }
 
-  // Build variants map grouped by productId directly from each product's subcollection
+  // Build variants map with controlled concurrency (batch of 25) to avoid
+  // N+1 Firestore fan-out that exhausts connection limits and freezes the page.
+  const CONCURRENT_BATCH_SIZE = 25;
   const variantsByProduct = {};
-  await Promise.all(
-    productsSnapshot.docs.map(async (doc) => {
-      const vSnap = await doc.ref.collection('variants').get();
-      const activeVars = [];
-      vSnap.docs.forEach(vd => {
-        const vData = vd.data();
-        if (vData.isActive !== false && vData.status !== 'archived') {
-          activeVars.push({ id: vd.id, ...vData });
-        }
-      });
-      variantsByProduct[doc.id] = activeVars;
-    })
-  );
+  const productDocs = productsSnapshot.docs;
+  for (let i = 0; i < productDocs.length; i += CONCURRENT_BATCH_SIZE) {
+    const batch = productDocs.slice(i, i + CONCURRENT_BATCH_SIZE);
+    await Promise.all(
+      batch.map(async (doc) => {
+        const vSnap = await doc.ref.collection('variants').get();
+        const activeVars = [];
+        vSnap.docs.forEach(vd => {
+          const vData = vd.data();
+          if (vData.isActive !== false && vData.status !== 'archived') {
+            activeVars.push({ id: vd.id, ...vData });
+          }
+        });
+        variantsByProduct[doc.id] = activeVars;
+      })
+    );
+  }
 
   const result = {
     productDocs: productsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })),
