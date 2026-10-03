@@ -2027,56 +2027,77 @@ export default function PublicDatasheetView({
           )}
 
           {/* Administration Format Tabs */}
-          <div className="pds-format-tabs">
-            {availableFormats.map(fmt => {
-              const isActive = fmt.id === activeFormatId;
-              const isPen = fmt.id.includes('pen');
-              const isCartridge = fmt.id.includes('cartridge');
-              let icon = '\ud83e\uddea';
-              let subtitle = t.formatSubVial || 'Lyophilized SubQ Cake (Sterile Vial)';
-              if (isCosmeticProduct) {
-                icon = fmt.id.includes('bottle') ? '\ud83e\uddf4' : fmt.id.includes('tube') ? '\uD83E\uDDF2' : '\ud83e\uddea';
-                subtitle = lang === 'es'
-                  ? (fmt.volume || product?.volume || '250 mL') + ' \u2014 Uso Cosm\u00e9tico Tópico'
-                  : (fmt.volume || product?.volume || '250 mL') + ' \u2014 Topical Cosmetic Use';
-              } else if (isDiagnosticKit || fmt.id.includes('test') || fmt.id.includes('blood')) {
-                icon = '\ud83e\ude78';
-                subtitle = lang === 'es' ? 'Kit Diagn\u00f3stico Capilar DBS (CE-IVDR)' : 'Capillary DBS Diagnostic Kit (CE-IVDR)';
-              } else if (isPen) {
-                icon = '\ud83d\udd8a\ufe0f';
-                subtitle = t.formatSubPen || 'Prefilled Multi-Dose Dial Device';
-              } else if (isCartridge) {
-                icon = '\ud83d\udc89';
-                subtitle = t.formatSubCart || '3 mL Multi-Dose Refill Cartridge';
-              } else if (fmt.id.includes('spray')) {
-                icon = '\ud83d\udca8';
-                subtitle = t.formatSubSpray || 'Intranasal Spray Device';
-              } else if (fmt.id.includes('capsule') || fmt.id.includes('tablet')) {
-                icon = '\ud83d\udc8a';
-                subtitle = t.formatSubOral || 'Oral Gastro-Resistant Formulation';
-              }
-
-              return (
-                <button
-                  key={fmt.id}
-                  onClick={() => {
-                    setActiveFormatId(fmt.id);
+          {/* Format Selector — GCP-style dropdown field */}
+          <div className="pds-format-selector-field">
+            <label className="pds-format-selector-label" htmlFor="format-select">
+              {t.selectFormat || 'Presentation Format'}
+            </label>
+            <div className="pds-format-selector-wrap">
+              <span className="pds-format-selector-icon" aria-hidden="true">
+                {(() => {
+                  const af = availableFormats.find(f => f.id === activeFormatId);
+                  if (!af) return '🧪';
+                  if (af.id.includes('spray')) return '💨';
+                  if (af.id.includes('pen')) return '🖊️';
+                  if (af.id.includes('cartridge')) return '💉';
+                  if (af.id.includes('capsule') || af.id.includes('tablet')) return '💊';
+                  if (af.id.includes('test') || af.id.includes('blood')) return '🩸';
+                  if (isCosmeticProduct) return af.id.includes('bottle') ? '🧴' : af.id.includes('tube') ? '🧲' : '🧪';
+                  return '🧪';
+                })()}
+              </span>
+              <select
+                id="format-select"
+                className="pds-format-select-native"
+                value={activeFormatId}
+                onChange={(e) => {
+                  const newFmtId = e.target.value;
+                  setActiveFormatId(newFmtId);
+                  const fmt = availableFormats.find(f => f.id === newFmtId);
+                  if (fmt) {
                     const compat = sortedStrengths.filter(s => !fmt.strengths || fmt.strengths.includes(s.id));
                     if (compat.length > 0 && !compat.some(s => s.id === selectedStrengthId)) {
                       setSelectedStrengthId(compat[0].id);
                     }
-                  }}
-                  className={`pds-format-tab-btn ${isActive ? 'active' : ''}`}
-                >
-                  <span className="pds-format-tab-icon">{icon}</span>
-                  <div className="pds-format-tab-text">
-                    <span className="pds-format-tab-name">{fmt.name}</span>
-                    <span className="pds-format-tab-sub">{subtitle}</span>
-                  </div>
-                  {isActive && <span className="pds-format-active-dot" />}
-                </button>
-              );
-            })}
+                  }
+                  triggerHaptic('selection');
+                }}
+              >
+                {availableFormats.map(fmt => {
+                  const isPen = fmt.id.includes('pen');
+                  const isCart = fmt.id.includes('cartridge');
+                  const isSpray = fmt.id.includes('spray');
+                  const isCapsule = fmt.id.includes('capsule') || fmt.id.includes('tablet');
+                  const isDiag = fmt.id.includes('test') || fmt.id.includes('blood');
+                  let subtitle = t.formatSubVial || 'Lyophilized SubQ Cake';
+                  if (isCosmeticProduct) {
+                    subtitle = (fmt.volume || product?.volume || '250 mL') + ' — Topical';
+                  } else if (isDiag) {
+                    subtitle = 'DBS Diagnostic Kit';
+                  } else if (isPen) {
+                    subtitle = t.formatSubPen || 'Multi-Dose Dial Device';
+                  } else if (isCart) {
+                    subtitle = t.formatSubCart || '3 mL Refill Cartridge';
+                  } else if (isSpray) {
+                    subtitle = t.formatSubSpray || 'Intranasal Spray Device';
+                  } else if (isCapsule) {
+                    subtitle = t.formatSubOral || 'Oral Formulation';
+                  }
+
+                  return (
+                    <option key={fmt.id} value={fmt.id}>
+                      {fmt.name} — {subtitle}
+                    </option>
+                  );
+                })}
+              </select>
+              <ChevronDown size={16} className="pds-format-select-chevron" />
+            </div>
+            {availableFormats.length > 1 && (
+              <span className="pds-format-count-hint">
+                {availableFormats.length} {t.formatsAvailable || 'formats available'}
+              </span>
+            )}
           </div>
 
           {/* Strengths Chips */}
