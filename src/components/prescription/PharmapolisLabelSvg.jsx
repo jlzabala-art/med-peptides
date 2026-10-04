@@ -25,6 +25,33 @@ function wrapLines(text, maxChars = 80) {
 }
 
 /**
+ * Wraps directions for use text, accounting for the "Directions for use: " prefix on line 1.
+ */
+function wrapDirections(text, firstLineMaxChars = 52, otherLinesMaxChars = 70) {
+  if (!text) return [];
+  const clean = String(text).replace(/^directions\s*(for\s*use)?:\s*/i, '').trim();
+  const words = clean.split(/\s+/);
+  const lines = [];
+  let current = '';
+  let isFirst = true;
+
+  for (const word of words) {
+    const limit = isFirst ? firstLineMaxChars : otherLinesMaxChars;
+    if ((current + ' ' + word).trim().length <= limit) {
+      current = (current + ' ' + word).trim();
+    } else {
+      if (current) {
+        lines.push(current);
+        isFirst = false;
+      }
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+/**
  * PharmapolisLabelSvg
  * ─────────────────────────────────────────────────────────────────────────────
  * High-precision vector SVG pharmaceutical label generator.
@@ -212,8 +239,13 @@ export default function PharmapolisLabelSvg({
             <text x="0" y={isShort ? 66 : 84} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
               • HPLC Verified Raw Materials &gt; 98.5% Active Pharmaceutical Purity.
             </text>
+            {warnings && (
+              <text x="0" y={isShort ? 88 : 110} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="600" fill="#475569">
+                • Safety &amp; Precautions: {warnings.length > 76 ? warnings.slice(0, 73) + '...' : warnings}
+              </text>
+            )}
             {!isShort && (
-              <text x="0" y="112" fontFamily="Arial, Helvetica, sans-serif" fontSize="16" fontWeight="750" fill="#16a34a">
+              <text x="0" y={warnings ? 132 : 112} fontFamily="Arial, Helvetica, sans-serif" fontSize="16" fontWeight="750" fill="#16a34a">
                 ✓ Tamper-evident seal intact upon dispensary release.
               </text>
             )}
@@ -254,65 +286,40 @@ export default function PharmapolisLabelSvg({
   const scanRxY = isShort ? 103 : 114;
   const scanRxSize = isShort ? 10 : 11;
 
-  // Text Wrapping with dynamic width constraints
-  const maxFormulaChars = withMicroQr ? 74 : 80;
-  const maxDirChars = withMicroQr ? 70 : 76;
-  const maxWarnChars = withMicroQr ? 72 : 78;
-
+  // Text Wrapping with clean boundaries
+  const maxFormulaChars = 66;
   const formulaLines = formula ? wrapLines(formula, maxFormulaChars) : [];
-  const directionLines = wrapLines(directions, maxDirChars);
-  const warningLines = warnings ? wrapLines(warnings, maxWarnChars) : [];
+  const directionLines = wrapDirections(directions, 50, 70);
 
-  // Content lines density calculation
-  const totalContentLines = (formulaLines.length > 0 ? formulaLines.length + 1 : 0) +
-                            (directionLines.length > 0 ? directionLines.length + 1 : 0) +
-                            warningLines.length;
-
-  const isSparse = totalContentLines <= 6;
-  const isMedium = totalContentLines > 6 && totalContentLines <= 10;
-
-  // Dynamic typography scale adjusting to both vertical height and density
+  // Dynamic typography scale adjusting to vertical canvas height
   const heightScale = isShort ? 0.82 : isMediumHeight ? 0.92 : 1;
 
-  const titleFontSize = Math.round((isSparse ? 40 : isMedium ? 34 : 28) * heightScale);
-  const formulaFontSize = Math.round((isSparse ? 30 : isMedium ? 26 : 22) * heightScale);
-  const formulaLineGap = Math.round((isSparse ? 44 : isMedium ? 38 : 30) * heightScale);
-  const dirFontSize = Math.round((isSparse ? 30 : isMedium ? 27 : 23) * heightScale);
-  const dirLineGap = Math.round((isSparse ? 44 : isMedium ? 38 : 32) * heightScale);
-  const warnFontSize = Math.round((isSparse ? 26 : isMedium ? 23 : 20) * heightScale);
-  const warnLineGap = Math.round((isSparse ? 38 : isMedium ? 34 : 28) * heightScale);
+  const titleFontSize = Math.round((productTitle.length > 55 ? 32 : 38) * heightScale);
+  const formulaFontSize = Math.round((isShort ? 26 : isMediumHeight ? 29 : 32) * heightScale);
+  const formulaLineGap = Math.round((isShort ? 38 : isMediumHeight ? 44 : 48) * heightScale);
+  const dirFontSize = Math.round((isShort ? 25 : isMediumHeight ? 28 : 31) * heightScale);
+  const dirLineGap = Math.round((isShort ? 38 : isMediumHeight ? 44 : 48) * heightScale);
 
-  // Available vertical canvas between patient box and dashed footer
-  const contentStartY = patientBoxBottom + (isShort ? 20 : 30);
-  const availableContentHeight = footerLineY - contentStartY - (isShort ? 12 : 20);
+  // Generous margin below patient box bottom line: guarantees title never touches the line
+  const titleMarginTop = isShort ? 24 : 34;
+  const titleY = patientBoxBottom + titleMarginTop + Math.round(titleFontSize * 0.82);
+  const titleBottom = titleY + Math.round(titleFontSize * 0.22);
 
-  const titleBlockHeight = titleFontSize + (isShort ? 10 : 16);
+  // Available vertical canvas between bottom of title and dashed footer
+  const availableContentHeight = footerLineY - titleBottom - (isShort ? 24 : 36);
+
   const formulaBlockHeight = formulaLines.length > 0 ? (formulaLines.length * formulaLineGap) : 0;
-  const dirBlockHeight = directionLines.length > 0 ? (directionLines.length * dirLineGap + (isShort ? 24 : 34)) : 0;
-  const warnBlockHeight = warningLines.length > 0 ? (warningLines.length * warnLineGap) : 0;
+  const dirBlockHeight = directionLines.length > 0 ? (directionLines.length * dirLineGap) : 0;
 
-  const totalRawHeight = titleBlockHeight + formulaBlockHeight + dirBlockHeight + warnBlockHeight;
-  const remainingSpace = Math.max(14, availableContentHeight - totalRawHeight);
+  const totalContentHeight = formulaBlockHeight + dirBlockHeight;
+  const remainingSpace = Math.max(20, availableContentHeight - totalContentHeight);
 
-  // Distribute remaining space across the active section separators
-  const activeSectionsCount = (formulaLines.length > 0 ? 1 : 0) + (directionLines.length > 0 ? 1 : 0) + (warningLines.length > 0 ? 1 : 0);
-  const distributedGap = Math.min(isShort ? 35 : 65, Math.max(16, Math.floor(remainingSpace / (activeSectionsCount || 1))));
+  // Distribute remaining vertical space into balanced breathing gaps
+  const gapTitleToFormula = Math.min(isShort ? 36 : 64, Math.max(26, Math.round(remainingSpace * 0.44)));
+  const gapFormulaToDir = Math.min(isShort ? 40 : 72, Math.max(28, Math.round(remainingSpace * 0.48)));
 
-  let currentY = contentStartY;
-  const titleY = currentY;
-  currentY += titleBlockHeight + distributedGap;
-
-  const formulaStartY = currentY;
-  if (formulaLines.length > 0) {
-    currentY += formulaBlockHeight + distributedGap;
-  }
-
-  const directionsStartY = currentY;
-  if (directionLines.length > 0) {
-    currentY += dirBlockHeight + distributedGap;
-  }
-
-  const warningsStartY = currentY;
+  const formulaStartY = titleBottom + gapTitleToFormula;
+  const directionsStartY = formulaStartY + formulaBlockHeight + (formulaBlockHeight > 0 ? gapFormulaToDir : 0);
 
   return (
     <svg
@@ -362,12 +369,12 @@ export default function PharmapolisLabelSvg({
         </text>
       </g>
 
-      {/* ── PRODUCT TITLE ── */}
+      {/* ── PRODUCT TITLE (With guaranteed clearance from patient box line) ── */}
       <text x="60" y={titleY} fontFamily="Arial, Helvetica, sans-serif" fontSize={titleFontSize} fontWeight="900" fill="#000000">
         {productTitle}
       </text>
 
-      {/* ── FORMULA DETAILS ── */}
+      {/* ── FORMULA DETAILS (High-contrast, prominent clinical posology) ── */}
       {formulaLines.map((line, idx) => (
         <text
           key={`f-${idx}`}
@@ -375,8 +382,8 @@ export default function PharmapolisLabelSvg({
           y={formulaStartY + (idx * formulaLineGap)}
           fontFamily="Arial, Helvetica, sans-serif"
           fontSize={formulaFontSize}
-          fontWeight="600"
-          fill="#1e293b"
+          fontWeight="700"
+          fill="#0f172a"
         >
           {line}
         </text>
@@ -393,7 +400,7 @@ export default function PharmapolisLabelSvg({
             fontWeight="800"
             fill="#000000"
           >
-            Directions for use: <tspan fontWeight="400" fill="#111111">{directionLines[0]}</tspan>
+            Directions for use: <tspan fontWeight="500" fill="#1e293b">{directionLines[0]}</tspan>
           </text>
           {directionLines.slice(1).map((line, idx) => (
             <text
@@ -402,29 +409,14 @@ export default function PharmapolisLabelSvg({
               y={directionsStartY + (idx + 1) * dirLineGap}
               fontFamily="Arial, Helvetica, sans-serif"
               fontSize={dirFontSize}
-              fontWeight="400"
-              fill="#111111"
+              fontWeight="500"
+              fill="#1e293b"
             >
               {line}
             </text>
           ))}
         </g>
       )}
-
-      {/* ── WARNINGS & PRECAUTIONS ── */}
-      {warningLines.map((line, idx) => (
-        <text
-          key={`w-${idx}`}
-          x="60"
-          y={warningsStartY + (idx * warnLineGap)}
-          fontFamily="Arial, Helvetica, sans-serif"
-          fontSize={warnFontSize}
-          fontWeight="500"
-          fill="#475569"
-        >
-          {line}
-        </text>
-      ))}
 
       {/* ── DASHED DIVIDER LINE ── */}
       <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="1.8" strokeDasharray="8,6" />

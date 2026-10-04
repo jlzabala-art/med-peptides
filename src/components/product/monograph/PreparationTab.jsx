@@ -991,64 +991,120 @@ export default function PreparationTab({
                 </div>
               </div>
 
-              {/* Target Clinical Dose Selector */}
+              {/* Target Clinical Dose Selector (GCP Multi-Device Standard) */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
+                <style>{`
+                  .gcp-dose-preset-grid {
+                    display: grid;
+                    grid-template-columns: repeat(${clinicalDosePresets.length <= 4 ? clinicalDosePresets.length : 3}, 1fr);
+                    gap: 6px;
+                    margin-bottom: 8px;
+                  }
+                  @media (min-width: 640px) {
+                    .gcp-dose-preset-grid {
+                      grid-template-columns: repeat(${clinicalDosePresets.length}, 1fr);
+                    }
+                  }
+                `}</style>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.04em' }}>
                     3. Target Clinical Dose
                   </label>
-                  <span style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 800 }}>
-                    {targetDoseMg} mg
+                  <span style={{
+                    fontSize: '0.72rem',
+                    color: customDose ? '#0284c7' : '#16a34a',
+                    fontWeight: 800,
+                    background: customDose ? '#f0f9ff' : '#ecfdf5',
+                    border: `1px solid ${customDose ? '#bae6fd' : '#bbf7d0'}`,
+                    padding: '2px 8px',
+                    borderRadius: '12px'
+                  }}>
+                    {targetDoseMg} mg {customDose ? '• Custom' : ''}
                   </span>
                 </div>
 
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(54px, 1fr))',
-                  gap: '6px',
-                  marginBottom: '8px'
-                }}>
-                  {clinicalDosePresets.map(d => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('selection');
-                        setTargetDoseMg(d);
-                        setCustomDose('');
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '7px 2px',
-                        borderRadius: '6px',
-                        border: targetDoseMg === d && !customDose ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
-                        background: targetDoseMg === d && !customDose ? '#16a34a' : '#ffffff',
-                        color: targetDoseMg === d && !customDose ? '#ffffff' : '#334155',
-                        fontSize: '0.76rem',
-                        fontWeight: targetDoseMg === d && !customDose ? 800 : 600,
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                      }}
-                    >
-                      {d} mg
-                    </button>
-                  ))}
+                {/* Symmetrical Presets Grid: 6-in-a-row on Laptop, 3x2 on Mobile (Zero orphans) */}
+                <div className="gcp-dose-preset-grid">
+                  {clinicalDosePresets.map(d => {
+                    const isSelected = targetDoseMg === d && !customDose;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('selection');
+                          setTargetDoseMg(d);
+                          setCustomDose('');
+                        }}
+                        style={{
+                          width: '100%',
+                          minHeight: '36px',
+                          padding: '6px 2px',
+                          borderRadius: '6px',
+                          border: isSelected ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                          background: isSelected ? '#16a34a' : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#334155',
+                          fontSize: '0.78rem',
+                          fontWeight: isSelected ? 800 : 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          boxShadow: isSelected ? '0 1px 3px rgba(22,163,74,0.25)' : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {d} mg
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Custom Dose Input */}
+                {/* GCP Integrated Stepper & Custom Input */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
                   background: '#ffffff',
-                  border: customDose ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                  border: customDose ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
                   borderRadius: '6px',
-                  padding: '4px 8px'
+                  padding: '3px 6px'
                 }}>
-                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Custom:</span>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', paddingLeft: '4px' }}>
+                    Custom:
+                  </span>
+
+                  {/* Decrement Stepper Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      const step = targetDoseMg <= 2.5 ? 0.25 : 0.5;
+                      const next = Math.max(0.1, Math.round((targetDoseMg - step) * 100) / 100);
+                      setTargetDoseMg(next);
+                      setCustomDose(String(next));
+                    }}
+                    style={{
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      width: '26px',
+                      height: '26px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '0.82rem',
+                      color: '#334155',
+                      cursor: 'pointer'
+                    }}
+                    title="Decrease 0.5 mg"
+                  >
+                    −
+                  </button>
+
                   <input
                     type="number"
-                    step="0.05"
+                    step="0.1"
                     min="0.05"
                     max="100"
                     placeholder="Enter mg..."
@@ -1065,14 +1121,67 @@ export default function PreparationTab({
                       flex: 1,
                       border: 'none',
                       outline: 'none',
-                      fontSize: '0.78rem',
+                      fontSize: '0.80rem',
                       fontWeight: 700,
                       color: '#0f172a',
-                      width: '100%',
+                      textAlign: 'center',
                       background: 'transparent'
                     }}
                   />
-                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700 }}>mg</span>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, paddingRight: '2px' }}>mg</span>
+
+                  {/* Increment Stepper Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      const step = targetDoseMg < 2.5 ? 0.25 : 0.5;
+                      const next = Math.round((targetDoseMg + step) * 100) / 100;
+                      setTargetDoseMg(next);
+                      setCustomDose(String(next));
+                    }}
+                    style={{
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      width: '26px',
+                      height: '26px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '0.82rem',
+                      color: '#334155',
+                      cursor: 'pointer'
+                    }}
+                    title="Increase 0.5 mg"
+                  >
+                    +
+                  </button>
+
+                  {/* Reset to Default Preset if custom active */}
+                  {customDose && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('selection');
+                        setCustomDose('');
+                        setTargetDoseMg(defaultInitialDose);
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        fontSize: '0.80rem',
+                        fontWeight: 700,
+                        padding: '0 4px'
+                      }}
+                      title="Reset to default preset"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
