@@ -15,6 +15,7 @@ export default function PharmacyLabelsModal({
   const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
   const [copiedLink, setCopiedLink] = useState(false);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
+  const [zoomMode, setZoomMode] = useState(false);
 
   // Sizing Presets & Custom Dimensions
   const [selectedPreset, setSelectedPreset] = useState('75x45');
@@ -528,29 +529,76 @@ export default function PharmacyLabelsModal({
 
           {/* High-Precision Interactive Vector SVG Preview Frame */}
           <div
-            ref={svgContainerRef}
             style={{
               width: '100%',
               maxWidth: '760px',
-              aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
-              borderRadius: '8px',
-              border: '1px solid #dadce0',
-              boxShadow: '0 2px 6px rgba(60,64,67,0.15), 0 8px 16px rgba(60,64,67,0.08)',
-              overflow: 'hidden',
-              background: '#ffffff',
-              position: 'relative',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              maxHeight: '440px'
+              flexDirection: 'column',
+              gap: '6px',
+              alignSelf: 'stretch',
+              flexShrink: 0
             }}
           >
-            <PharmapolisLabelSvg
-              labelData={currentItem}
-              variant={activeVariant}
-              widthMm={dimensions.widthMm}
-              heightMm={dimensions.heightMm}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {isEs ? 'Vista Previa en Vivo (Vectorial 300 DPI)' : 'Live Preview (Vector SVG 300 DPI)'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setZoomMode(!zoomMode)}
+                style={{
+                  background: zoomMode ? '#e8f0fe' : '#ffffff',
+                  color: zoomMode ? '#1a73e8' : '#5f6368',
+                  border: '1px solid #dadce0',
+                  borderRadius: '4px',
+                  padding: '3px 8px',
+                  fontSize: '0.70rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'all 0.15s'
+                }}
+              >
+                <Maximize2 size={12} />
+                <span>{zoomMode ? (isEs ? 'Ajustar a Pantalla' : 'Fit to Window') : (isEs ? 'Zoom 100% (Detalle)' : 'Zoom 100% (Detail)')}</span>
+              </button>
+            </div>
+
+            <div
+              ref={svgContainerRef}
+              style={{
+                width: '100%',
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
+                boxShadow: '0 2px 6px rgba(60,64,67,0.15), 0 8px 16px rgba(60,64,67,0.08)',
+                overflow: 'auto',
+                background: '#ffffff',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: zoomMode ? '16px' : '0'
+              }}
+            >
+              <div style={{
+                width: zoomMode ? '820px' : '100%',
+                minWidth: zoomMode ? '820px' : 'unset',
+                aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <PharmapolisLabelSvg
+                  labelData={currentItem}
+                  variant={activeVariant}
+                  widthMm={dimensions.widthMm}
+                  heightMm={dimensions.heightMm}
+                />
+              </div>
+            </div>
           </div>
 
           {/* QR Destination Badge & Diagnostic Info */}

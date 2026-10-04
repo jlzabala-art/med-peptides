@@ -111,11 +111,11 @@ export default function PharmapolisLabelSvg({
         <g transform="translate(60, 235)">
           <rect x="0" y="0" width="460" height="485" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
           
-          {/* Centered Large QR Code: 280 x 280 px */}
-          <svg x="90" y="20" width="280" height="280" viewBox="0 0 280 280">
+          {/* Centered Large QR Code: 310 x 310 px */}
+          <svg x="75" y="16" width="310" height="310" viewBox="0 0 310 310">
             <QRCodeSVG
               value={targetRxUrl}
-              size={280}
+              size={310}
               level="M"
               fgColor="#003666"
               bgColor="#ffffff"
@@ -123,24 +123,20 @@ export default function PharmapolisLabelSvg({
           </svg>
 
           {/* Under QR Verification Details */}
-          <text x="230" y="335" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="17" fontWeight="800" fill="#003666" letterSpacing="0.5">
+          <text x="230" y="358" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="18" fontWeight="800" fill="#003666" letterSpacing="0.5">
             SCAN FOR DIGITAL POSOLOGY &amp; CoA
           </text>
-          <text x="230" y="365" textAnchor="middle" fontFamily="monospace" fontSize="13" fontWeight="700" fill="#475569">
+          <text x="230" y="390" textAnchor="middle" fontFamily="monospace" fontSize="14" fontWeight="700" fill="#475569">
             {cleanDisplayUrl}
           </text>
           
           {/* Status & Security Verification Pills */}
-          <g transform="translate(230, 410)">
-            <rect x="-170" y="-22" width="340" height="34" fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.2" rx="17" />
-            <text x="0" y="0" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="14" fontWeight="800" fill="#065f46">
+          <g transform="translate(230, 432)">
+            <rect x="-175" y="-18" width="350" height="36" fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.2" rx="18" />
+            <text x="0" y="5" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="800" fill="#065f46">
               ✓ Verified Clinical Atlas Record
             </text>
           </g>
-
-          <text x="230" y="460" textAnchor="middle" fontFamily="monospace" fontSize="11" fontWeight="600" fill="#94a3b8" letterSpacing="0.4">
-            SHA-256 IMMUTABLE REGISTRY HASH
-          </text>
         </g>
 
         {/* RIGHT COLUMN: CLINICAL TRACEABILITY & SPECIFICATIONS (890 x 485 px) */}
@@ -222,47 +218,60 @@ export default function PharmapolisLabelSvg({
   const withMicroQr = variant === 'frontWithQr';
 
   // Text Wrapping with dynamic width constraints
-  const maxFormulaChars = withMicroQr ? 76 : 82;
-  const maxDirChars = withMicroQr ? 72 : 78;
-  const maxWarnChars = withMicroQr ? 74 : 80;
+  const maxFormulaChars = withMicroQr ? 74 : 80;
+  const maxDirChars = withMicroQr ? 70 : 76;
+  const maxWarnChars = withMicroQr ? 72 : 78;
 
   const formulaLines = formula ? wrapLines(formula, maxFormulaChars) : [];
   const directionLines = wrapLines(directions, maxDirChars);
   const warningLines = warnings ? wrapLines(warnings, maxWarnChars) : [];
 
-  // Space allocation: available height is 735 - 230 = 505 px
+  // Space allocation & typography scaling based on density
   const totalContentLines = (formulaLines.length > 0 ? formulaLines.length + 1 : 0) +
                             (directionLines.length > 0 ? directionLines.length + 1 : 0) +
                             warningLines.length;
 
-  // Dynamic typography sizing based on content density
-  const isDense = totalContentLines > 10;
-  const titleFontSize = isDense ? 30 : 34;
-  const formulaFontSize = isDense ? 23 : 26;
-  const formulaLineGap = isDense ? 32 : 36;
-  const dirFontSize = isDense ? 24 : 27;
-  const dirLineGap = isDense ? 34 : 38;
-  const warnFontSize = isDense ? 21 : 23;
-  const warnLineGap = isDense ? 30 : 34;
-  const sectionGap = isDense ? 24 : 34;
+  const isSparse = totalContentLines <= 6;
+  const isMedium = totalContentLines > 6 && totalContentLines <= 10;
 
-  let currentY = 270;
+  const titleFontSize = isSparse ? 40 : isMedium ? 34 : 28;
+  const formulaFontSize = isSparse ? 30 : isMedium ? 26 : 22;
+  const formulaLineGap = isSparse ? 44 : isMedium ? 38 : 30;
+  const dirFontSize = isSparse ? 30 : isMedium ? 27 : 23;
+  const dirLineGap = isSparse ? 44 : isMedium ? 38 : 32;
+  const warnFontSize = isSparse ? 26 : isMedium ? 23 : 20;
+  const warnLineGap = isSparse ? 38 : isMedium ? 34 : 28;
+
+  // Available vertical canvas between patient box (y=220) and dashed footer (y=742)
+  const contentStartY = 270;
+  const availableContentHeight = 742 - contentStartY; // ~472px
+
+  const titleBlockHeight = titleFontSize + 16;
+  const formulaBlockHeight = formulaLines.length > 0 ? (formulaLines.length * formulaLineGap) : 0;
+  const dirBlockHeight = directionLines.length > 0 ? (directionLines.length * dirLineGap + 36) : 0;
+  const warnBlockHeight = warningLines.length > 0 ? (warningLines.length * warnLineGap) : 0;
+
+  const totalRawHeight = titleBlockHeight + formulaBlockHeight + dirBlockHeight + warnBlockHeight;
+  const remainingSpace = Math.max(16, availableContentHeight - totalRawHeight);
+
+  // Distribute remaining space across the active section separators
+  const activeSectionsCount = (formulaLines.length > 0 ? 1 : 0) + (directionLines.length > 0 ? 1 : 0) + (warningLines.length > 0 ? 1 : 0);
+  const distributedGap = Math.min(65, Math.max(22, Math.floor(remainingSpace / (activeSectionsCount || 1))));
+
+  let currentY = contentStartY;
   const titleY = currentY;
-  currentY += isDense ? 42 : 48;
+  currentY += titleBlockHeight + distributedGap;
 
-  // Formula Block
   const formulaStartY = currentY;
   if (formulaLines.length > 0) {
-    currentY += (formulaLines.length * formulaLineGap) + sectionGap;
+    currentY += formulaBlockHeight + distributedGap;
   }
 
-  // Directions Block
   const directionsStartY = currentY;
   if (directionLines.length > 0) {
-    currentY += (directionLines.length * dirLineGap) + sectionGap;
+    currentY += dirBlockHeight + distributedGap;
   }
 
-  // Warnings Block
   const warningsStartY = currentY;
 
   return (
@@ -283,20 +292,20 @@ export default function PharmapolisLabelSvg({
         <text x="0" y="86" fontFamily="Arial, Helvetica, sans-serif" fontSize="19" fontWeight="400" fill="#222222">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
       </g>
 
-      {/* MICRO-QR (IF ENABLED): Crisp 130 x 130 container with centered 104 px QR Code */}
+      {/* MICRO-QR (IF ENABLED): Crisp 140 x 140 container with centered 112 px QR Code */}
       {withMicroQr && (
-        <g transform="translate(1310, 20)">
-          <rect x="0" y="0" width="130" height="130" fill="#ffffff" stroke="#003666" strokeWidth="1.8" rx="8" />
-          <svg x="13" y="10" width="104" height="104" viewBox="0 0 104 104">
+        <g transform="translate(1300, 16)">
+          <rect x="0" y="0" width="140" height="140" fill="#ffffff" stroke="#003666" strokeWidth="2" rx="8" />
+          <svg x="14" y="10" width="112" height="112" viewBox="0 0 112 112">
             <QRCodeSVG
               value={targetRxUrl}
-              size={104}
+              size={112}
               level="M"
               fgColor="#003666"
               bgColor="#ffffff"
             />
           </svg>
-          <text x="65" y="122" fontFamily="Arial, Helvetica, sans-serif" fontSize="11" fontWeight="900" fill="#003666" textAnchor="middle" letterSpacing="0.6">
+          <text x="70" y="132" fontFamily="Arial, Helvetica, sans-serif" fontSize="12" fontWeight="900" fill="#003666" textAnchor="middle" letterSpacing="0.8">
             SCAN RX
           </text>
         </g>

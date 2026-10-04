@@ -89,6 +89,57 @@ const PUBLIC_RX_STYLES = `
       padding-bottom: 70px !important;
     }
   }
+
+  /* Google Cloud UX Action Toolbar: 4 buttons responsive alignment */
+  .rx-header-action-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .rx-header-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+  .rx-header-action-btn:hover {
+    background: #f8fafd;
+    border-color: #1a73e8;
+    color: #1a73e8;
+  }
+  .rx-header-action-btn.rx-btn-primary {
+    color: #1a73e8;
+    font-weight: 600;
+  }
+  @media (max-width: 640px) {
+    .rx-header-action-toolbar {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      width: 100% !important;
+      gap: 8px !important;
+      margin-top: 12px !important;
+    }
+    .rx-header-action-btn {
+      width: 100% !important;
+      height: 38px !important;
+      font-size: 0.80rem !important;
+      padding: 0 8px !important;
+    }
+  }
 `;
 
 // Helper to safely extract string posology from either string or structured object
@@ -1435,31 +1486,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </div>
                 </div>
 
-                {/* Right: Standard GCP Action Toolbar */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {/* Right: Standard GCP Action Toolbar (Responsive 2x2 Grid on Mobile) */}
+                <div className="rx-header-action-toolbar">
                   <button
                     type="button"
                     onClick={() => {
                       triggerHaptic('selection');
                       window.print();
                     }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      height: '32px',
-                      padding: '0 12px',
-                      borderRadius: '4px',
-                      background: '#ffffff',
-                      color: '#1a73e8',
-                      border: '1px solid #dadce0',
-                      fontSize: '0.78rem',
-                      fontWeight: 500,
-                      cursor: 'pointer'
-                    }}
+                    className="rx-header-action-btn rx-btn-primary"
                     title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
                   >
-                    <Printer size={14} />
+                    <Printer size={14} color="#1a73e8" />
                     <span>{isEs ? 'Imprimir / PDF' : 'Print / Save PDF'}</span>
                   </button>
                   <button
@@ -1473,20 +1511,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         setTimeout(() => setCopied(false), 2000);
                       }
                     }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      height: '32px',
-                      padding: '0 12px',
-                      borderRadius: '4px',
-                      background: '#ffffff',
-                      color: '#3c4043',
-                      border: '1px solid #dadce0',
-                      fontSize: '0.78rem',
-                      fontWeight: 500,
-                      cursor: 'pointer'
-                    }}
+                    className="rx-header-action-btn"
                   >
                     <Copy size={14} />
                     <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
@@ -1497,20 +1522,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       triggerHaptic('selection');
                       setShowQrModal(true);
                     }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      height: '32px',
-                      padding: '0 12px',
-                      borderRadius: '4px',
-                      background: '#ffffff',
-                      color: '#3c4043',
-                      border: '1px solid #dadce0',
-                      fontSize: '0.78rem',
-                      fontWeight: 500,
-                      cursor: 'pointer'
-                    }}
+                    className="rx-header-action-btn"
                   >
                     <QrCode size={14} color="#1a73e8" />
                     <span>{isEs ? 'Código QR' : 'QR Verification'}</span>
@@ -1523,27 +1535,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         setSelectedLabelIndex(0);
                         setShowLabelsModal(true);
                       }}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        height: '32px',
-                        padding: '0 12px',
-                        borderRadius: '4px',
-                        background: '#ffffff',
-                        color: '#1a73e8',
-                        border: '1px solid #dadce0',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s'
-                      }}
-                      onClick={() => {
-                        setSelectedLabelIndex(0);
-                        setShowLabelsModal(true);
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
+                      className="rx-header-action-btn rx-btn-primary"
                       title={isEs ? 'Ver etiquetas oficiales para frascos' : 'View official compounding bottle labels'}
                     >
                       <Tag size={13} color="#1a73e8" />
