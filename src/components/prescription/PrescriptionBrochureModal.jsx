@@ -48,6 +48,30 @@ export default function PrescriptionBrochureModal({
         }
       ];
 
+  const getPosologyString = (pos) => {
+    if (!pos) return 'Apply 1 mL once daily in the evening directly to affected scalp areas. Massage gently.';
+    if (typeof pos === 'string') return pos;
+    if (typeof pos === 'object') {
+      return pos.regimen || pos.instructions || pos.dosageInstructions || pos.title || 'Apply as directed by physician.';
+    }
+    return String(pos);
+  };
+
+  const getFormulaString = (phase) => {
+    if (phase.formula && typeof phase.formula === 'string') return phase.formula;
+    if (phase.ingredients && typeof phase.ingredients === 'string') return phase.ingredients;
+    if (Array.isArray(phase.apis) && phase.apis.length > 0) {
+      const apisStr = phase.apis.map(a => `${a.name || a.productName || 'API'} ${a.dosage || a.dose || ''}`.trim()).join(' + ');
+      const vName = phase.vehicle?.name || phase.vehicle?.productName || phase.vehicleName;
+      return vName ? `${apisStr} in ${vName}` : apisStr;
+    }
+    return 'Minoxidil 4% + Spironolactone 1% + Arginine 1.5% in TrichoSol™ Patented Vehicle';
+  };
+
+  const getPhaseTitle = (phase, idx) => {
+    return phase.title || phase.name || phase.productName || `Phase ${phase.phaseNumber || idx + 1} Formulation`;
+  };
+
   // High-Precision Isolated Print Engine
   const handlePrint = () => {
     const sheetEl = sheetRef.current;
@@ -465,11 +489,11 @@ export default function PrescriptionBrochureModal({
                             Phase {phase.phaseNumber || idx + 1}:
                           </span>
                           <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e293b' }}>
-                            {phase.name || phase.productName}
+                            {getPhaseTitle(phase, idx)}
                           </span>
                         </div>
                         <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                          {phase.dosageForm || 'Topical Scalp Solution'} · {phase.volume || '100 mL'}
+                          {phase.dosageForm || (phase.route?.includes('oral') ? 'Oral Capsule' : 'Topical Scalp Solution')} · {phase.volume || '100 mL'}
                         </div>
                       </div>
 
@@ -479,7 +503,7 @@ export default function PrescriptionBrochureModal({
                             Active Formula &amp; Vehicle
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#1e293b', marginTop: '2px', fontFamily: 'monospace' }}>
-                            {phase.formula || phase.ingredients || 'Minoxidil, Finasteride, Latanoprost in TrichoSol™ base'}
+                            {getFormulaString(phase)}
                           </div>
                         </div>
 
@@ -488,7 +512,7 @@ export default function PrescriptionBrochureModal({
                             Prescribed Posology &amp; Directions for Use
                           </div>
                           <div style={{ fontSize: '0.74rem', color: '#1e293b', marginTop: '2px' }}>
-                            {phase.posology || phase.directions || 'Apply 1 mL once daily in the evening directly to affected scalp areas. Massage gently.'}
+                            {getPosologyString(phase.posology || phase.directions)}
                           </div>
                         </div>
                       </div>
@@ -673,14 +697,14 @@ export default function PrescriptionBrochureModal({
                     <div key={idx} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 14px', background: '#f8fafc' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-                          {phase.name || phase.productName}
+                          {getPhaseTitle(phase, idx)}
                         </span>
                         <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 600 }}>
-                          {phase.volume || '100 mL'} · 60-Day Supply
+                          {phase.volume || '100 mL'} · {phase.duration || '60-Day Supply'}
                         </span>
                       </div>
                       <div style={{ fontSize: '0.74rem', color: '#334155', marginTop: '4px' }}>
-                        {phase.posology || 'Apply 1 mL once daily in the evening directly to affected scalp areas.'}
+                        {getPosologyString(phase.posology)}
                       </div>
                     </div>
                   ))}

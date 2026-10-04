@@ -444,208 +444,137 @@ export default function PharmacyLabelsModal({
           </button>
         </div>
 
-        {/* Product / Phase Selector Tabs (if multi-product) */}
-        {labels.length > 1 && (
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            padding: '10px 20px',
-            borderBottom: '1px solid #dadce0',
-            background: '#fafafa',
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch'
-          }}>
-            {labels.map((lbl, idx) => {
-              const isSelected = idx === selectedProductIdx;
-              return (
-                <button
-                  key={lbl.id || idx}
-                  type="button"
-                  onClick={() => setSelectedProductIdx(idx)}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '4px',
-                    border: isSelected ? '1px solid #1a73e8' : '1px solid #dadce0',
-                    background: isSelected ? '#e8f0fe' : '#ffffff',
-                    color: isSelected ? '#1a73e8' : '#3c4043',
-                    fontSize: '0.78rem',
-                    fontWeight: isSelected ? 600 : 500,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  <span style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    background: isSelected ? '#1a73e8' : '#e8eaed',
-                    color: isSelected ? '#ffffff' : '#5f6368',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    {lbl.phaseNumber || idx + 1}
-                  </span>
-                  <span>{lbl.productName}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         {/* Content Body */}
         <div className="gcp-labels-body">
-          {/* Controls Bar: Variant Switcher + Preset Sizing */}
+          {/* Google Cloud Compact Controls Toolbar (Dropdown Fields) */}
           <div style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '8px',
+            background: '#f8fafc',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            border: '1px solid #dadce0',
             width: '100%',
-            maxWidth: '760px'
+            maxWidth: '760px',
+            boxSizing: 'border-box'
           }}>
-            {/* GCP Segmented Variant Switcher */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              background: '#f1f3f4',
-              padding: '3px',
-              borderRadius: '6px',
-              gap: '3px',
-              width: '100%'
-            }}>
-              <button
-                type="button"
-                onClick={() => setActiveVariant('backQr')}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: activeVariant === 'backQr' ? '1px solid #dadce0' : '1px solid transparent',
-                  background: activeVariant === 'backQr' ? '#ffffff' : 'transparent',
-                  color: activeVariant === 'backQr' ? '#1a73e8' : '#5f6368',
-                  boxShadow: activeVariant === 'backQr' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
-                  fontSize: '0.80rem',
-                  fontWeight: activeVariant === 'backQr' ? 600 : 500,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <span>{isEs ? 'Reverso con QR' : 'Back Label with QR'}</span>
-                <span style={{
-                  background: '#e6f4ea',
-                  color: '#137333',
-                  fontSize: '0.64rem',
-                  padding: '1px 5px',
-                  borderRadius: '3px',
-                  fontWeight: 700,
-                  border: '1px solid #ceead6'
-                }}>Scan</span>
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
+              {/* Field 1: Preparation / Phase (if multi-product) */}
+              {labels.length > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <label htmlFor="gcp-label-phase" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                    {isEs ? 'Fase:' : 'Phase:'}
+                  </label>
+                  <select
+                    id="gcp-label-phase"
+                    value={selectedProductIdx}
+                    onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
+                    style={{
+                      height: 30,
+                      padding: '0 24px 0 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #dadce0',
+                      background: '#ffffff',
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      color: '#202124',
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      WebkitAppearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 6px center',
+                      outline: 'none'
+                    }}
+                  >
+                    {labels.map((lbl, idx) => (
+                      <option key={lbl.id || idx} value={idx}>
+                        Phase {lbl.phaseNumber || idx + 1}: {lbl.productName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-              <button
-                type="button"
-                onClick={() => setActiveVariant('front')}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: activeVariant === 'front' ? '1px solid #dadce0' : '1px solid transparent',
-                  background: activeVariant === 'front' ? '#ffffff' : 'transparent',
-                  color: activeVariant === 'front' ? '#1a73e8' : '#5f6368',
-                  boxShadow: activeVariant === 'front' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
-                  fontSize: '0.80rem',
-                  fontWeight: activeVariant === 'front' ? 600 : 500,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.15s'
-                }}
-              >
-                {isEs ? 'Frontal Estándar' : 'Front Label'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveVariant('frontWithQr')}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: activeVariant === 'frontWithQr' ? '1px solid #dadce0' : '1px solid transparent',
-                  background: activeVariant === 'frontWithQr' ? '#ffffff' : 'transparent',
-                  color: activeVariant === 'frontWithQr' ? '#1a73e8' : '#5f6368',
-                  boxShadow: activeVariant === 'frontWithQr' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
-                  fontSize: '0.80rem',
-                  fontWeight: activeVariant === 'frontWithQr' ? 600 : 500,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.15s'
-                }}
-              >
-                {isEs ? 'Frontal con Micro-QR' : 'Front with Micro-QR'}
-              </button>
-            </div>
-
-            {/* Label Dimensions Bar (Presets & Custom mm) */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '8px',
-              background: '#f8fafc',
-              padding: '8px 12px',
-              borderRadius: '6px',
-              border: '1px solid #e2e8f0'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', marginRight: '4px' }}>
-                  {isEs ? 'Formato / Medida:' : 'Label Size:'}
-                </span>
-                {PRESETS.map((p) => {
-                  const isAct = selectedPreset === p.id;
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => handleSelectPreset(p)}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '4px',
-                        border: isAct ? '1px solid #1a73e8' : '1px solid #cbd5e1',
-                        background: isAct ? '#e8f0fe' : '#ffffff',
-                        color: isAct ? '#1a73e8' : '#334155',
-                        fontSize: '0.74rem',
-                        fontWeight: isAct ? 600 : 500,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        transition: 'all 0.15s'
-                      }}
-                    >
-                      <span>{p.label}</span>
-                      <span style={{ fontSize: '0.68rem', opacity: 0.75 }}>({p.sub})</span>
-                    </button>
-                  );
-                })}
+              {/* Field 2: Label Variant (Type) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label htmlFor="gcp-label-variant" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                  {isEs ? 'Tipo:' : 'Label:'}
+                </label>
+                <select
+                  id="gcp-label-variant"
+                  value={activeVariant}
+                  onChange={(e) => setActiveVariant(e.target.value)}
+                  style={{
+                    height: 30,
+                    padding: '0 24px 0 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#202124',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 6px center',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="backQr">{isEs ? 'Reverso con QR (Trazabilidad)' : 'Back Label with QR (Traceability)'}</option>
+                  <option value="front">{isEs ? 'Frontal Estándar' : 'Front Label (Standard)'}</option>
+                  <option value="frontWithQr">{isEs ? 'Frontal con Micro-QR' : 'Front Label with Micro-QR'}</option>
+                </select>
               </div>
 
-              {/* Custom mm Inputs (when Custom is selected) */}
+              {/* Field 3: Label Size / Format */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label htmlFor="gcp-label-size" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                  {isEs ? 'Medida:' : 'Size:'}
+                </label>
+                <select
+                  id="gcp-label-size"
+                  value={selectedPreset}
+                  onChange={(e) => {
+                    const p = PRESETS.find(x => x.id === e.target.value);
+                    if (p) handleSelectPreset(p);
+                  }}
+                  style={{
+                    height: 30,
+                    padding: '0 24px 0 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#202124',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 6px center',
+                    outline: 'none'
+                  }}
+                >
+                  {PRESETS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label} ({p.sub})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Custom mm Inputs if Custom is selected */}
               {selectedPreset === 'custom' && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <label style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>Ancho:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>W:</span>
                     <input
                       type="number"
                       min="25"
@@ -653,19 +582,20 @@ export default function PharmacyLabelsModal({
                       value={customWidth}
                       onChange={(e) => handleCustomWidthChange(e.target.value)}
                       style={{
-                        width: '54px',
-                        padding: '2px 6px',
-                        fontSize: '0.76rem',
-                        border: '1px solid #cbd5e1',
+                        width: '42px',
+                        height: 26,
+                        padding: '0 3px',
+                        fontSize: '0.74rem',
+                        border: '1px solid #dadce0',
                         borderRadius: '4px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        fontWeight: 600
                       }}
                     />
-                    <span>mm</span>
-                  </label>
-                  <span style={{ color: '#94a3b8' }}>×</span>
-                  <label style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>Alto:</span>
+                  </div>
+                  <span style={{ fontSize: '0.70rem', color: '#94a3b8' }}>×</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                    <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>H:</span>
                     <input
                       type="number"
                       min="20"
@@ -673,18 +603,39 @@ export default function PharmacyLabelsModal({
                       value={customHeight}
                       onChange={(e) => handleCustomHeightChange(e.target.value)}
                       style={{
-                        width: '54px',
-                        padding: '2px 6px',
-                        fontSize: '0.76rem',
-                        border: '1px solid #cbd5e1',
+                        width: '42px',
+                        height: 26,
+                        padding: '0 3px',
+                        fontSize: '0.74rem',
+                        border: '1px solid #dadce0',
                         borderRadius: '4px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        fontWeight: 600
                       }}
                     />
-                    <span>mm</span>
-                  </label>
+                  </div>
+                  <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>mm</span>
                 </div>
               )}
+            </div>
+
+            {/* Active Specs Badge on Right */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.70rem',
+              color: '#1a73e8',
+              background: '#e8f0fe',
+              border: '1px solid #d2e3fc',
+              padding: '3px 8px',
+              borderRadius: '4px',
+              fontWeight: 600,
+              whiteSpace: 'nowrap'
+            }}>
+              <span>{dimensions.widthMm} × {dimensions.heightMm} mm</span>
+              <span>·</span>
+              <span>300 DPI</span>
             </div>
           </div>
 

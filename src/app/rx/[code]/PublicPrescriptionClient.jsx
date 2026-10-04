@@ -134,16 +134,27 @@ const PUBLIC_RX_STYLES = `
   @media (max-width: 640px) {
     .rx-header-action-toolbar {
       display: grid !important;
-      grid-template-columns: repeat(2, 1fr) !important;
+      grid-template-columns: 1fr 1fr !important;
       width: 100% !important;
       gap: 8px !important;
       margin-top: 12px !important;
     }
+    /* Google Cloud UX: Primary CTA spans full width on top row */
+    .rx-header-action-toolbar > :first-child {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+    }
+    .rx-header-action-toolbar > :first-child .rx-header-action-btn {
+      width: 100% !important;
+      justify-content: center !important;
+      height: 38px !important;
+      font-size: 0.82rem !important;
+    }
     .rx-header-action-btn {
       width: 100% !important;
-      height: 38px !important;
-      font-size: 0.80rem !important;
-      padding: 0 8px !important;
+      height: 36px !important;
+      font-size: 0.78rem !important;
+      padding: 0 10px !important;
     }
   }
 `;
