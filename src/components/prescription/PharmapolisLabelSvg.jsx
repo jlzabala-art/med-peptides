@@ -114,6 +114,33 @@ export default function PharmapolisLabelSvg({
   const targetRxUrl = labelData.targetRxUrl || labelData.url || `https://med-peptides.com/rx/${fileNumber}?view=patient`;
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
 
+  // Extract active ingredients list for Block 2 (Back Label)
+  const activeIngredientsList = React.useMemo(() => {
+    if (Array.isArray(labelData.apis) && labelData.apis.length > 0) {
+      const filtered = labelData.apis.filter(a => {
+        const n = (a.drugName || a.drug || a.name || a.productName || a.activeIngredient || '').toLowerCase();
+        const f = (a.dosageForm || a.form || '').toLowerCase();
+        return !a.isVehicle && !a.isVehicleOrBase && !f.includes('vehicle') && !n.includes('vehicle') && !n.includes('trichosol') && !n.includes('pentravan');
+      });
+      if (filtered.length > 0) {
+        return filtered.map(a => {
+          const name = a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API';
+          const dose = a.dosage || a.dose || a.strength || '';
+          return `${name} ${dose}`.trim();
+        });
+      }
+    }
+    if (formula) {
+      const parts = formula.split(/\s*(?:\+|\bin\b)\s*/i).map(p => p.trim()).filter(Boolean);
+      if (parts.length > 0) return parts.filter(p => !p.toLowerCase().includes('vehicle') && !p.toLowerCase().includes('trichosol'));
+    }
+    return ['Personalized Compounded Active Formula'];
+  }, [labelData.apis, formula]);
+
+  const vehicleName = labelData.vehicle?.name || 
+                      (formula.toLowerCase().includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
+                      (formula.toLowerCase().includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 'Galenic Compounding Vehicle q.s.'));
+
   // ───────────────────────────────────────────────────────────────────────────
   // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)
   // ───────────────────────────────────────────────────────────────────────────
@@ -209,19 +236,49 @@ export default function PharmapolisLabelSvg({
             </text>
           </g>
 
-          {/* Block 2: Prescribing Physician & Clinic */}
-          <g transform={`translate(32, ${Math.round(colHeight * 0.38)})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#64748b" letterSpacing="0.8">
-              PRESCRIBING PHYSICIAN &amp; CLINIC
+          {/* Block 2: Active Compounded Ingredients & Base */}
+          <g transform={`translate(32, ${Math.round(colHeight * 0.33)})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 14} fontWeight="800" fill="#0284c7" letterSpacing="0.8">
+              ACTIVE COMPOUNDED INGREDIENTS &amp; BASE
             </text>
-            <text x="0" y={isShort ? 24 : 30} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 18 : 22} fontWeight="850" fill="#0f172a">
-              {doctorName}
+            
+            {/* Active Ingredients List */}
+            {activeIngredientsList.slice(0, 3).map((ing, iIdx) => (
+              <text
+                key={iIdx}
+                x="0"
+                y={isShort ? 20 + iIdx * 17 : 26 + iIdx * 22}
+                fontFamily="Arial, Helvetica, sans-serif"
+                fontSize={isShort ? 13 : 16}
+                fontWeight="800"
+                fill="#0f172a"
+              >
+                • {ing}
+              </text>
+            ))}
+
+            {/* Compounding Base / Vehicle */}
+            <text
+              x="0"
+              y={isShort ? 20 + Math.min(activeIngredientsList.length, 3) * 17 : 26 + Math.min(activeIngredientsList.length, 3) * 22}
+              fontFamily="Arial, Helvetica, sans-serif"
+              fontSize={isShort ? 12 : 14}
+              fontWeight="700"
+              fill="#0369a1"
+            >
+              Base: {vehicleName}
             </text>
-            <text x="0" y={isShort ? 46 : 58} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="600" fill="#475569">
-              {clinicName}
-            </text>
-            <text x="0" y={isShort ? 68 : 84} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="500" fill="#64748b">
-              License: {doctorLicense} • Refill Authorization: Active
+
+            {/* Compact 1-line Prescriber & Clinic Reference */}
+            <text
+              x="0"
+              y={isShort ? 20 + (Math.min(activeIngredientsList.length, 3) + 1) * 17 + 2 : 26 + (Math.min(activeIngredientsList.length, 3) + 1) * 22 + 4}
+              fontFamily="Arial, Helvetica, sans-serif"
+              fontSize={isShort ? 11 : 13}
+              fontWeight="600"
+              fill="#64748b"
+            >
+              Rx: {doctorName} • {clinicName.length > 36 ? clinicName.slice(0, 34) + '...' : clinicName} ({doctorLicense})
             </text>
           </g>
 

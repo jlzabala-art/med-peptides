@@ -711,9 +711,44 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   ]));
 
   // ── Compounded Formulations Architecture (Grouped by Vehicle & Route with Dedicated Posology) ──
-  const rawLines = (rx.allSessionItems && rx.allSessionItems.length > 0)
-    ? rx.allSessionItems
-    : (rx.prescriptionLines || rx.items || rx.compounds || []);
+  const rawLines = React.useMemo(() => {
+    if (rx.allSessionItems && rx.allSessionItems.length > 0) {
+      return rx.allSessionItems;
+    }
+    const itemsList = Array.isArray(rx.items) && rx.items.length > 0 ? rx.items : null;
+    const linesList = Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0 ? rx.prescriptionLines : null;
+
+    if (itemsList && linesList) {
+      // Merge itemsList with linesList so we retain rich clinical data + explicit drug names & doses
+      return itemsList.map((item, idx) => {
+        const line = linesList[idx] || linesList.find(l => {
+          const ln = (l.drugName || l.drug || l.name || '').toLowerCase();
+          const iname = (item.name || item.activeIngredient || '').toLowerCase();
+          return ln && (iname.includes(ln) || ln.includes(iname));
+        });
+        return {
+          ...line,
+          ...item,
+          name: item.name || line?.drugName || line?.drug || item.productName || item.activeIngredient,
+          drugName: line?.drugName || item.name || item.activeIngredient,
+          dosage: item.dosage || item.dose || line?.strength || '—',
+          dose: item.dose || item.dosage || line?.strength || '—'
+        };
+      });
+    }
+
+    if (itemsList) return itemsList;
+    if (linesList) {
+      return linesList.map(l => ({
+        ...l,
+        name: l.drugName || l.drug || l.name || l.title || 'Active Compound',
+        drugName: l.drugName || l.drug || l.name || l.title || 'Active Compound',
+        dose: l.strength || l.dosage || l.dose || '—',
+        dosage: l.strength || l.dosage || l.dose || '—'
+      }));
+    }
+    return rx.compounds || [];
+  }, [rx.allSessionItems, rx.items, rx.prescriptionLines, rx.compounds]);
 
   const compoundedFormulations = React.useMemo(() => {
     // Helper to generate rich vehicle specs and tailored posology based on vehicle type and instructions
@@ -1019,8 +1054,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         extra,
         container: resolvedContainer,
         vehicle: vehicleObj,
-        apis: apis.map((api, aIdx) => {
-          const apiName = api.productName || api.activeIngredient || api.name || `Active Compound ${aIdx + 1}`;
+        apis: apis.filter(api => {
+          const an = (api.drugName || api.drug || api.productName || api.name || api.activeIngredient || '').toLowerCase();
+          const af = (api.dosageForm || api.form || '').toLowerCase();
+          return !api.isVehicleOrBase && !api._isVehicleOrBase && !api.isVehicle && 
+                 !af.includes('vehicle') && 
+                 !an.includes('vehicle') && 
+                 !an.includes('vehiculo') && 
+                 !an.includes('trichosol') && 
+                 !an.includes('trichooil') && 
+                 !an.includes('pentravan');
+        }).map((api, aIdx) => {
+          const apiName = api.drugName || api.drug || api.productName || api.name || api.activeIngredient || `Active Compound ${aIdx + 1}`;
           const n = apiName.toLowerCase();
           
           const mono = getFagronClinicalMonograph(api.productId) || 
@@ -1029,13 +1074,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                        getFagronClinicalMonograph(apiName) ||
                        getFagronClinicalMonograph(n);
 
-          // Priority for rich clinical metadata: Monograph / Explicit Clinical field > fallback generic strings
+          // Priority for rich clinical metadata: Explicit Monograph / Clinical fields from DB > fallback strings
           const isGenericAction = !api.mechanismOfAction && (!api.action || api.action.toLowerCase().includes('personalized active ingredient') || api.action.toLowerCase().includes('principio activo personalizado'));
           const isGenericRole = !api.pharmacologicalClass && (!api.role || api.role.toLowerCase().includes('nutracéutico & modulador') || api.role.toLowerCase().includes('principio activo farmacogenómico') || api.role.toLowerCase().includes('systemic nutraceutical') || api.role.toLowerCase().includes('pharmacogenomic active'));
           const isGenericIndication = !api.clinicalIndication && (!api.indication || api.indication.toLowerCase().includes('personalizado') || api.indication.toLowerCase().includes('personalized') || api.indication.toLowerCase().includes('soporte metabólico') || api.indication.toLowerCase().includes('systemic metabolic') || api.indication.toLowerCase().includes('tratamiento folicular'));
 
-          let role = mono?.pharmacologicalClass || api.pharmacologicalClass || api.therapeuticClass || (!isGenericRole ? api.role : null);
-          let indication = mono?.clinicalIndication || api.clinicalIndication || api.category || (!isGenericIndication ? api.indication : null);
+          let role = mono?.pharmacologicalClass || api.pharmacologicalClass || api.therapeuticClass || api.category || (!isGenericRole ? api.role : null);
+          let indication = mono?.clinicalIndication || api.clinicalIndication || api.therapeuticClass || api.category || (!isGenericIndication ? api.indication : null);
           let action = mono?.mechanismOfAction || api.mechanismOfAction || api.mechanism || (!isGenericAction ? (api.instructions || api.action) : null);
           const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : (api.geneTargets || []);
 
@@ -1046,6 +1091,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               role = isEs ? 'Inhibidor Dual 5α-Reductasa Tipo I y II' : 'Dual 5α-Reductase Type I & II Inhibitor';
             } else if (n.includes('minoxidil')) {
               role = isEs ? 'Activador de Sulfotransferasa & Canales K_ATP' : 'Sulfotransferase Activator & K_ATP Channel Opener';
+            } else if (n.includes('spironolactone')) {
+              role = isEs ? 'Antagonista Competitivo de Receptores Androgénicos' : 'Competitive Androgen Receptor Antagonist';
+            } else if (n.includes('arginine') || n.includes('arginina')) {
+              role = isEs ? 'Precursor de Óxido Nítrico & Estimulador Microvascular' : 'Nitric Oxide Precursor & Microvascular Stimulator';
             } else if (n.includes('cetirizine') || n.includes('cetirizina')) {
               role = isEs ? 'Antagonista Selectivo del Receptor PGD2' : 'Selective PGD2 Receptor Antagonist';
             } else if (n.includes('panthenol') || n.includes('pantenol')) {
@@ -1066,6 +1115,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               indication = isEs ? 'Supresión de DHT Folicular & Prevención de Miniaturización' : 'Follicular DHT Suppression & Miniaturization Reversal';
             } else if (n.includes('minoxidil')) {
               indication = isEs ? 'Estimulación de Fase Anágena & Perfusión Microvascular' : 'Anagen Phase Induction & Microvascular Perfusion';
+            } else if (n.includes('spironolactone')) {
+              indication = isEs ? 'Bloqueo Local de DHT en Cuero Cabelludo' : 'Local Scalp DHT Blockade';
+            } else if (n.includes('arginine') || n.includes('arginina')) {
+              indication = isEs ? 'Optimización de Microcirculación Perifolicular' : 'Perifollicular Microcirculation Enhancement';
             } else {
               indication = isTrichoOil 
                 ? (isEs ? 'Higiene & Microcirculación Folicular' : 'Scalp Care & Follicular Microcirculation')
@@ -1200,7 +1253,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     }
 
     rawLines.forEach((item) => {
-      const nameLower = (item.name || item.productName || item.activeIngredient || '').toLowerCase();
+      const nameLower = (item.drugName || item.drug || item.name || item.productName || item.activeIngredient || '').toLowerCase();
       const formLower = (item.dosageForm || item.form || '').toLowerCase();
       const routeLower = (item.route || '').toLowerCase();
       const blockLower = (item.formulationBlock || '').toLowerCase();
@@ -1215,7 +1268,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         nameLower.includes('trichofoam') ||
         nameLower.includes('pentravan') ||
         nameLower.includes('vehiculo') ||
-        nameLower.includes('vehicle base')
+        nameLower.includes('vehicle base') ||
+        nameLower.includes('vehicle')
       );
 
       if (isVeh) {
@@ -1277,8 +1331,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
     // Preparation A: Topical Solution (TrichoSol)
     if (trichoSolItems.length > 0 || (trichoOilItems.length === 0 && oralItems.length === 0 && rawLines.length > 0)) {
-      const solItems = trichoSolItems.length > 0 ? trichoSolItems : rawLines.filter(i => !i._isVehicleOrBase);
-      const solVeh = vehicleLines.find(v => (v.name || '').toLowerCase().includes('trichosol'))?.name || 'TrichoSol™ (Fagron)';
+      const solItems = (trichoSolItems.length > 0 ? trichoSolItems : rawLines).filter(i => {
+        const n = (i.drugName || i.drug || i.name || i.productName || i.activeIngredient || '').toLowerCase();
+        const f = (i.dosageForm || i.form || '').toLowerCase();
+        return !i.isVehicleOrBase && !i._isVehicleOrBase && !i.isVehicle && 
+               !f.includes('vehicle') && 
+               !n.includes('vehicle') && 
+               !n.includes('trichosol') && 
+               !n.includes('trichooil') && 
+               !n.includes('pentravan');
+      });
+      const solVeh = vehicleLines.find(v => (v.drugName || v.name || '').toLowerCase().includes('trichosol'))?.name || 
+                     vehicleLines.find(v => (v.drugName || v.name || '').toLowerCase().includes('trichosol'))?.drugName || 
+                     'TrichoSol™ (Fagron)';
       activeBlocks.push({
         type: 'trichosol',
         vehicleName: solVeh,

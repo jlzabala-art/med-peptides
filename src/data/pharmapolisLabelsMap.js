@@ -608,7 +608,10 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
           doctorLicense: auth.doctorLicense || regMatch.doctorLicense,
           clinicName: auth.clinicName || regMatch.clinicName,
           fileNumber: auth.fileNumber || regMatch.fileNumber,
-          targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl
+          targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
+          apis: form?.apis || regMatch.apis || rx.items || rx.prescriptionLines || [],
+          formula: form?.formula || formulaText || regMatch.formula || '',
+          vehicle: form?.vehicle || null
         };
       }
 
@@ -638,6 +641,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
         pharmacy: 'Pharmapolis Compounding Pharmacy',
         formula: formulaText,
+        apis: form.apis || rx.items || rx.prescriptionLines || [],
+        vehicle: form.vehicle || null,
         directions: directionsText,
         warnings: warningsText,
         prodDate: rx.issuedDate || rx.createdAt || '15-09-2026',
@@ -661,7 +666,9 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       doctorLicense: auth.doctorLicense || m.doctorLicense,
       clinicName: auth.clinicName || m.clinicName,
       fileNumber: auth.fileNumber || m.fileNumber,
-      targetRxUrl: auth.targetRxUrl || m.targetRxUrl
+      targetRxUrl: auth.targetRxUrl || m.targetRxUrl,
+      apis: m.apis || rx.items || rx.prescriptionLines || [],
+      formula: m.formula || ''
     }));
   }
 
