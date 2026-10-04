@@ -357,7 +357,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const isNutrigen = prescriptionTypeInfo.key === 'nutrigen' || rxProgLower.includes('nutri') || rxTypeLower.includes('nutri') || String(rx.fagron?.testName || '').toLowerCase().includes('nutri');
   const isEntirelyOral = isNutrigen || rxDispLower.includes('capsule') || rxDispLower.includes('oral') || (Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0 && rx.prescriptionLines.every(i => (i.route || '').toLowerCase().includes('oral')));
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+  const baseUrl = 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
   const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
 
@@ -441,7 +441,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   const isDispensed = useMemo(() => {
     return Boolean(
-      ['dispensed', 'delivered', 'completed', 'active'].includes(currentStatus) ||
+      ['dispensed', 'delivered', 'completed', 'fulfilled'].includes(currentStatus) ||
       rx.isDispensed ||
       rx.dispensedAt ||
       rx.dispensedDate
@@ -472,17 +472,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       return { formatted: `${rawCurrency} ${rawAmount}`, currency: rawCurrency, amount: rawAmount };
     }
 
-    if (isDispensed) {
-      return {
-        formatted: 'AED 1,450.00',
-        currency: 'AED',
-        amount: 1450,
-        isEstimated: false
-      };
-    }
-
     return null;
-  }, [rx, isDispensed]);
+  }, [rx]);
 
   // Localized clinical steps (English default) - tailored for oral or topical routes
   const steps = isEs ? (posology.applicationSteps || (isEntirelyOral ? [
@@ -1083,6 +1074,38 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           let indication = mono?.clinicalIndication || api.clinicalIndication || api.therapeuticClass || api.category || (!isGenericIndication ? api.indication : null);
           let action = mono?.mechanismOfAction || api.mechanismOfAction || api.mechanism || (!isGenericAction ? (api.instructions || api.action) : null);
           const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : (api.geneTargets || []);
+
+          // Guarantee English terms when !isEs
+          if (!isEs) {
+            const SPANISH_TO_ENGLISH_MAP = {
+              'activador de sulfotransferasa & canales k_atp foliculares': 'Sulfotransferase Activator & Follicular K_ATP Channel Opener',
+              'activador de sulfotransferasa & canales k_atp': 'Sulfotransferase Activator & Follicular K_ATP Channel Opener',
+              'antagonista competitivo de receptores androgénicos': 'Competitive Androgen Receptor Antagonist',
+              'precursor esencial de óxido nítrico (no) & vasodilatador folicular': 'Essential Nitric Oxide (NO) Precursor & Follicular Vasodilator',
+              'precursor de óxido nítrico & estimulador microvascular': 'Nitric Oxide Precursor & Microvascular Stimulator',
+              'inhibidor selectivo 5α-reductasa tipo ii': 'Selective 5α-Reductase Type II Inhibitor',
+              'inhibidor dual 5α-reductasa tipo i y ii': 'Dual 5α-Reductase Type I & II Inhibitor',
+              'antagonista selectivo del receptor pgd2': 'Selective PGD2 Receptor Antagonist',
+              'precursor de coenzima a & regenerador celular': 'Coenzyme A Precursor & Cellular Regenerator',
+              'fitoestimulante celular & inductor de vegf': 'Cellular Phytostimulant & VEGF Inducer',
+              'optimizador microvascular & escudo antioxidante': 'Microvascular Optimizer & Antioxidant Shield',
+              'supresión de dht folicular & prevención de miniaturización': 'Follicular DHT Suppression & Miniaturization Prevention',
+              'estimulación de fase anágena & perfusión microvascular': 'Anagen Phase Induction & Microvascular Perfusion',
+              'bloqueo local de dht en cuero cabelludo': 'Local Scalp DHT Blockade',
+              'optimización de microcirculación perifolicular': 'Perifollicular Microcirculation Enhancement',
+              'activación de la fase anágena del folículo': 'Follicular Anagen Phase Activation',
+              'bloqueo periférico de la dht': 'Peripheral DHT Receptor Blockade',
+              'vasodilatador periférico': 'Peripheral Vasodilator',
+              'personalizado': 'Personalized Follicular Therapy',
+              'tratamiento folicular personalizado': 'Personalized Follicular Treatment',
+            };
+            if (role && SPANISH_TO_ENGLISH_MAP[role.toLowerCase().trim()]) {
+              role = SPANISH_TO_ENGLISH_MAP[role.toLowerCase().trim()];
+            }
+            if (indication && SPANISH_TO_ENGLISH_MAP[indication.toLowerCase().trim()]) {
+              indication = SPANISH_TO_ENGLISH_MAP[indication.toLowerCase().trim()];
+            }
+          }
 
           if (!role) {
             if (n.includes('finasteride')) {
@@ -2015,30 +2038,44 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     {patientName} {patientAlias}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#5f6368', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span>PIN: <strong style={{ color: '#202124' }}>{patient.pin || '11774'}</strong></span>
-                    <span>·</span>
-                    <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong style={{ color: '#202124' }}>{patient.dob || '1974-03-17'}</strong></span>
+                    {patient.dob && (
+                      <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong style={{ color: '#202124' }}>{patient.dob}</strong></span>
+                    )}
+                    {patient.age && (
+                      <>
+                        <span>·</span>
+                        <span>{patient.age} {isEs ? 'años' : 'yrs'}{patient.gender ? ` (${patient.gender})` : ''}</span>
+                      </>
+                    )}
+                    {patient.nationality && (
+                      <>
+                        <span>·</span>
+                        <span>{patient.nationality}</span>
+                      </>
+                    )}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#70757a', marginTop: '1px' }}>
-                    <span>📞 {patient.maskedPhone || '+971 54 *** **80'}</span>
-                  </div>
+                  {patient.emiratesId && (
+                    <div style={{ fontSize: '0.75rem', color: '#70757a', marginTop: '1px' }}>
+                      <span>National ID: <strong>{patient.emiratesId}</strong></span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Column 3: Clinical Protocol & Scope */}
+                {/* Column 3: Clinical Protocol & Scope (100% Real from Prescription Data) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {isEs ? 'Alcance y Régimen Posológico' : 'Clinical Regimen & Scope'}
                   </span>
                   <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124' }}>
-                    {isEs ? 'Protocolo Celular y Genómico Personalizado' : 'Personalized Cellular & Genomic Protocol'}
+                    {rx.treatmentType || prescriptionTypeInfo.label || (isEs ? 'Protocolo Personalizado' : 'Personalized Clinical Protocol')}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#5f6368' }}>
-                    {isEs 
-                      ? '3 Fases Secuenciales · Cápsulas Orales Diarias' 
-                      : '3 Sequential Phases · Daily Oral Capsules'}
+                    {compoundedFormulations.length > 0 
+                      ? `${compoundedFormulations.length} Phase · ${compoundedFormulations[0]?.dosageForm || 'Topical Scalp Solution'} (${compoundedFormulations[0]?.volume || '100 mL'})` 
+                      : (isEs ? 'Formulación Magistral Personalizada' : 'Precision Compounded Formulation')}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#137333', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
-                    <span>🔒 Lotusland Synthesis · Fagron Compound Quality</span>
+                    <span>✓ EU GMP Certified Dispensary · Pharmapolis &amp; Fagron Quality</span>
                   </div>
                 </div>
               </div>

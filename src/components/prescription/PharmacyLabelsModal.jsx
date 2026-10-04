@@ -15,7 +15,8 @@ export default function PharmacyLabelsModal({
   const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
   const [copiedLink, setCopiedLink] = useState(false);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
-  const [zoomMode, setZoomMode] = useState(false);
+  const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
+  const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
 
   // Sizing Presets & Custom Dimensions
   const [selectedPreset, setSelectedPreset] = useState('75x45');
@@ -28,6 +29,10 @@ export default function PharmacyLabelsModal({
   if (!isOpen || !labels || labels.length === 0) return null;
 
   const currentItem = labels[selectedProductIdx] || labels[0];
+
+  // Calculated pixel dimensions at current DPI: (mm / 25.4) * DPI
+  const exportWidthPx = Math.round((dimensions.widthMm / 25.4) * dpi);
+  const exportHeightPx = Math.round((dimensions.heightMm / 25.4) * dpi);
 
   const PRESETS = [
     { id: '75x45', label: '75 × 45 mm', sub: isEs ? 'Estándar' : 'Standard', w: 75, h: 45 },
@@ -58,7 +63,7 @@ export default function PharmacyLabelsModal({
     setDimensions(prev => ({ ...prev, heightMm: num }));
   };
 
-  // Dynamic 300 DPI High-Resolution PNG Generator from SVG
+  // Dynamic High-Resolution PNG Generator from SVG with user-selected DPI (300 / 600 / 1200)
   const handleDownloadPng = async () => {
     try {
       setIsGeneratingPng(true);
@@ -68,10 +73,8 @@ export default function PharmacyLabelsModal({
         return;
       }
 
-      // 300 DPI: 1 inch = 25.4 mm. Pixels = (mm / 25.4) * 300
-      const dpi = 300;
-      const widthPx = Math.round((dimensions.widthMm / 25.4) * dpi);
-      const heightPx = Math.round((dimensions.heightMm / 25.4) * dpi);
+      const widthPx = exportWidthPx;
+      const heightPx = exportHeightPx;
 
       const clonedSvg = svgElement.cloneNode(true);
       clonedSvg.setAttribute('width', `${widthPx}px`);
@@ -96,7 +99,7 @@ export default function PharmacyLabelsModal({
         const downloadLink = document.createElement('a');
         downloadLink.href = pngDataUrl;
         const cleanName = (currentItem.productName || 'Label').replace(/[^a-zA-Z0-9]/g, '_');
-        downloadLink.download = `Pharmapolis_${cleanName}_${dimensions.widthMm}x${dimensions.heightMm}mm_${activeVariant}_300DPI.png`;
+        downloadLink.download = `Pharmapolis_${cleanName}_${dimensions.widthMm}x${dimensions.heightMm}mm_${activeVariant}_${dpi}DPI.png`;
         downloadLink.click();
         setIsGeneratingPng(false);
       };
@@ -402,21 +405,11 @@ export default function PharmacyLabelsModal({
                 }}>
                   EU GMP Certified
                 </span>
-                <span style={{
-                  background: '#f1f3f4',
-                  color: '#3c4043',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '4px'
-                }}>
-                  {dimensions.widthMm} × {dimensions.heightMm} mm
-                </span>
               </div>
               <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#5f6368' }}>
                 {isEs 
-                  ? 'Pharmapolis Compounding Pharmacy · Renderizado vectorial SVG & Exportador 300 DPI a medida' 
-                  : 'Pharmapolis Compounding Pharmacy · Vector SVG Engine & Custom 300 DPI PNG Exporter'}
+                  ? 'Pharmapolis Compounding Pharmacy · Renderizado vectorial SVG & Exportador Multi-DPI a medida' 
+                  : 'Pharmapolis Compounding Pharmacy · Vector SVG Engine & Multi-DPI PNG Exporter'}
               </p>
             </div>
           </div>
@@ -617,9 +610,42 @@ export default function PharmacyLabelsModal({
                   <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>mm</span>
                 </div>
               )}
+
+              {/* Field 4: Print Resolution / DPI */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label htmlFor="gcp-label-dpi" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                  DPI:
+                </label>
+                <select
+                  id="gcp-label-dpi"
+                  value={dpi}
+                  onChange={(e) => setDpi(Number(e.target.value))}
+                  style={{
+                    height: 30,
+                    padding: '0 22px 0 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#202124',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 6px center',
+                    outline: 'none'
+                  }}
+                >
+                  <option value={300}>300 DPI (Standard)</option>
+                  <option value={600}>600 DPI (Micro-Print)</option>
+                  <option value={1200}>1200 DPI (Ultra HD)</option>
+                </select>
+              </div>
             </div>
 
-            {/* Active Specs Badge on Right */}
+            {/* Active Output Pixel Resolution Badge */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -633,9 +659,9 @@ export default function PharmacyLabelsModal({
               fontWeight: 600,
               whiteSpace: 'nowrap'
             }}>
-              <span>{dimensions.widthMm} × {dimensions.heightMm} mm</span>
+              <span>{exportWidthPx} × {exportHeightPx} px</span>
               <span>·</span>
-              <span>300 DPI</span>
+              <span>{dpi} DPI</span>
             </div>
           </div>
 
@@ -651,31 +677,50 @@ export default function PharmacyLabelsModal({
               flexShrink: 0
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {isEs ? 'Vista Previa en Vivo (Vectorial 300 DPI)' : 'Live Preview (Vector SVG 300 DPI)'}
-              </span>
-              <button
-                type="button"
-                onClick={() => setZoomMode(!zoomMode)}
-                style={{
-                  background: zoomMode ? '#e8f0fe' : '#ffffff',
-                  color: zoomMode ? '#1a73e8' : '#5f6368',
-                  border: '1px solid #dadce0',
-                  borderRadius: '4px',
-                  padding: '3px 8px',
-                  fontSize: '0.70rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <Maximize2 size={12} />
-                <span>{zoomMode ? (isEs ? 'Ajustar a Pantalla' : 'Fit to Window') : (isEs ? 'Zoom 100% (Detalle)' : 'Zoom 100% (Detail)')}</span>
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', flexWrap: 'wrap', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {isEs ? 'Vista Previa en Vivo' : 'Live Preview'}
+                </span>
+                <span style={{ fontSize: '0.66rem', color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
+                  Vector SVG · Min 6.5pt Print Legible
+                </span>
+              </div>
+
+              {/* Multi-step Zoom Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '0.68rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginRight: '2px' }}>
+                  Zoom:
+                </span>
+                <div style={{ display: 'inline-flex', background: '#f1f3f4', padding: '2px', borderRadius: '4px', gap: '2px' }}>
+                  {[
+                    { id: 'fit', label: isEs ? 'Ajustar' : 'Fit' },
+                    { id: 1, label: '100%' },
+                    { id: 1.5, label: '150%' },
+                    { id: 2, label: '200%' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setZoomLevel(opt.id)}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '3px',
+                        border: 'none',
+                        background: zoomLevel === opt.id ? '#ffffff' : 'transparent',
+                        color: zoomLevel === opt.id ? '#1a73e8' : '#5f6368',
+                        fontSize: '0.70rem',
+                        fontWeight: zoomLevel === opt.id ? 700 : 500,
+                        boxShadow: zoomLevel === opt.id ? '0 1px 2px rgba(60,64,67,0.15)' : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div
@@ -690,21 +735,29 @@ export default function PharmacyLabelsModal({
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                padding: zoomMode ? '16px' : '4px',
-                maxHeight: zoomMode ? 'none' : 'clamp(180px, 30vh, 250px)'
+                justifyContent: zoomLevel === 'fit' ? 'center' : 'flex-start',
+                padding: zoomLevel === 'fit' ? '8px' : '20px',
+                maxHeight: zoomLevel === 'fit' ? 'clamp(180px, 30vh, 250px)' : '420px',
+                boxSizing: 'border-box'
               }}
             >
               <div style={{
-                width: zoomMode ? '820px' : 'auto',
-                height: zoomMode ? 'auto' : '100%',
-                maxWidth: '100%',
-                maxHeight: zoomMode ? 'none' : 'clamp(170px, 28vh, 240px)',
+                width: zoomLevel === 'fit' 
+                  ? 'auto' 
+                  : zoomLevel === 1 
+                    ? '380px' 
+                    : zoomLevel === 1.5 
+                      ? '620px' 
+                      : '860px',
+                height: zoomLevel === 'fit' ? '100%' : 'auto',
+                maxWidth: zoomLevel === 'fit' ? '100%' : 'none',
+                maxHeight: zoomLevel === 'fit' ? 'clamp(170px, 28vh, 240px)' : 'none',
                 aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
                 flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                margin: zoomLevel === 'fit' ? '0' : '0 auto'
               }}>
                 <PharmapolisLabelSvg
                   labelData={currentItem}
