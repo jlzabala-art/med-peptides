@@ -547,7 +547,7 @@ export function getAuthoritativeClinicalData(rx) {
  * Finds all Pharmapolis label records associated with a given prescription object.
  * Guaranteed to return full clinical data and unique QR codes.
  */
-export function getPharmapolisLabelsForPrescription(rx) {
+export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = null) {
   if (!rx) return [];
   const rxId = String(rx.id || '').trim().toUpperCase();
   const rxNum = String(rx.prescriptionNumber || '').trim().toUpperCase();
@@ -587,6 +587,71 @@ export function getPharmapolisLabelsForPrescription(rx) {
 
     return false;
   });
+
+  // If explicit formulations are passed (e.g. from PublicPrescriptionClient compoundedFormulations)
+  // and there is more than 1 phase, ensure EVERY phase gets its own dedicated label!
+  if (explicitFormulations && Array.isArray(explicitFormulations) && explicitFormulations.length > 1) {
+    return explicitFormulations.map((form, fIdx) => {
+      const phaseNum = form.index || (fIdx + 1);
+      // Try to find a matching label from registry by phaseNumber or title
+      const regMatch = matches.find(m => 
+        m.phaseNumber === phaseNum || 
+        (m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10)))
+      );
+
+      if (regMatch) {
+        return {
+          ...regMatch,
+          phaseNumber: phaseNum,
+          patientName: auth.patientName || regMatch.patientName,
+          doctorName: auth.doctorName || regMatch.doctorName,
+          doctorLicense: auth.doctorLicense || regMatch.doctorLicense,
+          clinicName: auth.clinicName || regMatch.clinicName,
+          fileNumber: auth.fileNumber || regMatch.fileNumber,
+          targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl
+        };
+      }
+
+      // Generate dynamic label for this phase
+      const pName = form.title || form.productName || form.name || `Phase ${phaseNum} Compounded Protocol`;
+      const pForm = form.route || form.dosageForm || (form.volume?.includes('Cap') ? 'Oral Route (Plant-Based Capsules)' : 'Topical Scalp Solution');
+      const pVol = form.volume || '100 mL';
+
+      let formulaText = form.formula || '';
+      if (!formulaText && form.apis && Array.isArray(form.apis)) {
+        formulaText = form.apis.map(a => `${a.name || a.activeIngredient || ''} ${a.dosage || a.dose || ''}`.trim()).filter(Boolean).join(' + ');
+      }
+
+      const directionsText = form.posology?.regimen || form.instructions || form.directions || (form.posology?.steps ? form.posology.steps.map(s => s.text).join(' ') : 'Take / apply as directed by prescribing physician.');
+      const warningsText = form.warnings || 'For external / patient use only. Keep out of reach of children.';
+
+      return {
+        id: `${rx.id || 'rx'}-phase-${phaseNum}`,
+        phaseNumber: phaseNum,
+        patientName: auth.patientName || 'Patient Record',
+        fileNumber: auth.fileNumber || '51857',
+        productName: pName,
+        productTitle: pName,
+        subTitle: form.subtitle || `Phase ${phaseNum}: Clinical Protocol Administration`,
+        dosageForm: pForm,
+        volume: pVol,
+        dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+        pharmacy: 'Pharmapolis Compounding Pharmacy',
+        formula: formulaText,
+        directions: directionsText,
+        warnings: warningsText,
+        prodDate: rx.issuedDate || rx.createdAt || '15-09-2026',
+        expDate: rx.expiryDate || '15-09-2027',
+        storage: form.storage || rx.storage || 'Store at room temperature',
+        doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
+        doctorLicense: auth.doctorLicense || 'DHA Registered',
+        clinicName: auth.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
+        batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
+        lote: `2609-P${String(phaseNum)}`,
+        targetRxUrl: auth.targetRxUrl
+      };
+    });
+  }
 
   if (matches.length > 0) {
     return matches.map(m => ({

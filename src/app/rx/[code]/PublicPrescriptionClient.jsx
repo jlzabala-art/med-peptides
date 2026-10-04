@@ -184,10 +184,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showLabelsModal, setShowLabelsModal] = useState(false);
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
 
-  const prescriptionLabels = React.useMemo(() => {
-    return getPharmapolisLabelsForPrescription(rx);
-  }, [rx]);
-
   const togglePhase = (id) => {
     setExpandedPhases(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -1248,6 +1244,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       });
     });
   }, [rawLines, rx, isEs]);
+
+  // Guaranteed label generation for EVERY phase / formulation in the prescription
+  const prescriptionLabels = React.useMemo(() => {
+    return getPharmapolisLabelsForPrescription(rx, compoundedFormulations);
+  }, [rx, compoundedFormulations]);
 
   // Keep prescriptionApis for any auxiliary references
   const prescriptionApis = React.useMemo(() => {

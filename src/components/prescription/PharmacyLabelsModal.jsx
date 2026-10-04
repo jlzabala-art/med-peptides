@@ -172,38 +172,206 @@ export default function PharmacyLabelsModal({
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 9999,
-      background: 'rgba(15, 23, 42, 0.75)',
-      backdropFilter: 'blur(4px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '16px'
-    }}>
-      <div style={{
-        background: '#ffffff',
-        borderRadius: '16px',
-        maxWidth: '960px',
-        width: '100%',
-        maxHeight: '94vh',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        overflow: 'hidden',
-        border: '1px solid #e2e8f0'
-      }}>
+    <div className="gcp-labels-backdrop">
+      <style>{`
+        .gcp-labels-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: rgba(15, 23, 42, 0.75);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+        .gcp-labels-dialog {
+          background: #ffffff;
+          border-radius: 12px;
+          max-width: 920px;
+          width: 100%;
+          max-height: 94vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 48px -10px rgba(60, 64, 67, 0.28), 0 4px 12px rgba(60, 64, 67, 0.15);
+          overflow: hidden;
+          border: 1px solid #dadce0;
+          position: relative;
+        }
+        .gcp-labels-header {
+          padding: 12px 18px;
+          border-bottom: 1px solid #dadce0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #ffffff;
+          flex-shrink: 0;
+        }
+        .gcp-labels-body {
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
+          padding: 12px 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          align-items: center;
+          -webkit-overflow-scrolling: touch;
+        }
+        .gcp-labels-sticky-footer {
+          flex-shrink: 0;
+          background: #ffffff;
+          border-top: 1px solid #dadce0;
+          padding: 10px 18px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          z-index: 20;
+          box-shadow: 0 -2px 6px rgba(60, 64, 67, 0.05);
+        }
+        .gcp-footer-desktop-specs {
+          display: block;
+        }
+        .gcp-footer-mobile-specs {
+          display: none;
+        }
+        .gcp-footer-actions-wrap {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .gcp-footer-secondary-grid {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .gcp-btn-primary {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          height: 36px;
+          padding: 0 16px;
+          border-radius: 4px;
+          background: #1a73e8;
+          color: #ffffff;
+          font-size: 0.82rem;
+          font-weight: 600;
+          cursor: pointer;
+          border: 1px solid #1a73e8;
+          box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
+          transition: background 0.15s, box-shadow 0.15s;
+          white-space: nowrap;
+        }
+        .gcp-btn-primary:hover:not(:disabled) {
+          background: #1557b0;
+          box-shadow: 0 1px 3px rgba(60, 64, 67, 0.4);
+        }
+        .gcp-btn-secondary {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          height: 36px;
+          padding: 0 14px;
+          border-radius: 4px;
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          color: #1a73e8;
+          font-size: 0.80rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s, border-color 0.15s;
+          white-space: nowrap;
+        }
+        .gcp-btn-secondary:hover {
+          background: #f8fafd;
+          border-color: #1a73e8;
+        }
+        .gcp-btn-copy {
+          color: #3c4043;
+          font-weight: 500;
+        }
+        .gcp-btn-copy:hover {
+          color: #202124;
+        }
+
+        /* ── Responsive Mobile Rules (Google Cloud Mobile UX Standards) ── */
+        @media (max-width: 640px) {
+          .gcp-labels-backdrop {
+            padding: 0;
+            align-items: flex-end;
+          }
+          .gcp-labels-dialog {
+            max-height: 100dvh;
+            height: 100%;
+            border-radius: 14px 14px 0 0;
+            border: none;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
+          }
+          .gcp-labels-header {
+            padding: 10px 14px;
+          }
+          .gcp-labels-body {
+            padding: 10px 12px 14px 12px;
+            gap: 8px;
+          }
+          .gcp-labels-sticky-footer {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 8px)) 14px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            background: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -4px 18px rgba(60, 64, 67, 0.12), 0 -1px 3px rgba(60, 64, 67, 0.08);
+          }
+          .gcp-footer-desktop-specs {
+            display: none;
+          }
+          .gcp-footer-mobile-specs {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.74rem;
+            color: #5f6368;
+            padding: 0 2px;
+          }
+          .gcp-footer-actions-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+          }
+          .gcp-btn-primary {
+            width: 100%;
+            height: 42px;
+            font-size: 0.86rem;
+            border-radius: 6px;
+          }
+          .gcp-footer-secondary-grid {
+            display: grid;
+            gap: 8px;
+            width: 100%;
+          }
+          .gcp-btn-secondary {
+            width: 100%;
+            height: 38px;
+            font-size: 0.78rem;
+            border-radius: 6px;
+          }
+        }
+      `}</style>
+
+      <div className="gcp-labels-dialog">
         {/* Header */}
-        <div style={{
-          padding: '14px 20px',
-          borderBottom: '1px solid #dadce0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#ffffff'
-        }}>
+        <div className="gcp-labels-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
               width: 38,
@@ -332,14 +500,7 @@ export default function PharmacyLabelsModal({
         )}
 
         {/* Content Body */}
-        <div style={{
-          padding: '16px 20px',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '14px',
-          alignItems: 'center'
-        }}>
+        <div className="gcp-labels-body">
           {/* Controls Bar: Variant Switcher + Preset Sizing */}
           <div style={{
             display: 'flex',
@@ -572,19 +733,22 @@ export default function PharmacyLabelsModal({
                 width: '100%',
                 borderRadius: '8px',
                 border: '1px solid #dadce0',
-                boxShadow: '0 2px 6px rgba(60,64,67,0.15), 0 8px 16px rgba(60,64,67,0.08)',
+                boxShadow: '0 2px 6px rgba(60,64,67,0.12), 0 6px 14px rgba(60,64,67,0.06)',
                 overflow: 'auto',
                 background: '#ffffff',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: zoomMode ? '16px' : '0'
+                padding: zoomMode ? '16px' : '4px',
+                maxHeight: zoomMode ? 'none' : 'clamp(180px, 30vh, 250px)'
               }}
             >
               <div style={{
-                width: zoomMode ? '820px' : '100%',
-                minWidth: zoomMode ? '820px' : 'unset',
+                width: zoomMode ? '820px' : 'auto',
+                height: zoomMode ? 'auto' : '100%',
+                maxWidth: '100%',
+                maxHeight: zoomMode ? 'none' : 'clamp(170px, 28vh, 240px)',
                 aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
                 flexShrink: 0,
                 display: 'flex',
@@ -659,87 +823,66 @@ export default function PharmacyLabelsModal({
             </div>
           </div>
 
-          {/* GCP Bottom Specs & Action Bar */}
-          <div style={{
-            width: '100%',
-            maxWidth: '760px',
-            background: '#ffffff',
-            borderRadius: '6px',
-            border: '1px solid #dadce0',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}>
-            <div>
-              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#202124' }}>
-                {currentItem.productName}
-              </div>
-              <div style={{ fontSize: '0.74rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>{currentItem.dosageForm || 'Topical Solution'}</span>
-                <span>•</span>
-                <span>{currentItem.volume || '100 mL'}</span>
-                <span>•</span>
-                <span>{dimensions.widthMm} × {dimensions.heightMm} mm (Vector SVG · 300 DPI)</span>
-              </div>
+        </div>
+
+        {/* ── GCP Sticky Action Footer / Mobile Dock Sticker ── */}
+        <div className="gcp-labels-sticky-footer">
+          {/* Desktop Product & Dimension Specifications (Hidden on Mobile) */}
+          <div className="gcp-footer-desktop-specs">
+            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#202124' }}>
+              {currentItem.productName}
             </div>
+            <div style={{ fontSize: '0.74rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{currentItem.dosageForm || 'Topical Solution'}</span>
+              <span>•</span>
+              <span>{currentItem.volume || '100 mL'}</span>
+              <span>•</span>
+              <span>{dimensions.widthMm} × {dimensions.heightMm} mm (Vector SVG · 300 DPI)</span>
+            </div>
+          </div>
 
-            {/* Action Buttons Group */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Mobile Top Micro-Specs Strip (Visible Only on Mobile) */}
+          <div className="gcp-footer-mobile-specs">
+            <div style={{ fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
+              {currentItem.productName}
+            </div>
+            <div style={{ color: '#5f6368', whiteSpace: 'nowrap', fontSize: '0.72rem' }}>
+              {currentItem.volume || '100 mL'} · {dimensions.widthMm}×{dimensions.heightMm}mm
+            </div>
+          </div>
+
+          {/* Action Buttons Group */}
+          <div className="gcp-footer-actions-wrap">
+            {/* Primary Action: Download PNG (100% full width on mobile) */}
+            <button
+              type="button"
+              className="gcp-btn-primary"
+              onClick={handleDownloadPng}
+              disabled={isGeneratingPng}
+              style={{
+                cursor: isGeneratingPng ? 'wait' : 'pointer',
+                opacity: isGeneratingPng ? 0.75 : 1
+              }}
+            >
+              <Download size={16} />
+              <span>
+                {isGeneratingPng 
+                  ? (isEs ? 'Generando 300 DPI...' : 'Rendering 300 DPI...') 
+                  : (isEs ? `Descargar PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)` : `Download PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)`)}
+              </span>
+            </button>
+
+            {/* Secondary Symmetrical Actions (50% / 50% grid on mobile) */}
+            <div
+              className="gcp-footer-secondary-grid"
+              style={{
+                gridTemplateColumns: currentItem.targetRxUrl ? '1fr 1fr' : '1fr'
+              }}
+            >
               <button
                 type="button"
-                onClick={handleDownloadPng}
-                disabled={isGeneratingPng}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  height: '36px',
-                  padding: '0 16px',
-                  borderRadius: '4px',
-                  background: '#1a73e8',
-                  color: '#ffffff',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: isGeneratingPng ? 'wait' : 'pointer',
-                  border: '1px solid #1a73e8',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-                  transition: 'background 0.15s',
-                  opacity: isGeneratingPng ? 0.7 : 1
-                }}
-                onMouseEnter={(e) => { if (!isGeneratingPng) e.currentTarget.style.background = '#1557b0'; }}
-                onMouseLeave={(e) => { if (!isGeneratingPng) e.currentTarget.style.background = '#1a73e8'; }}
-              >
-                <Download size={15} />
-                <span>
-                  {isGeneratingPng 
-                    ? (isEs ? 'Generando 300 DPI...' : 'Rendering 300 DPI...') 
-                    : (isEs ? `Descargar PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)` : `Download PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)`)}
-                </span>
-              </button>
-
-              <button
-                type="button"
+                className="gcp-btn-secondary"
                 onClick={handlePrint}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  height: '36px',
-                  padding: '0 16px',
-                  borderRadius: '4px',
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  color: '#1a73e8',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'background 0.15s, border-color 0.15s'
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
               >
                 <Printer size={15} />
                 <span>{isEs ? 'Imprimir Etiqueta' : 'Print Label'}</span>
@@ -748,26 +891,17 @@ export default function PharmacyLabelsModal({
               {currentItem.targetRxUrl && (
                 <button
                   type="button"
+                  className="gcp-btn-secondary gcp-btn-copy"
                   onClick={handleCopyLink}
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    height: '36px',
-                    padding: '0 12px',
-                    borderRadius: '4px',
-                    background: '#ffffff',
-                    border: '1px solid #dadce0',
-                    color: copiedLink ? '#137333' : '#5f6368',
-                    fontSize: '0.80rem',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s'
+                    color: copiedLink ? '#137333' : '#3c4043',
+                    background: copiedLink ? '#e6f4ea' : '#ffffff',
+                    borderColor: copiedLink ? '#ceead6' : '#dadce0'
                   }}
                   title={currentItem.targetRxUrl}
                 >
                   {copiedLink ? <Check size={14} color="#137333" /> : <ExternalLink size={14} />}
-                  <span>{copiedLink ? (isEs ? 'URL Copiada ✓' : 'Link Copied ✓') : (isEs ? 'Copiar URL QR' : 'Copy QR Link')}</span>
+                  <span>{copiedLink ? (isEs ? 'URL Copiada ✓' : 'Link Copied ✓') : (isEs ? 'Copiar QR' : 'Copy QR Link')}</span>
                 </button>
               )}
             </div>
