@@ -1544,18 +1544,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
-                      title={isEs ? 'Ver etiquetas oficiales para frascos (7.5 × 4.5 cm)' : 'View official compounding bottle labels (7.5 × 4.5 cm)'}
+                      title={isEs ? 'Ver etiquetas oficiales para frascos' : 'View official compounding bottle labels'}
                     >
                       <Tag size={13} color="#1a73e8" />
                       <span>{isEs ? `Etiquetas (${prescriptionLabels.length})` : `Labels (${prescriptionLabels.length})`}</span>
-                      <span style={{
-                        background: '#e8f0fe',
-                        color: '#1a73e8',
-                        fontSize: '0.64rem',
-                        padding: '1px 5px',
-                        borderRadius: '3px',
-                        fontWeight: 700
-                      }}>7.5×4.5 cm</span>
                     </button>
                   )}
                 </div>
