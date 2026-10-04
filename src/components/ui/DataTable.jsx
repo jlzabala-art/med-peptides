@@ -41,6 +41,7 @@ export default function DataTable({
   onPageChange,
   // GCP Style Pagination
   rowsPerPage,
+  initialRowsPerPage = 25,
   onRowsPerPageChange,
   hasNextPage,
   hasPrevPage,
@@ -88,6 +89,7 @@ export default function DataTable({
   getRowProps, // (row) => ({ style?: {}, className?: string })
   pagination = true,
   hidePagination = false,
+  hideRowsPerPageSelector = false,
   alwaysShowPagination = true,
 
   // Ask Atlas Action
@@ -199,7 +201,7 @@ export default function DataTable({
   );
 
   const [internalPage, setInternalPage] = useState(1);
-  const [internalRowsPerPage, setInternalRowsPerPage] = useState(25);
+  const [internalRowsPerPage, setInternalRowsPerPage] = useState(initialRowsPerPage);
 
   // Reset to page 1 whenever the data set changes (e.g. filter applied on server).
   // Without this, navigating from page 2 of 46 results to a 21-result filtered set
@@ -1397,6 +1399,7 @@ export default function DataTable({
             }}
           >
             {/* Rows per page selector */}
+            {!hideRowsPerPageSelector && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500 }}>Rows per page:</span>
               <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
@@ -1427,6 +1430,7 @@ export default function DataTable({
                 <span style={{ position: 'absolute', right: '6px', pointerEvents: 'none', fontSize: '11px', color: '#64748b' }}>↕</span>
               </div>
             </div>
+            )}
 
             {/* Item count (e.g. 1-25 of 460) */}
             <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500, letterSpacing: '0.01em' }}>

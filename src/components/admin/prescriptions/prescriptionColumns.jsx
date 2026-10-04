@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
   Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
-  ClipboardCheck, Syringe, Send, Receipt
+  ClipboardCheck, Syringe, Send, Receipt, Share2
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
@@ -41,6 +41,7 @@ import AppActionGroup from '../../ui/AppActionGroup';
 import { prescriptionRepository } from '../../../repositories/prescriptionRepository';
 import notifier from '../../../services/NotificationService';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
+import { classifyPrescription } from '../../../data/prescriptionTypeClassifier';
 
 
 import RxCompletenessBadge from './RxCompletenessBadge';
@@ -75,7 +76,7 @@ function PatientAvatar({ name, size = 40 }) {
   );
 }
 
-const formatDoctorName = (name) => {
+export const formatDoctorName = (name) => {
   if (!name) return '—';
   let cleaned = name.trim();
   while (cleaned.toLowerCase().startsWith('dr.') || cleaned.toLowerCase().startsWith('dr ')) {
@@ -84,6 +85,10 @@ const formatDoctorName = (name) => {
     } else {
       cleaned = cleaned.substring(2).trim();
     }
+  }
+  const lower = cleaned.toLowerCase();
+  if (lower === 'heytham' || lower === 'haytham' || lower.includes('heytham salem') || lower.includes('haytham salem')) {
+    return 'Dr. Haytham Salem';
   }
   return `Dr. ${cleaned}`;
 };
@@ -133,133 +138,95 @@ export const getPrescriptionColumns = (options = {}) => {
   const canGenerateLabels = !isDoctor && role !== 'doctor';
   return [
     {
-      key: 'prescription',
-      header: 'Prescription & Patient',
-      width: '32%',
+      key: 'patient',
+      header: 'Patient & Doctor',
+      width: '34%',
       render: (rx) => {
         const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
-        const doctor = rx.doctor?.name || rx.doctorName || '—';
         const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
-        const doctorId = rx.doctorId || (rx.doctor && rx.doctor.id) || null;
-
-        const rawSource = (rx.source || 'manual').toLowerCase().trim();
-        const isImport = rawSource !== 'manual';
-
+        const doctor = rx.doctor?.name || rx.doctorName || '—';
         const isMultiPart = rx._isSessionGroup || rx.rxGroupId || rx.partNumber;
         const multiPartLabel = rx._isSessionGroup 
           ? `Multi-part (${rx._sessionCount || rx._sessionMembers?.length || 'Session'})`
           : rx.partNumber ? `Part ${rx.partNumber}${rx.totalParts ? ` of ${rx.totalParts}` : ''}` : null;
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <CopyableId value={rx.prescriptionCode || rx.id} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <div style={{ fontWeight: 600, color: '#202124', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{patient}</span>
+              {patientId && <CopyableId value={patientId} iconOnly={true} />}
               {multiPartLabel && (
                 <span style={{
-                  fontSize: '0.70rem',
-                  fontWeight: 700,
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
                   padding: '1px 6px',
                   borderRadius: '4px',
-                  background: '#f0fdf4',
-                  color: '#166534',
-                  border: '1px solid #bbf7d0',
+                  background: '#e6f4ea',
+                  color: '#137333',
+                  border: '1px solid #ceead6',
+                  marginLeft: '4px',
+                  whiteSpace: 'nowrap'
                 }}>
                   {multiPartLabel}
                 </span>
               )}
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 600,
-                padding: '1px 5px',
-                borderRadius: '4px',
-                background: isImport ? '#eff6ff' : '#f8fafc',
-                color: isImport ? '#1d4ed8' : '#475569',
-                border: `1px solid ${isImport ? '#bfdbfe' : '#e2e8f0'}`,
-              }}>
-                {isImport ? 'Import' : 'Manual'}
-              </span>
             </div>
-
-            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '2px' }}>
-              <span>{patient}</span>
-              {patientId && <CopyableId value={patientId} iconOnly={true} />}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.78rem', color: '#64748b' }}>
-              <Stethoscope size={12} style={{ flexShrink: 0 }} />
-              <span>{formatDoctorName(doctor)}</span>
-              {doctorId && <CopyableId value={doctorId} iconOnly={true} />}
+            <div style={{ fontSize: '0.80rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+              <Stethoscope size={12} color="#5f6368" />
+              <span style={{ fontWeight: 500, color: '#202124' }}>{formatDoctorName(doctor)}</span>
+              {(rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null)) && (
+                <span style={{ fontSize: '0.70rem', color: '#5f6368', background: '#f1f3f4', padding: '1px 5px', borderRadius: '3px' }}>
+                  {rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || 'Arthregen Clinic'}
+                </span>
+              )}
             </div>
           </div>
         );
       },
     },
     {
-      key: 'treatment',
-      header: 'Treatment & Items',
-      width: '36%',
+      key: 'type',
+      header: 'Program / Type',
+      width: '16%',
       render: (rx) => {
-        if (rx._isSessionGroup) {
-          const totalItems = rx.items?.length || 0;
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ fontWeight: 600, fontSize: '0.86rem', color: '#0f172a' }}>
-                Multi-Formulation Session
-              </div>
-              <div style={{ fontSize: '0.76rem', color: '#64748b' }}>
-                {rx._sessionMembers?.length || 1} protocol parts • {totalItems} total compounds
-              </div>
-            </div>
-          );
-        }
-
-        const items = rx.items || rx.compounds || rx.products || [];
-        const itemNames = items.map(i => i.name || i.productName || i.canonicalName || 'Compound').filter(Boolean);
-        const displaySummary = itemNames.slice(0, 2).join(', ');
-        const remainingCount = itemNames.length - 2;
-
+        const typeInfo = classifyPrescription(rx);
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {items.length > 0 ? (
-              <div style={{ fontSize: '0.84rem', color: '#1e293b', lineHeight: '1.3' }}>
-                <span style={{ fontWeight: 600 }}>{displaySummary}</span>
-                {remainingCount > 0 && (
-                  <span style={{ color: '#64748b', fontSize: '0.76rem', marginLeft: '4px' }}>
-                    +{remainingCount} more
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic' }}>
-                No medication lines recorded
-              </div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
-              <span style={{ fontSize: '0.72rem', color: '#64748b', background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
-                {items.length} item{items.length !== 1 ? 's' : ''}
-              </span>
-              <RxCompletenessBadge rx={rx} onEnrich={onEnrich} />
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: typeInfo.badgeBg,
+              color: typeInfo.badgeColor,
+              border: `1px solid ${typeInfo.badgeBorder}`,
+              whiteSpace: 'nowrap',
+              width: 'fit-content'
+            }}>
+              <span>{typeInfo.emoji}</span>
+              <span>{typeInfo.label}</span>
+            </span>
+            <span style={{ fontSize: '0.70rem', color: '#5f6368', whiteSpace: 'nowrap' }}>
+              {typeInfo.sublabel}
+            </span>
           </div>
         );
       },
     },
     {
-      key: 'status',
-      header: 'Status & Date',
-      width: '18%',
+      key: 'date',
+      header: 'Date',
+      width: '16%',
       render: (rx) => {
         const formatAnyDate = (val) => {
           if (!val) return null;
           let d = null;
-          if (typeof val.toDate === 'function') {
-            d = val.toDate();
-          } else if (val._seconds || val.seconds) {
-            d = new Date((val._seconds || val.seconds) * 1000);
-          } else if (typeof val === 'string' || typeof val === 'number') {
-            d = new Date(val);
-          }
+          if (typeof val.toDate === 'function') d = val.toDate();
+          else if (val._seconds || val.seconds) d = new Date((val._seconds || val.seconds) * 1000);
+          else if (typeof val === 'string' || typeof val === 'number') d = new Date(val);
           if (d && !isNaN(d.getTime())) {
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
           }
@@ -272,6 +239,18 @@ export const getPrescriptionColumns = (options = {}) => {
           || formatAnyDate(rx.fagron?.reportDate)
           || '—';
 
+        return (
+          <div style={{ fontSize: '0.8125rem', color: '#5f6368', fontWeight: 500, whiteSpace: 'nowrap' }}>
+            {dateStr}
+          </div>
+        );
+      },
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: '16%',
+      render: (rx) => {
         if (rx._isSessionGroup) {
           const statuses = (rx._sessionMembers || []).map(m => normalizeRxStatus(m.status) || 'draft');
           let aggregateStatus = 'draft';
@@ -284,76 +263,71 @@ export const getPrescriptionColumns = (options = {}) => {
           else aggregateStatus = statuses[0] || 'draft';
 
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-              <StatusBadge status={aggregateStatus} label={RX_STATUS_LABELS[aggregateStatus]} />
-              <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{dateStr}</div>
-            </div>
+            <StatusBadge status={aggregateStatus} label={RX_STATUS_LABELS[aggregateStatus]} />
           );
         }
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <InlineEditableCell
-              value={normalizeRxStatus(rx.status) || 'draft'}
-              type="select"
-              options={[
-                { label: 'Draft', value: 'draft' },
-                { label: 'Pending', value: 'pending' },
-                { label: 'Approved', value: 'approved' },
-                { label: 'Processing', value: 'processing' },
-                { label: 'In Transit', value: 'in_transit' },
-                { label: 'Completed', value: 'completed' },
-                { label: 'Cancelled', value: 'cancelled' }
-              ]}
-              format={(val) => <StatusBadge status={val} label={RX_STATUS_LABELS[val]} />}
-              onSave={async (newStatus) => {
-                try {
-                  await prescriptionRepository.updatePrescription(rx.id, { status: newStatus });
-                  toast.success('Status updated');
-                  if (options.onRefresh) options.onRefresh();
-                } catch (err) {
-                  console.error(err);
-                  toast.error('Failed to update status');
-                  throw err;
-                }
-              }}
-            />
-            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>{dateStr}</div>
-          </div>
+          <InlineEditableCell
+            value={normalizeRxStatus(rx.status) || 'draft'}
+            type="select"
+            options={[
+              { label: 'Draft', value: 'draft' },
+              { label: 'Pending', value: 'pending' },
+              { label: 'Approved', value: 'approved' },
+              { label: 'Processing', value: 'processing' },
+              { label: 'In Transit', value: 'in_transit' },
+              { label: 'Completed', value: 'completed' },
+              { label: 'Cancelled', value: 'cancelled' }
+            ]}
+            format={(val) => <StatusBadge status={val} label={RX_STATUS_LABELS[val]} />}
+            onSave={async (newStatus) => {
+              try {
+                await prescriptionRepository.updatePrescription(rx.id, { status: newStatus });
+                toast.success('Status updated');
+                if (options.onRefresh) options.onRefresh();
+              } catch (err) {
+                console.error(err);
+                toast.error('Failed to update status');
+                throw err;
+              }
+            }}
+          />
         );
       },
     },
     {
       key: 'action',
       header: 'Actions',
-      width: '14%',
+      width: '18%',
       align: 'right',
       sortable: false,
       render: (rx) => {
-        if (rx._isSessionGroup) {
-          return (
-            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem' }}>
-              <span style={{ fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic' }}>
-                Expand to manage
-              </span>
-            </div>
-          );
-        }
         
         const isPeptideRx = hasPeptideItems(rx);
         const isPharmopolisSupplier = isPharmopolisRx(rx);
 
         const actions = [
-          // ── PRIMARY ─────────────────────────────────────────────────────
+          // ── QUICK ACTION 1: View (Directly Visible) ─────────────────────
           {
             type: 'action',
-            label: 'View prescription',
+            label: 'View details',
             icon: Eye,
             isPrimary: true,
             onClick: () => {
               window.dispatchEvent(new CustomEvent('OPEN_PRESCRIPTION_VIEW', { detail: { rx } }));
             }
           },
+          // ── QUICK ACTION 2: Share Public Page (Directly Visible) ─────────
+          {
+            type: 'action',
+            label: 'Share public page',
+            icon: Share2,
+            onClick: () => {
+              window.dispatchEvent(new CustomEvent('OPEN_SHARE_PUBLIC_PAGE', { detail: { rx } }));
+            }
+          },
+          // ── OVERFLOW ACTIONS (in ··· menu) ──────────────────────────────
           {
             type: 'action',
             label: 'Enrich with AI',

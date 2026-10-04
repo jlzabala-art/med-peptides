@@ -18,10 +18,10 @@ export default function PrescriptionsKPIs({ serverKPIs, filteredCount = null, is
   const displayedTotal = (scope === 'filtered' && isFiltered && filteredCount != null) ? filteredCount : totalCount;
 
   const stats = [
-    { label: 'Total Prescriptions', value: displayedTotal, subtitle: scope === 'global' ? 'All database records' : (isFiltered ? 'Matching active filters' : 'Active prescriptions'), color: 'var(--color-primary, #003666)', icon: FileText, filter: 'all' },
-    { label: 'Pending Review', value: pendingCount, subtitle: 'Awaiting doctor approval', color: '#d97706', icon: Clock, alert: pendingCount > 0, filter: 'pending' },
-    { label: 'Active Treatments', value: activeCount, subtitle: 'Currently in progress', color: '#16a34a', icon: Activity, filter: 'active' },
-    { label: 'Fulfilled & Completed', value: fulfilledCount, subtitle: 'Successfully dispensed', color: '#2563eb', icon: CheckCircle2, filter: 'fulfilled' },
+    { label: 'Total Prescriptions', value: displayedTotal, subtitle: scope === 'global' ? 'All database records' : (isFiltered ? 'Matching active filters' : 'Active prescriptions'), icon: FileText, filter: 'all' },
+    { label: 'Pending Review', value: pendingCount, subtitle: 'Awaiting doctor approval', icon: Clock, alert: pendingCount > 0, filter: 'pending' },
+    { label: 'Active Treatments', value: activeCount, subtitle: 'Currently in progress', icon: Activity, filter: 'active' },
+    { label: 'Fulfilled & Completed', value: fulfilledCount, subtitle: 'Successfully dispensed', icon: CheckCircle2, filter: 'fulfilled' },
   ];
 
   return (

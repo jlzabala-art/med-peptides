@@ -190,29 +190,6 @@ export default function PeptideMonographHeader({
 
           {/* GCP Toolbar Actions */}
           <div className="pds-header-actions-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={handleCopySpec}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                color: '#1e293b',
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              title="Copy clinical monograph specs to clipboard"
-            >
-              {copied ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-              <span>{copied ? 'Copied ✓' : 'Copy Specs'}</span>
-            </button>
-
             {onOpenPreviewModal && (
               <button
                 type="button"
@@ -413,7 +390,7 @@ export default function PeptideMonographHeader({
             {/* Field 5: Supplier */}
             <div className="pds-summary-cell">
               <span className="pds-summary-label">Source Supplier</span>
-              <strong className="pds-summary-value">{supplier}</strong>
+              <strong className="pds-summary-value" title={supplier} style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflow: 'visible' }}>{supplier}</strong>
             </div>
           </div>
 

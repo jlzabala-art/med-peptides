@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { getPeptideScientificData } from '../../../../utils/knownPeptideData';
+import { processProductVariants } from '../../../../utils/productVariantProcessing';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 const BRAND_NAME = 'Atlas Solutions';
@@ -45,9 +46,12 @@ const PUBLIC_FIELDS = [
   'brand', 'supplier', 'target_pathway', 'standard'
 ];
 
+// Note: supplier identifiers are used ONLY server-side to build the format × strength
+// matrix; they are never drawn on the PDF.
 const VARIANT_PUBLIC_FIELDS = [
-  'id', 'dose', 'dosage', 'presentation', 'presentationName', 'format',
-  'strength', 'grade', 'administrationRoute',
+  'id', 'name', 'dose', 'dosage', 'presentation', 'presentationName', 'format', 'formatId',
+  'strength', 'strengthId', 'sku', 'supplierId', 'supplier', 'supplierName',
+  'grade', 'purity', 'administrationRoute',
   'reconstitutionGuide', 'storageInstructions', 'shelfLife',
   'contraindications', 'warnings',
 ];
@@ -651,7 +655,29 @@ export async function GET(request, context) {
     }
 
     // ── Complete Formulations & Available Dosages Table ──
-    if (variants.length > 0) {
+    // Build the same deduplicated format × strength matrix the web UI uses, so every
+    // presentation (vial, pen, nasal spray…) appears exactly once with its real dosage.
+    const presentationRows = (() => {
+      if (variants.length === 0) return [];
+      const { formats, strengths, variantIndex } = processProductVariants(variants);
+      const strengthById = new Map(strengths.map(s => [s.id, s]));
+      const parseMg = (s) => { const m = String(s || '').replace(/,/g, '').match(/(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 9999; };
+      const fallbackDose = product.dosage || product.dose || '';
+      const rows = [];
+      for (const fmt of formats) {
+        const sIds = [...(fmt.strengths || [])].sort((a, b) => parseMg(strengthById.get(a)?.name) - parseMg(strengthById.get(b)?.name));
+        for (const sId of sIds) {
+          const st = strengthById.get(sId);
+          const sample = Object.entries(variantIndex).find(([k]) => k.endsWith(`::${fmt.id}::${sId}`))?.[1] || {};
+          let dose = st?.name;
+          if (!dose || /^(standard|unknown)/i.test(dose)) dose = fallbackDose || (isCosmetic ? '250 mL' : 'Per device');
+          rows.push({ dose, pres: fmt.name, raw: sample });
+        }
+      }
+      return rows;
+    })();
+
+    if (presentationRows.length > 0) {
       if (y < 160) {
         page = addPage();
         y = H - 76;
@@ -669,13 +695,14 @@ export async function GET(request, context) {
       page.drawText(isCosmetic ? 'Regulatory & Safety Standard' : 'Purity / Quality Standard', { x: MRG + 390, y: y - 10, size: 7.5, font: fontB, color: BRAND_COLOR });
       y -= 18;
 
-      for (const v of variants.slice(0, 8)) {
+      for (const row of presentationRows) {
         if (y < 70) {
           page = addPage();
           y = H - 76;
         }
-        const vDose = cleanPdfText(v.dosage || v.dose || (isCosmetic ? '250 mL' : 'Standard Dose'));
-        const vPres = cleanPdfText(v.presentationName || v.presentation || v.format || (isCosmetic ? 'Cosmeceutical Bottle / Tube' : 'Lyophilized Sterile Vial'));
+        const v = row.raw || {};
+        const vDose = cleanPdfText(row.dose);
+        const vPres = cleanPdfText(row.pres || (isCosmetic ? 'Cosmeceutical Bottle / Tube' : 'Lyophilized Sterile Vial'));
         const vPresLower = String(vPres || '').toLowerCase();
         
         let reconText = v.reconstitutionGuide;

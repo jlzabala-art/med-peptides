@@ -31,11 +31,16 @@ const TOP_WHOLESELLERS = [
 
 function CareTeamLookupInput({ label, value, onChange, placeholder, defaultItems = [], icon: Icon }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState(value || '');
+  const formatQuery = (val) => {
+    if (!val) return '';
+    if (typeof val === 'object') return val.name || val.displayName || val.email || '';
+    return String(val);
+  };
+  const [query, setQuery] = useState(formatQuery(value));
   const containerRef = useRef(null);
 
   useEffect(() => {
-    setQuery(value || '');
+    setQuery(formatQuery(value));
   }, [value]);
 
   useEffect(() => {
@@ -49,7 +54,7 @@ function CareTeamLookupInput({ label, value, onChange, placeholder, defaultItems
   }, []);
 
   const filteredItems = defaultItems.filter(item => 
-    item.name.toLowerCase().includes(query.toLowerCase()) || 
+    (item.name || '').toLowerCase().includes(query.toLowerCase()) || 
     (item.title && item.title.toLowerCase().includes(query.toLowerCase()))
   );
 
@@ -157,22 +162,45 @@ function CareTeamLookupInput({ label, value, onChange, placeholder, defaultItems
 }
 
 export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescription }) {
-  const patient = rx?.patient?.name || rx?.patientName || rx?.patient || 'Unknown Patient';
-  const patEmail = rx?.patient?.email || rx?.patientEmail || rx?.email || null;
-  const patPhone = rx?.patient?.phone || rx?.patientPhone || rx?.phone || null;
-  const doctor = rx?.doctor?.name || rx?.doctorName || rx?.physicianName || '';
-  const docEmail = rx?.doctor?.email || rx?.doctorEmail || '';
-  const manager = rx?.accountManager || rx?.manager || '';
-  const wholeseller = rx?.wholesellerName || rx?.wholeseller || rx?.pharmacy || rx?.clinic || '';
+  const patient = typeof rx?.patient === 'object' && rx?.patient !== null 
+    ? (rx.patient.name || rx.patient.displayName || rx.patient.email || rx?.patientName || 'Unknown Patient')
+    : (rx?.patientName || rx?.patient || 'Unknown Patient');
+
+  const patEmail = typeof rx?.patient === 'object' && rx?.patient !== null
+    ? (rx.patient.email || rx?.patientEmail || null)
+    : (rx?.patientEmail || rx?.email || null);
+
+  const patPhone = typeof rx?.patient === 'object' && rx?.patient !== null
+    ? (rx.patient.phone || rx?.patientPhone || null)
+    : (rx?.patientPhone || rx?.phone || null);
+
+  const doctor = typeof rx?.doctor === 'object' && rx?.doctor !== null
+    ? (rx.doctor.name || rx.doctor.displayName || rx?.doctorName || rx?.physicianName || '')
+    : (rx?.doctorName || (typeof rx?.doctor === 'string' ? rx.doctor : '') || rx?.physicianName || '');
+
+  const docEmail = typeof rx?.doctor === 'object' && rx?.doctor !== null
+    ? (rx.doctor.email || rx?.doctorEmail || '')
+    : (rx?.doctorEmail || '');
+
+  const manager = typeof rx?.accountManager === 'object' && rx?.accountManager !== null
+    ? (rx.accountManager.name || rx.accountManager.displayName || rx.accountManager.email || '')
+    : (typeof rx?.manager === 'object' && rx?.manager !== null
+      ? (rx.manager.name || rx.manager.displayName || rx.manager.email || '')
+      : (rx?.accountManager || rx?.manager || ''));
+
+  const wholeseller = typeof rx?.wholeseller === 'object' && rx?.wholeseller !== null
+    ? (rx.wholeseller.name || rx.wholeseller.companyName || '')
+    : (rx?.wholesellerName || rx?.wholeseller || rx?.pharmacy || rx?.clinic || '');
+
   const diagnosis = rx?.diagnosis || rx?.clinicalIndication || rx?.condition || '';
   const protocol = rx?.protocol || rx?.protocolName || '';
   const notes = rx?.notes || rx?.clinicalNotes || rx?.instructions || '';
 
   const [isEditingTeam, setIsEditingTeam] = useState(false);
   const [isSavingTeam, setIsSavingTeam] = useState(false);
-  const [doctorName, setDoctorName] = useState(rx?.doctorName || rx?.doctor?.name || '');
-  const [accountManager, setAccountManager] = useState(rx?.accountManager || rx?.manager || '');
-  const [wholesellerName, setWholesellerName] = useState(rx?.wholesellerName || rx?.wholeseller || '');
+  const [doctorName, setDoctorName] = useState(doctor);
+  const [accountManager, setAccountManager] = useState(typeof manager === 'string' ? manager : '');
+  const [wholesellerName, setWholesellerName] = useState(typeof wholeseller === 'string' ? wholeseller : '');
   const [doctorsList, setDoctorsList] = useState(TOP_DOCTORS);
   const [managersList, setManagersList] = useState(TOP_MANAGERS);
   const [wholesellersList, setWholesellersList] = useState(TOP_WHOLESELLERS);
@@ -296,8 +324,12 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
     }
   };
 
-  const InfoRow = ({ icon: Icon, label, value, color = '#64748b' }) =>
-    value ? (
+  const InfoRow = ({ icon: Icon, label, value, color = '#64748b' }) => {
+    let displayVal = value;
+    if (displayVal && typeof displayVal === 'object') {
+      displayVal = displayVal.name || displayVal.displayName || displayVal.email || displayVal.id || JSON.stringify(displayVal);
+    }
+    return displayVal ? (
       <div
         style={{
           display: 'flex',
@@ -336,11 +368,12 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
           <div
             style={{ fontSize: '0.9rem', color: '#0f172a', fontWeight: 600, marginTop: '0.1rem' }}
           >
-            {value}
+            {displayVal}
           </div>
         </div>
       </div>
     ) : null;
+  };
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>

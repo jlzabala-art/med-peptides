@@ -5,7 +5,9 @@ import { calculateProductCompleteness } from '../../../utils/calculateProductCom
 
 export default function DataCompletenessBadge({ product, onClick }) {
   const completeness = calculateProductCompleteness(product);
-  const { score, color, bgColor, borderColor, statusLabel } = completeness;
+  const { score = 0, statusLabel = '' } = completeness || {};
+  // GCP Console standard status dot colors
+  const dotColor = score >= 80 ? '#137333' : score >= 50 ? '#b06000' : '#c5221f';
 
   return (
     <button
@@ -15,50 +17,37 @@ export default function DataCompletenessBadge({ product, onClick }) {
         e.stopPropagation();
         if (onClick) onClick(product, completeness);
       }}
-      title={`Data Quality: ${score}% (${statusLabel}). Click to enrich missing data.`}
+      title={`Data Quality: ${score}% (${statusLabel}). Click to enrich with AI.`}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '18px',
-        height: '18px',
-        minWidth: '18px',
-        minHeight: '18px',
-        maxWidth: '18px',
-        maxHeight: '18px',
+        width: '14px',
+        height: '14px',
         padding: 0,
         borderRadius: '50%',
-        backgroundColor: bgColor || '#f0fdf4',
-        border: `1.5px solid ${borderColor || '#86efac'}`,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+        backgroundColor: 'transparent',
+        border: 'none',
         cursor: 'pointer',
         flexShrink: 0,
         outline: 'none',
-        WebkitAppearance: 'none',
-        appearance: 'none',
-        boxSizing: 'border-box',
         verticalAlign: 'middle',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.2)';
-        e.currentTarget.style.boxShadow = `0 0 6px ${color}35`;
+        e.currentTarget.style.opacity = '0.8';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)';
-        e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+        e.currentTarget.style.opacity = '1';
       }}
     >
       <span 
         className="data-completeness-dot" 
         style={{
           display: 'block',
-          width: '6px',
-          height: '6px',
-          minWidth: '6px',
-          minHeight: '6px',
+          width: '8px',
+          height: '8px',
           borderRadius: '50%',
-          backgroundColor: color || '#16a34a',
-          boxShadow: `0 0 3px ${color || '#16a34a'}`,
+          backgroundColor: dotColor,
           flexShrink: 0,
         }} 
       />

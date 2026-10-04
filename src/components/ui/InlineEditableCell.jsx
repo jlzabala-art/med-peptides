@@ -480,14 +480,20 @@ export default function InlineEditableCell({
       }}
       title="Click to edit"
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'var(--color-bg-subtle, #f1f5f9)';
+        e.currentTarget.style.backgroundColor = 'var(--color-bg-subtle, #f1f3f4)';
         const icon = e.currentTarget.querySelector('.edit-icon');
-        if (icon) icon.style.opacity = '1';
+        if (icon) {
+          icon.style.opacity = '1';
+          icon.style.color = '#1a73e8';
+        }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = 'transparent';
         const icon = e.currentTarget.querySelector('.edit-icon');
-        if (icon) icon.style.opacity = '0.7';
+        if (icon) {
+          icon.style.opacity = '0.25';
+          icon.style.color = '#5f6368';
+        }
       }}
     >
       <span style={{ 
@@ -502,7 +508,7 @@ export default function InlineEditableCell({
         <span style={{ lineHeight: 1.2 }}>{formattedDisplay}</span>
         {suffix && <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.85em', lineHeight: 1.2 }}>{suffix}</span>}
       </span>
-      <span className="edit-icon" style={{ opacity: 0.7, transition: 'opacity 0.2s', color: 'var(--color-primary)', flexShrink: 0 }}>
+      <span className="edit-icon" style={{ opacity: 0.25, transition: 'opacity 0.15s, color 0.15s', color: '#5f6368', flexShrink: 0 }}>
         <Edit2 size={12} />
       </span>
     </div>

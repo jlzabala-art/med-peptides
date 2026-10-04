@@ -77,14 +77,13 @@ export default function DatasheetQuickSearchModal({
         }
       }
 
-      // Strictly filter by supplier when currentSupplier exists
-      let finalResults = rawProducts;
-      if (cleanCurrentSupplier) {
-        finalResults = rawProducts.filter((p) => {
-          const sup = (p.supplierName || p.sourceSupplier || p.supplier || '').toLowerCase().replace(/[\s-_]/g, '');
-          return sup.includes(cleanCurrentSupplier) || cleanCurrentSupplier.includes(sup);
-        });
-      }
+      // Strictly filter by supplier (Lotusland by default initially)
+      const targetSup = cleanCurrentSupplier || 'lotusland';
+      const finalResults = rawProducts.filter((p) => {
+        const sup = (p.supplierName || p.sourceSupplier || p.supplier || '').toLowerCase().replace(/[\s-_]/g, '');
+        if (!sup) return false;
+        return sup.includes(targetSup) || (targetSup.includes('lotus') && sup.includes('lotus'));
+      });
 
       // Deduplicate by slug / id
       const seen = new Set();
@@ -222,9 +221,9 @@ export default function DatasheetQuickSearchModal({
               performSearch(val);
             }}
             placeholder={
-              currentSupplier
-                ? (isSpanish ? `Buscar péptidos en catálogo ${currentSupplier}... (ej. BPC-157, Tirzepatide)` : `Search ${currentSupplier} peptide datasheets... (e.g. BPC-157, Tirzepatide)`)
-                : (isSpanish ? 'Buscar ficha técnica de péptido...' : 'Search peptide datasheets...')
+              isSpanish
+                ? 'Buscar ficha técnica de péptido... (ej. BPC-157, Tirzepatide)'
+                : 'Search peptide datasheets... (e.g. BPC-157, Tirzepatide)'
             }
             style={{
               flex: 1,

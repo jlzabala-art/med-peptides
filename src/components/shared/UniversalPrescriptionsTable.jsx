@@ -17,7 +17,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { getPrescriptionColumns } from '../admin/prescriptions/prescriptionColumns';
+import { getPrescriptionColumns, formatDoctorName } from '../admin/prescriptions/prescriptionColumns';
+import { classifyPrescription, PRESCRIPTION_TYPE_CONFIG } from '../../data/prescriptionTypeClassifier';
 import DataModule from '../ui/DataModule';
 import { useAuth } from '../../context/AuthContext';
 import PrescriptionIntakeWorkspace from '../../features/prescriptions/components/PrescriptionIntakeWorkspace';
@@ -58,6 +59,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
   const [isShareIntakeWhatsAppOpen, setIsShareIntakeWhatsAppOpen] = useState(false);
+  const [selectedShareRx, setSelectedShareRx] = useState(null);
   const [isSourceSelectorOpen, setIsSourceSelectorOpen] = useState(false);
   const [isProtocolSearchOpen, setIsProtocolSearchOpen] = useState(false);
   const [initialBuilderItems, setInitialBuilderItems] = useState([]);
@@ -77,6 +79,10 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   
   const statusFilter = searchParams.get('status') || '';
   const rangeFilter = searchParams.get('range') || 'all';
+  const sourceFilter = searchParams.get('source') || '';
+  const typeFilter = searchParams.get('type') || '';
+  const doctorFilter = searchParams.get('doctor') || searchParams.get('doctorName') || '';
+  const patientFilter = searchParams.get('patient') || '';
   const urlDoctorId = searchParams.get('doctorId') || '';
   const urlDoctorName = searchParams.get('doctorName') || '';
   const urlRxId = searchParams.get('id') || '';
@@ -151,17 +157,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     initialData: initialData?.length > 0 ? initialData : undefined,
   });
 
-  // Real-time synchronization (GCP UX standard: replaces manual Refresh button)
-  const { hasNewData, clearNewData } = usePrescriptionsRealtimeSync({
-    whereConditions: useMemo(() => {
-      const conds = [];
-      if (effectiveDoctorId) conds.push(['doctorId', '==', effectiveDoctorId]);
-      if (patientId) conds.push(['patientId', '==', patientId]);
-      return conds;
-    }, [effectiveDoctorId, patientId]),
-    enabled: !isAlgoliaActive,
-  });
-
   const displayPrescriptions = paginatedPrescriptions;
 
   const algoliaFacetFilters = useMemo(() => {
@@ -193,6 +188,19 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     300
   );
 
+  const realtimeWhereConditions = useMemo(() => {
+    const conds = [];
+    if (effectiveDoctorId) conds.push(['doctorId', '==', effectiveDoctorId]);
+    if (patientId) conds.push(['patientId', '==', patientId]);
+    return conds;
+  }, [effectiveDoctorId, patientId]);
+
+  // Real-time synchronization (GCP UX standard: replaces manual Refresh button)
+  const { hasNewData, clearNewData } = usePrescriptionsRealtimeSync({
+    whereConditions: realtimeWhereConditions,
+    enabled: !isAlgoliaActive,
+  });
+
   // Sync selectedItem with live data updates
   useEffect(() => {
     if (selectedItem) {
@@ -213,7 +221,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       const q = searchTerm.toLowerCase();
       rawData = (displayPrescriptions || []).filter(rx => {
         const matchesPatient = (rx.patientName || rx.patient?.name || '').toLowerCase().includes(q);
-        const matchesDoctor = (rx.doctorName || '').toLowerCase().includes(q);
+        const matchesDoctor = (rx.doctorName || rx.doctor?.name || '').toLowerCase().includes(q);
         const matchesBoxId = (rx.fagron?.boxId || '').toLowerCase().includes(q);
         const matchesProtocol = (rx.protocolName || rx.treatmentProgram || '').toLowerCase().includes(q);
         const matchesId = (rx.id || '').toLowerCase().includes(q);
@@ -229,6 +237,65 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     }
 
     if (!rawData || rawData.length === 0) return [];
+
+    // Filter by source (Fagron/NutriGen vs Manual)
+    if (sourceFilter) {
+      if (sourceFilter === 'fagron') {
+        rawData = rawData.filter(rx => Boolean(rx.fagron || rx.source === 'fagron' || rx.importSource === 'fagron' || rx.testName === 'NutriGen' || rx.fagron?.boxId));
+      } else if (sourceFilter === 'manual') {
+        rawData = rawData.filter(rx => !rx.fagron && rx.source !== 'fagron' && !rx.importSource && rx.testName !== 'NutriGen');
+      }
+    }
+
+    // Filter by clinical program / type (TrichoTest, NutriGen, Hormones, Peptides, Compounding)
+    if (typeFilter) {
+      rawData = rawData.filter(rx => {
+        const info = classifyPrescription(rx);
+        return info.key === typeFilter;
+      });
+    }
+
+    // Filter by doctor
+    if (doctorFilter) {
+      const docQ = doctorFilter.toLowerCase();
+      rawData = rawData.filter(rx => {
+        const docName = (rx.doctor?.name || rx.doctorName || '').toLowerCase();
+        return docName.includes(docQ);
+      });
+    }
+
+    // Filter by patient
+    if (patientFilter) {
+      const patQ = patientFilter.toLowerCase();
+      rawData = rawData.filter(rx => {
+        const pName = (rx.patient?.name || rx.patientName || '').toLowerCase();
+        return pName.includes(patQ);
+      });
+    }
+
+    // Filter by status
+    if (statusFilter) {
+      const stQ = statusFilter.toLowerCase();
+      rawData = rawData.filter(rx => {
+        const st = (normalizeRxStatus(rx.status) || 'draft').toLowerCase();
+        return st === stQ;
+      });
+    }
+
+    // Filter by date range
+    if (rangeFilter && rangeFilter !== 'all') {
+      const now = new Date();
+      let cutoff = new Date();
+      if (rangeFilter === '7d') cutoff.setDate(now.getDate() - 7);
+      else if (rangeFilter === '30d') cutoff.setDate(now.getDate() - 30);
+      else if (rangeFilter === '90d') cutoff.setDate(now.getDate() - 90);
+      else if (rangeFilter === 'year') cutoff = new Date(now.getFullYear(), 0, 1);
+
+      rawData = rawData.filter(rx => {
+        const d = rx.createdAt?.seconds ? new Date(rx.createdAt.seconds * 1000) : (rx.createdAt ? new Date(rx.createdAt) : null);
+        return !d || d >= cutoff;
+      });
+    }
 
     const groups = {};
     const result = [];
@@ -259,12 +326,14 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         });
 
         const first = members[0];
+        const isFagronGroup = members.some(m => Boolean(m.fagron || m.source === 'fagron' || m.importSource === 'fagron' || m.testName === 'NutriGen'));
         result.push({
           ...first,
           id: `multipart_${groupKey}`,
           _isSessionGroup: true,
           _sessionCount: members.length,
           _sessionMembers: members,
+          source: isFagronGroup ? 'fagron' : first.source,
           items: members.flatMap(m => m.prescriptionLines || m.items || []),
           prescriptionLines: members.flatMap(m => m.prescriptionLines || m.items || []),
         });
@@ -279,7 +348,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     });
     
     return result;
-  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm]);
+  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, patientFilter, statusFilter, rangeFilter]);
 
   const finalData = groupedData;
 
@@ -297,8 +366,16 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         loadProductsLazy();
       }
     };
+    const handleShareEvent = (e) => {
+      setSelectedShareRx(e.detail?.rx || null);
+      setIsShareIntakeWhatsAppOpen(true);
+    };
     window.addEventListener('OPEN_PRESCRIPTION_VIEW', handleViewEvent);
-    return () => window.removeEventListener('OPEN_PRESCRIPTION_VIEW', handleViewEvent);
+    window.addEventListener('OPEN_SHARE_PUBLIC_PAGE', handleShareEvent);
+    return () => {
+      window.removeEventListener('OPEN_PRESCRIPTION_VIEW', handleViewEvent);
+      window.removeEventListener('OPEN_SHARE_PUBLIC_PAGE', handleShareEvent);
+    };
   }, [loadProductsLazy]);
 
   const prescriptionExpandableRender = useCallback((row) => {
@@ -767,37 +844,121 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     return actions;
   }, [canGenerateLabels]);
 
-  // Filter definitions for DataModule
+  // Dynamic filter options based on prescriptions in the database
+  const doctorOptions = useMemo(() => {
+    const docMap = new Map();
+    (displayPrescriptions || []).forEach(rx => {
+      const name = rx.doctor?.name || rx.doctorName;
+      if (name && name !== '—') {
+        const cleaned = formatDoctorName(name);
+        docMap.set(cleaned, cleaned);
+      }
+    });
+    const opts = [{ label: 'All Doctors', value: '' }];
+    Array.from(docMap.keys()).sort().forEach(d => {
+      opts.push({ label: d, value: d });
+    });
+    return opts;
+  }, [displayPrescriptions]);
+
+  const patientOptions = useMemo(() => {
+    const patMap = new Map();
+    (displayPrescriptions || []).forEach(rx => {
+      const name = rx.patient?.name || rx.patientName;
+      if (name && name !== 'Unknown Patient') {
+        patMap.set(name, name);
+      }
+    });
+    const opts = [{ label: 'All Patients', value: '' }];
+    Array.from(patMap.keys()).sort().forEach(p => {
+      opts.push({ label: p, value: p });
+    });
+    return opts;
+  }, [displayPrescriptions]);
+
+  // GCP UX Standard Filter Dimensions (Attached directly to GlobalSearchBar)
   const filterOptions = useMemo(() => [
     {
-      key: 'status',
-      label: 'Status',
-      value: statusFilter,
-      onChange: (val) => updateUrlParam('status', val),
-      options: [
-        { label: 'All Statuses', value: '' },
-        { label: 'Draft', value: 'draft' },
-        { label: 'Pending', value: 'pending' },
-        { label: 'Approved', value: 'approved' },
-        { label: 'Processing', value: 'processing' },
-        { label: 'In Transit', value: 'in_transit' },
-        { label: 'Completed', value: 'completed' },
-        { label: 'Cancelled', value: 'cancelled' }
-      ]
-    },
-    {
       key: 'range',
-      label: 'Date',
-      value: rangeFilter,
-      onChange: (val) => updateUrlParam('range', val),
+      label: 'Date Range',
+      pluralLabel: 'Date Ranges',
+      multiSelect: false,
+      value: rangeFilter || 'all',
+      onChange: (val) => updateUrlParam('range', val === 'all' ? '' : val),
       options: [
         { label: 'All Time', value: 'all' },
         { label: 'Last 7 Days', value: '7d' },
         { label: 'Last 30 Days', value: '30d' },
         { label: 'Last 90 Days', value: '90d' },
+        { label: 'This Year', value: 'year' },
+      ]
+    },
+    {
+      key: 'doctor',
+      label: 'Doctor',
+      pluralLabel: 'Doctors',
+      multiSelect: false,
+      value: doctorFilter,
+      onChange: (val) => updateUrlParam('doctor', val),
+      options: doctorOptions
+    },
+    {
+      key: 'patient',
+      label: 'Patient',
+      pluralLabel: 'Patients',
+      multiSelect: false,
+      value: patientFilter,
+      onChange: (val) => updateUrlParam('patient', val),
+      options: patientOptions
+    },
+    {
+      key: 'source',
+      label: 'Source',
+      pluralLabel: 'Sources',
+      multiSelect: false,
+      value: sourceFilter,
+      onChange: (val) => updateUrlParam('source', val),
+      options: [
+        { label: 'All Sources', value: '' },
+        { label: '🧬 Imported (NutriGen / Fagron)', value: 'fagron' },
+        { label: '✏️ Manual Entry', value: 'manual' }
+      ]
+    },
+    {
+      key: 'type',
+      label: 'Program',
+      pluralLabel: 'Programs',
+      multiSelect: false,
+      value: typeFilter,
+      onChange: (val) => updateUrlParam('type', val),
+      options: [
+        { label: 'All Programs', value: '' },
+        { label: '🧬 TrichoTest™ (Follicular DNA)', value: 'trichotest' },
+        { label: '🧬 NutriGen™ (Oral Chrono)', value: 'nutrigen' },
+        { label: '⚡ Hormones · BHRT / TRT', value: 'hormone' },
+        { label: '💉 Peptides · SubQ Vials', value: 'peptide' },
+        { label: '💊 Compounding Rx (Galenic)', value: 'compounding' }
+      ]
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      pluralLabel: 'Statuses',
+      multiSelect: false,
+      value: statusFilter,
+      onChange: (val) => updateUrlParam('status', val),
+      options: [
+        { label: 'All Statuses', value: '' },
+        { label: 'Pending Review', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Draft', value: 'draft' },
+        { label: 'In Transit', value: 'in_transit' },
+        { label: 'Completed', value: 'completed' },
+        { label: 'Cancelled', value: 'cancelled' }
       ]
     }
-  ], [statusFilter, rangeFilter, updateUrlParam]);
+  ], [rangeFilter, doctorFilter, patientFilter, sourceFilter, typeFilter, statusFilter, doctorOptions, patientOptions, updateUrlParam]);
 
   const activeChips = useMemo(() => {
     const chips = [];
@@ -805,12 +966,27 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       chips.push({ key: 'status', label: 'Status', value: statusFilter, onRemove: () => updateUrlParam('status', '') });
     }
     if (rangeFilter && rangeFilter !== 'all') {
-      chips.push({ key: 'range', label: 'Date', value: rangeFilter, onRemove: () => updateUrlParam('range', 'all') });
+      const rangeMap = { '7d': 'Last 7 Days', '30d': 'Last 30 Days', '90d': 'Last 90 Days', 'year': 'This Year' };
+      chips.push({ key: 'range', label: 'Date', value: rangeMap[rangeFilter] || rangeFilter, onRemove: () => updateUrlParam('range', 'all') });
+    }
+    if (doctorFilter) {
+      chips.push({ key: 'doctor', label: 'Doctor', value: doctorFilter, onRemove: () => updateUrlParam('doctor', '') });
+    }
+    if (patientFilter) {
+      chips.push({ key: 'patient', label: 'Patient', value: patientFilter, onRemove: () => updateUrlParam('patient', '') });
+    }
+    if (typeFilter) {
+      const typeLabel = PRESCRIPTION_TYPE_CONFIG[typeFilter]?.label || typeFilter;
+      chips.push({ key: 'type', label: 'Program', value: typeLabel, onRemove: () => updateUrlParam('type', '') });
+    }
+    if (sourceFilter) {
+      const srcMap = { 'fagron': 'Imported (NutriGen)', 'manual': 'Manual Entry' };
+      chips.push({ key: 'source', label: 'Source', value: srcMap[sourceFilter] || sourceFilter, onRemove: () => updateUrlParam('source', '') });
     }
     if (urlDoctorId) {
       chips.push({ 
         key: 'doctorId', 
-        label: 'Doctor', 
+        label: 'Doctor ID', 
         value: urlDoctorName || urlDoctorId, 
         onRemove: () => {
           updateUrlParam('doctorId', '');
@@ -819,7 +995,20 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       });
     }
     return chips;
-  }, [statusFilter, rangeFilter, urlDoctorId, urlDoctorName, updateUrlParam]);
+  }, [statusFilter, rangeFilter, doctorFilter, patientFilter, sourceFilter, typeFilter, urlDoctorId, urlDoctorName, updateUrlParam]);
+
+  const handleClearAllFilters = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('status');
+    params.delete('range');
+    params.delete('doctor');
+    params.delete('doctorName');
+    params.delete('doctorId');
+    params.delete('patient');
+    params.delete('source');
+    params.delete('type');
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [router, pathname, searchParams]);
 
   const handleExportCsv = useCallback(async () => {
     const list = (isAlgoliaActive ? algoliaHits : displayPrescriptions) || [];
@@ -1029,6 +1218,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           </>
         }
         filters={activeChips}
+        filterOptions={filterOptions}
+        onClearAllFilters={handleClearAllFilters}
         data={finalData}
         loading={loading}
         hasMore={hasMore}
@@ -1052,7 +1243,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         }}
         mobileCardComponent={MobilePrescriptionCard}
         mobileCardProps={mobileCardPropsForTable}
-        onRefresh={refresh}
         emptyState={{
           title: "No prescriptions found",
           description: statusFilter || rangeFilter !== 'all' ? "No results match these filters. Try clearing them." : "Import your first prescription (PDF / Fagron) with AI or create one manually.",
@@ -1290,7 +1480,11 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
 
         <ShareIntakeWhatsAppModal
           isOpen={isShareIntakeWhatsAppOpen}
-          onClose={() => setIsShareIntakeWhatsAppOpen(false)}
+          onClose={() => {
+            setIsShareIntakeWhatsAppOpen(false);
+            setSelectedShareRx(null);
+          }}
+          rx={selectedShareRx}
         />
       </DataModule>
     </>

@@ -66,15 +66,160 @@ const INQUIRY_TOPICS_PEPTIDES = [
   }
 ];
 
-const INQUIRY_TOPICS_PRESCRIPTION = [
+const INQUIRY_TOPICS_NUTRIGEN = [
+  {
+    id: 'genomics_correlation',
+    labelEn: 'Fagron Genomics NutriGen™ & DNA Correlation',
+    labelEs: 'Correlación de Fagron Genomics NutriGen™ & ADN',
+    icon: Dna,
+    placeholderEn: 'Inquire about how your NutriGen genetic analysis (metabolism, detoxification, inflammation, oxidative stress) determined the active ingredients and dosages...',
+    placeholderEs: 'Consulte cómo su análisis genético NutriGen (metabolismo, detoxificación, inflamación, estrés oxidativo) determinó los principios activos y dosis...'
+  },
+  {
+    id: 'rx_details',
+    labelEn: 'Prescription Details & Treatment Protocol Support',
+    labelEs: 'Detalles de la Prescripción y Soporte del Tratamiento',
+    icon: ShieldCheck,
+    placeholderEn: 'Inquire about the sequential 3-phase progression (Detox 1, Detox 2, Cellular Supplementation), active compound synergies, or clinical targets...',
+    placeholderEs: 'Consulte sobre la progresión secuencial en 3 fases (Detox 1, Detox 2, Suplementación Celular), sinergias de activos o dianas clínicas...'
+  },
+  {
+    id: 'compounding_formulation',
+    labelEn: 'Compounding Formulation, Actives & Oral Capsules',
+    labelEs: 'Fórmula Magistral, Principios Activos y Cápsulas Orales',
+    icon: FlaskConical,
+    placeholderEn: 'Ask regarding active compounds (GreenSelect™, Silymarin, Quercetin, Resveratrol, Curcumin, Melatonin), Lotusland synthesis, excipients, or tolerability...',
+    placeholderEs: 'Consulte sobre los principios activos (GreenSelect™, Silimarina, Quercetina, Resveratrol, Curcumina, Melatonina), síntesis Lotusland, excipientes o tolerancia...'
+  },
+  {
+    id: 'posology_schedule',
+    labelEn: 'Posology Protocol, Administration Window & Morning Routine',
+    labelEs: 'Pauta Posológica, Horario de Administración y Rutina Matutina',
+    icon: Clock,
+    placeholderEn: 'Inquire about daily morning capsule administration with meals, missed dose guidelines, or phase transitions...',
+    placeholderEs: 'Consulte sobre la toma matutina diaria de cápsulas con comida, pautas para dosis olvidadas o transición entre fases...'
+  },
+  {
+    id: 'cycle_refill',
+    labelEn: 'Prescription Cycle Refill & Dispensary Logistics',
+    labelEs: 'Renovación de Ciclo de Prescripción y Envío de Farmacia',
+    icon: Building2,
+    placeholderEn: 'Inquire about dispensing sequential monthly bottles (30 capsules per bottle), international express delivery, or cycle renewal...',
+    placeholderEs: 'Consulte sobre la dispensación de frascos mensuales secuenciales (30 cápsulas por frasco), envío con mensajería o renovación del ciclo...'
+  },
+  {
+    id: 'prescribing_physician',
+    labelEn: 'Direct Consultation with Prescribing Clinic Team',
+    labelEs: 'Consulta Directa con el Equipo Médico de la Clínica',
+    icon: Mail,
+    placeholderEn: 'Submit clinical questions directly to Dr. Haytham Salem and the Arthregen Clinic clinical team...',
+    placeholderEs: 'Envíe sus consultas clínicas directamente al Dr. Haytham Salem y al equipo médico de Arthregen Clinic...'
+  }
+];
+
+const INQUIRY_TOPICS_TRICHOTEST = [
   {
     id: 'genomics_correlation',
     labelEn: 'Fagron Genomics TrichoTest™ & DNA Correlation',
-    labelEs: 'Correlación de Fagron Genomics TrichoTest™ & ADN',
+    labelEs: 'Correlación Fagron Genomics TrichoTest™ & ADN',
     icon: Dna,
-    placeholderEn: 'Inquire about how your genetic test results determined the active ingredients, dosages, or vehicle in this prescription...',
-    placeholderEs: 'Consulte cómo su informe genético determinó los principios activos, dosificaciones o vehículo de esta prescripción...'
+    placeholderEn: 'Inquire about how your TrichoTest™ genetic analysis (SULT1A1, AR, SRD5A, prostaglandins, IGF-1) determined your active ingredients, concentrations, and vehicle...',
+    placeholderEs: 'Consulte cómo su informe genético TrichoTest (SULT1A1, AR, SRD5A, prostaglandinas, IGF-1) determinó sus principios activos, concentraciones y vehículo...'
   },
+  {
+    id: 'compounding_formulation',
+    labelEn: 'Compounding Formulation & TrichoSol™ / TrichoFoam™ Vehicle',
+    labelEs: 'Fórmula Magistral y Vehículo TrichoSol™ / TrichoFoam™',
+    icon: FlaskConical,
+    placeholderEn: 'Ask regarding compounded actives (Minoxidil, Finasteride, Dutasteride, Latanoprost, 17-α-Estradiol), TrichoSol™ lipid carrier, alcohol-free tolerability, or excipients...',
+    placeholderEs: 'Consulte sobre principios activos (Minoxidil, Finasterida, Dutasterida, Latanoprost, 17-α-Estradiol), vehículo lipídico TrichoSol™, tolerancia sin alcohol o excipientes...'
+  },
+  {
+    id: 'rx_details',
+    labelEn: 'Prescription Details & Hair Density Evolution Support',
+    labelEs: 'Detalles de la Prescripción y Soporte de Densidad Capilar',
+    icon: ShieldCheck,
+    placeholderEn: 'Inquire about follicular therapeutic targets, early shedding phase management, synergy of compounded actives, or long-term growth evolution...',
+    placeholderEs: 'Consulte sobre dianas foliculares, manejo del shedding inicial, sinergias de activos formulados o evolución del crecimiento a largo plazo...'
+  },
+  {
+    id: 'posology_schedule',
+    labelEn: 'Posology Protocol, Scalp Application & Nightly Routine',
+    labelEs: 'Pauta Posológica, Aplicación en Cuero Cabelludo y Rutina Nocturna',
+    icon: Clock,
+    placeholderEn: 'Inquire about the 1.0 ml nightly application protocol, dry scalp requirements, graduated pipette dosing, missed doses, or hair washing intervals...',
+    placeholderEs: 'Consulte sobre la pauta de 1.0 ml nocturno en cuero cabelludo seco, dosificación con pipeta graduada, dosis olvidada o tiempos de lavado...'
+  },
+  {
+    id: 'cycle_refill',
+    labelEn: 'Prescription Cycle Refill & Dispensary Logistics',
+    labelEs: 'Renovación de Ciclo de Prescripción y Envío de Farmacia',
+    icon: Building2,
+    placeholderEn: 'Inquire about sequential 100ml topical bottles, international express delivery, temperature-stable transport, or cycle renewal...',
+    placeholderEs: 'Consulte sobre dispensación de frascos tópicos de 100 ml, mensajería internacional urgente, estabilidad térmica o renovación de ciclo...'
+  },
+  {
+    id: 'prescribing_physician',
+    labelEn: 'Direct Consultation with Prescribing Clinic Team',
+    labelEs: 'Consulta Directa con el Equipo Médico de la Clínica',
+    icon: Mail,
+    placeholderEn: 'Submit clinical evolution questions directly to the prescribing physician and clinical medical team...',
+    placeholderEs: 'Envíe sus consultas de evolución clínica directamente al médico prescriptor y al equipo médico de la clínica...'
+  }
+];
+
+const INQUIRY_TOPICS_HORMONES = [
+  {
+    id: 'endocrine_biomarkers',
+    labelEn: 'Endocrine Biomarker Monitoring & Lab Panels',
+    labelEs: 'Monitorización de Biomarcadores Endocrinos y Analíticas',
+    icon: ShieldCheck,
+    placeholderEn: 'Inquire about mandatory follow-up blood work: Total/Free Testosterone, Sensitive Estradiol (E2), SHBG, Hematocrit/CBC, PSA, Lipid Panel, DHEA-S, or liver enzymes...',
+    placeholderEs: 'Consulte sobre analíticas de control periódicas: Testosterona Total/Libre, Estradiol ultrasensible (E2), SHBG, Hematocrito/Hemograma, PSA, Perfil Lipídico o enzimas hepáticas...'
+  },
+  {
+    id: 'dose_titration',
+    labelEn: 'Dose Titration, Trough Levels & Symptom Balance',
+    labelEs: 'Titulación de Dosis, Niveles Valle y Equilibrio Clínico',
+    icon: Sparkles,
+    placeholderEn: 'Inquire about clinical dosage fine-tuning, steady-state trough levels vs peak values, and optimizing androgenic/estrogenic balance...',
+    placeholderEs: 'Consulte sobre el ajuste progresivo de dosis, niveles séricos valle frente a picos y optimización del equilibrio androgénico/estrogénico...'
+  },
+  {
+    id: 'transdermal_administration',
+    labelEn: 'Transdermal (Lipoderm / Topi-Pump) & Troche Routine',
+    labelEs: 'Aplicación Transdérmica (Lipoderm / Topi-Pump) y Troches',
+    icon: Clock,
+    placeholderEn: 'Inquire about precise application technique (hairless skin rotation, Topi-Pump clicks), secondary contact transfer prevention, or sublingual troche dissolution...',
+    placeholderEs: 'Consulte sobre técnica de aplicación (rotación en zonas sin vello, pulsaciones Topi-Pump), prevención de transferencia dérmica o disolución de troches...'
+  },
+  {
+    id: 'symptom_side_effects',
+    labelEn: 'Symptom Resolution & Side Effect Management',
+    labelEs: 'Evolución de Síntomas y Manejo de Efectos Secundarios',
+    icon: FlaskConical,
+    placeholderEn: 'Inquire about aromatization management, fluid retention, androgenic skin balance, mood and energy stabilization, or fertility preservation...',
+    placeholderEs: 'Consulte sobre modulación de aromatasa, retención de líquidos, salud cutánea, estabilización del estado de ánimo y energía o preservación de fertilidad...'
+  },
+  {
+    id: 'controlled_refill',
+    labelEn: 'Dispensary Logistics, Controlled Substance & Refill Protocol',
+    labelEs: 'Logística de Farmacia, Sustancias Reguladas y Renovación',
+    icon: Building2,
+    placeholderEn: 'Inquire about compounding lead times, dispensing controlled substances, specialized packaging, or prescription cycle extensions...',
+    placeholderEs: 'Consulte sobre tiempos de formulación magistral, dispensación de sustancias reguladas, envase Topi-Pump o extensiones de ciclo...'
+  },
+  {
+    id: 'prescribing_physician',
+    labelEn: 'Direct Consultation with Prescribing Endocrinologist',
+    labelEs: 'Consulta Directa con el Facultativo Especialista en BHRT',
+    icon: Mail,
+    placeholderEn: 'Submit your endocrine and clinical inquiries directly to the prescribing physician and clinical team...',
+    placeholderEs: 'Envíe sus consultas clínicas y endocrinas directamente al médico prescriptor y al equipo clínico...'
+  }
+];
+
+const INQUIRY_TOPICS_PRESCRIPTION = [
   {
     id: 'rx_details',
     labelEn: 'Prescription Details & Treatment Protocol Support',
@@ -85,35 +230,35 @@ const INQUIRY_TOPICS_PRESCRIPTION = [
   },
   {
     id: 'compounding_formulation',
-    labelEn: 'Compounding Formulation, Actives & TrichoSol™ Vehicle',
-    labelEs: 'Fórmula Magistral, Principios Activos y Vehículo TrichoSol™',
+    labelEn: 'Compounding Formulation, Actives & Vehicle',
+    labelEs: 'Fórmula Magistral, Principios Activos y Vehículo',
     icon: FlaskConical,
-    placeholderEn: 'Ask regarding Latanoprost 0.005%, 17-α-Estradiol 0.05%, TrichoSol™ lipid carrier, alcohol-free tolerability, or excipients...',
-    placeholderEs: 'Consulte sobre Latanoprost 0.005%, 17-α-Estradiol 0.05%, vehículo lipídico TrichoSol™, tolerancia sin alcohol o excipientes...'
+    placeholderEn: 'Ask regarding compounded active ingredients, vehicle choice, excipients, tolerability, or pharmaceutical stability...',
+    placeholderEs: 'Consulte sobre principios activos formulados, vehículo empleado, excipientes, tolerancia o estabilidad farmacéutica...'
   },
   {
     id: 'posology_schedule',
-    labelEn: 'Posology Protocol, Application Window & Nightly Routine',
-    labelEs: 'Pauta Posológica, Horario de Aplicación y Rutina Nocturna',
+    labelEn: 'Posology Protocol, Administration Window & Routine',
+    labelEs: 'Pauta Posológica, Horario de Administración y Rutina',
     icon: Clock,
-    placeholderEn: 'Inquire about the 1.0 ml nightly application protocol, dry scalp requirements, missed dose instructions, or washing times...',
-    placeholderEs: 'Consulte sobre la pauta de 1.0 ml nocturno, aplicación en cuero cabelludo seco, dosis olvidada o tiempos de lavado...'
+    placeholderEn: 'Inquire about administration timing, dosage instructions, missed doses, or routine alignment...',
+    placeholderEs: 'Consulte sobre horario de tomas/aplicación, instrucciones de dosis, dosis olvidada o compatibilidad de rutina...'
   },
   {
     id: 'cycle_refill',
     labelEn: 'Prescription Cycle Refill & Dispensary Logistics',
     labelEs: 'Renovación de Ciclo de Prescripción y Envío de Farmacia',
     icon: Building2,
-    placeholderEn: 'Inquire about dispensing remaining 3x 100ml units, international express delivery, or cycle renewal...',
-    placeholderEs: 'Consulte sobre la dispensación de las unidades restantes (3x 100ml), envío con mensajería o renovación del ciclo...'
+    placeholderEn: 'Inquire about dispensing remaining units, international courier delivery, or cycle renewal...',
+    placeholderEs: 'Consulte sobre la dispensación de unidades restantes, envío con mensajería o renovación del ciclo...'
   },
   {
     id: 'prescribing_physician',
     labelEn: 'Direct Consultation with Prescribing Clinic Team',
     labelEs: 'Consulta Directa con el Equipo Médico de la Clínica',
     icon: Mail,
-    placeholderEn: 'Submit clinical evolution questions directly to Dr. Hanieh Erdmann and the clinical medical team...',
-    placeholderEs: 'Envíe sus consultas de evolución clínica directamente a la Dra. Hanieh Erdmann y al equipo médico de la clínica...'
+    placeholderEn: 'Submit clinical evolution questions directly to the prescribing physician and medical clinic team...',
+    placeholderEs: 'Envíe sus consultas de evolución clínica directamente al médico prescriptor y al equipo de la clínica...'
   }
 ];
 
@@ -211,10 +356,20 @@ export default function PublicInstitutionalInquiryDrawer({
   lang = 'en'
 }) {
   const brandType = useMemo(() => {
+    // 0. Explicit brandType or prescriptionType passed from caller
+    if (initialEntity?.brandType) return initialEntity.brandType;
+    if (initialEntity?.prescriptionType === 'trichotest') return 'trichotest';
+    if (initialEntity?.prescriptionType === 'nutrigen') return 'nutrigen';
+    if (initialEntity?.prescriptionType === 'hormone' || initialEntity?.prescriptionType === 'hormones') return 'hormone';
+    if (initialEntity?.prescriptionType === 'peptide' || initialEntity?.prescriptionType === 'peptides') return 'peptides';
+
     const rawCat = String(initialEntity?.category || contextType || '').toLowerCase();
     const rawSupplier = String(initialEntity?.supplier || '').toLowerCase();
     const rawName = String(initialEntity?.name || '').toLowerCase();
     const rawSlug = String(initialEntity?.slug || '').toLowerCase();
+    const rawFormula = String(initialEntity?.formula || '').toLowerCase();
+    const rawGenomics = String(initialEntity?.genomicsTest || '').toLowerCase();
+    const rxId = String(initialEntity?.rxId || initialEntity?.prescriptionNumber || '').toLowerCase();
 
     if (
       contextType === 'prescription' ||
@@ -223,6 +378,61 @@ export default function PublicInstitutionalInquiryDrawer({
       initialEntity?.rxId ||
       initialEntity?.prescriptionNumber
     ) {
+      // 1. TrichoTest first
+      const isTricho =
+        rawGenomics.includes('tricho') ||
+        rawName.includes('tricho') ||
+        rawCat.includes('tricho') ||
+        rawFormula.includes('trichosol') ||
+        rawFormula.includes('trichofoam') ||
+        rawFormula.includes('trichotest') ||
+        rawFormula.includes('trichooil') ||
+        (rawFormula.includes('latanoprost') && (rawFormula.includes('estradiol') || rawFormula.includes('minoxidil')));
+      if (isTricho) return 'trichotest';
+
+      // 2. NutriGen
+      const isNutriGen = initialEntity?.isNutriGen ||
+        rawGenomics.includes('nutrigen') ||
+        rawName.includes('nutrigen') ||
+        rawCat.includes('nutrigen') ||
+        rawFormula.includes('greenselect') ||
+        rawFormula.includes('silymarin') ||
+        rxId === 'zcxwp3mesaid23osgtbp';
+      if (isNutriGen) return 'nutrigen';
+
+      // 3. Hormones / BHRT
+      const isHormone =
+        rawCat.includes('hormone') ||
+        rawCat.includes('bhrt') ||
+        rawCat.includes('trt') ||
+        rawFormula.includes('testosterone') ||
+        rawFormula.includes('progesterone') ||
+        rawFormula.includes('bi-est') ||
+        rawFormula.includes('biest') ||
+        rawFormula.includes('estriol') ||
+        rawFormula.includes('dhea') ||
+        rawFormula.includes('pregnenolone') ||
+        rawFormula.includes('lipoderm') ||
+        rawFormula.includes('topi-pump') ||
+        rawFormula.includes('troche') ||
+        rawFormula.includes('anastrozole') ||
+        rawFormula.includes('hcg') ||
+        rawFormula.includes('thyroid');
+      if (isHormone) return 'hormone';
+
+      // 4. Peptides
+      const isPeptide =
+        rawCat.includes('peptide') ||
+        rawFormula.includes('bpc-157') ||
+        rawFormula.includes('tb-500') ||
+        rawFormula.includes('cjc') ||
+        rawFormula.includes('ipamorelin') ||
+        rawFormula.includes('tirzepatide') ||
+        rawFormula.includes('semaglutide') ||
+        rawFormula.includes('subcutaneous') ||
+        rawFormula.includes('vial');
+      if (isPeptide) return 'peptides';
+
       return 'prescription';
     }
     if (
@@ -249,14 +459,21 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [initialEntity, contextType]);
 
   const activeTopics = useMemo(() => {
-    if (brandType === 'prescription') return INQUIRY_TOPICS_PRESCRIPTION;
+    if (brandType === 'trichotest') return INQUIRY_TOPICS_TRICHOTEST;
+    if (brandType === 'nutrigen') return INQUIRY_TOPICS_NUTRIGEN;
+    if (brandType === 'hormone' || brandType === 'hormones') return INQUIRY_TOPICS_HORMONES;
+    if (brandType === 'peptides') return INQUIRY_TOPICS_PEPTIDES;
     if (brandType === 'colway') return INQUIRY_TOPICS_COLWAY;
     if (brandType === 'bloodo') return INQUIRY_TOPICS_BLOODO;
-    return INQUIRY_TOPICS_PEPTIDES;
+    return INQUIRY_TOPICS_PRESCRIPTION;
   }, [brandType]);
 
   const [topic, setTopic] = useState(() => {
-    if (brandType === 'prescription') return initialEntity?.genomicsTest ? 'genomics_correlation' : 'rx_verification';
+    if (brandType === 'trichotest') return 'genomics_correlation';
+    if (brandType === 'nutrigen') return 'genomics_correlation';
+    if (brandType === 'hormone' || brandType === 'hormones') return 'endocrine_biomarkers';
+    if (brandType === 'peptides') return 'clinical_dosing';
+    if (brandType === 'prescription') return 'rx_details';
     if (brandType === 'colway') return 'salon_wholesale';
     if (brandType === 'bloodo') return 'clinic_b2b';
     if (contextType === 'product') return 'coa_specs';
@@ -267,11 +484,23 @@ export default function PublicInstitutionalInquiryDrawer({
 
   useEffect(() => {
     if (!activeTopics.some(t => t.id === topic)) {
-      setTopic(activeTopics[0]?.id || (brandType === 'prescription' ? (initialEntity?.genomicsTest ? 'genomics_correlation' : 'rx_verification') : 'general_inquiry'));
+      setTopic(activeTopics[0]?.id || 'general_inquiry');
     }
-  }, [activeTopics, topic, brandType, initialEntity]);
+  }, [activeTopics, topic]);
 
   const drawerHeaderTitle = useMemo(() => {
+    if (brandType === 'trichotest') {
+      return lang === 'es' ? 'Consulta TrichoTest™ y Protocolo Capilar' : 'TrichoTest™ Protocol & Clinical Inquiry';
+    }
+    if (brandType === 'nutrigen') {
+      return lang === 'es' ? 'Consulta NutriGen™ y Protocolo Clínico' : 'NutriGen™ Protocol & Clinical Inquiry';
+    }
+    if (brandType === 'hormone' || brandType === 'hormones') {
+      return lang === 'es' ? 'Consulta de Protocolo Hormonal y BHRT' : 'BHRT & Hormone Protocol Clinical Inquiry';
+    }
+    if (brandType === 'peptides') {
+      return lang === 'es' ? 'Consulta de Protocolo de Péptidos' : 'Peptide Protocol & Clinical Inquiry';
+    }
     if (brandType === 'prescription') {
       return lang === 'es' ? 'Consulta de Prescripción y Protocolo Médico' : 'Prescription & Medical Protocol Inquiry';
     }
@@ -285,10 +514,33 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [brandType, lang]);
 
   const drawerHeaderSubtitle = useMemo(() => {
+    const docName = initialEntity?.doctorName || 'Dr. Haytham Salem';
+    const clinicName = initialEntity?.clinic || 'Arthregen Clinic';
+
+    if (brandType === 'trichotest') {
+      return lang === 'es'
+        ? `Mesa Oficial TrichoTest™ • ${docName} (${clinicName}) & Atlas Services`
+        : `Official TrichoTest™ Clinical Desk • ${docName} (${clinicName}) & Atlas Services`;
+    }
+    if (brandType === 'nutrigen') {
+      return lang === 'es'
+        ? `Mesa Oficial NutriGen™ • ${docName} (${clinicName}) & Atlas Services`
+        : `Official NutriGen™ Clinical Desk • ${docName} (${clinicName}) & Atlas Services`;
+    }
+    if (brandType === 'hormone' || brandType === 'hormones') {
+      return lang === 'es'
+        ? `Mesa Clínica de Endocrinología y BHRT • ${docName} (${clinicName}) & Atlas Services`
+        : `Official Hormone & BHRT Clinical Desk • ${docName} (${clinicName}) & Atlas Services`;
+    }
+    if (brandType === 'peptides') {
+      return lang === 'es'
+        ? `Mesa Oficial de Péptidos & Medicina Regenerativa • ${docName} (${clinicName}) & Atlas Services`
+        : `Official Peptides & Regenerative Affairs Desk • ${docName} (${clinicName}) & Atlas Services`;
+    }
     if (brandType === 'prescription') {
       return lang === 'es'
-        ? 'Mesa Oficial de Asuntos Clínicos • Atlas Services & Clínica Prescriptora'
-        : 'Official Clinical Affairs Desk • Atlas Services & Prescribing Clinic';
+        ? `Mesa Oficial de Asuntos Clínicos • ${docName} (${clinicName}) & Atlas Services`
+        : `Official Clinical Affairs Desk • ${docName} (${clinicName}) & Atlas Services`;
     }
     if (brandType === 'colway') {
       return lang === 'es' ? 'Mesa Oficial Colway • Cosmética Clínica y Tricología' : 'Official Colway Clinical & Trichology Desk';
@@ -297,10 +549,17 @@ export default function PublicInstitutionalInquiryDrawer({
       return lang === 'es' ? 'Mesa de Diagnóstico Bloodo • Red Acreditada ISO 15189' : 'Bloodo Diagnostic Affairs Desk • ISO 15189 Accredited';
     }
     return lang === 'es' ? 'Mesa Oficial de Asuntos Médicos & Científicos' : 'Official Medical & Scientific Affairs Desk';
-  }, [brandType, lang]);
+  }, [brandType, lang, initialEntity]);
 
   const successDesc = useMemo(() => {
-    if (brandType === 'prescription') {
+    if (
+      brandType === 'prescription' ||
+      brandType === 'nutrigen' ||
+      brandType === 'trichotest' ||
+      brandType === 'hormone' ||
+      brandType === 'hormones' ||
+      brandType === 'peptides'
+    ) {
       return lang === 'es'
         ? 'Su consulta médica ha sido remitida con acuse de recibo al equipo clínico de la prescripción y a Atlas Services. Un enlace facultativo se pondrá en contacto en un plazo máximo de 24 horas laborables.'
         : 'Your medical inquiry has been securely routed to the prescription clinical team and Atlas Services Medical Affairs. A clinical liaison will follow up within 24 business hours.';

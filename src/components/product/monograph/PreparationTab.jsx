@@ -28,6 +28,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 import PrecisionSyringeVisualizer from './PrecisionSyringeVisualizer';
 import { calculateReconstitution, STANDARD_PRESENTATIONS } from './monographCalculationEngine';
+import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 
 function parseNumber(val, fallback = 10) {
   if (!val) return fallback;
@@ -51,6 +52,9 @@ export default function PreparationTab({
   presentationMatrixRows = [],
   supplierName
 }) {
+  // Label preview ("preview first, then print")
+  const [labelPreview, setLabelPreview] = useState(null); // { url, downloadUrl, title, subtitle, name }
+
   // ── 1. Determine Exact Presentation Category ──
   const formatStr = String(
     activeFormat?.id ||
@@ -1262,47 +1266,61 @@ export default function PreparationTab({
               Physical Label Dispensing
             </div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <a
-                href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '5px 10px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
-                  color: '#1e293b',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textDecoration: 'none'
-                }}
-              >
-                <Download size={12} /> 38×90mm Label
-              </a>
-              <a
-                href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '5px 10px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
-                  color: '#1e293b',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  textDecoration: 'none'
-                }}
-              >
-                <FileText size={12} /> A4 Sheet (×8)
-              </a>
+              {[
+                { key: '38x90', format: '38x90', label: '38×90mm Label', icon: <Printer size={13} />, title: 'Patient Label — 38×90 mm' },
+                { key: 'sheet', format: 'sheet_a4', label: 'A4 Sheet (×8)', icon: <FileText size={13} />, title: 'Patient Labels — A4 Sheet (×8)' },
+              ].map((opt) => {
+                const qs = new URLSearchParams({ format: opt.format, type: 'client' });
+                if (activeFormat?.id) { qs.set('presentation', activeFormat.id); }
+                const doseLabel = selectedStrength?.name || selectedStrength?.dosage || '';
+                if (doseLabel) qs.set('dose', doseLabel);
+                if (effectiveBatch) qs.set('batch', effectiveBatch);
+                const base = `/api/vial-label/${encodeURIComponent(slug)}?${qs.toString()}`;
+                return (
+                  <button
+                    key={opt.key}
+                    id={`prep-label-preview-${opt.key}`}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setLabelPreview({
+                        url: base,
+                        downloadUrl: `${base}&download=1`,
+                        title: opt.title,
+                        subtitle: [activeFormat?.name, doseLabel, effectiveBatch].filter(Boolean).join(' · '),
+                        name: `label_${slug}_${opt.format}.pdf`,
+                      });
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      minHeight: '36px',
+                      padding: '5px 12px',
+                      background: '#f8fafc',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      color: '#1e293b',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                    title="Preview before printing"
+                  >
+                    {opt.icon} {opt.label}
+                  </button>
+                );
+              })}
             </div>
+            <DocumentPreviewModal
+              isOpen={!!labelPreview}
+              onClose={() => setLabelPreview(null)}
+              fileUrl={labelPreview?.url}
+              downloadUrl={labelPreview?.downloadUrl}
+              downloadName={labelPreview?.name}
+              title={labelPreview?.title}
+              subtitle={labelPreview?.subtitle}
+            />
           </div>
         </div>
       </section>

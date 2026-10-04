@@ -36,6 +36,7 @@ import dynamic from 'next/dynamic';
 const CatalogModalsContainer = dynamic(() => import('./catalog/drawers/CatalogModalsContainer'), { ssr: false });
 const GenomicsMatrixView = dynamic(() => import('./catalog/GenomicsMatrixView'), { ssr: false });
 const GenomicsPriorityEditorModal = dynamic(() => import('./catalog/GenomicsPriorityEditorModal'), { ssr: false });
+const GenerateB2BShowcaseModal = dynamic(() => import('./catalog/modals/GenerateB2BShowcaseModal'), { ssr: false });
 
 // Icons
 import {
@@ -164,6 +165,7 @@ export default function MasterCatalogTable({
   const [selectedIds, setSelectedIds] = useState([]);
   const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+  const [isB2BShowcaseOpen, setIsB2BShowcaseOpen] = useState(false);
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
   const [isPriceListModalOpen, setIsPriceListModalOpen] = useState(false);
   const [isScanPriceListOpen, setIsScanPriceListOpen] = useState(false);
@@ -1072,6 +1074,12 @@ export default function MasterCatalogTable({
         onToggleSelectAllMatching={setIsAllMatchingSelected}
         bulkActions={[
           {
+            label: '✨ Mini-Website B2B',
+            icon: Sparkles,
+            variant: 'primary',
+            onClick: () => setIsB2BShowcaseOpen(true)
+          },
+          {
             label: 'Send to Workspace',
             icon: Package,
             onClick: () => {
@@ -1246,6 +1254,17 @@ export default function MasterCatalogTable({
           }));
           refresh(true);
         }}
+      />
+
+      {/* 7. B2B Showcase Generator Drawer (Gemini AI) */}
+      <GenerateB2BShowcaseModal
+        isOpen={isB2BShowcaseOpen}
+        onClose={() => setIsB2BShowcaseOpen(false)}
+        selectedProducts={(() => {
+          const idSet = new Set(selectedIds || []);
+          const matched = (data || []).filter(p => idSet.has(p.id) || (p.variants && p.variants.some(v => idSet.has(v.id))));
+          return matched.length > 0 ? matched : (data || []).slice(0, 5);
+        })()}
       />
     </div>
   );

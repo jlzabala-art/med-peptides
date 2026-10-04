@@ -1041,7 +1041,7 @@ export default function ProtocolWorkspaceTab({
               >
                 {availableProtocols.map((proto, idx) => (
                   <option key={proto.id} value={proto.id}>
-                    #{idx + 1} · {sanitizeProtocolTitle(proto.name, canonicalName)} ({proto.durationWeeks} Wks • {proto.defaultDoseMg || proto.phases?.[0]?.doseMg || 2.5} mg)
+                    #{idx + 1} · {sanitizeProtocolTitle(proto.name, canonicalName)}
                   </option>
                 ))}
               </select>

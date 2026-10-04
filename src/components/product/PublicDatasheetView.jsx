@@ -119,6 +119,7 @@ export default function PublicDatasheetView({
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewModalTab, setPreviewModalTab] = useState('monograph');
   const [isCoaModalOpen, setIsCoaModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -2749,22 +2750,18 @@ export default function PublicDatasheetView({
                     {t.shippingLabelDesc || 'Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.'}
                   </p>
                   <div className="pds-label-type-buttons">
-                    <a 
-                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      download={isMobileDevice ? undefined : `shipping_label_${variantFileSuffix}_38x90.pdf`}
-                      onClick={() => handleDownloadClick('shipping_38x90')}
-                      className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode ${downloadingType === 'shipping_38x90' ? 'loading' : ''}`}
-                      style={downloadingType === 'shipping_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                      title="Download 38x90mm Shipping Label (PDF File)"
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setPreviewModalTab('shipping');
+                        setIsPreviewModalOpen(true);
+                      }}
+                      className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode"
+                      title="Preview 38x90mm Shipping Label before printing"
                     >
-                      {downloadingType === 'shipping_38x90' ? (
-                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                      ) : (
-                        <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
-                      )}
-                    </a>
+                      <Eye size={15} className="pds-btn-icon" /> <span>{t.previewPrintLabel || 'Preview & Print 38×90mm'}</span>
+                    </button>
                     <a 
                       href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
                       target="_blank" 
@@ -2821,22 +2818,18 @@ export default function PublicDatasheetView({
                       : (t.clientVialLabelDesc || 'High-adhesion clinical vial label for patient vials. Displays formulation potency, sterile batch number, reconstitution instructions, and direct-lookup verification QR.')}
                   </p>
                   <div className="pds-label-type-buttons">
-                    <a 
-                      href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`}
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      download={isMobileDevice ? undefined : `client_vial_label_${variantFileSuffix}_38x90.pdf`}
-                      onClick={() => handleDownloadClick('client_38x90')}
-                      className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf ${downloadingType === 'client_38x90' ? 'loading' : ''}`}
-                      style={downloadingType === 'client_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
-                      title="Download 38x90mm Client Vial Label (PDF File)"
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setPreviewModalTab('client');
+                        setIsPreviewModalOpen(true);
+                      }}
+                      className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf"
+                      title="Preview 38x90mm Client Vial Label before printing"
                     >
-                      {downloadingType === 'client_38x90' ? (
-                        <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{t.downloadingState || 'Downloading...'}</span></>
-                      ) : (
-                        <><Download size={15} className="pds-btn-icon" /> <span>{t.downloadPrintReadyPdf || 'Download 38×90mm PDF'}</span></>
-                      )}
-                    </a>
+                      <Eye size={15} className="pds-btn-icon" /> <span>{t.previewPrintLabel || 'Preview & Print 38×90mm'}</span>
+                    </button>
                     <a 
                       href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
                       target="_blank" 
@@ -3029,6 +3022,7 @@ export default function PublicDatasheetView({
         version={versionInfo.version}
         updatedAtDate={versionInfo.updatedAtDate}
         isCosmetic={isCosmeticProduct}
+        initialTab={previewModalTab}
       />
 
       {/* Printable Lot Quality Certificate of Analysis (COA) Modal */}

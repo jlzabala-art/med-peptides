@@ -402,13 +402,16 @@
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 9px 34px 9px 12px;
-  font-size: 0.84rem;
-  font-weight: 700;
+  font-size: 0.80rem;
+  font-weight: 600;
   color: #003666;
   outline: none;
   cursor: pointer;
   transition: all 0.15s ease;
   box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .pds-gcp-native-select:focus {
@@ -1076,11 +1079,9 @@
     }
   }
 
-  /* GCP Switcher Header Compare Button on Mobile */
+  /* GCP Switcher Header Compare Button — HIDDEN on mobile (Compare Pathways in summary banner serves same purpose) */
   .pds-gcp-switcher-compare-btn {
-    min-height: 38px !important;
-    border-radius: 8px !important;
-    justify-content: center !important;
+    display: none !important;
   }
 
   /* Stepper on mobile: NO HORIZONTAL SCROLL - 100% Grid width */
@@ -1393,9 +1394,8 @@
   font-size: 0.82rem;
   font-weight: 750;
   color: #0f172a;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
+  line-height: 1.25;
 }
 
 /* Compact inline format selector in the header summary panel */

@@ -18,24 +18,31 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
   // Safely get string for semantic mapping
   const s = (status || (typeof customLabel === 'string' ? customLabel : '')).toLowerCase();
   
-  let bg = '#f1f5f9';
-  let color = '#64748b';
+  // Google Cloud Console Standard Semantic Maps
+  let bg = '#f1f3f4';
+  let border = '#dadce0';
+  let color = '#5f6368';
   
   if (['active', 'approved', 'reconciled', 'published', 'success', 'completed', 'delivered', 'accepted', 'aceptada', 'linked', 'in_stock', 'in stock'].includes(s)) {
-    bg = '#f0fdf4';
-    color = '#16a34a';
-  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused'].includes(s)) {
-    bg = '#fffbeb';
-    color = '#d97706';
+    bg = '#e6f4ea';
+    border = '#ceead6';
+    color = '#137333';
+  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused', 'on_demand', 'on demand', 'low_stock'].includes(s)) {
+    bg = '#fef7e0';
+    border = '#feefc3';
+    color = '#b06000';
   } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled', 'suspended', 'inactive', 'expired', 'caducada', 'revoked', 'out of stock', 'out_of_stock'].includes(s)) {
-    bg = '#fef2f2';
-    color = '#dc2626';
+    bg = '#fce8e6';
+    border = '#fad2cf';
+    color = '#c5221f';
   } else if (['po_created', 'synced', 'converted', 'info', 'invited', 'sent', 'enviada', 'protected', 'in_transit', 'in transit', 'en tránsito', 'en transito', 'shipped'].includes(s)) {
-    bg = '#eff6ff';
-    color = '#2563eb';
+    bg = '#e8f0fe';
+    border = '#d2e3fc';
+    color = '#1a73e8';
   } else if (['archived', 'hidden', 'disabled', 'unknown'].includes(s)) {
-    bg = '#f1f5f9';
-    color = '#64748b';
+    bg = '#f1f3f4';
+    border = '#dadce0';
+    color = '#5f6368';
   }
   
   // Canonical English label dictionary for any legacy status string
@@ -79,12 +86,13 @@ export default function StatusChip({ status, customLabel, style = {}, variant = 
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '2px 7px',
-        borderRadius: '9999px',
+        padding: '2px 8px',
+        borderRadius: '4px',
         fontSize: '0.70rem',
-        fontWeight: 650,
+        fontWeight: 600,
         letterSpacing: '0.01em',
         backgroundColor: bg,
+        border: `1px solid ${border}`,
         color: color,
         whiteSpace: 'nowrap',
         lineHeight: '1.2',

@@ -145,14 +145,13 @@ export function useMasterCatalogColumns({
                   <div style={{ 
                     display: 'inline-flex', 
                     alignItems: 'center', 
-                    backgroundColor: catBadge.bg, 
-                    border: `1px solid ${catBadge.border}`, 
-                    borderRadius: '5px', 
+                    backgroundColor: '#f1f3f4', 
+                    border: '1px solid #dadce0', 
+                    borderRadius: '4px', 
                     padding: '1px 6px',
                     fontSize: '0.70rem',
-                    fontWeight: 700,
-                    color: catBadge.color,
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                    fontWeight: 600,
+                    color: '#3c4043'
                   }}>
                     <InlineEditableCell 
                       value={row.category || 'No Category'} 
@@ -170,7 +169,7 @@ export function useMasterCatalogColumns({
                 );
               })()}
 
-              <span style={{ color: '#cbd5e1', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
+              <span style={{ color: '#dadce0', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
 
               {/* 2. Format & Variant Footprint (Clean Secondary Text) */}
               {(() => {
@@ -181,7 +180,7 @@ export function useMasterCatalogColumns({
 
                 if (isCorpService) {
                   return (
-                    <span style={{ fontSize: '0.73rem', color: '#64748b', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.73rem', color: '#5f6368', fontWeight: 500 }}>
                       💼 {n} {n === 1 ? 'Service Tier' : 'Service Tiers'}
                     </span>
                   );
@@ -196,30 +195,28 @@ export function useMasterCatalogColumns({
                 }
 
                 return (
-                  <span style={{ fontSize: '0.73rem', color: '#64748b', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                    <span style={{ fontWeight: 600, color: '#334155' }}>{formatStr}</span>
-                    <span style={{ color: '#94a3b8' }}>({n} {n === 1 ? 'var' : 'vars'})</span>
+                  <span style={{ fontSize: '0.73rem', color: '#5f6368', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontWeight: 600, color: '#202124' }}>{formatStr}</span>
+                    <span style={{ color: '#5f6368' }}>({n} {n === 1 ? 'var' : 'vars'})</span>
                   </span>
                 );
               })()}
 
-              {/* 3. Associated Clinical / Genomic Program (Micro-badge) */}
+              {/* 3. Associated Clinical / Genomic Program (GCP Minimalist Tag) */}
               {Array.isArray(row.programs) && row.programs.length > 0 && (
                 <>
-                  <span style={{ color: '#cbd5e1', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ color: '#dadce0', fontSize: '0.8rem', userSelect: 'none' }}>•</span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
                     {row.programs.map((prog, pIdx) => {
                       const progSlug = prog.slug || prog.id || '';
                       let progShortName = prog.name ? prog.name.replace('Fagron Genomics | ', '') : 'Genomics';
                       if (progSlug === 'fagron-genomics-telotest') progShortName = 'TeloTest';
                       if (progSlug === 'fagron-genomics-trichotest') progShortName = 'TrichoTest';
                       if (progSlug === 'fagron-genomics-nutrigen') progShortName = 'NutriGen';
-                      if (progShortName.length > 20) progShortName = progShortName.slice(0, 18) + '…';
+                      if (progShortName.length > 18) progShortName = progShortName.slice(0, 16) + '…';
 
                       const pri = prog.priority || 'A';
-                      const priColor = pri === 'A' ? '#15803d' : pri === 'B' ? '#b45309' : '#0369a1';
-                      const priBg = pri === 'A' ? '#f0fdf4' : pri === 'B' ? '#fffbeb' : '#f0f9ff';
-                      const priBorder = pri === 'A' ? '#bbf7d0' : pri === 'B' ? '#fde68a' : '#bae6fd';
+                      const priColor = pri === 'A' ? '#137333' : pri === 'B' ? '#b06000' : '#5f6368';
 
                       return (
                         <span
@@ -232,30 +229,26 @@ export function useMasterCatalogColumns({
                           }}
                           style={{
                             fontSize: '0.67rem',
-                            fontWeight: 700,
-                            padding: '1px 5px',
+                            fontWeight: 500,
+                            padding: '1px 6px',
                             borderRadius: '4px',
-                            background: priBg,
-                            color: priColor,
-                            border: `1px solid ${priBorder}`,
+                            background: '#f8f9fa',
+                            color: '#3c4043',
+                            border: '1px solid #dadce0',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '3px',
+                            gap: '4px',
                             cursor: onEditGenomicPriority ? 'pointer' : 'default',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
                           }}
                           title={`Associated Program: ${prog.name || progShortName} (Priority ${pri}). Click to edit.`}
                         >
-                          <span>🧬 {progShortName}</span>
+                          <span>{progShortName}</span>
                           <span style={{
-                            fontSize: '0.60rem',
-                            backgroundColor: priColor,
-                            color: '#ffffff',
-                            padding: '0 3px',
-                            borderRadius: '2px',
-                            fontWeight: 800
+                            fontSize: '0.62rem',
+                            color: priColor,
+                            fontWeight: 700
                           }}>
-                            {pri}
+                            · {pri}
                           </span>
                         </span>
                       );
@@ -323,19 +316,19 @@ export function useMasterCatalogColumns({
                 whiteSpace: 'nowrap',
                 display: 'inline-flex',
                 alignItems: 'baseline',
-                gap: '1px',
-                fontWeight: 700, 
+                gap: '2px',
+                fontWeight: 600, 
                 fontSize: '0.74rem',
-                color: '#0284c7',
-                backgroundColor: '#f0f9ff',
-                border: '1px solid #bae6fd',
-                padding: '1px 6px',
-                borderRadius: '6px'
+                color: '#1a73e8',
+                backgroundColor: '#e8f0fe',
+                border: '1px solid #d2e3fc',
+                padding: '2px 8px',
+                borderRadius: '4px'
               }}
               title={`Showing ${matchingCount} of ${totalCount} suppliers available`}
             >
               <span>{matchingCount}</span>
-              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500 }}>/{totalCount}</span>
+              <span style={{ fontSize: '0.68rem', color: '#5f6368', fontWeight: 500 }}>/{totalCount}</span>
             </span>
           );
         }
@@ -344,12 +337,13 @@ export function useMasterCatalogColumns({
           <span 
             style={{ 
               whiteSpace: 'nowrap',
-              fontWeight: 700, 
-              color: totalCount > 0 ? 'var(--color-primary, #003666)' : '#94a3b8',
-              backgroundColor: totalCount > 0 ? 'rgba(0, 54, 102, 0.05)' : 'transparent',
-              padding: totalCount > 0 ? '1px 6px' : '0',
-              borderRadius: '6px',
-              fontSize: '0.78rem',
+              fontWeight: 600, 
+              color: '#3c4043',
+              backgroundColor: '#f1f3f4',
+              border: '1px solid #dadce0',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '0.74rem',
               display: 'inline-block'
             }}
             title={`${totalCount} suppliers available`}

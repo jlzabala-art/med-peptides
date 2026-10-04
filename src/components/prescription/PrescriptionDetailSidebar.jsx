@@ -260,34 +260,35 @@ export default function PrescriptionDetailSidebar({
           </div>
         </div>
 
-        {/* Widget 2: Formulations & Vehicles Multi-Vehicle Navigator (Flexible) */}
+        {/* Widget 2: Formulations & Vehicles Multi-Vehicle Navigator (GCP Standard) */}
         {formulations && formulations.length > 0 && (
           <div style={{
             background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            padding: '1.15rem',
-            boxShadow: '0 4px 16px rgba(0, 54, 102, 0.05)'
+            borderRadius: '8px',
+            border: '1px solid #dadce0',
+            padding: '1rem',
+            boxShadow: 'none'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '0.75rem',
-              paddingBottom: '0.5rem',
-              borderBottom: '1px solid #f1f5f9'
+              marginBottom: '0.65rem',
+              paddingBottom: '0.45rem',
+              borderBottom: '1px solid #f1f3f4'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                <Layers size={14} color="#0d9488" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <Layers size={14} color="#1a73e8" />
                 <span>{isEs ? 'VEHÍCULOS & FÓRMULAS' : 'VEHICLES & FORMULAS'}</span>
               </div>
               <span style={{
                 fontSize: '0.68rem',
-                fontWeight: 700,
-                color: '#0d9488',
-                background: '#ccfbf1',
+                fontWeight: 500,
+                color: '#1a73e8',
+                background: '#e8f0fe',
                 padding: '1px 6px',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                border: '1px solid #d2e3fc'
               }}>
                 {formulations.length} {formulations.length === 1 ? (isEs ? 'Vehículo' : 'Vehicle') : (isEs ? 'Vehículos' : 'Vehicles')}
               </span>
@@ -301,11 +302,11 @@ export default function PrescriptionDetailSidebar({
                     key={form.id || fIdx}
                     onClick={() => scrollTo(form.id)}
                     style={{
-                      padding: '10px 12px',
-                      borderRadius: '10px',
+                      padding: '9px 11px',
+                      borderRadius: '6px',
                       border: '1px solid',
-                      borderColor: isFormActive ? (form.accentColor || '#0284c7') : '#e2e8f0',
-                      background: isFormActive ? '#f0fdfa' : '#f8fafc',
+                      borderColor: isFormActive ? '#1a73e8' : '#dadce0',
+                      background: isFormActive ? '#e8f0fe' : '#ffffff',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
                     }}
@@ -313,33 +314,34 @@ export default function PrescriptionDetailSidebar({
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
                       <span style={{
                         fontSize: '0.65rem',
-                        fontWeight: 800,
+                        fontWeight: 600,
                         textTransform: 'uppercase',
-                        padding: '2px 6px',
+                        padding: '1px 6px',
                         borderRadius: '4px',
-                        background: form.accentColor || '#0284c7',
-                        color: '#ffffff'
+                        background: '#e8f0fe',
+                        color: '#1a73e8',
+                        border: '1px solid #d2e3fc'
                       }}>
                         {form.vehicle?.tag || `PREP ${fIdx + 1}`}
                       </span>
                       {form.volume && (
-                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368' }}>
                           {form.volume}
                         </span>
                       )}
                     </div>
 
-                    <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124', lineHeight: 1.3 }}>
                       {form.vehicle?.name || form.title}
                     </div>
 
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       <span>{form.route}</span>
                       {form.apis?.length > 0 && (
                         <>
                           <span>·</span>
-                          <span style={{ fontWeight: 600, color: '#0284c7' }}>
-                            {form.apis.length} {isEs ? 'APIs' : 'APIs'}
+                          <span style={{ fontWeight: 500, color: '#1a73e8' }}>
+                            {form.apis.length} APIs
                           </span>
                         </>
                       )}
@@ -348,18 +350,19 @@ export default function PrescriptionDetailSidebar({
                     {form.posology?.regimen && (
                       <div style={{
                         marginTop: '6px',
-                        padding: '4px 8px',
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
+                        padding: '5px 8px',
+                        background: '#f8f9fa',
+                        border: '1px solid #dadce0',
+                        borderRadius: '4px',
                         fontSize: '0.70rem',
-                        color: '#334155',
+                        color: '#3c4043',
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '5px'
+                        alignItems: 'flex-start',
+                        gap: '6px',
+                        lineHeight: 1.35
                       }}>
-                        <Clock size={11} color="#0d9488" />
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Clock size={12} color="#5f6368" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>
                           {form.posology.regimen}
                         </span>
                       </div>
@@ -422,32 +425,32 @@ export default function PrescriptionDetailSidebar({
           </div>
         )}
 
-        {/* Widget 4: Permanent Prescription Canonical URL (Golden Rule) */}
+        {/* Widget 4: Permanent Prescription Canonical URL (GCP Standard) */}
         <div style={{
-          background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
-          borderRadius: '14px',
-          border: '1px solid #86efac',
-          padding: '1.15rem',
-          boxShadow: '0 4px 16px rgba(22, 163, 74, 0.06)'
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #dadce0',
+          padding: '1rem',
+          boxShadow: 'none'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              <Lock size={12} color="#16a34a" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <Lock size={13} color="#1a73e8" />
               <span>{isEs ? 'URL PERMANENTE OFICIAL' : 'OFFICIAL PERMANENT URL'}</span>
             </div>
-            <span style={{ fontSize: '0.66rem', fontWeight: 700, color: '#15803d', background: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
-              SSL 2026
+            <span style={{ fontSize: '0.68rem', fontWeight: 500, color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px' }}>
+              SSL Verified
             </span>
           </div>
 
           <div style={{
-            background: '#ffffff',
-            border: '1px solid #bbf7d0',
-            borderRadius: '8px',
-            padding: '8px 10px',
-            fontSize: '0.74rem',
+            background: '#f8f9fa',
+            border: '1px solid #dadce0',
+            borderRadius: '4px',
+            padding: '7px 10px',
+            fontSize: '0.72rem',
             fontFamily: 'monospace',
-            color: '#1e293b',
+            color: '#202124',
             wordBreak: 'break-all',
             marginBottom: '0.65rem'
           }}>
@@ -464,12 +467,12 @@ export default function PrescriptionDetailSidebar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '5px',
-                padding: '7px 10px',
-                borderRadius: '8px',
-                background: '#16a34a',
+                padding: '7px 12px',
+                borderRadius: '4px',
+                background: '#1a73e8',
                 color: '#ffffff',
                 border: 'none',
-                fontWeight: 700,
+                fontWeight: 500,
                 fontSize: '0.76rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
@@ -487,12 +490,11 @@ export default function PrescriptionDetailSidebar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '7px 10px',
-                borderRadius: '8px',
+                borderRadius: '4px',
                 background: '#ffffff',
-                color: '#166534',
-                border: '1px solid #86efac',
+                color: '#1a73e8',
+                border: '1px solid #dadce0',
                 textDecoration: 'none',
-                fontWeight: 700,
                 fontSize: '0.76rem'
               }}
               title={isEs ? 'Abrir enlace directo' : 'Open permanent link'}
@@ -502,21 +504,21 @@ export default function PrescriptionDetailSidebar({
           </div>
         </div>
 
-        {/* Widget 5: Prescribing Physician Authority (Doctor Prominence) */}
+        {/* Widget 5: Prescribing Physician Authority (GCP Standard) */}
         <div style={{
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%)',
-          borderRadius: '14px',
-          border: '1px solid #bbf7d0',
-          padding: '1.15rem',
-          boxShadow: '0 4px 16px rgba(16, 185, 129, 0.06)'
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #dadce0',
+          padding: '1rem',
+          boxShadow: 'none'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.65rem' }}>
             <div style={{
               width: 32,
               height: 32,
-              borderRadius: '8px',
-              background: '#047857',
-              color: '#ffffff',
+              borderRadius: '4px',
+              background: '#e8f0fe',
+              color: '#1a73e8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -525,19 +527,19 @@ export default function PrescriptionDetailSidebar({
               <Stethoscope size={16} />
             </div>
             <div>
-              <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {doctorName ? (isEs ? 'MÉDICO TRATANTE' : 'TREATING PHYSICIAN') : (isEs ? 'PRÁCTICA CLÍNICA' : 'CLINICAL PRACTICE')}
               </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#202124' }}>
                 {doctorName || (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')}
               </div>
             </div>
           </div>
 
-          <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4, marginBottom: '0.75rem' }}>
-            {doctorTitle && <div>{doctorTitle}</div>}
+          <div style={{ fontSize: '0.74rem', color: '#5f6368', lineHeight: 1.45, marginBottom: '0.75rem' }}>
+            {doctorTitle && <div style={{ color: '#3c4043', fontWeight: 500 }}>{doctorTitle}</div>}
             {doctorLicense && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: 700, marginTop: '2px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#137333', fontWeight: 500, marginTop: '2px', background: '#e6f4ea', border: '1px solid #ceead6', borderRadius: '4px', padding: '1px 6px' }}>
                 <ShieldCheck size={12} />
                 <span>
                   {doctorLicense.toUpperCase().includes('DHA') 
@@ -547,8 +549,13 @@ export default function PrescriptionDetailSidebar({
               </div>
             )}
             {doctorOffice && (
-              <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px' }}>
                 📍 {doctorOffice}
+              </div>
+            )}
+            {doctorPhone && (
+              <div style={{ fontSize: '0.70rem', color: '#1a73e8', marginTop: '2px' }}>
+                📞 {doctorPhone}
               </div>
             )}
             {!doctorName && onAssignDoctor && (
@@ -559,12 +566,12 @@ export default function PrescriptionDetailSidebar({
                   marginTop: '8px',
                   width: '100%',
                   padding: '6px 10px',
-                  borderRadius: '6px',
-                  background: '#f0fdf4',
-                  border: '1px solid #86efac',
-                  color: '#166534',
+                  borderRadius: '4px',
+                  background: '#f8f9fa',
+                  border: '1px solid #dadce0',
+                  color: '#1a73e8',
                   fontSize: '0.74rem',
-                  fontWeight: 700,
+                  fontWeight: 500,
                   cursor: 'pointer'
                 }}
               >

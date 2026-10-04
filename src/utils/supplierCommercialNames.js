@@ -15,9 +15,9 @@ export function formatCommercialSupplierName(rawNameOrId) {
     return 'Bioblend';
   }
 
-  // Lotusland -> Certified Clinical Synthesis Laboratory
+  // Lotusland concrete commercial supplier
   if (s.includes('lotusland') || s.includes('lotus')) {
-    return 'Certified Clinical Synthesis Laboratory';
+    return 'Lotusland';
   }
 
   if (s.includes('bioniq')) return 'Bioniq';

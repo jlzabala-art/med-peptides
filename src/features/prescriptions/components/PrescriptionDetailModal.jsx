@@ -115,13 +115,16 @@ function StatusChip({ status, large = false }) {
 }
 
 function PatientAvatar({ name, size = 52 }) {
-  const initials = (name || '??')
+  const safeName = typeof name === 'object' && name !== null
+    ? (name.name || name.displayName || name.email || '??')
+    : (typeof name === 'string' ? name : '??');
+  const initials = safeName
     .split(' ')
     .slice(0, 2)
-    .map((w) => w[0])
+    .map((w) => w[0] || '')
     .join('')
-    .toUpperCase();
-  const hue = (name || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+    .toUpperCase() || '??';
+  const hue = safeName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
   return (
     <div
       style={{
@@ -330,11 +333,17 @@ export default function PrescriptionDetailModal({
     return null;
   };
 
-  const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
+  const patient = typeof rx.patient === 'object' && rx.patient !== null
+    ? (rx.patient.name || rx.patient.displayName || rx.patient.email || rx.patientName || 'Unknown Patient')
+    : (rx.patientName || (typeof rx.patient === 'string' ? rx.patient : '') || 'Unknown Patient');
   const protocol = rx.protocol || rx.protocolName || null;
   const date = formatAnyDate(rx.createdAt) || formatAnyDate(rx.dateIssued) || formatAnyDate(rx.fagron?.importedAt) || formatAnyDate(rx.fagron?.reportDate) || rx.dateIssued || '—';
-  const doctor = rx.doctor?.name || rx.doctorName || null;
-  const manager = rx.accountManager || null;
+  const doctor = typeof rx.doctor === 'object' && rx.doctor !== null
+    ? (rx.doctor.name || rx.doctor.displayName || rx.doctorName || null)
+    : (rx.doctorName || (typeof rx.doctor === 'string' ? rx.doctor : null));
+  const manager = typeof rx.accountManager === 'object' && rx.accountManager !== null
+    ? (rx.accountManager.name || rx.accountManager.displayName || rx.accountManager.email || null)
+    : (typeof rx.accountManager === 'string' ? rx.accountManager : null);
 
   const apiCount = (rx.items || rx.products || []).length;
   const rawDuration = rx.duration || rx.items?.[0]?.duration;

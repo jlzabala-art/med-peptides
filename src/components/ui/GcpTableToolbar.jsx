@@ -142,25 +142,25 @@ export default function GcpTableToolbar({
           gap: 5px;
           height: 28px;
           padding: 0 8px;
-          border-radius: 5px;
-          border: 1px solid #cbd5e1;
+          border-radius: 4px;
+          border: 1px solid #dadce0;
           background-color: #ffffff;
-          color: #334155;
-          font-size: 0.75rem;
-          font-weight: 600;
+          color: #3c4043;
+          font-size: 0.74rem;
+          font-weight: 500;
           cursor: pointer;
-          transition: all 0.15s ease;
+          transition: background-color 0.15s, border-color 0.15s, color 0.15s;
           white-space: nowrap;
         }
         .gcp-toolbar-btn:hover {
-          background-color: #f1f5f9;
-          border-color: #94a3b8;
-          color: #0f172a;
+          background-color: #f1f3f4;
+          border-color: #dadce0;
+          color: #202124;
         }
         .gcp-toolbar-btn.is-active {
-          background-color: #eff6ff;
-          border-color: #93c5fd;
-          color: #1d4ed8;
+          background-color: #e8f0fe;
+          border-color: #d2e3fc;
+          color: #1a73e8;
         }
         .gcp-col-menu-popover {
           position: absolute;

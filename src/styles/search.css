@@ -191,29 +191,28 @@
   align-items: center;
   gap: 0.35rem;
   height: 28px;
-  padding: 0 0.65rem;
-  background: var(--color-bg-subtle, #f8fafc);
-  border: 1px solid var(--color-border, #e2e8f0);
-  border-radius: 7px;
-  font-size: 0.75rem;
+  padding: 0 10px;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 0.74rem;
   font-weight: 500;
-  color: var(--color-text-primary, #334155);
+  color: #3c4043;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
   user-select: none;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 .atlas-search__filter-pill-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background: #f1f3f4;
+  border-color: #dadce0;
+  color: #202124;
 }
 .atlas-search__filter-pill-btn.active {
-  border-color: var(--color-primary, #003666);
-  color: var(--color-primary, #003666);
-  background: rgba(0, 54, 102, 0.06);
-  font-weight: 600;
+  border-color: #1a73e8;
+  color: #1a73e8;
+  background: #e8f0fe;
+  font-weight: 500;
 }
 .atlas-search__filter-pill-menu {
   position: absolute;

@@ -28,10 +28,17 @@ export default function MonographPreviewModal({
   version = null,
   updatedAtDate = null,
   isCosmetic = false,
+  initialTab = 'monograph',
 }) {
-  const [activeTab, setActiveTab] = useState('monograph'); // 'monograph' | 'shipping' | 'client'
+  const [activeTab, setActiveTab] = useState(initialTab || 'monograph');
   const [selectedLabelFormatId, setSelectedLabelFormatId] = useState(activeFormat?.id || availableFormats?.[0]?.id || 'vial');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   useEffect(() => {
     if (activeFormat?.id) {
@@ -122,7 +129,7 @@ export default function MonographPreviewModal({
   const presentationsList = hasFormatMatrix
     ? availableFormats.flatMap((fmt) => {
         const compatStrengths = sortedStrengths.filter((s) => !fmt.strengths || fmt.strengths.includes(s.id));
-        const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: 'Standard Dose' }];
+        const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: doseName }];
         const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
         const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet') || fmt.id.includes('oral');
         const isSpray = fmt.id.includes('spray') || fmt.id.includes('nasal');

@@ -17,6 +17,7 @@ import { db } from '../../../../firebase';
 import AppActionGroup from '../../../ui/AppActionGroup';
 import UnifiedItemWorkspaceDrawer from './UnifiedItemWorkspaceDrawer';
 import ExpandedProductRow from './ExpandedProductRow';
+import GenerateB2BShowcaseModal from '../modals/GenerateB2BShowcaseModal';
 
 export default function CatalogTableView({
   products = [],
@@ -38,6 +39,7 @@ export default function CatalogTableView({
 }) {
   const { user } = useAuth();
   const [drawerProduct, setDrawerProduct] = useState(null);
+  const [isShowcaseModalOpen, setIsShowcaseModalOpen] = useState(false);
 
   // Transform data based on flat vs grouped
   const displayData = useMemo(() => {
@@ -549,6 +551,14 @@ export default function CatalogTableView({
         onColumnToggle={handleColumnToggle}
         tableId={`catalogProducts_items_${matrixViewType}`}
         dense={true}
+        bulkActions={[
+          {
+            label: '✨ Mini-Website B2B',
+            icon: Sparkles,
+            variant: 'primary',
+            onClick: () => setIsShowcaseModalOpen(true)
+          }
+        ]}
       />
     </div>
     
@@ -561,6 +571,16 @@ export default function CatalogTableView({
         onSelectionChange={onSelectionChange}
       />
     )}
+
+    <GenerateB2BShowcaseModal
+      isOpen={isShowcaseModalOpen}
+      onClose={() => setIsShowcaseModalOpen(false)}
+      selectedProducts={(() => {
+        const idSet = new Set(selectedIds || parentSelectedIds || []);
+        const matched = products.filter(p => idSet.has(p.id) || (p.variants && p.variants.some(v => idSet.has(v.id))));
+        return matched.length > 0 ? matched : products.slice(0, 5);
+      })()}
+    />
     </>
   );
 }

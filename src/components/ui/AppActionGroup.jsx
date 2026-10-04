@@ -61,24 +61,25 @@ const ACTION_CONFIG = {
   qr: { icon: QrCode, label: 'Instant QR Code', color: '#7c3aed', hoverColor: '#6d28d9' }
 };
 
+// GCP Console UX: Clean, monochromatic neutral buttons with subtle semantic hover states
 const ACTION_THEMES = {
-  offers: { color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', hoverBg: '#e0f2fe', hoverBorder: '#7dd3fc' },
-  list: { color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', hoverBg: '#e0f2fe', hoverBorder: '#7dd3fc' },
-  sparkles: { color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', hoverBg: '#f3e8ff', hoverBorder: '#d8b4fe' },
-  enrich: { color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', hoverBg: '#f3e8ff', hoverBorder: '#d8b4fe' },
-  create_order: { color: '#059669', bg: '#f0fdf4', border: '#bbf7d0', hoverBg: '#dcfce7', hoverBorder: '#86efac' },
-  create_quote: { color: '#0ea5e9', bg: '#f0f9ff', border: '#bae6fd', hoverBg: '#e0f2fe', hoverBorder: '#7dd3fc' },
-  request_rfq: { color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe', hoverBg: '#e0e7ff', hoverBorder: '#a5b4fc' },
-  share: { color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', hoverBg: '#e0f2fe', hoverBorder: '#7dd3fc' },
-  whatsapp: { color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', hoverBg: '#dcfce7', hoverBorder: '#86efac' },
-  copy_link: { color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe', hoverBg: '#e0e7ff', hoverBorder: '#a5b4fc' },
-  extend_validity: { color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', hoverBg: '#e0f2fe', hoverBorder: '#7dd3fc' },
-  qr: { color: '#7c3aed', bg: '#faf5ff', border: '#e9d5ff', hoverBg: '#f3e8ff', hoverBorder: '#d8b4fe' },
-  clone: { color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', hoverBg: '#dbeafe', hoverBorder: '#93c5fd' },
-  view: { color: '#475569', bg: '#f8fafc', border: '#cbd5e1', hoverBg: '#f1f5f9', hoverBorder: '#94a3b8' },
-  edit: { color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd', hoverBg: '#e0f2fe', hoverBorder: '#7dd3fc' },
-  delete: { color: '#dc2626', bg: '#fef2f2', border: '#fecaca', hoverBg: '#fee2e2', hoverBorder: '#fca5a5' },
-  archive: { color: '#d97706', bg: '#fffbeb', border: '#fde68a', hoverBg: '#fef3c7', hoverBorder: '#fcd34d' },
+  offers: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  list: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  sparkles: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f8f9fa', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  enrich: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f8f9fa', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  create_order: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#e6f4ea', hoverBorder: '#ceead6', hoverColor: '#137333' },
+  create_quote: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  request_rfq: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  share: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  whatsapp: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#e6f4ea', hoverBorder: '#ceead6', hoverColor: '#137333' },
+  copy_link: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  extend_validity: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  qr: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  clone: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  view: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#202124' },
+  edit: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#f1f3f4', hoverBorder: '#dadce0', hoverColor: '#1a73e8' },
+  delete: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#fce8e6', hoverBorder: '#fad2cf', hoverColor: '#c5221f' },
+  archive: { color: '#5f6368', bg: '#ffffff', border: '#dadce0', hoverBg: '#fef7e0', hoverBorder: '#feefc3', hoverColor: '#b06000' },
 };
 
 export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
@@ -198,21 +199,20 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
         }}
         title={label}
         style={{
-          width: '32px',
-          height: '32px',
-          minWidth: '32px',
-          minHeight: '32px',
+          width: '30px',
+          height: '30px',
+          minWidth: '30px',
+          minHeight: '30px',
           flexShrink: 0,
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           background: bg,
           border: `1px solid ${border}`,
-          borderRadius: '7px',
+          borderRadius: '4px',
           color: color,
           cursor: 'pointer',
-          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-          transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'background-color 0.15s, border-color 0.15s, color 0.15s',
           padding: 0,
           margin: 0
         }}
@@ -220,18 +220,14 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
           e.currentTarget.style.backgroundColor = hoverBg;
           e.currentTarget.style.borderColor = hoverBorder;
           e.currentTarget.style.color = hoverColor;
-          e.currentTarget.style.transform = 'translateY(-1px)';
-          e.currentTarget.style.boxShadow = '0 3px 6px -1px rgba(0, 0, 0, 0.08)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = bg;
           e.currentTarget.style.borderColor = border;
           e.currentTarget.style.color = color;
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
         }}
       >
-        <Icon size={15} strokeWidth={2} />
+        <Icon size={15} strokeWidth={1.8} />
       </button>
     );
   };
@@ -239,7 +235,7 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
   return (
     <div style={{
       display: 'inline-flex',
-      gap: '5px',
+      gap: '4px',
       alignItems: 'center',
       justifyContent: 'flex-end',
       position: 'relative',
@@ -254,42 +250,37 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
             onClick={toggleMenu}
             title="More actions"
             style={{
-              width: '32px',
-              height: '32px',
-              minWidth: '32px',
-              minHeight: '32px',
+              width: '30px',
+              height: '30px',
+              minWidth: '30px',
+              minHeight: '30px',
               flexShrink: 0,
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: menuOpen ? '#f1f5f9' : '#ffffff',
-              border: `1px solid ${menuOpen ? '#94a3b8' : '#cbd5e1'}`,
-              borderRadius: '7px',
-              color: menuOpen ? '#0f172a' : '#64748b',
+              background: menuOpen ? '#f1f3f4' : '#ffffff',
+              border: `1px solid ${menuOpen ? '#5f6368' : '#dadce0'}`,
+              borderRadius: '4px',
+              color: menuOpen ? '#202124' : '#5f6368',
               cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-              transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'background-color 0.15s, border-color 0.15s, color 0.15s',
               padding: 0,
               margin: 0
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9';
-              e.currentTarget.style.borderColor = '#94a3b8';
-              e.currentTarget.style.color = '#0f172a';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 3px 6px -1px rgba(0, 0, 0, 0.08)';
+              e.currentTarget.style.backgroundColor = '#f1f3f4';
+              e.currentTarget.style.borderColor = '#dadce0';
+              e.currentTarget.style.color = '#202124';
             }}
             onMouseLeave={(e) => {
               if (!menuOpen) {
                 e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#cbd5e1';
-                e.currentTarget.style.color = '#64748b';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.color = '#5f6368';
               }
             }}
           >
-            <MoreHorizontal size={16} strokeWidth={2.2} />
+            <MoreHorizontal size={15} strokeWidth={1.8} />
           </button>
 
           {/* Desktop Popover */}

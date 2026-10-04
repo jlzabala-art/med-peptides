@@ -67,19 +67,20 @@ export default function MetricCard({
             className="metric-card-icon-wrapper"
             style={{ 
               position: 'relative', 
-              width: '40px', 
-              height: '40px',
-              borderRadius: '10px',
+              width: '38px', 
+              height: '38px',
+              borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              backgroundColor: `${color}18`,
-              color: color,
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              color: '#1e293b',
               overflow: 'hidden'
             }}
           >
-            <Icon size={20} style={{ flexShrink: 0, zIndex: 1 }} />
+            <Icon size={18} style={{ flexShrink: 0, zIndex: 1 }} />
           </div>
         ) : <div />}
 

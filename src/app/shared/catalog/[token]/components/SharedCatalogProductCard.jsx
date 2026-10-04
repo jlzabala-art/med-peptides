@@ -296,6 +296,7 @@ export default function SharedCatalogProductCard({
             const showUnits = packagingMode === 'all' || packagingMode === 'units';
             const showKits = (packagingMode === 'all' || packagingMode === 'kits') && kitDisplayPrice > 0;
             const kitsInCart = Math.floor((cart[v.id]?.quantity || 0) / 10);
+            const unitSingular = (v.presentation || prod.dosageForm || 'unit').toLowerCase();
 
             return (
               <div

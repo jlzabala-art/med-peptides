@@ -200,15 +200,21 @@ export default function SearchableDropdown({
           title="Click to select"
           onMouseEnter={(e) => {
             if (disabled) return;
-            e.currentTarget.style.backgroundColor = 'var(--color-bg-subtle, #f1f5f9)';
+            e.currentTarget.style.backgroundColor = 'var(--color-bg-subtle, #f1f3f4)';
             const icon = e.currentTarget.querySelector('.edit-icon');
-            if (icon) icon.style.opacity = '1';
+            if (icon) {
+              icon.style.opacity = '1';
+              icon.style.color = '#1a73e8';
+            }
           }}
           onMouseLeave={(e) => {
             if (disabled) return;
             e.currentTarget.style.backgroundColor = 'transparent';
             const icon = e.currentTarget.querySelector('.edit-icon');
-            if (icon) icon.style.opacity = '0.7';
+            if (icon) {
+              icon.style.opacity = '0.25';
+              icon.style.color = '#5f6368';
+            }
           }}
         >
           <span 
@@ -225,7 +231,7 @@ export default function SearchableDropdown({
           >
             {!displayLabel ? <span style={{ color: 'var(--text-muted, #94a3b8)' }}>{placeholder}</span> : displayLabel}
           </span>
-          <span className="edit-icon" style={{ opacity: 0.7, transition: 'opacity 0.2s', color: 'var(--color-primary)', flexShrink: 0 }}>
+          <span className="edit-icon" style={{ opacity: 0.25, transition: 'opacity 0.15s, color 0.15s', color: '#5f6368', flexShrink: 0 }}>
             <Edit2 size={12} />
           </span>
         </div>

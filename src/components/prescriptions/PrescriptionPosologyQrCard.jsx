@@ -51,60 +51,60 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
   const steps = posology.applicationSteps || [
     {
       step: 1,
-      title: 'Preparación del Cuero Cabelludo',
-      timing: 'Noche (21:30 - 22:00)',
-      instruction: 'Asegurarse de que el cuero cabelludo esté completamente limpio y seco. Separar el cabello en líneas de 1-2 cm sobre las áreas con menor densidad.'
+      title: 'Scalp Preparation',
+      timing: 'Night (21:30 - 22:00)',
+      instruction: 'Ensure scalp is clean and thoroughly dry. Part hair in 1-2 cm sections across lower-density target areas.'
     },
     {
       step: 2,
-      title: 'Dosificación de Precisión (1.0 ml)',
-      timing: 'Dosis Diaria Exacta',
-      instruction: 'Extraer exactamente 1.0 ml con la pipeta graduada. Dosis superiores saturan los receptores foliculares sin aportar beneficio adicional.'
+      title: 'Precision Dosing (1.0 ml)',
+      timing: 'Exact Daily Dose',
+      instruction: 'Draw exactly 1.0 ml using the calibrated pipette. Exceeding recommended dose saturates follicular receptors without clinical benefit.'
     },
     {
       step: 3,
-      title: 'Aplicación Gota a Gota en Raíz',
-      timing: 'Contacto Dérmico',
-      instruction: 'Depositar las gotas directamente en contacto con la piel del cuero cabelludo (no sobre el tallo del cabello), distribuyendo uniformemente.'
+      title: 'Root-Targeted Drop Application',
+      timing: 'Dermal Contact',
+      instruction: 'Apply drops directly onto the scalp surface (avoiding hair shaft), distributing evenly across target zones.'
     },
     {
       step: 4,
-      title: 'Masaje de Microcirculación',
-      timing: '60 - 90 Segundos',
-      instruction: 'Efectuar un masaje circular suave con la yema de los dedos para activar el flujo vascular y optimizar la penetración transdérmica liposomal.'
+      title: 'Microcirculation Massage',
+      timing: '60 - 90 Seconds',
+      instruction: 'Perform gentle circular massage with fingertips to stimulate microvascular flow and optimize liposomal transdermal absorption.'
     },
     {
       step: 5,
-      title: 'Tiempo de Acción Nocturno',
-      timing: '6 a 8 Horas Continuas',
-      instruction: 'Dejar actuar durante el descanso nocturno. Dejar secar al aire sin usar calor directo de secador. Lavar las manos con agua y jabón tras aplicar.'
+      title: 'Overnight Action Period',
+      timing: '6 to 8 Continuous Hours',
+      instruction: 'Leave on during overnight rest. Allow to air dry without direct heat from hair dryers. Wash hands thoroughly with soap after application.'
     },
     {
       step: 6,
-      title: 'Higiene Matutina',
-      timing: 'A la mañana siguiente',
-      instruction: 'Lavar el cabello a la mañana siguiente con un champú neutro suave (pH 5.5 sin sulfatos agresivos).'
+      title: 'Morning Cleansing',
+      timing: 'Next Morning',
+      instruction: 'Wash hair the following morning with a mild, gentle neutral shampoo (pH 5.5, sulfate-free).'
     }
   ];
 
   const timeline = posology.timeline || [
     {
-      phase: 'Semanas 1 - 3',
-      title: 'Fase de Adaptación & Estabilización',
-      badge: 'Mes 1',
-      description: 'Frenado de la caída telógena activa. Posible leve caída transitoria (shedding fisiológico) al expulsar cabellos viejos para dar paso a la fase anágena.'
+      phase: 'Weeks 1 - 3',
+      title: 'Adaptation & Stabilization Phase',
+      badge: 'Month 1',
+      description: 'Arresting active telogen shedding. Mild temporary shedding may occur as old telogen hairs cycle out to initiate active anagen growth.'
     },
     {
-      phase: 'Semanas 4 - 8',
-      title: 'Activación Anágena & Proliferación',
-      badge: 'Mes 2',
-      description: 'Reactivación celular de la papila dérmica por IGrantine-F1™ y control androgénico por 17-α-Estradiol. Reducción notoria de caída en lavado.'
+      phase: 'Weeks 4 - 8',
+      title: 'Anagen Activation & Proliferation',
+      badge: 'Month 2',
+      description: 'Dermal papilla cellular stimulation via IGrantine-F1™ and androgenic control via 17-α-Estradiol. Noticeable reduction in wash shedding.'
     },
     {
-      phase: 'Semanas 9 - 12',
-      title: 'Engrosamiento, Densidad & Consolidación',
-      badge: 'Mes 3',
-      description: 'Incremento del calibre folicular y mayor cobertura visual. Finalización de los 3 frascos (300 ml). Revisión clínica con la Dra. Hanieh Erdmann.'
+      phase: 'Weeks 9 - 12',
+      title: 'Hair Caliber, Density & Consolidation',
+      badge: 'Month 3',
+      description: 'Follicular diameter increase and enhanced visual scalp coverage. Completion of 3-vial course (300 ml). Clinical evaluation with prescriber.'
     }
   ];
 
@@ -143,15 +143,19 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
         downloadLink.click();
       };
       img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-      toast.success('Código QR descargado ✓');
+      toast.success('QR Code downloaded ✓');
     } catch (err) {
       console.warn('[PrescriptionPosologyQrCard] Download error:', err);
     }
   };
 
-  const patientName = rx.patient?.name || rx.patientName || 'Paciente';
+  const patientName = typeof rx.patient === 'object' && rx.patient !== null
+    ? (rx.patient.name || rx.patient.displayName || rx.patient.email || rx.patientName || 'Patient')
+    : (rx.patientName || (typeof rx.patient === 'string' ? rx.patient : '') || 'Patient');
   const patientAlias = rx.patientAlias || rx.patient?.alias ? ` (~${rx.patientAlias || rx.patient?.alias})` : '';
-  const doctorName = rx.doctorName || rx.doctor?.name || 'Dra. Hanieh Erdmann';
+  const doctorName = typeof rx.doctor === 'object' && rx.doctor !== null
+    ? (rx.doctor.name || rx.doctor.displayName || rx.doctorName || 'Dr. Hanieh Erdmann')
+    : (rx.doctorName || (typeof rx.doctor === 'string' ? rx.doctor : '') || 'Dr. Hanieh Erdmann');
 
   // Dynamic formula & posology extraction
   const rawItems = rx.items || rx.compounds || [];
@@ -165,21 +169,21 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
       });
     const vehicle = rawItems.find(i => i.itemType === 'vehicle_base');
     const activeStr = activeItems.length > 0 ? activeItems.join(' + ') : rawItems.map(i => i.name).join(' + ');
-    formulaText = vehicle ? `${activeStr} en ${vehicle.name}` : activeStr;
+    formulaText = vehicle ? `${activeStr} in ${vehicle.name}` : activeStr;
     if (rx.structuredPosology?.packLabel) {
       formulaText += ` (${rx.structuredPosology.packLabel})`;
     }
   }
-  const posologyText = rx.structuredPosology?.summary || rx.posology || rx.dosageSchedule || 'Aplicar según pauta médica indicada.';
+  const posologyText = rx.structuredPosology?.summary || rx.posology || rx.dosageSchedule || 'Apply according to medical indication.';
 
   const shareTextWhatsApp = encodeURIComponent(
-    `*Atlas Health — Ficha Técnica y Posología Médica*\n` +
-    `📋 *Prescripción:* ${rxId}\n` +
-    `👤 *Paciente:* ${patientName}${patientAlias}\n` +
-    `🩺 *Médica Prescriptora:* ${doctorName}\n` +
-    `🧪 *Fórmula:* ${formulaText}\n` +
-    `🕒 *Posología:* ${posologyText}\n\n` +
-    `🔗 *Ver Ficha Digital Completa & Verificación:*\n${publicUrl}`
+    `*Atlas Health — Clinical Dossier & Medical Posology*\n` +
+    `📋 *Prescription:* ${rxId}\n` +
+    `👤 *Patient:* ${patientName}${patientAlias}\n` +
+    `🩺 *Prescribing Physician:* ${doctorName}\n` +
+    `🧪 *Formula:* ${formulaText}\n` +
+    `🕒 *Posology:* ${posologyText}\n\n` +
+    `🔗 *View Full Digital Dossier & Verification:*\n${publicUrl}`
   );
 
   return (
@@ -210,10 +214,10 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
             </div>
             <div>
               <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-                Guía de Posología & Modo de Aplicación
+                Posology Guide & Administration Protocol
               </h4>
               <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
-                Protocolo clínico personalizado — Curso terapéutico de 90 días (N3)
+                Personalized Clinical Protocol — 90-Day Therapeutic Course (N3)
               </p>
             </div>
           </div>
@@ -228,7 +232,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               fontWeight: 700,
               color: '#15803d'
             }}>
-              1.0 ml / Noche (Tópico)
+              1.0 ml / Night (Topical)
             </span>
             <span style={{
               padding: '3px 8px',
@@ -260,10 +264,10 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               <span style={{ fontSize: '1.1rem' }}>⏰</span>
               <div>
                 <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>
-                  Alerta Preventiva de Reposición (15 Días Antes de Agotar Producto)
+                  Preventive Refill Alert (15 Days Before Exhaustion)
                 </span>
                 <span style={{ display: 'inline-block', marginLeft: '6px', fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px', background: '#dcfce7', color: '#15803d' }}>
-                  ✓ ACTIVA & PROGRAMADA
+                  ✓ ACTIVE & SCHEDULED
                 </span>
               </div>
             </div>
@@ -272,7 +276,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               type="button"
               onClick={async () => {
                 triggerHaptic('impact');
-                const tId = toast.loading('Enviando alerta de prueba...');
+                const tId = toast.loading('Sending test alert...');
                 try {
                   const res = await fetch('/api/prescriptions/refill-alerts', {
                     method: 'POST',
@@ -281,9 +285,9 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                   });
                   const json = await res.json();
                   if (json.success) {
-                    toast.success('Alerta enviada al Médico y Administrador ✓', { id: tId });
+                    toast.success('Alert sent to Doctor and Administrator ✓', { id: tId });
                   } else {
-                    toast.error(json.error || 'Error al emitir alerta', { id: tId });
+                    toast.error(json.error || 'Failed to dispatch alert', { id: tId });
                   }
                 } catch (err) {
                   toast.error(err.message, { id: tId });
@@ -304,25 +308,25 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               }}
             >
               <span>🔔</span>
-              <span>Probar / Notificar Ahora</span>
+              <span>Test / Notify Now</span>
             </button>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.5rem', fontSize: '0.75rem', marginTop: '2px' }}>
             <div style={{ background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Inicio Tratamiento</div>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Treatment Start</div>
               <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>15 Sep 2026</div>
             </div>
             <div style={{ background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Duración Total</div>
-              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>90 Días (3 Frascos)</div>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Total Duration</div>
+              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>90 Days (3 Vials)</div>
             </div>
             <div style={{ background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Fin Estimado</div>
-              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>14 Dic 2026</div>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Estimated End</div>
+              <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '1px' }}>14 Dec 2026</div>
             </div>
             <div style={{ background: '#fef3c7', padding: '0.45rem 0.65rem', borderRadius: '6px', border: '1px solid #fde68a' }}>
-              <div style={{ fontSize: '0.66rem', color: '#92400e', fontWeight: 800, textTransform: 'uppercase' }}>🔔 Disparo Alerta (-15d)</div>
+              <div style={{ fontSize: '0.66rem', color: '#92400e', fontWeight: 800, textTransform: 'uppercase' }}>🔔 Alert Trigger (-15d)</div>
               <div style={{ fontWeight: 800, color: '#b45309', marginTop: '1px' }}>29 Nov 2026</div>
             </div>
           </div>
@@ -396,7 +400,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem' }}>
             <Activity size={16} color="#0d9488" />
             <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Cronograma de Respuesta Biológica (90 Días)
+              Biological Response Timeline (90 Days)
             </h5>
           </div>
 
@@ -444,11 +448,11 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
               <ShieldCheck size={16} color="#16a34a" />
               <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Acceso Clínico & Verificación QR
+                Clinical Access & QR Verification
               </span>
             </div>
             <p style={{ margin: '0 0 1rem', fontSize: '0.73rem', color: '#64748b' }}>
-              Escanee para acceder a la ficha digital, posología interactiva y recetas adjuntas
+              Scan to access digital dossier, interactive posology schedule, and attached prescriptions
             </p>
           </div>
 
@@ -464,7 +468,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               cursor: 'pointer',
               position: 'relative'
             }}
-            title="Click para ampliar el código QR"
+            title="Click to enlarge QR code"
           >
             <QRCodeSVG 
               id={`qr-prescription-${rxId}`}
@@ -508,7 +512,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                 }}
               >
                 {copied ? <Check size={14} color="#15803d" /> : <Copy size={14} />}
-                <span>{copied ? 'Copiado' : 'Copiar URL'}</span>
+                <span>{copied ? 'Copied' : 'Copy URL'}</span>
               </button>
 
               <button
@@ -530,7 +534,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                 }}
               >
                 <Download size={14} />
-                <span>Bajar QR</span>
+                <span>Download QR</span>
               </button>
             </div>
 
@@ -556,7 +560,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               }}
             >
               <Share2 size={14} />
-              <span>Compartir por WhatsApp</span>
+              <span>Share via WhatsApp</span>
             </a>
 
             {/* View Public Dossier Link */}
@@ -576,7 +580,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                 marginTop: '2px'
               }}
             >
-              <span>Abrir Ficha Pública Verificada</span>
+              <span>Open Verified Public Dossier</span>
               <ExternalLink size={11} />
             </a>
           </div>
@@ -596,11 +600,11 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FileText size={16} color="#6366f1" />
               <h5 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Documentos Clínicos Oficiales ({docs.length})
+                Official Clinical Documents ({docs.length})
               </h5>
             </div>
             <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700, background: '#f0fdf4', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-              Verificados ✓
+              Verified ✓
             </span>
           </div>
 
@@ -621,10 +625,10 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
               >
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {doc.title || doc.name || `Documento ${dIdx + 1}`}
+                    {doc.title || doc.name || `Document ${dIdx + 1}`}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
-                    {doc.type?.includes('pdf') || doc.url?.endsWith('.pdf') ? '📄 PDF Oficial Firmado' : '🖼️ Plantilla Fagron TrichoTest'}
+                    {doc.type?.includes('pdf') || doc.url?.endsWith('.pdf') ? '📄 Official Signed PDF' : '🖼️ Fagron TrichoTest Template'}
                   </div>
                 </div>
 
@@ -653,7 +657,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                     }}
                   >
                     <Eye size={12} />
-                    <span>Ver</span>
+                    <span>View</span>
                   </button>
 
                   {doc.url && (
@@ -671,7 +675,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                         alignItems: 'center',
                         textDecoration: 'none'
                       }}
-                      title="Descargar archivo original"
+                      title="Download original file"
                     >
                       <Download size={12} />
                     </a>
@@ -713,7 +717,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
             }}
           >
             <h3 style={{ margin: '0 0 0.5rem', color: '#0f172a', fontWeight: 800, fontSize: '1.1rem' }}>
-              Código QR de Prescripción
+              Prescription QR Code
             </h3>
             <p style={{ margin: '0 0 1.5rem', color: '#64748b', fontSize: '0.8rem' }}>
               {rxId} · {patientName}
@@ -751,7 +755,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                   cursor: 'pointer'
                 }}
               >
-                Descargar PNG
+                Download PNG
               </button>
               <button
                 type="button"
@@ -767,7 +771,7 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
                   cursor: 'pointer'
                 }}
               >
-                Cerrar
+                Close
               </button>
             </div>
           </div>

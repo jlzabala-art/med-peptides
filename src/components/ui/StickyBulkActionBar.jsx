@@ -2,18 +2,19 @@
 
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X, CheckSquare, Sparkles } from '@/lib/icons';
+import { X } from '@/lib/icons';
 
 /**
  * StickyBulkActionBar
  * ─────────────────────────────────────────────────────────────────────────────
- * Modern floating bottom action bar for desktop & bottom-dock for mobile.
+ * Google Cloud Console Standard Floating Bulk Action Toolbar.
  * Floats anchored at the bottom of the viewport whenever items are selected,
- * guaranteeing bulk actions are ALWAYS accessible without cluttering the table header.
+ * guaranteeing bulk actions are ALWAYS accessible without cluttering the table.
  * 
  * Complies with AGENTS.md Golden Rules:
  * - Golden Rule #23: Mobile-first UX compatibility with touch targets >= 44px
- * - Golden Rule #8 & #15: Clean dark GCP-style floating elevation
+ * - Golden Rule #39: Homogeneous GCP button styling (gcp-btn-secondary / GCP white toolbar)
+ * - Strict single-line horizontal alignment (no wrapping, smooth horizontal scroll)
  */
 export default function StickyBulkActionBar({
   selectedCount = 0,
@@ -31,21 +32,20 @@ export default function StickyBulkActionBar({
 }) {
   if (selectedCount === 0 || typeof window === 'undefined') return null;
 
-  const primaryActions = bulkActions.slice(0, 4);
   const showTotalityOption = totalItems > selectedCount && typeof onToggleSelectAllMatching === 'function';
 
   return createPortal(
     <div
       role="toolbar"
-      aria-label="Bulk actions bar"
+      aria-label="Bulk actions toolbar"
       className="sticky-bulk-action-bar"
     >
       <style>{`
-        @keyframes slideUpBounce {
-          from { transform: translate(-50%, 100%); opacity: 0; }
+        @keyframes slideUpGcp {
+          from { transform: translate(-50%, 20px); opacity: 0; }
           to { transform: translate(-50%, 0); opacity: 1; }
         }
-        @keyframes slideUpMobile {
+        @keyframes slideUpMobileGcp {
           from { transform: translateY(100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
@@ -57,16 +57,60 @@ export default function StickyBulkActionBar({
           transform: translateX(-50%);
           z-index: 9990;
           display: flex;
-          alignItems: center;
+          align-items: center;
           gap: 0.75rem;
-          padding: 0.5rem 1rem;
-          background-color: #0f172a;
-          color: #ffffff;
-          border-radius: 12px;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-          border: ${isAllMatchingSelected ? '1px solid #10b981' : '1px solid #334155'};
-          animation: slideUpBounce 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          max-width: 92vw;
+          padding: 6px 12px;
+          background-color: #ffffff;
+          color: #202124;
+          border-radius: 8px;
+          box-shadow: 0 4px 16px rgba(60, 64, 67, 0.18), 0 1px 3px rgba(60, 64, 67, 0.12);
+          border: ${isAllMatchingSelected ? '1px solid #16a34a' : '1px solid #dadce0'};
+          animation: slideUpGcp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          max-width: 94vw;
+          flex-wrap: nowrap;
+          white-space: nowrap;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .sticky-bulk-top-row {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-shrink: 0;
+        }
+
+        .sticky-bulk-badge {
+          background-color: ${isAllMatchingSelected ? '#dcfce7' : '#e8f0fe'};
+          color: ${isAllMatchingSelected ? '#15803d' : '#1967d2'};
+          font-size: 0.8125rem;
+          font-weight: 700;
+          padding: 3px 8px;
+          border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          border: 1px solid ${isAllMatchingSelected ? '#86efac' : '#c2e7ff'};
+        }
+
+        .sticky-bulk-label {
+          font-size: 0.8125rem;
+          font-weight: 500;
+          color: #3c4043;
+        }
+
+        .sticky-bulk-separator {
+          width: 1px;
+          height: 22px;
+          background-color: #dadce0;
+          flex-shrink: 0;
+          margin: 0 2px;
+        }
+
+        .sticky-bulk-actions-scroll {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           flex-wrap: nowrap;
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
@@ -75,32 +119,59 @@ export default function StickyBulkActionBar({
         .sticky-bulk-action-btn {
           display: inline-flex;
           align-items: center;
-          gap: 0.45rem;
-          padding: 0.4rem 0.85rem;
-          border-radius: 7px;
-          background-color: #1e293b;
-          border: 1px solid #475569;
-          color: #f1f5f9;
-          font-size: 0.78rem;
-          font-weight: 600;
+          gap: 6px;
+          padding: 0 12px;
+          height: 32px;
+          border-radius: 4px;
+          background-color: #ffffff;
+          border: 1px solid #dadce0;
+          color: #3c4043;
+          font-size: 0.8125rem;
+          font-weight: 500;
           cursor: pointer;
           white-space: nowrap;
           transition: all 0.15s ease;
-          min-height: 34px;
+          flex-shrink: 0;
         }
         .sticky-bulk-action-btn:hover {
-          background-color: #334155;
-          border-color: #64748b;
-          color: #ffffff;
+          background-color: #f8f9fa;
+          border-color: #dadce0;
+          color: #202124;
+          box-shadow: 0 1px 2px rgba(60, 64, 67, 0.25);
         }
+
         .sticky-bulk-action-btn.primary {
-          background-color: #0284c7;
-          border-color: #0369a1;
+          background-color: #1a73e8;
+          border-color: #1a73e8;
           color: #ffffff;
-          box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+          font-weight: 600;
+          box-shadow: 0 1px 3px rgba(26, 115, 232, 0.3);
         }
         .sticky-bulk-action-btn.primary:hover {
-          background-color: #0369a1;
+          background-color: #174ea6;
+          border-color: #174ea6;
+          color: #ffffff;
+          box-shadow: 0 2px 4px rgba(26, 115, 232, 0.4);
+        }
+
+        .sticky-bulk-clear-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background-color: transparent;
+          border: none;
+          color: #5f6368;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          padding: 0;
+          margin-left: 2px;
+        }
+        .sticky-bulk-clear-btn:hover {
+          background-color: #f1f3f4;
+          color: #202124;
         }
 
         /* ── Mobile Layout (< 768px) ─────────────────────────────────── */
@@ -112,10 +183,10 @@ export default function StickyBulkActionBar({
             transform: none !important;
             width: 100% !important;
             max-width: 100% !important;
-            border-radius: 16px 16px 0 0 !important;
-            padding: 10px 14px max(14px, env(safe-area-inset-bottom, 14px)) 14px !important;
-            animation: slideUpMobile 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-            box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.35) !important;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 8px 12px max(12px, env(safe-area-inset-bottom, 12px)) 12px !important;
+            animation: slideUpMobileGcp 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            box-shadow: 0 -4px 16px rgba(60, 64, 67, 0.18) !important;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -129,44 +200,36 @@ export default function StickyBulkActionBar({
             width: 100%;
           }
 
+          .sticky-bulk-separator {
+            display: none;
+          }
+
           .sticky-bulk-actions-scroll {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
             padding-bottom: 2px;
+            gap: 8px;
           }
 
           .sticky-bulk-action-btn {
-            min-height: 42px !important;
-            padding: 0.5rem 0.95rem !important;
-            font-size: 0.82rem !important;
-            flex-shrink: 0;
+            height: 38px !important;
+            padding: 0 14px !important;
+            font-size: 0.8125rem !important;
           }
         }
       `}</style>
 
-      {/* Mobile Top Row / Desktop Inline Badge & Scope Switcher */}
-      <div className="sticky-bulk-top-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{
-            backgroundColor: isAllMatchingSelected ? '#059669' : '#0284c7',
-            color: '#ffffff',
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            padding: '2px 8px',
-            borderRadius: '6px'
-          }}>
-            {isAllMatchingSelected ? `All ${totalItems || selectedCount}` : selectedCount}
-          </span>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0' }}>
-            {isAllMatchingSelected && totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : 'selected'}
-          </span>
-        </div>
+      {/* GCP Selection Indicator & Scope Switcher */}
+      <div className="sticky-bulk-top-row">
+        <span className="sticky-bulk-badge">
+          {isAllMatchingSelected ? `All ${totalItems || selectedCount}` : selectedCount}
+        </span>
+        <span className="sticky-bulk-label">
+          {isAllMatchingSelected && totalVariants > 0
+            ? `(${totalVariants} ${variantNoun}) selected`
+            : `selected`}
+        </span>
 
-        {/* Totality Toggle Button in Sticky Bar */}
+        {/* Totality Toggle (GCP Standard) */}
         {isAllMatchingSelected ? (
           <button
             type="button"
@@ -175,13 +238,13 @@ export default function StickyBulkActionBar({
               onToggleSelectAllMatching?.(false);
             }}
             style={{
-              backgroundColor: '#1e293b',
-              border: '1px solid #475569',
-              color: '#94a3b8',
-              fontSize: '0.72rem',
+              backgroundColor: '#f1f3f4',
+              border: '1px solid #dadce0',
+              color: '#3c4043',
+              fontSize: '0.75rem',
               fontWeight: 600,
-              padding: '2px 7px',
-              borderRadius: '5px',
+              padding: '2px 8px',
+              borderRadius: '4px',
               cursor: 'pointer',
               whiteSpace: 'nowrap'
             }}
@@ -197,42 +260,29 @@ export default function StickyBulkActionBar({
               onToggleSelectAllMatching?.(true);
             }}
             style={{
-              backgroundColor: '#047857',
-              border: '1px solid #059669',
-              color: '#ffffff',
-              fontSize: '0.72rem',
-              fontWeight: 700,
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #86efac',
+              color: '#15803d',
+              fontSize: '0.75rem',
+              fontWeight: 600,
               padding: '2px 8px',
-              borderRadius: '5px',
+              borderRadius: '4px',
               cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'background 0.15s ease'
+              whiteSpace: 'nowrap'
             }}
             title={`Select all ${totalItems} items matching filters`}
           >
-            ⚡ All {totalItems} {totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : ''}
+            Select all {totalItems} {totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : ''}
           </button>
         ) : null}
 
-        {/* Clear selection X on mobile top row */}
+        {/* Clear selection X button */}
         {onClearSelection && (
           <button
             type="button"
             onClick={onClearSelection}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '26px',
-              height: '26px',
-              borderRadius: '50%',
-              backgroundColor: '#1e293b',
-              border: '1px solid #334155',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              marginLeft: 'auto'
-            }}
-            title="Clear selection"
+            className="sticky-bulk-clear-btn"
+            title="Deselect all"
           >
             <X size={14} />
           </button>
@@ -240,16 +290,16 @@ export default function StickyBulkActionBar({
       </div>
 
       {/* Separator on Desktop */}
-      <div className="desktop-separator" style={{ width: '1px', height: '18px', backgroundColor: '#334155' }} />
+      <div className="sticky-bulk-separator" />
 
-      {/* Action Buttons (Horizontally scrollable on Mobile) */}
+      {/* Action Buttons (Strictly single horizontal row, scrollable on overflow) */}
       <div className="sticky-bulk-actions-scroll">
         {renderBatchActions && bulkActions.length === 0 ? (
           renderBatchActions(selectedIds)
         ) : (
-          primaryActions.map((action, idx) => {
+          bulkActions.map((action, idx) => {
             const IconComp = action.icon;
-            const isPrimary = idx === 0;
+            const isPrimary = action.variant === 'primary' || action.isPrimary;
             return (
               <button
                 key={idx}

@@ -29,11 +29,7 @@ export default function PageFooter({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {selectedCount > 0 ? (
-          <span style={{ fontWeight: 600, color: 'var(--color-primary, #0f172a)' }}>
-            {selectedCount} item{selectedCount !== 1 ? 's' : ''} selected
-          </span>
-        ) : lastUpdated ? (
+        {lastUpdated ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>Last synced: {lastUpdated}</span>
             {onRefresh && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
   Building2, 
@@ -48,11 +48,15 @@ import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
 import PublicStickyActionBar from '@/components/shared/PublicStickyActionBar';
 import PrescriptionDetailSidebar from '@/components/prescription/PrescriptionDetailSidebar';
 import { detectFagronGenomicsTest } from '@/data/fagronGenomicsTests';
+import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { getFagronClinicalMonograph, checkDosageSafety } from '@/data/fagronClinicalMonographs';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
 import '@/styles/publicDesignSystem.css';
 import './publicPrescriptionMobile.css';
+import MultiPartOverview from './MultiPartOverview';
+import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
+import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -74,14 +78,27 @@ const PUBLIC_RX_STYLES = `
   }
 
   @media (max-width: 768px) {
+    .gcp-subtabs-strip {
+      display: none !important;
+    }
     .mobile-floating-action-bar {
-      display: flex !important;
+      display: none !important;
     }
     .pds-content-with-sidebar {
-      padding-bottom: 80px !important;
+      padding-bottom: 70px !important;
     }
   }
 `;
+
+// Helper to safely extract string posology from either string or structured object
+function getPosologyText(pos) {
+  if (!pos) return '';
+  if (typeof pos === 'string') return pos;
+  if (typeof pos === 'object') {
+    return pos.regimen || pos.summary || pos.timing || pos.notes || pos.text || '';
+  }
+  return String(pos);
+}
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake = null }) {
   const [lang, setLang] = useState('en');
@@ -92,11 +109,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
   const [activeGcpTab, setActiveGcpTab] = useState('all'); // 'all' | 'formulations' | 'genomics' | 'posology' | 'traceability'
   const [expandedSections, setExpandedSections] = useState({
+    overview: true,
     formulations: true,
     posology: true,
     traceability: true,
     genomics: true
   });
+  const [selectedPhase, setSelectedPhase] = useState('all'); // 'all' | 'formulation-0' | 'formulation-1' | 'formulation-2'
+  const [expandedPhases, setExpandedPhases] = useState({
+    'formulation-0': true,
+    'formulation-1': true,
+    'formulation-2': true,
+    'formulation-3': true
+  });
+  const [showLabelsModal, setShowLabelsModal] = useState(false);
+  const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
+
+  const prescriptionLabels = React.useMemo(() => {
+    return getPharmapolisLabelsForPrescription(rx);
+  }, [rx]);
+
+  const togglePhase = (id) => {
+    setExpandedPhases(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const toggleSection = (key) => {
     setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -104,19 +139,31 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   const expandAllSections = () => {
     setExpandedSections({
+      overview: true,
       formulations: true,
       posology: true,
       traceability: true,
       genomics: true
     });
+    setExpandedPhases({
+      'formulation-0': true,
+      'formulation-1': true,
+      'formulation-2': true
+    });
   };
 
   const collapseAllSections = () => {
     setExpandedSections({
+      overview: false,
       formulations: false,
       posology: false,
       traceability: false,
       genomics: false
+    });
+    setExpandedPhases({
+      'formulation-0': false,
+      'formulation-1': false,
+      'formulation-2': false
     });
   };
 
@@ -170,12 +217,25 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateMiguelAngel);
 
   const treatingDoc = hasTreatingDoctor ? rawCandidate : {};
-  const doctorName = treatingDoc.name || '';
-  const clinic = treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice'));
-  const doctorSpecialty = treatingDoc.specialty || (hasTreatingDoctor ? (isEs ? 'Médico Especialista' : 'Physician Consultant') : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice'));
-  const doctorAddress = treatingDoc.address || '';
-  const doctorPhone = treatingDoc.phone || '';
-  const doctorLicense = treatingDoc.license || treatingDoc.licenseNumber || '';
+  let rawDoctorName = treatingDoc.name || '';
+  const isHaytham = String(rawDoctorName).toLowerCase().includes('haytham') || String(rawDoctorName).toLowerCase().includes('heytham');
+
+  const doctorName = isHaytham ? 'Dr. Haytham Salem' : rawDoctorName;
+  const clinic = isHaytham ? 'Arthregen Clinic' : (treatingDoc.clinic || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')));
+  const doctorClinic = clinic;
+  const doctorSpecialty = isHaytham 
+    ? 'Consultant Orthopedic Surgeon & Regenerative Medicine Specialist' 
+    : (treatingDoc.specialty || (hasTreatingDoctor ? (isEs ? 'Médico Especialista' : 'Physician Consultant') : (isEs ? 'Práctica Médica Colaboradora' : 'Collaborating Medical Practice')));
+  const doctorAddress = isHaytham 
+    ? 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE' 
+    : (treatingDoc.address || '');
+  const doctorPhone = isHaytham 
+    ? '+971 4 346 6149' 
+    : (treatingDoc.phone || '');
+  const doctorLicense = isHaytham 
+    ? 'DHA-P-0319842' 
+    : (treatingDoc.license || treatingDoc.licenseNumber || '');
+  const doctorWebsite = isHaytham ? 'www.mrhaytham.com' : (treatingDoc.website || '');
   const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
 
   const openDoctorModal = () => {
@@ -217,14 +277,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     }
   };
 
-  // Pharmacogenomic test correlation (e.g. Fagron Genomics TrichoTest™, NutriGen™)
+  // Pharmacogenomic test correlation & Unified Prescription Classification
   const genomicsData = detectFagronGenomicsTest(rx);
+  const prescriptionTypeInfo = useMemo(() => classifyPrescription(rx), [rx]);
   const docs = rx.documents || rx.attachedDocuments || [];
 
   const rxProgLower = String(rx.treatmentProgram || rx.program || '').toLowerCase();
   const rxTypeLower = String(rx.treatmentType || '').toLowerCase();
   const rxDispLower = String(rx.dispensingForm || '').toLowerCase();
-  const isNutrigen = rxProgLower.includes('nutri') || rxTypeLower.includes('nutri') || String(rx.fagron?.testName || '').toLowerCase().includes('nutri');
+  const isNutrigen = prescriptionTypeInfo.key === 'nutrigen' || rxProgLower.includes('nutri') || rxTypeLower.includes('nutri') || String(rx.fagron?.testName || '').toLowerCase().includes('nutri');
   const isEntirelyOral = isNutrigen || rxDispLower.includes('capsule') || rxDispLower.includes('oral') || (Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0 && rx.prescriptionLines.every(i => (i.route || '').toLowerCase().includes('oral')));
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
@@ -235,7 +296,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     {
       step: 1,
       title: 'Ingesta Diaria de la Cápsula',
-      timing: rx.posology?.toLowerCase().includes('night') ? 'Por la Noche' : 'Dosis Diaria',
+      timing: getPosologyText(rx.posology).toLowerCase().includes('night') ? 'Por la Noche' : 'Dosis Diaria',
       badge: 'Vía Oral',
       instruction: 'Tomar la cápsula prescrita acompañada de un vaso de agua abundante (200-250 ml).'
     },
@@ -307,7 +368,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     {
       step: 1,
       title: 'Daily Oral Administration',
-      timing: rx.posology?.toLowerCase().includes('night') ? 'Bedtime / Evening' : 'Daily Dose',
+      timing: getPosologyText(rx.posology).toLowerCase().includes('night') ? 'Bedtime / Evening' : 'Daily Dose',
       badge: 'Oral Route',
       instruction: 'Take the prescribed compounded capsule with a full glass of water (approx. 200–250 mL).'
     },
@@ -457,7 +518,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   ]));
 
   // ── Compounded Formulations Architecture (Grouped by Vehicle & Route with Dedicated Posology) ──
-  const rawLines = rx.prescriptionLines || rx.items || rx.compounds || [];
+  const rawLines = (rx.allSessionItems && rx.allSessionItems.length > 0)
+    ? rx.allSessionItems
+    : (rx.prescriptionLines || rx.items || rx.compounds || []);
 
   const compoundedFormulations = React.useMemo(() => {
     // Helper to generate rich vehicle specs and tailored posology based on vehicle type and instructions
@@ -471,7 +534,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       customPosology = '',
       customInstructions = '',
       apis = [],
-      containerType = ''
+      containerType = '',
+      duration = '',
+      extra = null
     }) => {
       const vNameLower = (vehicleName || '').toLowerCase();
       const titleLower = (treatmentTitle || '').toLowerCase();
@@ -522,7 +587,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         title: '',
         regimen: customPosology || '',
         timing: '',
-        duration: rx.duration || '30 days',
+        duration: duration || rx.duration || '30 days',
         steps: []
       };
 
@@ -582,12 +647,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         badgeText += isNutrigen 
           ? (isEs ? ' · CÁPSULAS MAGISTRALES ORALES (NUTRIGEN™)' : ' · ORAL COMPOUNDED CAPSULES (NUTRIGEN™)')
           : (isEs ? ' · CÁPSULAS MAGISTRALES ORALES' : ' · ORAL COMPOUNDED CAPSULES');
-        resolvedTitle = isNutrigen
-          ? (isEs ? 'Fórmula Magistral Personalizada en Cápsulas (NutriGen™)' : 'NutriGen™ Personalized Compounded Oral Capsules')
-          : (treatmentTitle || (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Nutraceutical Support (Capsules)'));
+        resolvedTitle = (isNutrigen && extra?.phaseName)
+          ? treatmentTitle
+          : isNutrigen
+            ? (isEs ? 'Fórmula Magistral Personalizada en Cápsulas (NutriGen™)' : 'NutriGen™ Personalized Compounded Oral Capsules')
+            : (treatmentTitle || (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Nutraceutical Support (Capsules)'));
         resolvedRoute = isEs ? 'Vía Oral (Cápsulas Vegetales Micronizadas)' : 'Oral Route (Micronized Plant-Based Capsules)';
         resolvedVolume = volume || rx.volume || (isEs ? '90 Cápsulas (Tratamiento 3 Meses)' : '90 Capsules (3-Month Protocol)');
-        resolvedContainer = resolvedContainer || (isEs ? 'Frasco Farmacéutico de Seguridad con Sello Hermético y Desecante (90 Cápsulas)' : 'Safety-Sealed Pharmaceutical Bottle with Hermetic Cap & Desiccant (90 Capsules)');
+        resolvedContainer = resolvedContainer || (isEs ? `Frasco Farmacéutico de Seguridad con Sello Hermético y Desecante (${resolvedVolume})` : `Safety-Sealed Pharmaceutical Bottle with Hermetic Cap & Desiccant (${resolvedVolume})`);
         vehicleObj.tag = isEs ? 'FORMA FARMACÉUTICA: CÁPSULAS ORALES' : 'DOSAGE FORM: ORAL CAPSULES';
         vehicleObj.name = vehicleName || (isEs ? 'Cápsulas Vegetales HPMC / Base Excipiente Micronizada' : 'Vegetarian HPMC Capsules / Micronized Powder Base Carrier');
         vehicleObj.specs = isEs
@@ -599,7 +666,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           : (isEs ? 'Pauta de Administración Oral (Cápsulas)' : 'Oral Capsule Administration Regimen');
         posologyObj.regimen = customPosology || (isEs ? '1 Cápsula Diaria por la Mañana con el Desayuno' : '1 Capsule Daily in the Morning with Breakfast');
         posologyObj.timing = isEs ? 'Por la mañana con el desayuno y un vaso lleno de agua' : 'Morning with breakfast and a full glass of water';
-        posologyObj.duration = rx.duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)');
+        posologyObj.duration = duration || rx.duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)');
         posologyObj.steps = [
           {
             step: 1,
@@ -628,10 +695,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           {
             step: 4,
             title: isEs ? 'Duración del Ciclo Terapéutico' : 'Treatment Cycle Duration',
-            timing: isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)',
-            instruction: isEs 
+            timing: duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)'),
+            instruction: duration
+              ? (isEs ? `Ciclo terapéutico de ${duration}. Se recomienda seguimiento médico y reevaluación al completar el período.` : `Protocol spans a ${duration} cycle. Medical follow-up and clinical review are recommended upon cycle completion.`)
+              : (isEs 
               ? 'Tratamiento planificado para un ciclo completo de 90 días (90 cápsulas). Se recomienda seguimiento médico y reevaluación al completar el período.' 
-              : 'Protocol spans a full 90-day cycle (90 capsules). Medical follow-up and clinical review are recommended upon cycle completion.'
+              : 'Protocol spans a full 90-day cycle (90 capsules). Medical follow-up and clinical review are recommended upon cycle completion.')
           }
         ];
       } else if (isTrichoFoam) {
@@ -717,8 +786,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       }
 
       // If doctor posology exists, use its text
-      if (customPosology && customPosology.length > 5 && customPosology !== posologyObj.regimen) {
-        posologyObj.regimen = customPosology;
+      const customPosologyStr = getPosologyText(customPosology);
+      if (customPosologyStr && customPosologyStr.length > 5 && customPosologyStr !== posologyObj.regimen) {
+        posologyObj.regimen = customPosologyStr;
+      }
+      
+      const pCombined = (customPosologyStr + ' ' + (extra?.dosageInstructions || '')).toLowerCase();
+      if (typeof customPosology === 'object' && customPosology?.timing) {
+        posologyObj.timing = customPosology.timing;
+      } else if (pCombined.includes('evening') || pCombined.includes('night') || pCombined.includes('sleep') || pCombined.includes('noche') || pCombined.includes('dormir') || pCombined.includes('cena')) {
+        posologyObj.timing = isEs ? 'Por la noche (con la cena o 45 min antes de dormir)' : 'Evening (with dinner or 45 min before sleep)';
+        posologyObj.title = isEs ? `Fase ${index}: Pauta Nocturna de Administración` : `Phase ${index}: Evening Restorative Administration Regimen`;
+      } else if (pCombined.includes('midday') || pCombined.includes('noon') || pCombined.includes('almuerzo') || pCombined.includes('mediodía')) {
+        posologyObj.timing = isEs ? 'Al mediodía con el almuerzo o comida principal' : 'Midday with lunch or main meal';
+        posologyObj.title = isEs ? `Fase ${index}: Pauta de Mediodía de Administración` : `Phase ${index}: Midday Administration Regimen`;
+      } else if (pCombined.includes('morning') || pCombined.includes('breakfast') || pCombined.includes('mañana') || pCombined.includes('desayuno')) {
+        posologyObj.timing = isEs ? 'Por la mañana con el desayuno y agua abundante' : 'Morning with breakfast and a full glass of water';
+        posologyObj.title = isEs ? `Fase ${index}: Pauta Matutina de Administración` : `Phase ${index}: Morning Administration Regimen`;
+      }
+
+      if (extra?.dosageInstructions) {
+        posologyObj.dosageInstructions = extra.dosageInstructions;
       }
 
       return {
@@ -729,12 +817,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         accentBg,
         badge: badgeText,
         title: resolvedTitle,
-        subtitle: rx.treatmentProgram || rx.fagron?.testName || (isEs 
+        subtitle: extra?.phaseName || rx.treatmentProgram || rx.fagron?.testName || (isEs 
           ? 'Formulación magistral calibrada al perfil clínico del paciente' 
           : 'Compounded formulation calibrated to patient clinical profile'),
         route: resolvedRoute,
         volume: resolvedVolume,
-        duration: rx.duration || '30 days',
+        duration: duration || rx.duration || '30 days',
+        extra,
         container: resolvedContainer,
         vehicle: vehicleObj,
         apis: apis.map((api, aIdx) => {
@@ -752,9 +841,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           const isGenericRole = !api.pharmacologicalClass && (!api.role || api.role.toLowerCase().includes('nutracéutico & modulador') || api.role.toLowerCase().includes('principio activo farmacogenómico') || api.role.toLowerCase().includes('systemic nutraceutical') || api.role.toLowerCase().includes('pharmacogenomic active'));
           const isGenericIndication = !api.clinicalIndication && (!api.indication || api.indication.toLowerCase().includes('personalizado') || api.indication.toLowerCase().includes('personalized') || api.indication.toLowerCase().includes('soporte metabólico') || api.indication.toLowerCase().includes('systemic metabolic') || api.indication.toLowerCase().includes('tratamiento folicular'));
 
-          let role = mono?.pharmacologicalClass || api.pharmacologicalClass || (!isGenericRole ? api.role : null);
-          let indication = mono?.clinicalIndication || api.clinicalIndication || (!isGenericIndication ? api.indication : null);
-          let action = mono?.mechanismOfAction || api.mechanismOfAction || (!isGenericAction ? (api.instructions || api.action) : null);
+          let role = mono?.pharmacologicalClass || api.pharmacologicalClass || api.therapeuticClass || (!isGenericRole ? api.role : null);
+          let indication = mono?.clinicalIndication || api.clinicalIndication || api.category || (!isGenericIndication ? api.indication : null);
+          let action = mono?.mechanismOfAction || api.mechanismOfAction || api.mechanism || (!isGenericAction ? (api.instructions || api.action) : null);
           const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : (api.geneTargets || []);
 
           if (!role) {
@@ -816,6 +905,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             indication,
             action,
             geneTargets,
+            cellularTarget: api.cellularTarget || null,
             rationale: api.rationale || null
           };
         }),
@@ -853,6 +943,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           customInstructions: block.instructions || '',
           apis: activeApis,
           containerType: block.container || ''
+        });
+      });
+    }
+
+    // Multi-part NutriGen / session: one dedicated formulation block per part (Detox 1, Detox 2, Supplementation...)
+    if (Array.isArray(rx._sessionMembers) && rx._sessionMembers.length > 1) {
+      const members = rx._sessionMembers;
+      return members.map((m, idx) => {
+        const mItems = (m.items || m.prescriptionLines || []).filter(i => !i.isVehicleOrBase && !i._isVehicleOrBase && !i.isVehicle);
+        const nutri = m.nutrigenomics || null;
+        return buildVehicleData({
+          index: idx + 1,
+          totalCount: members.length,
+          vehicleName: isEs ? 'Base de Cápsula Magistral / Excipiente de Celulosa' : 'Micronized Compounded Hard Capsules Base',
+          treatmentTitle: m.treatmentType || `Part ${idx + 1}`,
+          route: m.dispensingForm ? `${m.dispensingForm} (Oral)` : 'Oral Administration',
+          volume: m.volume || null,
+          customPosology: m.posology || '',
+          duration: m.duration || '',
+          apis: mItems,
+          extra: {
+            partCode: m.prescriptionNumber || m.prescriptionCode || m.id,
+            phaseName: m.phaseName || null,
+            nutrigenomics: nutri,
+            dosageInstructions: m.dosageInstructions || null
+          }
         });
       });
     }
@@ -1181,7 +1297,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   }, [rx, rawLines]);
 
   const resolvedDosageSummary = React.useMemo(() => {
-    return posology.summary || rx.posology || rx.dosageSchedule || (isEs ? 'Según prescripción médica' : 'As directed by healthcare professional');
+    return posology.summary || getPosologyText(rx.posology) || rx.dosageSchedule || (isEs ? 'Según prescripción médica' : 'As directed by healthcare professional');
   }, [posology, rx, isEs]);
 
   // WhatsApp share message: clean English format by default
@@ -1227,16 +1343,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           hideTier2={true}
           inquiryContextType="prescription"
           inquiryEntity={{
-            name: `Prescription ${rxId}`,
+            name: `Prescription ${rxId} — ${patientName}`,
             rxId,
             code: rxId,
             patientName,
-            doctorName,
-            clinic,
+            doctorName: doctorName || 'Dr. Haytham Salem',
+            clinic: clinic || 'Arthregen Clinic',
             formula: resolvedFormulaSummary,
             dosage: resolvedDosageSummary,
-            category: 'prescription',
-            genomicsTest: genomicsData?.test?.shortName || null
+            category: 'NutriGen Prescription Dossier',
+            genomicsTest: genomicsData?.test?.shortName || (isFagronMultiPart ? 'NutriGen' : 'Prescription'),
+            isNutriGen: true
           }}
           breadcrumb={[
             { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
@@ -1250,139 +1367,272 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         <div className="pds-content-with-sidebar">
           <div className="pds-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
-            {/* ── Master Header Card (GCP Standard High-Density Clinical Card) ─────── */}
-            <div className="rx-card" style={{
+            {/* ── Master Header Card (Google Cloud Console High-Density Resource Header) ─────── */}
+            <div className="rx-card gcp-resource-header-card" style={{
               background: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              padding: '1.1rem 1.25rem',
-              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.04)',
-              marginBottom: '0.15rem'
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
+              padding: '14px 18px',
+              boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.08)',
+              marginBottom: '0.75rem'
             }}>
-              <div className="rx-master-header-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                
-                {/* Prescribing Doctor Clinical Prominence */}
-                <div className="rx-doctor-col" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 260, flex: '1 1 280px' }}>
-                  <div className="rx-doctor-avatar" style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '10px',
-                    background: hasTreatingDoctor ? 'linear-gradient(135deg, #003666, #0284c7)' : 'linear-gradient(135deg, #475569, #64748b)',
+              {/* Row 1: Resource Title & Actions Toolbar */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '12px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid #e8eaed'
+              }}>
+                {/* Left: Identity & Official Status */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flexWrap: 'wrap' }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '6px',
+                    background: '#e8f0fe',
+                    color: '#1a73e8',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#ffffff',
-                    flexShrink: 0,
-                    boxShadow: '0 2px 6px rgba(0, 54, 102, 0.15)'
+                    flexShrink: 0
                   }}>
-                    {hasTreatingDoctor ? <Stethoscope size={22} /> : <Building2 size={22} />}
+                    <Stethoscope size={20} />
                   </div>
-                  <div className="rx-doctor-meta" style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <div className="rx-doctor-badge" style={{ fontSize: '0.72rem', fontWeight: 700, color: hasTreatingDoctor ? '#0284c7' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {hasTreatingDoctor ? (
-                          isDhaLicensed 
-                            ? (isEs ? 'Médica Prescriptora · Licencia DHA' : 'Prescribing Physician · DHA Licensed')
-                            : (isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician')
-                        ) : (
-                          isEs ? 'Práctica Clínica Colaboradora' : 'Collaborating Clinical Practice'
-                        )}
-                      </div>
-                      <button
-                        onClick={openDoctorModal}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0284c7',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px',
-                          fontSize: '0.73rem',
-                          fontWeight: 650,
-                          padding: '1px 5px',
-                          borderRadius: '4px'
-                        }}
-                        title={hasTreatingDoctor ? (isEs ? 'Editar médico tratante' : 'Edit treating physician') : (isEs ? 'Asignar médico' : 'Assign physician')}
-                      >
-                        <Edit3 size={11} />
-                        {hasTreatingDoctor ? (isEs ? 'Modificar' : 'Edit') : (isEs ? 'Asignar' : 'Assign')}
-                      </button>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <h1 style={{
+                        margin: 0,
+                        fontSize: '1.15rem',
+                        fontWeight: 600,
+                        color: '#202124',
+                        lineHeight: 1.3
+                      }}>
+                        {isEs ? 'Prescripción Médica' : 'Medical Prescription'} <span style={{ color: '#5f6368', fontWeight: 400 }}>#{rxId}</span>
+                      </h1>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '2px 8px',
+                        background: '#e6f4ea',
+                        color: '#137333',
+                        border: '1px solid #ceead6',
+                        borderRadius: '4px',
+                        fontSize: '0.72rem',
+                        fontWeight: 600
+                      }}>
+                        <Check size={12} />
+                        {isEs ? 'Oficial · Verificada' : 'Official · Verified'}
+                      </span>
                     </div>
-
-                    <h1 className="rx-doctor-name" style={{ margin: '0.1rem 0', fontSize: '1.15rem', fontWeight: 750, color: '#0f172a', lineHeight: 1.3 }}>
-                      {hasTreatingDoctor ? doctorName : clinic}
-                    </h1>
-
-                    {hasTreatingDoctor ? (
-                      <div className="rx-doctor-sub" style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '1px' }}>
-                        <span>{doctorSpecialty}</span>
-                        {doctorLicense && (
-                          <span style={{ color: '#0284c7', fontWeight: 700 }}>
-                            · Lic. {doctorLicense}
-                          </span>
-                        )}
-                        {doctorAddress && (
-                          <span style={{ color: '#94a3b8' }}>
-                            📍 {doctorAddress}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.76rem', color: '#64748b' }}>
-                          {isEs ? 'Sin médico asignado.' : 'No physician assigned.'}
-                        </span>
-                        <button
-                          onClick={openDoctorModal}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '3px 9px',
-                            background: '#eff6ff',
-                            color: '#1d4ed8',
-                            border: '1px solid #bfdbfe',
-                            borderRadius: '5px',
-                            fontSize: '0.74rem',
-                            fontWeight: 650,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Edit3 size={12} />
-                          {isEs ? 'Asignar Médico' : 'Assign Physician'}
-                        </button>
-                      </div>
-                    )}
+                    <div style={{ fontSize: '0.75rem', color: '#5f6368', marginTop: '2px' }}>
+                      {isEs ? 'Expediente clínico y régimen posológico digital' : 'Digital clinical dossier & posology regimen'}
+                    </div>
                   </div>
                 </div>
 
-                {/* Patient Identity Card (Compact GCP Style) */}
-                <div className="rx-patient-box" style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '0.7rem 1rem',
-                  minWidth: 240,
-                  flex: '0 1 auto'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px', gap: '8px' }}>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 750, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {isEs ? 'Paciente Registrado' : 'Registered Patient'}
+                {/* Right: Standard GCP Action Toolbar */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      window.print();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      height: '32px',
+                      padding: '0 12px',
+                      borderRadius: '4px',
+                      background: '#ffffff',
+                      color: '#1a73e8',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.78rem',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                    title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
+                  >
+                    <Printer size={14} />
+                    <span>{isEs ? 'Imprimir / PDF' : 'Print / Save PDF'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.href);
+                        setCopied(true);
+                        toast.success(isEs ? 'Enlace copiado ✓' : 'Link copied ✓');
+                        setTimeout(() => setCopied(false), 2000);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      height: '32px',
+                      padding: '0 12px',
+                      borderRadius: '4px',
+                      background: '#ffffff',
+                      color: '#3c4043',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.78rem',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Copy size={14} />
+                    <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setShowQrModal(true);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      height: '32px',
+                      padding: '0 12px',
+                      borderRadius: '4px',
+                      background: '#ffffff',
+                      color: '#3c4043',
+                      border: '1px solid #dadce0',
+                      fontSize: '0.78rem',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <QrCode size={14} color="#1a73e8" />
+                    <span>{isEs ? 'Código QR' : 'QR Verification'}</span>
+                  </button>
+                  {prescriptionLabels.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('selection');
+                        setSelectedLabelIndex(0);
+                        setShowLabelsModal(true);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        height: '32px',
+                        padding: '0 12px',
+                        borderRadius: '4px',
+                        background: '#ffffff',
+                        color: '#1a73e8',
+                        border: '1px solid #dadce0',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
+                      title={isEs ? 'Ver etiquetas oficiales para frascos (7.5 × 4.5 cm)' : 'View official compounding bottle labels (7.5 × 4.5 cm)'}
+                    >
+                      <Tag size={13} color="#1a73e8" />
+                      <span>{isEs ? `Etiquetas (${prescriptionLabels.length})` : `Labels (${prescriptionLabels.length})`}</span>
+                      <span style={{
+                        background: '#e8f0fe',
+                        color: '#1a73e8',
+                        fontSize: '0.64rem',
+                        padding: '1px 5px',
+                        borderRadius: '3px',
+                        fontWeight: 700
+                      }}>7.5×4.5 cm</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 2: High-Density GCP Metadata Columns (Zero Wasted Space) */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                gap: '16px',
+                marginTop: '12px'
+              }}>
+                {/* Column 1: Prescribing Physician */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {hasTreatingDoctor ? (isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice')}
+                    </span>
+                    <button
+                      onClick={openDoctorModal}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#1a73e8',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        fontSize: '0.72rem',
+                        fontWeight: 500,
+                        padding: '1px 4px'
+                      }}
+                      title={hasTreatingDoctor ? (isEs ? 'Editar médico tratante' : 'Edit treating physician') : (isEs ? 'Asignar médico' : 'Assign physician')}
+                    >
+                      <Edit3 size={11} />
+                      {hasTreatingDoctor ? (isEs ? 'Modificar' : 'Edit') : (isEs ? 'Asignar' : 'Assign')}
+                    </button>
+                  </div>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span>{hasTreatingDoctor ? doctorName : clinic}</span>
+                    {doctorLicense && (
+                      <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '1px 5px', borderRadius: '3px' }}>
+                        Lic. {doctorLicense}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#5f6368', lineHeight: 1.4 }}>
+                    {doctorSpecialty}
+                  </div>
+                  {(doctorClinic || doctorAddress) && (
+                    <div style={{ fontSize: '0.75rem', color: '#70757a', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                      <span>📍 {doctorClinic ? `${doctorClinic} · ` : ''}{doctorAddress || 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE'}</span>
                     </div>
-                    <span 
+                  )}
+                  {doctorPhone && (
+                    <div style={{ fontSize: '0.75rem', color: '#1a73e8', marginTop: '1px' }}>
+                      <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500 }}>
+                        📞 {doctorPhone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* Column 2: Registered Patient */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {isEs ? 'Paciente Registrado' : 'Registered Patient'}
+                    </span>
+                    <span
                       onClick={() => {
                         navigator.clipboard?.writeText(rxId);
                         toast.success(isEs ? 'Referencia copiada ✓' : 'Reference copied ✓');
                       }}
-                      style={{ 
-                        fontSize: '0.66rem', 
-                        fontFamily: 'monospace', 
-                        color: '#0369a1', 
-                        background: '#e0f2fe', 
-                        padding: '1px 6px', 
-                        borderRadius: '4px', 
-                        fontWeight: 700,
+                      style={{
+                        fontSize: '0.68rem',
+                        fontFamily: 'monospace',
+                        color: '#1a73e8',
+                        background: '#e8f0fe',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        fontWeight: 600,
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -1394,43 +1644,34 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <Copy size={10} />
                     </span>
                   </div>
-                  <div className="rx-patient-name" style={{ fontSize: '0.98rem', fontWeight: 750, color: '#0f172a', marginTop: '1px' }}>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124' }}>
                     {patientName} {patientAlias}
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: '#475569', marginTop: '2px', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span>PIN: <strong>{patient.pin || '11774'}</strong></span>
+                  <div style={{ fontSize: '0.78rem', color: '#5f6368', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span>PIN: <strong style={{ color: '#202124' }}>{patient.pin || '11774'}</strong></span>
                     <span>·</span>
-                    <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong>{patient.dob || '15/06/1984'}</strong></span>
-                    <span>·</span>
-                    <span style={{ color: '#0284c7', fontWeight: 600 }}>{patient.maskedPhone || '+971 54 *** **80'}</span>
+                    <span>{isEs ? 'F. Nac:' : 'DOB:'} <strong style={{ color: '#202124' }}>{patient.dob || '1974-03-17'}</strong></span>
                   </div>
+                  <div style={{ fontSize: '0.75rem', color: '#70757a', marginTop: '1px' }}>
+                    <span>📞 {patient.maskedPhone || '+971 54 *** **80'}</span>
+                  </div>
+                </div>
 
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('selection');
-                        window.print();
-                      }}
-                      className="rx-print-btn"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '3px 8px',
-                        borderRadius: '5px',
-                        background: '#ffffff',
-                        color: '#334155',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '0.73rem',
-                        fontWeight: 650,
-                        cursor: 'pointer'
-                      }}
-                      title={isEs ? 'Imprimir o Guardar en PDF' : 'Print or Save as PDF'}
-                    >
-                      <Printer size={13} color="#003666" />
-                      <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
-                    </button>
+                {/* Column 3: Clinical Protocol & Scope */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {isEs ? 'Alcance y Régimen Posológico' : 'Clinical Regimen & Scope'}
+                  </span>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124' }}>
+                    {isEs ? 'Protocolo Celular y Genómico Personalizado' : 'Personalized Cellular & Genomic Protocol'}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#5f6368' }}>
+                    {isEs 
+                      ? '3 Fases Secuenciales · Cápsulas Orales Diarias' 
+                      : '3 Sequential Phases · Daily Oral Capsules'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#137333', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                    <span>🔒 Lotusland Synthesis · Fagron Compound Quality</span>
                   </div>
                 </div>
               </div>
@@ -1553,6 +1794,71 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
             </div>
 
+        {/* ── Google Cloud Console Accordion Header Toolbar (Mobile & Desktop) ── */}
+        <div className="gcp-accordion-controls-bar" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 12px',
+          background: '#f8f9fa',
+          borderRadius: '8px',
+          border: '1px solid #dadce0',
+          marginBottom: '0.75rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124' }}>
+              {isEs ? 'Dossier Clínico Secuencial' : 'Clinical Protocol Outline'}
+            </span>
+            <span style={{ fontSize: '0.70rem', color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 8px', borderRadius: '10px', fontWeight: 500 }}>
+              {compoundedFormulations.length > 1 ? `${compoundedFormulations.length} Sequential Phases` : '1 Phase'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={expandAllSections}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '4px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#1a73e8',
+                fontSize: '0.74rem',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              {isEs ? 'Expandir Todo' : 'Expand all'}
+            </button>
+            <button
+              type="button"
+              onClick={collapseAllSections}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '4px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#5f6368',
+                fontSize: '0.74rem',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              {isEs ? 'Colapsar Todo' : 'Collapse all'}
+            </button>
+          </div>
+        </div>
+
+        {activeGcpTab === 'all' && (
+          <MultiPartOverview
+            formulations={compoundedFormulations}
+            onSelectPhase={(phaseId) => {
+              setSelectedPhase(phaseId);
+              setExpandedPhases(prev => ({ ...prev, [phaseId]: true }));
+            }}
+          />
+        )}
+
         {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'formulations') && (
         <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
@@ -1564,55 +1870,243 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px 14px',
-              background: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              padding: '10px 16px',
+              background: '#f8f9fa',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
               cursor: 'pointer',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               userSelect: 'none'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <FlaskConical size={16} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#202124' }}>
                     {isEs ? '1. Fórmulas Magistrales & Galénica' : '1. Compounded Formulations & Galenics'}
                   </span>
-                  <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#0284c7', color: '#ffffff' }}>
-                    {compoundedFormulations.length}
+                  <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
+                    {compoundedFormulations.length} {compoundedFormulations.length === 1 ? 'part' : 'parts'}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
                   {isEs ? 'Preparaciones magistrales calibradas al perfil del paciente' : 'Compounded preparations calibrated to patient clinical profile'}
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.72rem', fontWeight: 650 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#5f6368', fontSize: '0.74rem', fontWeight: 500 }}>
               <span>{expandedSections.formulations ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
-              {expandedSections.formulations ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {expandedSections.formulations ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </div>
           </div>
 
-          {expandedSections.formulations && compoundedFormulations.map((formulation, fIdx) => (
+          {/* Google Cloud Style Phase Overview & Controls (100% Vertical & Responsive, No Horizontal Scroll) */}
+          {expandedSections.formulations && compoundedFormulations.length > 1 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '10px',
+              padding: '10px 14px',
+              background: '#f8f9fa',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
+              marginBottom: '10px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  padding: '3px 9px',
+                  borderRadius: '12px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  <Layers size={13} />
+                  <span>{compoundedFormulations.length} {isEs ? 'Fases Secuenciales' : 'Sequential Phases'}</span>
+                </span>
+                <span style={{ fontSize: '0.76rem', color: '#5f6368' }}>
+                  {isEs ? 'Régimen cronobiológico secuencial adaptado al perfil genómico' : 'Sequential chronobiological regimen calibrated to patient genomics'}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allOpen = {};
+                    compoundedFormulations.forEach(f => { allOpen[f.id] = true; });
+                    setExpandedPhases(allOpen);
+                    setSelectedPhase('all');
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '4px',
+                    padding: '4px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    color: '#1a73e8',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Expandir Todo' : 'Expand All'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allClosed = {};
+                    compoundedFormulations.forEach(f => { allClosed[f.id] = false; });
+                    setExpandedPhases(allClosed);
+                  }}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #dadce0',
+                    borderRadius: '4px',
+                    padding: '4px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    color: '#5f6368',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isEs ? 'Colapsar Todo' : 'Collapse All'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {expandedSections.formulations && compoundedFormulations
+            .map((formulation, fIdx) => {
+              const isPhaseExpanded = expandedPhases[formulation.id] !== false;
+              const phaseNumber = formulation.index || (fIdx + 1);
+              const phaseLabel = prescriptionLabels.find(l => 
+                l.phaseNumber === phaseNumber || 
+                (l.productName && formulation.title && l.productName.toLowerCase().includes(formulation.title.toLowerCase().slice(0, 10)))
+              );
+              return (
             <div
               key={formulation.id}
               id={formulation.id}
               style={{
                 background: '#ffffff',
-                borderRadius: '16px',
-                border: '1px solid #e2e8f0',
-                padding: '1.75rem',
-                boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
+                boxShadow: 'none',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1.35rem',
-                scrollMarginTop: '100px'
+                overflow: 'hidden',
+                scrollMarginTop: '100px',
+                marginBottom: '12px'
               }}
             >
+              {/* Individual Phase Accordion Header - 100% Mobile Responsive (GCP Standard) */}
+              {compoundedFormulations.length > 1 && (
+                <div
+                  onClick={() => togglePhase(formulation.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    background: isPhaseExpanded ? '#f8f9fa' : '#ffffff',
+                    borderBottom: isPhaseExpanded ? '1px solid #dadce0' : 'none',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 280px' }}>
+                    <span style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      background: '#1a73e8',
+                      color: '#ffffff',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {phaseNumber}
+                    </span>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#202124' }}>
+                          Phase {phaseNumber}: {formulation.title}
+                        </span>
+                        {formulation.duration && (
+                          <span style={{ fontSize: '0.70rem', color: '#1967d2', background: '#e8f0fe', border: '1px solid #d2e3fc', borderRadius: '4px', padding: '1px 8px', fontWeight: 600 }}>
+                            {formulation.duration}
+                          </span>
+                        )}
+                        <span style={{ fontSize: '0.72rem', color: '#5f6368', background: '#f1f3f4', padding: '1px 8px', borderRadius: '4px' }}>
+                          {formulation.apis.length} APIs · {formulation.volume}
+                        </span>
+                        {formulation.posology?.timing && (
+                          <span style={{ fontSize: '0.70rem', color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', borderRadius: '4px', padding: '1px 8px', fontWeight: 600 }}>
+                            🕒 {formulation.posology.timing}
+                          </span>
+                        )}
+                      </div>
+                      {formulation.subtitle && (
+                        <div style={{ fontSize: '0.75rem', color: '#5f6368', marginTop: '3px' }}>
+                          {formulation.subtitle}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                    {phaseLabel && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const idx = prescriptionLabels.findIndex(l => l.id === phaseLabel.id);
+                          setSelectedLabelIndex(idx >= 0 ? idx : 0);
+                          setShowLabelsModal(true);
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          background: '#f1f3f4',
+                          border: '1px solid #dadce0',
+                          color: '#1a73e8',
+                          fontSize: '0.70rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#e8f0fe'; e.currentTarget.style.borderColor = '#1a73e8'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f3f4'; e.currentTarget.style.borderColor = '#dadce0'; }}
+                      >
+                        <Tag size={11} color="#1a73e8" />
+                        <span>{isEs ? 'Etiqueta 7.5×4.5 cm' : 'Label (7.5×4.5 cm)'}</span>
+                      </button>
+                    )}
+                    <span style={{ color: '#5f6368', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>{isPhaseExpanded ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
+                      {isPhaseExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {(!compoundedFormulations.length > 1 || isPhaseExpanded) && (
+              <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Preparation Master Header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -1876,10 +2370,50 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           <span>{api.rationale}</span>
                         </div>
                       )}
+
+                      {api.cellularTarget && (
+                        <div style={{ fontSize: '0.74rem', color: '#5f6368', display: 'flex', gap: '6px', alignItems: 'baseline' }}>
+                          <span style={{ fontWeight: 600, color: '#202124' }}>{isEs ? 'Diana celular:' : 'Cellular target:'}</span>
+                          <span>{api.cellularTarget}</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
+
+              {/* Sub-Section 2b: Genetic information for THIS part (Google Cloud style disclosure) */}
+              {formulation.extra?.nutrigenomics && (
+                <details open style={{ border: '1px solid #dadce0', borderRadius: '8px', background: '#ffffff', overflow: 'hidden' }}>
+                  <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1rem', background: '#f8f9fa', borderBottom: '1px solid #dadce0', fontSize: '0.84rem', fontWeight: 600, color: '#202124' }}>
+                    <Dna size={16} color="#1a73e8" />
+                    <span>{isEs ? 'Información genética de esta parte' : 'Genetic information for this part'}</span>
+                    <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontWeight: 500, color: '#5f6368' }}>{formulation.extra.nutrigenomics.genes?.length || 0} {isEs ? 'genes' : 'genes'}</span>
+                    <ChevronDown size={16} color="#5f6368" />
+                  </summary>
+                  <div style={{ padding: '1rem', display: 'grid', gap: '0.75rem', fontSize: '0.8rem', color: '#3c4043', lineHeight: 1.55 }}>
+                    <div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{isEs ? 'Vía metabólica' : 'Metabolic pathway'}</div>
+                      <div>{formulation.extra.nutrigenomics.pathway}</div>
+                    </div>
+                    {formulation.extra.nutrigenomics.genes?.length > 0 && (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{isEs ? 'Genes diana' : 'Target genes'}</span>
+                        {formulation.extra.nutrigenomics.genes.map((g) => (
+                          <span key={g} style={{ fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 600, color: '#1967d2', background: '#e8f0fe', border: '1px solid #d2e3fc', borderRadius: '4px', padding: '1px 8px' }}>{g}</span>
+                        ))}
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{isEs ? 'Resumen clínico' : 'Clinical summary'}</div>
+                      <div>{formulation.extra.nutrigenomics.clinicalSummary}</div>
+                    </div>
+                    <div style={{ background: '#e6f4ea', border: '1px solid #ceead6', borderRadius: '4px', padding: '0.6rem 0.8rem', color: '#137333' }}>
+                      <strong>{isEs ? 'Objetivo de la fase: ' : 'Phase objective: '}</strong>{formulation.extra.nutrigenomics.phaseObjective}
+                    </div>
+                  </div>
+                </details>
+              )}
 
               {/* Sub-Section 3: Dedicated Posology Protocol FOR THIS SPECIFIC VEHICLE */}
               <div 
@@ -1931,6 +2465,30 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     {formulation.posology.regimen}
                   </div>
                 </div>
+
+                {/* Specific Doctor Dosage Instructions */}
+                {formulation.posology.dosageInstructions && (
+                  <div style={{
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    borderRadius: '8px',
+                    padding: '9px 13px',
+                    color: '#1e40af',
+                    fontSize: '0.78rem',
+                    lineHeight: 1.45,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '8px'
+                  }}>
+                    <Info size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#1d4ed8' }} />
+                    <div>
+                      <strong style={{ display: 'block', color: '#1e3a8a', marginBottom: '2px', fontWeight: 700 }}>
+                        {isEs ? 'Indicaciones clínicas específicas del médico prescriptor:' : 'Prescribing Physician Clinical Directions:'}
+                      </strong>
+                      <span>{formulation.posology.dosageInstructions}</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Step-by-Step Pathway for this vehicle */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
@@ -1989,8 +2547,79 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   ))}
                 </div>
               </div>
+
+              {/* Physical Bottle Label Card (7.5 × 4.5 cm) */}
+              {phaseLabel && (
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '8px',
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <QrCode size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
+                        {isEs ? `Etiqueta de Frasco Pharmapolis (7.5 × 4.5 cm) — ${phaseLabel.productName}` : `Pharmapolis Compounding Bottle Label (7.5 × 4.5 cm) — ${phaseLabel.productName}`}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        {isEs ? 'Frontal, Trasera con QR de Trazabilidad y Frontal con Micro-QR (1500 × 900 px)' : 'Front, Back QR Traceability, and Front Micro-QR variants ready for printing'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const idx = prescriptionLabels.findIndex(l => l.id === phaseLabel.id);
+                      setSelectedLabelIndex(idx >= 0 ? idx : 0);
+                      setShowLabelsModal(true);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '7px 16px',
+                      borderRadius: '4px',
+                      background: '#1a73e8',
+                      color: '#ffffff',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      border: '1px solid #1a73e8',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
+                  >
+                    <Eye size={14} />
+                    <span>{isEs ? 'Ver / Descargar Etiqueta' : 'View / Download Label'}</span>
+                  </button>
+                </div>
+              )}
+              </div>
+              )}
             </div>
-          ))}
+          );
+        })}
         </div>
         )}
 
@@ -2005,36 +2634,35 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px 14px',
-              background: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              padding: '10px 16px',
+              background: '#f8f9fa',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
               cursor: 'pointer',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               userSelect: 'none'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#f0fdfa', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Clock size={16} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                  <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
                     {isEs ? '2. Posología, Régimen & Evolución Clínica' : '2. Posology, Regimen & Clinical Evolution'}
                   </span>
-                  <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#0f766e', color: '#ffffff' }}>
-                    90 Days
+                  <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
+                    Sequential Schedule
                   </span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
                   {isEs ? 'Hitos biológicos esperados y pauta de aplicación diaria' : 'Expected biological milestones and daily administration pathway'}
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f766e', fontSize: '0.72rem', fontWeight: 650 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#5f6368', fontSize: '0.74rem', fontWeight: 500 }}>
               <span>{expandedSections.posology ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
-              {expandedSections.posology ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {expandedSections.posology ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </div>
           </div>
 
@@ -2170,36 +2798,35 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '10px 14px',
-              background: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
+              padding: '10px 16px',
+              background: '#f8f9fa',
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
               cursor: 'pointer',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               userSelect: 'none'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Factory size={16} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                  <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
                     {isEs ? '3. Laboratorio, Calidad & Trazabilidad UE' : '3. Quality, Laboratory & EU Traceability'}
                   </span>
-                  <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#0284c7', color: '#ffffff' }}>
-                    CoA 100%
+                  <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
+                    CoA 100% · EU Lote
                   </span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
                   {isEs ? 'Certificado analítico de liberación, control de lote y verificación' : 'Certificate of analysis, batch release assays and mobile verification'}
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0284c7', fontSize: '0.72rem', fontWeight: 650 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#5f6368', fontSize: '0.74rem', fontWeight: 500 }}>
               <span>{expandedSections.traceability ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
-              {expandedSections.traceability ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {expandedSections.traceability ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </div>
           </div>
 
@@ -2554,38 +3181,37 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '10px 14px',
-                background: '#ffffff',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
+                padding: '10px 16px',
+                background: '#f8f9fa',
+                borderRadius: '8px',
+                border: '1px solid #dadce0',
                 cursor: 'pointer',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
                 userSelect: 'none'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '8px', background: '#fdf4ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Dna size={16} />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                    <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
                       {isEs 
                         ? `4. Análisis Farmacogenómico (${genomicsData?.test?.shortName || 'Fagron Genomics'})` 
                         : `4. Pharmacogenomics Analysis (${genomicsData?.test?.shortName || 'Fagron Genomics'})`}
                     </span>
-                    <span style={{ fontSize: '0.66rem', fontWeight: 700, padding: '1px 6px', borderRadius: '10px', background: '#9333ea', color: '#ffffff' }}>
-                      Fagron Genomics
+                    <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
+                      Fagron NutriGen
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
                     {isEs ? 'Correlación de biomarcadores genéticos y respuesta terapéutica' : 'Genetic biomarkers correlation and metabolic response'}
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9333ea', fontSize: '0.72rem', fontWeight: 650 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#5f6368', fontSize: '0.74rem', fontWeight: 500 }}>
                 <span>{expandedSections.genomics ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
-                {expandedSections.genomics ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                {expandedSections.genomics ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </div>
             </div>
 
@@ -2681,11 +3307,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           rxId,
           code: rxId,
           patientName,
-          doctorName,
-          clinic,
-          formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
-          dosage: '1.0 ml Once Daily at Night on Dry Scalp',
-          category: 'Prescription Dossier'
+          doctorName: doctorName || rx.treatingDoctor?.name || 'Treating Physician',
+          clinic: clinic || rx.treatingDoctor?.clinic || rx.clinicName || 'Compounding Medical Center',
+          formula: resolvedFormulaSummary,
+          dosage: resolvedDosageSummary,
+          category: prescriptionTypeInfo.label,
+          genomicsTest: genomicsData?.test?.shortName || (prescriptionTypeInfo.key === 'trichotest' ? 'TrichoTest' : prescriptionTypeInfo.key === 'nutrigen' ? 'NutriGen' : null),
+          prescriptionType: prescriptionTypeInfo.key,
+          brandType: prescriptionTypeInfo.brandType,
+          isNutriGen: prescriptionTypeInfo.key === 'nutrigen'
         }}
         lang={lang}
       />
@@ -2848,11 +3478,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   type="button"
                   onClick={() => setDocForm({
                     name: 'Dr. Haytham Salem',
-                    specialty: 'Consultant Regenerative Medicine & Nutrigenomics',
+                    specialty: 'Consultant Orthopedic Surgeon & Regenerative Medicine Specialist',
                     license: 'DHA-P-0319842',
-                    clinic: 'Hortman Clinics',
-                    phone: '+971 50 185 2160',
-                    address: 'Hortman Clinics, Dubai, UAE'
+                    clinic: 'Arthregen Clinic',
+                    phone: '+971 4 346 6149',
+                    address: 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE'
                   })}
                   style={{
                     padding: '4px 10px',
@@ -2865,7 +3495,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     cursor: 'pointer'
                   }}
                 >
-                  🩺 Dr. Haytham Salem (Hortman Clinics)
+                  🩺 Dr. Haytham Salem (Arthregen Clinic)
                 </button>
                 <button
                   type="button"
@@ -3162,102 +3792,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         </div>
       )}
 
-      {/* ── Mobile-First Floating Action Bar (Golden Rule #23) ── */}
-      {!embedded && (
-        <div className="mobile-floating-action-bar" style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'rgba(255, 255, 255, 0.96)',
-        backdropFilter: 'blur(10px)',
-        borderTop: '1px solid #cbd5e1',
-        padding: '10px 16px',
-        display: 'none',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: '10px',
-        zIndex: 99999,
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.1)'
-      }}>
-        <button
-          type="button"
-          onClick={() => {
-            const printBtn = document.querySelector('button[title*="PDF"], button[title*="Imprimir"]');
-            if (printBtn) printBtn.click();
-            else window.print();
-          }}
-          style={{
-            flex: 1,
-            height: '46px',
-            borderRadius: '8px',
-            background: '#003666',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 700,
-            fontSize: '0.84rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            cursor: 'pointer'
-          }}
-        >
-          <Printer size={16} />
-          <span>PDF</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (navigator.clipboard) {
-              navigator.clipboard.writeText(window.location.href);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            }
-          }}
-          style={{
-            flex: 1,
-            height: '46px',
-            borderRadius: '8px',
-            background: '#f1f5f9',
-            color: '#1e293b',
-            border: '1px solid #cbd5e1',
-            fontWeight: 600,
-            fontSize: '0.84rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            cursor: 'pointer'
-          }}
-        >
-          <Copy size={16} />
-          <span>{copied ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Enlace' : 'Link')}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowQrModal(true)}
-          style={{
-            flex: 1,
-            height: '46px',
-            borderRadius: '8px',
-            background: '#0284c7',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 700,
-            fontSize: '0.84rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            cursor: 'pointer'
-          }}
-        >
-          <QrCode size={16} />
-          <span>{isEs ? 'QR Lote' : 'Batch QR'}</span>
-        </button>
-      </div>
-      )}
+
 
       {/* ── Prescription Dedicated Clinical AI Research Copilot ── */}
       <PublicAtlasAIDrawer
@@ -3278,6 +3813,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         storageKey={`rx_${rxId}`}
         hideFloatingTrigger={true}
         lang={lang}
+      />
+
+      {/* ── Official Compounding Bottle Labels Modal (7.5 x 4.5 cm) ── */}
+      <PharmacyLabelsModal
+        isOpen={showLabelsModal}
+        onClose={() => setShowLabelsModal(false)}
+        labels={prescriptionLabels}
+        initialLabelIndex={selectedLabelIndex}
+        isEs={isEs}
       />
     </div>
   );

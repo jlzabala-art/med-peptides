@@ -15,6 +15,7 @@ import {
   Microscope 
 } from '@/lib/icons';
 import DataTable from '@/components/ui/DataTable';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
 
@@ -59,7 +60,7 @@ export default function QualityBatchTab({
     {
       header: 'Batch ID',
       field: 'batch',
-      width: '35%',
+      width: '30%',
       render: (item) => (
         <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#003666' }}>
           {item.batch}
@@ -69,31 +70,24 @@ export default function QualityBatchTab({
     {
       header: 'Release Date',
       field: 'date',
-      width: '25%',
+      width: '22%',
       render: (item) => <span style={{ color: '#64748b' }}>{item.date}</span>
     },
     {
       header: 'HPLC Purity',
       field: 'purity',
-      width: '20%',
+      width: '18%',
       render: (item) => <span style={{ fontWeight: 800, color: '#166534' }}>{item.purity}</span>
     },
     {
       header: 'Release Status',
       field: 'status',
-      width: '20%',
-      render: (item) => (
-        <span style={{
-          background: item.status === 'Active Release' ? '#ecfdf5' : '#f1f5f9',
-          color: item.status === 'Active Release' ? '#065f46' : '#64748b',
-          padding: '2px 8px',
-          borderRadius: '4px',
-          fontSize: '0.68rem',
-          fontWeight: 700
-        }}>
-          {item.status}
-        </span>
-      )
+      width: '30%',
+      align: 'right',
+      render: (item) => {
+        const statusKey = item.status === 'Active Release' ? 'active' : 'archived';
+        return <StatusBadge status={statusKey} customLabel={item.status} />;
+      }
     }
   ];
 
@@ -152,13 +146,22 @@ export default function QualityBatchTab({
           </div>
         </div>
 
-        {/* Analytical Parameters Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '1rem',
-          marginBottom: '1.25rem'
-        }}>
+        {/* Analytical Parameters Grid — GCP 3×2 desktop, 2×3 tablet, 1×6 mobile */}
+        <style>{`
+          .qbt-params-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+          }
+          @media (max-width: 900px) {
+            .qbt-params-grid { grid-template-columns: repeat(2, 1fr); }
+          }
+          @media (max-width: 540px) {
+            .qbt-params-grid { grid-template-columns: 1fr; }
+          }
+        `}</style>
+        <div className="qbt-params-grid">
           {/* Current Batch Code */}
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -258,22 +261,34 @@ export default function QualityBatchTab({
           </div>
 
           <div className="pds-coa-actions">
-            {onOpenCoaModal && (
-              <button
-                type="button"
-                onClick={onOpenCoaModal}
-                className="pds-coa-btn pds-coa-btn--view"
-              >
-                <ExternalLink size={14} /> View CoA Document
-              </button>
-            )}
-
             <button
               type="button"
-              onClick={handleDownloadCoa}
-              className="pds-coa-btn pds-coa-btn--download"
+              onClick={() => {
+                triggerHaptic('light');
+                if (onOpenCoaModal) {
+                  onOpenCoaModal();
+                } else {
+                  const coaUrl = `/api/coa/${encodeURIComponent(slug)}?batch=${encodeURIComponent(batchId)}`;
+                  window.open(coaUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              className="pds-coa-btn pds-coa-btn--view"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                backgroundColor: '#003666',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}
             >
-              <Download size={14} /> Download CoA (PDF)
+              <ExternalLink size={15} /> Preview Certificate of Analysis
             </button>
           </div>
         </div>
@@ -351,6 +366,9 @@ export default function QualityBatchTab({
             data={batchHistory.map((item) => ({ ...item, id: item.batch }))}
             keyField="id"
             hideExpandColumn
+            initialRowsPerPage={4}
+            hideRowsPerPageSelector
+            enableAskAtlas={false}
           />
         </div>
       </section>

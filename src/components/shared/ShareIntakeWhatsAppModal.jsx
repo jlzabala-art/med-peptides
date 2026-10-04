@@ -1,46 +1,92 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
-  X,
   Phone,
   Copy,
   Check,
   Share2,
   ExternalLink,
   Download,
-  Dna,
-  FileText,
-  Sparkles,
   ShieldCheck,
   User,
-  Stethoscope
+  Stethoscope,
+  FileText
 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
+import StandardDrawer from '@/components/ui/StandardDrawer';
 
-export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
+export default function ShareIntakeWhatsAppModal({ isOpen, onClose, rx = null }) {
   const { user, userProfile } = useAuth();
   const [recipientPhone, setRecipientPhone] = useState('');
-  const [recipientType, setRecipientType] = useState('patient'); // 'patient' | 'doctor' | 'general'
+  const [recipientType, setRecipientType] = useState('patient'); // 'patient' | 'doctor'
+  const [shareMode, setShareMode] = useState(rx ? 'dossier' : 'intake'); // 'dossier' | 'intake'
   const [lang, setLang] = useState('en');
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'link'
+
+  useEffect(() => {
+    if (rx) {
+      setShareMode('dossier');
+    } else {
+      setShareMode('intake');
+    }
+  }, [rx]);
 
   if (!isOpen) return null;
 
   const isEs = lang === 'es';
-  const baseUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/rx/intake` 
-    : 'https://med-peptides.com/rx/intake';
+  const origin = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : 'https://med-peptides.com';
 
   const userEmail = user?.email || userProfile?.email || '';
+  
+  // URLs
+  const intakeBaseUrl = `${origin}/rx/intake`;
   const intakeUrl = userEmail 
-    ? `${baseUrl}?am=${encodeURIComponent(userEmail)}`
-    : baseUrl;
+    ? `${intakeBaseUrl}?am=${encodeURIComponent(userEmail)}`
+    : intakeBaseUrl;
 
-  // Customized clinical message templates
+  const primaryRxId = (rx?._sessionMembers && rx?._sessionMembers[0]?.id) || rx?.id || '';
+  const rxCode = rx?.prescriptionNumber || rx?.code || primaryRxId;
+  const rxDossierUrl = `${origin}/rx/${encodeURIComponent(rxCode)}`;
+
+  const activeUrl = (shareMode === 'dossier' && rx) ? rxDossierUrl : intakeUrl;
+  const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
+  const doctorName = rx?.doctor?.name || rx?.doctorName || 'Prescribing Physician';
+
+  const isMultiPart = Boolean(rx?._isSessionGroup || (rx?._sessionMembers && rx?._sessionMembers.length > 1));
+  const partsCount = rx?._sessionCount || rx?._sessionMembers?.length || (rx?.totalParts || 0);
+  const testName = rx?.fagron?.testName || 'NutriGen';
+
+  // Clinical message templates
   const getMessage = () => {
+    if (shareMode === 'dossier' && rx) {
+      if (isMultiPart) {
+        const partsList = (rx._sessionMembers || []).map((m, idx) => {
+          const partNum = m.partNumber || idx + 1;
+          const items = m.prescriptionLines || m.items || [];
+          const itemNames = items.slice(0, 3).map(i => i.productName || i.name).filter(Boolean);
+          const moreCount = items.length > 3 ? ` +${items.length - 3} more` : '';
+          return isEs
+            ? `• Parte ${partNum} (${items.length} principios activos): ${itemNames.join(', ')}${moreCount}`
+            : `• Part ${partNum} (${items.length} active ingredients): ${itemNames.join(', ')}${moreCount}`;
+        }).join('\n');
+
+        if (isEs) {
+          return `📋 *Atlas Clinical Platform — Expediente Integral Fagron ${testName}*\n\nEstimado/a ${patientName},\n\nPuede acceder a su prescripción genética multiparte digitalizada (#${rxCode}), que incluye *${partsCount} fórmulas magistrales secuenciales* con su pauta posológica completa:\n\n${partsList}\n\n🔗 ${rxDossierUrl}\n\n🔒 Prescrito y verificado por ${doctorName}.`;
+        }
+        return `📋 *Atlas Clinical Platform — Comprehensive Fagron ${testName} Dossier*\n\nDear ${patientName},\n\nYou can access your verified multi-part genetic prescription (#${rxCode}), which includes *${partsCount} sequential compounded formulations* with customized administration schedules:\n\n${partsList}\n\n🔗 ${rxDossierUrl}\n\n🔒 Prescribed & clinically verified by ${doctorName}.`;
+      }
+
+      if (isEs) {
+        return `📋 *Atlas Clinical Platform — Expediente de Prescripción Digital*\n\nEstimado/a ${patientName},\n\nPuede acceder a su prescripción médica digitalizada (#${rxCode}), pautas de administración, calendario de dosificación y verificación clínica a través del siguiente enlace seguro:\n\n🔗 ${rxDossierUrl}\n\n🔒 Verificado por ${doctorName}.`;
+      }
+      return `📋 *Atlas Clinical Platform — Digital Prescription Dossier*\n\nDear ${patientName},\n\nYou can access your verified digital prescription (#${rxCode}), administration protocol, posology schedule, and clinical verification via the following secure link:\n\n🔗 ${rxDossierUrl}\n\n🔒 Prescribed & verified by ${doctorName}.`;
+    }
+
     if (isEs) {
       if (recipientType === 'doctor') {
         return `🩺 *Atlas Clinical Intelligence — Portal Médico de Digitalización de Prescripciones*\n\nEstimado Dr./Dra.,\n\nPuede digitalizar y verificar de forma instantánea informes genéticos de Fagron Genomics (TrichoTest™, NutriGen™, etc.) o recetas magistrales a través de nuestro portal seguro sin necesidad de registro previo:\n\n🔗 ${intakeUrl}\n\nEl motor multimodal con IA extraerá automáticamente todas las formulaciones, principios activos y pautas de dosificación.`;
@@ -68,12 +114,12 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
   };
 
   const handleCopy = (type) => {
-    const textToCopy = type === 'link' ? intakeUrl : messageText;
+    const textToCopy = type === 'link' ? activeUrl : messageText;
     navigator?.clipboard?.writeText(textToCopy);
     setCopiedType(type);
     toast.success(
       type === 'link' 
-        ? (isEs ? 'Enlace del portal copiado al portapapeles ✓' : 'Intake link copied to clipboard ✓')
+        ? (isEs ? 'Enlace copiado al portapapeles ✓' : 'Link copied to clipboard ✓')
         : (isEs ? 'Mensaje para WhatsApp copiado ✓' : 'WhatsApp message copied ✓')
     );
     setTimeout(() => setCopiedType(null), 2500);
@@ -93,258 +139,391 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 20, 20);
       const a = document.createElement('a');
-      a.download = `Atlas-Intake-Portal-QR.png`;
+      a.download = rx ? `Atlas-Rx-${rxCode}-QR.png` : `Atlas-Intake-Portal-QR.png`;
       a.href = canvas.toDataURL('image/png');
       a.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  return (
-    <div 
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 999999,
-        padding: '1rem'
-      }}
-    >
-      <div 
-        onClick={e => e.stopPropagation()}
+  const drawerTitle = rx 
+    ? (isEs ? `Compartir Prescripción #${rxCode}` : `Share Prescription #${rxCode}`)
+    : (isEs ? 'Compartir Portal Público de Prescripciones' : 'Share Public Prescription Intake Portal');
+
+  const drawerSubtitle = rx 
+    ? (isEs ? `Paciente: ${patientName}` : `Patient: ${patientName}`)
+    : (isEs ? 'Permite a pacientes o médicos subir recetas para digitalización IA' : 'Allow patients or physicians to upload prescriptions for AI digitization');
+
+  // GCP Console standard sticky footer actions
+  const drawerFooter = (
+    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+      <button
+        type="button"
+        onClick={onClose}
         style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          padding: '1.75rem',
-          maxWidth: '560px',
-          width: '100%',
-          maxHeight: '92vh',
-          overflowY: 'auto',
-          boxShadow: '0 20px 40px -8px rgba(0, 0, 0, 0.2)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
-          border: '1px solid #e2e8f0'
+          background: 'none',
+          border: 'none',
+          color: '#5f6368',
+          fontSize: '13px',
+          fontWeight: 500,
+          cursor: 'pointer',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          transition: 'background 0.15s ease',
         }}
+        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f3f4'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
       >
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: '#eff6ff',
-              color: '#1d4ed8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              border: '1px solid #bfdbfe'
-            }}>
-              <Share2 size={22} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                {isEs ? 'Compartir Portal Público de Prescripciones' : 'Share Public Prescription Intake Portal'}
-              </h3>
-              <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-                {isEs 
-                  ? 'Permite a pacientes o médicos subir sus recetas y análisis genéticos para su digitalización con IA' 
-                  : 'Allow patients or physicians to upload prescriptions and genomics reports for AI digitization'}
-              </p>
-            </div>
+        {isEs ? 'Cerrar' : 'Close'}
+      </button>
+
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <button
+          type="button"
+          onClick={() => handleCopy('link')}
+          style={{
+            height: '36px',
+            padding: '0 14px',
+            borderRadius: '4px',
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            color: '#1a73e8',
+            fontSize: '13px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'background 0.15s ease, border-color 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f8fafd';
+            e.currentTarget.style.borderColor = '#1a73e8';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff';
+            e.currentTarget.style.borderColor = '#dadce0';
+          }}
+        >
+          {copiedType === 'link' ? <Check size={14} style={{ color: '#137333' }} /> : <Copy size={14} />}
+          <span>{copiedType === 'link' ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => window.open(activeUrl, '_blank', 'noopener,noreferrer')}
+          style={{
+            height: '36px',
+            padding: '0 12px',
+            borderRadius: '4px',
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            color: '#3c4043',
+            fontSize: '13px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'background 0.15s ease',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f3f4'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+          title={isEs ? 'Abrir enlace en pestaña nueva' : 'Open link in new tab'}
+        >
+          <ExternalLink size={14} color="#5f6368" />
+          <span>{isEs ? 'Abrir' : 'Open'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleLaunchWhatsApp}
+          style={{
+            height: '36px',
+            padding: '0 16px',
+            borderRadius: '4px',
+            background: '#1e8e3e',
+            color: '#ffffff',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'background 0.15s ease',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#188038'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#1e8e3e'; }}
+        >
+          <Phone size={14} />
+          <span>{isEs ? 'Enviar vía WhatsApp' : 'Send via WhatsApp'}</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <StandardDrawer
+      isOpen={isOpen}
+      onClose={onClose}
+      title={drawerTitle}
+      subtitle={drawerSubtitle}
+      width="560px"
+      footer={drawerFooter}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* GCP Underline Tabs */}
+        {rx && (
+          <div style={{
+            display: 'flex',
+            borderBottom: '1px solid #dadce0',
+            gap: '24px',
+            marginTop: '-0.25rem',
+          }}>
+            <button
+              type="button"
+              onClick={() => setShareMode('dossier')}
+              style={{
+                padding: '8px 0 10px 0',
+                border: 'none',
+                background: 'transparent',
+                color: shareMode === 'dossier' ? '#1a73e8' : '#5f6368',
+                fontWeight: 500,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                borderBottom: shareMode === 'dossier' ? '2px solid #1a73e8' : '2px solid transparent',
+                marginBottom: '-1px',
+                transition: 'color 0.15s ease, border-color 0.15s ease',
+              }}
+            >
+              <FileText size={15} color={shareMode === 'dossier' ? '#1a73e8' : '#5f6368'} />
+              <span>{isEs ? 'Expediente del Paciente' : 'Patient Rx Dossier'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShareMode('intake')}
+              style={{
+                padding: '8px 0 10px 0',
+                border: 'none',
+                background: 'transparent',
+                color: shareMode === 'intake' ? '#1a73e8' : '#5f6368',
+                fontWeight: 500,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                borderBottom: shareMode === 'intake' ? '2px solid #1a73e8' : '2px solid transparent',
+                marginBottom: '-1px',
+                transition: 'color 0.15s ease, border-color 0.15s ease',
+              }}
+            >
+              <Share2 size={15} color={shareMode === 'intake' ? '#1a73e8' : '#5f6368'} />
+              <span>{isEs ? 'Portal de Subida General' : 'General Intake Portal'}</span>
+            </button>
           </div>
+        )}
 
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              padding: '4px',
-              borderRadius: '8px'
-            }}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Account Manager attribution notice */}
+        {/* GCP Account Manager attribution notice */}
         {userEmail && (
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '10px',
+            background: '#e6f4ea',
+            border: '1px solid #ceead6',
+            borderRadius: '4px',
             padding: '10px 14px',
-            fontSize: '0.8rem',
-            color: '#166534'
+            fontSize: '12px',
+            color: '#137333',
+            lineHeight: 1.4,
           }}>
-            <ShieldCheck size={18} style={{ color: '#16a34a', flexShrink: 0 }} />
+            <ShieldCheck size={16} style={{ color: '#137333', flexShrink: 0 }} />
             <div>
-              <strong>{isEs ? 'Atribución de Account Manager Activa:' : 'Active Account Manager Attribution:'}</strong>{' '}
+              <strong style={{ fontWeight: 600 }}>{isEs ? 'Atribución de Account Manager:' : 'Account Manager Attribution:'}</strong>{' '}
               {isEs 
-                ? <>Las recetas enviadas o cargadas a través de este enlace se vincularán automáticamente a tu usuario <strong>({userEmail})</strong>.</>
-                : <>Prescriptions uploaded through this link will be automatically attributed to your account <strong>({userEmail})</strong>.</>}
+                ? <>Vinculado a <strong>({userEmail})</strong>.</>
+                : <>Attributed to <strong>({userEmail})</strong>.</>}
             </div>
           </div>
         )}
 
-        {/* Options Row: Target recipient & Language */}
+        {/* Options Row: Target recipient & Language (GCP standard segmented controls) */}
         <div style={{
           display: 'flex',
-          gap: '10px',
-          background: '#f8fafc',
-          padding: '8px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
+          gap: '12px',
+          padding: '8px 12px',
+          background: '#f8f9fa',
+          borderRadius: '4px',
+          border: '1px solid #dadce0',
           flexWrap: 'wrap',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
         }}>
           {/* Recipient Segmented Selector */}
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button
-              type="button"
-              onClick={() => setRecipientType('patient')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: recipientType === 'patient' ? '#0284c7' : 'transparent',
-                color: recipientType === 'patient' ? '#ffffff' : '#64748b',
-                fontWeight: 700,
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <User size={13} />
-              <span>{isEs ? 'Para Paciente' : 'To Patient'}</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '12px', color: '#5f6368', fontWeight: 500 }}>
+              {isEs ? 'Audiencia:' : 'Audience:'}
+            </span>
+            <div style={{ display: 'inline-flex', border: '1px solid #dadce0', borderRadius: '4px', overflow: 'hidden', background: '#ffffff' }}>
+              <button
+                type="button"
+                onClick={() => setRecipientType('patient')}
+                style={{
+                  padding: '5px 12px',
+                  border: 'none',
+                  background: recipientType === 'patient' ? '#e8f0fe' : '#ffffff',
+                  color: recipientType === 'patient' ? '#1a73e8' : '#3c4043',
+                  fontWeight: recipientType === 'patient' ? 500 : 400,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  borderRight: shareMode === 'intake' ? '1px solid #dadce0' : 'none',
+                }}
+              >
+                <User size={13} color={recipientType === 'patient' ? '#1a73e8' : '#5f6368'} />
+                <span>{isEs ? 'Para Paciente' : 'To Patient'}</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setRecipientType('doctor')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: recipientType === 'doctor' ? '#0284c7' : 'transparent',
-                color: recipientType === 'doctor' ? '#ffffff' : '#64748b',
-                fontWeight: 700,
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <Stethoscope size={13} />
-              <span>{isEs ? 'Para Médico / Colega' : 'To Doctor / Colleague'}</span>
-            </button>
+              {shareMode === 'intake' && (
+                <button
+                  type="button"
+                  onClick={() => setRecipientType('doctor')}
+                  style={{
+                    padding: '5px 12px',
+                    border: 'none',
+                    background: recipientType === 'doctor' ? '#e8f0fe' : '#ffffff',
+                    color: recipientType === 'doctor' ? '#1a73e8' : '#3c4043',
+                    fontWeight: recipientType === 'doctor' ? 500 : 400,
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <Stethoscope size={13} color={recipientType === 'doctor' ? '#1a73e8' : '#5f6368'} />
+                  <span>{isEs ? 'Para Médico' : 'To Doctor'}</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Lang Toggle */}
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button
-              type="button"
-              onClick={() => setLang('es')}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '6px',
-                border: 'none',
-                background: lang === 'es' ? '#ffffff' : 'transparent',
-                color: lang === 'es' ? '#0f172a' : '#94a3b8',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                boxShadow: lang === 'es' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                cursor: 'pointer'
-              }}
-            >
-              ES 🇪🇸
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang('en')}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '6px',
-                border: 'none',
-                background: lang === 'en' ? '#ffffff' : 'transparent',
-                color: lang === 'en' ? '#0f172a' : '#94a3b8',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                boxShadow: lang === 'en' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                cursor: 'pointer'
-              }}
-            >
-              EN 🇺🇸
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '12px', color: '#5f6368', fontWeight: 500 }}>
+              {isEs ? 'Idioma:' : 'Language:'}
+            </span>
+            <div style={{ display: 'inline-flex', border: '1px solid #dadce0', borderRadius: '4px', overflow: 'hidden', background: '#ffffff' }}>
+              <button
+                type="button"
+                onClick={() => setLang('en')}
+                style={{
+                  padding: '4px 10px',
+                  border: 'none',
+                  borderRight: '1px solid #dadce0',
+                  background: lang === 'en' ? '#e8f0fe' : '#ffffff',
+                  color: lang === 'en' ? '#1a73e8' : '#5f6368',
+                  fontWeight: lang === 'en' ? 600 : 400,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang('es')}
+                style={{
+                  padding: '4px 10px',
+                  border: 'none',
+                  background: lang === 'es' ? '#e8f0fe' : '#ffffff',
+                  color: lang === 'es' ? '#1a73e8' : '#5f6368',
+                  fontWeight: lang === 'es' ? 600 : 400,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                ES
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Optional Phone Input */}
+        {/* GCP Form Input */}
         <div>
-          <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+          <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#3c4043', marginBottom: '4px' }}>
             {isEs ? 'Teléfono del Destinatario (Opcional, con prefijo):' : 'Recipient Phone Number (Optional, with country code):'}
           </label>
           <input
             type="tel"
-            placeholder="+34 600 000 000"
+            placeholder="+1 555 000 0000"
             value={recipientPhone}
             onChange={(e) => setRecipientPhone(e.target.value)}
             style={{
               width: '100%',
-              padding: '0.65rem 0.85rem',
-              borderRadius: '10px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.88rem',
-              color: '#0f172a',
+              height: '36px',
+              padding: '0 12px',
+              borderRadius: '4px',
+              border: '1px solid #dadce0',
+              fontSize: '13px',
+              color: '#202124',
+              backgroundColor: '#ffffff',
               boxSizing: 'border-box',
-              outline: 'none'
+              outline: 'none',
+              transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#1a73e8';
+              e.target.style.boxShadow = '0 0 0 1px #1a73e8';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#dadce0';
+              e.target.style.boxShadow = 'none';
             }}
           />
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '4px' }}>
-            {isEs ? 'Si lo deja vacío, WhatsApp le permitirá elegir cualquier contacto o grupo al abrirse.' : 'If left empty, WhatsApp lets you pick any contact or group upon opening.'}
+          <div style={{ fontSize: '11px', color: '#5f6368', marginTop: '4px' }}>
+            {isEs ? 'Si lo deja vacío, WhatsApp le permitirá elegir cualquier contacto o grupo.' : 'If left empty, WhatsApp lets you pick any contact or group.'}
           </div>
         </div>
 
         {/* Message Preview Box */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
-              {isEs ? 'Vista Previa del Mensaje a Enviar:' : 'Message Preview:'}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 500, color: '#3c4043' }}>
+              {isEs ? 'Vista Previa del Mensaje:' : 'Message Preview:'}
             </span>
-            <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+            <span style={{
+              fontSize: '11px',
+              color: '#137333',
+              background: '#e6f4ea',
+              border: '1px solid #ceead6',
+              borderRadius: '4px',
+              padding: '1px 6px',
+              fontWeight: 500,
+            }}>
               ✓ {isEs ? 'Enlace Directo Incluido' : 'Direct Link Included'}
             </span>
           </div>
 
           <div style={{
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
+            background: '#f8f9fa',
+            border: '1px solid #dadce0',
+            borderRadius: '4px',
             padding: '12px 14px',
-            fontSize: '0.82rem',
-            color: '#334155',
+            fontSize: '12px',
+            color: '#3c4043',
             lineHeight: 1.5,
             whiteSpace: 'pre-wrap',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: 'Roboto, -apple-system, sans-serif',
             maxHeight: '130px',
-            overflowY: 'auto'
+            overflowY: 'auto',
           }}>
             {messageText}
           </div>
@@ -355,171 +534,103 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose }) {
           display: 'flex',
           alignItems: 'center',
           gap: '14px',
-          background: '#f0fdf4',
-          border: '1px solid #bbf7d0',
-          borderRadius: '14px',
-          padding: '12px 16px'
+          background: '#ffffff',
+          border: '1px solid #dadce0',
+          borderRadius: '4px',
+          padding: '12px 16px',
         }}>
-          <div style={{ background: '#ffffff', padding: '6px', borderRadius: '8px', border: '1px solid #cbd5e1', flexShrink: 0 }}>
+          <div style={{ background: '#ffffff', padding: '6px', borderRadius: '4px', border: '1px solid #dadce0', flexShrink: 0 }}>
             <QRCodeSVG
               id="share-intake-qr"
-              value={intakeUrl}
+              value={activeUrl}
               size={64}
               level="M"
             />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 800 }}>
-              {isEs ? 'ENLACE OFICIAL DE ACCESO PÚBLICO' : 'OFFICIAL PUBLIC INTAKE URL'}
+            <div style={{ fontSize: '11px', color: '#5f6368', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              {shareMode === 'dossier' 
+                ? (isEs ? 'Enlace Directo al Expediente' : 'Direct Prescription Dossier URL')
+                : (isEs ? 'Enlace Oficial de Acceso Público' : 'Official Public Intake URL')}
             </div>
             <div style={{
-              fontSize: '0.82rem',
-              color: '#0f172a',
-              fontWeight: 700,
-              fontFamily: 'monospace',
+              fontSize: '12px',
+              color: '#202124',
+              fontFamily: "'Roboto Mono', SFMono-Regular, monospace",
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              background: '#f1f3f4',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              border: '1px solid #dadce0',
+              marginTop: '4px',
             }}>
-              {intakeUrl}
+              {activeUrl}
             </div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px', alignItems: 'center' }}>
               <button
                 type="button"
                 onClick={() => handleCopy('link')}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#0284c7',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
+                  color: '#1a73e8',
+                  fontSize: '12px',
+                  fontWeight: 500,
                   cursor: 'pointer',
                   padding: 0,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
                 }}
               >
-                {copiedType === 'link' ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
+                {copiedType === 'link' ? <Check size={12} style={{ color: '#137333' }} /> : <Copy size={12} />}
                 <span>{copiedType === 'link' ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
               </button>
-              <span style={{ color: '#cbd5e1' }}>•</span>
+              <span style={{ color: '#dadce0' }}>•</span>
               <button
                 type="button"
                 onClick={handleDownloadQrPng}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#64748b',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
+                  color: '#5f6368',
+                  fontSize: '12px',
+                  fontWeight: 500,
                   cursor: 'pointer',
                   padding: 0,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
                 }}
               >
                 <Download size={12} />
                 <span>{isEs ? 'Descargar QR' : 'Download QR'}</span>
               </button>
-              <span style={{ color: '#cbd5e1' }}>•</span>
+              <span style={{ color: '#dadce0' }}>•</span>
               <a
-                href={intakeUrl}
+                href={activeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  color: '#0284c7',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
+                  color: '#1a73e8',
+                  fontSize: '12px',
+                  fontWeight: 500,
                   textDecoration: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
                 }}
               >
                 <ExternalLink size={12} />
-                <span>{isEs ? 'Abrir Portal' : 'Open Portal'}</span>
+                <span>{isEs ? 'Abrir Enlace' : 'Open Link'}</span>
               </a>
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '10px', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={handleLaunchWhatsApp}
-            style={{
-              flex: '1 1 180px',
-              padding: '0.75rem 1.25rem',
-              borderRadius: '12px',
-              background: '#25D366',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.92rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)'
-            }}
-          >
-            <Phone size={18} />
-            <span>{isEs ? 'Enviar WhatsApp' : 'Send WhatsApp'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleCopy('link')}
-            style={{
-              flex: '1 1 140px',
-              padding: '0.75rem 1rem',
-              borderRadius: '12px',
-              background: '#0284c7',
-              border: '1px solid #0284c7',
-              color: '#ffffff',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 6px rgba(2, 132, 199, 0.2)'
-            }}
-          >
-            {copiedType === 'link' ? <Check size={16} style={{ color: '#ffffff' }} /> : <Copy size={16} />}
-            <span>{copiedType === 'link' ? (isEs ? '¡Enlace Copiado!' : 'Copied!') : (isEs ? 'Copiar Enlace' : 'Copy Link')}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => window.open(intakeUrl, '_blank', 'noopener,noreferrer')}
-            style={{
-              padding: '0.75rem 1rem',
-              borderRadius: '12px',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px'
-            }}
-            title="Abrir el portal de subida en una nueva pestaña"
-          >
-            <ExternalLink size={16} />
-            <span>{isEs ? 'Abrir Portal' : 'Open Portal'}</span>
-          </button>
-        </div>
-
       </div>
-    </div>
+    </StandardDrawer>
   );
 }
+

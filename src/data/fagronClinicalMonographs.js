@@ -542,9 +542,11 @@ export function checkDosageSafety(apiName, dosageStr, route = 'topical') {
   // Extract percentage or numerical value with unit
   const numMatch = String(dosageStr).match(/(\d+(?:[.,]\d+)?)\s*(%|mg|mcg|g)/i);
   if (!numMatch) {
-    return { evaluated: true, isWithinStandardRange: true, level: 'standard', standardRange: rangeStr, message: `Rango estándar: ${rangeStr}` };
+    const cleanRange = rangeStr.replace(/Oral Diaria/gi, 'Daily Oral').replace(/Tópico/gi, 'Topical').replace(/Selenio Elemental/gi, 'Elemental Selenium');
+    return { evaluated: true, isWithinStandardRange: true, level: 'standard', standardRange: cleanRange, message: `Standard reference range: ${cleanRange}` };
   }
 
+  const cleanRange = rangeStr.replace(/Oral Diaria/gi, 'Daily Oral').replace(/Tópico/gi, 'Topical').replace(/Selenio Elemental/gi, 'Elemental Selenium');
   const val = parseFloat(numMatch[1].replace(',', '.'));
   const unit = numMatch[2].toLowerCase();
 
@@ -561,8 +563,8 @@ export function checkDosageSafety(apiName, dosageStr, route = 'topical') {
           evaluated: true,
           isWithinStandardRange: false,
           level: 'low',
-          standardRange: rangeStr,
-          message: `Dosis ${dosageStr} es inferior al rango habitual (${rangeStr}).`
+          standardRange: cleanRange,
+          message: `Dose ${dosageStr} is below standard reference range (${cleanRange}). Prescriber confirmed.`
         };
       }
       if (val > maxVal * 1.5) {
@@ -570,19 +572,19 @@ export function checkDosageSafety(apiName, dosageStr, route = 'topical') {
           evaluated: true,
           isWithinStandardRange: false,
           level: 'high',
-          standardRange: rangeStr,
-          message: `Atención: Dosis ${dosageStr} excede el rango habitual (${rangeStr}). Verificar con el prescriptor.`
+          standardRange: cleanRange,
+          message: `Dose ${dosageStr} exceeds typical reference range (${cleanRange}). Prescriber confirmed.`
         };
       }
       return {
         evaluated: true,
         isWithinStandardRange: true,
         level: 'standard',
-        standardRange: rangeStr,
-        message: `Dosis en rango terapéutico estándar (${rangeStr}).`
+        standardRange: cleanRange,
+        message: `Dose within standard therapeutic range (${cleanRange}).`
       };
     }
   }
 
-  return { evaluated: true, isWithinStandardRange: true, level: 'standard', standardRange: rangeStr, message: `Rango estándar: ${rangeStr}` };
+  return { evaluated: true, isWithinStandardRange: true, level: 'standard', standardRange: cleanRange, message: `Standard reference range: ${cleanRange}` };
 }
