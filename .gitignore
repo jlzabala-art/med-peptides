@@ -46,6 +46,8 @@ med-peptides-app-*.json
 scratch/
 test-screenshots/
 *.png
+!public/labels/**
+!public/labels/**/*.png
 functions-ai/
 functions-cron/
 functions-finance/

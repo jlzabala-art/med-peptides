@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Download, Printer, QrCode, ExternalLink, Eye, Check } from '@/lib/icons';
+import React, { useState, useRef } from 'react';
+import { X, Download, Printer, QrCode, ExternalLink, Check, Maximize2 } from '@/lib/icons';
+import PharmapolisLabelSvg from './PharmapolisLabelSvg';
 
 export default function PharmacyLabelsModal({
   isOpen,
@@ -13,50 +14,148 @@ export default function PharmacyLabelsModal({
   const [selectedProductIdx, setSelectedProductIdx] = useState(initialLabelIndex || 0);
   const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isGeneratingPng, setIsGeneratingPng] = useState(false);
+
+  // Sizing Presets & Custom Dimensions
+  const [selectedPreset, setSelectedPreset] = useState('75x45');
+  const [dimensions, setDimensions] = useState({ widthMm: 75, heightMm: 45 });
+  const [customWidth, setCustomWidth] = useState(75);
+  const [customHeight, setCustomHeight] = useState(45);
+
+  const svgContainerRef = useRef(null);
 
   if (!isOpen || !labels || labels.length === 0) return null;
 
   const currentItem = labels[selectedProductIdx] || labels[0];
 
-  const getActiveImageUrl = () => {
-    if (activeVariant === 'front') return currentItem.frontUrl;
-    if (activeVariant === 'frontWithQr') return currentItem.frontWithQrUrl;
-    return currentItem.backQrUrl || currentItem.frontUrl;
+  const PRESETS = [
+    { id: '75x45', label: '75 × 45 mm', sub: isEs ? 'Estándar' : 'Standard', w: 75, h: 45 },
+    { id: '90x38', label: '90 × 38 mm', sub: isEs ? 'Térmica' : 'Thermal', w: 90, h: 38 },
+    { id: '100x50', label: '100 × 50 mm', sub: isEs ? 'Caja' : 'Box', w: 100, h: 50 },
+    { id: '50x30', label: '50 × 30 mm', sub: isEs ? 'Mini Vial' : 'Mini Vial', w: 50, h: 30 },
+    { id: 'custom', label: isEs ? 'Medida Libre' : 'Custom Size', sub: 'mm', w: null, h: null }
+  ];
+
+  const handleSelectPreset = (preset) => {
+    setSelectedPreset(preset.id);
+    if (preset.id !== 'custom') {
+      setDimensions({ widthMm: preset.w, heightMm: preset.h });
+      setCustomWidth(preset.w);
+      setCustomHeight(preset.h);
+    }
   };
 
+  const handleCustomWidthChange = (val) => {
+    const num = Math.max(25, Math.min(250, Number(val) || 25));
+    setCustomWidth(num);
+    setDimensions(prev => ({ ...prev, widthMm: num }));
+  };
+
+  const handleCustomHeightChange = (val) => {
+    const num = Math.max(20, Math.min(200, Number(val) || 20));
+    setCustomHeight(num);
+    setDimensions(prev => ({ ...prev, heightMm: num }));
+  };
+
+  // Dynamic 300 DPI High-Resolution PNG Generator from SVG
+  const handleDownloadPng = async () => {
+    try {
+      setIsGeneratingPng(true);
+      const svgElement = svgContainerRef.current?.querySelector('svg');
+      if (!svgElement) {
+        setIsGeneratingPng(false);
+        return;
+      }
+
+      // 300 DPI: 1 inch = 25.4 mm. Pixels = (mm / 25.4) * 300
+      const dpi = 300;
+      const widthPx = Math.round((dimensions.widthMm / 25.4) * dpi);
+      const heightPx = Math.round((dimensions.heightMm / 25.4) * dpi);
+
+      const clonedSvg = svgElement.cloneNode(true);
+      clonedSvg.setAttribute('width', `${widthPx}px`);
+      clonedSvg.setAttribute('height', `${heightPx}px`);
+
+      const svgXml = new XMLSerializer().serializeToString(clonedSvg);
+      const svgBlob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = widthPx;
+        canvas.height = heightPx;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, widthPx, heightPx);
+        ctx.drawImage(img, 0, 0, widthPx, heightPx);
+        URL.revokeObjectURL(svgUrl);
+
+        const pngDataUrl = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pngDataUrl;
+        const cleanName = (currentItem.productName || 'Label').replace(/[^a-zA-Z0-9]/g, '_');
+        downloadLink.download = `Pharmapolis_${cleanName}_${dimensions.widthMm}x${dimensions.heightMm}mm_${activeVariant}_300DPI.png`;
+        downloadLink.click();
+        setIsGeneratingPng(false);
+      };
+      img.onerror = () => {
+        setIsGeneratingPng(false);
+      };
+      img.src = svgUrl;
+    } catch (err) {
+      console.error('Error generating PNG:', err);
+      setIsGeneratingPng(false);
+    }
+  };
+
+  // High-Precision Vector Print Engine
   const handlePrint = () => {
-    const imgUrl = getActiveImageUrl();
+    const svgElement = svgContainerRef.current?.querySelector('svg');
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
+
+    const svgHtml = svgElement ? svgElement.outerHTML : '';
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${currentItem.productName} - Label 7.5 x 4.5 cm</title>
+          <title>${currentItem.productName || 'Pharmapolis Label'} - ${dimensions.widthMm}x${dimensions.heightMm}mm</title>
           <style>
             @page {
-              size: 75mm 45mm;
+              size: ${dimensions.widthMm}mm ${dimensions.heightMm}mm;
               margin: 0;
             }
+            * { box-sizing: border-box; }
             body {
               margin: 0;
               padding: 0;
+              width: ${dimensions.widthMm}mm;
+              height: ${dimensions.heightMm}mm;
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 75mm;
-              height: 45mm;
               background: #fff;
+              overflow: hidden;
             }
-            img {
-              width: 75mm;
-              height: 45mm;
-              object-fit: contain;
+            svg {
+              width: ${dimensions.widthMm}mm !important;
+              height: ${dimensions.heightMm}mm !important;
+              display: block;
             }
           </style>
         </head>
         <body>
-          <img src="${imgUrl}" onload="window.print(); window.close();" />
+          ${svgHtml}
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 250);
+            };
+          </script>
         </body>
       </html>
     `);
@@ -86,9 +185,9 @@ export default function PharmacyLabelsModal({
       <div style={{
         background: '#ffffff',
         borderRadius: '16px',
-        maxWidth: '920px',
+        maxWidth: '960px',
         width: '100%',
-        maxHeight: '92vh',
+        maxHeight: '94vh',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
@@ -108,7 +207,7 @@ export default function PharmacyLabelsModal({
             <div style={{
               width: 38,
               height: 38,
-              borderRadius: '4px',
+              borderRadius: '6px',
               background: '#e8f0fe',
               color: '#1a73e8',
               display: 'flex',
@@ -121,7 +220,7 @@ export default function PharmacyLabelsModal({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#202124' }}>
-                  {isEs ? 'Etiquetas Farmacéuticas Oficiales (7.5 × 4.5 cm)' : 'Official Compounding Bottle Labels (7.5 × 4.5 cm)'}
+                  {isEs ? 'Etiquetas Farmacéuticas Vectoriales' : 'Vector Pharmacy Compounding Labels'}
                 </h3>
                 <span style={{
                   background: '#e6f4ea',
@@ -129,16 +228,26 @@ export default function PharmacyLabelsModal({
                   border: '1px solid #ceead6',
                   fontSize: '0.68rem',
                   fontWeight: 600,
-                  padding: '1px 6px',
+                  padding: '2px 8px',
                   borderRadius: '4px'
                 }}>
                   EU GMP Certified
                 </span>
+                <span style={{
+                  background: '#f1f3f4',
+                  color: '#3c4043',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: '4px'
+                }}>
+                  {dimensions.widthMm} × {dimensions.heightMm} mm
+                </span>
               </div>
               <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#5f6368' }}>
                 {isEs 
-                  ? 'Pharmapolis Compounding Pharmacy · Troquelado estándar 75 × 45 mm (1500 × 900 px · 300 DPI)' 
-                  : 'Pharmapolis Compounding Pharmacy · Standard 75 × 45 mm die-cut (1500 × 900 px · 300 DPI)'}
+                  ? 'Pharmapolis Compounding Pharmacy · Renderizado vectorial SVG & Exportador 300 DPI a medida' 
+                  : 'Pharmapolis Compounding Pharmacy · Vector SVG Engine & Custom 300 DPI PNG Exporter'}
               </p>
             </div>
           </div>
@@ -223,131 +332,289 @@ export default function PharmacyLabelsModal({
 
         {/* Content Body */}
         <div style={{
-          padding: '20px',
+          padding: '16px 20px',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
+          gap: '14px',
           alignItems: 'center'
         }}>
-          {/* GCP Segmented Variant Switcher */}
+          {/* Controls Bar: Variant Switcher + Preset Sizing */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            background: '#f1f3f4',
-            padding: '3px',
-            borderRadius: '6px',
-            gap: '3px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
             width: '100%',
-            maxWidth: '680px'
+            maxWidth: '760px'
           }}>
-            <button
-              type="button"
-              onClick={() => setActiveVariant('backQr')}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '4px',
-                border: activeVariant === 'backQr' ? '1px solid #dadce0' : '1px solid transparent',
-                background: activeVariant === 'backQr' ? '#ffffff' : 'transparent',
-                color: activeVariant === 'backQr' ? '#1a73e8' : '#5f6368',
-                boxShadow: activeVariant === 'backQr' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
-                fontSize: '0.80rem',
-                fontWeight: activeVariant === 'backQr' ? 600 : 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.15s'
-              }}
-            >
-              <span>{isEs ? 'Reverso con QR' : 'Back Label with QR'}</span>
-              <span style={{
-                background: '#e6f4ea',
-                color: '#137333',
-                fontSize: '0.64rem',
-                padding: '1px 5px',
-                borderRadius: '3px',
-                fontWeight: 700,
-                border: '1px solid #ceead6'
-              }}>7.5×4.5 cm</span>
-            </button>
+            {/* GCP Segmented Variant Switcher */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              background: '#f1f3f4',
+              padding: '3px',
+              borderRadius: '6px',
+              gap: '3px',
+              width: '100%'
+            }}>
+              <button
+                type="button"
+                onClick={() => setActiveVariant('backQr')}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: activeVariant === 'backQr' ? '1px solid #dadce0' : '1px solid transparent',
+                  background: activeVariant === 'backQr' ? '#ffffff' : 'transparent',
+                  color: activeVariant === 'backQr' ? '#1a73e8' : '#5f6368',
+                  boxShadow: activeVariant === 'backQr' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
+                  fontSize: '0.80rem',
+                  fontWeight: activeVariant === 'backQr' ? 600 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s'
+                }}
+              >
+                <span>{isEs ? 'Reverso con QR' : 'Back Label with QR'}</span>
+                <span style={{
+                  background: '#e6f4ea',
+                  color: '#137333',
+                  fontSize: '0.64rem',
+                  padding: '1px 5px',
+                  borderRadius: '3px',
+                  fontWeight: 700,
+                  border: '1px solid #ceead6'
+                }}>Scan</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveVariant('front')}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '4px',
-                border: activeVariant === 'front' ? '1px solid #dadce0' : '1px solid transparent',
-                background: activeVariant === 'front' ? '#ffffff' : 'transparent',
-                color: activeVariant === 'front' ? '#1a73e8' : '#5f6368',
-                boxShadow: activeVariant === 'front' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
-                fontSize: '0.80rem',
-                fontWeight: activeVariant === 'front' ? 600 : 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.15s'
-              }}
-            >
-              {isEs ? 'Frontal Estándar' : 'Front Label'}
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveVariant('front')}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: activeVariant === 'front' ? '1px solid #dadce0' : '1px solid transparent',
+                  background: activeVariant === 'front' ? '#ffffff' : 'transparent',
+                  color: activeVariant === 'front' ? '#1a73e8' : '#5f6368',
+                  boxShadow: activeVariant === 'front' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
+                  fontSize: '0.80rem',
+                  fontWeight: activeVariant === 'front' ? 600 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s'
+                }}
+              >
+                {isEs ? 'Frontal Estándar' : 'Front Label'}
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveVariant('frontWithQr')}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '4px',
-                border: activeVariant === 'frontWithQr' ? '1px solid #dadce0' : '1px solid transparent',
-                background: activeVariant === 'frontWithQr' ? '#ffffff' : 'transparent',
-                color: activeVariant === 'frontWithQr' ? '#1a73e8' : '#5f6368',
-                boxShadow: activeVariant === 'frontWithQr' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
-                fontSize: '0.80rem',
-                fontWeight: activeVariant === 'frontWithQr' ? 600 : 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.15s'
-              }}
-            >
-              {isEs ? 'Frontal con Micro-QR' : 'Front with Micro-QR'}
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveVariant('frontWithQr')}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: activeVariant === 'frontWithQr' ? '1px solid #dadce0' : '1px solid transparent',
+                  background: activeVariant === 'frontWithQr' ? '#ffffff' : 'transparent',
+                  color: activeVariant === 'frontWithQr' ? '#1a73e8' : '#5f6368',
+                  boxShadow: activeVariant === 'frontWithQr' ? '0 1px 2px rgba(60,64,67,0.3)' : 'none',
+                  fontSize: '0.80rem',
+                  fontWeight: activeVariant === 'frontWithQr' ? 600 : 500,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s'
+                }}
+              >
+                {isEs ? 'Frontal con Micro-QR' : 'Front with Micro-QR'}
+              </button>
+            </div>
+
+            {/* Label Dimensions Bar (Presets & Custom mm) */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '8px',
+              background: '#f8fafc',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', marginRight: '4px' }}>
+                  {isEs ? 'Formato / Medida:' : 'Label Size:'}
+                </span>
+                {PRESETS.map((p) => {
+                  const isAct = selectedPreset === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(p)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        border: isAct ? '1px solid #1a73e8' : '1px solid #cbd5e1',
+                        background: isAct ? '#e8f0fe' : '#ffffff',
+                        color: isAct ? '#1a73e8' : '#334155',
+                        fontSize: '0.74rem',
+                        fontWeight: isAct ? 600 : 500,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.15s'
+                      }}
+                    >
+                      <span>{p.label}</span>
+                      <span style={{ fontSize: '0.68rem', opacity: 0.75 }}>({p.sub})</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom mm Inputs (when Custom is selected) */}
+              {selectedPreset === 'custom' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>Ancho:</span>
+                    <input
+                      type="number"
+                      min="25"
+                      max="250"
+                      value={customWidth}
+                      onChange={(e) => handleCustomWidthChange(e.target.value)}
+                      style={{
+                        width: '54px',
+                        padding: '2px 6px',
+                        fontSize: '0.76rem',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}
+                    />
+                    <span>mm</span>
+                  </label>
+                  <span style={{ color: '#94a3b8' }}>×</span>
+                  <label style={{ fontSize: '0.74rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>Alto:</span>
+                    <input
+                      type="number"
+                      min="20"
+                      max="200"
+                      value={customHeight}
+                      onChange={(e) => handleCustomHeightChange(e.target.value)}
+                      style={{
+                        width: '54px',
+                        padding: '2px 6px',
+                        fontSize: '0.76rem',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}
+                    />
+                    <span>mm</span>
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* High-Res Label Image Preview Frame (Exact 7.5 : 4.5 Ratio) */}
+          {/* High-Precision Interactive Vector SVG Preview Frame */}
+          <div
+            ref={svgContainerRef}
+            style={{
+              width: '100%',
+              maxWidth: '760px',
+              aspectRatio: `${dimensions.widthMm} / ${dimensions.heightMm}`,
+              borderRadius: '8px',
+              border: '1px solid #dadce0',
+              boxShadow: '0 2px 6px rgba(60,64,67,0.15), 0 8px 16px rgba(60,64,67,0.08)',
+              overflow: 'hidden',
+              background: '#ffffff',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxHeight: '440px'
+            }}
+          >
+            <PharmapolisLabelSvg
+              labelData={currentItem}
+              variant={activeVariant}
+              widthMm={dimensions.widthMm}
+              heightMm={dimensions.heightMm}
+            />
+          </div>
+
+          {/* QR Destination Badge & Diagnostic Info */}
           <div style={{
             width: '100%',
-            maxWidth: '680px',
-            aspectRatio: '7.5 / 4.5',
-            borderRadius: '8px',
-            border: '1px solid #dadce0',
-            boxShadow: '0 1px 3px rgba(60,64,67,0.15), 0 4px 8px rgba(60,64,67,0.08)',
-            overflow: 'hidden',
-            background: '#ffffff',
-            position: 'relative',
+            maxWidth: '760px',
+            background: '#f8fafc',
+            borderRadius: '6px',
+            border: '1px solid #e2e8f0',
+            padding: '8px 14px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'space-between',
+            fontSize: '0.74rem',
+            color: '#475569',
+            flexWrap: 'wrap',
+            gap: '8px'
           }}>
-            <img
-              src={getActiveImageUrl()}
-              alt={currentItem.productName}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain'
-              }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+              <span style={{ fontWeight: 600, color: '#003666', whiteSpace: 'nowrap' }}>
+                {isEs ? 'Destino Verificado QR:' : 'Verified QR Target:'}
+              </span>
+              <code style={{
+                background: '#ffffff',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                border: '1px solid #cbd5e1',
+                color: '#1e293b',
+                fontFamily: 'monospace',
+                fontSize: '0.72rem',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                maxWidth: '460px'
+              }}>
+                {currentItem.targetRxUrl || `https://med-peptides.com/rx/${currentItem.fileNumber || '51857'}`}
+              </code>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {currentItem.targetRxUrl && (
+                <a
+                  href={currentItem.targetRxUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#1a73e8',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>{isEs ? 'Probar Enlace ↗' : 'Test Link ↗'}</span>
+                </a>
+              )}
+            </div>
           </div>
 
           {/* GCP Bottom Specs & Action Bar */}
           <div style={{
             width: '100%',
-            maxWidth: '680px',
+            maxWidth: '760px',
             background: '#ffffff',
             borderRadius: '6px',
             border: '1px solid #dadce0',
@@ -367,15 +634,16 @@ export default function PharmacyLabelsModal({
                 <span>•</span>
                 <span>{currentItem.volume || '100 mL'}</span>
                 <span>•</span>
-                <span>75 × 45 mm (300 DPI)</span>
+                <span>{dimensions.widthMm} × {dimensions.heightMm} mm (Vector SVG · 300 DPI)</span>
               </div>
             </div>
 
-            {/* GCP Action Buttons Group */}
+            {/* Action Buttons Group */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <a
-                href={getActiveImageUrl()}
-                download
+              <button
+                type="button"
+                onClick={handleDownloadPng}
+                disabled={isGeneratingPng}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -387,18 +655,22 @@ export default function PharmacyLabelsModal({
                   color: '#ffffff',
                   fontSize: '0.82rem',
                   fontWeight: 600,
-                  textDecoration: 'none',
-                  cursor: 'pointer',
+                  cursor: isGeneratingPng ? 'wait' : 'pointer',
                   border: '1px solid #1a73e8',
                   boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-                  transition: 'background 0.15s'
+                  transition: 'background 0.15s',
+                  opacity: isGeneratingPng ? 0.7 : 1
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
+                onMouseEnter={(e) => { if (!isGeneratingPng) e.currentTarget.style.background = '#1557b0'; }}
+                onMouseLeave={(e) => { if (!isGeneratingPng) e.currentTarget.style.background = '#1a73e8'; }}
               >
                 <Download size={15} />
-                <span>{isEs ? 'Descargar PNG' : 'Download PNG'}</span>
-              </a>
+                <span>
+                  {isGeneratingPng 
+                    ? (isEs ? 'Generando 300 DPI...' : 'Rendering 300 DPI...') 
+                    : (isEs ? `Descargar PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)` : `Download PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)`)}
+                </span>
+              </button>
 
               <button
                 type="button"
