@@ -17,6 +17,135 @@ import { triggerHaptic } from '@/utils/haptics';
  * B. Available Presentations (Multi-format segmented matrix with Route badging)
  * C. Key Clinical Considerations (Concise; deep literature deferred to References)
  */
+function PresentationStrengthCard({ row, onRowClick }) {
+  const r = String(row.route || row.format || '').toLowerCase();
+  const isSpray = r.includes('nasal') || r.includes('spray');
+  const isPen = r.includes('pen');
+  const isOral = r.includes('oral') || r.includes('capsule');
+
+  return (
+    <div
+      onClick={() => onRowClick && onRowClick(row)}
+      style={{
+        background: '#ffffff',
+        border: row.isCurrentlyActive ? '1.5px solid #003666' : '1px solid #e2e8f0',
+        borderRadius: '8px',
+        padding: '0.85rem 1rem',
+        marginBottom: '0.65rem',
+        boxShadow: row.isCurrentlyActive ? '0 1px 4px rgba(0, 54, 102, 0.12)' : '0 1px 2px rgba(0,0,0,0.03)',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease'
+      }}
+    >
+      {/* Top Header: Strength + Format on Left, Action/Badge on Right */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.5rem',
+        marginBottom: '0.6rem',
+        borderBottom: '1px solid #f1f5f9',
+        paddingBottom: '0.5rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#003666' }}>
+            {row.strengthMg}
+          </span>
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 650,
+            color: '#475569',
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            padding: '2px 6px',
+            borderRadius: '4px'
+          }}>
+            {row.format}
+          </span>
+        </div>
+
+        <div>
+          {row.isCurrentlyActive ? (
+            <span style={{
+              background: '#ecfdf5',
+              color: '#065f46',
+              border: '1px solid #a7f3d0',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px'
+            }}>
+              Active ✓
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onRowClick) onRowClick(row);
+              }}
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#475569',
+                padding: '3px 8px',
+                borderRadius: '4px',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Set Active
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Grid Strip: Diluent, Concentration, Route */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+        gap: '0.5rem',
+        fontSize: '0.72rem'
+      }}>
+        <div style={{ background: '#f8fafc', padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
+          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Diluent / Vehicle</div>
+          <div style={{ color: '#0284c7', fontWeight: 700, marginTop: '2px' }}>{row.recommendedDiluent}</div>
+        </div>
+
+        <div style={{ background: '#f8fafc', padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
+          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Concentration</div>
+          <div style={{ color: '#003666', fontWeight: 750, marginTop: '2px' }}>{row.concentrationMgMl}</div>
+        </div>
+
+        <div style={{ background: '#f8fafc', padding: '0.35rem 0.5rem', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
+          <div style={{ fontSize: '0.62rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.04em' }}>Route</div>
+          <div style={{ marginTop: '2px' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '1px 6px',
+              borderRadius: '4px',
+              fontSize: '0.68rem',
+              fontWeight: 750,
+              background: isSpray ? '#fdf4ff' : isPen ? '#eff6ff' : isOral ? '#fffbeb' : '#f0fdf4',
+              color: isSpray ? '#86198f' : isPen ? '#1d4ed8' : isOral ? '#b45309' : '#166534',
+              border: isSpray ? '1px solid #f0abfc' : isPen ? '1px solid #bfdbfe' : isOral ? '1px solid #fde68a' : '1px solid #bbf7d0'
+            }}>
+              {isSpray ? '👃 Intranasal' : isPen ? '💉 SubQ Pen' : isOral ? '💊 Oral Solid' : '🧪 SubQ'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function OverviewTab({
   product = {},
   presentationMatrixRows = [],
@@ -536,6 +665,7 @@ export default function OverviewTab({
           keyField="id"
           hideExpandColumn
           onRowClick={handleRowClick}
+          mobileCardComponent={PresentationStrengthCard}
         />
       </section>
 

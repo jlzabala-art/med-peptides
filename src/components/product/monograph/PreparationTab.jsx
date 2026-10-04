@@ -1257,18 +1257,38 @@ export default function PreparationTab({
           </div>
 
           {/* Physical Vial Label Links */}
+          {/* Physical Vial Label Links (GCP Distributed Action Tiles) */}
           <div style={{
-            borderTop: '1px solid #f1f5f9',
-            paddingTop: '0.75rem',
+            borderTop: '1px solid #e2e8f0',
+            paddingTop: '0.85rem',
             marginTop: 'auto'
           }}>
-            <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
-              Physical Label Dispensing
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
+              <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Physical Label Dispensing
+              </span>
+              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                Standard clinical thermal & A4 templates
+              </span>
             </div>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px' }}>
               {[
-                { key: '38x90', format: '38x90', label: '38×90mm Label', icon: <Printer size={13} />, title: 'Patient Label — 38×90 mm' },
-                { key: 'sheet', format: 'sheet_a4', label: 'A4 Sheet (×8)', icon: <FileText size={13} />, title: 'Patient Labels — A4 Sheet (×8)' },
+                { 
+                  key: '38x90', 
+                  format: '38x90', 
+                  label: '38×90 mm Thermal Label', 
+                  desc: 'Individual vial & outer carton adhesive sticker',
+                  icon: <Printer size={15} color="#003666" />, 
+                  title: 'Patient Label — 38×90 mm' 
+                },
+                { 
+                  key: 'sheet', 
+                  format: 'sheet_a4', 
+                  label: 'A4 Dispensing Sheet (×8)', 
+                  desc: 'Multi-dose batch print sheet for clinical trays',
+                  icon: <FileText size={15} color="#003666" />, 
+                  title: 'Patient Labels — A4 Sheet (×8)' 
+                },
               ].map((opt) => {
                 const qs = new URLSearchParams({ format: opt.format, type: 'client' });
                 if (activeFormat?.id) { qs.set('presentation', activeFormat.id); }
@@ -1292,22 +1312,48 @@ export default function PreparationTab({
                       });
                     }}
                     style={{
-                      display: 'inline-flex',
+                      display: 'flex',
                       alignItems: 'center',
-                      gap: '5px',
-                      minHeight: '36px',
-                      padding: '5px 12px',
-                      background: '#f8fafc',
+                      gap: '10px',
+                      padding: '8px 12px',
+                      background: '#ffffff',
                       border: '1px solid #cbd5e1',
                       borderRadius: '6px',
-                      color: '#1e293b',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#003666';
+                      e.currentTarget.style.background = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#cbd5e1';
+                      e.currentTarget.style.background = '#ffffff';
                     }}
                     title="Preview before printing"
                   >
-                    {opt.icon} {opt.label}
+                    <div style={{ 
+                      width: '32px', 
+                      height: '32px', 
+                      borderRadius: '4px', 
+                      background: '#e0f2fe', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      flexShrink: 0 
+                    }}>
+                      {opt.icon}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                        {opt.label}
+                      </div>
+                      <div style={{ fontSize: '0.66rem', color: '#64748b', marginTop: '2px', lineHeight: 1.2 }}>
+                        {opt.desc}
+                      </div>
+                    </div>
                   </button>
                 );
               })}

@@ -66,11 +66,12 @@ export default function PeptideMonographHeader({
   const uniqueVariantDoses = [...new Set(variantDoses)];
 
   const strengthsList = (sortedStrengths || []).map(s => s.name || s.id).filter(Boolean);
-  const availableStrengths = strengthsList.length > 0 
-    ? strengthsList.join(' | ') 
+  const strengthsArray = strengthsList.length > 0 
+    ? strengthsList 
     : uniqueVariantDoses.length > 0 
-      ? uniqueVariantDoses.join(' | ') 
-      : (product.availableStrengths || 'Standard Formulation');
+      ? uniqueVariantDoses 
+      : (product.availableStrengths ? String(product.availableStrengths).split('|').map(s => s.trim()).filter(Boolean) : ['Standard Formulation']);
+  const availableStrengths = strengthsArray.join(' | ');
 
   // Dynamic Presentation Format Resolution
   const rawFormat = String(
@@ -332,7 +333,34 @@ export default function PeptideMonographHeader({
             {/* Field 2: Strengths */}
             <div className="pds-summary-cell">
               <span className="pds-summary-label">Available Strengths</span>
-              <strong className="pds-summary-value" style={{ fontFamily: 'monospace' }}>{availableStrengths}</strong>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '4px' }}>
+                {strengthsArray.map((str, sIdx) => {
+                  const isActive = (selectedStrength?.name === str || selectedStrength?.id === str || selectedStrength?.dosage === str);
+                  return (
+                    <span
+                      key={`${str}-${sIdx}`}
+                      onClick={() => onStrengthChange && onStrengthChange(str)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        fontFamily: 'monospace',
+                        background: isActive ? '#003666' : '#f1f5f9',
+                        color: isActive ? '#ffffff' : '#003666',
+                        border: `1px solid ${isActive ? '#003666' : '#cbd5e1'}`,
+                        cursor: onStrengthChange ? 'pointer' : 'default',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={onStrengthChange ? `Select ${str}` : str}
+                    >
+                      {str}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Field 3: Verified Purity */}

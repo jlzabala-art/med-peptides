@@ -37,7 +37,8 @@ import {
   Factory,
   QrCode,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Tag
 } from '@/lib/icons';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
