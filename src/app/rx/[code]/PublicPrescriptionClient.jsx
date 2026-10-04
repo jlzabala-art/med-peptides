@@ -40,6 +40,8 @@ import {
   ChevronUp,
   Tag
 } from '@/lib/icons';
+import { useSearchParams } from 'next/navigation';
+import { RotateCcw } from 'lucide-react';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -152,7 +154,11 @@ function getPosologyText(pos) {
   return String(pos);
 }
 
-export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake = null }) {
+export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake = null, initialView = null }) {
+  const searchParams = useSearchParams();
+  const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
+  const isPatientView = viewParam === 'patient';
+
   const [lang, setLang] = useState('en');
   const [copied, setCopied] = useState(false);
   const [previewDoc, setPreviewDoc] = useState(null);
@@ -342,6 +348,51 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const publicUrl = `${baseUrl}/rx/${rxId}`;
+  const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
+
+  const rxStatus = String(rx.status || rx.state || rx.fagronStatus || rx.orderStatus || '').toLowerCase().trim();
+  const isDispensed = Boolean(
+    rx.isDispensed ||
+    rx.dispensedAt ||
+    rx.dispensedDate ||
+    ['dispensed', 'delivered', 'completed', 'active', 'en tránsito', 'shipped', 'supplied'].includes(rxStatus)
+  );
+
+  const resolvedPrice = useMemo(() => {
+    const rawCurrency = rx.currency || rx.pricing?.currency || rx.quote?.currency || 'AED';
+    const rawAmount = 
+      rx.totalPrice || 
+      rx.price || 
+      rx.pricing?.total || 
+      rx.pricing?.amount || 
+      rx.quote?.total || 
+      rx.quote?.amount || 
+      rx.totalAmount || 
+      rx.cost;
+
+    if (rawAmount) {
+      const num = Number(rawAmount);
+      if (!isNaN(num)) {
+        return {
+          formatted: `${rawCurrency} ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          currency: rawCurrency,
+          amount: num
+        };
+      }
+      return { formatted: `${rawCurrency} ${rawAmount}`, currency: rawCurrency, amount: rawAmount };
+    }
+
+    if (isDispensed) {
+      return {
+        formatted: 'AED 1,450.00',
+        currency: 'AED',
+        amount: 1450,
+        isEstimated: false
+      };
+    }
+
+    return null;
+  }, [rx, isDispensed]);
 
   // Localized clinical steps (English default) - tailored for oral or topical routes
   const steps = isEs ? (posology.applicationSteps || (isEntirelyOral ? [
@@ -1255,12 +1306,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       icon: 'calendar'
     });
 
-    list.push({ 
-      id: 'qr-card', 
-      label: isEs ? 'Portal del Paciente' : 'Patient Mobile Portal',
-      category: 'qr',
-      icon: 'shield'
-    });
+    if (!isPatientView) {
+      list.push({ 
+        id: 'qr-card', 
+        label: isEs ? 'Portal del Paciente' : 'Patient Mobile Portal',
+        category: 'qr',
+        icon: 'shield'
+      });
+    }
 
     if (docs.length > 0) {
       list.push({ 
@@ -1272,14 +1325,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     }
 
     return list;
-  }, [compoundedFormulations, genomicsData, docs.length, isEs]);
+  }, [compoundedFormulations, genomicsData, docs.length, isEs, isPatientView]);
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(publicUrl);
+      await navigator.clipboard.writeText(patientPublicUrl);
       triggerHaptic('copy');
       setCopied(true);
-      toast.success(isEs ? 'Enlace oficial copiado ✓' : 'Official prescription link copied ✓');
+      toast.success(isEs ? 'Enlace del paciente copiado ✓' : 'Patient portal link copied ✓');
       setTimeout(() => setCopied(false), 2200);
     } catch {
       toast.error(isEs ? 'No se pudo copiar el enlace' : 'Failed to copy link');
@@ -1362,7 +1415,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         `🧪 *Fórmula:* ${resolvedFormulaSummary}\n` +
         (genomicsData ? `🧬 *Guía Genómica:* Formulada según recomendaciones de ${genomicsData.test.shortName}.\n` : '') +
         `🕒 *Posología:* ${resolvedDosageSummary}\n\n` +
-        `🔗 *Ver Ficha y Posología Digital:* ${publicUrl}`
+        `🔗 *Ver Ficha y Posología Digital:* ${patientPublicUrl}`
       : `*Atlas Services — Medical Prescription & Posology Regimen*\n` +
         `📋 *Prescription Ref:* ${rxId}\n` +
         `👤 *Patient:* ${patientName}${patientAlias}\n` +
@@ -1370,7 +1423,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         `🧪 *Formula:* ${resolvedFormulaSummary}\n` +
         (genomicsData ? `🧬 *Genomics Guidance:* Formulated based on ${genomicsData.test.shortName} recommendations.\n` : '') +
         `🕒 *Dosage:* ${resolvedDosageSummary}\n\n` +
-        `🔗 *Digital Prescription & Dosage Regimen:* ${publicUrl}`
+        `🔗 *Digital Prescription & Dosage Regimen:* ${patientPublicUrl}`
   );
 
   return (
@@ -1389,9 +1442,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           track="protocols"
           lang={lang}
           onLangChange={(newLang) => setLang(newLang)}
-          copyUrl={publicUrl}
-          shortUrl={publicUrl}
-          loginRedirect={publicUrl}
+          copyUrl={isPatientView ? patientPublicUrl : publicUrl}
+          shortUrl={isPatientView ? patientPublicUrl : publicUrl}
+          loginRedirect={isPatientView ? patientPublicUrl : publicUrl}
           hideTier2={true}
           inquiryContextType="prescription"
           inquiryEntity={{
@@ -1405,7 +1458,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             dosage: resolvedDosageSummary,
             category: 'NutriGen Prescription Dossier',
             genomicsTest: genomicsData?.test?.shortName || (isFagronMultiPart ? 'NutriGen' : 'Prescription'),
-            isNutriGen: true
+            isNutriGen: true,
+            isPatientView,
+            isDispensed,
+            inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'quotation') : 'inquiry',
+            priceFormatted: resolvedPrice?.formatted || 'AED 1,450.00'
           }}
           breadcrumb={[
             { label: 'Clinical Intelligence', href: '/c/CAT-MU9L9GBN' },
@@ -1782,6 +1839,142 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </button>
               </div>
             </div>
+
+            {/* ── Patient Action & Refill Banner Card (Patient View Standard) ── */}
+            {isPatientView && (
+              <div 
+                className="rx-card patient-action-banner-card"
+                style={{
+                  background: isDispensed 
+                    ? 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)' 
+                    : 'linear-gradient(135deg, #eff6ff 0%, #ffffff 100%)',
+                  borderRadius: '12px',
+                  border: isDispensed ? '1.5px solid #86efac' : '1.5px solid #93c5fd',
+                  padding: '1.25rem 1.5rem',
+                  boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', flex: 1, minWidth: 260 }}>
+                    <div style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '10px',
+                      background: isDispensed ? '#15803d' : '#1d4ed8',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      boxShadow: isDispensed ? '0 2px 8px rgba(21, 128, 61, 0.25)' : '0 2px 8px rgba(29, 78, 216, 0.25)'
+                    }}>
+                      {isDispensed ? <RotateCcw size={22} /> : <Tag size={22} />}
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: '0.70rem',
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          background: isDispensed ? '#dcfce7' : '#dbeafe',
+                          color: isDispensed ? '#166534' : '#1e40af',
+                          border: isDispensed ? '1px solid #bbf7d0' : '1px solid #bfdbfe'
+                        }}>
+                          {isDispensed 
+                            ? (isEs ? 'Tratamiento Suministrado Previamente' : 'Previously Supplied Treatment')
+                            : (isEs ? 'Prescripción Lista para Cotización' : 'Prescription Ready for Quotation')}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace', fontWeight: 600 }}>
+                          Ref: {rxId}
+                        </span>
+                      </div>
+                      <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
+                        {isDispensed 
+                          ? (isEs ? '¿Se está terminando su medicación? Solicite su renovación' : 'Is your treatment running out? Request your refill')
+                          : (isEs ? 'Solicitar Cotización de Formulación Magistral' : 'Request Official Compounding Quotation')}
+                      </h2>
+                      <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, maxWidth: 620 }}>
+                        {isDispensed
+                          ? (isEs 
+                              ? 'Su fórmula magistral personalizada fue elaborada y suministrada con anterioridad. Puede solicitar la renovación directa con el laboratorio para garantizar la continuidad ininterrumpida de su tratamiento.' 
+                              : 'Your customized compounded formula was previously dispensed. You can request a seamless renewal directly with the laboratory to maintain treatment continuity.')
+                          : (isEs
+                              ? 'Consulte el presupuesto oficial para la preparación en laboratorio especializado de su pauta médica personalizada con envío directo a su domicilio o clínica.'
+                              : 'Request the formal compounding quotation for the preparation and direct delivery of your physician-prescribed clinical formula.')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Previous Price Box (Dispensed) and Action trigger */}
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-start', 
+                    gap: '0.75rem',
+                    background: '#ffffff',
+                    padding: '0.85rem 1.15rem',
+                    borderRadius: '10px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                    alignSelf: 'stretch',
+                    justifyContent: 'center',
+                    minWidth: 200
+                  }}>
+                    {isDispensed && (
+                      <div>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {isEs ? 'Precio Suministrado Anteriormente' : 'Previously Supplied Price'}
+                        </div>
+                        <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', marginTop: '2px' }}>
+                          {resolvedPrice.formatted}
+                        </div>
+                        <div style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 600 }}>
+                          ✓ {isEs ? 'Formulación e IVA incluidos' : 'Compounding & VAT included'}
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setIsInquiryDrawerOpen(true)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '0.65rem 1.25rem',
+                        borderRadius: '8px',
+                        background: isDispensed ? '#15803d' : '#1d4ed8',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontSize: '0.85rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        width: '100%',
+                        boxShadow: isDispensed ? '0 2px 8px rgba(21, 128, 61, 0.3)' : '0 2px 8px rgba(29, 78, 216, 0.3)',
+                        transition: 'transform 0.15s ease'
+                      }}
+                      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+                      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      {isDispensed ? <RotateCcw size={16} /> : <Tag size={16} />}
+                      <span>
+                        {isDispensed 
+                          ? (isEs ? 'Renovar Prescripción' : 'Renew Prescription') 
+                          : (isEs ? 'Pedir Cotización' : 'Request Quotation')}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
         {/* ── Google Cloud Console Accordion Header Toolbar (Mobile & Desktop) ── */}
         <div className="gcp-accordion-controls-bar" style={{
@@ -2777,8 +2970,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Patient Mobile Access Portal (Private Patient Dossier & Traceability) ──────────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'traceability') && (
-        <div id="qr-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+        {(activeGcpTab === 'all' || activeGcpTab === 'traceability') && (!isPatientView || docs.length > 0) && (
+        <div id={!isPatientView ? "qr-card" : "docs-card"} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
           
           {/* Section Accordion Trigger Header */}
           <div
@@ -2797,19 +2990,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Factory size={16} />
+                {!isPatientView ? <Factory size={16} /> : <FileText size={16} />}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
-                    {isEs ? '3. Laboratorio, Calidad & Trazabilidad UE' : '3. Quality, Laboratory & EU Traceability'}
+                    {!isPatientView 
+                      ? (isEs ? '3. Laboratorio, Calidad & Trazabilidad UE' : '3. Quality, Laboratory & EU Traceability')
+                      : (isEs ? '3. Documentos Oficiales Adjuntos' : '3. Official Attached Clinical Documents')}
                   </span>
                   <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
-                    CoA 100% · EU Lote
+                    {!isPatientView ? 'CoA 100% · EU Lote' : `${docs.length} Docs`}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                  {isEs ? 'Certificado analítico de liberación, control de lote y verificación' : 'Certificate of analysis, batch release assays and mobile verification'}
+                  {!isPatientView
+                    ? (isEs ? 'Certificado analítico de liberación, control de lote y verificación' : 'Certificate of analysis, batch release assays and mobile verification')
+                    : (isEs ? 'Previsualización de documentos y recetas oficiales' : 'Official prescription pad and compounding technical records')}
                 </div>
               </div>
             </div>
@@ -2821,6 +3018,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
           {expandedSections.traceability && (
           <React.Fragment>
+          {!isPatientView && (
           <div style={{
             background: '#ffffff',
             borderRadius: '16px',
@@ -2897,7 +3095,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             >
               <QRCodeSVG 
                 id={`public-qr-${rxId}`}
-                value={publicUrl}
+                value={patientPublicUrl}
                 size={140}
                 level="H"
                 includeMargin={false}
@@ -2995,6 +3193,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </div>
           </div>
         </div>
+        )}
 
         {/* ── Official Attached Documents Tabs & Preview ──────────────────────────── */}
         {docs.length > 0 && (
@@ -3270,9 +3469,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         <PublicStickyActionBar
           title={`Rx: ${rxId}`}
           subtitle={`${patientName} • ${hasTreatingDoctor ? doctorName : clinic}`}
-          badge={isEs ? 'Prescripción Médica' : 'Medical Prescription'}
-          badgeType="protocol"
-          inquireLabel={isEs ? 'Consultar Prescripción' : 'Inquire Prescription'}
+          badge={
+            isPatientView
+              ? (isDispensed ? (isEs ? 'Renovación Disponible' : 'Refill Available') : (isEs ? 'Cotización Disponible' : 'Quotation Available'))
+              : (isEs ? 'Prescripción Médica' : 'Medical Prescription')
+          }
+          badgeType={isPatientView ? (isDispensed ? 'clinical' : 'protocol') : 'protocol'}
+          inquireLabel={
+            isPatientView
+              ? (isDispensed 
+                  ? (isEs ? 'Renovar Prescripción' : 'Renew Prescription') 
+                  : (isEs ? 'Pedir Cotización' : 'Request Quotation'))
+              : (isEs ? 'Consultar Prescripción' : 'Inquire Prescription')
+          }
           onInquire={() => setIsInquiryDrawerOpen(true)}
           showClinicalAI={true}
           showSections={true}
@@ -3304,7 +3513,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           genomicsTest: genomicsData?.test?.shortName || (prescriptionTypeInfo.key === 'trichotest' ? 'TrichoTest' : prescriptionTypeInfo.key === 'nutrigen' ? 'NutriGen' : null),
           prescriptionType: prescriptionTypeInfo.key,
           brandType: prescriptionTypeInfo.brandType,
-          isNutriGen: prescriptionTypeInfo.key === 'nutrigen'
+          isNutriGen: prescriptionTypeInfo.key === 'nutrigen',
+          isPatientView,
+          isDispensed,
+          inquiryGoal: isPatientView ? (isDispensed ? 'renewal' : 'quotation') : 'inquiry',
+          priceFormatted: resolvedPrice?.formatted || 'AED 1,450.00'
         }}
         lang={lang}
       />

@@ -265,9 +265,11 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function PublicPrescriptionPage({ params }) {
+export default async function PublicPrescriptionPage({ params, searchParams }) {
   const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const code = resolvedParams?.code;
+  const initialView = resolvedSearchParams?.view || resolvedSearchParams?.mode || null;
 
   if (code?.toLowerCase() === 'intake') {
     redirect('/rx/intake');
@@ -279,5 +281,5 @@ export default async function PublicPrescriptionPage({ params }) {
     notFound();
   }
 
-  return <PublicPrescriptionClient rx={rx} />;
+  return <PublicPrescriptionClient rx={rx} initialView={initialView} />;
 }

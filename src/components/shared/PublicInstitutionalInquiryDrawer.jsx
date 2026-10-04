@@ -15,7 +15,9 @@ import {
   Loader2,
   Clock,
   Sparkles,
-  Dna
+  Dna,
+  Tag,
+  RefreshCw
 } from 'lucide-react';
 import { useAlgoliaSearch } from '@/hooks/data/useAlgoliaSearch';
 import { triggerHaptic } from '@/utils/haptics';
@@ -68,6 +70,22 @@ const INQUIRY_TOPICS_PEPTIDES = [
 
 const INQUIRY_TOPICS_NUTRIGEN = [
   {
+    id: 'quotation_request',
+    labelEn: 'Prescription Quotation & Compounding Pricing',
+    labelEs: 'Cotización de Prescripción y Precio Oficial',
+    icon: Tag,
+    placeholderEn: 'Request official quotation, dispensary fulfillment costs, insurance reimbursement support, or shipping delivery options...',
+    placeholderEs: 'Solicite presupuesto oficial, costes de formulación magistral, documentación para reembolso o plazos de entrega...'
+  },
+  {
+    id: 'prescription_renewal',
+    labelEn: 'Treatment Refill & Direct Prescription Renewal',
+    labelEs: 'Renovación y Reposición Directa de Prescripción',
+    icon: RefreshCw,
+    placeholderEn: 'Confirm current posological adherence, remaining capsule count, preferred refill delivery address, and renewal authorization...',
+    placeholderEs: 'Confirme adherencia a la pauta, cápsulas restantes en el frasco, dirección de entrega para la reposición y solicitud de renovación...'
+  },
+  {
     id: 'genomics_correlation',
     labelEn: 'Fagron Genomics NutriGen™ & DNA Correlation',
     labelEs: 'Correlación de Fagron Genomics NutriGen™ & ADN',
@@ -118,6 +136,22 @@ const INQUIRY_TOPICS_NUTRIGEN = [
 ];
 
 const INQUIRY_TOPICS_TRICHOTEST = [
+  {
+    id: 'quotation_request',
+    labelEn: 'Prescription Quotation & Compounding Pricing',
+    labelEs: 'Cotización de Prescripción y Precio Oficial',
+    icon: Tag,
+    placeholderEn: 'Request official quotation, dispensary fulfillment costs, insurance reimbursement support, or shipping delivery options...',
+    placeholderEs: 'Solicite presupuesto oficial, costes de formulación magistral, documentación para reembolso o plazos de entrega...'
+  },
+  {
+    id: 'prescription_renewal',
+    labelEn: 'Treatment Refill & Direct Prescription Renewal',
+    labelEs: 'Renovación y Reposición Directa de Prescripción',
+    icon: RefreshCw,
+    placeholderEn: 'Confirm current posological adherence, remaining supply, preferred refill delivery address, and renewal authorization...',
+    placeholderEs: 'Confirme adherencia a la pauta, producto restante, dirección de entrega para la reposición y solicitud de renovación...'
+  },
   {
     id: 'genomics_correlation',
     labelEn: 'Fagron Genomics TrichoTest™ & DNA Correlation',
@@ -220,6 +254,22 @@ const INQUIRY_TOPICS_HORMONES = [
 ];
 
 const INQUIRY_TOPICS_PRESCRIPTION = [
+  {
+    id: 'quotation_request',
+    labelEn: 'Prescription Quotation & Compounding Pricing',
+    labelEs: 'Cotización de Prescripción y Precio Oficial',
+    icon: Tag,
+    placeholderEn: 'Request official quotation, dispensary fulfillment costs, insurance reimbursement support, or shipping delivery options...',
+    placeholderEs: 'Solicite presupuesto oficial, costes de formulación magistral, documentación para reembolso o plazos de entrega...'
+  },
+  {
+    id: 'prescription_renewal',
+    labelEn: 'Treatment Refill & Direct Prescription Renewal',
+    labelEs: 'Renovación y Reposición Directa de Prescripción',
+    icon: RefreshCw,
+    placeholderEn: 'Confirm current posological adherence, remaining capsule count, preferred refill delivery address, and renewal authorization...',
+    placeholderEs: 'Confirme adherencia a la pauta, cápsulas restantes en el frasco, dirección de entrega para la reposición y solicitud de renovación...'
+  },
   {
     id: 'rx_details',
     labelEn: 'Prescription Details & Treatment Protocol Support',
@@ -469,6 +519,8 @@ export default function PublicInstitutionalInquiryDrawer({
   }, [brandType]);
 
   const [topic, setTopic] = useState(() => {
+    if (initialEntity?.inquiryGoal === 'renewal') return 'prescription_renewal';
+    if (initialEntity?.inquiryGoal === 'quotation') return 'quotation_request';
     if (brandType === 'trichotest') return 'genomics_correlation';
     if (brandType === 'nutrigen') return 'genomics_correlation';
     if (brandType === 'hormone' || brandType === 'hormones') return 'endocrine_biomarkers';
@@ -483,12 +535,22 @@ export default function PublicInstitutionalInquiryDrawer({
   });
 
   useEffect(() => {
-    if (!activeTopics.some(t => t.id === topic)) {
+    if (initialEntity?.inquiryGoal === 'renewal') {
+      setTopic('prescription_renewal');
+    } else if (initialEntity?.inquiryGoal === 'quotation') {
+      setTopic('quotation_request');
+    } else if (!activeTopics.some(t => t.id === topic)) {
       setTopic(activeTopics[0]?.id || 'general_inquiry');
     }
-  }, [activeTopics, topic]);
+  }, [activeTopics, topic, initialEntity?.inquiryGoal]);
 
   const drawerHeaderTitle = useMemo(() => {
+    if (initialEntity?.inquiryGoal === 'renewal') {
+      return lang === 'es' ? 'Renovación de Prescripción Médica' : 'Prescription Renewal & Refill Request';
+    }
+    if (initialEntity?.inquiryGoal === 'quotation') {
+      return lang === 'es' ? 'Solicitud de Cotización de Prescripción' : 'Prescription Quotation Request';
+    }
     if (brandType === 'trichotest') {
       return lang === 'es' ? 'Consulta TrichoTest™ y Protocolo Capilar' : 'TrichoTest™ Protocol & Clinical Inquiry';
     }
@@ -511,7 +573,7 @@ export default function PublicInstitutionalInquiryDrawer({
       return lang === 'es' ? 'Consulta de Diagnóstico y Laboratorio' : 'Diagnostic & Laboratory Inquiry';
     }
     return lang === 'es' ? 'Consulta Médica e Institucional' : 'Institutional & Clinical Inquiry';
-  }, [brandType, lang]);
+  }, [brandType, lang, initialEntity?.inquiryGoal]);
 
   const drawerHeaderSubtitle = useMemo(() => {
     const docName = initialEntity?.doctorName || 'Dr. Haytham Salem';
@@ -1037,6 +1099,11 @@ export default function PublicInstitutionalInquiryDrawer({
                       {attachedEntity.strength && (
                         <div style={{ fontSize: '0.74rem', color: '#3b82f6', fontWeight: 600, marginTop: '2px' }}>
                           {lang === 'es' ? 'Dosis/Concentración:' : 'Strength/Dose:'} {attachedEntity.strength}
+                        </div>
+                      )}
+                      {attachedEntity.priceFormatted && (
+                        <div style={{ fontSize: '0.74rem', color: '#15803d', fontWeight: 750, marginTop: '2px' }}>
+                          {lang === 'es' ? 'Precio Suministrado:' : 'Supplied Price:'} {attachedEntity.priceFormatted}
                         </div>
                       )}
                     </div>

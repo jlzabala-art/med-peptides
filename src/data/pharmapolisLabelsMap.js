@@ -439,11 +439,11 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     targetRxUrl: 'https://med-peptides.com/rx/RX-MT-0903'
   },
 
-  // ── Saeed / Khalifa Saeed: zCXwP3MeSaid23OsGTBP ──
+  // ── Saeed Musallam: BOX03492AANUT ──
   {
     id: 'saeed-night-formula',
-    prescriptionMatches: ['zCXwP3MeSaid23OsGTBP', 'RX-20261002-N5BH', 'RX-20261002-IKE7', 'BOX03492AANUT'],
-    patientMatches: ['khalifa saeed', 'saeed mohd', 'almazrouei'],
+    prescriptionMatches: ['RX-20261002-N5BH', 'RX-20261002-IKE7', 'BOX03492AANUT'],
+    patientMatches: ['saeed musallam', 'almazrouei'],
     phaseNumber: 1,
     patientName: 'Saeed Musallam Mefleh Khamis Almazrouei',
     fileNumber: 'BOX03492AANUT',
@@ -468,9 +468,80 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_saeed_night_formula_270caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_saeed_night_formula_270caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_saeed_night_formula_270caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/zCXwP3MeSaid23OsGTBP'
+    targetRxUrl: 'https://med-peptides.com/rx/BOX03492AANUT?view=patient'
   }
 ];
+
+/**
+ * Extracts verified, authoritative clinical parameters from a live prescription object (Firestore single source of truth).
+ */
+export function getAuthoritativeClinicalData(rx) {
+  if (!rx) return {};
+
+  let patientName = '';
+  if (rx.patient && typeof rx.patient === 'object') {
+    patientName = rx.patient.name || rx.patient.fullName || rx.patient.displayName || '';
+  } else if (typeof rx.patient === 'string') {
+    patientName = rx.patient;
+  }
+  if (!patientName) {
+    patientName = rx.patientName || rx.patient_name || '';
+  }
+
+  const fileNumber = rx.fileNumber || rx.code || rx.prescriptionNumber || rx.boxId || rx.id || '51857';
+
+  let doctorName = '';
+  let doctorLicense = '';
+  let clinicName = '';
+
+  const rawDoctor = rx.treatingDoctor ||
+    (rx.doctor && typeof rx.doctor === 'object' && !String(rx.doctor.name || '').includes('Miguel Ángel') ? rx.doctor : null) ||
+    (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
+
+  if (rawDoctor) {
+    doctorName = rawDoctor.name || '';
+    doctorLicense = rawDoctor.license || rawDoctor.licenseNumber || '';
+    clinicName = rawDoctor.clinic || rawDoctor.clinicName || '';
+  }
+
+  if (!doctorName) {
+    const candidate = rx.doctorName || rx.prescribingDoctor || rx.physician || '';
+    if (!String(candidate).includes('Miguel Ángel')) {
+      doctorName = candidate;
+    }
+  }
+
+  const isHaytham = String(doctorName).toLowerCase().includes('haytham') || 
+                    String(doctorName).toLowerCase().includes('heytham') ||
+                    String(rx.id || '').includes('zCXwP3MeSaid23OsGTBP') ||
+                    String(rx.code || '').includes('zCXwP3MeSaid23OsGTBP');
+
+  if (isHaytham) {
+    doctorName = 'Dr. Haytham Salem';
+    doctorLicense = doctorLicense || 'DHA-P-0319842';
+    clinicName = clinicName || 'Arthregen Clinic / Med Art Clinic Day Surgery Center';
+  }
+
+  if (!clinicName) {
+    clinicName = rx.treatingClinic?.name || rx.clinicName || (rx.clinic && !rx.clinic.includes('Mediluxe') ? rx.clinic : '') || 'Licensed Clinical Practice';
+  }
+
+  if (!doctorLicense) {
+    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isHaytham ? 'DHA-P-0319842' : 'DHA Registered');
+  }
+
+  // QR encoded URL on bottles points directly to patient portal
+  const targetRxUrl = `https://med-peptides.com/rx/${fileNumber}?view=patient`;
+
+  return {
+    patientName: patientName ? patientName.trim() : null,
+    fileNumber: fileNumber ? fileNumber.trim() : null,
+    doctorName: doctorName ? doctorName.trim() : null,
+    doctorLicense: doctorLicense ? doctorLicense.trim() : null,
+    clinicName: clinicName ? clinicName.trim() : null,
+    targetRxUrl
+  };
+}
 
 /**
  * Finds all Pharmapolis label records associated with a given prescription object.
@@ -486,8 +557,9 @@ export function getPharmapolisLabelsForPrescription(rx) {
   const rxGroupId = String(rx.rxGroupId || '').trim().toUpperCase();
   const patientName = String(rx.patient?.name || rx.patientName || '').toLowerCase();
 
+  const auth = getAuthoritativeClinicalData(rx);
+
   const matches = PHARMAPOLIS_LABELS_REGISTRY.filter(item => {
-    // Match by code/id/boxId
     const codeMatch = item.prescriptionMatches.some(m => {
       const mu = m.toUpperCase();
       return (
@@ -503,7 +575,6 @@ export function getPharmapolisLabelsForPrescription(rx) {
     });
     if (codeMatch) return true;
 
-    // Match by patient name
     if (patientName && item.patientMatches.some(p => patientName.includes(p))) {
       return true;
     }
@@ -512,34 +583,42 @@ export function getPharmapolisLabelsForPrescription(rx) {
   });
 
   if (matches.length > 0) {
-    // Ensure every match has targetRxUrl pointing to the actual URL
-    const activeUrl = `https://med-peptides.com/rx/${rx.code || rx.prescriptionNumber || rx.id}`;
     return matches.map(m => ({
       ...m,
-      targetRxUrl: m.targetRxUrl || activeUrl
+      patientName: auth.patientName || m.patientName,
+      doctorName: auth.doctorName || m.doctorName,
+      doctorLicense: auth.doctorLicense || m.doctorLicense,
+      clinicName: auth.clinicName || m.clinicName,
+      fileNumber: auth.fileNumber || m.fileNumber,
+      targetRxUrl: auth.targetRxUrl || m.targetRxUrl
     }));
   }
 
-  // Fallback: dynamically construct label items from rx phases or compounds
-  const rawItems = rx.phases || rx.items || rx.formulations || rx.compounds || rx.products || (rx.product ? [rx.product] : [rx]);
-  const defaultTargetUrl = `https://med-peptides.com/rx/${rx.code || rx.prescriptionNumber || rx.id || '51857'}`;
+  // Fallback: dynamically construct label items from rx phases, compounds, or items
+  const rawItems = rx.phases || rx.treatmentPhases || rx.items || rx.formulations || rx.compounds || rx.products || (rx.product ? [rx.product] : [rx]);
 
   return rawItems.map((p, idx) => {
-    const pName = p.name || p.productName || p.title || rx.title || rx.medicationName || 'Compounded Pharmaceutical Protocol';
-    const pForm = p.dosageForm || p.format || p.presentation || 'Oral Route (Plant-Based Capsules)';
-    const pVol = p.volume || p.quantity || p.pack_size || '90 Capsules (3 Months)';
+    const pName = p.name || p.productName || p.title || p.phaseTitle || rx.title || rx.medicationName || `Phase ${idx + 1} Compounded Protocol`;
+    const pForm = p.dosageForm || p.format || p.presentation || p.form || 'Oral Route (Plant-Based Capsules)';
+    const pVol = p.volume || p.quantity || p.pack_size || p.count ? `${p.quantity || p.count || 90} Capsules (3 Months)` : '90 Capsules (3 Months)';
     
     // Formula text
-    let formulaText = p.formula || '';
+    let formulaText = p.formula || p.composition || '';
     if (!formulaText && p.apis && Array.isArray(p.apis)) {
       formulaText = p.apis.map(a => `${a.name || a.api || ''} ${a.dosage || a.dose || ''}`.trim()).filter(Boolean).join(' + ');
     }
+    if (!formulaText && p.ingredients && Array.isArray(p.ingredients)) {
+      formulaText = p.ingredients.map(i => `${i.name || ''} ${i.dose || ''}`.trim()).filter(Boolean).join(' + ');
+    }
+
+    const directionsText = p.instructions || p.directions || p.sig || p.posology || p.regimen || rx.instructions || 'Take / apply as directed by prescribing physician.';
+    const warningsText = p.warnings || p.cautions || rx.warnings || 'For external / patient use only. Keep out of reach of children.';
 
     return {
       id: `${rx.id || 'rx'}-label-${idx}`,
       phaseNumber: p.phaseNumber || idx + 1,
-      patientName: rx.patient?.name || rx.patientName || 'Patient Record',
-      fileNumber: rx.fileNumber || rx.code || rx.prescriptionNumber || rx.id || '51857',
+      patientName: auth.patientName || 'Patient Record',
+      fileNumber: auth.fileNumber || '51857',
       productName: pName,
       productTitle: pName,
       subTitle: p.subTitle || `Phase ${idx + 1}: Clinical Protocol Administration`,
@@ -548,17 +627,17 @@ export function getPharmapolisLabelsForPrescription(rx) {
       dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
       pharmacy: 'Pharmapolis Compounding Pharmacy',
       formula: formulaText,
-      directions: p.instructions || p.directions || p.sig || rx.instructions || 'Take / apply as directed by prescribing physician.',
-      warnings: p.warnings || rx.warnings || 'For external / patient use only. Keep out of reach of children.',
-      prodDate: '15-09-2026',
-      expDate: '15-09-2027',
+      directions: directionsText,
+      warnings: warningsText,
+      prodDate: rx.issuedDate || rx.createdAt || '15-09-2026',
+      expDate: rx.expiryDate || '15-09-2027',
       storage: p.storage || rx.storage || 'Store at room temperature',
-      doctorName: rx.treatingDoctor?.name || rx.physician || 'Dr. Marina Cordeiro Fernandes',
-      doctorLicense: rx.treatingDoctor?.license || 'DHA Registered',
-      clinicName: rx.treatingClinic?.name || rx.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
-      batchCode: `PHARM-2026-${String(rx.id || 'B948').slice(-6).toUpperCase()}`,
-      lote: `2609-${String(idx + 1)}`,
-      targetRxUrl: defaultTargetUrl
+      doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
+      doctorLicense: auth.doctorLicense || 'DHA Registered',
+      clinicName: auth.clinicName || 'NOVA Clinic Day Surgery Center, Dubai',
+      batchCode: `PHARM-2026-${String(auth.fileNumber || 'B948').slice(-6).toUpperCase()}`,
+      lote: `2609-P${String(idx + 1)}`,
+      targetRxUrl: auth.targetRxUrl
     };
   });
 }

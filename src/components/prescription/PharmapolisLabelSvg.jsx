@@ -42,8 +42,30 @@ export default function PharmapolisLabelSvg({
   // Base coordinates: 1500 x 900 for 75 x 45 mm
   const baseWidth = Math.round(widthMm * 20);
   const baseHeight = Math.round(heightMm * 20);
+  // Base coordinates: 1500 px base width, dynamic responsive height
   const WIDTH = 1500;
   const HEIGHT = Math.round((heightMm / widthMm) * 1500) || 900;
+
+  // Responsive height tiers
+  const isShort = HEIGHT < 720; // e.g. 90x38 mm (633 px)
+  const isMediumHeight = HEIGHT >= 720 && HEIGHT < 850; // e.g. 100x50 mm (750 px)
+
+  // Pin footer elements dynamically to bottom of canvas
+  const footerLineY = HEIGHT - (isShort ? 88 : isMediumHeight ? 100 : 110);
+  const footerTextY = HEIGHT - (isShort ? 54 : isMediumHeight ? 62 : 68);
+  const footerFontSize = isShort ? 19 : isMediumHeight ? 21 : 23;
+  const footerLineGap = isShort ? 30 : 36;
+
+  // Header & Patient Box coordinates (guarantees zero overlap with Micro-QR)
+  const headerY = isShort ? 24 : 36;
+  const headerTitleSize = isShort ? 28 : 34;
+  const headerSubSize = isShort ? 15 : 18;
+
+  const patientBoxY = isShort ? 134 : 166;
+  const patientBoxHeight = isShort ? 46 : 56;
+  const patientBoxBottom = patientBoxY + patientBoxHeight;
+  const patientFontSize = isShort ? 20 : 23;
+  const patientTextY = isShort ? 31 : 37;
 
   // Extraction of clinical parameters with defensive fallbacks
   const patientName = (labelData.patientName || labelData.patient?.name || 'PATIENT RECORD').toUpperCase();
@@ -61,14 +83,18 @@ export default function PharmapolisLabelSvg({
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
   
-  // Unique QR URL strictly bound to this prescription
-  const targetRxUrl = labelData.targetRxUrl || labelData.url || `https://med-peptides.com/rx/${fileNumber}`;
+  // Unique QR URL strictly bound to this prescription (pointing to patient view)
+  const targetRxUrl = labelData.targetRxUrl || labelData.url || `https://med-peptides.com/rx/${fileNumber}?view=patient`;
   const cleanDisplayUrl = targetRxUrl.replace(/^https?:\/\//, '');
 
   // ───────────────────────────────────────────────────────────────────────────
   // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)
   // ───────────────────────────────────────────────────────────────────────────
   if (variant === 'backQr') {
+    const colY = patientBoxBottom + (isShort ? 12 : 20);
+    const colHeight = footerLineY - colY - (isShort ? 10 : 16);
+    const backQrSize = Math.min(colHeight - (isShort ? 92 : 130), isShort ? 210 : 300);
+
     return (
       <svg
         ref={svgRef}
@@ -81,41 +107,41 @@ export default function PharmapolisLabelSvg({
         <rect width={WIDTH} height={HEIGHT} fill="#ffffff" />
 
         {/* ── HEADER ── */}
-        <g transform="translate(60, 42)">
-          <text x="0" y="32" fontFamily="Arial, Helvetica, sans-serif" fontSize="34" fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-          <text x="0" y="58" fontFamily="Arial, Helvetica, sans-serif" fontSize="18" fontWeight="500" fill="#334155">Verification &amp; Digital Monograph Registry</text>
-          <text x="0" y="82" fontFamily="Arial, Helvetica, sans-serif" fontSize="17" fontWeight="400" fill="#64748b">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+        <g transform={`translate(60, ${headerY})`}>
+          <text x="0" y="28" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
+          <text x="0" y="52" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#334155">Verification &amp; Digital Monograph Registry</text>
+          <text x="0" y="74" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize - 1} fontWeight="400" fill="#64748b">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
-        <g transform="translate(1440, 46)">
-          <rect x="-310" y="0" width="310" height="44" fill="#f8fafc" stroke="#003666" strokeWidth="1.6" rx="6" />
-          <text x="-155" y="28" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="800" fill="#003666" letterSpacing="0.5">
+        <g transform={`translate(1440, ${headerY + 2})`}>
+          <rect x="-310" y="0" width="310" height={isShort ? 38 : 44} fill="#f8fafc" stroke="#003666" strokeWidth="1.6" rx="6" />
+          <text x="-155" y={isShort ? 24 : 28} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#003666" letterSpacing="0.5">
             EU GMP CERTIFIED DISPENSARY
           </text>
         </g>
 
         {/* ── PATIENT BOX ── */}
-        <g transform="translate(60, 155)">
-          <rect x="0" y="0" width="1380" height="58" fill="#f8fafc" stroke="#000000" strokeWidth="1.8" rx="4" />
-          <text x="20" y="37" fontFamily="Arial, Helvetica, sans-serif" fontSize="22" fontWeight="700" letterSpacing="0.4" fill="#000000">
+        <g transform={`translate(60, ${patientBoxY})`}>
+          <rect x="0" y="0" width="1380" height={patientBoxHeight} fill="#f8fafc" stroke="#000000" strokeWidth="1.8" rx="4" />
+          <text x="20" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
             PATIENT NAME: <tspan fontWeight="900">{patientName}</tspan>
           </text>
-          <text x="1360" y="37" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize="20" fontWeight="800" fill="#003666">
+          <text x="1360" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize - 2} fontWeight="800" fill="#003666">
             FILE #{fileNumber}
           </text>
         </g>
 
         {/* ── TWO-COLUMN WORKSPACE ── */}
-        {/* LEFT COLUMN: LARGE CENTERED QR CODE (460 x 485 px) */}
-        <g transform="translate(60, 235)">
-          <rect x="0" y="0" width="460" height="485" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
+        {/* LEFT COLUMN: LARGE CENTERED QR CODE */}
+        <g transform={`translate(60, ${colY})`}>
+          <rect x="0" y="0" width="460" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
           
-          {/* Centered Large QR Code: 310 x 310 px */}
-          <svg x="75" y="16" width="310" height="310" viewBox="0 0 310 310">
+          {/* Centered Dynamic QR Code */}
+          <svg x={Math.round((460 - backQrSize) / 2)} y={isShort ? 8 : 14} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
             <QRCodeSVG
               value={targetRxUrl}
-              size={310}
+              size={backQrSize}
               level="M"
               fgColor="#003666"
               bgColor="#ffffff"
@@ -123,87 +149,89 @@ export default function PharmapolisLabelSvg({
           </svg>
 
           {/* Under QR Verification Details */}
-          <text x="230" y="358" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="18" fontWeight="800" fill="#003666" letterSpacing="0.5">
+          <text x="230" y={backQrSize + (isShort ? 26 : 36)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="800" fill="#003666" letterSpacing="0.5">
             SCAN FOR DIGITAL POSOLOGY &amp; CoA
           </text>
-          <text x="230" y="390" textAnchor="middle" fontFamily="monospace" fontSize="14" fontWeight="700" fill="#475569">
-            {cleanDisplayUrl}
+          <text x="230" y={backQrSize + (isShort ? 46 : 64)} textAnchor="middle" fontFamily="monospace" fontSize={isShort ? 12 : 14} fontWeight="700" fill="#475569">
+            {cleanDisplayUrl.length > 38 ? cleanDisplayUrl.slice(0, 36) + '...' : cleanDisplayUrl}
           </text>
           
-          {/* Status & Security Verification Pills */}
-          <g transform="translate(230, 432)">
-            <rect x="-175" y="-18" width="350" height="36" fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.2" rx="18" />
-            <text x="0" y="5" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="800" fill="#065f46">
+          {/* Status & Security Verification Pill */}
+          <g transform={`translate(230, ${backQrSize + (isShort ? 72 : 98)})`}>
+            <rect x="-165" y="-14" width="330" height={isShort ? 28 : 34} fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.2" rx="17" />
+            <text x="0" y={isShort ? 5 : 7} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#065f46">
               ✓ Verified Clinical Atlas Record
             </text>
           </g>
         </g>
 
-        {/* RIGHT COLUMN: CLINICAL TRACEABILITY & SPECIFICATIONS (890 x 485 px) */}
-        <g transform="translate(550, 235)">
-          <rect x="0" y="0" width="890" height="485" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
+        {/* RIGHT COLUMN: CLINICAL TRACEABILITY & SPECIFICATIONS */}
+        <g transform={`translate(550, ${colY})`}>
+          <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
 
           {/* Block 1: Formulation & Batch */}
-          <g transform="translate(32, 42)">
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="800" fill="#64748b" letterSpacing="0.8">
+          <g transform={`translate(32, ${Math.round(colHeight * 0.08)})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#64748b" letterSpacing="0.8">
               FORMULATION CODE &amp; BATCH
             </text>
-            <text x="0" y="32" fontFamily="Arial, Helvetica, sans-serif" fontSize="23" fontWeight="900" fill="#000000">
+            <text x="0" y={isShort ? 24 : 32} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 18 : 23} fontWeight="900" fill="#000000">
               {productTitle}
             </text>
-            <text x="0" y="64" fontFamily="Arial, Helvetica, sans-serif" fontSize="18" fontWeight="700" fill="#003666">
+            <text x="0" y={isShort ? 48 : 64} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 15 : 18} fontWeight="700" fill="#003666">
               Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote Control: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
             </text>
           </g>
 
           {/* Block 2: Prescribing Physician & Clinic */}
-          <g transform="translate(32, 175)">
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="800" fill="#64748b" letterSpacing="0.8">
+          <g transform={`translate(32, ${Math.round(colHeight * 0.38)})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#64748b" letterSpacing="0.8">
               PRESCRIBING PHYSICIAN &amp; CLINIC
             </text>
-            <text x="0" y="30" fontFamily="Arial, Helvetica, sans-serif" fontSize="22" fontWeight="850" fill="#0f172a">
+            <text x="0" y={isShort ? 24 : 30} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 18 : 22} fontWeight="850" fill="#0f172a">
               {doctorName}
             </text>
-            <text x="0" y="58" fontFamily="Arial, Helvetica, sans-serif" fontSize="17" fontWeight="600" fill="#475569">
+            <text x="0" y={isShort ? 46 : 58} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="600" fill="#475569">
               {clinicName}
             </text>
-            <text x="0" y="84" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="500" fill="#64748b">
+            <text x="0" y={isShort ? 68 : 84} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="500" fill="#64748b">
               License: {doctorLicense} • Refill Authorization: Active
             </text>
           </g>
 
           {/* Block 3: Compounding Specifications & Purity */}
-          <g transform="translate(32, 310)">
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize="15" fontWeight="800" fill="#64748b" letterSpacing="0.8">
+          <g transform={`translate(32, ${Math.round(colHeight * 0.68)})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#64748b" letterSpacing="0.8">
               COMPOUNDING SPECIFICATIONS &amp; PURITY
             </text>
-            <text x="0" y="28" fontFamily="Arial, Helvetica, sans-serif" fontSize="17" fontWeight="700" fill="#0f172a">
+            <text x="0" y={isShort ? 22 : 28} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
               • Hypoallergenic formulation: Zero gluten, zero lactose, zero dairy.
             </text>
-            <text x="0" y="56" fontFamily="Arial, Helvetica, sans-serif" fontSize="17" fontWeight="700" fill="#0f172a">
+            <text x="0" y={isShort ? 44 : 56} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
               • No bromelain, no sunflower lecithin, no seed oils in capsule fill.
             </text>
-            <text x="0" y="84" fontFamily="Arial, Helvetica, sans-serif" fontSize="17" fontWeight="700" fill="#0f172a">
+            <text x="0" y={isShort ? 66 : 84} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
               • HPLC Verified Raw Materials &gt; 98.5% Active Pharmaceutical Purity.
             </text>
-            <text x="0" y="112" fontFamily="Arial, Helvetica, sans-serif" fontSize="16" fontWeight="750" fill="#16a34a">
-              ✓ Tamper-evident seal intact upon dispensary release.
-            </text>
+            {!isShort && (
+              <text x="0" y="112" fontFamily="Arial, Helvetica, sans-serif" fontSize="16" fontWeight="750" fill="#16a34a">
+                ✓ Tamper-evident seal intact upon dispensary release.
+              </text>
+            )}
           </g>
         </g>
 
         {/* ── DASHED DIVIDER LINE ── */}
-        <line x1="60" y1="742" x2="1440" y2="742" stroke="#000000" strokeWidth="1.8" strokeDasharray="8,6" />
+        <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="1.8" strokeDasharray="8,6" />
 
         {/* ── FOOTER ROW ── */}
-        <g transform="translate(60, 788)">
-          <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize="23" fontWeight="700" fill="#000000">
+        <g transform={`translate(60, ${footerTextY})`}>
+          <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
             Prod. date: <tspan fontWeight="400">{prodDate}</tspan>
           </text>
-          <text x="0" y="38" fontFamily="Arial, Helvetica, sans-serif" fontSize="23" fontWeight="700" fill="#000000">
+          <text x="0" y={footerLineGap} fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
             Storage: <tspan fontWeight="400">{storage}</tspan>
           </text>
-          <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize="23" fontWeight="700" fill="#000000">
+          <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
             Exp. date: <tspan fontWeight="400">{expDate}</tspan>
           </text>
         </g>
@@ -217,6 +245,15 @@ export default function PharmapolisLabelSvg({
   // ───────────────────────────────────────────────────────────────────────────
   const withMicroQr = variant === 'frontWithQr';
 
+  // Micro-QR dimensions and coordinates (engineered to NEVER collide with patient box)
+  const microQrY = isShort ? 10 : 14;
+  const microQrWidth = isShort ? 116 : 126;
+  const microQrHeight = isShort ? 112 : 122;
+  const microQrX = 1440 - microQrWidth;
+  const qrInnerSize = isShort ? 86 : 96;
+  const scanRxY = isShort ? 103 : 114;
+  const scanRxSize = isShort ? 10 : 11;
+
   // Text Wrapping with dynamic width constraints
   const maxFormulaChars = withMicroQr ? 74 : 80;
   const maxDirChars = withMicroQr ? 70 : 76;
@@ -226,7 +263,7 @@ export default function PharmapolisLabelSvg({
   const directionLines = wrapLines(directions, maxDirChars);
   const warningLines = warnings ? wrapLines(warnings, maxWarnChars) : [];
 
-  // Space allocation & typography scaling based on density
+  // Content lines density calculation
   const totalContentLines = (formulaLines.length > 0 ? formulaLines.length + 1 : 0) +
                             (directionLines.length > 0 ? directionLines.length + 1 : 0) +
                             warningLines.length;
@@ -234,29 +271,32 @@ export default function PharmapolisLabelSvg({
   const isSparse = totalContentLines <= 6;
   const isMedium = totalContentLines > 6 && totalContentLines <= 10;
 
-  const titleFontSize = isSparse ? 40 : isMedium ? 34 : 28;
-  const formulaFontSize = isSparse ? 30 : isMedium ? 26 : 22;
-  const formulaLineGap = isSparse ? 44 : isMedium ? 38 : 30;
-  const dirFontSize = isSparse ? 30 : isMedium ? 27 : 23;
-  const dirLineGap = isSparse ? 44 : isMedium ? 38 : 32;
-  const warnFontSize = isSparse ? 26 : isMedium ? 23 : 20;
-  const warnLineGap = isSparse ? 38 : isMedium ? 34 : 28;
+  // Dynamic typography scale adjusting to both vertical height and density
+  const heightScale = isShort ? 0.82 : isMediumHeight ? 0.92 : 1;
 
-  // Available vertical canvas between patient box (y=220) and dashed footer (y=742)
-  const contentStartY = 270;
-  const availableContentHeight = 742 - contentStartY; // ~472px
+  const titleFontSize = Math.round((isSparse ? 40 : isMedium ? 34 : 28) * heightScale);
+  const formulaFontSize = Math.round((isSparse ? 30 : isMedium ? 26 : 22) * heightScale);
+  const formulaLineGap = Math.round((isSparse ? 44 : isMedium ? 38 : 30) * heightScale);
+  const dirFontSize = Math.round((isSparse ? 30 : isMedium ? 27 : 23) * heightScale);
+  const dirLineGap = Math.round((isSparse ? 44 : isMedium ? 38 : 32) * heightScale);
+  const warnFontSize = Math.round((isSparse ? 26 : isMedium ? 23 : 20) * heightScale);
+  const warnLineGap = Math.round((isSparse ? 38 : isMedium ? 34 : 28) * heightScale);
 
-  const titleBlockHeight = titleFontSize + 16;
+  // Available vertical canvas between patient box and dashed footer
+  const contentStartY = patientBoxBottom + (isShort ? 20 : 30);
+  const availableContentHeight = footerLineY - contentStartY - (isShort ? 12 : 20);
+
+  const titleBlockHeight = titleFontSize + (isShort ? 10 : 16);
   const formulaBlockHeight = formulaLines.length > 0 ? (formulaLines.length * formulaLineGap) : 0;
-  const dirBlockHeight = directionLines.length > 0 ? (directionLines.length * dirLineGap + 36) : 0;
+  const dirBlockHeight = directionLines.length > 0 ? (directionLines.length * dirLineGap + (isShort ? 24 : 34)) : 0;
   const warnBlockHeight = warningLines.length > 0 ? (warningLines.length * warnLineGap) : 0;
 
   const totalRawHeight = titleBlockHeight + formulaBlockHeight + dirBlockHeight + warnBlockHeight;
-  const remainingSpace = Math.max(16, availableContentHeight - totalRawHeight);
+  const remainingSpace = Math.max(14, availableContentHeight - totalRawHeight);
 
   // Distribute remaining space across the active section separators
   const activeSectionsCount = (formulaLines.length > 0 ? 1 : 0) + (directionLines.length > 0 ? 1 : 0) + (warningLines.length > 0 ? 1 : 0);
-  const distributedGap = Math.min(65, Math.max(22, Math.floor(remainingSpace / (activeSectionsCount || 1))));
+  const distributedGap = Math.min(isShort ? 35 : 65, Math.max(16, Math.floor(remainingSpace / (activeSectionsCount || 1))));
 
   let currentY = contentStartY;
   const titleY = currentY;
@@ -286,36 +326,39 @@ export default function PharmapolisLabelSvg({
       <rect width={WIDTH} height={HEIGHT} fill="#ffffff" />
 
       {/* ── HEADER ── */}
-      <g transform="translate(60, 42)">
-        <text x="0" y="32" fontFamily="Arial, Helvetica, sans-serif" fontSize="36" fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-        <text x="0" y="60" fontFamily="Arial, Helvetica, sans-serif" fontSize="19" fontWeight="400" fill="#222222">g.k. Hristo Botev-North/Yuzhen</text>
-        <text x="0" y="86" fontFamily="Arial, Helvetica, sans-serif" fontSize="19" fontWeight="400" fill="#222222">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+      <g transform={`translate(60, ${headerY})`}>
+        <text x="0" y="28" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
+        <text x="0" y="52" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="400" fill="#222222">g.k. Hristo Botev-North/Yuzhen</text>
+        <text x="0" y="74" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize - 1} fontWeight="400" fill="#222222">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
       </g>
 
-      {/* MICRO-QR (IF ENABLED): Crisp 140 x 140 container with centered 112 px QR Code */}
+      {/* MICRO-QR (IF ENABLED): Guaranteed zero overlap with patient box */}
       {withMicroQr && (
-        <g transform="translate(1300, 16)">
-          <rect x="0" y="0" width="140" height="140" fill="#ffffff" stroke="#003666" strokeWidth="2" rx="8" />
-          <svg x="14" y="10" width="112" height="112" viewBox="0 0 112 112">
+        <g transform={`translate(${microQrX}, ${microQrY})`}>
+          <rect x="0" y="0" width={microQrWidth} height={microQrHeight} fill="#ffffff" stroke="#003666" strokeWidth="2" rx="8" />
+          <svg x={Math.round((microQrWidth - qrInnerSize) / 2)} y="8" width={qrInnerSize} height={qrInnerSize} viewBox={`0 0 ${qrInnerSize} ${qrInnerSize}`}>
             <QRCodeSVG
               value={targetRxUrl}
-              size={112}
+              size={qrInnerSize}
               level="M"
               fgColor="#003666"
               bgColor="#ffffff"
             />
           </svg>
-          <text x="70" y="132" fontFamily="Arial, Helvetica, sans-serif" fontSize="12" fontWeight="900" fill="#003666" textAnchor="middle" letterSpacing="0.8">
+          <text x={Math.round(microQrWidth / 2)} y={scanRxY} fontFamily="Arial, Helvetica, sans-serif" fontSize={scanRxSize} fontWeight="900" fill="#003666" textAnchor="middle" letterSpacing="0.8">
             SCAN RX
           </text>
         </g>
       )}
 
       {/* ── PATIENT BOX ── */}
-      <g transform="translate(60, 155)">
-        <rect x="0" y="0" width="1380" height="60" fill="#f8fafc" stroke="#000000" strokeWidth="2" rx="4" />
-        <text x="20" y="38" fontFamily="Arial, Helvetica, sans-serif" fontSize="24" fontWeight="700" letterSpacing="0.4" fill="#000000">
+      <g transform={`translate(60, ${patientBoxY})`}>
+        <rect x="0" y="0" width="1380" height={patientBoxHeight} fill="#f8fafc" stroke="#000000" strokeWidth="2" rx="4" />
+        <text x="20" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
           PATIENT NAME: <tspan fontWeight="900">{patientName}</tspan>
+        </text>
+        <text x="1360" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize - 2} fontWeight="800" fill="#003666">
+          RX #{fileNumber}
         </text>
       </g>
 
@@ -384,17 +427,17 @@ export default function PharmapolisLabelSvg({
       ))}
 
       {/* ── DASHED DIVIDER LINE ── */}
-      <line x1="60" y1="742" x2="1440" y2="742" stroke="#000000" strokeWidth="1.8" strokeDasharray="8,6" />
+      <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="1.8" strokeDasharray="8,6" />
 
       {/* ── FOOTER INFO ROW ── */}
-      <g transform="translate(60, 788)">
-        <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize="24" fontWeight="700" fill="#000000">
+      <g transform={`translate(60, ${footerTextY})`}>
+        <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
           Prod. date: <tspan fontWeight="400">{prodDate}</tspan>
         </text>
-        <text x="0" y="38" fontFamily="Arial, Helvetica, sans-serif" fontSize="24" fontWeight="700" fill="#000000">
+        <text x="0" y={footerLineGap} fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
           Storage: <tspan fontWeight="400">{storage}</tspan>
         </text>
-        <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize="24" fontWeight="700" fill="#000000">
+        <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
           Exp. date: <tspan fontWeight="400">{expDate}</tspan>
         </text>
       </g>
