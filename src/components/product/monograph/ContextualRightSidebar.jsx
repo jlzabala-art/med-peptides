@@ -15,6 +15,7 @@ import {
   Syringe
 } from '@/lib/icons';
 import { QRCodeSVG } from 'qrcode.react';
+import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 
 /**
  * ContextualRightSidebar
@@ -35,6 +36,7 @@ export default function ContextualRightSidebar({
   onOpenCoaModal
 }) {
   const pageUrl = `https://med-peptides.com/p/${slug}`;
+  const refDossier = getPeptideReferenceDossier(slug);
 
   return (
     <aside
@@ -245,29 +247,43 @@ export default function ContextualRightSidebar({
             <>
               <div>
                 <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                  FDA Reference Application
+                  FDA / Regulatory Reference
                 </span>
                 <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#1e40af', marginTop: '2px' }}>
-                  NDA 210583 (Vyleesi®)
+                  {refDossier?.regulatory?.appNumber || refDossier?.regulatory?.brand}
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                {refDossier?.regulatory?.brandUrl && (
+                  <a
+                    href={refDossier.regulatory.brandUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '0.74rem', color: '#0284c7', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <ExternalLink size={11} /> Official Label / DailyMed
+                  </a>
+                )}
+                {refDossier?.pubChemUrl && (
+                  <a
+                    href={refDossier.pubChemUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '0.74rem', color: '#0284c7', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <ExternalLink size={11} /> {refDossier.pubChemCid ? `PubChem CID: ${refDossier.pubChemCid}` : `PubChem Chemical Index`}
+                  </a>
+                )}
                 <a
-                  href="https://pubchem.ncbi.nlm.nih.gov/compound/9941957"
+                  href={refDossier?.literature?.[0]?.pmid && refDossier.literature[0].pmid !== 'NCBI'
+                    ? `https://pubmed.ncbi.nlm.nih.gov/${refDossier.literature[0].pmid}/`
+                    : `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(refDossier?.canonicalName || slug)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ fontSize: '0.74rem', color: '#0284c7', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  <ExternalLink size={11} /> PubChem CID: 9941957
-                </a>
-                <a
-                  href="https://pubmed.ncbi.nlm.nih.gov/?term=bremelanotide"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: '0.74rem', color: '#0284c7', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <ExternalLink size={11} /> PubMed Bremelanotide Index
+                  <ExternalLink size={11} /> {refDossier?.literature?.[0]?.pmid ? `PubMed (PMID: ${refDossier.literature[0].pmid})` : `PubMed Research Index`}
                 </a>
               </div>
             </>

@@ -8,6 +8,13 @@ import React from 'react';
  * Google Cloud Console-inspired U-100 Insulin Syringe Visualizer.
  * Subordinate to the calculated dose: displays Target dose, Volume, and U-100 units
  * in one clean header, followed by an exact calibrated vector graphic.
+ * 
+ * Clinical SVG Layering:
+ * 1. Background Barrel & Needle Hub
+ * 2. Volumetric Fluid Column
+ * 3. Rubber Stopper & Plunger Mechanism
+ * 4. OVERLAY Graduation Ticks & High-Contrast Halo Numbers (Never Occluded)
+ * 5. Dynamic Injection Draw Cursor
  */
 export default function PrecisionSyringeVisualizer({
   targetDoseMg = 1.25,
@@ -91,25 +98,25 @@ export default function PrecisionSyringeVisualizer({
       {/* ── High-Precision SVG Syringe Graphic ── */}
       <div style={{ width: '100%', overflowX: 'auto', padding: '0.5rem 0' }}>
         <svg
-          viewBox="0 0 520 80"
-          style={{ width: '100%', height: 'auto', minWidth: '420px', display: 'block' }}
+          viewBox="0 0 540 102"
+          style={{ width: '100%', height: 'auto', minWidth: '460px', display: 'block' }}
           role="img"
           aria-label={`U-100 syringe drawn to ${units} units`}
         >
           <defs>
             {/* Fluid gradient */}
             <linearGradient id="fluidGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.45" />
-              <stop offset="50%" stopColor="#0284c7" stopOpacity="0.65" />
-              <stop offset="100%" stopColor="#0369a1" stopOpacity="0.55" />
+              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.55" />
+              <stop offset="50%" stopColor="#0284c7" stopOpacity="0.75" />
+              <stop offset="100%" stopColor="#0369a1" stopOpacity="0.65" />
             </linearGradient>
 
             {/* Glass Barrel Reflection */}
             <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
-              <stop offset="15%" stopColor="#f8fafc" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+              <stop offset="15%" stopColor="#f8fafc" stopOpacity="0.3" />
               <stop offset="85%" stopColor="#cbd5e1" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.55" />
             </linearGradient>
 
             {/* Plunger gradient */}
@@ -120,52 +127,102 @@ export default function PrecisionSyringeVisualizer({
             </linearGradient>
           </defs>
 
-          {/* 1. Needle & Hub */}
-          <line x1="8" y1="40" x2="42" y2="40" stroke="#94a3b8" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M 42 34 L 58 36 L 58 44 L 42 46 Z" fill="#64748b" />
+          {/* LAYER 1: Needle & Needle Hub */}
+          <line x1="8" y1="44" x2="42" y2="44" stroke="#94a3b8" strokeWidth="2.2" strokeLinecap="round" />
+          <path d="M 42 36 L 58 38 L 58 50 L 42 52 Z" fill="#64748b" />
           {/* Needle tip bevel */}
-          <line x1="8" y1="40" x2="14" y2="38" stroke="#cbd5e1" strokeWidth="1.5" />
+          <line x1="8" y1="44" x2="14" y2="42" stroke="#cbd5e1" strokeWidth="1.5" />
 
-          {/* 2. Glass Syringe Outer Barrel */}
-          <rect x="58" y="22" width="346" height="36" rx="2" fill="url(#glassGrad)" stroke="#94a3b8" strokeWidth="1.5" />
+          {/* LAYER 2: Glass Syringe Outer Barrel */}
+          <rect x="58" y="20" width="346" height="46" rx="3" fill="url(#glassGrad)" stroke="#94a3b8" strokeWidth="1.5" />
 
-          {/* 3. Fluid Column inside barrel up to current units */}
+          {/* LAYER 3: Volumetric Fluid Column inside barrel up to current units */}
           {fillWidth > 0 && (
             <rect
               x="60"
-              y="23.5"
+              y="22"
               width={fillWidth}
-              height="33"
+              height="42"
               fill="url(#fluidGrad)"
             />
           )}
 
-          {/* 4. Graduation Tick Marks (every 2 units, major every 10) */}
+          {/* LAYER 4: Rubber Stopper & Plunger Shaft (Rendered underneath the overlay numbers) */}
+          {/* Black Rubber Stopper Ring 1 */}
+          <rect
+            x={plungerX}
+            y="22"
+            width="8"
+            height="42"
+            rx="1.5"
+            fill="url(#plungerGrad)"
+          />
+          {/* Black Rubber Stopper Ring 2 */}
+          <rect
+            x={plungerX + 8}
+            y="24"
+            width="6"
+            height="38"
+            rx="1"
+            fill="#334155"
+          />
+
+          {/* Plunger Shaft */}
+          <rect
+            x={plungerX + 14}
+            y="39"
+            width={Math.max(20, 510 - (plungerX + 14))}
+            height="10"
+            fill="#e2e8f0"
+            stroke="#94a3b8"
+            strokeWidth="1"
+          />
+
+          {/* Plunger Thumb Press (at the end) */}
+          <rect
+            x={Math.max(plungerX + 25, 508)}
+            y="24"
+            width="9"
+            height="38"
+            rx="2"
+            fill="#64748b"
+            stroke="#475569"
+            strokeWidth="1"
+          />
+
+          {/* LAYER 5: Graduation Tick Marks & High-Contrast Halo Numbers (ALWAYS ON TOP) */}
           {Array.from({ length: 51 }).map((_, idx) => {
             const unitVal = idx * 2;
             const x = zeroX + (unitVal / 100) * scaleLength;
             const isMajor = unitVal % 10 === 0;
             const isMid = unitVal % 5 === 0 && !isMajor;
-            const y1 = 23;
-            const y2 = isMajor ? 36 : isMid ? 31 : 27;
+            const y1 = 21;
+            const y2 = isMajor ? 35 : isMid ? 30 : 26;
 
             return (
               <g key={idx}>
+                {/* Tick mark line */}
                 <line
                   x1={x}
                   y1={y1}
                   x2={x}
                   y2={y2}
-                  stroke={isMajor ? "#0f172a" : "#64748b"}
-                  strokeWidth={isMajor ? 1.4 : 0.8}
+                  stroke={isMajor ? "#0f172a" : "#475569"}
+                  strokeWidth={isMajor ? 1.6 : 0.9}
                 />
+                
+                {/* Major graduation number with white protective outline halo so it's never occluded */}
                 {isMajor && (
                   <text
                     x={x}
-                    y="50"
-                    fontSize="8.5"
-                    fontWeight="700"
-                    fill="#334155"
+                    y="56"
+                    fontSize="11"
+                    fontWeight="800"
+                    fill="#0f172a"
+                    stroke="#ffffff"
+                    strokeWidth="3.2"
+                    paintOrder="stroke fill"
+                    strokeLinejoin="round"
                     textAnchor="middle"
                     fontFamily="monospace"
                   >
@@ -176,69 +233,29 @@ export default function PrecisionSyringeVisualizer({
             );
           })}
 
-          {/* 5. Rubber Stopper & Plunger */}
-          {/* Black Rubber Stopper Ring 1 */}
-          <rect
-            x={plungerX}
-            y="23.5"
-            width="8"
-            height="33"
-            rx="1.5"
-            fill="url(#plungerGrad)"
-          />
-          {/* Black Rubber Stopper Ring 2 */}
-          <rect
-            x={plungerX + 8}
-            y="25"
-            width="6"
-            height="30"
-            rx="1"
-            fill="#334155"
-          />
-
-          {/* Plunger Shaft */}
-          <rect
-            x={plungerX + 14}
-            y="35"
-            width={Math.max(20, 500 - (plungerX + 14))}
-            height="10"
-            fill="#e2e8f0"
-            stroke="#94a3b8"
-            strokeWidth="1"
-          />
-
-          {/* Plunger Thumb Press (at the end) */}
-          <rect
-            x={Math.max(plungerX + 25, 498)}
-            y="26"
-            width="8"
-            height="28"
-            rx="2"
-            fill="#64748b"
-            stroke="#475569"
-            strokeWidth="1"
-          />
-
-          {/* 6. Active Calibration Needle Marker (red/cyan target line at draw point) */}
+          {/* LAYER 6: Active Calibration Needle Marker (draw point cursor) */}
           <line
             x1={plungerX}
-            y1="16"
+            y1="12"
             x2={plungerX}
-            y2="63"
+            y2="73"
             stroke="#0284c7"
-            strokeWidth="1.8"
+            strokeWidth="2"
             strokeDasharray="2 2"
           />
           <polygon
-            points={`${plungerX - 4},16 ${plungerX + 4},16 ${plungerX},22`}
+            points={`${plungerX - 4},12 ${plungerX + 4},12 ${plungerX},18`}
             fill="#0284c7"
           />
           <text
             x={plungerX}
-            y="12"
-            fontSize="9"
-            fontWeight="800"
+            y="10"
+            fontSize="10"
+            fontWeight="850"
             fill="#0284c7"
+            stroke="#ffffff"
+            strokeWidth="2.5"
+            paintOrder="stroke fill"
             textAnchor="middle"
             fontFamily="monospace"
           >
@@ -251,13 +268,15 @@ export default function PrecisionSyringeVisualizer({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '6px',
         fontSize: '0.72rem',
         color: '#64748b',
         paddingTop: '0.4rem'
       }}>
         <span>0.30mm (30G / 31G) × 8mm Micro-Fine SubQ Needle</span>
-        <span style={{ fontWeight: 600, color: '#0369a1' }}>
-          Align top edge of black rubber stopper with line {units}
+        <span style={{ fontWeight: 700, color: '#0369a1' }}>
+          Align leading edge of black rubber stopper with graduation {units}
         </span>
       </div>
     </div>

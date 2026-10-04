@@ -60,6 +60,7 @@ import './publicPrescriptionMobile.css';
 import MultiPartOverview from './MultiPartOverview';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
+import PrescriptionStatusQuickAction from '@/components/prescription/PrescriptionStatusQuickAction';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -350,13 +351,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const publicUrl = `${baseUrl}/rx/${rxId}`;
   const patientPublicUrl = `${baseUrl}/rx/${rxId}?view=patient`;
 
-  const rxStatus = String(rx.status || rx.state || rx.fagronStatus || rx.orderStatus || '').toLowerCase().trim();
-  const isDispensed = Boolean(
-    rx.isDispensed ||
-    rx.dispensedAt ||
-    rx.dispensedDate ||
-    ['dispensed', 'delivered', 'completed', 'active', 'en tránsito', 'shipped', 'supplied'].includes(rxStatus)
-  );
+  const [currentStatus, setCurrentStatus] = useState(() => {
+    return String(rx.status || rx.state || rx.fagronStatus || rx.orderStatus || 'approved').toLowerCase().trim();
+  });
+
+  const isDispensed = useMemo(() => {
+    return Boolean(
+      ['dispensed', 'delivered', 'completed', 'active'].includes(currentStatus) ||
+      rx.isDispensed ||
+      rx.dispensedAt ||
+      rx.dispensedDate
+    );
+  }, [currentStatus, rx.isDispensed, rx.dispensedAt, rx.dispensedDate]);
 
   const resolvedPrice = useMemo(() => {
     const rawCurrency = rx.currency || rx.pricing?.currency || rx.quote?.currency || 'AED';
@@ -1536,6 +1542,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         <Check size={12} />
                         {isEs ? 'Oficial · Verificada' : 'Official · Verified'}
                       </span>
+                      <PrescriptionStatusQuickAction
+                        status={currentStatus}
+                        prescriptionId={rxId}
+                        prescriptionNumber={rx.prescriptionNumber || rxId}
+                        onStatusChange={(newStatus) => setCurrentStatus(newStatus)}
+                        isEs={isEs}
+                        readOnly={isPatientView}
+                      />
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#5f6368', marginTop: '2px' }}>
                       {isEs ? 'Expediente clínico y régimen posológico digital' : 'Digital clinical dossier & posology regimen'}

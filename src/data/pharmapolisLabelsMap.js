@@ -439,10 +439,10 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     targetRxUrl: 'https://med-peptides.com/rx/RX-MT-0903'
   },
 
-  // ── Saeed Musallam: BOX03492AANUT ──
+  // ── Saeed Musallam ──
   {
     id: 'saeed-night-formula',
-    prescriptionMatches: ['RX-20261002-N5BH', 'RX-20261002-IKE7', 'BOX03492AANUT'],
+    prescriptionMatches: ['RX-20261002-N5BH', 'RX-20261002-IKE7'],
     patientMatches: ['saeed musallam', 'almazrouei'],
     phaseNumber: 1,
     patientName: 'Saeed Musallam Mefleh Khamis Almazrouei',
@@ -560,6 +560,12 @@ export function getPharmapolisLabelsForPrescription(rx) {
   const auth = getAuthoritativeClinicalData(rx);
 
   const matches = PHARMAPOLIS_LABELS_REGISTRY.filter(item => {
+    // Cross-patient safety guard: if prescription has a patient name, do not match a registry item intended for someone else
+    if (patientName && item.patientMatches && item.patientMatches.length > 0) {
+      const patientMatchesThisItem = item.patientMatches.some(p => patientName.includes(p));
+      if (!patientMatchesThisItem) return false;
+    }
+
     const codeMatch = item.prescriptionMatches.some(m => {
       const mu = m.toUpperCase();
       return (

@@ -100,10 +100,27 @@ export default function PreparationTab({
 
   const initialStrengthMg = dynamicStrengths[0]?.mg || (isSpray ? 30 : isPen ? 6 : 10);
 
+  const slugStr = (product?.canonicalName || product?.name || slug || '').toLowerCase();
+  const isTirzepatide = slugStr.includes('tirzepatide');
+  const isSemaglutide = slugStr.includes('semaglutide');
+  const isRetatrutide = slugStr.includes('retatrutide');
+
+  const clinicalDosePresets = useMemo(() => {
+    if (isTirzepatide) return [2.5, 5.0, 7.5, 10.0, 12.5, 15.0];
+    if (isSemaglutide) return [0.25, 0.5, 1.0, 1.7, 2.4];
+    if (isRetatrutide) return [1.0, 2.0, 4.0, 8.0, 12.0];
+    if (slugStr.includes('pt-141') || slugStr.includes('bremelanotide')) return [0.5, 1.0, 1.25, 1.5, 1.75, 2.0];
+    if (slugStr.includes('bpc')) return [0.25, 0.5, 0.75, 1.0];
+    return [0.5, 1.0, 1.25, 1.5, 2.0, 2.5];
+  }, [isTirzepatide, isSemaglutide, isRetatrutide, slugStr]);
+
+  const defaultInitialDose = isTirzepatide ? 2.5 : isSemaglutide ? 0.25 : isRetatrutide ? 2.0 : 1.25;
+
   // ── States for Vial Reconstitution ──
   const [selectedVialStrength, setSelectedVialStrength] = useState(initialStrengthMg);
   const [selectedBacVolume, setSelectedBacVolume] = useState(2.0);
-  const [targetDoseMg, setTargetDoseMg] = useState(1.25);
+  const [targetDoseMg, setTargetDoseMg] = useState(defaultInitialDose);
+  const [customDose, setCustomDose] = useState('');
 
   // ── States for Nasal Spray ──
   const [selectedSprayStrength, setSelectedSprayStrength] = useState(initialStrengthMg);
@@ -908,7 +925,12 @@ export default function PreparationTab({
                 <label style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
                   1. Vial Presentation Strength
                 </label>
-                <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(64px, 1fr))',
+                  gap: '6px',
+                  marginTop: '6px'
+                }}>
                   {dynamicStrengths.map(s => (
                     <button
                       key={s.id}
@@ -919,16 +941,16 @@ export default function PreparationTab({
                         setSelectedBacVolume(s.mg <= 5 ? 1.0 : s.mg <= 10 ? 2.0 : 4.0);
                       }}
                       style={{
-                        flex: 1,
-                        minWidth: '65px',
-                        padding: '8px',
+                        width: '100%',
+                        padding: '8px 2px',
                         borderRadius: '6px',
                         border: selectedVialStrength === s.mg ? '1.5px solid #003666' : '1px solid #cbd5e1',
                         background: selectedVialStrength === s.mg ? '#003666' : '#ffffff',
                         color: selectedVialStrength === s.mg ? '#ffffff' : '#334155',
-                        fontSize: '0.82rem',
+                        fontSize: '0.80rem',
                         fontWeight: selectedVialStrength === s.mg ? 800 : 600,
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        textAlign: 'center'
                       }}
                     >
                       {s.name}
@@ -971,33 +993,86 @@ export default function PreparationTab({
 
               {/* Target Clinical Dose Selector */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
-                <label style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
-                  3. Target Clinical Dose
-                </label>
-                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                  {[0.5, 1.0, 1.25, 1.5, 2.0].map(d => (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', color: '#64748b' }}>
+                    3. Target Clinical Dose
+                  </label>
+                  <span style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 800 }}>
+                    {targetDoseMg} mg
+                  </span>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(54px, 1fr))',
+                  gap: '6px',
+                  marginBottom: '8px'
+                }}>
+                  {clinicalDosePresets.map(d => (
                     <button
                       key={d}
                       type="button"
                       onClick={() => {
                         triggerHaptic('selection');
                         setTargetDoseMg(d);
+                        setCustomDose('');
                       }}
                       style={{
-                        flex: 1,
-                        padding: '8px 4px',
+                        width: '100%',
+                        padding: '7px 2px',
                         borderRadius: '6px',
-                        border: targetDoseMg === d ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
-                        background: targetDoseMg === d ? '#16a34a' : '#ffffff',
-                        color: targetDoseMg === d ? '#ffffff' : '#334155',
-                        fontSize: '0.78rem',
-                        fontWeight: targetDoseMg === d ? 800 : 600,
-                        cursor: 'pointer'
+                        border: targetDoseMg === d && !customDose ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                        background: targetDoseMg === d && !customDose ? '#16a34a' : '#ffffff',
+                        color: targetDoseMg === d && !customDose ? '#ffffff' : '#334155',
+                        fontSize: '0.76rem',
+                        fontWeight: targetDoseMg === d && !customDose ? 800 : 600,
+                        cursor: 'pointer',
+                        textAlign: 'center'
                       }}
                     >
-                      {d.toFixed(2)}
+                      {d} mg
                     </button>
                   ))}
+                </div>
+
+                {/* Custom Dose Input */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#ffffff',
+                  border: customDose ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '4px 8px'
+                }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Custom:</span>
+                  <input
+                    type="number"
+                    step="0.05"
+                    min="0.05"
+                    max="100"
+                    placeholder="Enter mg..."
+                    value={customDose}
+                    onChange={(e) => {
+                      const valStr = e.target.value;
+                      setCustomDose(valStr);
+                      const num = parseFloat(valStr);
+                      if (!isNaN(num) && num > 0) {
+                        setTargetDoseMg(num);
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: '#0f172a',
+                      width: '100%',
+                      background: 'transparent'
+                    }}
+                  />
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700 }}>mg</span>
                 </div>
               </div>
             </div>

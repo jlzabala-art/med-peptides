@@ -17,6 +17,7 @@ import {
 import { QRCodeSVG } from 'qrcode.react';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
+import { getPeptideReferenceDossier } from '@/data/peptideReferenceDossiers';
 
 /**
  * PeptideMonographTopStrip
@@ -46,6 +47,7 @@ export default function PeptideMonographTopStrip({
   const cleanSlug = slug || product.slug || 'product';
   const pageUrl = dynamicPublicUrl || (typeof window !== 'undefined' ? window.location.href : `https://med-peptides.com/p/${cleanSlug}`);
   const isPt141 = cleanSlug.toLowerCase().includes('pt-141') || (product.canonicalName || product.name || '').toLowerCase().includes('pt-141');
+  const refDossier = getPeptideReferenceDossier(product?.slug || product?.canonicalName || product?.name || cleanSlug);
 
   const handleCopyUrl = async () => {
     triggerHaptic('light');
@@ -346,9 +348,22 @@ export default function PeptideMonographTopStrip({
                   <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
                     FDA Reference
                   </span>
-                  <strong style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 800 }}>
-                    NDA 210583 (Vyleesi®)
-                  </strong>
+                  {refDossier?.regulatory?.brandUrl ? (
+                    <a
+                      href={refDossier.regulatory.brandUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 800, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                      title="View official prescription label in DailyMed"
+                    >
+                      <span>{refDossier.regulatory.appNumber || refDossier.regulatory.brand}</span>
+                      <ExternalLink size={10} />
+                    </a>
+                  ) : (
+                    <strong style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 800 }}>
+                      {refDossier?.regulatory?.appNumber || refDossier?.regulatory?.brand || 'Analytical Standard'}
+                    </strong>
+                  )}
                 </div>
 
                 <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
@@ -357,9 +372,22 @@ export default function PeptideMonographTopStrip({
                   <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
                     Chemical Index
                   </span>
-                  <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 700 }}>
-                    PubChem CID: 9941957
-                  </span>
+                  {refDossier?.pubChemUrl ? (
+                    <a
+                      href={refDossier.pubChemUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                      title="View chemical index in NCBI PubChem"
+                    >
+                      <span>{refDossier.pubChemCid ? `PubChem CID: ${refDossier.pubChemCid}` : `CAS: ${refDossier.casNumber}`}</span>
+                      <ExternalLink size={10} color="#0284c7" />
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 700 }}>
+                      CAS: {refDossier?.casNumber || 'Verified'}
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ width: '1px', height: '26px', background: '#e2e8f0' }} className="pds-strip-divider" />
@@ -368,9 +396,20 @@ export default function PeptideMonographTopStrip({
                   <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
                     Literature
                   </span>
-                  <span style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 700 }}>
-                    PubMed Indexed
-                  </span>
+                  <a
+                    href={refDossier?.literature?.[0]?.pmid && refDossier.literature[0].pmid !== 'NCBI'
+                      ? `https://pubmed.ncbi.nlm.nih.gov/${refDossier.literature[0].pmid}/`
+                      : `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(refDossier?.canonicalName || 'peptide')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '0.82rem', color: '#0284c7', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                    title="Open primary trial in PubMed"
+                  >
+                    <span>
+                      {refDossier?.literature?.length ? `${refDossier.literature.length} Trials (PMID: ${refDossier.literature[0].pmid})` : 'PubMed Indexed'}
+                    </span>
+                    <ExternalLink size={10} />
+                  </a>
                 </div>
               </>
             )}
