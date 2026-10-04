@@ -1538,6 +1538,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         cursor: 'pointer',
                         transition: 'all 0.15s'
                       }}
+                      onClick={() => {
+                        setSelectedLabelIndex(0);
+                        setShowLabelsModal(true);
+                      }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; e.currentTarget.style.borderColor = '#1a73e8'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
                       title={isEs ? 'Ver etiquetas oficiales para frascos (7.5 × 4.5 cm)' : 'View official compounding bottle labels (7.5 × 4.5 cm)'}

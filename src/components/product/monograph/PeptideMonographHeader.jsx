@@ -22,6 +22,8 @@ export default function PeptideMonographHeader({
   activeFormat = null,
   availableFormats = [],
   sortedStrengths = [],
+  selectedStrength = null,
+  onStrengthChange = null,
   onFormatChange,
   onOpenPreviewModal,
   onOpenCoaModal,

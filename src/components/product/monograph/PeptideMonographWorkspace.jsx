@@ -146,6 +146,8 @@ export default function PeptideMonographWorkspace({
         activeFormat={activeFormat}
         availableFormats={availableFormats}
         sortedStrengths={sortedStrengths}
+        selectedStrength={selectedStrength}
+        onStrengthChange={onSelectVariant}
         dynamicPublicUrl={dynamicPublicUrl}
         onFormatChange={onFormatChange}
         onOpenPreviewModal={() => setIsPreviewModalOpen(true)}
