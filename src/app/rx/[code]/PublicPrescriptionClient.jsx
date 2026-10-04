@@ -279,7 +279,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
   // Pharmacogenomic test correlation & Unified Prescription Classification
   const genomicsData = detectFagronGenomicsTest(rx);
-  const prescriptionTypeInfo = useMemo(() => classifyPrescription(rx), [rx]);
+  const prescriptionTypeInfo = React.useMemo(() => classifyPrescription(rx), [rx]);
   const docs = rx.documents || rx.attachedDocuments || [];
 
   const rxProgLower = String(rx.treatmentProgram || rx.program || '').toLowerCase();

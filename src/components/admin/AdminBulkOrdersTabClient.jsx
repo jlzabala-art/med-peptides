@@ -30,7 +30,7 @@ import AppActionGroup from '../ui/AppActionGroup';
  */
 
 import { usePathname } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   collection,
   query,
