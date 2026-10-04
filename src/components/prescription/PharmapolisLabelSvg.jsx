@@ -145,9 +145,14 @@ export default function PharmapolisLabelSvg({
   // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)
   // ───────────────────────────────────────────────────────────────────────────
   if (variant === 'backQr') {
-    const colY = patientBoxBottom + (isShort ? 12 : 20);
-    const colHeight = footerLineY - colY - (isShort ? 10 : 16);
-    const backQrSize = Math.min(colHeight - (isShort ? 92 : 130), isShort ? 210 : 300);
+    const colY = patientBoxBottom + (isShort ? 10 : 16);
+    const colHeight = footerLineY - colY - (isShort ? 12 : 18);
+    // Dynamic QR sizing: leaves at least 80px for the verification badges below
+    const backQrSize = isShort ? 160 : Math.min(colHeight - 140, 230);
+
+    const b1Y = Math.round(colHeight * 0.06);
+    const b2Y = Math.round(colHeight * (isShort ? 0.29 : 0.31));
+    const b3Y = Math.round(colHeight * (isShort ? 0.66 : 0.67));
 
     return (
       <svg
@@ -162,15 +167,15 @@ export default function PharmapolisLabelSvg({
 
         {/* ── HEADER ── */}
         <g transform={`translate(60, ${headerY})`}>
-          <text x="0" y="28" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
-          <text x="0" y="52" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#334155">Verification &amp; Digital Monograph Registry</text>
-          <text x="0" y="74" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize - 1} fontWeight="400" fill="#64748b">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
+          <text x="0" y="24" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerTitleSize} fontWeight="900" letterSpacing="0.5" fill="#000000">PHARMAPOLIS</text>
+          <text x="0" y="46" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize} fontWeight="500" fill="#334155">Verification &amp; Digital Monograph Registry</text>
+          <text x="0" y="66" fontFamily="Arial, Helvetica, sans-serif" fontSize={headerSubSize - 1} fontWeight="400" fill="#64748b">1A Arhimandrit Evlogi Street, 4013 Plovdiv, Bulgaria</text>
         </g>
 
         {/* EU GMP CERTIFIED BADGE */}
         <g transform={`translate(1440, ${headerY + 2})`}>
-          <rect x="-310" y="0" width="310" height={isShort ? 38 : 44} fill="#f8fafc" stroke="#003666" strokeWidth="1.6" rx="6" />
-          <text x="-155" y={isShort ? 24 : 28} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#003666" letterSpacing="0.5">
+          <rect x="-310" y="0" width="310" height={isShort ? 34 : 40} fill="#f8fafc" stroke="#003666" strokeWidth="1.6" rx="6" />
+          <text x="-155" y={isShort ? 22 : 26} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 14} fontWeight="800" fill="#003666" letterSpacing="0.5">
             EU GMP CERTIFIED DISPENSARY
           </text>
         </g>
@@ -192,7 +197,7 @@ export default function PharmapolisLabelSvg({
           <rect x="0" y="0" width="460" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
           
           {/* Centered Dynamic QR Code */}
-          <svg x={Math.round((460 - backQrSize) / 2)} y={isShort ? 8 : 14} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
+          <svg x={Math.round((460 - backQrSize) / 2)} y={isShort ? 10 : 16} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
             <QRCodeSVG
               value={targetRxUrl}
               size={backQrSize}
@@ -203,17 +208,17 @@ export default function PharmapolisLabelSvg({
           </svg>
 
           {/* Under QR Verification Details */}
-          <text x="230" y={backQrSize + (isShort ? 26 : 36)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="800" fill="#003666" letterSpacing="0.5">
+          <text x="230" y={backQrSize + (isShort ? 24 : 32)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 15} fontWeight="800" fill="#003666" letterSpacing="0.5">
             SCAN FOR DIGITAL POSOLOGY &amp; CoA
           </text>
-          <text x="230" y={backQrSize + (isShort ? 46 : 64)} textAnchor="middle" fontFamily="monospace" fontSize={isShort ? 12 : 14} fontWeight="700" fill="#475569">
-            {cleanDisplayUrl.length > 38 ? cleanDisplayUrl.slice(0, 36) + '...' : cleanDisplayUrl}
+          <text x="230" y={backQrSize + (isShort ? 40 : 54)} textAnchor="middle" fontFamily="monospace" fontSize={isShort ? 11 : 13} fontWeight="700" fill="#475569">
+            {cleanDisplayUrl.length > 36 ? cleanDisplayUrl.slice(0, 34) + '...' : cleanDisplayUrl}
           </text>
           
           {/* Status & Security Verification Pill */}
-          <g transform={`translate(230, ${backQrSize + (isShort ? 72 : 98)})`}>
-            <rect x="-165" y="-14" width="330" height={isShort ? 28 : 34} fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.2" rx="17" />
-            <text x="0" y={isShort ? 5 : 7} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#065f46">
+          <g transform={`translate(230, ${backQrSize + (isShort ? 64 : 86)})`}>
+            <rect x="-150" y="-12" width="300" height={isShort ? 24 : 30} fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.2" rx="15" />
+            <text x="0" y={isShort ? 4 : 6} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 13} fontWeight="800" fill="#065f46">
               ✓ Verified Clinical Atlas Record
             </text>
           </g>
@@ -224,21 +229,21 @@ export default function PharmapolisLabelSvg({
           <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.6" rx="8" />
 
           {/* Block 1: Formulation & Batch */}
-          <g transform={`translate(32, ${Math.round(colHeight * 0.08)})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#64748b" letterSpacing="0.8">
+          <g transform={`translate(32, ${b1Y})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 13} fontWeight="800" fill="#64748b" letterSpacing="0.8">
               FORMULATION CODE &amp; BATCH
             </text>
-            <text x="0" y={isShort ? 24 : 32} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 18 : 23} fontWeight="900" fill="#000000">
-              {productTitle}
+            <text x="0" y={isShort ? 20 : 26} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 16 : 21} fontWeight="900" fill="#000000">
+              {productTitle.length > 46 ? productTitle.slice(0, 44) + '...' : productTitle}
             </text>
-            <text x="0" y={isShort ? 48 : 64} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 15 : 18} fontWeight="700" fill="#003666">
+            <text x="0" y={isShort ? 40 : 50} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="700" fill="#003666">
               Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote Control: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
             </text>
           </g>
 
           {/* Block 2: Active Compounded Ingredients & Base */}
-          <g transform={`translate(32, ${Math.round(colHeight * 0.33)})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 14} fontWeight="800" fill="#0284c7" letterSpacing="0.8">
+          <g transform={`translate(32, ${b2Y})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 13} fontWeight="800" fill="#0284c7" letterSpacing="0.8">
               ACTIVE COMPOUNDED INGREDIENTS &amp; BASE
             </text>
             
@@ -247,9 +252,9 @@ export default function PharmapolisLabelSvg({
               <text
                 key={iIdx}
                 x="0"
-                y={isShort ? 20 + iIdx * 17 : 26 + iIdx * 22}
+                y={isShort ? 17 + iIdx * 15 : 22 + iIdx * 20}
                 fontFamily="Arial, Helvetica, sans-serif"
-                fontSize={isShort ? 13 : 16}
+                fontSize={isShort ? 12 : 15}
                 fontWeight="800"
                 fill="#0f172a"
               >
@@ -260,49 +265,44 @@ export default function PharmapolisLabelSvg({
             {/* Compounding Base / Vehicle */}
             <text
               x="0"
-              y={isShort ? 20 + Math.min(activeIngredientsList.length, 3) * 17 : 26 + Math.min(activeIngredientsList.length, 3) * 22}
+              y={isShort ? 17 + Math.min(activeIngredientsList.length, 3) * 15 : 22 + Math.min(activeIngredientsList.length, 3) * 20}
               fontFamily="Arial, Helvetica, sans-serif"
-              fontSize={isShort ? 12 : 14}
+              fontSize={isShort ? 11 : 14}
               fontWeight="700"
               fill="#0369a1"
             >
-              Base: {vehicleName}
+              Base: {vehicleName.length > 55 ? vehicleName.slice(0, 52) + '...' : vehicleName}
             </text>
 
             {/* Compact 1-line Prescriber & Clinic Reference */}
             <text
               x="0"
-              y={isShort ? 20 + (Math.min(activeIngredientsList.length, 3) + 1) * 17 + 2 : 26 + (Math.min(activeIngredientsList.length, 3) + 1) * 22 + 4}
+              y={isShort ? 17 + (Math.min(activeIngredientsList.length, 3) + 1) * 15 + 2 : 22 + (Math.min(activeIngredientsList.length, 3) + 1) * 20 + 3}
               fontFamily="Arial, Helvetica, sans-serif"
-              fontSize={isShort ? 11 : 13}
+              fontSize={isShort ? 10 : 12}
               fontWeight="600"
               fill="#64748b"
             >
-              Rx: {doctorName} • {clinicName.length > 36 ? clinicName.slice(0, 34) + '...' : clinicName} ({doctorLicense})
+              Rx: {doctorName} • {clinicName.length > 28 ? clinicName.slice(0, 26) + '...' : clinicName} ({doctorLicense})
             </text>
           </g>
 
-          {/* Block 3: Compounding Specifications & Purity */}
-          <g transform={`translate(32, ${Math.round(colHeight * 0.68)})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#64748b" letterSpacing="0.8">
+          {/* Block 3: Compounding Specifications & Purity (Clean, Non-Redundant, Generous Padding) */}
+          <g transform={`translate(32, ${b3Y})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 13} fontWeight="800" fill="#64748b" letterSpacing="0.8">
               COMPOUNDING SPECIFICATIONS &amp; PURITY
             </text>
-            <text x="0" y={isShort ? 22 : 28} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
-              • Hypoallergenic formulation: Zero gluten, zero lactose, zero dairy.
-            </text>
-            <text x="0" y={isShort ? 44 : 56} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
-              • No bromelain, no sunflower lecithin, no seed oils in capsule fill.
-            </text>
-            <text x="0" y={isShort ? 66 : 84} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="700" fill="#0f172a">
+            <text x="0" y={isShort ? 17 : 24} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 15} fontWeight="700" fill="#0f172a">
               • HPLC Verified Raw Materials &gt; 98.5% Active Pharmaceutical Purity.
             </text>
-            {warnings && (
-              <text x="0" y={isShort ? 88 : 110} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="600" fill="#475569">
-                • Safety &amp; Precautions: {warnings.length > 76 ? warnings.slice(0, 73) + '...' : warnings}
-              </text>
-            )}
+            <text x="0" y={isShort ? 33 : 46} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 15} fontWeight="700" fill="#0f172a">
+              • Hypoallergenic formulation: Zero gluten, zero lactose, zero dairy.
+            </text>
+            <text x="0" y={isShort ? 49 : 68} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 11 : 14} fontWeight="600" fill="#475569">
+              • Precaution: Topical scalp use only. Keep out of reach of children.
+            </text>
             {!isShort && (
-              <text x="0" y={warnings ? 132 : 112} fontFamily="Arial, Helvetica, sans-serif" fontSize="16" fontWeight="750" fill="#16a34a">
+              <text x="0" y={88} fontFamily="Arial, Helvetica, sans-serif" fontSize="14" fontWeight="750" fill="#16a34a">
                 ✓ Tamper-evident seal intact upon dispensary release.
               </text>
             )}

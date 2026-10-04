@@ -716,95 +716,64 @@ export default function PharmacyLabelsModal({
             </div>
           </div>
 
-          {/* QR Destination Badge & Diagnostic Info */}
-          <div style={{
-            width: '100%',
-            maxWidth: '760px',
-            background: '#f8fafc',
-            borderRadius: '6px',
-            border: '1px solid #e2e8f0',
-            padding: '8px 14px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '0.74rem',
-            color: '#475569',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-              <span style={{ fontWeight: 600, color: '#003666', whiteSpace: 'nowrap' }}>
-                {isEs ? 'Destino Verificado QR:' : 'Verified QR Target:'}
-              </span>
-              <code style={{
-                background: '#ffffff',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                border: '1px solid #cbd5e1',
-                color: '#1e293b',
-                fontFamily: 'monospace',
-                fontSize: '0.72rem',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                maxWidth: '460px'
-              }}>
-                {currentItem.targetRxUrl || `https://med-peptides.com/rx/${currentItem.fileNumber || '51857'}`}
-              </code>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {currentItem.targetRxUrl && (
-                <a
-                  href={currentItem.targetRxUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: '#1a73e8',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <span>{isEs ? 'Probar Enlace ↗' : 'Test Link ↗'}</span>
-                </a>
-              )}
-            </div>
-          </div>
-
         </div>
 
         {/* ── GCP Sticky Action Footer / Mobile Dock Sticker ── */}
         <div className="gcp-labels-sticky-footer">
-          {/* Desktop Product & Dimension Specifications (Hidden on Mobile) */}
-          <div className="gcp-footer-desktop-specs">
-            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#202124' }}>
-              {currentItem.productName}
-            </div>
-            <div style={{ fontSize: '0.74rem', color: '#5f6368', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{currentItem.dosageForm || 'Topical Solution'}</span>
-              <span>•</span>
+          {/* Desktop Single-Line Specs & Direct Patient Link (No Redundant Titles) */}
+          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.78rem',
+              color: '#5f6368',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              <span style={{ fontWeight: 600, color: '#202124' }}>
+                {currentItem.dosageForm || 'Topical Scalp Solution'}
+              </span>
+              <span style={{ color: '#dadce0' }}>•</span>
               <span>{currentItem.volume || '100 mL'}</span>
-              <span>•</span>
-              <span>{dimensions.widthMm} × {dimensions.heightMm} mm (Vector SVG · 300 DPI)</span>
+              {currentItem.targetRxUrl && (
+                <>
+                  <span style={{ color: '#dadce0' }}>•</span>
+                  <a
+                    href={currentItem.targetRxUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#1a73e8',
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px'
+                    }}
+                  >
+                    <span>{isEs ? 'Ver Portal Paciente' : 'Patient View'}</span>
+                    <ExternalLink size={12} />
+                  </a>
+                </>
+              )}
             </div>
           </div>
 
           {/* Mobile Top Micro-Specs Strip (Visible Only on Mobile) */}
           <div className="gcp-footer-mobile-specs">
-            <div style={{ fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>
-              {currentItem.productName}
+            <div style={{ fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {currentItem.dosageForm || 'Topical Solution'}
             </div>
             <div style={{ color: '#5f6368', whiteSpace: 'nowrap', fontSize: '0.72rem' }}>
-              {currentItem.volume || '100 mL'} · {dimensions.widthMm}×{dimensions.heightMm}mm
+              {currentItem.volume || '100 mL'}
             </div>
           </div>
 
-          {/* Action Buttons Group */}
+          {/* Action Buttons Group (Google Cloud UX Hierarchy) */}
           <div className="gcp-footer-actions-wrap">
-            {/* Primary Action: Download PNG (100% full width on mobile) */}
+            {/* Primary Action: Download PNG */}
             <button
               type="button"
               className="gcp-btn-primary"
@@ -819,11 +788,11 @@ export default function PharmacyLabelsModal({
               <span>
                 {isGeneratingPng 
                   ? (isEs ? 'Generando 300 DPI...' : 'Rendering 300 DPI...') 
-                  : (isEs ? `Descargar PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)` : `Download PNG (${dimensions.widthMm}×${dimensions.heightMm}mm)`)}
+                  : (isEs ? 'Descargar PNG' : 'Download PNG')}
               </span>
             </button>
 
-            {/* Secondary Symmetrical Actions (50% / 50% grid on mobile) */}
+            {/* Secondary Symmetrical Actions */}
             <div
               className="gcp-footer-secondary-grid"
               style={{
@@ -836,7 +805,7 @@ export default function PharmacyLabelsModal({
                 onClick={handlePrint}
               >
                 <Printer size={15} />
-                <span>{isEs ? 'Imprimir Etiqueta' : 'Print Label'}</span>
+                <span>{isEs ? 'Imprimir' : 'Print Label'}</span>
               </button>
 
               {currentItem.targetRxUrl && (
@@ -852,7 +821,7 @@ export default function PharmacyLabelsModal({
                   title={currentItem.targetRxUrl}
                 >
                   {copiedLink ? <Check size={14} color="#137333" /> : <ExternalLink size={14} />}
-                  <span>{copiedLink ? (isEs ? 'URL Copiada ✓' : 'Link Copied ✓') : (isEs ? 'Copiar QR' : 'Copy QR Link')}</span>
+                  <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy QR Link')}</span>
                 </button>
               )}
             </div>

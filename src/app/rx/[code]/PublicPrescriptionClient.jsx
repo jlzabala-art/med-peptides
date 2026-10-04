@@ -1575,7 +1575,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         `🧪 *Fórmula:* ${resolvedFormulaSummary}\n` +
         (genomicsData ? `🧬 *Guía Genómica:* Formulada según recomendaciones de ${genomicsData.test.shortName}.\n` : '') +
         `🕒 *Posología:* ${resolvedDosageSummary}\n\n` +
-        `🔗 *Ver Ficha y Posología Digital:* ${patientPublicUrl}`
+        `🛒 *Información y Cotización:* Consulte los detalles de la formulación y solicite presupuesto oficial para la preparación y compra de su prescripción:\n` +
+        `🔗 ${patientPublicUrl}`
       : `*Atlas Services — Medical Prescription & Posology Regimen*\n` +
         `📋 *Prescription Ref:* ${rxId}\n` +
         `👤 *Patient:* ${patientName}${patientAlias}\n` +
@@ -1583,7 +1584,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         `🧪 *Formula:* ${resolvedFormulaSummary}\n` +
         (genomicsData ? `🧬 *Genomics Guidance:* Formulated based on ${genomicsData.test.shortName} recommendations.\n` : '') +
         `🕒 *Dosage:* ${resolvedDosageSummary}\n\n` +
-        `🔗 *Digital Prescription & Dosage Regimen:* ${patientPublicUrl}`
+        `🛒 *Product Info & Compounding Quotation:* Review formulation details and request an official compounding quotation to purchase your prescription:\n` +
+        `🔗 ${patientPublicUrl}`
   );
 
   return (
@@ -3433,13 +3435,41 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </div>
 
             {/* Action Buttons & Info */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minWidth: 260, maxWidth: 420 }}>
-              <div style={{ fontSize: '0.84rem', color: '#334155', lineHeight: 1.55 }}>
-                {isEs 
-                  ? 'Guarde o comparta este acceso para consultar la pauta médica diaria desde cualquier smartphone sin necesidad de instalar aplicaciones.' 
-                  : 'Bookmark or share this access link to review your daily posology protocol and trichological progress anytime from any mobile device.'}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minWidth: 280, maxWidth: 460 }}>
+              {/* Informative Value Callout */}
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #d2e3fc',
+                borderRadius: '10px',
+                padding: '12px 14px',
+                boxShadow: '0 1px 3px rgba(60,64,67,0.06)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8' }}>
+                    {isEs ? 'Acceso del Paciente & Cotización Directa' : 'Patient Access & Direct Compounding Quotation'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: '#3c4043', lineHeight: 1.5 }}>
+                  {isEs 
+                    ? 'Al compartir este código QR, el paciente podrá consultar la información completa de su fórmula magistral, posología y, si lo desea, solicitar cotización formal para la elaboración y compra de su prescripción.' 
+                    : 'When shared with the patient, this QR code enables them to view complete product and formulation details, follow their daily posology schedule, and request an official compounding quotation to purchase their prescription directly.'}
+                </div>
               </div>
 
+              {/* 3 Value Badges */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe' }}>
+                  ✓ {isEs ? 'Detalles de la Fórmula' : 'Compounded Formula Details'}
+                </span>
+                <span style={{ fontSize: '0.70rem', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}>
+                  ✓ {isEs ? 'Pauta Posológica' : 'Step-by-Step Posology'}
+                </span>
+                <span style={{ fontSize: '0.70rem', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}>
+                  ✓ {isEs ? 'Cotización y Compra Online' : 'Direct Quote & Purchase'}
+                </span>
+              </div>
+
+              {/* Action Buttons Row */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <button
                   type="button"
@@ -3449,13 +3479,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
-                    padding: '0.65rem',
+                    padding: '0.60rem',
                     borderRadius: '8px',
                     background: copied ? '#f0fdf4' : '#ffffff',
-                    border: `1px solid ${copied ? '#86efac' : '#cbd5e1'}`,
-                    color: copied ? '#15803d' : '#334155',
+                    border: `1px solid ${copied ? '#86efac' : '#dadce0'}`,
+                    color: copied ? '#15803d' : '#3c4043',
                     fontSize: '0.78rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
@@ -3471,13 +3501,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
-                    padding: '0.65rem',
+                    padding: '0.60rem',
                     borderRadius: '8px',
                     background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    color: '#334155',
+                    border: '1px solid #dadce0',
+                    color: '#3c4043',
                     fontSize: '0.78rem',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
@@ -3508,6 +3538,30 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               >
                 <Share2 size={14} />
                 <span>{isEs ? 'Compartir por WhatsApp' : 'Share via WhatsApp'}</span>
+              </a>
+
+              {/* Preview Patient View Link (Instant Verification for Doctor) */}
+              <a
+                href={patientPublicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '0.50rem',
+                  borderRadius: '8px',
+                  background: '#f8fafd',
+                  border: '1px dashed #c2e7ff',
+                  color: '#1a73e8',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  textDecoration: 'none'
+                }}
+              >
+                <ExternalLink size={13} />
+                <span>{isEs ? 'Probar Vista del Paciente y Cotización ↗' : 'Preview Patient Experience & Quotation ↗'}</span>
               </a>
             </div>
           </div>
