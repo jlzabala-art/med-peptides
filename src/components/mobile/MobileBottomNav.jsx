@@ -54,21 +54,21 @@ const ROLE_BOTTOM_ITEMS = {
     { id: 'home', label: 'Pharmacy', path: '/pharmacy', icon: Home },
     { id: 'dispense', label: 'Dispense', path: '/pharmacy', icon: Pill },
     { id: 'orders', label: 'Orders', path: '/pharmacy', icon: Package },
-    { id: 'ai', label: 'Rx Copilot', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'ai', label: 'Atlas AI', action: 'open_ai', icon: Sparkles, isAi: true },
     { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   patient: [
     { id: 'home', label: 'Home', path: '/patient', icon: Home },
     { id: 'treatments', label: 'My Regimen', path: '/patient', icon: Pill },
     { id: 'orders', label: 'Orders', path: '/patient/orders', icon: Package },
-    { id: 'ai', label: 'Care AI', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'ai', label: 'Atlas AI', action: 'open_ai', icon: Sparkles, isAi: true },
     { id: 'profile', label: 'Profile', action: 'open_sidebar', icon: User },
   ],
   wholesaler: [
     { id: 'home', label: 'Dashboard', path: '/wholesaler', icon: Home },
     { id: 'catalog', label: 'Wholesale', path: '/admin/catalog', icon: ShoppingBag },
     { id: 'orders', label: 'Orders & RFQ', path: '/wholesaler/orders', icon: Package },
-    { id: 'ai', label: 'B2B Copilot', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'ai', label: 'Atlas AI', action: 'open_ai', icon: Sparkles, isAi: true },
     { id: 'menu', label: 'Account', action: 'open_sidebar', icon: Menu },
   ],
   supplier: [
@@ -106,7 +106,7 @@ export default function MobileBottomNav({ onOpenSidebar, onOpenAi }) {
       const eventDetail = isDoc ? {
         mode: 'doctor',
         role: effectiveRole,
-        contextLabel: 'Doctor Clinical Copilot',
+        contextLabel: 'Atlas AI',
       } : undefined;
 
       window.dispatchEvent(new CustomEvent('open-clinical-ai', { detail: eventDetail }));

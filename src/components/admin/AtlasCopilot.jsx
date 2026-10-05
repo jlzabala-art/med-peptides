@@ -19,7 +19,7 @@ export default function AtlasCopilot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I am your Atlas AI Copilot. I can help you analyze patients, query clinical protocols, or summarize clinic performance. What do you need?' }
+    { role: 'assistant', content: 'Hello! I am Atlas AI. I can help you analyze patients, query clinical protocols, or summarize clinic performance. What do you need?' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -98,7 +98,7 @@ export default function AtlasCopilot() {
       <div style={{ padding: '1rem 1.25rem', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Bot size={20} />
-          <span style={{ fontWeight: 700, fontSize: '1.05rem' }}>Atlas Copilot</span>
+          <span style={{ fontWeight: 700, fontSize: '1.05rem' }}>Atlas AI</span>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button onClick={() => setIsMinimized(!isMinimized)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: '0.25rem' }}>

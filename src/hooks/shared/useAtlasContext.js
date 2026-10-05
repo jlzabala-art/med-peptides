@@ -27,7 +27,7 @@ export function useAtlasContext() {
         themeAccent = '#0d9488';
         themeBgActive = 'rgba(13, 148, 136, 0.08)';
         agentType = 'clinical_decision';
-        assistantName = 'Atlas AI Copilot';
+        assistantName = 'Atlas AI';
         
         if (isProductsPath) {
           suggestedPrompts = [

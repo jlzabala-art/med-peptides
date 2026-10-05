@@ -66,7 +66,7 @@ export default function ChatHeader({
   const themeAccent = isPatientContext ? '#0d9488' : isProtocolContext ? '#0d9488' : isQuotationsContext ? '#0284c7' : (isProductContext || isCatalogContext) ? '#7c3aed' : isDoctorRole ? '#0d9488' : contextMode === 'admin' ? '#1a73e8' : '#4285f4';
   const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : isProtocolContext ? 'rgba(13, 148, 136, 0.08)' : isQuotationsContext ? 'rgba(2, 132, 199, 0.08)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.08)' : isDoctorRole ? 'rgba(13, 148, 136, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : '#e8f0fe';
   const headerTitle = isPatientContext 
-    ? '🩺 Patient Clinical Copilot' 
+    ? '🩺 Atlas AI (Patient)' 
     : isProtocolContext && activeProtocolName
       ? `📋 ${activeProtocolName}`
       : isProtocolContext
@@ -82,7 +82,7 @@ export default function ChatHeader({
                 : isCatalogContext
                   ? '🧬 Catalog & Peptide Intelligence'
                   : isDoctorRole
-                    ? '🩺 Atlas AI Copilot (Doctor)'
+                    ? '🩺 Atlas AI (Doctor)'
                     : contextMode === 'admin'
                       ? 'Atlas AI (Admin)'
                       : 'Atlas AI';

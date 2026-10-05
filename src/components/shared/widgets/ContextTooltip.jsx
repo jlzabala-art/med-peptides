@@ -73,7 +73,7 @@ export default function ContextTooltip({ content, copilotPrompt }) {
               onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
               onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
             >
-              <Bot size={14} /> Ask Atlas Copilot
+              <Bot size={14} /> Ask Atlas AI
             </button>
           )}
           {/* Tooltip Arrow */}

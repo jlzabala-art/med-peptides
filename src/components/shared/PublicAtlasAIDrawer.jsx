@@ -838,7 +838,7 @@ export default function PublicAtlasAIDrawer({
           type="button"
           onClick={() => setIsOpen(true)}
           className="atlas-ai-public-fab"
-          title="Open Atlas AI Technical Research Copilot"
+          title="Open Atlas AI"
           style={{
             position: 'fixed',
             bottom: '24px',
@@ -925,7 +925,7 @@ export default function PublicAtlasAIDrawer({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <Sparkles size={16} color="#38bdf8" />
                   <span style={{ fontSize: '0.98rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#ffffff' }}>
-                    Atlas Research Copilot
+                    Atlas AI
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#7dd3fc', marginTop: '2px', fontWeight: 600 }}>
@@ -1126,16 +1126,16 @@ export default function PublicAtlasAIDrawer({
                     </div>
                     <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a' }}>
                       {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'
-                        ? (lang === 'es' ? 'Copiloto IA de Prescripción y Posología' : 'Prescription & Posology AI Copilot')
+                        ? (lang === 'es' ? 'Atlas AI · Prescripción y Posología' : 'Atlas AI · Prescription & Posology')
                         : contextType === 'cosmetic_product' || contextAnchor?.isCosmetic || contextAnchor?.category?.toLowerCase().includes('cosmetic') || contextAnchor?.category?.toLowerCase().includes('hair')
-                        ? 'Dermocosmetic & INCI Research Copilot'
+                        ? 'Atlas AI · Dermocosmetic & INCI'
                         : contextType === 'diagnostic_test'
-                        ? 'Diagnostic Laboratory & Biomarker AI Copilot'
+                        ? 'Atlas AI · Diagnostic Laboratory & Biomarkers'
                         : contextType === 'protocol'
-                        ? 'Clinical Protocol Research Copilot'
+                        ? 'Atlas AI · Clinical Protocols'
                         : contextType === 'aesthetic' || contextAnchor?.category?.toLowerCase().includes('aesthetic')
-                        ? 'Aesthetic Medicine & Rheology Copilot'
-                        : 'Dedicated Technical Research Assistant'}
+                        ? 'Atlas AI · Aesthetic Medicine & Rheology'
+                        : 'Atlas AI · Clinical Decision Support'}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px', maxWidth: '340px', margin: '6px auto 0', lineHeight: 1.45 }}>
                       {contextType === 'prescription' || contextAnchor?.rxId || contextAnchor?.category === 'prescription'

@@ -1643,7 +1643,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             formula: resolvedFormulaSummary,
             dosage: resolvedDosageSummary,
             category: 'NutriGen Prescription Dossier',
-            genomicsTest: genomicsData?.test?.shortName || (isFagronMultiPart ? 'NutriGen' : 'Prescription'),
+            genomicsTest: genomicsData?.test?.shortName || rx.testName || (compoundedFormulations?.length > 1 ? 'NutriGen' : 'Prescription'),
             isNutriGen: true,
             isPatientView,
             isDispensed,

@@ -423,7 +423,34 @@ export async function serverCreateAtlasQuotationRequest({
 
     const docRef = await adminDb.collection('quotations').add(payload);
 
-    logger.info('[supplierRfqActions] Created Doctor-to-Atlas quotation request', {
+    // 2. Real-time In-App Notification for Admin Dashboard & Notification Bell
+    try {
+      await adminDb.collection('notifications').add({
+        title: `Quotation Requested: ${prescriptionCode}`,
+        message: `${requesterName || rxData.doctorName || 'Doctor'} requested a compounding quotation for ${rxData.patientName || 'Patient'} (${prescriptionCode}).`,
+        type: 'quotation',
+        link: `/admin/quotations?search=${quoteRequestId}`,
+        targetRoles: ['admin', 'medical_director'],
+        read: false,
+        createdAt: new Date(),
+      });
+    } catch (notifErr) {
+      logger.warn('[supplierRfqActions] Could not write in-app notification', { error: notifErr.message });
+    }
+
+    // 3. Mark Prescription with active quotation status
+    try {
+      await rxSnap.ref.update({
+        quotationStatus: 'requested',
+        quoteRequestId,
+        lastQuotationRequestId: docRef.id,
+        updatedAt: new Date(),
+      });
+    } catch (rxUpdateErr) {
+      logger.warn('[supplierRfqActions] Could not update prescription quotationStatus', { error: rxUpdateErr.message });
+    }
+
+    logger.info('[supplierRfqActions] Created Doctor-to-Atlas quotation request with notification', {
       docId: docRef.id,
       quoteRequestId,
       prescriptionCode,

@@ -96,7 +96,7 @@ export default function AdminAIAssistant({ onClose }) {
               <Bot size={20} />
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>Platform Copilot</h2>
+              <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>Atlas AI</h2>
               <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                 <Sparkles size={12} color="#0071bd" /> AI Assistant
               </p>

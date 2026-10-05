@@ -120,21 +120,49 @@ export async function POST(request) {
         : (Array.isArray(record.prescriptionLines) ? record.prescriptionLines : []);
       const productNames = rawLines.map((i) => i.name || i.productName || i.title).filter(Boolean);
 
+      const rawDate = record.date || record.dateIssued;
+      let formattedDate = record.dateFormatted || '';
+      if (!formattedDate) {
+        if (rawDate && typeof rawDate === 'string') {
+          const dmy = rawDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (dmy) {
+            const dt = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+            formattedDate = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          } else {
+            const dt = new Date(rawDate);
+            if (!isNaN(dt.getTime())) formattedDate = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          }
+        }
+        if (!formattedDate && record.createdAt) {
+          const ts = getTimestamp(record.createdAt);
+          formattedDate = new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+      }
+
       formattedRecord = {
+        ...record,
         objectID: targetId,
         id: targetId,
         code: record.code || record.prescriptionCode || `RX-${targetId.slice(0, 6).toUpperCase()}`,
         prescriptionCode: record.prescriptionCode || record.code || `RX-${targetId.slice(0, 6).toUpperCase()}`,
         patientName: record.patientName || record.patient?.name || '',
-        patientId: record.patientId || '',
+        patientId: record.patientId || record.patient?.id || '',
         doctorName: record.doctorName || record.doctor?.name || '',
-        doctorId: record.doctorId || '',
+        doctorId: record.doctorId || record.doctor?.id || '',
         status: (record.status || 'pending').toLowerCase(),
-        items: productNames,
+        date: record.date || rawDate || formattedDate,
+        dateIssued: record.dateIssued || rawDate || '',
+        dateFormatted: formattedDate,
+        rxGroupId: record.rxGroupId || record.sessionId || '',
+        sessionId: record.sessionId || record.rxGroupId || '',
+        partNumber: record.partNumber || null,
+        totalParts: record.totalParts || null,
+        items: rawLines,
+        searchableItems: productNames,
         itemCount: rawLines.length,
         total: Number(record.total || record.amount || 0),
         source: record.source || 'portal',
-        createdAt_ts: getTimestamp(record.createdAt)
+        createdAt_ts: getTimestamp(record.createdAt || record.dateIssued)
       };
     } else if (indexName === 'atlas_patients') {
       const doctorIds = new Set(record.doctorIds || []);

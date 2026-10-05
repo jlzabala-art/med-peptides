@@ -648,6 +648,36 @@ export default function AdminQuotationsTab() {
           }
         };
 
+        if (row.type === 'doctor_to_atlas_quotation' || row.prescriptionCode) {
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#e0f2fe', color: '#0284c7', fontWeight: 800, border: '1px solid #bae6fd', flexShrink: 0 }}>
+                🩺 RX QUOTE REQ
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span 
+                  onClick={handleClientClick}
+                  style={{ 
+                    fontWeight: 700, 
+                    color: clientId ? '#0284c7' : 'var(--text-main)', 
+                    fontSize: '0.88rem', 
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis',
+                    cursor: clientId ? 'pointer' : 'default'
+                  }}
+                  title={clientId ? "Click to view Patient Profile" : undefined}
+                >
+                  {row.clientName || row.patientName} {clientId && '↗'}
+                </span>
+                <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                  Dr. {row.doctorName || row.requester?.name || 'Physician'} • Ref: {row.prescriptionCode}
+                </span>
+              </div>
+            </div>
+          );
+        }
+
         if (isWholesaler) {
           return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -909,6 +939,56 @@ export default function AdminQuotationsTab() {
     return (
       <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#f8fafc', borderTop: '1px solid var(--border)', borderRadius: '0 0 8px 8px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         
+        {/* Special Doctor Quotation Request Callout */}
+        {row.type === 'doctor_to_atlas_quotation' && (
+          <div style={{
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#2563eb', color: 'white' }}>
+                  DOCTOR QUOTATION REQUEST
+                </span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e3a8a' }}>
+                  Prescription #{row.prescriptionCode} • Patient: {row.patientName || row.clientName}
+                </span>
+              </div>
+              <a
+                href={`/rx/${row.prescriptionCode || row.prescriptionId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  color: '#2563eb',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                Open Clinical Rx Dossier ↗
+              </a>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '0.80rem', color: '#1e40af' }}>
+              <div><strong>Requester:</strong> {row.requester?.name || row.doctorName}</div>
+              {row.requester?.email && <div><strong>Email:</strong> <a href={`mailto:${row.requester.email}`} style={{ color: '#2563eb' }}>{row.requester.email}</a></div>}
+              {row.requester?.phone && <div><strong>Phone / WhatsApp:</strong> <a href={`tel:${row.requester.phone}`} style={{ color: '#2563eb' }}>{row.requester.phone}</a></div>}
+            </div>
+            {row.notes && (
+              <div style={{ fontSize: '0.80rem', color: '#1e293b', backgroundColor: 'white', padding: '8px 12px', borderRadius: '6px', border: '1px solid #dbeafe' }}>
+                <strong>Doctor Notes:</strong> "{row.notes}"
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 1. Grid de Contexto Comercial (4 Tarjetas de Metadatos) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
           

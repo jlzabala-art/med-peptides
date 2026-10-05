@@ -228,7 +228,7 @@ export default function PortalLayout({
         e.preventDefault();
         setPaletteOpen((prev) => !prev);
       }
-      // Cmd+J or Cmd+I for AI Copilot
+      // Cmd+J or Cmd+I for Atlas AI
       if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J' || e.key === 'i' || e.key === 'I')) {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent('open-atlas-ai'));
@@ -976,8 +976,8 @@ export default function PortalLayout({
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
-            title="Open AI Copilot - Press ⌘J"
-            aria-label="Open AI Copilot"
+            title="Open Atlas AI - Press ⌘J"
+            aria-label="Open Atlas AI"
           >
             <Sparkles
               size={13}
@@ -994,7 +994,7 @@ export default function PortalLayout({
                 whiteSpace: 'nowrap',
               }}
             >
-              AI Copilot
+              Atlas AI
             </span>
 
             {!isMobile && (

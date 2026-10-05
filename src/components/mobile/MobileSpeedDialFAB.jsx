@@ -70,7 +70,7 @@ export default function MobileSpeedDialFAB() {
     },
     {
       id: 'atlas-ai',
-      label: isDoctorRole ? 'Clinical AI Copilot' : 'Ask Atlas AI Copilot',
+      label: isDoctorRole ? 'Atlas AI (Clinical)' : 'Ask Atlas AI',
       icon: Sparkles,
       color: isDoctorRole ? '#0d9488' : '#9333ea',
       bgColor: isDoctorRole ? '#ccfbf1' : '#f3e8ff',

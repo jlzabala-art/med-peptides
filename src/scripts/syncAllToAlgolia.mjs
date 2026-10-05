@@ -37,11 +37,38 @@ async function syncAll() {
   rxSnap.forEach(doc => {
     const d = doc.data();
     const targetId = doc.id;
-    const items = Array.isArray(d.items) ? d.items : (Array.isArray(d.prescriptionLines) ? d.prescriptionLines : []);
-    const productNames = items.map(i => i.name || i.productName || i.product_title).filter(Boolean);
+    const rawItems = Array.isArray(d.items) ? d.items : (Array.isArray(d.prescriptionLines) ? d.prescriptionLines : []);
+    const cleanItems = rawItems.slice(0, 15).map(i => ({
+      name: i.name || i.productName || i.title || '',
+      activeIngredient: i.activeIngredient || '',
+      dosage: i.dosage || i.dose || '',
+      dose: i.dose || i.dosage || '',
+      category: i.category || '',
+      form: i.form || i.dosageForm || ''
+    }));
+    const productNames = rawItems.map(i => i.name || i.productName || i.product_title || i.activeIngredient).filter(Boolean);
     const patientName = d.patientName || d.patient?.name || d.patient?.fullName || '';
     const doctorName = d.doctorName || d.doctor?.name || d.treatingDoctor?.name || '';
     const code = d.prescriptionCode || d.prescriptionNumber || d.code || ('RX-' + targetId.slice(0, 6).toUpperCase());
+
+    const rawDate = d.date || d.dateIssued;
+    let formattedDate = d.dateFormatted || '';
+    if (!formattedDate) {
+      if (rawDate && typeof rawDate === 'string') {
+        const dmy = rawDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (dmy) {
+          const dt = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+          formattedDate = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        } else {
+          const dt = new Date(rawDate);
+          if (!isNaN(dt.getTime())) formattedDate = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+      }
+      if (!formattedDate && d.createdAt) {
+        const ts = getTimestamp(d.createdAt);
+        formattedDate = new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+    }
 
     rxObjects.push({
       objectID: targetId,
@@ -52,9 +79,18 @@ async function syncAll() {
       patientId: d.patientId || d.patient?.id || '',
       doctorName,
       doctorId: d.doctorId || d.doctor?.id || '',
+      clinicName: d.clinicName || d.clinic?.name || '',
       status: (d.status || 'pending').toLowerCase(),
-      items: productNames,
-      itemCount: items.length,
+      date: d.date || rawDate || formattedDate,
+      dateIssued: d.dateIssued || rawDate || '',
+      dateFormatted: formattedDate,
+      rxGroupId: d.rxGroupId || d.sessionId || '',
+      sessionId: d.sessionId || d.rxGroupId || '',
+      partNumber: d.partNumber || null,
+      totalParts: d.totalParts || null,
+      items: cleanItems,
+      searchableItems: productNames,
+      itemCount: rawItems.length,
       treatmentProgram: d.treatmentProgram || d.program || '',
       treatmentType: d.treatmentType || d.type || '',
       boxId: d.fagron?.boxId || '',

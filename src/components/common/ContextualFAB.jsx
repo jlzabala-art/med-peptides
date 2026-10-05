@@ -268,7 +268,7 @@ const getContextConfig = (pathname) => {
         },
         {
           id: 'ask_atlas',
-          label: 'Ask Atlas AI Copilot',
+          label: 'Ask Atlas AI',
           icon: <Bot size={16} color="#7c3aed" />,
           bg: '#f3e8ff',
         },
@@ -380,7 +380,7 @@ const getContextConfig = (pathname) => {
       id: 'b2c_copilot',
       theme: '#1a73e8', // AI Blue
       icon: <Bot size={20} />,
-      label: 'AI Copilot',
+      label: 'Atlas AI',
       actions: [
         {
           id: 'open_ai_copilot',

@@ -119,8 +119,8 @@ export default function GlobalSearchBar({
       setSuggestions([
         {
           key: 'ai_prompt_entry',
-          id: 'ai_copilot',
-          name: q ? `Ask Screen AI Copilot: "${q}"` : 'Ask Screen AI Copilot (type question & press Enter)',
+          id: 'atlas_ai',
+          name: q ? `Ask Atlas AI: "${q}"` : 'Ask Atlas AI (type question & press Enter)',
           category: 'AI Omnibar',
           isAiPrompt: true,
           query: q,
@@ -610,7 +610,7 @@ export default function GlobalSearchBar({
           <div className="atlas-search__dropdown" style={{ zIndex: 100 }}>
             <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {value.trim().startsWith('/ai') ? '🤖 Screen AI Copilot' : 'Algolia Suggestions'}
+                {value.trim().startsWith('/ai') ? '🤖 Atlas AI' : 'Algolia Suggestions'}
               </span>
               {isSearchingSuggestions && <Loader size={12} className="atlas-search__spinner" />}
             </div>
