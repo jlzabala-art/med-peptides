@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { prescriptionSchema } from '../../../schemas/prescriptionSchema';
 import { resolveIngredients } from '../../../services/apiIngredientMatcher';
+import { syncPrescriptionToAlgolia, syncPatientToAlgolia } from '../../../services/algoliaSyncService';
 import AIContextBadge from '../../../components/ui/AIContextBadge';
 
 export default function ImportPrescriptionModal({ 
@@ -159,7 +160,21 @@ export default function ImportPrescriptionModal({
             },
           };
 
-          await addDoc(collection(db, 'prescriptions'), newRx);
+          const docRef = await addDoc(collection(db, 'prescriptions'), newRx);
+          
+          // Incremental Algolia sync
+          syncPrescriptionToAlgolia({ ...newRx, id: docRef.id }).catch(err => {
+            console.warn('[ImportPrescriptionModal] Algolia rx sync error:', err);
+          });
+          if (newRx.patient?.id || newRx.patient?.name) {
+            syncPatientToAlgolia({
+              id: newRx.patient.id || newRx.patientId || docRef.id,
+              name: newRx.patient.name || newRx.patientName,
+              ...newRx.patient
+            }).catch(err => {
+              console.warn('[ImportPrescriptionModal] Algolia patient sync error:', err);
+            });
+          }
         }
 
         // Final toast summary

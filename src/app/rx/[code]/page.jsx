@@ -104,6 +104,26 @@ const getPrescriptionData = cache(async (code) => {
     }
   }
 
+  // 6. Fallback search by document ID prefix (e.g. #RX-6F8QZC or 6F8QZC from 20-char Firestore IDs)
+  if (!rxDoc && cleanCodeNoPrefix.length >= 5) {
+    try {
+      const lower = cleanCodeNoPrefix.toLowerCase();
+      const end = lower.slice(0, -1) + String.fromCharCode(lower.charCodeAt(lower.length - 1) + 1);
+      const { FieldPath } = await import('firebase-admin/firestore');
+      const prefixSnap = await adminDb.collection('prescriptions')
+        .where(FieldPath.documentId(), '>=', lower)
+        .where(FieldPath.documentId(), '<', end)
+        .limit(1)
+        .get()
+        .catch(() => null);
+      if (prefixSnap && !prefixSnap.empty) {
+        rxDoc = { id: prefixSnap.docs[0].id, ...prefixSnap.docs[0].data() };
+      }
+    } catch (e) {
+      console.warn('Prefix match fallback failed:', e.message);
+    }
+  }
+
   if (!rxDoc) return null;
 
   // If this prescription belongs to a Fagron multi-part box or rxGroupId, fetch linked parts
