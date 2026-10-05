@@ -101,6 +101,18 @@ const getPrescriptionData = cache(async (code) => {
     }
   }
 
+  // 5. Fallback search by Fagron sample code / boxId
+  if (!rxDoc) {
+    const qSnap5 = await adminDb.collection('prescriptions')
+      .where('fagron.boxId', 'in', codesToSearch)
+      .limit(1)
+      .get()
+      .catch(() => null);
+    if (qSnap5 && !qSnap5.empty) {
+      rxDoc = { id: qSnap5.docs[0].id, ...qSnap5.docs[0].data() };
+    }
+  }
+
   if (!rxDoc) return null;
 
   // If this prescription belongs to a Fagron multi-part box or rxGroupId, fetch linked parts

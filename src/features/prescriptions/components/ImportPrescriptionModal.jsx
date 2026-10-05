@@ -67,9 +67,10 @@ export default function ImportPrescriptionModal({
            * - No match → create a placeholder 'draft' product in Firestore
            *   with isApiPlaceholder:true for admin follow-up
            */
+          const blockIngredients = Array.isArray(block.items) ? block.items : (Array.isArray(block.ingredients) ? block.ingredients : []);
           const resolved = await resolveIngredients(
-            block.ingredients || [],
-            { supplierHint: 'Fagron Iberia', importSource: 'fagron_genemocis' }
+            blockIngredients,
+            { supplierHint: 'Fagron Iberia', importSource: 'fagron_genomics' }
           );
 
           const blockNewPlaceholders = resolved.filter(r => r.isPlaceholder && r.isNew).length;
@@ -85,11 +86,13 @@ export default function ImportPrescriptionModal({
             productId: r.productId || null,
             variantId: null,
             productName: r.matchedName || r.original?.name || '',
+            drugName: r.matchedName || r.original?.name || '',
             sku: '',
-            activeIngredient: r.original?.name || '',
-            concentration: r.original?.dose || '',
-            dosage: r.original?.dose || '',
+            activeIngredient: r.original?.activeIngredient || r.original?.name || '',
+            concentration: r.original?.dose || r.original?.strength || '',
+            dosage: r.original?.dose || r.original?.dosage || '',
             dose: r.original?.dose || '',
+            isVehicleOrBase: !!r.original?.isVehicleOrBase,
             quantity: r.original?.quantity || 1,
             price: 0,
             instructions: block.posology || extractedData.posology || '',
@@ -101,28 +104,46 @@ export default function ImportPrescriptionModal({
             status: 'Pending',
           }));
 
+          const patientName = (typeof extractedData.patient === 'object' ? extractedData.patient?.name : extractedData.patient) || context.patientName || 'Unknown Patient';
+          const doctorName = (typeof extractedData.doctor === 'object' ? extractedData.doctor?.name : extractedData.doctor) || context.doctorName || 'Unknown Doctor';
+
           const newRx = {
             ...prescriptionSchema,
             ...context,
-            patientName: extractedData.patient || context.patientName || 'Unknown Patient',
-            doctorName: extractedData.doctor || context.doctorName || 'Unknown Doctor',
-            clinicName: extractedData.clinic || null,
-            doctorLicense: extractedData.doctorLicense || null,
-            sourceType: 'fagron_genemocis',
+            patientName,
+            patient: typeof extractedData.patient === 'object' ? {
+              ...extractedData.patient,
+              name: patientName
+            } : { name: patientName },
+            doctorName,
+            doctor: typeof extractedData.doctor === 'object' ? {
+              ...extractedData.doctor,
+              name: doctorName
+            } : { name: doctorName },
+            clinicName: extractedData.doctor?.clinicName || extractedData.clinic || null,
+            doctorLicense: extractedData.doctor?.licenseNumber || extractedData.doctorLicense || null,
+            sourceType: 'fagron_genomics',
             source: 'fagron',
             status: 'draft',
             // 'Ready' if every item was matched to catalog; 'Needs Review' if any placeholder
             validationStatus: anyUnresolved ? 'Needs Review' : 'Ready',
             sessionId,
-            treatmentProgram: block.treatmentProgram || null,
+            treatmentProgram: block.treatmentProgram || extractedData.fagronDetails?.testName || 'TrichoTest',
             treatmentType: block.treatmentType || null,
-            importSource: 'fagron_genemocis',
+            importSource: 'fagron_genomics',
             posology: block.posology || extractedData.posology || '',
             clinicalIndication: block.posology || '',
             volume: block.volume || null,
             dispensingForm: block.dispensingForm || null,
             items: mappedItems,
             prescriptionLines: mappedItems,
+            formulationBlocks: blocks,
+            fagron: extractedData.fagronDetails ? {
+              boxId: extractedData.fagronDetails.boxId || null,
+              testName: extractedData.fagronDetails.testName || 'TrichoTest',
+              reportDate: extractedData.fagronDetails.reportDate || extractedData.prescriptionDate || null,
+              geneticBiomarkers: extractedData.fagronDetails.geneticBiomarkers || []
+            } : null,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             aiExtraction: {

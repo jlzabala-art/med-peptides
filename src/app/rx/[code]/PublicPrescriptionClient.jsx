@@ -38,7 +38,8 @@ import {
   QrCode,
   ChevronDown,
   ChevronUp,
-  Tag
+  Tag,
+  Smartphone
 } from '@/lib/icons';
 import { useSearchParams } from 'next/navigation';
 import { RotateCcw } from 'lucide-react';
@@ -2333,61 +2334,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               </div>
             )}
-
-        {/* ── Google Cloud Console Accordion Header Toolbar (Mobile & Desktop) ── */}
-        <div className="gcp-accordion-controls-bar" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 12px',
-          background: '#f8f9fa',
-          borderRadius: '8px',
-          border: '1px solid #dadce0',
-          marginBottom: '0.75rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124' }}>
-              {isEs ? 'Dossier Clínico Secuencial' : 'Clinical Protocol Outline'}
-            </span>
-            <span style={{ fontSize: '0.70rem', color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 8px', borderRadius: '10px', fontWeight: 500 }}>
-              {compoundedFormulations.length > 1 ? `${compoundedFormulations.length} Sequential Phases` : '1 Phase'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={expandAllSections}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#1a73e8',
-                fontSize: '0.74rem',
-                fontWeight: 500,
-                cursor: 'pointer'
-              }}
-            >
-              {isEs ? 'Expandir Todo' : 'Expand all'}
-            </button>
-            <button
-              type="button"
-              onClick={collapseAllSections}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#5f6368',
-                fontSize: '0.74rem',
-                fontWeight: 500,
-                cursor: 'pointer'
-              }}
-            >
-              {isEs ? 'Colapsar Todo' : 'Collapse all'}
-            </button>
-          </div>
-        </div>
 
         {activeGcpTab === 'all' && (
           <MultiPartOverview
