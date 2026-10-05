@@ -1725,26 +1725,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   {isEs ? 'Vista Paciente' : 'Patient Preview'}
                 </a>
               )}
-              {isPatientView && (
-                <a
-                  href={`/rx/${rxId}`}
-                  style={{
-                    marginLeft: 'auto',
-                    fontSize: '0.72rem', fontWeight: 500,
-                    color: 'rgba(255,255,255,0.85)',
-                    textDecoration: 'none',
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                    padding: '3px 9px', borderRadius: '4px',
-                    background: 'rgba(255,255,255,0.15)',
-                    border: '1px solid rgba(255,255,255,0.25)',
-                    transition: 'background 0.15s'
-                  }}
-                  title={isEs ? 'Volver a la vista médico' : 'Back to doctor view'}
-                >
-                  <Stethoscope size={11} />
-                  {isEs ? 'Vista Médico' : 'Doctor View'}
-                </a>
-              )}
             </div>
           }
         />

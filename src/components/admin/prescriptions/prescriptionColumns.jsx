@@ -87,6 +87,9 @@ export const formatDoctorName = (name) => {
     }
   }
   const lower = cleaned.toLowerCase();
+  if (lower.includes('sezgin') || lower.includes('cagatay') || lower.includes('çagatay')) {
+    return 'Dr. Çağatay Sezgin, MD, FISHRS';
+  }
   if (lower === 'heytham' || lower === 'haytham' || lower.includes('heytham salem') || lower.includes('haytham salem')) {
     return 'Dr. Haytham Salem';
   }

@@ -24,6 +24,10 @@ const formatDoctorName = (name) => {
       cleaned = cleaned.substring(2).trim();
     }
   }
+  const lower = cleaned.toLowerCase();
+  if (lower.includes('sezgin') || lower.includes('cagatay') || lower.includes('çagatay')) {
+    return 'Dr. Çağatay Sezgin, MD, FISHRS';
+  }
   return `Dr. ${cleaned}`;
 };
 
