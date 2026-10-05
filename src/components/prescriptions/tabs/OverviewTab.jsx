@@ -8,7 +8,7 @@ import PrescriptionPosologyQrCard from '../PrescriptionPosologyQrCard';
 
 const TOP_DOCTORS = [
   { name: 'Dr. Anitathurasini Rajoo', title: 'Trichology & Peptide Therapy' },
-  { name: 'Dr. Sezgin Cagatay', title: 'Dermatology Specialist' },
+  { name: 'Dr. Çağatay Sezgin, MD, FISHRS', title: 'Hair Transplant Surgeon / Novomed' },
   { name: 'Dr. Vibhor Devendra', title: 'Genomic Medicine' },
   { name: 'Dr. Maria Santos', title: 'Anti-Aging Medicine' },
   { name: 'Dr. Ahmed Al-Mansoori', title: 'Clinical Director' }

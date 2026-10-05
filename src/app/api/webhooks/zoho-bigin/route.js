@@ -124,7 +124,124 @@ export async function POST(request) {
 
     const customMarkup = Number(rawContact.Markup || rawContact.Commercial_Markup || 20) || 20;
 
-    // 5. Auto-provision or Synchronize Wholesaler using existing server action
+    // 5. Intelligent Routing: Check if Contact is a Doctor/Physician vs Wholesaler
+    const titleLower = String(rawContact.Title || '').toLowerCase();
+    const specLower = String(rawContact.Speciality || '').toLowerCase();
+    const descLower = String(description).toLowerCase();
+    const isDoctorContact = titleLower.includes('dr') || 
+      titleLower.includes('doctor') || 
+      titleLower.includes('surgeon') || 
+      titleLower.includes('physician') || 
+      titleLower.includes('md') || 
+      specLower.length > 0 || 
+      descLower.includes('dha license') ||
+      descLower.includes('surgeon');
+
+    if (isDoctorContact) {
+      // Find existing user in Firestore by zohoContactId or email
+      let userDocRef = null;
+      let existingData = {};
+      const userByBigin = await adminDb.collection('users').where('zohoContactId', '==', String(contactId)).limit(1).get();
+      if (!userByBigin.empty) {
+        userDocRef = userByBigin.docs[0].ref;
+        existingData = userByBigin.docs[0].data() || {};
+      } else {
+        const userByEmail = await adminDb.collection('users').where('email', '==', email).limit(1).get();
+        if (!userByEmail.empty) {
+          userDocRef = userByEmail.docs[0].ref;
+          existingData = userByEmail.docs[0].data() || {};
+        }
+      }
+
+      const street = rawContact.Mailing_Street || '';
+      const city = rawContact.Mailing_City || '';
+      const country = rawContact.Mailing_Country || '';
+      const fullAddress = [street, city, country].filter(Boolean).join(', ');
+
+      // Extract DHA license from description if present
+      let licenseNumber = existingData.license || '';
+      const licMatch = description.match(/DHA\s*(?:License|Licence)?[:\s-]*([A-Z0-9-]+)/i);
+      if (licMatch) licenseNumber = licMatch[1];
+
+      const cleanDocName = name.startsWith('Dr.') ? name : (rawContact.Title ? `${rawContact.Title} ${name}` : `Dr. ${name}`);
+
+      const doctorData = {
+        name: cleanDocName,
+        displayName: cleanDocName,
+        title: rawContact.Title || existingData.title || 'Dr.',
+        specialty: rawContact.Speciality || (titleLower.includes('surgeon') ? rawContact.Title : (existingData.specialty || 'Specialist Physician')),
+        clinic: companyName || existingData.clinic || '',
+        clinicName: companyName || existingData.clinicName || '',
+        address: fullAddress || existingData.address || '',
+        city: city || existingData.city || 'Dubai',
+        country: country || existingData.country || 'United Arab Emirates',
+        phone: rawContact.Phone || phone || existingData.phone || '',
+        clinicPhone: rawContact.Phone || phone || existingData.clinicPhone || '',
+        mobile: rawContact.Mobile || phone || existingData.mobile || '',
+        email,
+        secondaryEmail: rawContact.Secondary_Email || existingData.secondaryEmail || '',
+        description,
+        zohoContactId: String(contactId),
+        role: 'doctor',
+        isDoctor: true,
+        updatedAt: new Date().toISOString()
+      };
+      if (licenseNumber) {
+        doctorData.license = licenseNumber;
+        doctorData.licenseNumber = licenseNumber;
+      }
+
+      if (userDocRef) {
+        await userDocRef.set(doctorData, { merge: true });
+      } else {
+        const newDoc = adminDb.collection('users').doc();
+        await newDoc.set({ ...doctorData, createdAt: new Date().toISOString() });
+      }
+
+      // Also cascade updates to any existing prescriptions where this doctor is referenced
+      try {
+        const rxSnap = await adminDb.collection('prescriptions')
+          .where('treatingDoctor.zohoContactId', '==', String(contactId))
+          .get();
+
+        for (const doc of rxSnap.docs) {
+          await doc.ref.update({
+            doctorName: doctorData.name,
+            doctorSpecialty: doctorData.specialty,
+            clinic: doctorData.clinic,
+            clinicName: doctorData.clinicName,
+            'treatingDoctor.name': doctorData.name,
+            'treatingDoctor.clinic': doctorData.clinic,
+            'treatingDoctor.clinicName': doctorData.clinicName,
+            'treatingDoctor.specialty': doctorData.specialty,
+            'treatingDoctor.address': doctorData.address,
+            'treatingDoctor.phone': doctorData.phone,
+            'treatingDoctor.mobile': doctorData.mobile,
+            'treatingDoctor.email': doctorData.email,
+            'treatingDoctor.license': doctorData.license || '',
+            updatedAt: new Date().toISOString()
+          });
+        }
+      } catch (err) {
+        console.warn('[/api/webhooks/zoho-bigin] Prescription cascade notice:', err);
+      }
+
+      await webhookEventRef.update({
+        status: 'processed_doctor',
+        doctorName: doctorData.name,
+        clinicName: doctorData.clinicName,
+        processedAt: new Date().toISOString()
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Doctor profile and associated prescriptions synchronized from Zoho Bigin',
+        webhookId: webhookEventRef.id,
+        doctor: doctorData
+      });
+    }
+
+    // 6. Auto-provision or Synchronize Wholesaler using existing server action
     const syncResult = await importBiginWholesalerAction({
       contact: {
         id: String(contactId),
