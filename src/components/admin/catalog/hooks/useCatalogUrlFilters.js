@@ -58,6 +58,7 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
   const filterAvailability = searchParams.get('availability') || '';
   const filterQuality      = searchParams.get('quality') || 'all';
   const filterTimeframe    = searchParams.get('timeframe') || (searchParams.get('filter') === 'recent_import' ? 'recent_import' : '');
+  const filterWorkspace    = searchParams.get('workspace') || '';
   const searchQueryParam   = searchParams.get('q') || '';
 
   const [searchTerm, setSearchTerm] = useState(searchQueryParam);
@@ -235,11 +236,17 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
           router.replace(`${pathname}?${params.toString()}`, { scroll: false });
         }
       }] : []),
+      ...(filterWorkspace === '1' || filterWorkspace === 'true' ? [{
+        key: 'workspace-chip',
+        label: 'Workspace',
+        value: '💼 In Active Workspace',
+        onRemove: () => updateUrlParam('workspace', '')
+      }] : []),
     ].filter(Boolean);
   }, [
     filterProductType, filterStatus, filterCategory, filterSubcategory,
     filterGoals, filterPresentation, filterSupplier, filterTags,
-    filterPriority, filterAvailability, filterTimeframe, supplierIdToName,
+    filterPriority, filterAvailability, filterTimeframe, filterWorkspace, supplierIdToName,
     getCategoryLabel, setMultiParam, updateUrlParam, pathname, router
   ]);
 
@@ -255,7 +262,9 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     filterTags.length > 0 ||
     (filterPriority && filterPriority !== 'all') ||
     filterAvailability ||
-    filterTimeframe
+    filterTimeframe ||
+    filterWorkspace === '1' ||
+    filterWorkspace === 'true'
   );
 
   return {
@@ -274,6 +283,7 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
     filterAvailability,
     filterQuality,
     filterTimeframe,
+    filterWorkspace,
     searchTerm,
     setSearchTerm,
     debouncedSearchTerm,

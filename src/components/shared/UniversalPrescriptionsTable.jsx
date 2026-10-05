@@ -86,6 +86,12 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const urlDoctorId = searchParams.get('doctorId') || '';
   const urlDoctorName = searchParams.get('doctorName') || '';
   const urlRxId = searchParams.get('id') || '';
+  const workspaceFilter = searchParams.get('workspace') || '';
+
+  const activeWorkspace = useWorkspaceStore((s) => s.workspaces?.[s.activeWorkspaceId]);
+  const activeWsRxIds = useMemo(() => {
+    return activeWorkspace?.prescriptionIds || (activeWorkspace?.prescriptions || []).map((p) => p.id) || [];
+  }, [activeWorkspace]);
 
   const [loadingUrlItem, setLoadingUrlItem] = useState(false);
 
@@ -247,6 +253,16 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       }
     }
 
+    // Filter by Workspace (SSOT active workbench)
+    if (workspaceFilter === '1' || workspaceFilter === 'true') {
+      rawData = rawData.filter(rx => {
+        if (rx._isSessionGroup && rx._sessionMembers) {
+          return rx._sessionMembers.some(m => activeWsRxIds.includes(m.id));
+        }
+        return activeWsRxIds.includes(rx.id);
+      });
+    }
+
     // Filter by clinical program / type (TrichoTest, NutriGen, Hormones, Peptides, Compounding)
     if (typeFilter) {
       rawData = rawData.filter(rx => {
@@ -348,7 +364,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     });
     
     return result;
-  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, patientFilter, statusFilter, rangeFilter]);
+  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, patientFilter, statusFilter, rangeFilter, workspaceFilter, activeWsRxIds]);
 
   const finalData = groupedData;
 
@@ -879,6 +895,18 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   // GCP UX Standard Filter Dimensions (Attached directly to GlobalSearchBar)
   const filterOptions = useMemo(() => [
     {
+      key: 'workspace',
+      label: 'Workspace',
+      pluralLabel: 'Workspace',
+      multiSelect: false,
+      value: workspaceFilter,
+      onChange: (val) => updateUrlParam('workspace', val),
+      options: [
+        { label: 'All Prescriptions', value: '' },
+        { label: `💼 In Active Workspace (${activeWsRxIds.length})`, value: '1' }
+      ]
+    },
+    {
       key: 'range',
       label: 'Date Range',
       pluralLabel: 'Date Ranges',
@@ -958,10 +986,13 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         { label: '✏️ Manual Entry', value: 'manual' }
       ]
     }
-  ], [rangeFilter, typeFilter, statusFilter, doctorFilter, patientFilter, sourceFilter, doctorOptions, patientOptions, updateUrlParam]);
+  ], [workspaceFilter, activeWsRxIds.length, rangeFilter, typeFilter, statusFilter, doctorFilter, patientFilter, sourceFilter, doctorOptions, patientOptions, updateUrlParam]);
 
   const activeChips = useMemo(() => {
     const chips = [];
+    if (workspaceFilter === '1' || workspaceFilter === 'true') {
+      chips.push({ key: 'workspace', label: 'Workspace', value: '💼 In Active Workspace', onRemove: () => updateUrlParam('workspace', '') });
+    }
     if (statusFilter) {
       chips.push({ key: 'status', label: 'Status', value: statusFilter, onRemove: () => updateUrlParam('status', '') });
     }
@@ -1007,6 +1038,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     params.delete('patient');
     params.delete('source');
     params.delete('type');
+    params.delete('workspace');
     router.replace(`${pathname}?${params.toString()}`);
   }, [router, pathname, searchParams]);
 

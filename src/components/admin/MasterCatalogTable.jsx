@@ -148,6 +148,7 @@ export default function MasterCatalogTable({
     filterAvailability,
     filterQuality,
     filterTimeframe,
+    filterWorkspace,
     searchTerm,
     setSearchTerm,
     debouncedSearchTerm,
@@ -157,6 +158,19 @@ export default function MasterCatalogTable({
     filterChips,
     hasAnyFilter
   } = useCatalogUrlFilters({ supplierIdToName });
+
+  const activeWorkspace = useWorkspaceStore((s) => s.workspaces?.[s.activeWorkspaceId]);
+  const activeWsProductIds = useMemo(() => {
+    if (!activeWorkspace || !Array.isArray(activeWorkspace.items)) return new Set();
+    const set = new Set();
+    activeWorkspace.items.forEach((it) => {
+      if (it.productId) set.add(String(it.productId).trim());
+      if (it.id) set.add(String(it.id).trim());
+      if (it.variantId) set.add(String(it.variantId).trim());
+    });
+    return set;
+  }, [activeWorkspace]);
+  const activeWsProductCount = activeWorkspace?.items?.length || 0;
 
   // Drawers & Modals States
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -308,6 +322,16 @@ export default function MasterCatalogTable({
       });
     }
 
+    // Filter by Active Workspace (SSOT active workbench)
+    if (filterWorkspace === '1' || filterWorkspace === 'true') {
+      rows = rows.filter(row => {
+        const id = String(row.id || '').trim();
+        const slug = String(row.slug || '').trim();
+        const hasVariantInWs = Array.isArray(row.variants) && row.variants.some(v => activeWsProductIds.has(String(v.id || '').trim()));
+        return activeWsProductIds.has(id) || (slug && activeWsProductIds.has(slug)) || hasVariantInWs;
+      });
+    }
+
     if (filterProductType.length > 0) {
       rows = rows.filter(row => {
         const rowTypes = getProductAvailableTypes(row);
@@ -429,7 +453,7 @@ export default function MasterCatalogTable({
       }
     }
     return uniqueRows;
-  }, [data, optimisticOverrides, supplierIdToName, getCategoryLabel, filterCategory, filterProductType, filterTags, filterTagMode, filterPriority, filterSubcategory, effectiveSupplierFilter, filterGoals, filterQuality, filterTimeframe, recentImportFilter]);
+  }, [data, optimisticOverrides, supplierIdToName, getCategoryLabel, filterCategory, filterProductType, filterTags, filterTagMode, filterPriority, filterSubcategory, effectiveSupplierFilter, filterGoals, filterQuality, filterTimeframe, filterWorkspace, activeWsProductIds, recentImportFilter]);
 
   // Server-side KPIs derivation (Rule #22)
   const displayedMetrics = useMemo(() => {
@@ -861,6 +885,18 @@ export default function MasterCatalogTable({
         }}
         filterOptions={isGenomicsMatrix ? [
           {
+            key: 'workspace',
+            label: 'Workspace',
+            pluralLabel: 'Workspace',
+            multiSelect: false,
+            value: filterWorkspace,
+            options: [
+              { label: 'All Products', value: '' },
+              { label: `💼 In Active Workspace (${activeWsProductCount})`, value: '1' }
+            ],
+            onChange: (val) => updateUrlParam('workspace', val)
+          },
+          {
             key: 'tag',
             label: 'Genetic Test / Panel',
             pluralLabel: 'Genetic Tests',
@@ -902,6 +938,18 @@ export default function MasterCatalogTable({
             onChange: (val) => updateUrlParam('tagMode', val === 'all' ? 'all' : '')
           }
         ] : [
+          {
+            key: 'workspace',
+            label: 'Workspace',
+            pluralLabel: 'Workspace',
+            multiSelect: false,
+            value: filterWorkspace,
+            options: [
+              { label: 'All Products', value: '' },
+              { label: `💼 In Active Workspace (${activeWsProductCount})`, value: '1' }
+            ],
+            onChange: (val) => updateUrlParam('workspace', val)
+          },
           {
             key: 'tag',
             label: 'Tags',

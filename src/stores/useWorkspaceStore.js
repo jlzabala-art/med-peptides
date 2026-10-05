@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { resolveItemSku } from '@/utils/skuResolver';
 import { normalizeVariant } from '../repositories/mappers';
+import notifier from '@/services/NotificationService';
 
 function generateWorkspaceId() {
   return `ws_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -31,6 +32,8 @@ const DEFAULT_WORKSPACE = {
   convertedAt: null,
   convertedInfo: null, // { type, docId, summary }
   items: [],
+  prescriptions: [],
+  prescriptionIds: [],
   operationType: 'unassigned', // 'sell_quotation' | 'sell_prescription' | 'sell_order' | 'buy_po' | 'buy_rfq' | 'unassigned'
   intent: 'sell', // 'sell' | 'buy'
   targetEntity: null, // { type: 'clinic'|'patient'|'doctor'|'wholesaler'|'supplier', id, name, email, phone }
@@ -116,6 +119,8 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
       convertedAt: null,
       convertedInfo: null,
       items: [],
+      prescriptions: [],
+      prescriptionIds: [],
       operationType: 'unassigned',
       intent: initialIntent,
       targetEntity: null,
@@ -347,6 +352,8 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
         [wsId]: {
           ...s.workspaces[wsId],
           items: [],
+          prescriptions: [],
+          prescriptionIds: [],
           targetEntity: null,
           status: 'draft',
           convertedAt: null,
@@ -854,6 +861,206 @@ const createWorkspaceItemsSlice = (set, get) => ({
         [targetId]: { ...targetWs, items: nextTargetItems, updatedAt: Date.now() },
       },
     }));
+  },
+
+  // ─── Direct Product Workspace Toggles (Rule-free SSOT) ───────────
+  isProductInWorkspace: (productId, targetWorkspaceId = null) => {
+    const { workspaces, activeWorkspaceId } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces?.[wsId];
+    if (!ws || !Array.isArray(ws.items)) return false;
+    const cleanId = String(productId || '').trim();
+    if (!cleanId) return false;
+    return ws.items.some(
+      (it) => it.productId === cleanId || it.id === cleanId || it.variantId === cleanId
+    );
+  },
+
+  removeProductFromWorkspace: (productId, targetWorkspaceId = null) => {
+    const { workspaces, activeWorkspaceId } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces?.[wsId];
+    if (!ws) return;
+    const cleanId = String(productId || '').trim();
+    const nextItems = (ws.items || []).filter(
+      (it) => it.productId !== cleanId && it.id !== cleanId && it.variantId !== cleanId
+    );
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: { ...ws, items: nextItems, updatedAt: Date.now() },
+      },
+    }));
+  },
+
+  toggleProductInWorkspace: (product, targetWorkspaceId = null, options = {}) => {
+    const { workspaces, activeWorkspaceId, isProductInWorkspace, removeProductFromWorkspace, addItem } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces?.[wsId];
+    if (!ws || !product) return false;
+
+    const prodId = product.id || product.productId;
+    const isIn = isProductInWorkspace(prodId, wsId);
+    const prodName = product.canonicalName || product.name || product.displayName || 'Product';
+
+    if (isIn) {
+      removeProductFromWorkspace(prodId, wsId);
+      notifier.info(`"${prodName}" removed from ${ws.name || 'Workspace'}`);
+      return false;
+    } else {
+      const firstVariant = (Array.isArray(product.variants) && product.variants[0]) || {};
+      const itemToAdd = {
+        id: firstVariant.id || product.id,
+        productId: product.id,
+        variantId: firstVariant.id || product.id,
+        canonicalName: prodName,
+        sku: resolveItemSku({ ...product, ...firstVariant }),
+        dosage: firstVariant.dosage || product.dosage || '',
+        format: firstVariant.format || product.format || 'Vial',
+        quantity: 1,
+        unitPrice: firstVariant.resolvedPrice?.perUnit || firstVariant.price || product.price || 0,
+        supplierCost: firstVariant.supplierCost || product.pricing?.supplierCost || 0,
+        supplierName: firstVariant.supplierName || (Array.isArray(product.suppliers) && product.suppliers[0]) || '',
+        supplierId: firstVariant.supplierId || '',
+        category: product.category || '',
+      };
+      addItem(itemToAdd, wsId, { openDrawer: options.openDrawer ?? false });
+      notifier.success(`"${prodName}" added to ${ws.name || 'Workspace'}`);
+      return true;
+    }
+  },
+
+  // ─── Direct Prescription Workspace Toggles (Rule-free SSOT) ───────────
+  isPrescriptionInWorkspace: (prescriptionId, targetWorkspaceId = null) => {
+    const { workspaces, activeWorkspaceId } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces?.[wsId];
+    if (!ws) return false;
+    const cleanId = String(prescriptionId || '').trim();
+    if (!cleanId) return false;
+    const pIds = ws.prescriptionIds || (ws.prescriptions || []).map((p) => p.id);
+    return pIds.includes(cleanId);
+  },
+
+  removePrescriptionFromWorkspace: (prescriptionId, targetWorkspaceId = null) => {
+    const { workspaces, activeWorkspaceId } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces?.[wsId];
+    if (!ws) return;
+    const cleanId = String(prescriptionId || '').trim();
+    const currentPrescriptions = ws.prescriptions || [];
+    const currentPrescriptionIds = ws.prescriptionIds || currentPrescriptions.map((p) => p.id);
+
+    const nextRxList = currentPrescriptions.filter((p) => p.id !== cleanId);
+    const nextRxIds = currentPrescriptionIds.filter((id) => id !== cleanId);
+    const nextItems = (ws.items || []).filter((it) => it.prescriptionId !== cleanId);
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: {
+          ...ws,
+          prescriptions: nextRxList,
+          prescriptionIds: nextRxIds,
+          items: nextItems,
+          updatedAt: Date.now(),
+        },
+      },
+    }));
+  },
+
+  togglePrescriptionInWorkspace: (prescription, targetWorkspaceId = null, options = {}) => {
+    const { workspaces, activeWorkspaceId, isPrescriptionInWorkspace, removePrescriptionFromWorkspace } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces?.[wsId];
+    if (!ws || !prescription) return false;
+
+    const rxId = prescription.id;
+    const isIn = isPrescriptionInWorkspace(rxId, wsId);
+    const patientName = prescription.patient?.name || prescription.patientName || 'Patient';
+    const rxCode = prescription.prescriptionCode || prescription.id?.slice(0, 8);
+
+    if (isIn) {
+      removePrescriptionFromWorkspace(rxId, wsId);
+      notifier.info(`Rx #${rxCode} (${patientName}) removed from ${ws.name || 'Workspace'}`);
+      return false;
+    } else {
+      const currentPrescriptions = ws.prescriptions || [];
+      const currentPrescriptionIds = ws.prescriptionIds || currentPrescriptions.map((p) => p.id);
+
+      const nextRxList = [
+        ...currentPrescriptions,
+        {
+          id: rxId,
+          prescriptionCode: rxCode,
+          patientName,
+          patientId: prescription.patientId || prescription.patient?.id || '',
+          doctorName: prescription.doctorName || prescription.doctor?.name || '',
+          status: prescription.status || 'draft',
+          totalItems: (prescription.items || prescription.compounds || prescription.products || []).length,
+          addedAt: Date.now(),
+        },
+      ];
+      const nextRxIds = [...new Set([...currentPrescriptionIds, rxId])];
+
+      const rawItems = prescription.items || prescription.compounds || prescription.products || [];
+      const itemsToAdd = rawItems.map((i, idx) => ({
+        id: i.id || i.variantId || i.productId || `rx_item_${rxId}_${idx}`,
+        productId: i.productId || i.id,
+        variantId: i.variantId || i.id,
+        canonicalName: i.name || i.productName || i.product_title || 'Medication',
+        sku: i.sku || '',
+        dosage: i.dosage || i.dose || '',
+        format: i.format || i.dosage_form || 'Vial',
+        quantity: parseInt(i.quantity, 10) || 1,
+        unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+        price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+        unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+        supplierCost: parseFloat(i.supplierCost || 0),
+        supplierName: prescription.supplierName || 'Pharmapolis Ltd',
+        category: i.category || 'Prescription Biologics',
+        prescriptionId: rxId,
+        prescriptionCode: rxCode,
+        patientName,
+        patientId: prescription.patientId || prescription.patient?.id || '',
+      }));
+
+      let nextItems = [...(ws.items || [])];
+      itemsToAdd.forEach((item) => {
+        const existingIdx = nextItems.findIndex((it) => it.id === item.id);
+        if (existingIdx >= 0) {
+          nextItems[existingIdx] = { ...nextItems[existingIdx], ...item };
+        } else {
+          nextItems.push(item);
+        }
+      });
+
+      const nextTargetEntity = ws.targetEntity || {
+        type: 'patient',
+        id: prescription.patientId || prescription.patient?.id || '',
+        name: patientName,
+        email: prescription.patient?.email || prescription.patientEmail || '',
+        phone: prescription.patient?.phone || prescription.patientPhone || '',
+        fileNumber: prescription.patient?.fileNumber || prescription.patientFileNumber || prescription.patient?.mrn || '',
+      };
+
+      set((s) => ({
+        workspaces: {
+          ...s.workspaces,
+          [wsId]: {
+            ...ws,
+            prescriptions: nextRxList,
+            prescriptionIds: nextRxIds,
+            items: nextItems,
+            targetEntity: nextTargetEntity,
+            updatedAt: Date.now(),
+          },
+        },
+      }));
+
+      notifier.success(`Rx #${rxCode} (${patientName}) added to ${ws.name || 'Workspace'}`);
+      return true;
+    }
   },
 });
 

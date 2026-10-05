@@ -89,6 +89,66 @@ function resolveCategoryBadge(rawCat, categoryOptions = []) {
   };
 }
 
+// ── 1-Click Workspace Toggle Button (SSOT Integration) ─────────────────────────
+function WorkspaceProductToggleButton({ product }) {
+  const isInWorkspace = useWorkspaceStore((s) => {
+    const ws = s.workspaces?.[s.activeWorkspaceId];
+    if (!ws || !Array.isArray(ws.items)) return false;
+    const cleanId = String(product.id || product.productId || '').trim();
+    if (!cleanId) return false;
+    return ws.items.some(
+      (it) => it.productId === cleanId || it.id === cleanId || it.variantId === cleanId
+    );
+  });
+  const toggleProductInWorkspace = useWorkspaceStore((s) => s.toggleProductInWorkspace);
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (toggleProductInWorkspace) {
+      toggleProductInWorkspace(product);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      type="button"
+      title={isInWorkspace ? 'Remove from active workspace' : 'Add to active workspace'}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '3px 8px',
+        borderRadius: '6px',
+        fontSize: '0.72rem',
+        fontWeight: isInWorkspace ? 700 : 500,
+        backgroundColor: isInWorkspace ? '#e0f2fe' : '#ffffff',
+        color: isInWorkspace ? '#0369a1' : '#475569',
+        border: isInWorkspace ? '1px solid #7dd3fc' : '1px solid #cbd5e1',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        flexShrink: 0,
+        whiteSpace: 'nowrap'
+      }}
+      onMouseEnter={(e) => {
+        if (!isInWorkspace) {
+          e.currentTarget.style.backgroundColor = '#f1f5f9';
+          e.currentTarget.style.borderColor = '#94a3b8';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isInWorkspace) {
+          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.borderColor = '#cbd5e1';
+        }
+      }}
+    >
+      <Briefcase size={12} color={isInWorkspace ? '#0284c7' : '#64748b'} />
+      <span>{isInWorkspace ? 'In Workspace' : '+ Workspace'}</span>
+    </button>
+  );
+}
+
 export function useMasterCatalogColumns({
   categoryOptions = [],
   filterSupplier = [],
@@ -602,29 +662,12 @@ export function useMasterCatalogColumns({
             }
           },
           {
-            type: 'add_to_workspace',
+            type: 'workspace_toggle',
             icon: Briefcase,
-            label: 'Add to Workspace',
+            label: 'Toggle in active workspace',
             onClick: () => {
-              const itemToAdd = {
-                id: row.variants?.[0]?.id || row.id,
-                productId: row.id,
-                variantId: row.variants?.[0]?.id || row.id,
-                canonicalName: row.canonicalName || row.displayName || row.name || 'Compound',
-                sku: resolveItemSku({ ...row, ...row.variants?.[0] }),
-                dosage: row.variants?.[0]?.dosage || row.dosage || '',
-                format: row.variants?.[0]?.format || row.format || 'Vial',
-                quantity: 1,
-                unitPrice: row.variants?.[0]?.resolvedPrice?.perUnit || row.variants?.[0]?.price || 0,
-                supplierCost: row.variants?.[0]?.supplierCost || row.pricing?.supplierCost || 0,
-                supplierName: row.variants?.[0]?.supplierName || (row.suppliers && row.suppliers[0]) || '',
-                supplierId: row.variants?.[0]?.supplierId || '',
-              };
-              const { workspaces, activeWorkspaceId, addItem } = useWorkspaceStore.getState();
-              const wsList = Object.values(workspaces || {});
-              const activeWs = workspaces[activeWorkspaceId] || wsList[0];
-              addItem(itemToAdd, activeWs?.id);
-              notifier.success(`"${itemToAdd.canonicalName}" agregado a ${activeWs?.name || 'Workspace 1'}.`);
+              const { toggleProductInWorkspace } = useWorkspaceStore.getState();
+              if (toggleProductInWorkspace) toggleProductInWorkspace(row);
             }
           },
           {
@@ -635,7 +678,12 @@ export function useMasterCatalogColumns({
           }
         ];
 
-        return <AppActionGroup maxVisible={2} actions={actions} />;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', width: '100%', paddingRight: '8px' }}>
+            <WorkspaceProductToggleButton product={row} />
+            <AppActionGroup maxVisible={2} actions={actions} />
+          </div>
+        );
       }
     }
   ], [

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
   Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
-  ClipboardCheck, Syringe, Send, Receipt, Share2
+  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
@@ -128,6 +128,64 @@ function RenewButton({ rx, onRefresh, onRefill }) {
         ? <Loader2 size={16} color="#64748b" style={{ animation: 'spin 1s linear infinite' }} />
         : <Copy size={16} color="#64748b" />
       }
+    </button>
+  );
+}
+
+// ── 1-Click Workspace Toggle Button (SSOT Integration) ─────────────────────────
+function WorkspaceRxToggleButton({ rx }) {
+  const isInWorkspace = useWorkspaceStore((s) => {
+    const ws = s.workspaces?.[s.activeWorkspaceId];
+    if (!ws) return false;
+    const cleanId = String(rx.id || '').trim();
+    const pIds = ws.prescriptionIds || (ws.prescriptions || []).map((p) => p.id);
+    return pIds.includes(cleanId);
+  });
+  const togglePrescriptionInWorkspace = useWorkspaceStore((s) => s.togglePrescriptionInWorkspace);
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (togglePrescriptionInWorkspace) {
+      togglePrescriptionInWorkspace(rx);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      type="button"
+      title={isInWorkspace ? 'Remove from active workspace' : 'Add to active workspace'}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '3px 8px',
+        borderRadius: '6px',
+        fontSize: '0.72rem',
+        fontWeight: isInWorkspace ? 700 : 500,
+        backgroundColor: isInWorkspace ? '#e0f2fe' : '#ffffff',
+        color: isInWorkspace ? '#0369a1' : '#475569',
+        border: isInWorkspace ? '1px solid #7dd3fc' : '1px solid #cbd5e1',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        flexShrink: 0,
+        whiteSpace: 'nowrap'
+      }}
+      onMouseEnter={(e) => {
+        if (!isInWorkspace) {
+          e.currentTarget.style.backgroundColor = '#f1f5f9';
+          e.currentTarget.style.borderColor = '#94a3b8';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isInWorkspace) {
+          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.borderColor = '#cbd5e1';
+        }
+      }}
+    >
+      <Briefcase size={12} color={isInWorkspace ? '#0284c7' : '#64748b'} />
+      <span>{isInWorkspace ? 'In Workspace' : '+ Workspace'}</span>
     </button>
   );
 }
@@ -712,7 +770,8 @@ export const getPrescriptionColumns = (options = {}) => {
         ];
 
           return (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', paddingRight: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', width: '100%', paddingRight: '12px' }}>
+              <WorkspaceRxToggleButton rx={rx} />
               <AppActionGroup maxVisible={2} actions={actions} />
             </div>
           );
