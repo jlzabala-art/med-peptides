@@ -4,6 +4,108 @@ import React, { useState, useRef } from 'react';
 import { X, Printer, Download, QrCode, FileText, User, ShieldCheck, Stethoscope, Check, ExternalLink, Calendar, MapPin, Pill, Share2, Clock } from '@/lib/icons';
 import { QRCodeSVG } from 'qrcode.react';
 
+// Clean Doctor Name & Credentials to Professional Standards
+const formatDoctorName = (name) => {
+  if (!name) return 'Dr. Marina Cordeiro Fernandes';
+  return String(name)
+    .replace(/,\s*md\b/i, ', MD')
+    .replace(/,\s*fishrs\b/i, ', FISHRS')
+    .replace(/,\s*phd\b/i, ', PhD')
+    .replace(/,\s*facp\b/i, ', FACP')
+    .replace(/,\s*faad\b/i, ', FAAD')
+    .replace(/\bMd\b/, 'MD')
+    .replace(/\bFishrs\b/, 'FISHRS');
+};
+
+// Comprehensive Medical English Translation for Active Ingredients (APIs)
+const translateTherapeuticClass = (rawClass) => {
+  if (!rawClass) return '';
+  const classLower = rawClass.toLowerCase().trim();
+  const dict = {
+    'agonista selectivo de receptores de prostaglandina f2α (fp)': 'Selective Prostaglandin F2α (FP) Receptor Agonist',
+    'agonista selectivo de receptores de prostaglandina f2a (fp)': 'Selective Prostaglandin F2α (FP) Receptor Agonist',
+    'activador de sulfotransferasa & canales k_atp foliculares': 'Sulfotransferase Activator & Follicular K_ATP Channel Opener',
+    'activador de sulfotransferasa & canales k_atp': 'Sulfotransferase Activator & Follicular K_ATP Channel Opener',
+    'antagonista selectivo del receptor pgd2 / crth2': 'Selective PGD2 / CRTH2 Receptor Antagonist',
+    'antagonista selectivo del receptor pgd2': 'Selective PGD2 / CRTH2 Receptor Antagonist',
+    'antagonista competitivo de receptores androgénicos': 'Competitive Androgen Receptor Antagonist',
+    'inhibidor dual 5α-reductasa tipo i, ii y iii': 'Dual 5α-Reductase Type I, II & III Inhibitor',
+    'inhibidor dual 5α-reductasa tipo i y ii': 'Dual 5α-Reductase Type I & II Inhibitor',
+    'inhibidor selectivo 5α-reductasa tipo ii': 'Selective 5α-Reductase Type II Inhibitor',
+    'agonista de receptores mt1/mt2 & antioxidante mitocondrial': 'MT1/MT2 Receptor Agonist & Mitochondrial Antioxidant',
+    'metaloenzima esencial & regulador enzimático folicular': 'Essential Metalloenzyme & Follicular Enzyme Regulator',
+    'cofactor de metionina sintasa & síntesis de adn eritropoyético': 'Methionine Synthase Cofactor & Erythropoietic DNA Synthesis Activator',
+    'fitoestimulante celular & up-regulador de factores de crecimiento': 'Cellular Phytostimulant & Growth Factor Upregulator',
+    'fitoestimulante celular & inductor de vegf': 'Cellular Phytostimulant & VEGF Inducer',
+    'antioxidante lipofílico de membrana & protector endotelial': 'Lipophilic Membrane Antioxidant & Endothelial Protector',
+    'precursor esencial de óxido nítrico (no) & vasodilatador folicular': 'Essential Nitric Oxide (NO) Precursor & Follicular Vasodilator',
+    'precursor de óxido nítrico & estimulador microvascular': 'Nitric Oxide Precursor & Microvascular Stimulator',
+    'precursor de coenzima a & regenerador celular': 'Coenzyme A Precursor & Cellular Regenerator',
+    'optimizador microvascular & escudo antioxidante': 'Microvascular Optimizer & Antioxidant Shield',
+    'supresión de dht folicular & prevención de miniaturización': 'Follicular DHT Suppression & Miniaturization Prevention',
+    'estimulación de fase anágena & perfusión microvascular': 'Anagen Phase Induction & Microvascular Perfusion',
+    'bloqueo local de dht en cuero cabelludo': 'Local Scalp DHT Blockade',
+    'optimización de microcirculación perifolicular': 'Perifollicular Microcirculation Enhancement',
+    'activación de la fase anágena del folículo': 'Follicular Anagen Phase Activation',
+    'bloqueo periférico de la dht': 'Peripheral DHT Receptor Blockade',
+    'vasodilatador periférico': 'Peripheral Vasodilator',
+    'vasodilatador periférico & estimulante folicular': 'Peripheral Vasodilator & Follicular Stimulant',
+    'antiandrógeno no esteroideo': 'Non-Steroidal Antiandrogen',
+    'corticoesteroide antiinflamatorio': 'Anti-inflammatory Corticosteroid',
+    'agente quelante de cobre & péptido biorregulador': 'Copper Peptide & Bio-regulatory Matrix Agent',
+    'inmuno-modulador local': 'Local Immunomodulator',
+    'antifúngico & regulador de microbiota folicular': 'Antifungal & Follicular Microbiota Regulator',
+    'vitamina hidrosoluble & cofactor metabólico': 'Water-soluble Vitamin & Metabolic Cofactor',
+    'aminoácido azufrado & precursor de queratina': 'Sulfur Amino Acid & Keratin Precursor',
+    'antioxidante celular & regenerador mitocondrial': 'Cellular Antioxidant & Mitochondrial Regenerator',
+    'bioflavonoide venotónico & microcirculatorio': 'Venotonic Bioflavonoid & Microcirculatory Agent',
+    'pharmacogenomic active ingredient': 'Pharmacogenomic Active Ingredient'
+  };
+
+  if (dict[classLower]) return dict[classLower];
+
+  for (const [key, val] of Object.entries(dict)) {
+    if (classLower.includes(key)) return val;
+  }
+
+  return rawClass
+    .replace(/tópico/gi, 'Topical')
+    .replace(/oral/gi, 'Oral')
+    .replace(/sublingual/gi, 'Sublingual')
+    .replace(/agonista/gi, 'Agonist')
+    .replace(/antagonista/gi, 'Antagonist')
+    .replace(/inhibidor/gi, 'Inhibitor')
+    .replace(/receptores/gi, 'Receptors')
+    .replace(/de/gi, 'of')
+    .replace(/y/gi, '&');
+};
+
+const formatApiDose = (rawDose) => {
+  if (!rawDose) return '';
+  let str = String(rawDose).trim();
+  if (/dose\s+to\s+calibrate/i.test(str)) {
+    return 'Personalized Calibrated Dose';
+  }
+  return str
+    .replace(/tópico/gi, 'Topical')
+    .replace(/oral/gi, 'Oral')
+    .replace(/sublingual/gi, 'Sublingual');
+};
+
+const getVehicleDescription = (vehicleName = '') => {
+  const v = String(vehicleName).toLowerCase();
+  if (v.includes('trichooil') || v.includes('oil')) {
+    return 'TrichoOil™ (Fagron) (100% natural plant-derived emollient lipid carrier, alcohol-free)';
+  }
+  if (v.includes('trichofoam') || v.includes('foam')) {
+    return 'TrichoFoam™ (Fagron) (Patented surfactant scalp foam carrier, alcohol-free)';
+  }
+  if (v.includes('trichocream') || v.includes('cream')) {
+    return 'TrichoCream™ (Fagron) (Conditioning lipid emulsion carrier, alcohol-free)';
+  }
+  return 'TrichoSol™ (Fagron) (Patented liposomal phytocomplex, alcohol-free, non-greasy carrier)';
+};
+
 export default function PrescriptionBrochureModal({
   isOpen,
   onClose,
@@ -25,7 +127,7 @@ export default function PrescriptionBrochureModal({
   const rxId = rx.prescriptionNumber || rx.prescriptionCode || rx.id || 'BOX03483AATRI';
   const fileNumber = rx.fileNumber || rx.fileNo || '51857';
   const patientName = (rx.patientName || rx.patient?.name || 'Patient Record').toUpperCase();
-  const doctorName = rx.doctorName || rx.treatingDoctor || rx.physician || 'Dr. Marina Cordeiro Fernandes';
+  const doctorName = formatDoctorName(rx.doctorName || rx.treatingDoctor || rx.physician || 'Dr. Marina Cordeiro Fernandes');
   const clinicName = rx.clinicName || 'NOVA Clinic Day Surgery Center, Dubai';
   const doctorLicense = rx.doctorLicense || 'DHA-91105367';
   const batchCode = rx.batchCode || 'PHARM-2026-B948';
@@ -35,6 +137,7 @@ export default function PrescriptionBrochureModal({
   // Target URLs for QR codes
   const doctorQrUrl = publicUrl || `https://med-peptides.com/rx/${rxId}`;
   const patientQrUrl = patientPublicUrl || `https://med-peptides.com/rx/${rxId}?view=patient`;
+  const cleanDisplayUrl = `med-peptides.com/rx/${rx.prescriptionCode || rx.prescriptionNumber || rxId}`;
 
   // Formulations fallback
   const formulations = compoundedFormulations && compoundedFormulations.length > 0 
@@ -610,21 +713,21 @@ export default function PrescriptionBrochureModal({
               ════════════════════════════════════════════════════════════════ */
               <>
                 {/* 1. Warm Patient Header */}
-                <div style={{ borderBottom: '2px solid #003666', paddingBottom: '14px' }}>
+                <div style={{ borderBottom: '2px solid #1a73e8', paddingBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#003666' }}>
-                        YOUR PERSONALIZED TREATMENT GUIDE
+                      <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#202124', letterSpacing: '-0.01em' }}>
+                        Personalized Treatment Guide
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.78rem', color: '#5f6368', marginTop: '3px' }}>
                         Digital Posology Regimen &amp; Step-by-Step Daily Instructions
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#1a73e8' }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1a73e8' }}>
                         Ref: #{rxId}
                       </div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                      <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '2px' }}>
                         {clinicName}
                       </div>
                     </div>
@@ -633,91 +736,84 @@ export default function PrescriptionBrochureModal({
 
                 {/* 2. Personalized Welcome Card */}
                 <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '14px 16px',
+                  background: '#f8f9fa',
+                  border: '1px solid #dadce0',
+                  borderRadius: '6px',
+                  padding: '12px 16px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center'
                 }}>
                   <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Prescribed Specifically For:</div>
-                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.70rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 500 }}>
+                      Prescribed Specifically For
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#202124', marginTop: '2px' }}>
                       {patientName}
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#475569', marginTop: '3px' }}>
-                      Prescribing Physician: <strong>{doctorName}</strong>
+                    <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '3px' }}>
+                      Prescribing Physician: <strong style={{ color: '#202124', fontWeight: 600 }}>{doctorName}</strong>
                     </div>
                   </div>
                   <div>
                     <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      padding: '3px 8px',
-                      borderRadius: '4px',
+                      gap: '5px',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
                       background: '#e6f4ea',
                       color: '#137333',
                       border: '1px solid #ceead6',
                       fontSize: '0.72rem',
-                      fontWeight: 700
+                      fontWeight: 600
                     }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#137333' }} />
-                      ACTIVE TREATMENT
+                      Active Treatment
                     </span>
                   </div>
                 </div>
 
-                {/* 3. Step-by-Step Daily Application Guide (2-Column Decongested Layout) */}
+                {/* 3. Step-by-Step Daily Application Guide */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#1a73e8', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     How to Apply Your Topical Treatment Correctly
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', borderLeft: '3px solid #1a73e8' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#1a73e8' }}>STEP 1</span>
-                        <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Preparation</span>
+                    {[
+                      { step: 1, label: 'Preparation', title: 'Dry & Clean Scalp', desc: 'Ensure your hair and scalp are completely clean and thoroughly dry before applying the solution.' },
+                      { step: 2, label: 'Accurate Dosage', title: 'Dose: 1 mL (Daily)', desc: 'Measure exactly 1 mL (approx. 6 metered spray actuations or 1 calibrated dropper) onto affected areas.' },
+                      { step: 3, label: 'Absorption', title: 'Fingertip Massage', desc: 'Gently distribute the lotion with clean fingertips for 30–45 seconds to maximize follicular contact.' },
+                      { step: 4, label: 'Contact Time', title: 'Leave-In (≥ 4 Hours)', desc: 'Do not wash, wet, or rinse scalp for at least 4 hours. Wash hands thoroughly with soap after application.' }
+                    ].map((s) => (
+                      <div key={s.step} style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '6px', padding: '12px 14px', borderLeft: '3px solid #1a73e8' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            fontSize: '0.70rem',
+                            fontWeight: 700,
+                            color: '#1a73e8',
+                            background: '#e8f0fe',
+                            padding: '2px 8px',
+                            borderRadius: '12px'
+                          }}>
+                            Step {s.step}
+                          </span>
+                          <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 500 }}>{s.label}</span>
+                        </div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#202124', marginTop: '6px' }}>{s.title}</div>
+                        <div style={{ fontSize: '0.73rem', color: '#5f6368', marginTop: '4px', lineHeight: 1.45 }}>{s.desc}</div>
                       </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>Dry &amp; Clean Scalp</div>
-                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px', lineHeight: 1.45 }}>Ensure your hair and scalp are completely clean and thoroughly dry before applying the solution.</div>
-                    </div>
-
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', borderLeft: '3px solid #1a73e8' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#1a73e8' }}>STEP 2</span>
-                        <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Accurate Dosage</span>
-                      </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>Dose: 1 mL (Daily)</div>
-                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px', lineHeight: 1.45 }}>Measure exactly 1 mL (approx. 6 metered spray actuations or 1 calibrated dropper) onto affected areas.</div>
-                    </div>
-
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', borderLeft: '3px solid #0284c7' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0284c7' }}>STEP 3</span>
-                        <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Absorption</span>
-                      </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>Fingertip Massage</div>
-                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px', lineHeight: 1.45 }}>Gently distribute the lotion with clean fingertips for 30–45 seconds to maximize follicular contact.</div>
-                    </div>
-
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', borderLeft: '3px solid #0284c7' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0284c7' }}>STEP 4</span>
-                        <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Contact Time</span>
-                      </div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginTop: '3px' }}>Leave-In (≥ 4 Hours)</div>
-                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px', lineHeight: 1.45 }}>Do not wash, wet, or rinse scalp for at least 4 hours. Wash hands thoroughly with soap after application.</div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
                 {/* 4. Treatment Regimen & Active Compounded Ingredients (APIs) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Your Prescribed Treatment Regimen &amp; Compounded Actives
+                  <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#1a73e8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    Prescribed Treatment Regimen &amp; Compounded Actives
                   </div>
 
                   {formulations.map((phase, idx) => {
@@ -729,67 +825,61 @@ export default function PrescriptionBrochureModal({
                     const vehicleName = phase.vehicle?.name || phase.vehicleName || 'TrichoSol™ Patented Vehicle';
 
                     return (
-                      <div key={idx} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px 14px', background: '#f8fafc' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                      <div key={idx} style={{ border: '1px solid #dadce0', borderRadius: '6px', padding: '12px 14px', background: '#f8f9fa' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dadce0', paddingBottom: '8px' }}>
                           <div>
-                            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+                            <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#202124' }}>
                               {getPhaseTitle(phase, idx)}
                             </span>
-                            <span style={{ fontSize: '0.72rem', color: '#64748b', marginLeft: '6px' }}>
+                            <span style={{ fontSize: '0.72rem', color: '#5f6368', marginLeft: '6px' }}>
                               ({phase.dosageForm || 'Compounded Topical Scalp Solution'})
                             </span>
                           </div>
-                          <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 700, background: '#eff6ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                          <span style={{ fontSize: '0.72rem', color: '#1a73e8', fontWeight: 600, background: '#e8f0fe', padding: '2px 8px', borderRadius: '4px', border: '1px solid #d2e3fc' }}>
                             {phase.volume || '100 mL'} · {phase.duration || '3-Month Supply'}
                           </span>
                         </div>
 
                         {/* Daily Posology Highlight Box */}
-                        <div style={{ background: '#ffffff', border: '1px solid #dbeafe', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Clock size={15} color="#1d4ed8" style={{ flexShrink: 0 }} />
-                          <div style={{ fontSize: '0.76rem', color: '#1e3a8a', fontWeight: 600 }}>
-                            <strong>Daily Administration:</strong> {getPosologyString(phase.posology)}
+                        <div style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '4px', padding: '8px 12px', margin: '8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Clock size={15} color="#1a73e8" style={{ flexShrink: 0 }} />
+                          <div style={{ fontSize: '0.76rem', color: '#202124', fontWeight: 500 }}>
+                            <strong style={{ color: '#1a73e8', fontWeight: 600 }}>Daily Administration:</strong> {getPosologyString(phase.posology)}
                           </div>
                         </div>
 
                         {/* Active Ingredients & Clinical Targets */}
                         <div style={{ marginTop: '8px' }}>
-                          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+                          <div style={{ fontSize: '0.70rem', fontWeight: 600, color: '#1a73e8', letterSpacing: '0.02em', marginBottom: '6px' }}>
                             Active Pharmaceutical Ingredients (APIs):
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '6px' }}>
                             {apis.map((api, aIdx) => {
                               const rawClass = api.therapeuticClass || api.category || api.role || '';
-                              const classLower = rawClass.toLowerCase().trim();
-                              const englishClass = {
-                                'activador de sulfotransferasa & canales k_atp foliculares': 'Sulfotransferase Activator & Follicular K_ATP Channel Opener',
-                                'activador de sulfotransferasa & canales k_atp': 'Sulfotransferase Activator & Follicular K_ATP Channel Opener',
-                                'antagonista competitivo de receptores androgénicos': 'Competitive Androgen Receptor Antagonist',
-                                'precursor esencial de óxido nítrico (no) & vasodilatador folicular': 'Essential Nitric Oxide (NO) Precursor & Follicular Vasodilator',
-                                'precursor de óxido nítrico & estimulador microvascular': 'Nitric Oxide Precursor & Microvascular Stimulator',
-                                'inhibidor selectivo 5α-reductasa tipo ii': 'Selective 5α-Reductase Type II Inhibitor',
-                                'inhibidor dual 5α-reductasa tipo i y ii': 'Dual 5α-Reductase Type I & II Inhibitor',
-                                'antagonista selectivo del receptor pgd2': 'Selective PGD2 Receptor Antagonist',
-                                'precursor de coenzima a & regenerador celular': 'Coenzyme A Precursor & Cellular Regenerator',
-                                'fitoestimulante celular & inductor de vegf': 'Cellular Phytostimulant & VEGF Inducer',
-                                'optimizador microvascular & escudo antioxidante': 'Microvascular Optimizer & Antioxidant Shield',
-                                'supresión de dht folicular & prevención de miniaturización': 'Follicular DHT Suppression & Miniaturization Prevention',
-                                'estimulación de fase anágena & perfusión microvascular': 'Anagen Phase Induction & Microvascular Perfusion',
-                                'bloqueo local de dht en cuero cabelludo': 'Local Scalp DHT Blockade',
-                                'optimización de microcirculación perifolicular': 'Perifollicular Microcirculation Enhancement',
-                                'activación de la fase anágena del folículo': 'Follicular Anagen Phase Activation',
-                                'bloqueo periférico de la dht': 'Peripheral DHT Receptor Blockade',
-                                'vasodilatador periférico': 'Peripheral Vasodilator',
-                              }[classLower] || rawClass;
+                              const englishClass = translateTherapeuticClass(rawClass);
+                              const doseFormatted = formatApiDose(api.dosage || api.dose || api.strength || api.concentration);
 
                               return (
-                                <div key={aIdx} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 10px', fontSize: '0.72rem' }}>
-                                  <div style={{ fontWeight: 800, color: '#0f172a', display: 'flex', justifyContent: 'space-between' }}>
+                                <div key={aIdx} style={{ background: '#ffffff', border: '1px solid #dadce0', borderRadius: '4px', padding: '6px 10px', fontSize: '0.72rem' }}>
+                                  <div style={{ fontWeight: 600, color: '#202124', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
                                     <span>{api.name || api.drugName || api.activeIngredient || `Active Compound ${aIdx + 1}`}</span>
-                                    <span style={{ color: '#0369a1', fontWeight: 700 }}>{api.dosage || api.dose || api.strength || ''}</span>
+                                    {doseFormatted && (
+                                      <span style={{
+                                        color: '#1a73e8',
+                                        fontWeight: 600,
+                                        fontSize: '0.70rem',
+                                        background: '#e8f0fe',
+                                        padding: '1px 6px',
+                                        borderRadius: '3px',
+                                        border: '1px solid #d2e3fc',
+                                        whiteSpace: 'nowrap'
+                                      }}>
+                                        {doseFormatted}
+                                      </span>
+                                    )}
                                   </div>
                                   {englishClass && (
-                                    <div style={{ color: '#475569', fontSize: '0.67rem', marginTop: '2px', lineHeight: 1.3 }}>
+                                    <div style={{ color: '#5f6368', fontSize: '0.67rem', marginTop: '2px', lineHeight: 1.3 }}>
                                       {englishClass}
                                     </div>
                                   )}
@@ -797,8 +887,8 @@ export default function PrescriptionBrochureModal({
                               );
                             })}
                           </div>
-                          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '6px' }}>
-                            <strong>Compounding Vehicle:</strong> {vehicleName} (Liposomal phytocomplex, alcohol-free, non-greasy carrier)
+                          <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '6px' }}>
+                            <strong style={{ color: '#202124' }}>Compounding Vehicle:</strong> {getVehicleDescription(vehicleName)}
                           </div>
                         </div>
                       </div>
@@ -811,29 +901,29 @@ export default function PrescriptionBrochureModal({
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
                   gap: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  background: '#f8f9fa',
+                  border: '1px solid #dadce0',
                   borderRadius: '6px',
                   padding: '12px 14px'
                 }}>
                   <div>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>
-                      Storage Instructions
+                    <div style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1a73e8' }}>
+                      Storage &amp; Stability Guidelines
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', lineHeight: 1.45 }}>
                       • Store at room temperature (15–25°C) away from direct sunlight.<br/>
                       • Keep the bottle tightly closed when not in use.<br/>
                       • Keep out of reach of children and domestic pets.
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1a73e8' }}>
                       Clinical Response Milestones
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '4px', lineHeight: 1.4 }}>
-                      • <strong>Weeks 1–4:</strong> Follicular stimulation & stabilization.<br/>
-                      • <strong>Weeks 5–8:</strong> Noticeable reduction in shedding.<br/>
-                      • <strong>Weeks 9–12:</strong> Visible hair caliber & density gains.
+                    <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '4px', lineHeight: 1.45 }}>
+                      • <strong style={{ color: '#202124' }}>Weeks 1–4:</strong> Follicular stimulation &amp; stabilization.<br/>
+                      • <strong style={{ color: '#202124' }}>Weeks 5–8:</strong> Noticeable reduction in shedding.<br/>
+                      • <strong style={{ color: '#202124' }}>Weeks 9–12:</strong> Visible hair caliber &amp; density gains.
                     </div>
                   </div>
                 </div>
@@ -843,29 +933,30 @@ export default function PrescriptionBrochureModal({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  background: '#eff6ff',
-                  border: '1px solid #bfdbfe',
+                  background: '#f8f9fa',
+                  border: '1px solid #dadce0',
+                  borderLeft: '4px solid #1a73e8',
                   borderRadius: '6px',
                   padding: '12px 16px',
                   marginTop: 'auto',
                   gap: '16px'
                 }}>
                   <div>
-                    <div style={{ fontSize: '0.80rem', fontWeight: 800, color: '#1e40af' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124' }}>
                       Scan to Access Your Patient Portal &amp; Request Refills
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#334155', marginTop: '3px', maxWidth: '440px' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '3px', maxWidth: '440px', lineHeight: 1.4 }}>
                       Scan this QR code with your smartphone camera to view your digital dosage tracker, update your treating physician, or request a prescription renewal.
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#2563eb', fontFamily: 'monospace', marginTop: '4px' }}>
-                      {patientQrUrl}
+                    <div style={{ fontSize: '0.70rem', color: '#1a73e8', fontFamily: 'monospace', marginTop: '4px', fontWeight: 600 }}>
+                      {cleanDisplayUrl}
                     </div>
                   </div>
 
                   <div style={{
                     padding: '8px',
                     background: '#ffffff',
-                    border: '1px solid #93c5fd',
+                    border: '1px solid #dadce0',
                     borderRadius: '6px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -875,11 +966,11 @@ export default function PrescriptionBrochureModal({
                   }}>
                     <QRCodeSVG
                       value={patientQrUrl}
-                      size={100}
+                      size={92}
                       level="H"
                       includeMargin={false}
                     />
-                    <span style={{ fontSize: '0.58rem', fontWeight: 700, color: '#1d4ed8', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '0.58rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase' }}>
                       Patient Portal QR
                     </span>
                   </div>
