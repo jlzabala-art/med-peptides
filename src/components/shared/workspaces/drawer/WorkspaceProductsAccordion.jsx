@@ -517,27 +517,7 @@ export default function WorkspaceProductsAccordion({
             flex: stepperMode ? 1 : 'none',
           }}
         >
-          {items.length === 0 ? (
-            <WorkspaceCatalogPickers
-              itemsCount={items.length}
-              isAdmin={isAdmin}
-              isDoctor={isDoctor}
-              isWholesaler={isWholesaler}
-              isPatient={isPatient}
-              activePicker={activePicker}
-              setActivePicker={setActivePicker}
-              pickerSearch={pickerSearch}
-              setPickerSearch={setPickerSearch}
-              onAddClinicalRegimen={onAddClinicalRegimen}
-              protocols={protocols}
-              onLoadProtocol={onLoadProtocol}
-              availableProducts={availableProducts}
-              onAddProduct={onAddProduct}
-              savedKits={savedKits}
-              onLoadKit={onLoadKit}
-              onDeleteKit={onDeleteKit}
-            />
-          ) : (
+          {items.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {/* Unified GCP Action Ribbon */}
               <div
