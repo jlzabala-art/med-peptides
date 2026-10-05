@@ -278,8 +278,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   // 2) Production Physician (productionDoctor):
   //    Dr. Miguel Ángel López Aranda (España, Lic. 282869584, no DHA).
   //    Strictly internal for compounding pharmacy / Fagron manufacture. NEVER shown to patient.
-  const rawCandidate = customTreatingDoctor || 
-    rx.treatingDoctor || 
+  const rawCandidate = rx.treatingDoctor || 
     (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !String(rx.doctor.name).includes('Miguel Ángel') ? rx.doctor : null) ||
     (rx.doctorName && !String(rx.doctorName).includes('Miguel Ángel') ? { name: rx.doctorName, clinic: rx.clinic, specialty: rx.doctorSpecialty || 'Prescribing Physician' } : null) ||
     (rx.prescribingDoctor && !String(rx.prescribingDoctor).includes('Miguel Ángel') ? { name: rx.prescribingDoctor, clinic: rx.clinic, specialty: 'Prescribing Physician' } : null) ||
