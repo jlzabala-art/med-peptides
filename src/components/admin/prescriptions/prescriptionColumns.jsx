@@ -135,7 +135,7 @@ function RenewButton({ rx, onRefresh, onRefill }) {
   );
 }
 
-// ── 1-Click Workspace Toggle Button (SSOT Integration) ─────────────────────────
+// ── 1-Click Workspace Toggle Button (SSOT Integration - GCP Icon Standard) ──
 function WorkspaceRxToggleButton({ rx }) {
   const isInWorkspace = useWorkspaceStore((s) => {
     const ws = s.workspaces?.[s.activeWorkspaceId];
@@ -157,38 +157,43 @@ function WorkspaceRxToggleButton({ rx }) {
     <button
       onClick={handleClick}
       type="button"
-      title={isInWorkspace ? 'Remove from active workspace' : 'Add to active workspace'}
+      title={isInWorkspace ? 'In workspace (click to remove)' : 'Add to active workspace'}
+      aria-label={isInWorkspace ? 'In workspace (click to remove)' : 'Add to active workspace'}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '4px',
-        padding: '3px 8px',
-        borderRadius: '6px',
-        fontSize: '0.72rem',
-        fontWeight: isInWorkspace ? 700 : 500,
-        backgroundColor: isInWorkspace ? '#e0f2fe' : '#ffffff',
-        color: isInWorkspace ? '#0369a1' : '#475569',
-        border: isInWorkspace ? '1px solid #7dd3fc' : '1px solid #cbd5e1',
+        justifyContent: 'center',
+        width: '28px',
+        height: '28px',
+        borderRadius: '4px',
+        backgroundColor: isInWorkspace ? '#e8f0fe' : '#ffffff',
+        border: isInWorkspace ? '1px solid #d2e3fc' : '1px solid #dadce0',
+        color: isInWorkspace ? '#1a73e8' : '#5f6368',
         cursor: 'pointer',
         transition: 'all 0.15s ease',
         flexShrink: 0,
-        whiteSpace: 'nowrap'
+        padding: 0
       }}
       onMouseEnter={(e) => {
         if (!isInWorkspace) {
-          e.currentTarget.style.backgroundColor = '#f1f5f9';
-          e.currentTarget.style.borderColor = '#94a3b8';
+          e.currentTarget.style.backgroundColor = '#f1f3f4';
+          e.currentTarget.style.borderColor = '#dadce0';
+          e.currentTarget.style.color = '#202124';
+        } else {
+          e.currentTarget.style.backgroundColor = '#d2e3fc';
         }
       }}
       onMouseLeave={(e) => {
         if (!isInWorkspace) {
           e.currentTarget.style.backgroundColor = '#ffffff';
-          e.currentTarget.style.borderColor = '#cbd5e1';
+          e.currentTarget.style.borderColor = '#dadce0';
+          e.currentTarget.style.color = '#5f6368';
+        } else {
+          e.currentTarget.style.backgroundColor = '#e8f0fe';
         }
       }}
     >
-      <Briefcase size={12} color={isInWorkspace ? '#0284c7' : '#64748b'} />
-      <span>{isInWorkspace ? 'In Workspace' : '+ Workspace'}</span>
+      <Briefcase size={14} color={isInWorkspace ? '#1a73e8' : '#5f6368'} />
     </button>
   );
 }
@@ -201,76 +206,32 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'patient',
       header: 'Patient & Doctor',
-      width: '31%',
+      width: '38%',
       render: (rx) => {
         const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
         const doctor = rx.doctor?.name || rx.doctorName || '—';
         const formattedDoc = formatDoctorName(doctor);
         const clinicName = rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
-        
-        let multiPartLabel = null;
-        let multiPartTooltip = null;
-        if (rx._isSessionGroup) {
-          const count = rx._sessionCount || rx._sessionMembers?.length || 2;
-          multiPartLabel = `${count} parts`;
-          multiPartTooltip = `Multi-part prescription (${count} compounded formulations)`;
-        } else if (rx.partNumber && rx.totalParts && rx.totalParts > 1) {
-          multiPartLabel = `Part ${rx.partNumber}/${rx.totalParts}`;
-          multiPartTooltip = `Formulation part ${rx.partNumber} of ${rx.totalParts}`;
-        } else if (rx.partNumber && rx.partNumber > 1) {
-          multiPartLabel = `Part ${rx.partNumber}`;
-          multiPartTooltip = `Formulation part ${rx.partNumber}`;
-        } else if (rx.isMultiPart && rx.totalParts && rx.totalParts > 1) {
-          multiPartLabel = `${rx.totalParts} parts`;
-          multiPartTooltip = `Multi-part prescription (${rx.totalParts} parts)`;
-        }
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0, overflow: 'hidden' }}>
             {/* Primary line: Patient Name (Strict 1 line, native tooltip, copy icon) */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', minWidth: 0 }}>
-              <div style={{ 
-                minWidth: 0,
-                flex: '1 1 auto',
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px',
-                overflow: 'hidden'
-              }}>
-                <span 
-                  title={patient}
-                  style={{ 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    whiteSpace: 'nowrap',
-                    fontWeight: 600, 
-                    color: '#202124', 
-                    fontSize: '0.88rem'
-                  }}
-                >
-                  {patient}
-                </span>
-                {patientId && <CopyableId value={patientId} iconOnly={true} />}
-              </div>
-              {multiPartLabel && (
-                <span 
-                  title={multiPartTooltip}
-                  style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 600,
-                    padding: '1px 6px',
-                    borderRadius: '10px',
-                    background: '#e6f4ea',
-                    color: '#137333',
-                    border: '1px solid #ceead6',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0
-                  }}
-                >
-                  {multiPartLabel}
-                </span>
-              )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+              <span 
+                title={patient}
+                style={{ 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  whiteSpace: 'nowrap',
+                  fontWeight: 600, 
+                  color: '#202124', 
+                  fontSize: '0.88rem'
+                }}
+              >
+                {patient}
+              </span>
+              {patientId && <CopyableId value={patientId} iconOnly={true} />}
             </div>
 
             {/* Secondary line: Doctor Name */}
@@ -329,48 +290,41 @@ export const getPrescriptionColumns = (options = {}) => {
       },
     },
     {
-      key: 'type',
-      header: 'Program / Type',
-      width: '22%',
+      key: 'parts',
+      header: 'Parts',
+      width: '14%',
       render: (rx) => {
-        const typeInfo = classifyPrescription(rx);
+        let count = 1;
+        if (rx._isSessionGroup) {
+          count = rx._sessionCount || rx._sessionMembers?.length || 2;
+        } else if (rx.totalParts && rx.totalParts > 1) {
+          count = rx.totalParts;
+        } else if (rx.isMultiPart) {
+          count = rx.totalParts || 2;
+        }
+
+        const isMulti = count > 1;
+
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <span 
-              title={`${typeInfo.label} — ${typeInfo.sublabel}`}
+              title={isMulti ? `Multi-part prescription (${count} compounded formulations)` : 'Single formulation'}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
                 fontSize: '0.74rem',
-                fontWeight: 600,
+                fontWeight: isMulti ? 600 : 500,
                 padding: '2px 8px',
-                borderRadius: '4px',
-                background: typeInfo.badgeBg,
-                color: typeInfo.badgeColor,
-                border: `1px solid ${typeInfo.badgeBorder}`,
-                whiteSpace: 'nowrap',
-                width: 'fit-content',
-                maxWidth: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              <span>{typeInfo.emoji}</span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeInfo.label}</span>
-            </span>
-            <span 
-              title={typeInfo.sublabel}
-              style={{ 
-                fontSize: '0.72rem', 
-                color: '#5f6368', 
-                lineHeight: 1.35,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                borderRadius: '12px',
+                background: isMulti ? '#e6f4ea' : '#f1f3f4',
+                color: isMulti ? '#137333' : '#5f6368',
+                border: isMulti ? '1px solid #ceead6' : '1px solid #dadce0',
                 whiteSpace: 'nowrap'
               }}
             >
-              {typeInfo.sublabel}
+              <span>{isMulti ? '📦' : '💊'}</span>
+              <span>{count} {count === 1 ? 'part' : 'parts'}</span>
             </span>
           </div>
         );
@@ -379,7 +333,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'date',
       header: 'Date',
-      width: '12%',
+      width: '14%',
       render: (rx) => {
         const formatAnyDate = (val) => {
           if (!val) return null;
@@ -473,7 +427,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'action',
       header: 'Actions',
-      width: '21%',
+      width: '20%',
       align: 'right',
       sortable: false,
       render: (rx) => {

@@ -395,15 +395,39 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   }, [loadProductsLazy]);
 
   const prescriptionExpandableRender = useCallback((row) => {
+    const typeInfo = classifyPrescription(row);
+
     // ── MULTI-PART / SESSION GROUP: list each sequential formulation/part ───────────
     if (row._isSessionGroup) {
       return (
         <div style={{ padding: '1rem 1.25rem', backgroundColor: '#f8fafc', borderTop: '1px dashed #cbd5e1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#334155', fontWeight: 600 }}>
-              Prescription Parts & Formulations ({row._sessionMembers.length} parts)
-            </h4>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#202124', fontWeight: 600 }}>
+                Prescription Parts & Formulations ({row._sessionMembers.length} parts)
+              </h4>
+              <span 
+                title={`${typeInfo.label} — ${typeInfo.sublabel}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  background: typeInfo.badgeBg,
+                  color: typeInfo.badgeColor,
+                  border: `1px solid ${typeInfo.badgeBorder}`,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span>{typeInfo.emoji}</span>
+                <span>{typeInfo.label}</span>
+                {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
+              </span>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>
               Linked multi-part patient treatment sequence
             </span>
           </div>
@@ -474,7 +498,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       );
     }
 
-    // ── REGULAR ROW: show source details, items, and imported file ───────────────────
+    // ── REGULAR ROW: show program / type, source details, items, and imported file ──
     const rawSource = (row.source || 'manual').toLowerCase().trim();
     const isImport = rawSource !== 'manual';
     const items = row.items || row.compounds || row.products || [];
@@ -488,8 +512,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
          'Import')
       : 'Manual Entry';
 
-    if (items.length === 0 && !importedFileUrl) return null;
-
     return (
       <div style={{
         padding: '12px 16px',
@@ -499,17 +521,38 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         flexDirection: 'column',
         gap: '10px',
       }}>
-        {/* Source chip */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Header bar: Program / Type badge + Source chip */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span 
+            title={`${typeInfo.label} — ${typeInfo.sublabel}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: typeInfo.badgeBg,
+              color: typeInfo.badgeColor,
+              border: `1px solid ${typeInfo.badgeBorder}`,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>{typeInfo.emoji}</span>
+            <span>{typeInfo.label}</span>
+            {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
+          </span>
+
           <span style={{
-            padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700,
-            background: isImport ? '#eff6ff' : '#f8fafc',
-            color: isImport ? '#2563eb' : '#64748b',
-            border: isImport ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+            padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600,
+            background: isImport ? '#eff6ff' : '#ffffff',
+            color: isImport ? '#1a73e8' : '#5f6368',
+            border: isImport ? '1px solid #bfdbfe' : '1px solid #dadce0',
           }}>
             {isImport ? '↑ Import' : '✏ Manual'}
           </span>
-          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{sourceLabel}</span>
+          <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>{sourceLabel}</span>
         </div>
 
         {/* Items list */}
