@@ -8,6 +8,7 @@ import { deriveCanonicalIdentity } from '../../../utils/canonicalProductRegistry
 import PublicDatasheetView from '../../../components/product/PublicDatasheetView';
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
+import RawApiDatasheetView from '../../../components/product/layouts/RawApiDatasheetView';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -481,11 +482,13 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const jsonLd = generateProductJsonLd(safeProduct, BASE_URL);
 
   const catLower = (safeProduct.category || '').toLowerCase();
+  const typeLower = (safeProduct.type || safeProduct.productType || '').toLowerCase();
   const isAesthetic = catLower === 'aesthetic injectables' || catLower === 'aesthetic injectable' || safeProduct.is_aesthetic_injectable === true;
   const isCosmetics = catLower === 'cosmetics' || catLower === 'hair cosmetics' || catLower === 'cosmeceutical' || safeProduct.is_cosmetic === true;
+  const isRawApi = typeLower === 'raw_api' || typeLower === 'raw_material' || catLower === 'raw_material' || catLower === 'compounding_material' || safeProduct.is_raw_api === true;
 
   const productName = safeProduct.canonicalName || safeProduct.name || slug;
-  const sectionLabel = isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : 'Catalog';
+  const sectionLabel = isCosmetics ? 'Cosmetics' : isAesthetic ? 'Aesthetics' : isRawApi ? 'Compounding APIs' : 'Catalog';
   const breadcrumbJsonLd = generateBreadcrumbJsonLd([
     { name: 'Home', url: '/' },
     { name: sectionLabel, url: '/catalog' },
@@ -527,6 +530,25 @@ export default async function PublicProductRoute({ params, searchParams }) {
           />
         )}
         <CosmeticsDetail product={safeProduct} />
+      </>
+    );
+  }
+  if (isRawApi) {
+    return (
+      <>
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+        <RawApiDatasheetView product={safeProduct} slug={slug} baseUrl={BASE_URL} />
       </>
     );
   }

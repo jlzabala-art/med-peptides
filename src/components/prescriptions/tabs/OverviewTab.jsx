@@ -161,7 +161,7 @@ function CareTeamLookupInput({ label, value, onChange, placeholder, defaultItems
   );
 }
 
-export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescription }) {
+export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescription, onUpdateRx }) {
   const patient = typeof rx?.patient === 'object' && rx?.patient !== null 
     ? (rx.patient.name || rx.patient.displayName || rx.patient.email || rx?.patientName || 'Unknown Patient')
     : (rx?.patientName || rx?.patient || 'Unknown Patient');
@@ -300,9 +300,12 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
         details: changeSummary
       };
 
+      const cleanDocName = (doctorName || rx.doctorName || '').trim();
       const payload = {
-        doctorName: doctorName || rx.doctorName || '',
-        doctor: { ...(typeof rx.doctor === 'object' && rx.doctor !== null ? rx.doctor : {}), name: doctorName || rx.doctorName || '' },
+        doctorName: cleanDocName,
+        doctor: { ...(typeof rx.doctor === 'object' && rx.doctor !== null ? rx.doctor : {}), name: cleanDocName },
+        treatingDoctor: cleanDocName ? { ...(typeof rx.treatingDoctor === 'object' && rx.treatingDoctor !== null ? rx.treatingDoctor : {}), name: cleanDocName, clinic: wholesellerName || rx.clinic || '' } : null,
+        hasTreatingDoctor: Boolean(cleanDocName),
         accountManager: accountManager || '',
         wholesellerName: wholesellerName || '',
         wholeseller: wholesellerName || '',
@@ -313,7 +316,8 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
       };
 
       await updatePrescription(rx.id, payload);
-      if (onUpdateRx) onUpdateRx({ ...rx, ...payload });
+      if (typeof onUpdateRx === 'function') onUpdateRx({ ...rx, ...payload });
+      if (typeof refreshPrescription === 'function') refreshPrescription();
       toast.success("Care Team updated & logged in timeline!");
       setIsEditingTeam(false);
     } catch (err) {
