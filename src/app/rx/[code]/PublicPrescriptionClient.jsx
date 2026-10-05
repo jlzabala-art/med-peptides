@@ -68,7 +68,8 @@ import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import PrescriptionBrochureModal from '@/components/prescription/PrescriptionBrochureModal';
 import PrescriptionStatusQuickAction from '@/components/prescription/PrescriptionStatusQuickAction';
-import { resolveDoctorProfile } from '@/services/doctorDirectoryService';
+import { resolveDoctorProfile, formatMedicalLicense } from '@/services/doctorDirectoryService';
+import DoctorRxSwitcherModal from '@/components/prescription/DoctorRxSwitcherModal';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -207,6 +208,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
   const [showSupplierRfqModal, setShowSupplierRfqModal] = useState(false);
   const [showAtlasQuotationModal, setShowAtlasQuotationModal] = useState(false);
+  const [showRxSwitcherModal, setShowRxSwitcherModal] = useState(false);
 
   const togglePhase = (id) => {
     setExpandedPhases(prev => ({ ...prev, [id]: !prev[id] }));
@@ -308,6 +310,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const doctorLicense = isHaytham 
     ? 'DHA-P-0319842' 
     : (treatingDoc.license || treatingDoc.licenseNumber || '');
+  const formattedDoctorLicense = useMemo(() => {
+    return formatMedicalLicense(doctorLicense, treatingDoc);
+  }, [doctorLicense, treatingDoc]);
   const doctorWebsite = isHaytham ? 'www.mrhaytham.com' : (treatingDoc.website || '');
   const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
 
@@ -1655,8 +1660,99 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             { label: isEs ? 'Prescripciones Médicas' : 'Prescription Dossier' },
             { label: rxId }
           ]}
+          isDoctorView={!isPatientView}
+          onImportRx={() => { window.location.href = `/rx/intake?from=${rxId}&fromRole=doctor`; }}
+          onSwitchRx={() => setShowRxSwitcherModal(true)}
+          banner={
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+              padding: '6px 20px',
+              background: isPatientView
+                ? 'linear-gradient(90deg, #0d9488 0%, #0284c7 100%)'
+                : 'linear-gradient(90deg, #1a73e8 0%, #6d28d9 100%)',
+              borderBottom: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
+            }}>
+              {/* Mode icon */}
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 22, height: 22, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.18)',
+                flexShrink: 0
+              }}>
+                {isPatientView
+                  ? <User size={12} color="#ffffff" />
+                  : <Stethoscope size={12} color="#ffffff" />}
+              </span>
+
+              {/* Label */}
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ffffff', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                {isPatientView
+                  ? (isEs ? 'Vista Paciente' : 'Patient View')
+                  : (isEs ? 'Vista Médico — Panel Clínico' : 'Doctor View — Clinical Panel')}
+              </span>
+
+              {/* Description */}
+              <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)', fontWeight: 400, display: 'none' }}
+                className="rx-banner-desc"
+              >
+                {isPatientView
+                  ? (isEs ? 'Dossier simplificado para el paciente' : 'Simplified dossier for patient use')
+                  : (isEs ? 'Acceso completo · Solo visible por el médico' : 'Full clinical access · Visible to doctor only')}
+              </span>
+
+              {/* Switch view link */}
+              {!isPatientView && (
+                <a
+                  href={`/rx/${rxId}?view=patient`}
+                  style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.72rem', fontWeight: 500,
+                    color: 'rgba(255,255,255,0.85)',
+                    textDecoration: 'none',
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    padding: '3px 9px', borderRadius: '4px',
+                    background: 'rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    transition: 'background 0.15s'
+                  }}
+                  title={isEs ? 'Ver cómo lo verá el paciente' : 'Preview the patient view'}
+                >
+                  <Eye size={11} />
+                  {isEs ? 'Vista Paciente' : 'Patient Preview'}
+                </a>
+              )}
+              {isPatientView && (
+                <a
+                  href={`/rx/${rxId}`}
+                  style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.72rem', fontWeight: 500,
+                    color: 'rgba(255,255,255,0.85)',
+                    textDecoration: 'none',
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    padding: '3px 9px', borderRadius: '4px',
+                    background: 'rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    transition: 'background 0.15s'
+                  }}
+                  title={isEs ? 'Volver a la vista médico' : 'Back to doctor view'}
+                >
+                  <Stethoscope size={11} />
+                  {isEs ? 'Vista Médico' : 'Doctor View'}
+                </a>
+              )}
+            </div>
+          }
         />
       )}
+
+      <style>{`
+        @media (min-width: 640px) { .rx-banner-desc { display: inline !important; } }
+      `}</style>
 
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0.75rem 1rem' }}>
         <div className="pds-content-with-sidebar">
@@ -1705,11 +1801,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         color: '#202124',
                         lineHeight: 1.3
                       }}>
-                        Medical Prescription <span style={{ color: '#5f6368', fontWeight: 400 }}>#{rxId}</span>
+                        {isEs ? 'Prescripción Médica' : 'Medical Prescription'}{' '}
+                        <span style={{ color: '#5f6368', fontWeight: 400 }}>#{rxId}</span>
                       </h1>
 
-                      {/* Google Cloud UX Status Pill (Strictly Read-Only on Public Page) */}
+                      {/* GCP Status Badge — role=status for a11y */}
                       <span
+                        role="status"
+                        aria-label={`${isEs ? 'Estado' : 'Status'}: ${currentStatusMeta.label}`}
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -1727,7 +1826,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           userSelect: 'none',
                           cursor: 'default'
                         }}
-                        title={`Prescription Status: ${currentStatusMeta.label}`}
                       >
                         <span
                           style={{
@@ -1742,16 +1840,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       </span>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#5f6368', marginTop: '2px' }}>
-                      Digital clinical dossier &amp; posology regimen · EU GMP Certified
+                      {isEs
+                        ? 'Dossier clínico digital · Pauta posológica · Certificado GMP EU'
+                        : 'Digital clinical dossier · Posology regimen · EU GMP Certified'}
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Unified Role-Aware Actions (Live Preview Modal & Export) */}
+                {/* Right: Unified Role-Aware Actions — GCP hierarchy: Primary filled · Secondary icon-ghost */}
                 <div className="rx-header-action-toolbar" style={{ position: 'relative' }}>
                   {!isPatientView ? (
-                    /* Doctor / Clinical View: Unified Dropdown */
-                    <div ref={docDropdownRef} style={{ position: 'relative' }}>
+                    /* Doctor View: single primary CTA + icon-ghost secondaries */
+                    <div ref={docDropdownRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      {/* PRIMARY: Documents dropdown */}
                       <button
                         type="button"
                         onClick={() => {
@@ -1769,10 +1870,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           gap: '6px',
                           cursor: 'pointer'
                         }}
-                        title="View Medical Monograph, Patient Treatment Guide, or Bottle Labels"
+                        title={isEs ? 'Ver monografía, guía del paciente o etiquetas' : 'View Medical Monograph, Patient Guide or Bottle Labels'}
                       >
                         <FileText size={14} color="#ffffff" />
-                        <span>Documents &amp; PDF</span>
+                        <span>{isEs ? 'Documentos' : 'Documents'}</span>
                         <ChevronDown
                           size={12}
                           color="#ffffff"
@@ -1783,18 +1884,30 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         />
                       </button>
 
+                      {/* SECONDARY: QR icon-ghost — same row, demoted weight */}
+                      <button
+                        type="button"
+                        onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
+                        className="rx-header-action-btn"
+                        title={isEs ? 'Verificación QR de la prescripción' : 'QR Verification'}
+                        style={{ padding: '0 10px', minWidth: 36 }}
+                      >
+                        <QrCode size={14} color="#1a73e8" />
+                      </button>
+
+                      {/* Dropdown panel — anchored left:0 relative to this wrapper */}
                       {showDocDropdown && (
                         <div style={{
                           position: 'absolute',
                           top: 'calc(100% + 6px)',
-                          right: 0,
+                          left: 0,
                           zIndex: 999,
                           background: '#ffffff',
                           borderRadius: '8px',
                           boxShadow: '0 8px 24px rgba(60,64,67,0.2), 0 2px 6px rgba(60,64,67,0.12)',
                           border: '1px solid #dadce0',
                           padding: '6px',
-                          minWidth: '250px',
+                          minWidth: '260px',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '2px',
@@ -1802,148 +1915,99 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         }}>
                           <button
                             type="button"
-                            onClick={() => {
-                              setShowDocDropdown(false);
-                              setShowBrochureModal(true);
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '10px',
-                              padding: '8px 10px',
-                              borderRadius: '4px',
-                              border: 'none',
-                              background: 'transparent',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              color: '#202124',
-                              transition: 'background 0.15s'
-                            }}
+                            onClick={() => { setShowDocDropdown(false); setShowBrochureModal(true); }}
+                            style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 10px', borderRadius:'4px', border:'none', background:'transparent', textAlign:'left', cursor:'pointer', color:'#202124', width:'100%', transition:'background 0.15s' }}
                             onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafd'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                           >
                             <FileText size={16} color="#1a73e8" />
                             <div>
-                              <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>Medical Brochure</div>
-                              <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>Full clinical monograph &amp; dossier (A4)</div>
+                              <div style={{ fontSize:'0.80rem', fontWeight:600 }}>{isEs ? 'Bróchure Médico' : 'Medical Brochure'}</div>
+                              <div style={{ fontSize:'0.68rem', color:'#5f6368' }}>{isEs ? 'Monografía clínica completa (A4)' : 'Full clinical monograph & dossier (A4)'}</div>
                             </div>
                           </button>
 
                           <button
                             type="button"
-                            onClick={() => {
-                              setShowDocDropdown(false);
-                              setShowBrochureModal(true);
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '10px',
-                              padding: '8px 10px',
-                              borderRadius: '4px',
-                              border: 'none',
-                              background: 'transparent',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              color: '#202124',
-                              transition: 'background 0.15s'
-                            }}
+                            onClick={() => { setShowDocDropdown(false); setShowBrochureModal(true); }}
+                            style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 10px', borderRadius:'4px', border:'none', background:'transparent', textAlign:'left', cursor:'pointer', color:'#202124', width:'100%', transition:'background 0.15s' }}
                             onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafd'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                           >
                             <User size={16} color="#059669" />
                             <div>
-                              <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>Patient Guide</div>
-                              <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>Step-by-step daily posology guide (A4)</div>
+                              <div style={{ fontSize:'0.80rem', fontWeight:600 }}>{isEs ? 'Guía del Paciente' : 'Patient Guide'}</div>
+                              <div style={{ fontSize:'0.68rem', color:'#5f6368' }}>{isEs ? 'Pauta diaria de administración (A4)' : 'Step-by-step daily posology guide (A4)'}</div>
                             </div>
                           </button>
 
                           {prescriptionLabels.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowDocDropdown(false);
-                                setSelectedLabelIndex(0);
-                                setShowLabelsModal(true);
-                              }}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                padding: '8px 10px',
-                                borderRadius: '4px',
-                                border: 'none',
-                                borderTop: '1px solid #f1f3f4',
-                                background: 'transparent',
-                                textAlign: 'left',
-                                cursor: 'pointer',
-                                color: '#202124',
-                                transition: 'background 0.15s'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafd'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                            >
-                              <Tag size={16} color="#c2410c" />
-                              <div>
-                                <div style={{ fontSize: '0.80rem', fontWeight: 600 }}>Bottle Labels ({prescriptionLabels.length})</div>
-                                <div style={{ fontSize: '0.68rem', color: '#5f6368' }}>300 DPI EU GMP compounding labels</div>
-                              </div>
-                            </button>
+                            <>
+                              <div style={{ height:1, background:'#f1f3f4', margin:'2px 0' }} />
+                              <button
+                                type="button"
+                                onClick={() => { setShowDocDropdown(false); setSelectedLabelIndex(0); setShowLabelsModal(true); }}
+                                style={{ display:'flex', alignItems:'center', gap:'10px', padding:'8px 10px', borderRadius:'4px', border:'none', background:'transparent', textAlign:'left', cursor:'pointer', color:'#202124', width:'100%', transition:'background 0.15s' }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafd'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                              >
+                                <Tag size={16} color="#c2410c" />
+                                <div>
+                                  <div style={{ fontSize:'0.80rem', fontWeight:600 }}>{isEs ? `Etiquetas de Frasco (${prescriptionLabels.length})` : `Bottle Labels (${prescriptionLabels.length})`}</div>
+                                  <div style={{ fontSize:'0.68rem', color:'#5f6368' }}>{isEs ? 'Etiquetas EU GMP 300 DPI' : '300 DPI EU GMP compounding labels'}</div>
+                                </div>
+                              </button>
+                            </>
                           )}
                         </div>
                       )}
                     </div>
                   ) : (
-                    /* Patient View: Single Direct Action (NO labels, NO technical brochure) */
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('selection');
-                        setShowBrochureModal(true);
-                      }}
-                      className="rx-header-action-btn rx-btn-primary"
-                      style={{
-                        background: '#1a73e8',
-                        color: '#ffffff',
-                        border: '1px solid #1a73e8',
-                        fontWeight: 600,
-                        cursor: 'pointer'
-                      }}
-                      title="View personalized treatment guide & PDF"
-                    >
-                      <FileText size={14} color="#ffffff" />
-                      <span>Treatment Guide &amp; PDF</span>
-                    </button>
+                    /* Patient View: primary CTA + icon-ghost secondaries */
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      {/* PRIMARY */}
+                      <button
+                        type="button"
+                        onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
+                        className="rx-header-action-btn rx-btn-primary"
+                        style={{ background: '#1a73e8', color: '#ffffff', border: '1px solid #1a73e8', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                        title={isEs ? 'Ver guía de tratamiento y PDF' : 'View treatment guide & PDF'}
+                      >
+                        <FileText size={14} color="#ffffff" />
+                        <span>{isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}</span>
+                      </button>
+
+                      {/* SECONDARY: Copy icon-ghost */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('selection');
+                          if (navigator.clipboard) {
+                            navigator.clipboard.writeText(window.location.href);
+                            setCopied(true);
+                            toast.success(isEs ? 'Enlace copiado ✓' : 'Link copied ✓');
+                            setTimeout(() => setCopied(false), 2000);
+                          }
+                        }}
+                        className="rx-header-action-btn"
+                        title={isEs ? 'Copiar enlace' : 'Copy link'}
+                        style={{ padding: '0 10px', minWidth: 36 }}
+                      >
+                        {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+                      </button>
+
+                      {/* SECONDARY: QR icon-ghost */}
+                      <button
+                        type="button"
+                        onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
+                        className="rx-header-action-btn"
+                        title={isEs ? 'Verificación QR' : 'QR Verification'}
+                        style={{ padding: '0 10px', minWidth: 36 }}
+                      >
+                        <QrCode size={14} color="#1a73e8" />
+                      </button>
+                    </div>
                   )}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      if (navigator.clipboard) {
-                        navigator.clipboard.writeText(window.location.href);
-                        setCopied(true);
-                        toast.success('Link copied ✓');
-                        setTimeout(() => setCopied(false), 2000);
-                      }
-                    }}
-                    className="rx-header-action-btn"
-                  >
-                    <Copy size={14} />
-                    <span>{copied ? 'Copied ✓' : 'Copy Link'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      setShowQrModal(true);
-                    }}
-                    className="rx-header-action-btn"
-                  >
-                    <QrCode size={14} color="#1a73e8" />
-                    <span>QR Verification</span>
-                  </button>
                 </div>
               </div>
 
@@ -4526,6 +4590,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         isOpen={showAtlasQuotationModal}
         onClose={() => setShowAtlasQuotationModal(false)}
       />
+
+      {/* ── Doctor Prescriptions Switcher Modal (doctor view only) ── */}
+      {!isPatientView && (
+        <DoctorRxSwitcherModal
+          isOpen={showRxSwitcherModal}
+          onClose={() => setShowRxSwitcherModal(false)}
+          currentRxId={rxId}
+          doctorName={doctorName}
+          lang={lang}
+        />
+      )}
     </div>
   );
 }

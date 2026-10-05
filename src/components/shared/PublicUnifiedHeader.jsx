@@ -14,7 +14,7 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -61,7 +61,14 @@ export default function PublicUnifiedHeader({
   // Optional custom Tier 2 content
   customTier2 = null,
   // Hide contact / inquiry envelope button in Tier 1
-  hideContactButton = false
+  hideContactButton = false,
+  // Doctor-only: enables Import Rx and Prescriptions Switcher buttons
+  isDoctorView = false,
+  onImportRx = null,
+  onSwitchRx = null,
+  rxSwitcherCount = 0,
+  // Sticky sub-banner (e.g. Doctor View / Patient View Mode indicator)
+  banner = null
 }) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -309,19 +316,86 @@ export default function PublicUnifiedHeader({
                 </span>
               </button>
 
-              {/* Clinical AI Copilot Global Trigger (Hidden on Mobile Header to prioritize Search & Auth) */}
-              <button
-                type="button"
-                className="puh-btn puh-btn-ai hide-on-extra-narrow hide-on-mobile-header"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
-                }}
-                title={isSpanish ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas Clinical AI Research Copilot'}
-              >
-                <Sparkles size={14} />
-                <span className="puh-btn-label">{isSpanish ? 'Atlas AI' : 'Atlas AI'}</span>
-              </button>
+              {/* Doctor-only: Import Prescription button (hidden on /rx/intake itself) */}
+              {isDoctorView && pathname !== '/rx/intake' && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-import-rx hide-on-extra-narrow"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    if (onImportRx) onImportRx();
+                    else window.location.href = '/rx/intake';
+                  }}
+                  title={isSpanish ? 'Importar nueva prescripción desde el portal' : 'Import prescription from intake portal'}
+                  style={{
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.22)',
+                    color: '#ffffff',
+                    fontWeight: 500
+                  }}
+                >
+                  <FileInput size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Importar Rx' : 'Import Rx'}</span>
+                </button>
+              )}
+
+              {/* Doctor-only: My Prescriptions Switcher / Back button */}
+              {isDoctorView && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-rx-switcher"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    if (onSwitchRx) onSwitchRx();
+                    else window.location.href = '/doctor/prescriptions';
+                  }}
+                  title={isSpanish ? 'Ver todas mis prescripciones' : 'Browse all my prescriptions'}
+                  style={{
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.22)',
+                    color: '#ffffff',
+                    fontWeight: 500,
+                    position: 'relative'
+                  }}
+                >
+                  <LayoutList size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Mis Prescripciones' : 'My Prescriptions'}</span>
+                  {rxSwitcherCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-5px',
+                      right: '-5px',
+                      background: '#ea4335',
+                      color: '#fff',
+                      borderRadius: '50%',
+                      fontSize: '0.62rem',
+                      fontWeight: 700,
+                      width: 16,
+                      height: 16,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      lineHeight: 1
+                    }}>{rxSwitcherCount > 9 ? '9+' : rxSwitcherCount}</span>
+                  )}
+                </button>
+              )}
+
+              {/* Clinical AI Copilot (hidden when in doctor view to avoid clutter) */}
+              {!isDoctorView && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-ai hide-on-extra-narrow hide-on-mobile-header"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    window.dispatchEvent(new CustomEvent('open-public-atlas-ai'));
+                  }}
+                  title={isSpanish ? 'Abrir Asistente Clínico Atlas AI' : 'Open Atlas Clinical AI Research Copilot'}
+                >
+                  <Sparkles size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Atlas AI' : 'Atlas AI'}</span>
+                </button>
+              )}
 
               {/* Institutional Inquiry Drawer Trigger (if enabled) */}
               {!hideContactButton && (
@@ -488,6 +562,13 @@ export default function PublicUnifiedHeader({
                 </>
               )}
             </div>
+          </div>
+        )}
+
+        {/* View-mode / announcement sticky sub-banner (Doctor View / Patient View) */}
+        {banner && (
+          <div className="puh-sticky-banner-slot" style={{ width: '100%' }}>
+            {banner}
           </div>
         )}
       </header>

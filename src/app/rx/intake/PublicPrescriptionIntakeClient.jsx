@@ -21,6 +21,7 @@ import IntakeStepperHeader from './components/IntakeStepperHeader';
 import IntakePhase3Deliver from './components/IntakePhase3Deliver';
 import IntakePatientQrModal from './components/IntakePatientQrModal';
 import IntakeDoctorSelector from './components/IntakeDoctorSelector';
+import DoctorRxSwitcherModal from '@/components/prescription/DoctorRxSwitcherModal';
 import {
   extractPrescriptionFromDocument,
   normalizeExtractedPrescriptions
@@ -510,9 +511,20 @@ function formatFileSize(bytes) {
 const STORAGE_SESSION_KEY = 'atlas_intake_session_v2';
 
 export default function PublicPrescriptionIntakeClient() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, activeRole } = useAuth();
   const searchParams = useSearchParams();
   const referralAm = searchParams?.get('am') || '';
+  const fromRx = searchParams?.get('from') || '';
+  const fromRole = searchParams?.get('fromRole') || '';
+
+  // Determine if the user is in doctor context
+  const isDoctor = Boolean(
+    (user && (activeRole === 'doctor' || activeRole === 'admin' || userProfile?.role === 'doctor' || userProfile?.role === 'admin')) ||
+    fromRole === 'doctor' ||
+    fromRx
+  );
+
+  const [showRxSwitcherModal, setShowRxSwitcherModal] = useState(false);
 
   const activeAmEmail = user?.email || referralAm || '';
   const activeAmName = user?.displayName || userProfile?.name || (activeAmEmail ? activeAmEmail.split('@')[0] : '');
@@ -1201,10 +1213,16 @@ export default function PublicPrescriptionIntakeClient() {
         lang={lang}
         onLangChange={setLang}
         hideTier2={false}
-        breadcrumb={[
+        breadcrumb={isDoctor ? [
+          { label: isEs ? 'Panel Médico' : 'Doctor Console', href: '/doctor' },
+          { label: isEs ? 'Mis Prescripciones' : 'My Prescriptions', href: fromRx ? `/rx/${fromRx}` : '/doctor/prescriptions' },
+          { label: isEs ? 'Ingesta de Prescripción' : 'Prescription Ingestion' }
+        ] : [
           { label: 'Home', href: '/' },
-          { label: 'Autonomous Clinical Intake' }
+          { label: isEs ? 'Ingesta Clínica Autónoma' : 'Autonomous Clinical Intake' }
         ]}
+        isDoctorView={isDoctor}
+        onSwitchRx={() => setShowRxSwitcherModal(true)}
         copyUrl={typeof window !== 'undefined' ? `${window.location.origin}/rx/intake` : 'https://med-peptides.com/rx/intake'}
       />
 
@@ -1224,6 +1242,73 @@ export default function PublicPrescriptionIntakeClient() {
       {currentPhase === 1 && (
         <div className="pds-page-shell-inner" style={{ maxWidth: '1040px', margin: '0 auto', padding: '1rem 1.25rem 2rem' }}>
           
+          {/* GCP Contextual Back / Prescriptions Access Bar for Doctor */}
+          {isDoctor && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1rem',
+              padding: '8px 14px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '8px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (fromRx) {
+                    window.location.href = `/rx/${fromRx}`;
+                  } else {
+                    window.location.href = '/doctor/prescriptions';
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#1a73e8',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  borderRadius: '4px'
+                }}
+              >
+                <ArrowLeft size={14} />
+                <span>
+                  {fromRx
+                    ? (isEs ? `Volver a Prescripción #${fromRx}` : `Back to Prescription #${fromRx}`)
+                    : (isEs ? 'Volver a Mis Prescripciones' : 'Back to My Prescriptions')}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowRxSwitcherModal(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#f8fafd',
+                  border: '1px solid #dadce0',
+                  color: '#3c4043',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: '5px 12px',
+                  borderRadius: '6px'
+                }}
+              >
+                <FileText size={14} color="#1a73e8" />
+                <span>{isEs ? 'Explorar Mis Prescripciones' : 'Browse My Prescriptions'}</span>
+              </button>
+            </div>
+          )}
+
           {/* GCP Autonomous Presentation Header (Compact, 1-Screen Density) */}
           <div style={{ textAlign: 'center', marginBottom: '1.15rem' }}>
             <div style={{
@@ -2180,6 +2265,17 @@ export default function PublicPrescriptionIntakeClient() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Doctor Prescriptions Switcher Modal ── */}
+      {isDoctor && (
+        <DoctorRxSwitcherModal
+          isOpen={showRxSwitcherModal}
+          onClose={() => setShowRxSwitcherModal(false)}
+          currentRxId={fromRx}
+          doctorName={activeAmName}
+          lang={lang}
+        />
       )}
     </div>
   );

@@ -32,8 +32,9 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     profileUrl: 'https://novomed.com/doctors/dr-cagatay-sezgin/',
     email: 'cagataysezgin66@gmail.com',
     secondaryEmail: 'sezgin@hortmanclinics.com',
-    license: '00208953-005',
-    licenseNumber: '00208953-005',
+    license: 'DHA 00208953-005',
+    licenseNumber: 'DHA 00208953-005',
+    authority: 'DHA',
     licenseValidFrom: '3 September 2026',
     assistantName: 'Adriana Barac',
     assistantEmail: 'adriana.barac@novomed.com',
@@ -196,4 +197,72 @@ export function resolveDoctorProfile(inputDoc) {
     email: '',
     license: ''
   };
+}
+
+/**
+ * Canonical Medical License Formatter
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Correctly attributes licensing authority acronyms according to jurisdiction:
+ * - Dubai / UAE: "DHA" (e.g. "DHA 00208953-005", "DHA-P-0319842")
+ * - Abu Dhabi: "DOH" / "HAAD"
+ * - UAE Federal: "MOHAP"
+ * - Spain / España: "Lic." (e.g. "Lic. 282869584") or "Col."
+ * - United Kingdom: "GMC" (e.g. "GMC 1234567")
+ * - United States: "NPI"
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+export function formatMedicalLicense(rawLicense, doctorContext = {}) {
+  if (!rawLicense || typeof rawLicense !== 'string') return '';
+  const lic = rawLicense.trim();
+  if (!lic || lic === '—' || lic === '-') return '';
+
+  const upper = lic.toUpperCase();
+
+  // 1. If already prefixed with recognized authority acronym
+  if (upper.startsWith('DHA-') || upper.startsWith('DHA ') || upper.startsWith('DHA:')) {
+    return lic.replace(/^DHA[:\s]+/i, 'DHA ');
+  }
+  if (upper.startsWith('DHCC') || upper.startsWith('MOHAP') || upper.startsWith('DOH') || upper.startsWith('HAAD')) {
+    return lic;
+  }
+  if (upper.startsWith('COMB') || upper.startsWith('GMC') || upper.startsWith('NPI')) {
+    return lic;
+  }
+  if (upper.startsWith('COL.') || upper.startsWith('COL ') || upper.startsWith('LIC.') || upper.startsWith('LIC ')) {
+    return lic;
+  }
+
+  // 2. Derive authority from doctor / context metadata (country, city, address, clinic, doctor name)
+  const country = String(doctorContext.country || doctorContext.doctorCountry || '').toLowerCase();
+  const city = String(doctorContext.city || doctorContext.doctorCity || '').toLowerCase();
+  const address = String(doctorContext.address || doctorContext.doctorAddress || '').toLowerCase();
+  const clinic = String(doctorContext.clinic || doctorContext.clinicName || '').toLowerCase();
+  const name = String(doctorContext.name || doctorContext.doctorName || '').toLowerCase();
+
+  const isUae = country.includes('emirates') || country.includes('uae') || country.includes('emiratos') ||
+                city.includes('dubai') || city.includes('abu dhabi') ||
+                address.includes('dubai') || address.includes('uae') || address.includes('jumeirah') ||
+                clinic.includes('novomed') || clinic.includes('arthregen') || clinic.includes('shamma') || clinic.includes('mediluxe') ||
+                name.includes('sezgin') || name.includes('haytham') || name.includes('hanieh') || name.includes('rajoo');
+
+  const isSpain = country.includes('spain') || country.includes('españa') ||
+                  city.includes('madrid') || city.includes('barcelona') || city.includes('valencia') || city.includes('málaga') ||
+                  name.includes('miguel ángel') || name.includes('aranda');
+
+  const isUk = country.includes('united kingdom') || country.includes('uk') || city.includes('london');
+
+  if (isUae) {
+    return `DHA ${lic}`;
+  }
+
+  if (isSpain) {
+    return `Lic. ${lic}`;
+  }
+
+  if (isUk) {
+    return `GMC ${lic}`;
+  }
+
+  // Default to DHA if operating within our primary UAE clinical ecosystem
+  return `DHA ${lic}`;
 }
