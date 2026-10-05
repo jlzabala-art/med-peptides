@@ -86,9 +86,9 @@ export default function AdminProcurementRFQsTab() {
 
   const kpis = {
     total: activeRfqsForKpis.length,
-    awaitingQuote: activeRfqsForKpis.filter(r => ['sent', 'draft', 'pending'].includes(String(r.status || '').toLowerCase())).length,
-    quotesReceived: activeRfqsForKpis.filter(r => ['supplier_responded', 'responded'].includes(String(r.status || '').toLowerCase())).length,
-    convertedToPO: activeRfqsForKpis.filter(r => String(r.status || '').toLowerCase() === 'po_created').length,
+    awaitingQuote: activeRfqsForKpis.filter(r => ['sent', 'draft', 'pending', 'pending_supplier'].includes(String(r.status || '').toLowerCase())).length,
+    quotesReceived: activeRfqsForKpis.filter(r => ['supplier_responded', 'responded', 'supplier_quoted'].includes(String(r.status || '').toLowerCase())).length,
+    convertedToPO: activeRfqsForKpis.filter(r => ['po_created', 'accepted'].includes(String(r.status || '').toLowerCase())).length,
   };
 
   const handleExportRfqs = () => {
@@ -261,7 +261,7 @@ export default function AdminProcurementRFQsTab() {
           footer={
             <>
               <button onClick={() => setSelectedRfq(null)} className="btn btn-outline">Close</button>
-              {selectedRfq.status === 'supplier_responded' && (
+              {(selectedRfq.status === 'supplier_responded' || selectedRfq.status === 'supplier_quoted') && (
                 <button 
                   onClick={() => handleConvertPO(selectedRfq)} 
                   className="btn btn-primary"

@@ -58,6 +58,7 @@ import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { getFagronClinicalMonograph, checkDosageSafety } from '@/data/fagronClinicalMonographs';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import RequestSupplierRFQModal from '@/features/prescriptions/components/RequestSupplierRFQModal';
 import '@/styles/publicDesignSystem.css';
 import './publicPrescriptionMobile.css';
 import MultiPartOverview from './MultiPartOverview';
@@ -198,6 +199,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   });
   const [showLabelsModal, setShowLabelsModal] = useState(false);
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
+  const [showSupplierRfqModal, setShowSupplierRfqModal] = useState(false);
 
   const togglePhase = (id) => {
     setExpandedPhases(prev => ({ ...prev, [id]: !prev[id] }));
@@ -3546,6 +3548,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <ExternalLink size={13} />
                 <span>{isEs ? 'Probar Vista del Paciente y Cotización ↗' : 'Preview Patient Experience & Quotation ↗'}</span>
               </a>
+
+              {/* B2B Supplier RFQ Magic Link Generator */}
+              <button
+                type="button"
+                onClick={() => setShowSupplierRfqModal(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '0.55rem',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#1a73e8',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                <Building2 size={14} />
+                <span>{isEs ? 'Pedir Cotización a Proveedor / Lab (RFQ)' : 'Request Supplier / Lab Quote (RFQ)'}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -4397,6 +4422,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           setSelectedLabelIndex(0);
           setShowLabelsModal(true);
         }}
+      />
+
+      {/* ── B2B Supplier RFQ Direct Magic Link Generator Modal ── */}
+      <RequestSupplierRFQModal
+        rx={rx}
+        isOpen={showSupplierRfqModal}
+        onClose={() => setShowSupplierRfqModal(false)}
       />
     </div>
   );

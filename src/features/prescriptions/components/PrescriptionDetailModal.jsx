@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { serverAutoDraftQuotationFromPrescription } from '../../../app/actions/transactionActions';
 import { generateClinicalProtocol, getProtocolFilename } from '../../../services/pdfService';
 import { checkInteractionsAction, matchProtocolAction } from '../../../actions/aiActions';
-import { Package, X, Edit, CheckCircle, Download, FileText, Send, User, Stethoscope, Activity, Clock, Calendar, Pill, FlaskConical, MoreHorizontal, ChevronDown, Upload, FileCheck, AlertCircle, Check, ArrowUpRight, Wand2, RefreshCw, DollarSign } from '@/lib/icons';
+import { Package, X, Edit, CheckCircle, Download, FileText, Send, User, Stethoscope, Activity, Clock, Calendar, Pill, FlaskConical, MoreHorizontal, ChevronDown, Upload, FileCheck, AlertCircle, Check, ArrowUpRight, Wand2, RefreshCw, DollarSign, Building2 } from '@/lib/icons';
 import HighDensityDrawer from '../../../components/ui/HighDensityDrawer';
 import StandardDrawerTabs from '../../../components/common/StandardDrawerTabs';
 import DocumentPreviewModal from '../../../components/ui/DocumentPreviewModal';
+import RequestSupplierRFQModal from './RequestSupplierRFQModal';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
@@ -189,6 +190,7 @@ export default function PrescriptionDetailModal({
   const [isMatching, setIsMatching] = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isRFQModalOpen, setIsRFQModalOpen] = useState(false);
   const [relatedPrescriptions, setRelatedPrescriptions] = useState([]);
   const [isLoadingRelated, setIsLoadingRelated] = useState(false);
 
@@ -496,6 +498,20 @@ export default function PrescriptionDetailModal({
             </button>
 
             <button
+              onClick={() => setIsRFQModalOpen(true)}
+              className="rx-action-btn"
+              style={{
+                padding: '0.4rem 0.75rem', borderRadius: '6px',
+                border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8',
+                fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+              }}
+              title="Generate zero-login public quote link for compounding pharmacies & suppliers"
+            >
+              <Building2 size={13} /> Supplier RFQ
+            </button>
+
+            <button
               onClick={() => { setActiveTab('items'); if (onEdit) onEdit(rx); }}
               className="rx-action-btn"
               style={{
@@ -770,6 +786,12 @@ export default function PrescriptionDetailModal({
         isOpen={!!previewPdfUrl}
         onClose={() => setPreviewPdfUrl(null)}
         fileUrl={previewPdfUrl}
+      />
+
+      <RequestSupplierRFQModal
+        rx={currentRx || rx}
+        isOpen={isRFQModalOpen}
+        onClose={() => setIsRFQModalOpen(false)}
       />
 
       <style>{`
