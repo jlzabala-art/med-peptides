@@ -319,15 +319,26 @@ export const getPrescriptionColumns = (options = {}) => {
           let d = null;
           if (typeof val.toDate === 'function') d = val.toDate();
           else if (val._seconds || val.seconds) d = new Date((val._seconds || val.seconds) * 1000);
-          else if (typeof val === 'string' || typeof val === 'number') d = new Date(val);
+          else if (typeof val === 'number') d = new Date(val);
+          else if (typeof val === 'string') {
+            const dmy = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (dmy) {
+              d = new Date(parseInt(dmy[3], 10), parseInt(dmy[2], 10) - 1, parseInt(dmy[1], 10));
+            } else {
+              d = new Date(val);
+            }
+          }
           if (d && !isNaN(d.getTime())) {
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
           }
           return null;
         };
 
-        const dateStr = formatAnyDate(rx.createdAt)
+        const dateStr = formatAnyDate(rx.date)
           || formatAnyDate(rx.dateIssued)
+          || formatAnyDate(rx.createdAt)
+          || formatAnyDate(rx.createdAt_ts)
+          || formatAnyDate(rx.updatedAt)
           || formatAnyDate(rx.fagron?.importedAt)
           || formatAnyDate(rx.fagron?.reportDate)
           || '—';

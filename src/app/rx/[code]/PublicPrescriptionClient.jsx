@@ -1123,12 +1123,31 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               : 'Personalized active ingredient calibrated to patient clinical and genomic profile.';
           }
 
-          const doseStr = api.dosage || api.dose || api.strength || api.concentration || '—';
-          const dosageSafety = checkDosageSafety(
-            api.productId || apiName, 
-            doseStr, 
-            resolvedRoute.toLowerCase().includes('oral') ? 'oral' : 'topical'
-          );
+          const rawDose = api.dosage || api.dose || api.strength || api.concentration;
+          const hasPrescribedDose = Boolean(rawDose && rawDose !== '—' && String(rawDose).trim() !== '');
+          
+          let doseStr = rawDose;
+          if (!hasPrescribedDose) {
+            const rawStandard = mono?.standardDosages;
+            const standardRef = typeof rawStandard === 'string'
+              ? rawStandard
+              : (rawStandard?.[resolvedRoute.toLowerCase().includes('oral') ? 'oral' : 'topical'] || rawStandard?.topical || null);
+            
+            if (standardRef) {
+              const primaryRef = standardRef.split('·')[0].trim();
+              doseStr = `Ref: ${primaryRef}`;
+            } else {
+              doseStr = isEs ? 'Dosis a calibrar' : 'Dose to calibrate';
+            }
+          }
+
+          const dosageSafety = hasPrescribedDose
+            ? checkDosageSafety(
+                api.productId || apiName, 
+                rawDose, 
+                resolvedRoute.toLowerCase().includes('oral') ? 'oral' : 'topical'
+              )
+            : { evaluated: false, isWithinStandardRange: true, level: 'unrated' };
 
           return {
             id: api.id || `api-${index}-${aIdx + 1}`,
@@ -2775,7 +2794,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                             alignItems: 'center',
                             gap: '3px'
                           }}>
-                            {formulation.isOral ? `💊 ${api.dosage} / cápsula` : api.dosage}
+                            {formulation.isOral 
+                              ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') ? `💊 ${api.dosage}` : `💊 ${api.dosage} / cápsula`) 
+                              : api.dosage}
                           </span>
                           {api.dosageSafety?.evaluated && (
                             <span 

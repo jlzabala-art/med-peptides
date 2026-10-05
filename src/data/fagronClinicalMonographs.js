@@ -543,7 +543,7 @@ export function checkDosageSafety(apiName, dosageStr, route = 'topical') {
   const numMatch = String(dosageStr).match(/(\d+(?:[.,]\d+)?)\s*(%|mg|mcg|g)/i);
   if (!numMatch) {
     const cleanRange = rangeStr.replace(/Oral Diaria/gi, 'Daily Oral').replace(/Tópico/gi, 'Topical').replace(/Selenio Elemental/gi, 'Elemental Selenium');
-    return { evaluated: true, isWithinStandardRange: true, level: 'standard', standardRange: cleanRange, message: `Standard reference range: ${cleanRange}` };
+    return { evaluated: false, isWithinStandardRange: true, level: 'unrated', standardRange: cleanRange, message: `Reference range: ${cleanRange}` };
   }
 
   const cleanRange = rangeStr.replace(/Oral Diaria/gi, 'Daily Oral').replace(/Tópico/gi, 'Topical').replace(/Selenio Elemental/gi, 'Elemental Selenium');
