@@ -108,7 +108,7 @@ export const NAVIGATION_REGISTRY = [
       },
       {
         id: 'quotations',
-        label: 'Estimates',
+        label: 'Quotations',
         icon: FileText,
         roles: ['admin', 'sales', 'finance'],
         // Quotes & pricing

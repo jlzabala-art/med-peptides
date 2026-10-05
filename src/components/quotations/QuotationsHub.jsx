@@ -148,7 +148,7 @@ export default function QuotationsHub() {
             Quotations
           </h1>
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Manage commercial proposals and patient estimates.
+            Manage commercial proposals and patient quotations.
           </p>
         </div>
 

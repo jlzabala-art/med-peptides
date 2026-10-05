@@ -586,6 +586,17 @@ const createWorkspaceItemsSlice = (set, get) => ({
           tier_10_price: tier10Price,
           cost_tiers: item.cost_tiers || null,
           cost_10: tier10Price,
+          partNumber: item.partNumber ?? null,
+          totalParts: item.totalParts ?? null,
+          partName: item.partName || item.phaseName || '',
+          phaseName: item.phaseName || '',
+          formula: item.formula || '',
+          prescriptionId: item.prescriptionId || '',
+          prescriptionCode: item.prescriptionCode || '',
+          rxGroupId: item.rxGroupId || '',
+          sessionId: item.sessionId || '',
+          patientName: item.patientName || '',
+          patientId: item.patientId || '',
         });
       }
     });
@@ -1004,26 +1015,41 @@ const createWorkspaceItemsSlice = (set, get) => ({
       const nextRxIds = [...new Set([...currentPrescriptionIds, rxId])];
 
       const rawItems = prescription.items || prescription.compounds || prescription.products || [];
-      const itemsToAdd = rawItems.map((i, idx) => ({
-        id: i.id || i.variantId || i.productId || `rx_item_${rxId}_${idx}`,
-        productId: i.productId || i.id,
-        variantId: i.variantId || i.id,
-        canonicalName: i.name || i.productName || i.product_title || 'Medication',
-        sku: i.sku || '',
-        dosage: i.dosage || i.dose || '',
-        format: i.format || i.dosage_form || 'Vial',
-        quantity: parseInt(i.quantity, 10) || 1,
-        unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
-        price: parseFloat(i.unitPrice || i.rate || i.price || 0),
-        unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
-        supplierCost: parseFloat(i.supplierCost || 0),
-        supplierName: prescription.supplierName || 'Pharmapolis Ltd',
-        category: i.category || 'Prescription Biologics',
-        prescriptionId: rxId,
-        prescriptionCode: rxCode,
-        patientName,
-        patientId: prescription.patientId || prescription.patient?.id || '',
-      }));
+      const partNum = prescription.partNumber ?? null;
+      const totalParts = prescription.totalParts ?? null;
+      const phaseName = prescription.phaseName || prescription.formula || (partNum ? `Part ${partNum}${totalParts ? ` of ${totalParts}` : ''}` : '');
+      const formula = prescription.formula || '';
+      const rxGroupId = prescription.rxGroupId || prescription.sessionId || rxId;
+
+      const itemsToAdd = rawItems.map((i, idx) => {
+        const baseId = i.id || i.variantId || i.productId || `item_${idx}`;
+        return {
+          id: `rx_${rxId}_p${partNum || 1}_${baseId}`,
+          productId: i.productId || i.id,
+          variantId: i.variantId || i.id,
+          canonicalName: i.name || i.productName || i.product_title || 'Medication',
+          sku: i.sku || '',
+          dosage: i.dosage || i.dose || '',
+          format: i.format || i.dosage_form || 'Vial',
+          quantity: parseInt(i.quantity, 10) || 1,
+          unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+          price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+          unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+          supplierCost: parseFloat(i.supplierCost || 0),
+          supplierName: prescription.supplierName || 'Pharmapolis Ltd',
+          category: i.category || 'Prescription Biologics',
+          prescriptionId: rxId,
+          prescriptionCode: rxCode,
+          rxGroupId,
+          partNumber: partNum,
+          totalParts,
+          partName: phaseName,
+          phaseName,
+          formula,
+          patientName,
+          patientId: prescription.patientId || prescription.patient?.id || '',
+        };
+      });
 
       let nextItems = [...(ws.items || [])];
       itemsToAdd.forEach((item) => {

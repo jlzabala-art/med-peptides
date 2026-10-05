@@ -74,7 +74,7 @@ export default function ChatHeader({
         : isQuotationsContext && activeQuoteNumber
           ? `💼 Quote #${activeQuoteNumber} (${activeQuoteClient || 'Client'})`
           : isQuotationsContext
-            ? '💼 Commercial AI — Estimates & Quotes'
+            ? '💼 Commercial AI — Quotations'
             : isProductContext && activeProductName
               ? `🔬 ${activeProductName}`
               : isProductContext
@@ -94,9 +94,9 @@ export default function ChatHeader({
       : isProtocolContext
         ? `Protocol Intelligence Active · ${pageContext?.protocolsCount ? `${pageContext.protocolsCount} Protocols` : 'Protocols DB'}`
         : isQuotationsContext && activeQuoteNumber
-          ? `Estimate Active · Margin ${pageContext?.marginPercent || selectedQuote?.marginPercent || 45}%`
+          ? `Quotation Active · Margin ${pageContext?.marginPercent || selectedQuote?.marginPercent || 45}%`
           : isQuotationsContext
-            ? `Estimates Pipeline Active · ${pageContext?.totalQuotations ? `${pageContext.totalQuotations} Quotes` : 'Pro-Forma Desk'}`
+            ? `Quotations Pipeline Active · ${pageContext?.totalQuotations ? `${pageContext.totalQuotations} Quotes` : 'Pro-Forma Desk'}`
             : isProductContext && activeProductName
               ? `Product Active · ${selectedProduct?.sku || selectedProduct?.concentration || 'Tier 2/3'}`
               : isProductContext 

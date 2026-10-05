@@ -602,22 +602,38 @@ export const getPrescriptionColumns = (options = {}) => {
               const patientName = rx.patient?.name || rx.patientName || 'Patient';
               const patientId = rx.patientId || rx.patient?.id || '';
               if (!rawItems.length) { toast.error('No items in this prescription'); return; }
-              const itemsToAdd = rawItems.map((i, idx) => ({
-                id: i.id || i.variantId || i.productId || `rx_item_${Date.now()}_${idx}`,
-                productId: i.productId || i.id, variantId: i.variantId || i.id,
-                canonicalName: i.name || i.productName || i.product_title || 'Medication',
-                sku: i.sku || '', dosage: i.dosage || i.dose || '',
-                format: i.format || i.dosage_form || 'Vial',
-                quantity: parseInt(i.quantity, 10) || 1,
-                unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                price: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
-                supplierCost: parseFloat(i.supplierCost || 0),
-                supplierName: rx.supplierName || 'Pharmapolis Ltd',
-                category: i.category || 'Prescription Biologics',
-                prescriptionId: rx.id, prescriptionCode: rx.prescriptionCode || rx.id,
-                patientName, patientId,
-              }));
+              const partNum = rx.partNumber ?? null;
+              const totalParts = rx.totalParts ?? null;
+              const phaseName = rx.phaseName || rx.formula || (partNum ? `Part ${partNum}${totalParts ? ` of ${totalParts}` : ''}` : '');
+              const formula = rx.formula || '';
+              const rxCode = rx.prescriptionCode || rx.rxCode || rx.code || rx.id;
+              const rxGroupId = rx.rxGroupId || rx.sessionId || rx.id;
+
+              const itemsToAdd = rawItems.map((i, idx) => {
+                const baseId = i.id || i.variantId || i.productId || `item_${idx}`;
+                return {
+                  id: `rx_${rx.id}_p${partNum || 1}_${baseId}`,
+                  productId: i.productId || i.id, variantId: i.variantId || i.id,
+                  canonicalName: i.name || i.productName || i.product_title || 'Medication',
+                  sku: i.sku || '', dosage: i.dosage || i.dose || '',
+                  format: i.format || i.dosage_form || 'Vial',
+                  quantity: parseInt(i.quantity, 10) || 1,
+                  unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  supplierCost: parseFloat(i.supplierCost || 0),
+                  supplierName: rx.supplierName || 'Pharmapolis Ltd',
+                  category: i.category || 'Prescription Biologics',
+                  prescriptionId: rx.id, prescriptionCode: rxCode,
+                  rxGroupId,
+                  partNumber: partNum,
+                  totalParts,
+                  partName: phaseName,
+                  phaseName,
+                  formula,
+                  patientName, patientId,
+                };
+              });
               const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
               addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
               setTargetEntity({ type: 'patient', id: patientId, name: patientName,

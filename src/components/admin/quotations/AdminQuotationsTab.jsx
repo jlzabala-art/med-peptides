@@ -479,7 +479,7 @@ export default function AdminQuotationsTab() {
     const client = quote.clientName || 'Client';
     const quoteNum = quote.quotationNumber || quote.id;
 
-    const draftText = `Dear ${client},\n\nWe have finalized your peptide prescription & commercial estimate (${quoteNum}).\n• Protocol Items: ${itemsCount} compounded formulation(s)\n• Estimated Total: $${total} (incl. 2-8°C refrigerated express handling)\n• Status: Ready for lab processing\n\nPlease let us know to dispatch this directly to your facility.\n\nBest regards,\nAtlas Health Medical Commercial Desk`;
+    const draftText = `Dear ${client},\n\nWe have finalized your peptide prescription & commercial quotation (${quoteNum}).\n• Protocol Items: ${itemsCount} compounded formulation(s)\n• Quotation Total: $${total} (incl. 2-8°C refrigerated express handling)\n• Status: Ready for lab processing\n\nPlease let us know to dispatch this directly to your facility.\n\nBest regards,\nAtlas Health Medical Commercial Desk`;
 
     navigator.clipboard?.writeText(draftText);
     notifier.success(`✉️ AI Commercial proposal copied to clipboard for ${client}!`);
@@ -523,7 +523,7 @@ export default function AdminQuotationsTab() {
             <div class="meta">Compounding Pharmacy & Lyophilized Peptide Solutions</div>
           </div>
           <div style="text-align: right;">
-            <h2 style="margin: 0; color: #0284c7;">PRO-FORMA ESTIMATE</h2>
+            <h2 style="margin: 0; color: #0284c7;">PRO-FORMA QUOTATION</h2>
             <div class="meta">Quote #: <strong>${quote.quotationNumber || quote.id}</strong></div>
             <div class="meta">Date: ${quote.createdDate ? quote.createdDate.toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
@@ -540,7 +540,7 @@ export default function AdminQuotationsTab() {
             <strong style="font-size: 12px; color: #64748b; text-transform: uppercase;">Clinical & Logistics Desk</strong>
             <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">Supervisor: ${quote.doctorName || quote.accountManagerId || 'Direct Medical Desk'}</div>
             <div class="meta">Handling: ❄️ 2-8°C Insulated Express Cold Chain</div>
-            <div class="meta">Status: Official Estimate</div>
+            <div class="meta">Status: Official Quotation</div>
           </div>
         </div>
 
@@ -1232,8 +1232,8 @@ export default function AdminQuotationsTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
       {/* 1. Golden Standard Sticky Page Header (Zoho Books Standard) */}
       <PageHeader
-        title="Estimates"
-        subtitle="Manage commercial pro-forma estimates, margin calculations, client approvals, and supplier purchase conversions"
+        title="Quotations"
+        subtitle="Manage commercial pro-forma quotations, margin calculations, client approvals, and supplier purchase conversions"
         panel="admin"
         icon={FileText}
         actions={
@@ -1416,7 +1416,7 @@ export default function AdminQuotationsTab() {
         <EmptyState
           icon={FileText}
           title="No quotations found"
-          subtitle="There are no quotations matching your active filters. Create a new estimate or reset filters."
+          subtitle="There are no quotations matching your active filters. Create a new quotation or reset filters."
           action={{
             label: "Create First Quotation",
             onClick: () => window.dispatchEvent(new CustomEvent('open-quotation-wizard'))

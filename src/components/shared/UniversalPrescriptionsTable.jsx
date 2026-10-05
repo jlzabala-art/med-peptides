@@ -676,9 +676,18 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               };
             }
             const rawItems = rx.items || rx.compounds || rx.products || [];
+            const partNum = rx.partNumber ?? null;
+            const totalParts = rx.totalParts ?? null;
+            const phaseName = rx.phaseName || rx.formula || (partNum ? `Part ${partNum}${totalParts ? ` of ${totalParts}` : ''}` : '');
+            const formula = rx.formula || '';
+            const rxCode = rx.prescriptionCode || rx.rxCode || rx.code || rx.id;
+            const rxGroupId = rx.rxGroupId || rx.sessionId || rx.id;
+
             rawItems.forEach((i, idx) => {
+              const baseId = i.id || i.variantId || i.productId || `item_${idx}`;
+              const uniqueId = `rx_${rx.id}_p${partNum || 1}_${baseId}`;
               allItems.push({
-                id: i.id || i.variantId || i.productId || `rx_${rx.id}_item_${idx}`,
+                id: uniqueId,
                 productId: i.productId || i.id,
                 variantId: i.variantId || i.id,
                 canonicalName: i.name || i.productName || i.product_title || 'Medication',
@@ -693,7 +702,13 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                 supplierName: rx.supplierName || 'Pharmapolis Ltd',
                 category: i.category || 'Prescription Biologics',
                 prescriptionId: rx.id,
-                prescriptionCode: rx.prescriptionCode || rx.id,
+                prescriptionCode: rxCode,
+                rxGroupId,
+                partNumber: partNum,
+                totalParts,
+                partName: phaseName,
+                phaseName,
+                formula,
                 patientName,
                 patientId: pId,
               });

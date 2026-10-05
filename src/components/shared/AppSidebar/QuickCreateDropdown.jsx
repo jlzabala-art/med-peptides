@@ -18,7 +18,7 @@ const QUICK_CREATE_MAP = {
     { label: 'New Doctor', desc: 'Practitioner onboarding', icon: Stethoscope, action: 'new-doctor', color: '#0d9488', bg: '#f0fdfa' },
     { label: 'New Protocol', desc: 'Treatment regimen designer', icon: ClipboardList, action: 'new-protocol', color: '#7c3aed', bg: '#f5f3ff' },
     { label: 'New Prescription', desc: 'Compound Rx analyzer', icon: FileText, action: 'rx-builder', color: '#003666', bg: '#f0f4f8' },
-    { label: 'New Quotation', desc: 'Patient estimate & billing', icon: Receipt, action: 'new-quotation', color: '#d97706', bg: '#fffbeb' },
+    { label: 'New Quotation', desc: 'Patient quotation & billing', icon: Receipt, action: 'new-quotation', color: '#d97706', bg: '#fffbeb' },
     { label: 'New Purchase Order', desc: 'B2B distributor PO', icon: ShoppingBag, action: 'new-purchase-order', color: '#ea580c', bg: '#fff7ed' },
   ],
   doctor: [
@@ -36,7 +36,7 @@ const QUICK_CREATE_MAP = {
   clinic_manager: [
     { label: 'New Patient', desc: 'Clinical intake & records', icon: UserPlus, action: 'new-patient', color: '#0284c7', bg: '#eff6ff' },
     { label: 'New Doctor', desc: 'Onboard medical staff', icon: Stethoscope, action: 'new-doctor', color: '#0d9488', bg: '#f0fdfa' },
-    { label: 'New Quotation', desc: 'Create pricing estimate', icon: Receipt, action: 'new-quotation', color: '#d97706', bg: '#fffbeb' },
+    { label: 'New Quotation', desc: 'Create pricing quotation', icon: Receipt, action: 'new-quotation', color: '#d97706', bg: '#fffbeb' },
     { label: 'New Invoice', desc: 'Process payment invoice', icon: Receipt, action: 'new-invoice', color: '#16a34a', bg: '#f0fdf4' },
   ],
   sales: [

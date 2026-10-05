@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import {
   Package,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
+  Layers,
   Plus,
   FileText,
   Droplet,
@@ -65,6 +67,7 @@ export default function WorkspaceProductsAccordion({
   const [workspaceSearch, setWorkspaceSearch] = useState('');
   const [groupByCategory, setGroupByCategory] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [expandedParts, setExpandedParts] = useState({});
   const [transferItemId, setTransferItemId] = useState(null);
 
   const workspacesMap = useWorkspaceStore((s) => s.workspaces);
@@ -427,6 +430,85 @@ export default function WorkspaceProductsAccordion({
     acc[key].push(it);
     return acc;
   }, {});
+
+  // Detect if items in workspace belong to a multi-part prescription or multiple prescriptions
+  const hasPartStructure = React.useMemo(() => {
+    if (!items || items.length === 0) return false;
+    const distinctRxs = new Set(
+      items
+        .filter((it) => it.prescriptionId || it.prescriptionCode)
+        .map((it) => it.prescriptionId || it.prescriptionCode)
+    );
+    const hasAnyPart = items.some(
+      (it) => it.partNumber != null || (it.totalParts && it.totalParts > 1) || it.partName
+    );
+    return hasAnyPart || distinctRxs.size > 1;
+  }, [items]);
+
+  // Group displayed items by part / prescription / session
+  const partGroups = React.useMemo(() => {
+    if (!hasPartStructure) return null;
+
+    const groups = {};
+    (displayedItems || []).forEach((it) => {
+      let groupKey;
+      let label;
+      let badgeLabel;
+
+      if (it.partNumber != null) {
+        groupKey = `part_${it.rxGroupId || it.prescriptionId || 'rx'}_${it.partNumber}`;
+        badgeLabel = `PART ${it.partNumber}${it.totalParts ? `/${it.totalParts}` : ''}`;
+        label = it.partName || it.phaseName || it.formula || `Part ${it.partNumber} Formulation`;
+      } else if (it.prescriptionCode) {
+        groupKey = `rx_${it.prescriptionId || it.prescriptionCode}`;
+        badgeLabel = `RX`;
+        label = it.prescriptionCode ? `#${it.prescriptionCode}` : (it.partName || 'Prescription Items');
+      } else {
+        groupKey = 'general';
+        badgeLabel = 'ITEMS';
+        label = 'Additional Compounds';
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          key: groupKey,
+          partNumber: it.partNumber,
+          totalParts: it.totalParts,
+          badgeLabel,
+          label,
+          prescriptionCode: it.prescriptionCode,
+          patientName: it.patientName,
+          items: [],
+          subtotal: 0,
+        };
+      }
+      groups[groupKey].items.push(it);
+      const rate = getItemUnitPrice ? getItemUnitPrice(it) : (it.unitPrice || it.price || 0);
+      groups[groupKey].subtotal += (Number(rate) || 0) * (Number(it.quantity) || 1);
+    });
+
+    return Object.values(groups);
+  }, [displayedItems, hasPartStructure, getItemUnitPrice]);
+
+  const isPartExpanded = (groupKey) => !!expandedParts[groupKey];
+
+  const togglePartExpanded = (groupKey) => {
+    setExpandedParts((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
+
+  const handleExpandAllParts = () => {
+    if (!partGroups) return;
+    const next = {};
+    partGroups.forEach((g) => { next[g.key] = true; });
+    setExpandedParts(next);
+  };
+
+  const handleCollapseAllParts = () => {
+    setExpandedParts({});
+  };
 
   return (
     <div
@@ -836,12 +918,250 @@ export default function WorkspaceProductsAccordion({
                 </div>
               )}
 
-              {/* Items Display: Grouped or Flat */}
+              {/* Multi-Part Quick Toolbar (Visible when 2 or more parts exist) */}
+              {hasPartStructure && partGroups && partGroups.length > 1 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '4px 8px',
+                    backgroundColor: '#f1f5f9',
+                    borderRadius: '6px',
+                    fontSize: '0.72rem',
+                    color: '#475569',
+                  }}
+                >
+                  <span style={{ fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Layers size={13} color="#0284c7" />
+                    <span>{partGroups.length} Prescription Parts • {displayedItems.length} Compounds</span>
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleExpandAllParts}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#0284c7',
+                        cursor: 'pointer',
+                        padding: 0,
+                        fontWeight: 700,
+                        fontSize: '0.70rem',
+                      }}
+                    >
+                      Expand All
+                    </button>
+                    <span style={{ color: '#cbd5e1' }}>•</span>
+                    <button
+                      type="button"
+                      onClick={handleCollapseAllParts}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        padding: 0,
+                        fontWeight: 600,
+                        fontSize: '0.70rem',
+                      }}
+                    >
+                      Collapse All
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Items Display: Grouped by Parts or Standard */}
               {displayedItems.length === 0 ? (
                 <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
                   <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
                     No products matching &ldquo;{workspaceSearch}&rdquo;
                   </p>
+                </div>
+              ) : hasPartStructure && partGroups && partGroups.length > 0 ? (
+                /* --- MULTI-PART PRESCRIPTION STRUCTURE (Collapsed by default) --- */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {partGroups.map((grp) => {
+                    const isExpanded = isPartExpanded(grp.key);
+                    return (
+                      <div
+                        key={grp.key}
+                        style={{
+                          backgroundColor: '#ffffff',
+                          border: isExpanded ? '1px solid #93c5fd' : '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          boxShadow: isExpanded ? '0 2px 8px rgba(37, 99, 235, 0.08)' : '0 1px 2px rgba(0,0,0,0.02)',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {/* Collapsible Part Header Bar (~38px) */}
+                        <div
+                          onClick={() => togglePartExpanded(grp.key)}
+                          style={{
+                            padding: '8px 12px',
+                            backgroundColor: isExpanded ? '#eff6ff' : '#f8fafc',
+                            borderBottom: isExpanded ? '1px solid #bfdbfe' : 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            gap: '8px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                padding: '2px 8px',
+                                backgroundColor: isExpanded ? '#dbeafe' : '#e2e8f0',
+                                color: isExpanded ? '#1d4ed8' : '#334155',
+                                borderRadius: '12px',
+                                fontSize: '0.66rem',
+                                fontWeight: 800,
+                                letterSpacing: '0.3px',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {grp.badgeLabel}
+                            </span>
+
+                            {grp.prescriptionCode && (
+                              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', flexShrink: 0 }}>
+                                #{grp.prescriptionCode}
+                              </span>
+                            )}
+
+                            <span
+                              style={{
+                                fontSize: '0.76rem',
+                                fontWeight: 700,
+                                color: '#0f172a',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                              title={grp.label}
+                            >
+                              {grp.label}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 600,
+                                color: '#64748b',
+                                backgroundColor: '#ffffff',
+                                padding: '2px 6px',
+                                borderRadius: '6px',
+                                border: '1px solid #e2e8f0',
+                              }}
+                            >
+                              {grp.items.length} {grp.items.length === 1 ? 'compound' : 'compounds'}
+                            </span>
+
+                            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
+                              ${grp.subtotal.toFixed(2)}
+                            </span>
+
+                            <div style={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>
+                              {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Part Items List (rendered when expanded) */}
+                        {isExpanded && (
+                          <div>
+                            {viewMode === 'compact' ? (
+                              <div>
+                                <div
+                                  style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr auto auto auto auto',
+                                    gap: '8px',
+                                    padding: '5px 10px',
+                                    backgroundColor: '#f1f5f9',
+                                    borderBottom: '1px solid #e2e8f0',
+                                    fontSize: '0.66rem',
+                                    fontWeight: 800,
+                                    color: '#475569',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                  }}
+                                >
+                                  <span>Product & Dosage</span>
+                                  <span style={{ textAlign: 'center', minWidth: '70px' }}>Qty</span>
+                                  <span style={{ textAlign: 'right', minWidth: '55px' }}>
+                                    {isDoctor ? 'Clinic Price' : isWholesaler ? 'Wholesale Price' : isPatient ? 'Retail Price' : 'Price'}
+                                  </span>
+                                  <span style={{ textAlign: 'right', minWidth: '52px' }}>Total</span>
+                                  <span style={{ width: '24px' }}></span>
+                                </div>
+
+                                {grp.items.map((it, idx) => (
+                                  <WorkspaceCompactRow
+                                    key={it.id || idx}
+                                    item={it}
+                                    it={it}
+                                    idx={idx}
+                                    unitRate={getItemUnitPrice ? getItemUnitPrice(it) : (it.unitPrice || it.price || 0)}
+                                    isAdmin={isAdmin}
+                                    isDoctor={isDoctor}
+                                    isWholesaler={isWholesaler}
+                                    isPatient={isPatient}
+                                    getItemUnitPrice={getItemUnitPrice}
+                                    getItemTierInfo={getItemTierInfo}
+                                    onUpdateItemPrice={onUpdateItemPrice}
+                                    onUpdateItemQuantity={onUpdateItemQuantity}
+                                    onRemoveItem={onRemoveItem}
+                                    transferItemId={transferItemId}
+                                    setTransferItemId={setTransferItemId}
+                                    availableWorkspaces={availableWorkspaces}
+                                    currentWorkspaceId={activeWs?.id}
+                                    onTransferItem={handleTransferItem}
+                                    onShareDatasheet={handleShareItemDatasheet}
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', padding: '8px' }}>
+                                {grp.items.map((it, idx) => (
+                                  <WorkspaceItemCard
+                                    key={it.id || idx}
+                                    item={it}
+                                    isAdmin={isAdmin}
+                                    isDoctor={isDoctor}
+                                    isWholesaler={isWholesaler}
+                                    isPatient={isPatient}
+                                    isExpanded={!!expandedItemIds[it.id]}
+                                    onToggleExpand={toggleItemExpanded}
+                                    getItemUnitPrice={getItemUnitPrice}
+                                    getItemTierInfo={getItemTierInfo}
+                                    onUpdateItemPrice={onUpdateItemPrice}
+                                    onUpdateItemQuantity={onUpdateItemQuantity}
+                                    onUpdateItemFormat={onUpdateItemFormat}
+                                    onRemoveItem={onRemoveItem}
+                                    transferItemId={transferItemId}
+                                    setTransferItemId={setTransferItemId}
+                                    availableWorkspaces={availableWorkspaces}
+                                    currentWorkspaceId={activeWs?.id}
+                                    onTransferItem={handleTransferItem}
+                                    onShareDatasheet={handleShareItemDatasheet}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : viewMode === 'compact' ? (
                 /* --- COMPACT TABLE VIEW (~34px rows) --- */
