@@ -1490,9 +1490,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
     list.push({ 
       id: 'patient-sharing-card', 
-      label: isEs ? 'Compartir con Paciente' : 'Patient Communication',
+      label: isPatientView
+        ? (isEs ? 'Contacto con Médico' : 'Doctor & Clinic Support')
+        : (isEs ? 'Compartir con Paciente' : 'Patient Communication'),
       category: 'patient-sharing',
-      icon: 'share'
+      icon: isPatientView ? 'stethoscope' : 'share'
     });
 
     if (!isPatientView) {
@@ -2165,7 +2167,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   { id: 'posology', label: isEs ? 'Pauta & Modo de Empleo' : 'Regimen & Routine', icon: Clock },
                   { id: 'traceability', label: isEs ? 'Laboratorio & Calidad UE' : 'Quality & Standards', icon: Factory },
                   ...(genomicsData ? [{ id: 'genomics', label: isEs ? 'Farmacogenómica' : 'Genomics', icon: Dna }] : []),
-                  { id: 'patientSharing', label: isEs ? 'Compartir con Paciente' : 'Patient Sharing', icon: Share2 },
+                  { id: 'patientSharing', label: isPatientView ? (isEs ? 'Contacto Médico' : 'Doctor Support') : (isEs ? 'Compartir con Paciente' : 'Patient Sharing'), icon: isPatientView ? Stethoscope : Share2 },
                   ...(!isPatientView ? [{ id: 'quotation', label: isEs ? 'Pedir Cotización' : 'Request Quotation', icon: FileText }] : [])
                 ].map(tab => {
                   const isActive = activeGcpTab === tab.id;
@@ -3802,7 +3804,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'genomics') && genomicsData && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
             {/* Section Accordion Trigger Header */}
             <div
               onClick={() => toggleSection('genomics')}
@@ -3853,7 +3855,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           </div>
         )}
 
-        {/* ── Section 5: Patient Communication & Mobile Access Hub ── */}
+        {/* ── Section 5: Doctor & Clinical Care Hub (Patient View) vs Patient Sharing & Mobile Access (Doctor View) ── */}
         {(activeGcpTab === 'all' || activeGcpTab === 'patientSharing') && (
         <div id="patient-sharing-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           <div
@@ -3871,22 +3873,48 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Share2 size={16} />
+              <div style={{ 
+                width: 32, 
+                height: 32, 
+                borderRadius: '4px', 
+                background: isPatientView ? '#eff6ff' : '#ecfdf5', 
+                color: isPatientView ? '#1d4ed8' : '#059669', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                flexShrink: 0 
+              }}>
+                {isPatientView ? <Stethoscope size={16} /> : <Share2 size={16} />}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
-                    {isEs ? '5. Compartir con el Paciente & Acceso Móvil' : '5. Patient Communication & Mobile Access Hub'}
+                    {isPatientView
+                      ? (isEs ? '5. Contacto Médico & Soporte Clínico' : '5. Doctor & Clinical Care Hub')
+                      : (isEs ? '5. Compartir con el Paciente & Acceso Móvil' : '5. Patient Communication & Mobile Access Hub')}
                   </span>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0' }}>
-                    {isEs ? 'Portal del Paciente' : 'Patient Safe View'}
+                  <span style={{ 
+                    fontSize: '0.68rem', 
+                    fontWeight: 500, 
+                    padding: '1px 8px', 
+                    borderRadius: '10px', 
+                    background: isPatientView ? '#eff6ff' : '#ecfdf5', 
+                    color: isPatientView ? '#1d4ed8' : '#047857', 
+                    border: isPatientView ? '1px solid #bfdbfe' : '1px solid #a7f3d0' 
+                  }}>
+                    {isPatientView 
+                      ? (isEs ? 'Atención Médica' : 'Direct Clinician Contact') 
+                      : (isEs ? 'Portal del Paciente' : 'Patient Safe View')}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                  {isEs 
-                    ? 'Enlace privado sin datos técnicos de laboratorio, código QR de consulta y envío directo por WhatsApp' 
-                    : 'Private patient dossier link, clinical QR code and direct WhatsApp sharing'}
+                  {isPatientView
+                    ? (isEs 
+                        ? 'Comunicación directa con tu médico prescriptor y centro clínico autorizado' 
+                        : 'Direct communication with your prescribing physician and licensed medical practice')
+                    : (isEs 
+                        ? 'Enlace privado sin datos técnicos de laboratorio, código QR de consulta y envío directo por WhatsApp' 
+                        : 'Private patient dossier link, clinical QR code and direct WhatsApp sharing')}
                 </div>
               </div>
             </div>
@@ -3907,210 +3935,400 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               flexDirection: 'column',
               gap: '1.25rem'
             }}>
-              {/* Privacy Notice Banner */}
-              <div style={{
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '10px',
-                padding: '12px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <ShieldCheck size={22} color="#16a34a" style={{ flexShrink: 0 }} />
-                <div style={{ fontSize: '0.78rem', color: '#166534', lineHeight: 1.45 }}>
-                  <strong>{isEs ? 'Seguridad Clínica y Privacidad del Paciente:' : 'Clinical Privacy & Patient Safety:'}</strong>{' '}
-                  {isEs 
-                    ? 'La vista del paciente muestra exclusivamente el modo de empleo, pasos diarios, horarios y contacto médico. Se ocultan los costes comerciales y especificaciones de laboratorio B2B.' 
-                    : 'The patient view displays strictly application instructions, daily routines, timing, and clinician contacts. Internal compounding costs and raw supplier logistics are withheld.'}
-                </div>
-              </div>
-
-              {/* Action Grid */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '16px'
-              }}>
-                {/* Column 1: QR & In-Clinic Scan */}
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  gap: '10px'
-                }}>
-                  <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
-                    📱 {isEs ? 'Código QR para Escaneo en Consulta' : 'In-Clinic Mobile QR Scan'}
-                  </div>
+              {isPatientView ? (
+                /* ── PATIENT VIEW: Dedicated Doctor & Clinical Support Hub ── */
+                <>
                   <div style={{
-                    background: '#ffffff',
-                    padding: '12px',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
                     borderRadius: '10px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                  }}>
-                    <QRCodeSVG
-                      value={patientPublicUrl}
-                      size={150}
-                      level="M"
-                      includeMargin={false}
-                    />
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                    {isEs ? 'El paciente puede escanearlo directamente desde la pantalla' : 'The patient can scan this directly using their mobile camera'}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      setShowQrModal(true);
-                    }}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      padding: '6px 12px',
-                      color: '#0f172a',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
-                  >
-                    <Maximize2 size={13} />
-                    <span>{isEs ? 'Ampliar QR en Pantalla Completa' : 'Full Screen QR'}</span>
-                  </button>
-                </div>
-
-                {/* Column 2: Direct Share & WhatsApp */}
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
-                }}>
-                  <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
-                    🔗 {isEs ? 'Enlace Directo del Paciente' : 'Direct Patient Link'}
-                  </div>
-
-                  {/* URL Box */}
-                  <div style={{
+                    padding: '12px 14px',
                     display: 'flex',
                     alignItems: 'center',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    padding: '6px 10px',
-                    gap: '8px'
+                    gap: '12px'
                   }}>
-                    <input
-                      type="text"
-                      readOnly
-                      value={patientPublicUrl}
-                      style={{
-                        border: 'none',
-                        outline: 'none',
-                        width: '100%',
-                        fontSize: '0.75rem',
-                        color: '#334155',
-                        background: 'transparent',
-                        fontFamily: 'monospace'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('selection');
-                        if (navigator.clipboard) {
-                          navigator.clipboard.writeText(patientPublicUrl);
-                          toast.success(isEs ? 'Enlace del paciente copiado ✓' : 'Patient link copied ✓');
-                        }
-                      }}
-                      style={{
-                        background: '#0284c7',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        padding: '5px 10px',
-                        fontSize: '0.72rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        flexShrink: 0
-                      }}
-                    >
-                      <Copy size={12} />
-                      <span>{isEs ? 'Copiar' : 'Copy'}</span>
-                    </button>
+                    <Stethoscope size={22} color="#1d4ed8" style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: '0.78rem', color: '#1e40af', lineHeight: 1.45 }}>
+                      <strong>{isEs ? 'Atención Médica y Seguimiento Clínico:' : 'Personalized Clinical Care:'}</strong>{' '}
+                      {isEs 
+                        ? 'Para cualquier consulta médica sobre la pauta de tratamiento, evolución esperada de 90 días o renovación de prescripción, puedes contactar directamente con tu médico prescriptor o su clínica.' 
+                        : 'For any clinical inquiries regarding your administration schedule, expected 90-day progress, or prescription renewals, contact your prescribing physician or clinical practice directly.'}
+                    </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-                    <a
-                      href={`https://wa.me/?text=${encodeURIComponent(
-                        isEs
-                          ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${doctorName}:\n🔗 ${patientPublicUrl}`
-                          : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${doctorName}:\n🔗 ${patientPublicUrl}`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        background: '#25D366',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px 14px',
-                        fontSize: '0.80rem',
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
-                      }}
-                    >
-                      <span>💬 {isEs ? 'Enviar por WhatsApp al Paciente' : 'Share via WhatsApp with Patient'}</span>
-                    </a>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {/* Physician & Licensed Practice Credentials */}
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '18px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: '50%',
+                          background: '#e0f2fe',
+                          color: '#0284c7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <Stethoscope size={22} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                            {doctorName}
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                            {doctorSpecialty || (isEs ? 'Médico Prescriptor Titular' : 'Prescribing Physician')}
+                          </div>
+                          {doctorLicense && (
+                            <div style={{ fontSize: '0.70rem', color: '#0369a1', fontWeight: 600, marginTop: 2 }}>
+                              {formattedDoctorLicense || `Lic. ${doctorLicense}`}
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-                    <a
-                      href={patientPublicUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
+                      <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
+                          <Building2 size={15} style={{ color: '#64748b', flexShrink: 0, marginTop: 2 }} />
+                          <div>
+                            <strong>{doctorClinic}</strong>
+                            {doctorAddress && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 1 }}>{doctorAddress}</div>}
+                          </div>
+                        </div>
+                        {doctorPhone && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#334155' }}>
+                            <Phone size={15} style={{ color: '#64748b', flexShrink: 0 }} />
+                            <a href={`tel:${doctorPhone}`} style={{ color: '#0284c7', fontWeight: 600, textDecoration: 'none' }}>
+                              {doctorPhone}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Direct Patient Communication Channels */}
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '18px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '12px'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                          {isEs ? 'Canales de Comunicación del Paciente' : 'Direct Patient Communication Channels'}
+                        </div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
+                          {isEs 
+                            ? 'Conéctate de forma segura con la consulta médica para resolver dudas de dosificación o coordinar visitas.' 
+                            : 'Connect securely with the medical practice to resolve dosage questions or arrange clinical follow-up.'}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {/* WhatsApp Action */}
+                        <a
+                          href={`https://wa.me/${String(doctorPhone || '+97143498800').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                            isEs
+                              ? `Estimado equipo médico de ${doctorClinic},\nSoy ${patientName}, paciente del ${doctorName}. Me pongo en contacto en relación a mi prescripción médica #${rxId}.\n🔗 Consulta de seguimiento: ${patientPublicUrl}`
+                              : `Dear ${doctorClinic} clinical team,\nI am ${patientName}, patient of ${doctorName}. I am contacting you regarding my prescription #${rxId}.\n🔗 Clinical follow-up inquiry: ${patientPublicUrl}`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            background: '#25D366',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '10px 16px',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
+                          }}
+                        >
+                          <span>💬 {isEs ? 'Contactar por WhatsApp con la Clínica' : 'Contact Clinic / Doctor on WhatsApp'}</span>
+                        </a>
+
+                        {/* Call Clinic Action */}
+                        {doctorPhone && (
+                          <a
+                            href={`tel:${doctorPhone}`}
+                            style={{
+                              background: '#ffffff',
+                              color: '#0f172a',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '8px',
+                              padding: '9px 16px',
+                              fontSize: '0.80rem',
+                              fontWeight: 600,
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px'
+                            }}
+                          >
+                            <Phone size={15} style={{ color: '#0284c7' }} />
+                            <span>{isEs ? `Llamar a la Consulta (${doctorPhone})` : `Call Practice (${doctorPhone})`}</span>
+                          </a>
+                        )}
+
+                        {/* QR Modal for Patient Wallet */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('selection');
+                            setShowQrModal(true);
+                          }}
+                          style={{
+                            background: '#ffffff',
+                            color: '#0284c7',
+                            border: '1px solid #bae6fd',
+                            borderRadius: '8px',
+                            padding: '8px 16px',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <QrCode size={15} />
+                          <span>{isEs ? 'Ver Código QR de Mi Receta' : 'View My Prescription QR Card'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* ── DOCTOR / ADMIN VIEW: Patient Communication & Mobile Sharing Hub ── */
+                <>
+                  <div style={{
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '10px',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <ShieldCheck size={22} color="#16a34a" style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: '0.78rem', color: '#166534', lineHeight: 1.45 }}>
+                      <strong>{isEs ? 'Seguridad Clínica y Privacidad del Paciente:' : 'Clinical Privacy & Patient Safety:'}</strong>{' '}
+                      {isEs 
+                        ? 'La vista del paciente muestra exclusivamente el modo de empleo, pasos diarios, horarios y contacto médico. Se ocultan los costes comerciales y especificaciones de laboratorio B2B.' 
+                        : 'The patient view displays strictly application instructions, daily routines, timing, and clinician contacts. Internal compounding costs and raw supplier logistics are withheld.'}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {/* Column 1: QR & In-Clinic Scan */}
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      gap: '10px'
+                    }}>
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
+                        📱 {isEs ? 'Código QR para Escaneo en Consulta' : 'In-Clinic Mobile QR Scan'}
+                      </div>
+                      <div style={{
                         background: '#ffffff',
-                        color: '#0284c7',
-                        border: '1px solid #0284c7',
-                        borderRadius: '8px',
-                        padding: '8px 14px',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        textDecoration: 'none',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                      }}>
+                        <QRCodeSVG
+                          value={patientPublicUrl}
+                          size={150}
+                          level="M"
+                          includeMargin={false}
+                        />
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        {isEs ? 'El paciente puede escanearlo directamente desde la pantalla' : 'The patient can scan this directly using their mobile camera'}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('selection');
+                          setShowQrModal(true);
+                        }}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          color: '#0f172a',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}
+                      >
+                        <Maximize2 size={13} />
+                        <span>{isEs ? 'Ampliar QR en Pantalla Completa' : 'Full Screen QR'}</span>
+                      </button>
+                    </div>
+
+                    {/* Column 2: Direct Share & WhatsApp */}
+                    <div style={{
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}>
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#334155' }}>
+                        🔗 {isEs ? 'Enlace Directo del Paciente' : 'Direct Patient Link'}
+                      </div>
+
+                      <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <ExternalLink size={14} />
-                      <span>{isEs ? 'Abrir Vista de Paciente en Nueva Pestaña' : 'Open Patient View in New Tab'}</span>
-                    </a>
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        padding: '6px 10px',
+                        gap: '8px'
+                      }}>
+                        <input
+                          type="text"
+                          readOnly
+                          value={patientPublicUrl}
+                          style={{
+                            border: 'none',
+                            outline: 'none',
+                            width: '100%',
+                            fontSize: '0.75rem',
+                            color: '#334155',
+                            background: 'transparent',
+                            fontFamily: 'monospace'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('selection');
+                            if (navigator.clipboard) {
+                              navigator.clipboard.writeText(patientPublicUrl);
+                              toast.success(isEs ? 'Enlace del paciente copiado ✓' : 'Patient link copied ✓');
+                            }
+                          }}
+                          style={{
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '5px 10px',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            flexShrink: 0
+                          }}
+                        >
+                          <Copy size={12} />
+                          <span>{isEs ? 'Copiar' : 'Copy'}</span>
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(
+                            isEs
+                              ? `Estimado/a ${patientName},\nAquí tiene su pauta personalizada y guía de administración prescrita por ${doctorName}:\n🔗 ${patientPublicUrl}`
+                              : `Dear ${patientName},\nHere is your personalized treatment guide and daily routine prescribed by ${doctorName}:\n🔗 ${patientPublicUrl}`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            background: '#25D366',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '10px 14px',
+                            fontSize: '0.80rem',
+                            fontWeight: 700,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
+                          }}
+                        >
+                          <span>💬 {isEs ? 'Enviar por WhatsApp al Paciente' : 'Share via WhatsApp with Patient'}</span>
+                        </a>
+
+                        <a
+                          href={patientPublicUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            background: '#ffffff',
+                            color: '#0284c7',
+                            border: '1px solid #0284c7',
+                            borderRadius: '8px',
+                            padding: '8px 14px',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <ExternalLink size={14} />
+                          <span>{isEs ? 'Abrir Vista de Paciente en Nueva Pestaña' : 'Open Patient View in New Tab'}</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           )}
         </div>

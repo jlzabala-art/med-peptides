@@ -161,8 +161,10 @@ export default function PrescriptionDetailSidebar({
     if (iconType === 'dna' || id.includes('genomics')) return Dna;
     if (iconType === 'clock' || id.includes('posology')) return Clock;
     if (iconType === 'calendar' || id.includes('milestone')) return Calendar;
+    if (iconType === 'stethoscope' || id.includes('doctor') || id.includes('clinical')) return Stethoscope;
     if (iconType === 'shield' || id.includes('qr')) return ShieldCheck;
     if (iconType === 'file' || id.includes('doc')) return FileText;
+    if (iconType === 'share' || id.includes('sharing')) return ExternalLink;
     if (id.includes('formula')) return FlaskConical;
     return List;
   };

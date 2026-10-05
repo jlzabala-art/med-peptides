@@ -1,10 +1,28 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { X, Search, FileText, ChevronRight, ExternalLink, Clock, FlaskConical, Loader2 } from 'lucide-react';
+import { 
+  X, 
+  Search, 
+  FileText, 
+  ChevronRight, 
+  ChevronDown, 
+  ExternalLink, 
+  Clock, 
+  FlaskConical, 
+  Loader2, 
+  Copy, 
+  Check, 
+  MapPin, 
+  Pill,
+  Calendar,
+  Layers,
+  Sparkles
+} from 'lucide-react';
 import { db } from '@/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { triggerHaptic } from '@/utils/haptics';
+import { toast } from 'react-hot-toast';
 
 export default function DoctorRxSwitcherModal({
   isOpen,
@@ -17,6 +35,9 @@ export default function DoctorRxSwitcherModal({
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [expandedRows, setExpandedRows] = useState({});
+  const [copiedId, setCopiedId] = useState(null);
+
   const overlayRef = useRef(null);
   const searchRef = useRef(null);
   const isEs = lang === 'es';
@@ -36,7 +57,7 @@ export default function DoctorRxSwitcherModal({
 
   const getStatusMeta = (status) =>
     STATUS_META[String(status || '').toLowerCase()] || {
-      label: String(status || '').toUpperCase(),
+      label: String(status || 'Active').toUpperCase(),
       color: '#475569', bg: '#f1f5f9', border: '#cbd5e1'
     };
 
@@ -51,7 +72,7 @@ export default function DoctorRxSwitcherModal({
     setLoading(true);
     try {
       const prescRef = collection(db, 'prescriptions');
-      const q1 = query(prescRef, orderBy('createdAt', 'desc'), limit(50));
+      const q1 = query(prescRef, orderBy('createdAt', 'desc'), limit(60));
       const snap = await getDocs(q1);
       const results = [];
       const normalizedDoctor = (doctorName || '').toLowerCase().replace('dr. ', '').replace('dr ', '');
@@ -80,6 +101,7 @@ export default function DoctorRxSwitcherModal({
     } else {
       setSearchQuery('');
       setStatusFilter('all');
+      setExpandedRows({});
     }
   }, [isOpen, fetchPrescriptions]);
 
@@ -92,13 +114,37 @@ export default function DoctorRxSwitcherModal({
 
   if (!isOpen) return null;
 
+  const toggleRow = (id, e) => {
+    if (e) e.stopPropagation();
+    triggerHaptic('light');
+    setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleCopyLink = (id, e) => {
+    if (e) e.stopPropagation();
+    triggerHaptic('selection');
+    const url = `${window.location.origin}/rx/${id}`;
+    navigator.clipboard?.writeText(url);
+    setCopiedId(id);
+    toast.success(isEs ? 'Enlace permanente copiado ✓' : 'Permanent Rx link copied ✓');
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleNavigate = (id, e) => {
+    if (e) e.stopPropagation();
+    triggerHaptic('selection');
+    onClose();
+    window.location.href = `/rx/${id}`;
+  };
+
   const filtered = prescriptions.filter((rx) => {
     const status = String(rx.status || rx.state || '').toLowerCase();
     const name = (rx.patientName || rx.patient?.name || '').toLowerCase();
     const id = String(rx.id || rx.prescriptionNumber || '').toLowerCase();
     const formula = String(rx.treatmentTitle || rx.description || rx.program || '').toLowerCase();
+    const clinic = String(rx.clinic || rx.clinicName || rx.treatingDoctor?.clinic || '').toLowerCase();
     const q = searchQuery.toLowerCase();
-    const matchSearch = !q || name.includes(q) || id.includes(q) || formula.includes(q);
+    const matchSearch = !q || name.includes(q) || id.includes(q) || formula.includes(q) || clinic.includes(q);
     const matchStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && ['active','approved','prescribed','dispensed','processing'].includes(status)) ||
@@ -115,11 +161,43 @@ export default function DoctorRxSwitcherModal({
     } catch { return '—'; }
   };
 
+  const extractApis = (rx) => {
+    const list = [];
+    if (Array.isArray(rx.items) && rx.items.length > 0) {
+      rx.items.forEach(i => {
+        if (!i._isVehicleOrBase && !i.isVehicle) {
+          list.push({
+            name: i.name || i.drugName || i.activeIngredient || i.productName || 'Compound',
+            dose: i.dose || i.dosage || i.concentration || '',
+            vehicle: i.vehicle || i.base || rx.volume || ''
+          });
+        }
+      });
+    } else if (Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0) {
+      rx.prescriptionLines.forEach(i => {
+        list.push({
+          name: i.name || i.activeIngredient || i.productName || 'Compound',
+          dose: i.dose || i.dosage || i.concentration || '',
+          vehicle: i.vehicle || i.base || ''
+        });
+      });
+    } else if (Array.isArray(rx.compounds) && rx.compounds.length > 0) {
+      rx.compounds.forEach(i => {
+        list.push({
+          name: i.name || i.title || 'Compound',
+          dose: i.dose || i.concentration || '',
+          vehicle: ''
+        });
+      });
+    }
+    return list;
+  };
+
   const getFormulaSummary = (rx) => {
     if (rx.treatmentTitle) return rx.treatmentTitle;
-    const items = rx.items || rx.prescriptionLines || rx.compounds || [];
-    if (items.length > 0) {
-      return items.slice(0,2).map(i => i.name || i.drugName || i.activeIngredient || '').filter(Boolean).join(' + ') + (items.length > 2 ? ` +${items.length-2}` : '');
+    const apis = extractApis(rx);
+    if (apis.length > 0) {
+      return apis.slice(0, 2).map(i => i.name).join(' + ') + (apis.length > 2 ? ` +${apis.length - 2}` : '');
     }
     return rx.description || rx.program || (isEs ? 'Fórmula magistral' : 'Compounded formula');
   };
@@ -136,8 +214,8 @@ export default function DoctorRxSwitcherModal({
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '5vh',
-        paddingBottom: '5vh',
+        paddingTop: '4vh',
+        paddingBottom: '4vh',
         overflowY: 'auto'
       }}
     >
@@ -151,154 +229,432 @@ export default function DoctorRxSwitcherModal({
           boxShadow: '0 24px 64px rgba(60,64,67,0.3)',
           border: '1px solid #dadce0',
           width: '100%',
-          maxWidth: 680,
+          maxWidth: 780,
           margin: '0 16px',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '85vh',
+          maxHeight: '90vh',
           animation: 'gcpModalIn 0.2s cubic-bezier(0.4,0,0.2,1)'
         }}
       >
         <style>{`
           @keyframes gcpModalIn { from { opacity:0; transform:translateY(-12px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
           @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-          .rxsc:hover { background:#f8fafd !important; border-color:#1a73e8 !important; }
-          .rxsc--cur { background:#e8f0fe !important; border-color:#1a73e8 !important; }
-          .rxsf { padding:4px 12px; border-radius:16px; border:1px solid #dadce0; background:#fff; color:#5f6368; font-size:0.78rem; font-weight:500; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
-          .rxsf:hover { background:#f1f3f4; }
-          .rxsf--active { background:#e8f0fe !important; border-color:#1a73e8 !important; color:#1a73e8 !important; font-weight:600 !important; }
+          .gcp-rx-row { transition: background 0.15s ease, border-color 0.15s ease; border-bottom: 1px solid #e8eaed; }
+          .gcp-rx-row:hover { background: #f8fafd; }
+          .gcp-rx-row--cur { background: #e8f0fe !important; border-color: #1a73e8 !important; }
+          .rxsf { padding: 4px 12px; border-radius: 16px; border: 1px solid #dadce0; background: #fff; color: #5f6368; font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+          .rxsf:hover { background: #f1f3f4; }
+          .rxsf--active { background: #e8f0fe !important; border-color: #1a73e8 !important; color: #1a73e8 !important; font-weight: 600 !important; }
+          .gcp-action-btn { background: #ffffff; border: 1px solid #dadce0; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; font-weight: 600; color: #1a73e8; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+          .gcp-action-btn:hover { background: #1a73e8; color: #ffffff; border-color: #1a73e8; }
+          .gcp-action-btn-primary { background: #1a73e8; border: 1px solid #1a73e8; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; font-weight: 600; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+          .gcp-action-btn-primary:hover { background: #1557b0; border-color: #1557b0; }
         `}</style>
 
-        {/* Header */}
-        <div style={{ padding:'16px 20px 14px', borderBottom:'1px solid #e8eaed', display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexShrink:0 }}>
+        {/* Header (GCP Standard) */}
+        <div style={{ padding: '16px 20px 14px', borderBottom: '1px solid #e8eaed', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
           <div>
-            <h2 style={{ margin:0, fontSize:'1rem', fontWeight:600, color:'#202124' }}>
-              {isEs ? 'Mis Prescripciones' : 'My Prescriptions'}
-            </h2>
-            <p style={{ margin:'2px 0 0', fontSize:'0.78rem', color:'#5f6368' }}>
-              {isEs ? `${filtered.length} resultado${filtered.length!==1?'s':''} · Selecciona para navegar` : `${filtered.length} result${filtered.length!==1?'s':''} · Select to navigate`}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: '#202124' }}>
+                {isEs ? 'Mis Prescripciones' : 'My Prescriptions'}
+              </h2>
+              <span style={{ fontSize: '0.70rem', color: '#1a73e8', background: '#e8f0fe', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                {isEs ? 'Registro Clínico' : 'Clinical Register'}
+              </span>
+            </div>
+            <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#5f6368' }}>
+              {isEs 
+                ? `${filtered.length} prescripciones · Despliega para ver principios activos o selecciona para abrir el dossier` 
+                : `${filtered.length} prescriptions · Expand to review active ingredients or select to open dossier`}
             </p>
           </div>
-          <button type="button" onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#5f6368', padding:'4px', borderRadius:'4px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+          <button 
+            type="button" 
+            onClick={onClose} 
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5f6368', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+            title={isEs ? 'Cerrar' : 'Close'}
+          >
             <X size={18} />
           </button>
         </div>
 
-        {/* Search + Filters */}
-        <div style={{ padding:'12px 20px', borderBottom:'1px solid #e8eaed', display:'flex', flexDirection:'column', gap:10, flexShrink:0 }}>
-          <div style={{ position:'relative' }}>
-            <Search size={14} style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:'#80868b', pointerEvents:'none' }} />
+        {/* Search + Filters (GCP Standard) */}
+        <div style={{ padding: '12px 20px', borderBottom: '1px solid #e8eaed', display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0, background: '#fafbfc' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#80868b', pointerEvents: 'none' }} />
             <input
               ref={searchRef}
               type="text"
-              placeholder={isEs ? 'Buscar por paciente, ID o fórmula…' : 'Search by patient, ID or formula…'}
+              placeholder={isEs ? 'Buscar por paciente, ID de prescripción, activos o clínica…' : 'Search by patient, Rx ID, active ingredients or clinic…'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
-                width:'100%', height:36, padding:'0 10px 0 32px',
-                border:'1px solid #dadce0', borderRadius:'6px', fontSize:'0.85rem',
-                color:'#202124', background:'#f8f9fa', outline:'none',
-                boxSizing:'border-box', transition:'border-color 0.15s, box-shadow 0.15s'
+                width: '100%', height: 36, padding: '0 32px 0 32px',
+                border: '1px solid #dadce0', borderRadius: '6px', fontSize: '0.85rem',
+                color: '#202124', background: '#ffffff', outline: 'none',
+                boxSizing: 'border-box', transition: 'border-color 0.15s, box-shadow 0.15s'
               }}
-              onFocus={e => { e.target.style.borderColor='#1a73e8'; e.target.style.background='#fff'; e.target.style.boxShadow='0 0 0 2px rgba(26,115,232,0.15)'; }}
-              onBlur={e => { e.target.style.borderColor='#dadce0'; e.target.style.background='#f8f9fa'; e.target.style.boxShadow='none'; }}
+              onFocus={e => { e.target.style.borderColor = '#1a73e8'; e.target.style.boxShadow = '0 0 0 2px rgba(26,115,232,0.15)'; }}
+              onBlur={e => { e.target.style.borderColor = '#dadce0'; e.target.style.boxShadow = 'none'; }}
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#80868b', padding: 2 }}
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
-          <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             {STATUS_FILTERS.map(f => (
-              <button key={f.id} type="button" className={`rxsf${statusFilter===f.id?' rxsf--active':''}`} onClick={() => setStatusFilter(f.id)}>
-                {f.label}
+              <button 
+                key={f.id} 
+                type="button" 
+                className={`rxsf${statusFilter === f.id ? ' rxsf--active' : ''}`} 
+                onClick={() => setStatusFilter(f.id)}
+              >
+                <span>{f.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* List */}
-        <div style={{ overflowY:'auto', flexGrow:1, padding:'8px 12px 12px' }}>
+        {/* Table Headings (GCP Desktop Table Header) */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '32px 1.8fr 1fr 1fr 1.6fr 100px',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 20px',
+          background: '#f1f3f4',
+          borderBottom: '1px solid #dadce0',
+          fontSize: '0.72rem',
+          fontWeight: 700,
+          color: '#5f6368',
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+          flexShrink: 0
+        }}>
+          <div></div>
+          <div>{isEs ? 'Paciente & Código' : 'Patient & Rx Code'}</div>
+          <div>{isEs ? 'Fecha' : 'Date'}</div>
+          <div>{isEs ? 'Estado' : 'Status'}</div>
+          <div>{isEs ? 'Fórmula & Activos' : 'Formula & APIs'}</div>
+          <div style={{ textAlign: 'right' }}>{isEs ? 'Acción' : 'Action'}</div>
+        </div>
+
+        {/* List Body */}
+        <div style={{ overflowY: 'auto', flexGrow: 1, padding: 0 }}>
           {loading ? (
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, padding:'32px 0', color:'#5f6368', fontSize:'0.85rem' }}>
-              <Loader2 size={18} style={{ animation:'spin 1s linear infinite' }} />
-              {isEs ? 'Cargando prescripciones…' : 'Loading prescriptions…'}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '40px 0', color: '#5f6368', fontSize: '0.85rem' }}>
+              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: '#1a73e8' }} />
+              {isEs ? 'Cargando prescripciones médicas…' : 'Loading prescription records…'}
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ textAlign:'center', padding:'32px 0', color:'#80868b' }}>
-              <FileText size={32} style={{ marginBottom:8, opacity:0.4 }} />
-              <p style={{ margin:0, fontSize:'0.85rem', fontWeight:500 }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#80868b' }}>
+              <FileText size={36} style={{ marginBottom: 8, opacity: 0.35 }} />
+              <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, color: '#3c4043' }}>
                 {isEs ? 'No se encontraron prescripciones' : 'No prescriptions found'}
               </p>
-              <p style={{ margin:'4px 0 0', fontSize:'0.78rem' }}>
-                {isEs ? 'Intenta con otro término de búsqueda' : 'Try a different search term or filter'}
+              <p style={{ margin: '4px 0 0', fontSize: '0.78rem' }}>
+                {isEs ? 'Intenta con otro término de búsqueda o limpia los filtros' : 'Try a different search query or clear your active filters'}
               </p>
             </div>
           ) : (
-            <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+            <div>
               {filtered.map((rx) => {
                 const rxId = rx.id || rx.prescriptionNumber || '';
                 const isCurrent = rxId === currentRxId;
+                const isExpanded = Boolean(expandedRows[rxId]);
                 const statusMeta = getStatusMeta(rx.status || rx.state);
                 const patientName = rx.patientName || rx.patient?.name || (isEs ? 'Paciente' : 'Patient');
                 const formulaSummary = getFormulaSummary(rx);
+                const apis = extractApis(rx);
                 const createdAt = formatDate(rx.createdAt || rx.prescriptionDate);
+                const clinicName = rx.clinic || rx.clinicName || rx.treatingDoctor?.clinic || rx.doctor?.clinic || '';
+                const posologySummary = rx.structuredPosology?.summary || rx.dosageSchedule || rx.posology || '';
 
                 return (
-                  <a
-                    key={rxId}
-                    href={`/rx/${rxId}`}
-                    className={`rxsc${isCurrent?' rxsc--cur':''}`}
-                    onClick={(e) => { triggerHaptic('selection'); onClose(); e.preventDefault(); window.location.href = `/rx/${rxId}`; }}
-                    style={{
-                      display:'flex', alignItems:'center', gap:12,
-                      padding:'10px 12px', borderRadius:'8px',
-                      border:`1px solid ${isCurrent?'#1a73e8':'#e8eaed'}`,
-                      background: isCurrent ? '#e8f0fe' : '#ffffff',
-                      cursor:'pointer', textDecoration:'none',
-                      transition:'all 0.15s ease'
-                    }}
-                    tabIndex={0}
-                  >
-                    <div style={{ width:36, height:36, borderRadius:'8px', background: isCurrent?'#c5d9fc':'#f1f3f4', color: isCurrent?'#1a73e8':'#5f6368', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <FileText size={16} />
-                    </div>
+                  <div key={rxId} className={`gcp-rx-row${isCurrent ? ' gcp-rx-row--cur' : ''}`}>
+                    {/* Primary Row (First Level) */}
+                    <div 
+                      onClick={(e) => toggleRow(rxId, e)}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '32px 1.8fr 1fr 1fr 1.6fr 100px',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '10px 20px',
+                        cursor: 'pointer',
+                        userSelect: 'none'
+                      }}
+                    >
+                      {/* Accordion Chevron */}
+                      <button
+                        type="button"
+                        onClick={(e) => toggleRow(rxId, e)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: isExpanded ? '#1a73e8' : '#5f6368',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: 4,
+                          borderRadius: 4,
+                          transition: 'transform 0.15s ease'
+                        }}
+                        title={isExpanded ? (isEs ? 'Colapsar detalles' : 'Collapse details') : (isEs ? 'Expandir APIs' : 'Expand APIs')}
+                      >
+                        {isExpanded ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
+                      </button>
 
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                        <span style={{ fontWeight:600, fontSize:'0.88rem', color:'#202124', whiteSpace:'nowrap' }}>{patientName}</span>
-                        <span style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'2px 7px', borderRadius:'4px', background:statusMeta.bg, color:statusMeta.color, border:`1px solid ${statusMeta.border}`, fontSize:'0.68rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.04em' }}>
-                          <span style={{ width:5, height:5, borderRadius:'50%', background:statusMeta.color, flexShrink:0 }} />
+                      {/* Patient & Rx Code */}
+                      <div style={{ minWidth: 0, paddingRight: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 650, fontSize: '0.86rem', color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {patientName}
+                          </span>
+                          {isCurrent && (
+                            <span style={{ fontSize: '0.65rem', color: '#1a73e8', fontWeight: 700, background: '#c5d9fc', padding: '1px 6px', borderRadius: '4px' }}>
+                              {isEs ? 'ACTUAL' : 'CURRENT'}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                          <span style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace', background: '#f1f3f4', padding: '1px 5px', borderRadius: '3px' }}>
+                            #{rxId}
+                          </span>
+                          {clinicName && (
+                            <span style={{ fontSize: '0.70rem', color: '#80868b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
+                              · {clinicName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Date */}
+                      <div style={{ fontSize: '0.78rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Clock size={12} style={{ color: '#80868b', flexShrink: 0 }} />
+                        <span>{createdAt}</span>
+                      </div>
+
+                      {/* Status Badge (GCP Semantic) */}
+                      <div>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          background: statusMeta.bg,
+                          color: statusMeta.color,
+                          border: `1px solid ${statusMeta.border}`,
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.03em',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: statusMeta.color, flexShrink: 0 }} />
                           {statusMeta.label}
                         </span>
-                        {isCurrent && (
-                          <span style={{ fontSize:'0.68rem', color:'#1a73e8', fontWeight:600, background:'#c5d9fc', padding:'2px 7px', borderRadius:'4px' }}>
-                            {isEs ? 'ACTUAL' : 'CURRENT'}
+                      </div>
+
+                      {/* Formula & APIs Quick Pill */}
+                      <div style={{ minWidth: 0, paddingRight: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <FlaskConical size={12} style={{ color: '#1a73e8', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.76rem', color: '#3c4043', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {formulaSummary}
                           </span>
+                        </div>
+                        {apis.length > 0 && (
+                          <div style={{ fontSize: '0.68rem', color: '#1a73e8', marginTop: 1 }}>
+                            {apis.length} {isEs ? 'principios activos' : 'active ingredients'}
+                          </div>
                         )}
                       </div>
-                      <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:3, flexWrap:'wrap' }}>
-                        <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:'0.76rem', color:'#5f6368' }}>
-                          <FlaskConical size={11} />
-                          <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:220 }}>{formulaSummary}</span>
-                        </span>
-                        <span style={{ display:'flex', alignItems:'center', gap:4, fontSize:'0.76rem', color:'#80868b' }}>
-                          <Clock size={11} />
-                          {createdAt}
-                        </span>
-                        <span style={{ fontSize:'0.72rem', color:'#80868b', fontFamily:'monospace' }}>#{rxId}</span>
+
+                      {/* Action Button */}
+                      <div style={{ textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          className="gcp-action-btn-primary"
+                          onClick={(e) => handleNavigate(rxId, e)}
+                          title={isEs ? 'Abrir dossier clínico' : 'Open clinical dossier'}
+                        >
+                          <span>{isEs ? 'Detalle' : 'Detail'}</span>
+                          <ChevronRight size={13} />
+                        </button>
                       </div>
                     </div>
-                    <ChevronRight size={15} style={{ color:'#bdc1c6', flexShrink:0 }} />
-                  </a>
+
+                    {/* Expandable Master-Detail Panel (APIs & Clinical Summary) */}
+                    {isExpanded && (
+                      <div style={{
+                        padding: '12px 20px 16px 56px',
+                        background: '#f8fafd',
+                        borderTop: '1px dashed #dadce0',
+                        borderLeft: '3px solid #1a73e8',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 10
+                      }}>
+                        {/* APIs Breakdown */}
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                            <Pill size={13} style={{ color: '#1a73e8' }} />
+                            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                              {isEs ? 'Desglose de Principios Activos & Concentración' : 'Active Ingredients & Concentration'}
+                            </span>
+                            <span style={{ fontSize: '0.68rem', color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '8px', fontWeight: 600 }}>
+                              {apis.length} {apis.length === 1 ? 'API' : 'APIs'}
+                            </span>
+                          </div>
+
+                          {apis.length > 0 ? (
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                              gap: 6
+                            }}>
+                              {apis.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  style={{
+                                    background: '#ffffff',
+                                    border: '1px solid #dadce0',
+                                    borderRadius: '6px',
+                                    padding: '6px 10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 8
+                                  }}
+                                >
+                                  <div style={{ minWidth: 0 }}>
+                                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {item.name}
+                                    </div>
+                                    {item.vehicle && (
+                                      <div style={{ fontSize: '0.68rem', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {item.vehicle}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {item.dose && (
+                                    <span style={{
+                                      fontSize: '0.72rem',
+                                      fontWeight: 700,
+                                      color: '#1a73e8',
+                                      background: '#e8f0fe',
+                                      border: '1px solid #d2e3fc',
+                                      padding: '2px 7px',
+                                      borderRadius: '4px',
+                                      flexShrink: 0
+                                    }}>
+                                      {item.dose}
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '0.75rem', color: '#5f6368', fontStyle: 'italic', background: '#fff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #dadce0' }}>
+                              {formulaSummary}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Posology & Clinic Meta */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: 2 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                            {clinicName && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.74rem', color: '#5f6368' }}>
+                                <MapPin size={12} style={{ color: '#1a73e8' }} />
+                                <span>{clinicName}</span>
+                              </div>
+                            )}
+                            {posologySummary && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.74rem', color: '#5f6368' }}>
+                                <Clock size={12} style={{ color: '#0d9488' }} />
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
+                                  {posologySummary}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Quick Secondary Actions */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <button
+                              type="button"
+                              onClick={(e) => handleCopyLink(rxId, e)}
+                              style={{
+                                background: '#ffffff',
+                                border: '1px solid #dadce0',
+                                borderRadius: '4px',
+                                padding: '4px 8px',
+                                fontSize: '0.72rem',
+                                fontWeight: 500,
+                                color: '#5f6368',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                              title={isEs ? 'Copiar enlace permanente de la prescripción' : 'Copy permanent prescription URL'}
+                            >
+                              {copiedId === rxId ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
+                              <span>{copiedId === rxId ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar URL' : 'Copy URL')}</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="gcp-action-btn-primary"
+                              onClick={(e) => handleNavigate(rxId, e)}
+                              style={{ padding: '4px 10px', fontSize: '0.74rem' }}
+                            >
+                              <span>{isEs ? 'Abrir Dossier Completo →' : 'Open Full Dossier →'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div style={{ padding:'12px 20px', borderTop:'1px solid #e8eaed', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0, background:'#f8f9fa', borderRadius:'0 0 12px 12px' }}>
-          <span style={{ fontSize:'0.75rem', color:'#80868b' }}>
-            {isEs ? `${filtered.length} prescripción${filtered.length!==1?'es':''}` : `${filtered.length} prescription${filtered.length!==1?'s':''}`}
+        {/* Footer (GCP Standard) */}
+        <div style={{ padding: '12px 20px', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: '#f8f9fa', borderRadius: '0 0 12px 12px' }}>
+          <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 500 }}>
+            {isEs 
+              ? `${filtered.length} prescripción${filtered.length !== 1 ? 'es' : ''} disponible${filtered.length !== 1 ? 's' : ''}` 
+              : `${filtered.length} prescription${filtered.length !== 1 ? 's' : ''} available`}
           </span>
-          <a href="/rx/intake" style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:'0.78rem', color:'#1a73e8', fontWeight:500, textDecoration:'none' }} onClick={onClose}>
+          <a 
+            href="/rx/intake" 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: 5, 
+              fontSize: '0.78rem', 
+              color: '#1a73e8', 
+              fontWeight: 600, 
+              textDecoration: 'none',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              transition: 'background 0.15s'
+            }} 
+            onClick={onClose}
+          >
             <ExternalLink size={13} />
             {isEs ? 'Importar nueva prescripción' : 'Import new prescription'}
           </a>
