@@ -16,9 +16,11 @@ import {
   ChevronUp,
   Layers,
   Check,
+  FileText,
 } from 'lucide-react';
 import { searchAlgoliaProducts } from '@/services/algoliaSearch';
 import { getAllProducts } from '@/repositories/productRepository';
+import { getPeptideScientificData } from '@/utils/knownPeptideData';
 import { triggerHaptic } from '@/utils/haptics';
 
 // ── Google Cloud Clinical Category Classification ───────────────────────────
@@ -137,6 +139,90 @@ function formatProductSubtitle(item, isSpanish) {
   if (cat === 'compounding_material') return isSpanish ? 'Excipiente Estéril de Compounding' : 'Sterile Compounding Excipient';
   if (cat === 'peptide') return isSpanish ? 'Péptido Liofilizado de Investigación' : 'Lyophilized Research & Clinical Peptide';
   return item.category || (isSpanish ? 'Formulación Clínica' : 'Clinical Formulation');
+}
+
+// Format smart clinical specification badge (Dose, CAS, or Format) instead of redundant purity
+function formatProductClinicalBadge(item, isSpanish) {
+  // 1. Clinical Dosage / Concentration (highest operational value for clinicians: e.g. "10mg / Vial", "5mg/ml")
+  if (item.dosage && typeof item.dosage === 'string' && item.dosage.trim()) {
+    const d = item.dosage.trim();
+    if (d !== '—' && !d.toLowerCase().includes('consult') && d.length <= 28) {
+      return {
+        type: 'dosage',
+        text: d,
+        isMono: false,
+      };
+    }
+  }
+
+  // 2. Specific Clinical Format / Presentation (e.g. "Liofilizado", "Spray Nasal", "Capsules")
+  if (item.format || item.presentation) {
+    const f = (item.format || item.presentation).trim();
+    if (f && f.length <= 26) {
+      return {
+        type: 'format',
+        text: f,
+        isMono: false,
+      };
+    }
+  }
+
+  // 3. International CAS Chemical Registry Number (essential identifier for compounding APIs and reference standards)
+  const sciData = getPeptideScientificData(item.canonicalName || item.name || item.slug);
+  const cas = item.casNumber || item.cas || sciData?.casNumber;
+  if (cas && typeof cas === 'string' && cas.trim()) {
+    return {
+      type: 'cas',
+      text: `CAS ${cas.trim()}`,
+      isMono: true,
+    };
+  }
+
+  // 4. Meaningful clinical fallback based on category
+  const cat = (item.category || item.categoryId || '').toLowerCase();
+  const name = (item.canonicalName || item.name || '').toLowerCase();
+
+  if (name.includes('water') || cat.includes('compounding') || cat.includes('diluent')) {
+    return {
+      type: 'vehicle',
+      text: isSpanish ? 'Solvente Estéril' : 'Sterile Vehicle',
+      isMono: false,
+    };
+  }
+  if (cat.includes('raw_material') || cat.includes('api')) {
+    return {
+      type: 'api',
+      text: isSpanish ? 'Polvo API' : 'Pure API',
+      isMono: false,
+    };
+  }
+  if (cat.includes('clinical_supplies') || name.includes('pen')) {
+    return {
+      type: 'device',
+      text: isSpanish ? 'Dispositivo Pen' : 'Pen Device',
+      isMono: false,
+    };
+  }
+  if (cat.includes('aesthetic') || cat.includes('cosmetic')) {
+    return {
+      type: 'aesthetic',
+      text: isSpanish ? 'Uso Estético' : 'Aesthetic',
+      isMono: false,
+    };
+  }
+  if (cat.includes('peptide')) {
+    return {
+      type: 'peptide',
+      text: isSpanish ? 'Liofilizado' : 'Lyophilized',
+      isMono: false,
+    };
+  }
+
+  return {
+    type: 'monograph',
+    text: isSpanish ? 'Ficha Técnica' : 'Datasheet',
+    isMono: false,
+  };
 }
 
 export default function DatasheetQuickSearchModal({
@@ -685,7 +771,7 @@ export default function DatasheetQuickSearchModal({
                         const isCurrent = item.slug === currentSlug;
                         const name = item.canonicalName || item.name || item.displayName || 'Compound';
                         const subtitle = formatProductSubtitle(item, isSpanish);
-                        const purity = item.purity || '≥99.0% RP-HPLC';
+                        const clinicalBadge = formatProductClinicalBadge(item, isSpanish);
 
                         return (
                           <div
@@ -747,24 +833,30 @@ export default function DatasheetQuickSearchModal({
                               </div>
                             </div>
 
-                            {/* Purity & Arrow */}
+                            {/* Clinical Specification Chip & Arrow */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                               <span
                                 style={{
-                                  fontSize: '0.66rem',
+                                  fontSize: clinicalBadge.isMono ? '0.64rem' : '0.68rem',
+                                  fontFamily: clinicalBadge.isMono ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : 'inherit',
                                   fontWeight: 700,
-                                  padding: '2px 6px',
+                                  padding: '2px 8px',
                                   borderRadius: '4px',
-                                  background: '#f0fdf4',
-                                  border: '1px solid #bbf7d0',
-                                  color: '#16a34a',
+                                  backgroundColor: isSelected ? '#e0f2fe' : '#f1f5f9',
+                                  border: `1px solid ${isSelected ? '#bae6fd' : '#e2e8f0'}`,
+                                  color: isSelected ? '#0369a1' : '#334155',
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '3px',
+                                  gap: '4px',
+                                  letterSpacing: clinicalBadge.isMono ? '0.02em' : 'normal',
+                                  transition: 'all 0.12s ease',
                                 }}
                               >
-                                <ShieldCheck size={11} />
-                                <span>{purity}</span>
+                                {clinicalBadge.type === 'cas' && <FileText size={10} style={{ color: isSelected ? '#0284c7' : '#64748b' }} />}
+                                {clinicalBadge.type === 'dosage' && <Layers size={10} style={{ color: isSelected ? '#0284c7' : '#64748b' }} />}
+                                {clinicalBadge.type === 'vehicle' && <Droplet size={10} style={{ color: isSelected ? '#0284c7' : '#64748b' }} />}
+                                {clinicalBadge.type === 'api' && <FlaskConical size={10} style={{ color: isSelected ? '#0284c7' : '#64748b' }} />}
+                                <span>{clinicalBadge.text}</span>
                               </span>
 
                               <ArrowRight
