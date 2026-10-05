@@ -17,6 +17,7 @@ import {
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import StandardDrawer from '@/components/ui/StandardDrawer';
+import PatientExperienceHub from '@/components/prescription/PatientExperienceHub';
 
 export default function ShareIntakeWhatsAppModal({ isOpen, onClose, rx = null }) {
   const { user, userProfile } = useAuth();
@@ -455,6 +456,17 @@ export default function ShareIntakeWhatsAppModal({ isOpen, onClose, rx = null })
             </div>
           </div>
         </div>
+
+        {/* Clinical Privacy & Patient Experience Capabilities (GCP Disclosure Hub) */}
+        {shareMode === 'dossier' && rx && (
+          <PatientExperienceHub
+            rx={rx}
+            isPatientView={false}
+            lang={lang}
+            doctorPhone={rx?.doctor?.phone || ''}
+            patientPublicUrl={rxDossierUrl}
+          />
+        )}
 
         {/* GCP Form Input */}
         <div>

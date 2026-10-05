@@ -70,6 +70,7 @@ import PrescriptionBrochureModal from '@/components/prescription/PrescriptionBro
 import PrescriptionStatusQuickAction from '@/components/prescription/PrescriptionStatusQuickAction';
 import { resolveDoctorProfile, formatMedicalLicense } from '@/services/doctorDirectoryService';
 import DoctorRxSwitcherModal from '@/components/prescription/DoctorRxSwitcherModal';
+import PatientExperienceHub from '@/components/prescription/PatientExperienceHub';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -3942,28 +3943,20 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               {isPatientView ? (
                 /* ── PATIENT VIEW: Dedicated Doctor & Clinical Support Hub ── */
                 <>
-                  <div style={{
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '10px',
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
-                    <Stethoscope size={22} color="#1d4ed8" style={{ flexShrink: 0 }} />
-                    <div style={{ fontSize: '0.78rem', color: '#1e40af', lineHeight: 1.45 }}>
-                      <strong>{isEs ? 'Atención Médica y Seguimiento Clínico:' : 'Personalized Clinical Care:'}</strong>{' '}
-                      {isEs 
-                        ? 'Para cualquier consulta médica sobre la pauta de tratamiento, evolución esperada de 90 días o renovación de prescripción, puedes contactar directamente con tu médico prescriptor o su clínica.' 
-                        : 'For any clinical inquiries regarding your administration schedule, expected 90-day progress, or prescription renewals, contact your prescribing physician or clinical practice directly.'}
-                    </div>
-                  </div>
+                  <PatientExperienceHub
+                    rx={rx}
+                    isPatientView={true}
+                    lang={lang}
+                    doctorPhone={doctorPhone}
+                    patientPublicUrl={patientPublicUrl}
+                    onOpenQuotation={() => setShowAtlasQuotationModal(true)}
+                  />
 
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '16px'
+                    gap: '16px',
+                    marginTop: '8px'
                   }}>
                     {/* Physician & Licensed Practice Credentials */}
                     <div style={{
@@ -4036,12 +4029,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     }}>
                       <div>
                         <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
-                          {isEs ? 'Canales de Comunicación del Paciente' : 'Direct Patient Communication Channels'}
+                          {isEs ? 'Canales Directos con la Consulta' : 'Direct Practice Channels'}
                         </div>
                         <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.45 }}>
                           {isEs 
-                            ? 'Conéctate de forma segura con la consulta médica para resolver dudas de dosificación o coordinar visitas.' 
-                            : 'Connect securely with the medical practice to resolve dosage questions or arrange clinical follow-up.'}
+                            ? 'Conéctate de forma segura con la consulta médica para resolver dudas de dosificación o coordinar visitas presenciales.' 
+                            : 'Connect securely with the clinical team to clarify protocol timing or schedule follow-up appointments.'}
                         </div>
                       </div>
 
@@ -4131,28 +4124,19 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               ) : (
                 /* ── DOCTOR / ADMIN VIEW: Patient Communication & Mobile Sharing Hub ── */
                 <>
-                  <div style={{
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    borderRadius: '10px',
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
-                    <ShieldCheck size={22} color="#16a34a" style={{ flexShrink: 0 }} />
-                    <div style={{ fontSize: '0.78rem', color: '#166534', lineHeight: 1.45 }}>
-                      <strong>{isEs ? 'Seguridad Clínica y Privacidad del Paciente:' : 'Clinical Privacy & Patient Safety:'}</strong>{' '}
-                      {isEs 
-                        ? 'La vista del paciente muestra exclusivamente el modo de empleo, pasos diarios, horarios y contacto médico. Se ocultan los costes comerciales y especificaciones de laboratorio B2B.' 
-                        : 'The patient view displays strictly application instructions, daily routines, timing, and clinician contacts. Internal compounding costs and raw supplier logistics are withheld.'}
-                    </div>
-                  </div>
+                  <PatientExperienceHub
+                    rx={rx}
+                    isPatientView={false}
+                    lang={lang}
+                    doctorPhone={doctorPhone}
+                    patientPublicUrl={patientPublicUrl}
+                  />
 
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '16px'
+                    gap: '16px',
+                    marginTop: '8px'
                   }}>
                     {/* Column 1: QR & In-Clinic Scan */}
                     <div style={{

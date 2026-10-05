@@ -33,6 +33,7 @@ import notifier from '../../services/NotificationService';
 import BulkActionsBar from '../ui/BulkActionsBar';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { usePatientActions } from '../../hooks/usePatientActions';
+import { usePatientExport } from '../../hooks/usePatientExport';
 import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope, Layers } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import EntityLink from '../ui/EntityLink';
