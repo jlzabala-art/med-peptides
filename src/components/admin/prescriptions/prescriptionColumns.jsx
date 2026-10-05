@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
   Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
-  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase
+  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
@@ -273,10 +273,10 @@ export const getPrescriptionColumns = (options = {}) => {
               )}
             </div>
 
-            {/* Secondary line: Doctor + Clinic (Strict 1 line, native tooltips) */}
+            {/* Secondary line: Doctor Name */}
             <div style={{ 
-              fontSize: '0.80rem', 
-              color: '#5f6368', 
+              fontSize: '0.78rem', 
+              color: '#3c4043', 
               display: 'flex', 
               alignItems: 'center', 
               gap: '5px', 
@@ -284,7 +284,7 @@ export const getPrescriptionColumns = (options = {}) => {
               overflow: 'hidden',
               whiteSpace: 'nowrap'
             }}>
-              <Stethoscope size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+              <Stethoscope size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
               <span 
                 title={formattedDoc}
                 style={{ 
@@ -292,32 +292,38 @@ export const getPrescriptionColumns = (options = {}) => {
                   color: '#202124',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 1
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {formattedDoc}
               </span>
-              {clinicName && (
+            </div>
+
+            {/* Tertiary line: Clinic (On its own distinct line) */}
+            {clinicName && (
+              <div style={{ 
+                fontSize: '0.72rem', 
+                color: '#5f6368', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '4px', 
+                minWidth: 0,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap'
+              }}>
+                <Building2 size={11} color="#5f6368" style={{ flexShrink: 0 }} />
                 <span 
                   title={clinicName}
                   style={{ 
-                    fontSize: '0.70rem', 
-                    color: '#5f6368', 
-                    background: '#f1f3f4', 
-                    padding: '1px 5px', 
-                    borderRadius: '3px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '150px',
-                    flexShrink: 0
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {clinicName}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         );
       },
