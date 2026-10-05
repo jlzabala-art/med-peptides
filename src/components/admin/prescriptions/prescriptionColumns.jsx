@@ -140,64 +140,120 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'patient',
       header: 'Patient & Doctor',
-      width: '32%',
+      width: '31%',
       render: (rx) => {
         const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
         const doctor = rx.doctor?.name || rx.doctorName || '—';
+        const formattedDoc = formatDoctorName(doctor);
+        const clinicName = rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
         
         let multiPartLabel = null;
+        let multiPartTooltip = null;
         if (rx._isSessionGroup) {
           const count = rx._sessionCount || rx._sessionMembers?.length || 2;
-          multiPartLabel = `Multi-part · ${count} parts`;
+          multiPartLabel = `${count} parts`;
+          multiPartTooltip = `Multi-part prescription (${count} compounded formulations)`;
         } else if (rx.partNumber && rx.totalParts && rx.totalParts > 1) {
           multiPartLabel = `Part ${rx.partNumber}/${rx.totalParts}`;
+          multiPartTooltip = `Formulation part ${rx.partNumber} of ${rx.totalParts}`;
         } else if (rx.partNumber && rx.partNumber > 1) {
           multiPartLabel = `Part ${rx.partNumber}`;
+          multiPartTooltip = `Formulation part ${rx.partNumber}`;
         } else if (rx.isMultiPart && rx.totalParts && rx.totalParts > 1) {
-          multiPartLabel = `Multi-part (${rx.totalParts})`;
+          multiPartLabel = `${rx.totalParts} parts`;
+          multiPartTooltip = `Multi-part prescription (${rx.totalParts} parts)`;
         }
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minWidth: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0, overflow: 'hidden' }}>
+            {/* Primary line: Patient Name (Strict 1 line, native tooltip, copy icon) */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', minWidth: 0 }}>
               <div style={{ 
-                fontWeight: 600, 
-                color: '#202124', 
-                fontSize: '0.88rem', 
+                minWidth: 0,
+                flex: '1 1 auto',
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '6px',
-                minWidth: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+                overflow: 'hidden'
               }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{patient}</span>
+                <span 
+                  title={patient}
+                  style={{ 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    whiteSpace: 'nowrap',
+                    fontWeight: 600, 
+                    color: '#202124', 
+                    fontSize: '0.88rem'
+                  }}
+                >
+                  {patient}
+                </span>
                 {patientId && <CopyableId value={patientId} iconOnly={true} />}
               </div>
               {multiPartLabel && (
-                <span style={{
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  padding: '2px 7px',
-                  borderRadius: '12px',
-                  background: '#e6f4ea',
-                  color: '#137333',
-                  border: '1px solid #ceead6',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0
-                }}>
+                <span 
+                  title={multiPartTooltip}
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    padding: '1px 6px',
+                    borderRadius: '10px',
+                    background: '#e6f4ea',
+                    color: '#137333',
+                    border: '1px solid #ceead6',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                >
                   {multiPartLabel}
                 </span>
               )}
             </div>
-            <div style={{ fontSize: '0.80rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
-              <Stethoscope size={12} color="#5f6368" />
-              <span style={{ fontWeight: 500, color: '#202124' }}>{formatDoctorName(doctor)}</span>
-              {(rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null)) && (
-                <span style={{ fontSize: '0.70rem', color: '#5f6368', background: '#f1f3f4', padding: '1px 5px', borderRadius: '3px' }}>
-                  {rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || 'Arthregen Clinic'}
+
+            {/* Secondary line: Doctor + Clinic (Strict 1 line, native tooltips) */}
+            <div style={{ 
+              fontSize: '0.80rem', 
+              color: '#5f6368', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '5px', 
+              minWidth: 0,
+              overflow: 'hidden',
+              whiteSpace: 'nowrap'
+            }}>
+              <Stethoscope size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+              <span 
+                title={formattedDoc}
+                style={{ 
+                  fontWeight: 500, 
+                  color: '#202124',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 1
+                }}
+              >
+                {formattedDoc}
+              </span>
+              {clinicName && (
+                <span 
+                  title={clinicName}
+                  style={{ 
+                    fontSize: '0.70rem', 
+                    color: '#5f6368', 
+                    background: '#f1f3f4', 
+                    padding: '1px 5px', 
+                    borderRadius: '3px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '150px',
+                    flexShrink: 0
+                  }}
+                >
+                  {clinicName}
                 </span>
               )}
             </div>
@@ -208,34 +264,45 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'type',
       header: 'Program / Type',
-      width: '24%',
+      width: '22%',
       render: (rx) => {
         const typeInfo = classifyPrescription(rx);
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '0.74rem',
-              fontWeight: 600,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              background: typeInfo.badgeBg,
-              color: typeInfo.badgeColor,
-              border: `1px solid ${typeInfo.badgeBorder}`,
-              whiteSpace: 'nowrap',
-              width: 'fit-content'
-            }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0, overflow: 'hidden' }}>
+            <span 
+              title={`${typeInfo.label} — ${typeInfo.sublabel}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: typeInfo.badgeBg,
+                color: typeInfo.badgeColor,
+                border: `1px solid ${typeInfo.badgeBorder}`,
+                whiteSpace: 'nowrap',
+                width: 'fit-content',
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
               <span>{typeInfo.emoji}</span>
-              <span>{typeInfo.label}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{typeInfo.label}</span>
             </span>
-            <span style={{ 
-              fontSize: '0.72rem', 
-              color: '#5f6368', 
-              lineHeight: 1.35,
-              wordBreak: 'break-word'
-            }}>
+            <span 
+              title={typeInfo.sublabel}
+              style={{ 
+                fontSize: '0.72rem', 
+                color: '#5f6368', 
+                lineHeight: 1.35,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
               {typeInfo.sublabel}
             </span>
           </div>
@@ -245,7 +312,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'date',
       header: 'Date',
-      width: '11%',
+      width: '12%',
       render: (rx) => {
         const formatAnyDate = (val) => {
           if (!val) return null;
@@ -266,7 +333,10 @@ export const getPrescriptionColumns = (options = {}) => {
           || '—';
 
         return (
-          <div style={{ fontSize: '0.8125rem', color: '#5f6368', fontWeight: 500, whiteSpace: 'nowrap' }}>
+          <div 
+            title={dateStr}
+            style={{ fontSize: '0.8125rem', color: '#5f6368', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
             {dateStr}
           </div>
         );
@@ -275,7 +345,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'status',
       header: 'Status',
-      width: '13%',
+      width: '14%',
       render: (rx) => {
         if (rx._isSessionGroup) {
           const statuses = (rx._sessionMembers || []).map(m => normalizeRxStatus(m.status) || 'draft');
@@ -325,7 +395,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'action',
       header: 'Actions',
-      width: '20%',
+      width: '21%',
       align: 'right',
       sortable: false,
       render: (rx) => {

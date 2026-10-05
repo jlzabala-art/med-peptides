@@ -115,20 +115,23 @@ export async function POST(request) {
         updatedAt_ts: getTimestamp(record.updatedAt || record.createdAt)
       };
     } else if (indexName === 'prescriptions') {
-      const items = Array.isArray(record.items) ? record.items : [];
-      const productNames = items.map((i) => i.name || i.productName).filter(Boolean);
+      const rawLines = Array.isArray(record.items) && record.items.length > 0 
+        ? record.items 
+        : (Array.isArray(record.prescriptionLines) ? record.prescriptionLines : []);
+      const productNames = rawLines.map((i) => i.name || i.productName || i.title).filter(Boolean);
 
       formattedRecord = {
         objectID: targetId,
         id: targetId,
-        code: record.code || `RX-${targetId.slice(0, 6).toUpperCase()}`,
+        code: record.code || record.prescriptionCode || `RX-${targetId.slice(0, 6).toUpperCase()}`,
+        prescriptionCode: record.prescriptionCode || record.code || `RX-${targetId.slice(0, 6).toUpperCase()}`,
         patientName: record.patientName || record.patient?.name || '',
         patientId: record.patientId || '',
         doctorName: record.doctorName || record.doctor?.name || '',
         doctorId: record.doctorId || '',
         status: (record.status || 'pending').toLowerCase(),
         items: productNames,
-        itemCount: items.length,
+        itemCount: rawLines.length,
         total: Number(record.total || record.amount || 0),
         source: record.source || 'portal',
         createdAt_ts: getTimestamp(record.createdAt)

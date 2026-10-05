@@ -164,7 +164,7 @@ export default function FilterRow({
   onClearAll = null, 
   activeCount = 0, 
   className = '',
-  maxInlinePills = 2,
+  maxInlinePills = 4,
   resultCount
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

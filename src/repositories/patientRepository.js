@@ -34,6 +34,7 @@ import { db } from '../firebase';
 import { validatePatientWrite } from './patientWriteGuard';
 import { getCache, setCache, invalidateCache } from '../lib/cache';
 import { logPHIAccess, PHI_ACTIONS } from '../services/PHIAuditService';
+import { syncPatientToAlgolia, removeObjectFromAlgolia } from '../services/algoliaSyncService';
 import { withRetry } from './_resilience';
 import { logger } from '../utils/logger';
 
@@ -186,6 +187,10 @@ export const patientRepository = {
       });
     }
 
+    syncPatientToAlgolia({ ...cleanData, id: ref.id, role: 'patient' }).catch((err) => {
+      logger.warn('[patientRepository] Algolia sync create error:', err);
+    });
+
     return ref.id;
   },
 
@@ -264,6 +269,10 @@ export const patientRepository = {
         metadata: { operation: 'update', fieldsModified: Object.keys(cleanData) },
       });
     }
+
+    syncPatientToAlgolia({ ...cleanData, id: patientId, role: 'patient' }).catch((err) => {
+      logger.warn('[patientRepository] Algolia sync update error:', err);
+    });
   },
 
   /**
@@ -310,6 +319,10 @@ export const patientRepository = {
     } catch (syncErr) {
       logger.warn('[patientRepository.deletePatient] Customer SSOT archive sync warning:', syncErr);
     }
+
+    removeObjectFromAlgolia('atlas_patients', patientId).catch((err) => {
+      logger.warn('[patientRepository] Algolia sync delete error:', err);
+    });
   },
 
   /**

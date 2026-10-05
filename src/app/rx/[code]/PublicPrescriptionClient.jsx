@@ -48,6 +48,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
 import { db } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import CopyableId from '@/components/ui/CopyableId';
 import DocumentPreviewModal from '@/components/ui/DocumentPreviewModal';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PublicAtlasAIDrawer from '@/components/shared/PublicAtlasAIDrawer';
@@ -1947,9 +1948,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                         <span>{doctorName}</span>
                         {doctorLicense && (
-                          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '1px 5px', borderRadius: '3px' }}>
-                            Lic. {doctorLicense}
-                          </span>
+                          <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                            <CopyableId value={doctorLicense} displayValue={`Lic. ${doctorLicense}`} />
+                          </div>
                         )}
                       </div>
                       <div style={{ fontSize: '0.78rem', color: '#5f6368', lineHeight: 1.4 }}>

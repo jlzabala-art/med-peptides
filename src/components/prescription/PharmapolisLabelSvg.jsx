@@ -137,10 +137,12 @@ export default function PharmapolisLabelSvg({
     return ['Personalized Compounded Active Formula'];
   }, [labelData.apis, formula]);
 
+  const formulaLower = (formula || '').toLowerCase();
+  const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem');
   const vehicleName = labelData.vehicle?.name || 
-                      (formula.toLowerCase().includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
-                      (formula.toLowerCase().includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 
-                      (formula.toLowerCase().includes('pomade') || formula.toLowerCase().includes('pomada') || (widthMm === 100 && heightMm === 55) ? 'Compounded Topical Pomade Base (30 mL)' : 'Galenic Compounding Vehicle q.s.')));
+                      (isPomadeOrOintment ? 'Compounded Topical Pomade Base (30 g)' :
+                      (formulaLower.includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
+                      (formulaLower.includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 'Galenic Compounding Vehicle q.s.')));
 
   // ───────────────────────────────────────────────────────────────────────────
   // VARIANT 1: BACK LABEL WITH LARGE PROMINENT QR CODE (Reverso con QR)

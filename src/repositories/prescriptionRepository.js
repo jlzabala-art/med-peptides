@@ -19,6 +19,7 @@ import { normalizePrescription } from './mappers';
 import { validatePrescriptionWrite } from './prescriptionWriteGuard';
 import { getCache, setCache, invalidateCache } from '../lib/cache';
 import { trackPrescriptionCreated } from '../services/algoliaInsights';
+import { syncPrescriptionToAlgolia, removeObjectFromAlgolia } from '../services/algoliaSyncService';
 import { canTransitionTo } from '../schemas/transactionalStateMachine';
 import { ClinicalStateTransitionError } from '../errors/ClinicalErrors';
 import { logPHIAccess, PHI_ACTIONS } from '../services/PHIAuditService';
@@ -88,6 +89,10 @@ export const prescriptionRepository = {
 
     await updateDoc(doc(db, 'prescriptions', id), cleanData);
     this.invalidatePrescriptionCache(id);
+
+    syncPrescriptionToAlgolia({ ...cleanData, id }).catch((err) => {
+      logger.warn('[prescriptionRepository] Algolia sync update error:', err);
+    });
   },
 
   /**
@@ -119,6 +124,10 @@ export const prescriptionRepository = {
       });
     }
 
+    syncPrescriptionToAlgolia({ ...cleanData, id: ref.id }).catch((err) => {
+      logger.warn('[prescriptionRepository] Algolia sync create error:', err);
+    });
+
     return ref.id;
   },
 
@@ -145,6 +154,10 @@ export const prescriptionRepository = {
       { entityName: 'prescriptionRepository.deletePrescription' }
     );
     this.invalidatePrescriptionCache(id);
+
+    removeObjectFromAlgolia('prescriptions', id).catch((err) => {
+      logger.warn('[prescriptionRepository] Algolia sync delete error:', err);
+    });
   },
 
   /**
@@ -189,6 +202,10 @@ export const prescriptionRepository = {
         metadata: { from: currentStatus, to: targetStatus },
       });
     }
+
+    syncPrescriptionToAlgolia({ id, status: targetStatus }).catch((err) => {
+      logger.warn('[prescriptionRepository] Algolia sync status error:', err);
+    });
   },
 
   /**

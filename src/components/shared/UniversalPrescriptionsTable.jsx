@@ -894,37 +894,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       ]
     },
     {
-      key: 'doctor',
-      label: 'Doctor',
-      pluralLabel: 'Doctors',
-      multiSelect: false,
-      value: doctorFilter,
-      onChange: (val) => updateUrlParam('doctor', val),
-      options: doctorOptions
-    },
-    {
-      key: 'patient',
-      label: 'Patient',
-      pluralLabel: 'Patients',
-      multiSelect: false,
-      value: patientFilter,
-      onChange: (val) => updateUrlParam('patient', val),
-      options: patientOptions
-    },
-    {
-      key: 'source',
-      label: 'Source',
-      pluralLabel: 'Sources',
-      multiSelect: false,
-      value: sourceFilter,
-      onChange: (val) => updateUrlParam('source', val),
-      options: [
-        { label: 'All Sources', value: '' },
-        { label: '🧬 Imported (NutriGen / Fagron)', value: 'fagron' },
-        { label: '✏️ Manual Entry', value: 'manual' }
-      ]
-    },
-    {
       key: 'type',
       label: 'Program',
       pluralLabel: 'Programs',
@@ -957,8 +926,39 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         { label: 'Completed', value: 'completed' },
         { label: 'Cancelled', value: 'cancelled' }
       ]
+    },
+    {
+      key: 'doctor',
+      label: 'Doctor',
+      pluralLabel: 'Doctors',
+      multiSelect: false,
+      value: doctorFilter,
+      onChange: (val) => updateUrlParam('doctor', val),
+      options: doctorOptions
+    },
+    {
+      key: 'patient',
+      label: 'Patient',
+      pluralLabel: 'Patients',
+      multiSelect: false,
+      value: patientFilter,
+      onChange: (val) => updateUrlParam('patient', val),
+      options: patientOptions
+    },
+    {
+      key: 'source',
+      label: 'Source',
+      pluralLabel: 'Sources',
+      multiSelect: false,
+      value: sourceFilter,
+      onChange: (val) => updateUrlParam('source', val),
+      options: [
+        { label: 'All Sources', value: '' },
+        { label: '🧬 Imported (NutriGen / Fagron)', value: 'fagron' },
+        { label: '✏️ Manual Entry', value: 'manual' }
+      ]
     }
-  ], [rangeFilter, doctorFilter, patientFilter, sourceFilter, typeFilter, statusFilter, doctorOptions, patientOptions, updateUrlParam]);
+  ], [rangeFilter, typeFilter, statusFilter, doctorFilter, patientFilter, sourceFilter, doctorOptions, patientOptions, updateUrlParam]);
 
   const activeChips = useMemo(() => {
     const chips = [];
