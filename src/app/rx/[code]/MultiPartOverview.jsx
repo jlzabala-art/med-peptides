@@ -179,8 +179,11 @@ export default function MultiPartOverview({ formulations = [], onSelectPhase = n
                         {(f?.apis?.length || 0)} APIs · {f?.volume || '—'}
                       </span>
                     </div>
-                    {f.subtitle && <div style={{ fontSize: '0.76rem', color: GCP.muted, marginTop: 2 }}>{f.subtitle}</div>}
-                    {f.posology?.regimen && <div style={{ fontSize: '0.76rem', color: '#3c4043', marginTop: 2 }}><strong>Regimen:</strong> {f.posology.regimen}</div>}
+                    {f.posology?.regimen && (
+                      <div style={{ fontSize: '0.76rem', color: '#3c4043', marginTop: 2 }}>
+                        <strong>Regimen:</strong> {typeof f.posology.regimen === 'object' ? (f.posology.regimen.regimen || f.posology.regimen.summary || '') : String(f.posology.regimen)}
+                      </div>
+                    )}
                     <div style={{ marginTop: '4px', fontSize: '0.70rem', color: GCP.blue, fontWeight: 500 }}>
                       View Phase {i + 1} Details & Formulation →
                     </div>

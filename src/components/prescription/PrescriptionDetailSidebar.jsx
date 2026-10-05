@@ -365,7 +365,9 @@ export default function PrescriptionDetailSidebar({
                       }}>
                         <Clock size={12} color="#5f6368" style={{ flexShrink: 0, marginTop: '2px' }} />
                         <span style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>
-                          {form.posology.regimen}
+                          {typeof form.posology?.regimen === 'object' 
+                            ? (form.posology.regimen.regimen || form.posology.regimen.summary || '') 
+                            : String(form.posology?.regimen || '')}
                         </span>
                       </div>
                     )}

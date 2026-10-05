@@ -170,7 +170,10 @@ function getPosologyText(pos) {
   if (!pos) return '';
   if (typeof pos === 'string') return pos;
   if (typeof pos === 'object') {
-    return pos.regimen || pos.summary || pos.timing || pos.notes || pos.text || '';
+    const val = pos.regimen || pos.summary || pos.timing || pos.notes || pos.text || (Array.isArray(pos.steps) ? pos.steps[0] : '');
+    if (typeof val === 'string') return val;
+    if (val && typeof val === 'object') return getPosologyText(val);
+    return '';
   }
   return String(pos);
 }
@@ -773,10 +776,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         specs: ''
       };
 
+      const safeCustomPosology = getPosologyText(customPosology);
       let posologyObj = {
         title: '',
-        regimen: customPosology || '',
-        timing: '',
+        regimen: safeCustomPosology || '',
+        timing: (typeof customPosology === 'object' && customPosology?.timing) ? String(customPosology.timing) : '',
         duration: duration || rx.duration || '30 days',
         steps: []
       };
@@ -795,7 +799,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           : '100% Natural essential fatty acid vehicle enriched with patented TrichoTech™ phytocomplex. Restores scalp epidermal lipid barrier, balances sebum excretion, and shields follicular stem cells.';
         
         posologyObj.title = isEs ? 'Pauta de Higiene & Cuidado del Cuero Cabelludo' : 'Pre-Wash Scalp Care & Hygiene Regimen';
-        posologyObj.regimen = customPosology || (isEs ? '1–2 Veces por Semana (Tratamiento Pre-Lavado)' : '1–2 Times Weekly (Pre-Shampoo Treatment)');
+        posologyObj.regimen = safeCustomPosology || (isEs ? '1–2 Veces por Semana (Tratamiento Pre-Lavado)' : '1–2 Times Weekly (Pre-Shampoo Treatment)');
         posologyObj.timing = isEs ? '10–15 minutos antes de lavar el cabello' : '10–15 minutes before showering / washing hair';
         posologyObj.steps = [
           {
@@ -854,7 +858,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         posologyObj.title = isNutrigen 
           ? (isEs ? 'Pauta de Administración Diaria NutriGen™ (Cápsulas)' : 'NutriGen™ Daily Oral Capsule Administration Regimen')
           : (isEs ? 'Pauta de Administración Oral (Cápsulas)' : 'Oral Capsule Administration Regimen');
-        posologyObj.regimen = customPosology || (isEs ? '1 Cápsula Diaria por la Mañana con el Desayuno' : '1 Capsule Daily in the Morning with Breakfast');
+        posologyObj.regimen = safeCustomPosology || (isEs ? '1 Cápsula Diaria por la Mañana con el Desayuno' : '1 Capsule Daily in the Morning with Breakfast');
         posologyObj.timing = isEs ? 'Por la mañana con el desayuno y un vaso lleno de agua' : 'Morning with breakfast and a full glass of water';
         posologyObj.duration = duration || rx.duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)');
         posologyObj.steps = [
@@ -906,7 +910,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           ? 'Espuma de penetración rápida libre de propilenglicol con fitocomplejo TrichoTech™.'
           : 'Rapid-penetration, propylene glycol-free foam carrier formulated with TrichoTech™ phytocomplex.';
         posologyObj.title = isEs ? 'Pauta de Administración en Espuma' : 'Topical Foam Administration Protocol';
-        posologyObj.regimen = customPosology || (isEs ? '2 Pulsaciones Diarias' : '2 Pumps Daily');
+        posologyObj.regimen = safeCustomPosology || (isEs ? '2 Pulsaciones Diarias' : '2 Pumps Daily');
         posologyObj.timing = isEs ? 'Por la mañana o noche sobre cuero cabelludo seco' : 'Morning or evening onto dry scalp';
         posologyObj.steps = [
           {
@@ -937,7 +941,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           : '100% Alcohol-Free & Propylene Glycol-Free hydrophilic liposomal vehicle. Eliminates scalp dermatitis and contact erythema while optimizing follicle transdermal uptake.';
         
         posologyObj.title = isEs ? 'Pauta de Administración Nocturna' : 'Nightly Administration Regimen (Topical Solution)';
-        posologyObj.regimen = customPosology || (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)');
+        posologyObj.regimen = safeCustomPosology || (isEs ? '1.0 mL Nocturno Diario (4-5 Pulverizaciones)' : '1.0 mL Nightly (4-5 Sprays)');
         posologyObj.timing = isEs ? 'Cada noche antes de acostarse sobre cuero cabelludo limpio y seco' : 'Nightly at bedtime onto clean, dry scalp';
         posologyObj.steps = [
           {
@@ -1249,7 +1253,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       const title = rx.treatmentType || (isNutrigen ? (isEs ? 'Fórmula Magistral NutriGen (Cápsulas)' : 'NutriGen Supplementation Formulation') : (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Compounded Oral Formulation'));
       const routeText = rx.dispensingForm ? `${rx.dispensingForm} (Vía Oral)` : (isEs ? 'Vía Oral' : 'Oral Administration');
       const volText = rx.volume || (isEs ? '90 Cápsulas' : '90 Capsules');
-      const posologyText = rx.posology || (isEs ? '1 Cápsula Diaria' : '1 Capsule Daily');
+      const posologyText = getPosologyText(rx.posology) || (isEs ? '1 Cápsula Diaria' : '1 Capsule Daily');
 
       return [
         buildVehicleData({
@@ -1363,7 +1367,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         treatmentTitle: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'),
         route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
         volume: rx.volume || '100 mL',
-        customPosology: rx.posology || '',
+        customPosology: getPosologyText(rx.posology) || '',
         apis: solItems
       });
     }
@@ -1390,7 +1394,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         treatmentTitle: isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Capsules)',
         route: isEs ? 'Vía Oral' : 'Oral Administration',
         volume: rx.volume || (isEs ? '30 Cápsulas' : '30 Compounded Capsules'),
-        customPosology: rx.posology || (isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime'),
+        customPosology: getPosologyText(rx.posology) || (isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime'),
         apis: oralItems
       });
     }
@@ -3011,7 +3015,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     fontSize: '0.8rem',
                     fontWeight: 800
                   }}>
-                    {formulation.posology.regimen}
+                    {String(formulation.posology.regimen || '')}
                   </div>
                 </div>
 

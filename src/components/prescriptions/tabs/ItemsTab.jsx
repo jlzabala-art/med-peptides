@@ -361,7 +361,10 @@ export default function ItemsTab({ rx, products = [], onProductClick, onProtocol
           )}
           {rx.posology && (
             <div style={{ fontSize: '0.88rem', color: '#334155', lineHeight: 1.5 }}>
-              <strong style={{ color: '#0f172a' }}>Clinical Posology / Administration:</strong> {rx.posology}
+              <strong style={{ color: '#0f172a' }}>Clinical Posology / Administration:</strong>{' '}
+              {typeof rx.posology === 'object' 
+                ? (rx.posology.regimen || rx.posology.summary || rx.posology.timing || JSON.stringify(rx.posology)) 
+                : String(rx.posology)}
             </div>
           )}
         </div>

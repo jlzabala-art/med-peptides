@@ -174,7 +174,12 @@ export default function PrescriptionPosologyQrCard({ rx, onOpenPreview = null })
       formulaText += ` (${rx.structuredPosology.packLabel})`;
     }
   }
-  const posologyText = rx.structuredPosology?.summary || rx.posology || rx.dosageSchedule || 'Apply according to medical indication.';
+
+  const rawPos = rx.posology;
+  const safePosology = typeof rawPos === 'object' 
+    ? (rawPos?.regimen || rawPos?.summary || rawPos?.timing || (Array.isArray(rawPos?.steps) ? rawPos.steps[0] : ''))
+    : rawPos;
+  const posologyText = rx.structuredPosology?.summary || safePosology || rx.dosageSchedule || 'Apply according to medical indication.';
 
   const shareTextWhatsApp = encodeURIComponent(
     `*Atlas Health — Clinical Dossier & Medical Posology*\n` +
