@@ -67,6 +67,7 @@ import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import PrescriptionBrochureModal from '@/components/prescription/PrescriptionBrochureModal';
 import PrescriptionStatusQuickAction from '@/components/prescription/PrescriptionStatusQuickAction';
+import { resolveDoctorProfile } from '@/services/doctorDirectoryService';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
 const PUBLIC_RX_STYLES = `
@@ -291,7 +292,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const isCandidateMiguelAngel = Boolean(rawCandidate && String(rawCandidate.name || '').includes('Miguel Ángel'));
   const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateMiguelAngel);
 
-  const treatingDoc = hasTreatingDoctor ? rawCandidate : {};
+  // Auto-enrich treating doctor details from verified directory (specialty, clinic, phone, license, address)
+  const resolvedProfile = hasTreatingDoctor ? resolveDoctorProfile(rawCandidate) : null;
+  const treatingDoc = resolvedProfile || (hasTreatingDoctor ? rawCandidate : {});
   let rawDoctorName = treatingDoc.name || '';
   const isHaytham = String(rawDoctorName).toLowerCase().includes('haytham') || String(rawDoctorName).toLowerCase().includes('heytham');
 
@@ -306,7 +309,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     : (treatingDoc.address || '');
   const doctorPhone = isHaytham 
     ? '+971 4 346 6149' 
-    : (treatingDoc.phone || '');
+    : (treatingDoc.phone || treatingDoc.mobile || '');
   const doctorLicense = isHaytham 
     ? 'DHA-P-0319842' 
     : (treatingDoc.license || treatingDoc.licenseNumber || '');
@@ -2009,13 +2012,22 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           <span>📍 {doctorClinic ? `${doctorClinic}${doctorAddress ? ' · ' : ''}` : ''}{doctorAddress}</span>
                         </div>
                       )}
-                      {doctorPhone && (
-                        <div style={{ fontSize: '0.75rem', color: '#1a73e8', marginTop: '1px' }}>
-                          <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500 }}>
-                            📞 {doctorPhone}
-                          </a>
-                        </div>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '1px' }}>
+                        {doctorPhone && (
+                          <div style={{ fontSize: '0.75rem', color: '#1a73e8' }}>
+                            <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500 }}>
+                              📞 {doctorPhone}
+                            </a>
+                          </div>
+                        )}
+                        {treatingDoc.email && (
+                          <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>
+                            <a href={`mailto:${treatingDoc.email}`} style={{ color: '#5f6368', textDecoration: 'none' }}>
+                              ✉️ {treatingDoc.email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </>
                   ) : (
                     <div style={{

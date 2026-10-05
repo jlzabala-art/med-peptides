@@ -13,15 +13,29 @@ import {
   Phone
 } from 'lucide-react';
 import { serverCreateAtlasQuotationRequest } from '../../../actions/supplierRfqActions';
+import { resolveDoctorProfile } from '../../../services/doctorDirectoryService';
 import { toast } from 'react-hot-toast';
 
 export default function RequestAtlasQuotationModal({ rx, isOpen, onClose, onSuccess }) {
-  const [requesterName, setRequesterName] = useState(rx?.doctorName || rx?.doctor?.name || '');
-  const [requesterEmail, setRequesterEmail] = useState('');
-  const [requesterPhone, setRequesterPhone] = useState(rx?.doctor?.phone || '');
+  const initialDoctor = rx?.treatingDoctor || rx?.doctor || {};
+  const initialName = initialDoctor.name || rx?.doctorName || '';
+  const resolvedInitial = initialName ? resolveDoctorProfile(initialName) : null;
+
+  const [requesterName, setRequesterName] = useState(resolvedInitial?.name || initialName || '');
+  const [requesterEmail, setRequesterEmail] = useState(initialDoctor.email || resolvedInitial?.email || '');
+  const [requesterPhone, setRequesterPhone] = useState(initialDoctor.phone || initialDoctor.mobile || resolvedInitial?.phone || resolvedInitial?.mobile || '');
   const [notes, setNotes] = useState('Please provide compounding quotation.');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedReq, setSubmittedReq] = useState(null);
+
+  const handleRequesterNameChange = (nameVal) => {
+    setRequesterName(nameVal);
+    const resolved = resolveDoctorProfile(nameVal);
+    if (resolved) {
+      if (!requesterEmail && resolved.email) setRequesterEmail(resolved.email);
+      if (!requesterPhone && (resolved.phone || resolved.mobile)) setRequesterPhone(resolved.phone || resolved.mobile);
+    }
+  };
 
   if (!isOpen || !rx) return null;
 
@@ -114,10 +128,20 @@ export default function RequestAtlasQuotationModal({ rx, isOpen, onClose, onSucc
               }}>
                 <div style={{ fontWeight: 700 }}>Prescription: {code}</div>
                 <div style={{ color: '#3c4043', marginTop: '2px' }}>Patient: {patient}</div>
-                {formulations.length > 0 && (
+                {formulations.length > 0 ? (
                   <div style={{ marginTop: '6px', fontSize: '0.8rem', color: '#5f6368' }}>
-                    Formula: {formulations.map(f => f.title || f.vehicle || 'Vehicle').join(' + ')}
+                    Formula: {formulations.map(f => {
+                      if (typeof f === 'string') return f;
+                      const vName = typeof f.vehicle === 'object' && f.vehicle !== null ? (f.vehicle.name || f.vehicle.title) : f.vehicle;
+                      return f.title || f.name || vName || 'Compounded Formulation';
+                    }).filter(Boolean).join(' + ')}
                   </div>
+                ) : (
+                  (rx.formula || rx.medicationName || rx.title) && (
+                    <div style={{ marginTop: '6px', fontSize: '0.8rem', color: '#5f6368' }}>
+                      Formula: {rx.formula || rx.medicationName || rx.title}
+                    </div>
+                  )
                 )}
               </div>
 
@@ -128,9 +152,9 @@ export default function RequestAtlasQuotationModal({ rx, isOpen, onClose, onSucc
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Dr. Hanieh Erdmann / Prescribing Clinic"
+                  placeholder="e.g. Dr. Sezgin Cagatay / Hortman Clinics"
                   value={requesterName}
-                  onChange={(e) => setRequesterName(e.target.value)}
+                  onChange={(e) => handleRequesterNameChange(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '8px 12px',

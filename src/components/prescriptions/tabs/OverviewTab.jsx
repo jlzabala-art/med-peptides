@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ArrowUpRight, Stethoscope, Edit, Save, X, Building2, UserCheck, Search, ChevronDown } from '@/lib/icons';
 import { updatePrescription, fetchCareTeamUsers } from '../../../services/prescriptionsService';
+import { resolveDoctorProfile } from '../../../services/doctorDirectoryService';
 import notifier from '../../../services/NotificationService';
 import { toast } from 'react-hot-toast';
 import PrescriptionPosologyQrCard from '../PrescriptionPosologyQrCard';
@@ -301,15 +302,21 @@ export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescript
       };
 
       const cleanDocName = (doctorName || rx.doctorName || '').trim();
+      const resolvedDoc = cleanDocName ? resolveDoctorProfile(cleanDocName) : null;
+      const finalDocName = resolvedDoc ? resolvedDoc.name : cleanDocName;
+      const finalClinic = wholesellerName || (resolvedDoc?.clinic || rx.clinic || '');
+      const finalClinicName = wholesellerName || (resolvedDoc?.clinicName || rx.clinicName || '');
+
       const payload = {
-        doctorName: cleanDocName,
-        doctor: { ...(typeof rx.doctor === 'object' && rx.doctor !== null ? rx.doctor : {}), name: cleanDocName },
-        treatingDoctor: cleanDocName ? { ...(typeof rx.treatingDoctor === 'object' && rx.treatingDoctor !== null ? rx.treatingDoctor : {}), name: cleanDocName, clinic: wholesellerName || rx.clinic || '' } : null,
+        doctorName: finalDocName,
+        doctor: resolvedDoc || (cleanDocName ? { name: cleanDocName } : null),
+        treatingDoctor: resolvedDoc || (cleanDocName ? { name: cleanDocName } : null),
         hasTreatingDoctor: Boolean(cleanDocName),
         accountManager: accountManager || '',
-        wholesellerName: wholesellerName || '',
-        wholeseller: wholesellerName || '',
-        clinic: wholesellerName || rx.clinic || '',
+        wholesellerName: wholesellerName || (resolvedDoc?.clinic || ''),
+        wholeseller: wholesellerName || (resolvedDoc?.clinic || ''),
+        clinic: finalClinic,
+        clinicName: finalClinicName,
         timeline: [...(rx.timeline || []), newTimelineEvent],
         auditTrail: [...(rx.auditTrail || []), newAuditLog],
         updatedAt: new Date()
