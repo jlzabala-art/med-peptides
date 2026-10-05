@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { 
   X, 
   Search, 
@@ -17,12 +17,28 @@ import {
   Pill,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from 'lucide-react';
 import { db } from '@/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { triggerHaptic } from '@/utils/haptics';
 import { toast } from 'react-hot-toast';
+
+// ── Multi-Tier Cache Layer (0ms Instant Load) ─────────────────────────────────
+// Tier 1: In-memory module cache (survives component remounts within the SPA session)
+const _RX_RAM_CACHE = new Map();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+// Helper to safely extract string posology from either string, object, or undefined
+function getPosologyString(raw) {
+  if (!raw) return '';
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object') {
+    return raw.regimen || raw.summary || raw.timing || raw.notes || (Array.isArray(raw.steps) ? raw.steps[0] : '') || '';
+  }
+  return String(raw);
+}
 
 export default function DoctorRxSwitcherModal({
   isOpen,
@@ -33,6 +49,7 @@ export default function DoctorRxSwitcherModal({
 }) {
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isBackgroundUpdating, setIsBackgroundUpdating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [expandedRows, setExpandedRows] = useState({});
@@ -68,36 +85,115 @@ export default function DoctorRxSwitcherModal({
     { id: 'completed', label: isEs ? 'Completadas' : 'Completed' },
   ];
 
-  const fetchPrescriptions = useCallback(async () => {
-    setLoading(true);
+  // ── Multi-Tier Fetch (RAM -> localStorage -> Firestore SWR) ────────────────
+  const fetchPrescriptions = useCallback(async (forceRefresh = false) => {
+    const normalizedDoctor = (doctorName || '').toLowerCase().replace('dr. ', '').replace('dr ', '').trim();
+    const cacheKey = `rx_list_${normalizedDoctor || 'all'}`;
+    const storageKey = `atlas_rx_cache_${normalizedDoctor || 'all'}`;
+
+    let hasCachedData = false;
+    const now = Date.now();
+
+    // 1. Tier 1: Check Memory RAM Cache (Instant 0ms)
+    if (!forceRefresh) {
+      const inRam = _RX_RAM_CACHE.get(cacheKey);
+      if (inRam && (now - inRam.timestamp < CACHE_TTL_MS)) {
+        setPrescriptions(inRam.data);
+        hasCachedData = true;
+      } else if (typeof window !== 'undefined') {
+        // 2. Tier 2: Check localStorage Cache (Instant ~1ms)
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.data) && parsed.data.length > 0) {
+              setPrescriptions(parsed.data);
+              hasCachedData = true;
+              // Warm up RAM cache
+              _RX_RAM_CACHE.set(cacheKey, { data: parsed.data, timestamp: parsed.timestamp || now });
+            }
+          }
+        } catch (e) {
+          console.warn('DoctorRxSwitcher: localStorage read error', e);
+        }
+      }
+    }
+
+    // If no cache was found, show full loader. If cached data was loaded, revalidate quietly in background!
+    if (!hasCachedData) {
+      setLoading(true);
+    } else {
+      setIsBackgroundUpdating(true);
+    }
+
+    // 3. Tier 3: Firestore Query (Background SWR)
     try {
       const prescRef = collection(db, 'prescriptions');
       const q1 = query(prescRef, orderBy('createdAt', 'desc'), limit(60));
       const snap = await getDocs(q1);
       const results = [];
-      const normalizedDoctor = (doctorName || '').toLowerCase().replace('dr. ', '').replace('dr ', '');
+
       snap.forEach((doc) => {
         const d = doc.data();
         const dName = (
           d.treatingDoctor?.name || d.doctorName || d.doctor?.name || d.prescribingDoctor || ''
         ).toLowerCase();
+
         if (!normalizedDoctor || dName.includes(normalizedDoctor)) {
-          results.push({ id: doc.id, ...d });
+          // Normalize and project lightweight clean record
+          results.push({
+            id: doc.id,
+            prescriptionNumber: d.prescriptionNumber || '',
+            code: d.code || '',
+            patientName: d.patientName || d.patient?.name || '',
+            patient: d.patient ? { name: d.patient.name, alias: d.patient.alias } : null,
+            status: d.status || d.state || 'active',
+            state: d.state || d.status || 'active',
+            treatmentTitle: d.treatmentTitle || d.description || d.program || '',
+            clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || '',
+            clinicName: d.clinicName || d.clinic || '',
+            createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
+            items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
+            prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
+            compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
+            // Defensive sanitization: ensure string posology to prevent React Error #31
+            posology: getPosologyString(d.posology),
+            structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
+            treatingDoctor: d.treatingDoctor ? { name: d.treatingDoctor.name, clinic: d.treatingDoctor.clinic } : null,
+            doctorName: d.doctorName || '',
+            description: d.description || ''
+          });
         }
       });
+
       setPrescriptions(results);
+
+      // Save to Tier 1 RAM Cache
+      _RX_RAM_CACHE.set(cacheKey, { data: results, timestamp: Date.now() });
+
+      // Save to Tier 2 localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify({ data: results, timestamp: Date.now() }));
+        } catch {
+          // Ignore potential localStorage quota errors
+        }
+      }
     } catch (err) {
       console.warn('DoctorRxSwitcher: fetch failed', err);
-      setPrescriptions([]);
+      if (!hasCachedData) {
+        setPrescriptions([]);
+      }
     } finally {
       setLoading(false);
+      setIsBackgroundUpdating(false);
     }
   }, [doctorName]);
 
   useEffect(() => {
     if (isOpen) {
       fetchPrescriptions();
-      setTimeout(() => searchRef.current?.focus(), 120);
+      setTimeout(() => searchRef.current?.focus(), 80);
     } else {
       setSearchQuery('');
       setStatusFilter('all');
@@ -120,43 +216,77 @@ export default function DoctorRxSwitcherModal({
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleCopyLink = (id, e) => {
-    if (e) e.stopPropagation();
+  const handleCopyLink = (code, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     triggerHaptic('selection');
-    const url = `${window.location.origin}/rx/${id}`;
+    const url = `${window.location.origin}/rx/${encodeURIComponent(code)}`;
     navigator.clipboard?.writeText(url);
-    setCopiedId(id);
+    setCopiedId(code);
     toast.success(isEs ? 'Enlace permanente copiado ✓' : 'Permanent Rx link copied ✓');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleNavigate = (id, e) => {
-    if (e) e.stopPropagation();
+  const handleNavigate = (rx, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     triggerHaptic('selection');
+    const targetCode = rx.prescriptionNumber || rx.code || rx.id;
+    if (!targetCode) return;
+
+    // Check if user is already on this prescription
+    const cleanCurrent = (currentRxId || '').toUpperCase().replace(/^RX-/, '').trim();
+    const cleanTarget = String(targetCode).toUpperCase().replace(/^RX-/, '').trim();
+    if (cleanCurrent && cleanTarget && cleanCurrent === cleanTarget) {
+      toast.success(isEs ? 'Ya estás viendo este dossier' : 'Already viewing this prescription dossier');
+      onClose();
+      return;
+    }
+
     onClose();
-    window.location.href = `/rx/${id}`;
+    window.location.assign(`/rx/${encodeURIComponent(targetCode)}`);
   };
 
   const filtered = prescriptions.filter((rx) => {
     const status = String(rx.status || rx.state || '').toLowerCase();
     const name = (rx.patientName || rx.patient?.name || '').toLowerCase();
-    const id = String(rx.id || rx.prescriptionNumber || '').toLowerCase();
-    const formula = String(rx.treatmentTitle || rx.description || rx.program || '').toLowerCase();
+    const id = String(rx.id || '').toLowerCase();
+    const prescNum = String(rx.prescriptionNumber || '').toLowerCase();
+    const code = String(rx.code || '').toLowerCase();
+    const formula = String(rx.treatmentTitle || rx.description || '').toLowerCase();
     const clinic = String(rx.clinic || rx.clinicName || rx.treatingDoctor?.clinic || '').toLowerCase();
     const q = searchQuery.toLowerCase();
-    const matchSearch = !q || name.includes(q) || id.includes(q) || formula.includes(q) || clinic.includes(q);
+    
+    const matchSearch = !q || 
+      name.includes(q) || 
+      id.includes(q) || 
+      prescNum.includes(q) || 
+      code.includes(q) || 
+      formula.includes(q) || 
+      clinic.includes(q);
+
     const matchStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && ['active','approved','prescribed','dispensed','processing'].includes(status)) ||
       (statusFilter === 'pending' && ['pending','awaiting payment','draft'].includes(status)) ||
       (statusFilter === 'completed' && ['completed','delivered'].includes(status));
+
     return matchSearch && matchStatus;
   });
 
   const formatDate = (ts) => {
     if (!ts) return '—';
     try {
-      const d = ts?.toDate ? ts.toDate() : new Date(ts);
+      let d;
+      if (typeof ts === 'number') d = new Date(ts);
+      else if (ts?.toDate) d = ts.toDate();
+      else if (ts?.seconds) d = new Date(ts.seconds * 1000);
+      else d = new Date(ts);
+      if (isNaN(d.getTime())) return '—';
       return d.toLocaleDateString(isEs ? 'es-ES' : 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
     } catch { return '—'; }
   };
@@ -199,8 +329,11 @@ export default function DoctorRxSwitcherModal({
     if (apis.length > 0) {
       return apis.slice(0, 2).map(i => i.name).join(' + ') + (apis.length > 2 ? ` +${apis.length - 2}` : '');
     }
-    return rx.description || rx.program || (isEs ? 'Fórmula magistral' : 'Compounded formula');
+    return rx.description || (isEs ? 'Fórmula magistral' : 'Compounded formula');
   };
+
+  // Normalized current Rx identifier for 100% accurate match
+  const cleanCurrentCode = (currentRxId || '').toUpperCase().replace(/^RX-/, '').trim();
 
   return (
     <div
@@ -208,14 +341,14 @@ export default function DoctorRxSwitcherModal({
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
       style={{
         position: 'fixed', inset: 0,
-        background: 'rgba(32,33,36,0.55)',
-        backdropFilter: 'blur(3px)',
+        background: 'rgba(32,33,36,0.60)',
+        backdropFilter: 'blur(4px)',
         zIndex: 10000,
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingTop: '4vh',
-        paddingBottom: '4vh',
+        paddingTop: '3.5vh',
+        paddingBottom: '3.5vh',
         overflowY: 'auto'
       }}
     >
@@ -229,16 +362,16 @@ export default function DoctorRxSwitcherModal({
           boxShadow: '0 24px 64px rgba(60,64,67,0.3)',
           border: '1px solid #dadce0',
           width: '100%',
-          maxWidth: 780,
+          maxWidth: 880, // Roomy GCP Dialog
           margin: '0 16px',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '90vh',
+          maxHeight: '92vh',
           animation: 'gcpModalIn 0.2s cubic-bezier(0.4,0,0.2,1)'
         }}
       >
         <style>{`
-          @keyframes gcpModalIn { from { opacity:0; transform:translateY(-12px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+          @keyframes gcpModalIn { from { opacity:0; transform:translateY(-10px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
           @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
           .gcp-rx-row { transition: background 0.15s ease, border-color 0.15s ease; border-bottom: 1px solid #e8eaed; }
           .gcp-rx-row:hover { background: #f8fafd; }
@@ -246,27 +379,33 @@ export default function DoctorRxSwitcherModal({
           .rxsf { padding: 4px 12px; border-radius: 16px; border: 1px solid #dadce0; background: #fff; color: #5f6368; font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
           .rxsf:hover { background: #f1f3f4; }
           .rxsf--active { background: #e8f0fe !important; border-color: #1a73e8 !important; color: #1a73e8 !important; font-weight: 600 !important; }
-          .gcp-action-btn { background: #ffffff; border: 1px solid #dadce0; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; font-weight: 600; color: #1a73e8; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
-          .gcp-action-btn:hover { background: #1a73e8; color: #ffffff; border-color: #1a73e8; }
-          .gcp-action-btn-primary { background: #1a73e8; border: 1px solid #1a73e8; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; font-weight: 600; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
-          .gcp-action-btn-primary:hover { background: #1557b0; border-color: #1557b0; }
+          .gcp-action-btn-primary { background: #1a73e8; border: 1px solid #1a73e8; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; font-weight: 600; color: #ffffff !important; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; text-decoration: none; box-sizing: border-box; }
+          .gcp-action-btn-primary:hover { background: #1557b0; border-color: #1557b0; color: #ffffff !important; }
+          .gcp-action-btn-secondary { background: #ffffff; border: 1px solid #dadce0; border-radius: 6px; padding: 5px 12px; font-size: 0.78rem; font-weight: 600; color: #1a73e8 !important; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; text-decoration: none; box-sizing: border-box; }
+          .gcp-action-btn-secondary:hover { background: #e8f0fe; border-color: #1a73e8; }
         `}</style>
 
         {/* Header (GCP Standard) */}
-        <div style={{ padding: '16px 20px 14px', borderBottom: '1px solid #e8eaed', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
+        <div style={{ padding: '16px 22px 14px', borderBottom: '1px solid #e8eaed', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: '#202124' }}>
+              <h2 style={{ margin: 0, fontSize: '1.08rem', fontWeight: 600, color: '#202124' }}>
                 {isEs ? 'Mis Prescripciones' : 'My Prescriptions'}
               </h2>
               <span style={{ fontSize: '0.70rem', color: '#1a73e8', background: '#e8f0fe', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
                 {isEs ? 'Registro Clínico' : 'Clinical Register'}
               </span>
+              {isBackgroundUpdating && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.68rem', color: '#80868b' }}>
+                  <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                  {isEs ? 'Sincronizando…' : 'Syncing…'}
+                </span>
+              )}
             </div>
             <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#5f6368' }}>
               {isEs 
-                ? `${filtered.length} prescripciones · Despliega para ver principios activos o selecciona para abrir el dossier` 
-                : `${filtered.length} prescriptions · Expand to review active ingredients or select to open dossier`}
+                ? `${filtered.length} prescripciones · Despliega para ver principios activos o pulsa Detalle para abrir el dossier` 
+                : `${filtered.length} prescriptions · Expand to review active ingredients or click Detail to open dossier`}
             </p>
           </div>
           <button 
@@ -280,7 +419,7 @@ export default function DoctorRxSwitcherModal({
         </div>
 
         {/* Search + Filters (GCP Standard) */}
-        <div style={{ padding: '12px 20px', borderBottom: '1px solid #e8eaed', display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0, background: '#fafbfc' }}>
+        <div style={{ padding: '12px 22px', borderBottom: '1px solid #e8eaed', display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0, background: '#fafbfc' }}>
           <div style={{ position: 'relative' }}>
             <Search size={15} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#80868b', pointerEvents: 'none' }} />
             <input
@@ -322,13 +461,13 @@ export default function DoctorRxSwitcherModal({
           </div>
         </div>
 
-        {/* Table Headings (GCP Desktop Table Header) */}
+        {/* Table Headings (GCP Desktop Table Header - Adjusted for Zero Overlap) */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '32px 1.8fr 1fr 1fr 1.6fr 100px',
+          gridTemplateColumns: '32px 2.3fr 0.85fr 0.9fr 1.65fr 105px',
           alignItems: 'center',
-          gap: 8,
-          padding: '8px 20px',
+          gap: 10,
+          padding: '8px 22px',
           background: '#f1f3f4',
           borderBottom: '1px solid #dadce0',
           fontSize: '0.72rem',
@@ -348,14 +487,14 @@ export default function DoctorRxSwitcherModal({
 
         {/* List Body */}
         <div style={{ overflowY: 'auto', flexGrow: 1, padding: 0 }}>
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '40px 0', color: '#5f6368', fontSize: '0.85rem' }}>
+          {loading && prescriptions.length === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '48px 0', color: '#5f6368', fontSize: '0.85rem' }}>
               <Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: '#1a73e8' }} />
               {isEs ? 'Cargando prescripciones médicas…' : 'Loading prescription records…'}
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#80868b' }}>
-              <FileText size={36} style={{ marginBottom: 8, opacity: 0.35 }} />
+            <div style={{ textAlign: 'center', padding: '48px 20px', color: '#80868b' }}>
+              <FileText size={38} style={{ marginBottom: 8, opacity: 0.35 }} />
               <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 600, color: '#3c4043' }}>
                 {isEs ? 'No se encontraron prescripciones' : 'No prescriptions found'}
               </p>
@@ -366,28 +505,45 @@ export default function DoctorRxSwitcherModal({
           ) : (
             <div>
               {filtered.map((rx) => {
-                const rxId = rx.id || rx.prescriptionNumber || '';
-                const isCurrent = rxId === currentRxId;
-                const isExpanded = Boolean(expandedRows[rxId]);
+                const targetCode = rx.prescriptionNumber || rx.code || rx.id;
+                const cleanRowId = String(rx.id || '').toUpperCase().replace(/^RX-/, '').trim();
+                const cleanRowCode = String(rx.code || '').toUpperCase().replace(/^RX-/, '').trim();
+                const cleanRowPrescNum = String(rx.prescriptionNumber || '').toUpperCase().replace(/^RX-/, '').trim();
+
+                const isCurrent = Boolean(
+                  cleanCurrentCode && (
+                    cleanCurrentCode === cleanRowId ||
+                    cleanCurrentCode === cleanRowCode ||
+                    cleanCurrentCode === cleanRowPrescNum
+                  )
+                );
+
+                const isExpanded = Boolean(expandedRows[rx.id]);
                 const statusMeta = getStatusMeta(rx.status || rx.state);
                 const patientName = rx.patientName || rx.patient?.name || (isEs ? 'Paciente' : 'Patient');
                 const formulaSummary = getFormulaSummary(rx);
                 const apis = extractApis(rx);
-                const createdAt = formatDate(rx.createdAt || rx.prescriptionDate);
-                const clinicName = rx.clinic || rx.clinicName || rx.treatingDoctor?.clinic || rx.doctor?.clinic || '';
-                const posologySummary = rx.structuredPosology?.summary || rx.dosageSchedule || rx.posology || '';
+                const createdAt = formatDate(rx.createdAt);
+                const clinicName = rx.clinic || rx.clinicName || rx.treatingDoctor?.clinic || '';
+                
+                // Safe string conversion for posology to prevent React Error #31
+                const posologySummary = getPosologyString(rx.structuredPosology?.summary) || 
+                                        getPosologyString(rx.dosageSchedule) || 
+                                        getPosologyString(rx.posology);
+
+                const displayCode = rx.prescriptionNumber || (rx.code ? (rx.code.startsWith('RX-') ? rx.code : `RX-${rx.code}`) : rx.id);
 
                 return (
-                  <div key={rxId} className={`gcp-rx-row${isCurrent ? ' gcp-rx-row--cur' : ''}`}>
+                  <div key={rx.id} className={`gcp-rx-row${isCurrent ? ' gcp-rx-row--cur' : ''}`}>
                     {/* Primary Row (First Level) */}
                     <div 
-                      onClick={(e) => toggleRow(rxId, e)}
+                      onClick={(e) => toggleRow(rx.id, e)}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: '32px 1.8fr 1fr 1fr 1.6fr 100px',
+                        gridTemplateColumns: '32px 2.3fr 0.85fr 0.9fr 1.65fr 105px',
                         alignItems: 'center',
-                        gap: 8,
-                        padding: '10px 20px',
+                        gap: 10,
+                        padding: '10px 22px',
                         cursor: 'pointer',
                         userSelect: 'none'
                       }}
@@ -395,7 +551,7 @@ export default function DoctorRxSwitcherModal({
                       {/* Accordion Chevron */}
                       <button
                         type="button"
-                        onClick={(e) => toggleRow(rxId, e)}
+                        onClick={(e) => toggleRow(rx.id, e)}
                         style={{
                           background: 'none',
                           border: 'none',
@@ -413,32 +569,58 @@ export default function DoctorRxSwitcherModal({
                         {isExpanded ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
                       </button>
 
-                      {/* Patient & Rx Code */}
-                      <div style={{ minWidth: 0, paddingRight: 8 }}>
+                      {/* Patient & Rx Code (Zero Overlap GCP Design) */}
+                      <div style={{ minWidth: 0, paddingRight: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                           <span style={{ fontWeight: 650, fontSize: '0.86rem', color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {patientName}
                           </span>
                           {isCurrent && (
-                            <span style={{ fontSize: '0.65rem', color: '#1a73e8', fontWeight: 700, background: '#c5d9fc', padding: '1px 6px', borderRadius: '4px' }}>
+                            <span style={{ fontSize: '0.64rem', color: '#1a73e8', fontWeight: 700, background: '#c5d9fc', padding: '1px 6px', borderRadius: '4px', flexShrink: 0 }}>
                               {isEs ? 'ACTUAL' : 'CURRENT'}
                             </span>
                           )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                          <span style={{ fontSize: '0.70rem', color: '#5f6368', fontFamily: 'monospace', background: '#f1f3f4', padding: '1px 5px', borderRadius: '3px' }}>
-                            #{rxId}
+                        {/* Monospace Pill + Clinic Name with clean separation and wrapping */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, flexWrap: 'wrap', minWidth: 0 }}>
+                          <span style={{ 
+                            fontSize: '0.68rem', 
+                            color: '#3c4043', 
+                            fontFamily: 'SFMono-Regular, Consolas, Menlo, monospace', 
+                            background: '#f1f3f4', 
+                            border: '1px solid #dadce0',
+                            padding: '1px 6px', 
+                            borderRadius: '4px',
+                            maxWidth: 145,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0
+                          }} title={displayCode}>
+                            #{displayCode}
                           </span>
                           {clinicName && (
-                            <span style={{ fontSize: '0.70rem', color: '#80868b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
-                              · {clinicName}
+                            <span style={{ 
+                              fontSize: '0.70rem', 
+                              color: '#5f6368', 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis', 
+                              whiteSpace: 'nowrap', 
+                              maxWidth: 135,
+                              flexShrink: 1,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 3
+                            }} title={clinicName}>
+                              <span style={{ color: '#9aa0a6' }}>•</span>
+                              {clinicName}
                             </span>
                           )}
                         </div>
                       </div>
 
                       {/* Date */}
-                      <div style={{ fontSize: '0.78rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ fontSize: '0.78rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                         <Clock size={12} style={{ color: '#80868b', flexShrink: 0 }} />
                         <span>{createdAt}</span>
                       </div>
@@ -466,7 +648,7 @@ export default function DoctorRxSwitcherModal({
                       </div>
 
                       {/* Formula & APIs Quick Pill */}
-                      <div style={{ minWidth: 0, paddingRight: 8 }}>
+                      <div style={{ minWidth: 0, paddingRight: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                           <FlaskConical size={12} style={{ color: '#1a73e8', flexShrink: 0 }} />
                           <span style={{ fontSize: '0.76rem', color: '#3c4043', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -474,30 +656,30 @@ export default function DoctorRxSwitcherModal({
                           </span>
                         </div>
                         {apis.length > 0 && (
-                          <div style={{ fontSize: '0.68rem', color: '#1a73e8', marginTop: 1 }}>
+                          <div style={{ fontSize: '0.68rem', color: '#1a73e8', marginTop: 1, fontWeight: 500 }}>
                             {apis.length} {isEs ? 'principios activos' : 'active ingredients'}
                           </div>
                         )}
                       </div>
 
-                      {/* Action Button */}
+                      {/* Action Button (Native <a> tag + handleNavigate for robust UX) */}
                       <div style={{ textAlign: 'right' }}>
-                        <button
-                          type="button"
-                          className="gcp-action-btn-primary"
-                          onClick={(e) => handleNavigate(rxId, e)}
-                          title={isEs ? 'Abrir dossier clínico' : 'Open clinical dossier'}
+                        <a
+                          href={`/rx/${encodeURIComponent(targetCode)}`}
+                          className={isCurrent ? "gcp-action-btn-secondary" : "gcp-action-btn-primary"}
+                          onClick={(e) => handleNavigate(rx, e)}
+                          title={isEs ? 'Abrir dossier clínico de esta prescripción' : 'Open clinical dossier for this prescription'}
                         >
-                          <span>{isEs ? 'Detalle' : 'Detail'}</span>
+                          <span>{isCurrent ? (isEs ? 'Viendo' : 'Viewing') : (isEs ? 'Detalle' : 'Detail')}</span>
                           <ChevronRight size={13} />
-                        </button>
+                        </a>
                       </div>
                     </div>
 
                     {/* Expandable Master-Detail Panel (APIs & Clinical Summary) */}
                     {isExpanded && (
                       <div style={{
-                        padding: '12px 20px 16px 56px',
+                        padding: '12px 22px 16px 56px',
                         background: '#f8fafd',
                         borderTop: '1px dashed #dadce0',
                         borderLeft: '3px solid #1a73e8',
@@ -509,20 +691,16 @@ export default function DoctorRxSwitcherModal({
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                             <Pill size={13} style={{ color: '#1a73e8' }} />
-                            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#202124', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                              {isEs ? 'Desglose de Principios Activos & Concentración' : 'Active Ingredients & Concentration'}
+                            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                              {isEs ? 'Principios Activos & Concentración' : 'Active Ingredients & Concentration'}
                             </span>
-                            <span style={{ fontSize: '0.68rem', color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '8px', fontWeight: 600 }}>
-                              {apis.length} {apis.length === 1 ? 'API' : 'APIs'}
+                            <span style={{ fontSize: '0.70rem', color: '#5f6368', background: '#e8eaed', padding: '1px 6px', borderRadius: '10px' }}>
+                              {apis.length} APIs
                             </span>
                           </div>
 
                           {apis.length > 0 ? (
-                            <div style={{
-                              display: 'grid',
-                              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-                              gap: 6
-                            }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                               {apis.map((item, idx) => (
                                 <div
                                   key={idx}
@@ -530,23 +708,16 @@ export default function DoctorRxSwitcherModal({
                                     background: '#ffffff',
                                     border: '1px solid #dadce0',
                                     borderRadius: '6px',
-                                    padding: '6px 10px',
-                                    display: 'flex',
+                                    padding: '5px 10px',
+                                    display: 'inline-flex',
                                     alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: 8
+                                    gap: 6,
+                                    boxShadow: '0 1px 2px rgba(60,64,67,0.05)'
                                   }}
                                 >
-                                  <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                      {item.name}
-                                    </div>
-                                    {item.vehicle && (
-                                      <div style={{ fontSize: '0.68rem', color: '#5f6368', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {item.vehicle}
-                                      </div>
-                                    )}
-                                  </div>
+                                  <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
+                                    {item.name}
+                                  </span>
                                   {item.dose && (
                                     <span style={{
                                       fontSize: '0.72rem',
@@ -583,8 +754,8 @@ export default function DoctorRxSwitcherModal({
                             {posologySummary && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.74rem', color: '#5f6368' }}>
                                 <Clock size={12} style={{ color: '#0d9488' }} />
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                                  {posologySummary}
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 360 }}>
+                                  {String(posologySummary)}
                                 </span>
                               </div>
                             )}
@@ -594,7 +765,7 @@ export default function DoctorRxSwitcherModal({
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <button
                               type="button"
-                              onClick={(e) => handleCopyLink(rxId, e)}
+                              onClick={(e) => handleCopyLink(targetCode, e)}
                               style={{
                                 background: '#ffffff',
                                 border: '1px solid #dadce0',
@@ -610,17 +781,17 @@ export default function DoctorRxSwitcherModal({
                               }}
                               title={isEs ? 'Copiar enlace permanente de la prescripción' : 'Copy permanent prescription URL'}
                             >
-                              {copiedId === rxId ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
-                              <span>{copiedId === rxId ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar URL' : 'Copy URL')}</span>
+                              {copiedId === targetCode ? <Check size={12} style={{ color: '#16a34a' }} /> : <Copy size={12} />}
+                              <span>{copiedId === targetCode ? (isEs ? 'Copiado' : 'Copied') : (isEs ? 'Copiar URL' : 'Copy URL')}</span>
                             </button>
-                            <button
-                              type="button"
+                            <a
+                              href={`/rx/${encodeURIComponent(targetCode)}`}
                               className="gcp-action-btn-primary"
-                              onClick={(e) => handleNavigate(rxId, e)}
-                              style={{ padding: '4px 10px', fontSize: '0.74rem' }}
+                              onClick={(e) => handleNavigate(rx, e)}
+                              style={{ padding: '4px 12px', fontSize: '0.74rem' }}
                             >
                               <span>{isEs ? 'Abrir Dossier Completo →' : 'Open Full Dossier →'}</span>
-                            </button>
+                            </a>
                           </div>
                         </div>
                       </div>
@@ -633,12 +804,34 @@ export default function DoctorRxSwitcherModal({
         </div>
 
         {/* Footer (GCP Standard) */}
-        <div style={{ padding: '12px 20px', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: '#f8f9fa', borderRadius: '0 0 12px 12px' }}>
-          <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 500 }}>
-            {isEs 
-              ? `${filtered.length} prescripción${filtered.length !== 1 ? 'es' : ''} disponible${filtered.length !== 1 ? 's' : ''}` 
-              : `${filtered.length} prescription${filtered.length !== 1 ? 's' : ''} available`}
-          </span>
+        <div style={{ padding: '12px 22px', borderTop: '1px solid #e8eaed', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: '#f8f9fa', borderRadius: '0 0 12px 12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 500 }}>
+              {isEs 
+                ? `${filtered.length} prescripción${filtered.length !== 1 ? 'es' : ''} disponible${filtered.length !== 1 ? 's' : ''}` 
+                : `${filtered.length} prescription${filtered.length !== 1 ? 's' : ''} available`}
+            </span>
+            <button
+              type="button"
+              onClick={() => fetchPrescriptions(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#1a73e8',
+                fontSize: '0.72rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '2px 6px',
+                borderRadius: '4px'
+              }}
+              title={isEs ? 'Refrescar datos desde el servidor' : 'Refresh data from server'}
+            >
+              <RefreshCw size={11} className={isBackgroundUpdating ? 'spin' : ''} />
+              <span>{isEs ? 'Actualizar' : 'Refresh'}</span>
+            </button>
+          </div>
           <a 
             href="/rx/intake" 
             style={{ 

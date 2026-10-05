@@ -17,6 +17,7 @@ export default function PharmacyLabelsModal({
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
+  const [showCutGuides, setShowCutGuides] = useState(true); // Scissor cut lines & crop marks toggle
 
   // Sizing Presets & Custom Dimensions
   const [selectedPreset, setSelectedPreset] = useState('75x45');
@@ -645,6 +646,38 @@ export default function PharmacyLabelsModal({
                   <option value={1200}>1200 DPI (Ultra HD)</option>
                 </select>
               </div>
+
+              {/* Field 5: Cut Guides (✂) Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowCutGuides(prev => !prev)}
+                style={{
+                  height: 30,
+                  padding: '0 10px',
+                  borderRadius: '4px',
+                  border: showCutGuides ? '1px solid #1a73e8' : '1px solid #dadce0',
+                  background: showCutGuides ? '#e8f0fe' : '#ffffff',
+                  color: showCutGuides ? '#1a73e8' : '#5f6368',
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s'
+                }}
+                title={isEs ? 'Mostrar/Ocultar guías de corte con tijera' : 'Toggle scissor cut lines & crop marks'}
+              >
+                <span style={{ fontSize: '0.88rem' }}>✂</span>
+                <span>{isEs ? 'Guías de Corte' : 'Cut Guides'}</span>
+                <span style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: showCutGuides ? '#1a73e8' : '#dadce0',
+                  display: 'inline-block'
+                }} />
+              </button>
             </div>
 
             {/* Active Output Pixel Resolution Badge */}
@@ -766,6 +799,7 @@ export default function PharmacyLabelsModal({
                   variant={activeVariant}
                   widthMm={dimensions.widthMm}
                   heightMm={dimensions.heightMm}
+                  showCutGuides={showCutGuides}
                 />
               </div>
             </div>
