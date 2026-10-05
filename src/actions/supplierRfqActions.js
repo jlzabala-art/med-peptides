@@ -134,7 +134,7 @@ export async function serverCreateSupplierRFQFromPrescription({
       items,
       formulationBlocks,
       fagronDetails: rxData.fagronDetails || null,
-      notes: notes || 'Please provide compounding quotation, available batch expiry, certificate of analysis, and express cold-chain freight.',
+      notes: notes || 'Please provide compounding quotation.',
       status: 'pending_supplier',
       requestedByUid,
       totals: {
@@ -319,7 +319,6 @@ export async function submitSupplierQuotationAction(token, quotationPayload) {
       itemsSubtotal,
       total: grandTotal,
       leadTimeDays: parseInt(leadTimeDays) || 3,
-      hasCOA: Boolean(hasCOA),
       supplierNotes: (supplierNotes || '').trim(),
       submittedAt: new Date().toISOString(),
     };
@@ -359,3 +358,86 @@ export async function submitSupplierQuotationAction(token, quotationPayload) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 4. Doctor-to-Atlas Quotation Request
+ * Allows a physician/clinic to submit an imported prescription to Atlas for evaluation.
+ * Atlas administrative team will review and choose the compounding supplier.
+ */
+export async function serverCreateAtlasQuotationRequest({
+  rxId,
+  requesterName = '',
+  requesterEmail = '',
+  requesterPhone = '',
+  notes = 'Please provide compounding quotation.',
+}) {
+  if (!adminDb) {
+    throw new Error("Firebase Admin is not initialized.");
+  }
+
+  try {
+    // 1. Fetch prescription data
+    let rxSnap = await adminDb.collection('prescriptions').doc(rxId).get();
+    let rxData = rxSnap.exists ? rxSnap.data() : null;
+
+    if (!rxData) {
+      const qCode = await adminDb.collection('prescriptions').where('prescriptionCode', '==', rxId).limit(1).get();
+      if (!qCode.empty) {
+        rxSnap = qCode.docs[0];
+        rxData = rxSnap.data();
+      } else {
+        const qBox = await adminDb.collection('prescriptions').where('fagronDetails.boxId', '==', rxId).limit(1).get();
+        if (!qBox.empty) {
+          rxSnap = qBox.docs[0];
+          rxData = rxSnap.data();
+        }
+      }
+    }
+
+    if (!rxData) {
+      throw new Error(`Prescription ${rxId} not found.`);
+    }
+
+    const quoteRequestId = `ATLAS-REQ-${Date.now().toString().slice(-6)}`;
+    const prescriptionCode = rxData.prescriptionCode || rxData.fagronDetails?.boxId || rxId;
+
+    const payload = {
+      quoteRequestId,
+      type: 'doctor_to_atlas_quotation',
+      status: 'pending_atlas_review',
+      prescriptionId: rxSnap.id,
+      prescriptionCode,
+      patientName: rxData.patient?.name || rxData.patientName || 'Patient',
+      doctorName: rxData.doctor?.name || rxData.doctorName || requesterName || 'Prescribing Doctor',
+      requester: {
+        name: requesterName || rxData.doctor?.name || '',
+        email: requesterEmail || '',
+        phone: requesterPhone || '',
+      },
+      notes: notes || 'Please provide compounding quotation.',
+      formulationBlocks: rxData.formulationBlocks || [],
+      items: rxData.items || [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const docRef = await adminDb.collection('quotations').add(payload);
+
+    logger.info('[supplierRfqActions] Created Doctor-to-Atlas quotation request', {
+      docId: docRef.id,
+      quoteRequestId,
+      prescriptionCode,
+    });
+
+    return {
+      success: true,
+      id: docRef.id,
+      quoteRequestId,
+      message: 'Quotation request successfully submitted to Atlas.',
+    };
+  } catch (err) {
+    logger.error('[supplierRfqActions] Error creating Doctor-to-Atlas quotation request', { error: err.message });
+    return { success: false, error: err.message };
+  }
+}
+

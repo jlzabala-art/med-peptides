@@ -43,21 +43,13 @@ async function seed() {
       emiratesId: '784-1973-9874561-2'
     },
 
-    // Doctor / Clinic Identification
-    doctorName: 'Dr. Haytham Salem',
-    doctorLicense: 'DHA-P-0319842',
-    clinicName: 'Med Art Clinic Day Surgery Center',
-    doctor: {
-      id: 'dr-haytham-salem',
-      name: 'Dr. Haytham Salem',
-      title: 'Consultant Orthopedic & Regenerative Medicine · Arthregen Clinic',
-      license: 'DHA-P-0319842',
-      clinic: 'Med Art Clinic Day Surgery Center',
-      address: 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE',
-      city: 'Dubai',
-      country: 'United Arab Emirates',
-      phone: '+971 4 346 6149'
-    },
+    // Doctor / Clinic Identification (Pending Assignment from Portal)
+    doctorName: null,
+    doctorLicense: null,
+    clinicName: null,
+    doctor: null,
+    treatingDoctor: null,
+    hasTreatingDoctor: false,
 
     // Fagron Genomics metadata
     fagron: {

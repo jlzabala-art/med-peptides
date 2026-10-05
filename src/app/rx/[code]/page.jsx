@@ -8,17 +8,8 @@ export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
-// ⚡ Layer 1 In-Memory Server RAM Cache
-const RX_RAM_CACHE = new Map();
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
-
-export function invalidateRxCache(code) {
-  if (!code) {
-    RX_RAM_CACHE.clear();
-  } else {
-    RX_RAM_CACHE.delete(decodeURIComponent(code).trim().toUpperCase());
-  }
-}
+import { RX_RAM_CACHE, CACHE_TTL_MS, invalidateRxCache } from '@/lib/rxCache';
+export { invalidateRxCache };
 
 // ⚡ Per-Request React Server Component memoization
 const getPrescriptionData = cache(async (code) => {
@@ -191,7 +182,7 @@ export async function generateMetadata({ params }) {
   const rx = await getPrescriptionData(code);
 
   const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
-  const doctor = rx?.doctorName || rx?.prescribingDoctor || rx?.treatingDoctor?.name || rx?.doctor?.name || 'Dr. Heytham';
+  const doctor = rx?.doctorName || rx?.prescribingDoctor || rx?.treatingDoctor?.name || rx?.doctor?.name || null;
   let clinic = rx?.clinic || rx?.treatingDoctor?.clinic || 'Atlas Health Services';
   if (clinic.toLowerCase().includes('mediluxe') || clinic.toLowerCase().includes('bedaya')) {
     clinic = 'Atlas Health Services';
@@ -224,9 +215,11 @@ export async function generateMetadata({ params }) {
     if (posologySummary) {
       description += `Posology: ${posologySummary}. `;
     }
-    description += `Prescribed by ${doctor} • Atlas Health Services.`;
+    description += doctor ? `Prescribed by ${doctor} • Atlas Health Services.` : `Atlas Health Services.`;
   } else {
-    description = `Official datasheet and posology protocol for ${patientName}. Prescribed by ${doctor} (${clinic}). Atlas Health Services.`;
+    description = doctor 
+      ? `Official datasheet and posology protocol for ${patientName}. Prescribed by ${doctor} (${clinic}). Atlas Health Services.`
+      : `Official datasheet and posology protocol for ${patientName}. Atlas Health Services.`;
   }
 
   // Clamped to WhatsApp's optimal preview length

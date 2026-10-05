@@ -558,7 +558,7 @@ export default function PrescriptionDetailSidebar({
                 📞 {doctorPhone}
               </div>
             )}
-            {!doctorName && onAssignDoctor && (
+            {onAssignDoctor && (
               <button
                 type="button"
                 onClick={onAssignDoctor}
@@ -572,10 +572,14 @@ export default function PrescriptionDetailSidebar({
                   color: '#1a73e8',
                   fontSize: '0.74rem',
                   fontWeight: 500,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px'
                 }}
               >
-                + {isEs ? 'Asignar Médico Tratante' : 'Assign Treating Physician'}
+                {doctorName ? (isEs ? '✏️ Cambiar Médico' : '✏️ Change Physician') : (isEs ? '+ Asignar Médico Tratante' : '+ Assign Treating Physician')}
               </button>
             )}
           </div>

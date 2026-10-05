@@ -19,7 +19,7 @@ import { toast } from 'react-hot-toast';
 
 export default function RequestSupplierRFQModal({ rx, isOpen, onClose, onSuccess }) {
   const [selectedSupplier, setSelectedSupplier] = useState('Fagron Genomics / Lab');
-  const [notes, setNotes] = useState('Please provide compounding quotation, available batch expiry, certificate of analysis (COA), and express cold-chain freight.');
+  const [notes, setNotes] = useState('Please provide compounding quotation.');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedRFQ, setGeneratedRFQ] = useState(null);
   const [copied, setCopied] = useState(false);

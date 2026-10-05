@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import { invalidateRxCache } from '@/app/rx/[code]/page';
+import { invalidateRxCache } from '@/lib/rxCache';
+import { revalidatePath } from 'next/cache';
 
 /**
  * POST /api/prescriptions/update-treating-doctor
@@ -14,7 +15,9 @@ export async function POST(request) {
     const body = await request.json();
     const { prescriptionId, prescriptionNumber, treatingDoctor } = body;
 
-    if (!prescriptionId && !prescriptionNumber) {
+    const lookupCode = (prescriptionId || prescriptionNumber || '').trim();
+
+    if (!lookupCode) {
       return NextResponse.json(
         { error: 'prescriptionId or prescriptionNumber is required' },
         { status: 400 }
@@ -37,14 +40,39 @@ export async function POST(request) {
       docSnap = await docRef.get();
     }
 
-    if ((!docSnap || !docSnap.exists) && prescriptionNumber) {
+    if (!docSnap || !docSnap.exists) {
+      // Try by prescriptionNumber
       const qSnap = await adminDb.collection('prescriptions')
-        .where('prescriptionNumber', '==', prescriptionNumber)
+        .where('prescriptionNumber', '==', lookupCode)
         .limit(1)
         .get();
       if (!qSnap.empty) {
         docRef = qSnap.docs[0].ref;
         docSnap = qSnap.docs[0];
+      }
+    }
+
+    if (!docSnap || !docSnap.exists) {
+      // Try by prescriptionCode
+      const qSnap2 = await adminDb.collection('prescriptions')
+        .where('prescriptionCode', '==', lookupCode)
+        .limit(1)
+        .get();
+      if (!qSnap2.empty) {
+        docRef = qSnap2.docs[0].ref;
+        docSnap = qSnap2.docs[0];
+      }
+    }
+
+    if (!docSnap || !docSnap.exists) {
+      // Try by fagronDetails.boxId
+      const qSnap3 = await adminDb.collection('prescriptions')
+        .where('fagronDetails.boxId', '==', lookupCode)
+        .limit(1)
+        .get();
+      if (!qSnap3.empty) {
+        docRef = qSnap3.docs[0].ref;
+        docSnap = qSnap3.docs[0];
       }
     }
 
@@ -100,6 +128,14 @@ export async function POST(request) {
       if (typeof invalidateRxCache === 'function') {
         invalidateRxCache(docRef.id);
         if (prescriptionNumber) invalidateRxCache(prescriptionNumber);
+        if (existingData.prescriptionNumber) invalidateRxCache(existingData.prescriptionNumber);
+        if (existingData.prescriptionCode) invalidateRxCache(existingData.prescriptionCode);
+        if (existingData.fagronDetails?.boxId) invalidateRxCache(existingData.fagronDetails.boxId);
+      }
+      const pCode = existingData.prescriptionNumber || existingData.prescriptionCode || existingData.fagronDetails?.boxId || docRef.id;
+      revalidatePath(`/rx/${pCode}`);
+      if (existingData.fagronDetails?.boxId) {
+        revalidatePath(`/rx/${existingData.fagronDetails.boxId}`);
       }
     } catch (_) {}
 

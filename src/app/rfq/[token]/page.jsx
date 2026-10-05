@@ -44,7 +44,6 @@ export default function PublicSupplierRFQPage() {
   const [compoundingFee, setCompoundingFee] = useState(0);
   const [shippingCost, setShippingCost] = useState(0);
   const [leadTimeDays, setLeadTimeDays] = useState(3);
-  const [hasCOA, setHasCOA] = useState(true);
   const [supplierNotes, setSupplierNotes] = useState('');
 
   // Submission state
@@ -72,7 +71,6 @@ export default function PublicSupplierRFQPage() {
             setCompoundingFee(sq.compoundingFee || 0);
             setShippingCost(sq.shippingCost || 0);
             setLeadTimeDays(sq.leadTimeDays || 3);
-            setHasCOA(sq.hasCOA !== false);
             setSupplierNotes(sq.supplierNotes || '');
 
             const pricesMap = {};
@@ -162,7 +160,6 @@ export default function PublicSupplierRFQPage() {
         compoundingFee: parsedCompounding,
         shippingCost: parsedShipping,
         leadTimeDays: parseInt(leadTimeDays) || 3,
-        hasCOA,
         supplierNotes: supplierNotes.trim(),
       };
 
@@ -454,7 +451,7 @@ export default function PublicSupplierRFQPage() {
             }}>
               <ShieldCheck size={20} style={{ flexShrink: 0 }} />
               <div>
-                <strong>Strict Quality Requirement:</strong> All quoted active pharmaceutical ingredients (APIs) and vehicles must comply with USP/Ph. Eur. Compounding Pharmacopeia monographs, include a Certificate of Analysis (COA), and be compounded under certified GMP / ISO cleanroom conditions.
+                <strong>Compounding Quality Standard:</strong> All quoted active pharmaceutical ingredients (APIs) and vehicles must comply with USP/Ph. Eur. Compounding Pharmacopeia monographs and be compounded under certified GMP / cleanroom laboratory conditions.
               </div>
             </div>
           </div>
@@ -785,11 +782,10 @@ export default function PublicSupplierRFQPage() {
                 <input
                   type="checkbox"
                   disabled={isQuoted}
-                  checked={hasCOA}
-                  onChange={(e) => setHasCOA(e.target.checked)}
+                  defaultChecked={true}
                   style={{ width: '16px', height: '16px', accentColor: '#1a73e8' }}
                 />
-                Confirm Batch Certificate of Analysis (COA) and Purity Grade Standard will accompany formulation.
+                Confirm compounding complies with USP/Ph. Eur. Pharmacopeia monograph standards.
               </label>
 
               <div>

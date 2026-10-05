@@ -41,7 +41,7 @@ import {
   Tag,
   Smartphone
 } from '@/lib/icons';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { RotateCcw } from 'lucide-react';
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
@@ -58,6 +58,7 @@ import { classifyPrescription } from '@/data/prescriptionTypeClassifier';
 import { getFagronClinicalMonograph, checkDosageSafety } from '@/data/fagronClinicalMonographs';
 import GenomicsPrescriptionGuidanceCard from '@/components/prescription/GenomicsPrescriptionGuidanceCard';
 import PublicInstitutionalInquiryDrawer from '@/components/shared/PublicInstitutionalInquiryDrawer';
+import RequestAtlasQuotationModal from '@/features/prescriptions/components/RequestAtlasQuotationModal';
 import RequestSupplierRFQModal from '@/features/prescriptions/components/RequestSupplierRFQModal';
 import '@/styles/publicDesignSystem.css';
 import './publicPrescriptionMobile.css';
@@ -172,6 +173,7 @@ function getPosologyText(pos) {
 }
 
 export default function PublicPrescriptionClient({ rx, embedded = false, onBackToIntake = null, initialView = null }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const viewParam = initialView || searchParams?.get('view') || searchParams?.get('mode');
   const isPatientView = viewParam === 'patient';
@@ -200,6 +202,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showLabelsModal, setShowLabelsModal] = useState(false);
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
   const [showSupplierRfqModal, setShowSupplierRfqModal] = useState(false);
+  const [showAtlasQuotationModal, setShowAtlasQuotationModal] = useState(false);
 
   const togglePhase = (id) => {
     setExpandedPhases(prev => ({ ...prev, [id]: !prev[id] }));
@@ -341,6 +344,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       setCustomTreatingDoctor(data.treatingDoctor);
       setShowDoctorModal(false);
       toast.success(isEs ? 'Médico tratante asignado con éxito ✓' : 'Treating physician updated successfully ✓');
+      try {
+        router.refresh();
+      } catch (_) {}
     } catch (err) {
       console.error(err);
       toast.error(err.message || 'Error updating doctor');
@@ -1960,49 +1966,96 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                     <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {hasTreatingDoctor ? (isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician') : (isEs ? 'Práctica Médica' : 'Medical Practice')}
+                      {isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician'}
                     </span>
-                    <button
-                      onClick={openDoctorModal}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#1a73e8',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '3px',
-                        fontSize: '0.72rem',
-                        fontWeight: 500,
-                        padding: '1px 4px'
-                      }}
-                      title={hasTreatingDoctor ? (isEs ? 'Editar médico tratante' : 'Edit treating physician') : (isEs ? 'Asignar médico' : 'Assign physician')}
-                    >
-                      <Edit3 size={11} />
-                      {hasTreatingDoctor ? (isEs ? 'Modificar' : 'Edit') : (isEs ? 'Asignar' : 'Assign')}
-                    </button>
-                  </div>
-                  <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <span>{hasTreatingDoctor ? doctorName : clinic}</span>
-                    {doctorLicense && (
-                      <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '1px 5px', borderRadius: '3px' }}>
-                        Lic. {doctorLicense}
-                      </span>
+                    {hasTreatingDoctor && (
+                      <button
+                        onClick={openDoctorModal}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#1a73e8',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          fontSize: '0.72rem',
+                          fontWeight: 500,
+                          padding: '1px 4px'
+                        }}
+                        title={isEs ? 'Editar médico tratante' : 'Edit treating physician'}
+                      >
+                        <Edit3 size={11} />
+                        {isEs ? 'Modificar' : 'Edit'}
+                      </button>
                     )}
                   </div>
-                  <div style={{ fontSize: '0.78rem', color: '#5f6368', lineHeight: 1.4 }}>
-                    {doctorSpecialty}
-                  </div>
-                  {(doctorClinic || doctorAddress) && (
-                    <div style={{ fontSize: '0.75rem', color: '#70757a', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
-                      <span>📍 {doctorClinic ? `${doctorClinic} · ` : ''}{doctorAddress || 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE'}</span>
-                    </div>
-                  )}
-                  {doctorPhone && (
-                    <div style={{ fontSize: '0.75rem', color: '#1a73e8', marginTop: '1px' }}>
-                      <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500 }}>
-                        📞 {doctorPhone}
-                      </a>
+
+                  {hasTreatingDoctor ? (
+                    <>
+                      <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span>{doctorName}</span>
+                        {doctorLicense && (
+                          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '1px 5px', borderRadius: '3px' }}>
+                            Lic. {doctorLicense}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#5f6368', lineHeight: 1.4 }}>
+                        {doctorSpecialty}
+                      </div>
+                      {(doctorClinic || doctorAddress) && (
+                        <div style={{ fontSize: '0.75rem', color: '#70757a', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                          <span>📍 {doctorClinic ? `${doctorClinic}${doctorAddress ? ' · ' : ''}` : ''}{doctorAddress}</span>
+                        </div>
+                      )}
+                      {doctorPhone && (
+                        <div style={{ fontSize: '0.75rem', color: '#1a73e8', marginTop: '1px' }}>
+                          <a href={`tel:${doctorPhone}`} style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 500 }}>
+                            📞 {doctorPhone}
+                          </a>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      padding: '8px 10px',
+                      borderRadius: '6px',
+                      background: '#fffbeb',
+                      border: '1px dashed #fcd34d',
+                      marginTop: '2px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#b45309' }}>
+                          ⚠️ {isEs ? 'Sin médico asignado' : 'Pending Physician Assignment'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={openDoctorModal}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: '#ffffff',
+                            border: '1px solid #d97706',
+                            borderRadius: '4px',
+                            color: '#b45309',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            padding: '3px 8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Edit3 size={11} />
+                          {isEs ? '+ Asignar' : '+ Assign'}
+                        </button>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#92400e', lineHeight: 1.3 }}>
+                        {isEs ? 'Prescripción pendiente de asociar a un facultativo clínico colegiado.' : 'Prescription awaiting treating clinician assignment.'}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -3421,36 +3474,37 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
             {/* Action Buttons & Info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', minWidth: 280, maxWidth: 460 }}>
-              {/* Informative Value Callout */}
+              {/* Google Cloud UX Informative Notice Callout */}
               <div style={{
-                background: '#ffffff',
-                border: '1px solid #d2e3fc',
-                borderRadius: '10px',
-                padding: '12px 14px',
-                boxShadow: '0 1px 3px rgba(60,64,67,0.06)'
+                background: '#f8fafd',
+                border: '1px solid #dadce0',
+                borderLeft: '3px solid #1a73e8',
+                borderRadius: '4px',
+                padding: '10px 14px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a73e8' }}>
-                    {isEs ? 'Acceso del Paciente & Cotización Directa' : 'Patient Access & Direct Compounding Quotation'}
+                  <Info size={15} color="#1a73e8" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#202124' }}>
+                    {isEs ? 'Acceso del Paciente & Cotización con Atlas' : 'Patient Access & Atlas Quotation'}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.82rem', color: '#3c4043', lineHeight: 1.5 }}>
+                <div style={{ fontSize: '0.78rem', color: '#5f6368', lineHeight: 1.45 }}>
                   {isEs 
-                    ? 'Al compartir este código QR, el paciente podrá consultar la información completa de su fórmula magistral, posología y, si lo desea, solicitar cotización formal para la elaboración y compra de su prescripción.' 
-                    : 'When shared with the patient, this QR code enables them to view complete product and formulation details, follow their daily posology schedule, and request an official compounding quotation to purchase their prescription directly.'}
+                    ? 'Al compartir este código QR, el paciente o clínico accede a la fórmula completa, posología diaria y puede enviar una solicitud de cotización oficial para formulación magistral directamente a Atlas Health Services.' 
+                    : 'When shared with the patient, this QR code enables them to view formulation details, follow their posology schedule, and submit an official compounding quotation request directly to Atlas Health Services.'}
                 </div>
               </div>
 
-              {/* 3 Value Badges */}
+              {/* GCP Neutral Capability Chips */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                <span style={{ fontSize: '0.70rem', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 500, padding: '2px 8px', borderRadius: '4px', background: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0' }}>
                   ✓ {isEs ? 'Detalles de la Fórmula' : 'Compounded Formula Details'}
                 </span>
-                <span style={{ fontSize: '0.70rem', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 500, padding: '2px 8px', borderRadius: '4px', background: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0' }}>
                   ✓ {isEs ? 'Pauta Posológica' : 'Step-by-Step Posology'}
                 </span>
-                <span style={{ fontSize: '0.70rem', fontWeight: 600, padding: '2px 8px', borderRadius: '10px', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}>
-                  ✓ {isEs ? 'Cotización y Compra Online' : 'Direct Quote & Purchase'}
+                <span style={{ fontSize: '0.70rem', fontWeight: 500, padding: '2px 8px', borderRadius: '4px', background: '#f1f3f4', color: '#3c4043', border: '1px solid #dadce0' }}>
+                  ✓ {isEs ? 'Cotización con Atlas' : 'Request to Atlas Quotation'}
                 </span>
               </div>
 
@@ -3549,27 +3603,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <span>{isEs ? 'Probar Vista del Paciente y Cotización ↗' : 'Preview Patient Experience & Quotation ↗'}</span>
               </a>
 
-              {/* B2B Supplier RFQ Magic Link Generator */}
+              {/* Request to Atlas Quotation */}
               <button
                 type="button"
-                onClick={() => setShowSupplierRfqModal(true)}
+                onClick={() => setShowAtlasQuotationModal(true)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
                   padding: '0.55rem',
-                  borderRadius: '8px',
-                  background: '#ffffff',
-                  border: '1px solid #dadce0',
-                  color: '#1a73e8',
+                  borderRadius: '4px',
+                  background: '#1a73e8',
+                  border: '1px solid #1a73e8',
+                  color: '#ffffff',
                   fontSize: '0.78rem',
-                  fontWeight: 700,
+                  fontWeight: 600,
                   cursor: 'pointer'
                 }}
               >
                 <Building2 size={14} />
-                <span>{isEs ? 'Pedir Cotización a Proveedor / Lab (RFQ)' : 'Request Supplier / Lab Quote (RFQ)'}</span>
+                <span>{isEs ? 'Solicitar cotización a Atlas' : 'Request to Atlas quotation'}</span>
               </button>
             </div>
           </div>
@@ -4424,11 +4478,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         }}
       />
 
-      {/* ── B2B Supplier RFQ Direct Magic Link Generator Modal ── */}
-      <RequestSupplierRFQModal
+      {/* ── Request to Atlas quotation Modal ── */}
+      <RequestAtlasQuotationModal
         rx={rx}
-        isOpen={showSupplierRfqModal}
-        onClose={() => setShowSupplierRfqModal(false)}
+        isOpen={showAtlasQuotationModal}
+        onClose={() => setShowAtlasQuotationModal(false)}
       />
     </div>
   );
