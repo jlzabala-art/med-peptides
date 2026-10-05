@@ -255,19 +255,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     return () => window.removeEventListener('OPEN_RX_SECTION', handleSectionJump);
   }, []);
 
-  // Treating Doctor Modal State
-  const [customTreatingDoctor, setCustomTreatingDoctor] = useState(null);
-  const [showDoctorModal, setShowDoctorModal] = useState(false);
-  const [isSavingDoctor, setIsSavingDoctor] = useState(false);
-  const [docForm, setDocForm] = useState({
-    name: '',
-    specialty: '',
-    license: '',
-    clinic: '',
-    phone: '',
-    address: ''
-  });
-
   const isEs = lang === 'es';
 
   const rxId = rx.id || rx.prescriptionNumber || 'RX-PRESCRIPTION';
@@ -316,47 +303,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const doctorWebsite = isHaytham ? 'www.mrhaytham.com' : (treatingDoc.website || '');
   const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
 
-  const openDoctorModal = () => {
-    setDocForm({
-      name: treatingDoc.name || doctorName || '',
-      specialty: treatingDoc.specialty || doctorSpecialty || '',
-      license: doctorLicense || '',
-      clinic: treatingDoc.clinic || clinic || '',
-      phone: doctorPhone || '',
-      address: doctorAddress || ''
-    });
-    setShowDoctorModal(true);
-  };
-
-  const handleSaveTreatingDoctor = async (doctorData) => {
-    setIsSavingDoctor(true);
-    try {
-      const res = await fetch('/api/prescriptions/update-treating-doctor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prescriptionId: rx.id || rxId,
-          prescriptionNumber: rx.prescriptionNumber || rxId,
-          treatingDoctor: doctorData
-        })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to update treating physician');
-      }
-      setCustomTreatingDoctor(data.treatingDoctor);
-      setShowDoctorModal(false);
-      toast.success(isEs ? 'Médico tratante asignado con éxito ✓' : 'Treating physician updated successfully ✓');
-      try {
-        router.refresh();
-      } catch (_) {}
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || 'Error updating doctor');
-    } finally {
-      setIsSavingDoctor(false);
-    }
-  };
 
   // Pharmacogenomic test correlation & Unified Prescription Classification
   const genomicsData = detectFagronGenomicsTest(rx);
@@ -1971,27 +1917,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       {isEs ? 'Médico Prescriptor Tratante' : 'Prescribing Treating Physician'}
                     </span>
-                    {hasTreatingDoctor && (
-                      <button
-                        onClick={openDoctorModal}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#1a73e8',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px',
-                          fontSize: '0.72rem',
-                          fontWeight: 500,
-                          padding: '1px 4px'
-                        }}
-                        title={isEs ? 'Editar médico tratante' : 'Edit treating physician'}
-                      >
-                        <Edit3 size={11} />
-                        {isEs ? 'Modificar' : 'Edit'}
-                      </button>
-                    )}
                   </div>
 
                   {hasTreatingDoctor ? (
@@ -2033,40 +1958,18 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     <div style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '6px',
+                      gap: '4px',
                       padding: '8px 10px',
                       borderRadius: '6px',
                       background: '#fffbeb',
                       border: '1px dashed #fcd34d',
                       marginTop: '2px'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#b45309' }}>
-                          ⚠️ {isEs ? 'Sin médico asignado' : 'Pending Physician Assignment'}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={openDoctorModal}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            background: '#ffffff',
-                            border: '1px solid #d97706',
-                            borderRadius: '4px',
-                            color: '#b45309',
-                            fontSize: '0.72rem',
-                            fontWeight: 600,
-                            padding: '3px 8px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Edit3 size={11} />
-                          {isEs ? '+ Asignar' : '+ Assign'}
-                        </button>
-                      </div>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#b45309' }}>
+                        ⚠️ {isEs ? 'Sin médico asignado' : 'Pending Physician Assignment'}
+                      </span>
                       <div style={{ fontSize: '0.74rem', color: '#92400e', lineHeight: 1.3 }}>
-                        {isEs ? 'Prescripción pendiente de asociar a un facultativo clínico colegiado.' : 'Prescription awaiting treating clinician assignment.'}
+                        {isEs ? 'El equipo clínico de Atlas asignará formalmente el médico prescriptor responsable.' : 'The Atlas clinical board will formally designate the responsible prescribing physician.'}
                       </div>
                     </div>
                   )}
@@ -3905,7 +3808,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             publicUrl={publicUrl}
             onOpenPdf={handleDownloadQrPng}
             onExportExcel={handleExportExcel}
-            onAssignDoctor={openDoctorModal}
             lang={lang}
           />
         </div>
@@ -4067,381 +3969,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           onClose={() => setPreviewDoc(null)}
         />
       )}
-
-      {/* ── Assign / Edit Treating Physician Modal ────────────────────────────── */}
-      {showDoctorModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem'
-        }}>
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            maxWidth: 540,
-            width: '100%',
-            padding: '1.75rem',
-            boxShadow: '0 20px 40px rgba(15, 23, 42, 0.2)',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '8px', background: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Stethoscope size={20} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                    {isEs ? 'Médico Tratante / Clínico' : 'Treating Physician Assignment'}
-                  </h3>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                    {isEs ? 'Visible exclusivamente al paciente en QR, etiqueta y portal' : 'Strictly the only doctor visible on QR, bottle label, and patient portal'}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowDoctorModal(false)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Quick Presets */}
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
-                {isEs ? 'Plantillas Rápidas de Médicos' : 'Physician Presets'}
-              </div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => setDocForm({
-                    name: 'Dr. Haytham Salem',
-                    specialty: 'Consultant Orthopedic Surgeon & Regenerative Medicine Specialist',
-                    license: 'DHA-P-0319842',
-                    clinic: 'Arthregen Clinic',
-                    phone: '+971 4 346 6149',
-                    address: 'Med Art Clinic Day Surgery Center, Villa 823, Jumeirah St., Dubai, UAE'
-                  })}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: (docForm.name.includes('Haytham') || docForm.name.includes('Heytham')) ? '#eff6ff' : '#f8fafc',
-                    color: (docForm.name.includes('Haytham') || docForm.name.includes('Heytham')) ? '#0284c7' : '#334155',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  🩺 Dr. Haytham Salem (Arthregen Clinic)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDocForm({
-                    name: 'Dr. Hanieh Erdmann',
-                    specialty: 'Physician Consultant Dermatology',
-                    license: 'DHA-00013060-006',
-                    clinic: 'Bedaya Polyclinic',
-                    phone: '+971 4 395 5599',
-                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
-                  })}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: docForm.name.includes('Hanieh') ? '#eff6ff' : '#f8fafc',
-                    color: docForm.name.includes('Hanieh') ? '#0284c7' : '#334155',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  🩺 Dr. Hanieh Erdmann (DHA)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDocForm({
-                    name: 'Dr. Sezgin Cagatay',
-                    specialty: 'Specialist Aesthetic & Regenerative Medicine',
-                    license: 'DHA-P-0248891',
-                    clinic: 'Bedaya Polyclinic',
-                    phone: '+971 4 395 5599',
-                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
-                  })}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: docForm.name.includes('Sezgin') ? '#eff6ff' : '#f8fafc',
-                    color: docForm.name.includes('Sezgin') ? '#0284c7' : '#334155',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  🩺 Dr. Sezgin Cagatay (DHA)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDocForm({
-                    name: 'Dr. Valentina Ghorashi',
-                    specialty: 'Consultant Aesthetic & Anti-Aging Medicine',
-                    license: 'DHA-P-0199411',
-                    clinic: 'Bedaya Polyclinic',
-                    phone: '+971 4 395 5599',
-                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
-                  })}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: docForm.name.includes('Valentina') ? '#eff6ff' : '#f8fafc',
-                    color: docForm.name.includes('Valentina') ? '#0284c7' : '#334155',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  🩺 Dr. Valentina Ghorashi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDocForm({
-                    name: 'Dr. Nahla ElAwady',
-                    specialty: 'Specialist Regenerative Medicine',
-                    license: 'DHA-P-0284102',
-                    clinic: 'Bedaya Polyclinic',
-                    phone: '+971 4 395 5599',
-                    address: 'Villa 634B, Jumeirah Beach Road, Umm Suqeim 1, Dubai, UAE'
-                  })}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    background: docForm.name.includes('Nahla') ? '#eff6ff' : '#f8fafc',
-                    color: docForm.name.includes('Nahla') ? '#0284c7' : '#334155',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  🩺 Dr. Nahla ElAwady
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDocForm({
-                    name: '',
-                    specialty: '',
-                    license: '',
-                    clinic: '',
-                    phone: '',
-                    address: ''
-                  })}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px dashed #cbd5e1',
-                    background: '#ffffff',
-                    color: '#64748b',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  ✏️ {isEs ? 'Limpiar / Personalizado' : 'Clear / Custom'}
-                </button>
-              </div>
-            </div>
-
-            {/* Form Fields */}
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleSaveTreatingDoctor(docForm);
-            }} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                  {isEs ? 'Nombre del Médico' : 'Doctor Full Name'} *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={docForm.name}
-                  onChange={(e) => setDocForm({ ...docForm, name: e.target.value })}
-                  placeholder="e.g. Dr. Hanieh Erdmann"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.85rem'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                    {isEs ? 'Especialidad / Título' : 'Specialty / Title'}
-                  </label>
-                  <input
-                    type="text"
-                    value={docForm.specialty}
-                    onChange={(e) => setDocForm({ ...docForm, specialty: e.target.value })}
-                    placeholder="Physician Consultant Dermatology"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                    {isEs ? 'Nº de Licencia / Colegiado' : 'License Number'}
-                  </label>
-                  <input
-                    type="text"
-                    value={docForm.license}
-                    onChange={(e) => setDocForm({ ...docForm, license: e.target.value })}
-                    placeholder="e.g. DHA-00013060-006"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                  {isEs ? 'Clínica / Centro Médico' : 'Clinic / Medical Center'}
-                </label>
-                <input
-                  type="text"
-                  value={docForm.clinic}
-                  onChange={(e) => setDocForm({ ...docForm, clinic: e.target.value })}
-                  placeholder="Bedaya Polyclinic"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.85rem'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                    {isEs ? 'Teléfono de Contacto' : 'Phone'}
-                  </label>
-                  <input
-                    type="text"
-                    value={docForm.phone}
-                    onChange={(e) => setDocForm({ ...docForm, phone: e.target.value })}
-                    placeholder="+971 4 395 5599"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                    {isEs ? 'Dirección' : 'Clinic Address'}
-                  </label>
-                  <input
-                    type="text"
-                    value={docForm.address}
-                    onChange={(e) => setDocForm({ ...docForm, address: e.target.value })}
-                    placeholder="Dubai, UAE"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                fontSize: '0.72rem',
-                color: '#64748b',
-                marginTop: '4px'
-              }}>
-                🔒 <strong>Segregación Clínica:</strong> La tramitación de formulación y fabricación se mantiene internamente bajo la supervisión del director médico asignado. Este formulario actualiza los datos del médico tratante expuestos al paciente y en el dossier.
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowDoctorModal(false)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    color: '#475569',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {isEs ? 'Cancelar' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingDoctor}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: isSavingDoctor ? 'not-allowed' : 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)'
-                  }}
-                >
-                  {isSavingDoctor ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar y Actualizar' : 'Save & Update')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-
 
       {/* ── Prescription Dedicated Clinical AI Research Copilot ── */}
       <PublicAtlasAIDrawer
