@@ -821,7 +821,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         isDoctorView={true}
         onImportRx={() => setIsIntakeOpen(true)}
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
-        rxSwitcherCount={doctorPrescriptions.length}
+        rxSwitcherCount={allPrescriptions.length}
       />
 
       {/* ── Portal Layout with Left Collapsible Clinical Rail (GCP Standard) ── */}
