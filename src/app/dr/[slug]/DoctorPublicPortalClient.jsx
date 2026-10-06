@@ -95,6 +95,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
 
+  // GCP Resource Inspector Drawer State (Golden Rule #4: Master-Detail sin abandonar contexto)
+  const [selectedInspectorItem, setSelectedInspectorItem] = useState(null);
+  const [inspectorTab, setInspectorTab] = useState('dossier'); // 'dossier' | 'formulations' | 'dispensary'
+
   // Therapeutic Pharmacopeia & Compounding APIs State (Lotusland Clinical Directory)
   const [formularyGoal, setFormularyGoal] = useState('all');
   const [formularySearch, setFormularySearch] = useState('');
@@ -322,6 +326,29 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     if (!activeLabelRx) return [];
     return getPharmapolisLabelsForPrescription(activeLabelRx, null);
   }, [activeLabelRx]);
+
+  // ── GCP Resource Inspector Drawer Handlers (Golden Rule #4) ───────────────
+  const handleRowClickPrescription = (rx) => {
+    triggerHaptic('selection');
+    setSelectedInspectorItem({
+      type: 'prescription',
+      data: rx
+    });
+    setInspectorTab('dossier');
+  };
+
+  const handleRowClickTask = (task) => {
+    triggerHaptic('selection');
+    const matchedRx = allPrescriptions.find(
+      (p) => p.code === task.code || (p.prescriptionNumber && p.prescriptionNumber === task.code)
+    );
+    setSelectedInspectorItem({
+      type: 'task',
+      data: task,
+      prescription: matchedRx || null
+    });
+    setInspectorTab('dossier');
+  };
 
   // ── Pending Clinical Tasks Columns (DataTable Exclusive Rendering) ───────
   const taskColumns = useMemo(() => [
@@ -1310,6 +1337,46 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               }
             ]}
           />
+
+          {/* Instant Search Multi-Registry Breakdown Pill (GCP Standard) */}
+          {searchQuery.trim() && (
+            <div
+              style={{
+                marginTop: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '8px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '6px',
+                padding: '8px 14px',
+                fontSize: '0.78rem',
+                color: '#1e40af'
+              }}
+            >
+              <span style={{ fontWeight: 600 }}>Active Search: &ldquo;{searchQuery}&rdquo;</span>
+              <span style={{ color: '#93c5fd' }}>•</span>
+              <span><strong>{filteredPrescriptions.length}</strong> matching prescriptions</span>
+              <span style={{ color: '#93c5fd' }}>•</span>
+              <span><strong>{filteredTasks.length}</strong> care tasks</span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{
+                  marginLeft: 'auto',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#2563eb',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontSize: '0.74rem'
+                }}
+              >
+                Clear Search
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Table 1: Pending Clinical Tasks & To-Do Actions (DataTable Universal) ── */}
@@ -1385,6 +1452,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             pagination={true}
             initialRowsPerPage={10}
             alwaysShowPagination={true}
+            onRowClick={handleRowClickTask}
             emptyTitle="All Patient Care Tasks Up to Date"
             emptyDescription="There are no pending protocol titrations, phase adjustments, or refill authorizations requiring physician action."
             expandableRender={(task) => (
@@ -1583,6 +1651,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             pagination={true}
             initialRowsPerPage={10}
             alwaysShowPagination={true}
+            onRowClick={handleRowClickPrescription}
             emptyTitle="No Prescriptions Found"
             emptyDescription="No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
             expandableRender={(rx) => {
@@ -2582,6 +2651,441 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </div>
         </div>
       )}
+      {/* ── GCP Resource Inspector Drawer (Golden Rule #4: Master-Detail sin abandonar contexto) ── */}
+      {selectedInspectorItem && (() => {
+        const isTask = selectedInspectorItem.type === 'task';
+        const item = selectedInspectorItem.data;
+        const rx = isTask ? selectedInspectorItem.prescription : item;
+        const rxCode = rx?.code || rx?.prescriptionNumber || item?.code || 'N/A';
+        const patientName = rx?.patientName || item?.patientName || 'Anonymous Patient';
+        const treatmentTitle = rx?.treatmentTitle || item?.title || 'Personalized Clinical Protocol';
+        const itemsList = rx?.items && rx.items.length > 0 ? rx.items : (rx?.prescriptionLines || []);
+        const posology = rx?.posology || item?.description || 'Administer as directed by treating physician according to physiological circadian cycle.';
+        const status = rx?.status || (isTask ? item?.priority : 'active');
+        const createdDate = rx?.createdAt || rx?.createdDate ? new Date(rx.createdAt || rx.createdDate).toLocaleDateString() : 'Active Regimen';
+
+        return (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9999,
+              background: 'rgba(15, 23, 42, 0.45)',
+              backdropFilter: 'blur(3px)',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}
+            onClick={() => setSelectedInspectorItem(null)}
+          >
+            <aside
+              style={{
+                width: '100%',
+                maxWidth: '480px',
+                height: '100%',
+                background: '#ffffff',
+                boxShadow: '-6px 0 28px rgba(0,0,0,0.18)',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drawer Top Header (GCP Style) */}
+              <div
+                style={{
+                  padding: '16px 20px',
+                  background: '#f8fafc',
+                  borderBottom: '1px solid #dadce0',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                    Clinical Registry · Resource Inspector
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
+                      {isTask ? `Task: ${item.title}` : `Prescription #${rxCode}`}
+                    </h3>
+                    <CopyableId value={rxCode} iconOnly={true} />
+                  </div>
+                  <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <StatusBadge status={status} />
+                    {rx && (
+                      <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={11} /> {createdDate}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {rx && (
+                    <Link
+                      href={`/rx/${rxCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Open full monograph dossier in new tab"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '4px',
+                        border: '1px solid #dadce0',
+                        background: '#ffffff',
+                        color: '#003666',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <ExternalLink size={14} />
+                    </Link>
+                  )}
+                  {rx && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenLabelsModal(rx)}
+                      title="View Pharmapolis pharmacy bottle labels"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '4px',
+                        border: '1px solid #dadce0',
+                        background: '#ffffff',
+                        color: '#0284c7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Tag size={14} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInspectorItem(null)}
+                    title="Close inspector"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      background: 'transparent',
+                      color: '#5f6368',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer GCP Subtabs Strip */}
+              <div
+                style={{
+                  display: 'flex',
+                  borderBottom: '1px solid #e2e8f0',
+                  background: '#ffffff',
+                  padding: '0 16px',
+                  gap: '4px'
+                }}
+              >
+                {[
+                  { id: 'dossier', label: 'Clinical Dossier', icon: FileText },
+                  { id: 'formulations', label: `Formulations (${itemsList.length || 1})`, icon: FlaskConical },
+                  { id: 'dispensary', label: 'Quality & Tracking', icon: ShieldCheck }
+                ].map((t) => {
+                  const Icon = t.icon;
+                  const isActive = inspectorTab === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setInspectorTab(t.id)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '10px 12px',
+                        border: 'none',
+                        borderBottom: isActive ? '2px solid #003666' : '2px solid transparent',
+                        background: 'transparent',
+                        color: isActive ? '#003666' : '#64748b',
+                        fontSize: '0.78rem',
+                        fontWeight: isActive ? 700 : 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.12s'
+                      }}
+                    >
+                      <Icon size={14} color={isActive ? '#003666' : '#64748b'} />
+                      <span>{t.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Drawer Scrollable Content */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {inspectorTab === 'dossier' && (
+                  <>
+                    {/* Patient Information Card */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        Patient Demographics & Record
+                      </div>
+                      <div style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
+                        {patientName}
+                      </div>
+                      {rx?.patient?.dob && (
+                        <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                          DOB: {rx.patient.dob} {rx.patient?.gender ? `· ${rx.patient.gender}` : ''}
+                        </div>
+                      )}
+                      <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Canonical Ref:</span>
+                        <CopyableId value={rxCode} />
+                      </div>
+                    </div>
+
+                    {/* Prescribing Doctor Information */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Treating Physician
+                      </div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Stethoscope size={14} />
+                        <span>{doctor.name || 'Dr. Marina Cordeiro Fernandes'}</span>
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px' }}>
+                        {doctor.specialty || 'Regenerative Medicine & Longevity'} · Lic: {doctor.licenseNumber || 'DHA-P-0319842'}
+                      </div>
+                    </div>
+
+                    {/* Clinical Regimen Title & Posology */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Regimen & Posology Schedule
+                      </div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#0f172a', marginBottom: '6px' }}>
+                        {treatmentTitle}
+                      </div>
+                      <div style={{ background: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '6px', padding: '10px 12px', fontSize: '0.8rem', color: '#134e4a', lineHeight: 1.45 }}>
+                        {posology}
+                      </div>
+                    </div>
+
+                    {/* If Task: Task action block */}
+                    {isTask && (
+                      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '14px 16px' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>
+                          Pending Care Task Action
+                        </div>
+                        <div style={{ fontSize: '0.82rem', color: '#78350f', lineHeight: 1.4, marginBottom: '10px' }}>
+                          {item.description}
+                        </div>
+                        <Link
+                          href={item.actionUrl}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 14px',
+                            borderRadius: '4px',
+                            background: '#b45309',
+                            color: '#ffffff',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            textDecoration: 'none'
+                          }}
+                        >
+                          <span>Execute {item.actionLabel}</span>
+                          <ArrowUpRight size={13} />
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {inspectorTab === 'formulations' && (
+                  <>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                      Active Compounded Ingredients & Formulations ({itemsList.length || 1})
+                    </div>
+                    {itemsList.length === 0 ? (
+                      <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '6px', fontSize: '0.8rem', color: '#64748b', textAlign: 'center' }}>
+                        Custom personalized galenic blend under formulation review.
+                      </div>
+                    ) : (
+                      itemsList.map((it, idx) => (
+                        <div key={idx} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px 14px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#0f172a' }}>{it.name}</span>
+                            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0d9488', background: '#f0fdf4', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bbf7d0' }}>
+                              {it.dose || it.vehicle || 'Pharmaceutical Grade'}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#64748b', lineHeight: 1.35 }}>
+                            Vehicle / Base: {it.vehicle || 'Micronized Plant-Based HPMC Capsules (Acid-Resistant)'}
+                          </div>
+                          <div style={{ marginTop: '6px', fontSize: '0.70rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={11} /> EU GMP Verified Active API
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </>
+                )}
+
+                {inspectorTab === 'dispensary' && (
+                  <>
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Laboratory & Dispensary Verification
+                      </div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#003666', marginBottom: '4px' }}>
+                        EU GMP Certified Cleanroom Dispensary
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b', lineHeight: 1.4 }}>
+                        Formulated under ISO Class 5 Laminar Airflow with HPLC purity certification by Pharmapolis & Fagron Compounding Solutions.
+                      </p>
+                    </div>
+
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Patient Access & Security
+                      </div>
+                      <p style={{ margin: '0 0 10px 0', fontSize: '0.76rem', color: '#475569', lineHeight: 1.4 }}>
+                        Digital clinical dossier is protected by codified access token. Patients can verify authenticity and dosage guidelines directly.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = `${window.location.origin}/rx/${rxCode}?view=patient`;
+                          navigator.clipboard?.writeText(url);
+                          toast.success('Patient direct link copied ✓');
+                        }}
+                        style={{
+                          height: '32px',
+                          padding: '0 12px',
+                          borderRadius: '4px',
+                          border: '1px solid #dadce0',
+                          background: '#ffffff',
+                          color: '#003666',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <Copy size={13} />
+                        <span>Copy Patient View Link</span>
+                      </button>
+                    </div>
+
+                    {rx && (
+                      <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '6px', padding: '14px 16px' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', marginBottom: '6px' }}>
+                          Pharmapolis Bottle Label
+                        </div>
+                        <p style={{ margin: '0 0 10px 0', fontSize: '0.76rem', color: '#0c4a6e', lineHeight: 1.4 }}>
+                          Direct access to vector print templates formatted for Pharmapolis amber pharmaceutical bottles.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenLabelsModal(rx)}
+                          style={{
+                            height: '32px',
+                            padding: '0 12px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            fontSize: '0.76rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <Tag size={13} />
+                          <span>Open Bottle Labels Modal</span>
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Drawer Bottom Action Bar */}
+              <div
+                style={{
+                  padding: '12px 20px',
+                  borderTop: '1px solid #dadce0',
+                  background: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '10px'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedInspectorItem(null)}
+                  style={{
+                    height: '34px',
+                    padding: '0 14px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#3c4043',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close
+                </button>
+
+                {rx && (
+                  <Link
+                    href={`/rx/${rxCode}`}
+                    style={{
+                      height: '34px',
+                      padding: '0 16px',
+                      borderRadius: '4px',
+                      background: '#003666',
+                      color: '#ffffff',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <span>Open Full Monograph</span>
+                    <ArrowUpRight size={13} />
+                  </Link>
+                )}
+              </div>
+            </aside>
+          </div>
+        );
+      })()}
     </div>
   );
 }
