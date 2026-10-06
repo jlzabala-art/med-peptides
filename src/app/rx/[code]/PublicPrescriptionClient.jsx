@@ -1612,7 +1612,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       });
     }
 
-    // Preparation C: Topical Solution (TrichoSol)
+    // Preparation C: Topical Solution (TrichoSol) or Topical Foam (TrichoFoam)
     if (trichoSolItems.length > 0 || (pomadeItems.length === 0 && hormoneItems.length === 0 && trichoOilItems.length === 0 && oralItems.length === 0 && rawLines.length > 0)) {
       const solItems = (trichoSolItems.length > 0 ? trichoSolItems : rawLines).filter(i => {
         const n = (i.drugName || i.drug || i.name || i.productName || i.activeIngredient || '').toLowerCase();
@@ -1622,16 +1622,40 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                !n.includes('vehicle') && 
                !n.includes('trichosol') && 
                !n.includes('trichooil') && 
+               !n.includes('trichofoam') && 
                !n.includes('pentravan');
       });
-      const solVeh = vehicleLines.find(v => (v.drugName || v.name || '').toLowerCase().includes('trichosol'))?.name || 
-                     vehicleLines.find(v => (v.drugName || v.name || '').toLowerCase().includes('trichosol'))?.drugName || 
-                     'TrichoSol™ (Fagron)';
+
+      const isFoam = String(rx.dispensingForm || '').toLowerCase().includes('foam') ||
+                     String(rx.treatmentType || '').toLowerCase().includes('foam') ||
+                     vehicleLines.some(v => {
+                       const vn = (v.name || v.drugName || '').toLowerCase();
+                       return vn.includes('foam') || vn.includes('trichofoam');
+                     });
+
+      const foamVehicleMatch = vehicleLines.find(v => {
+        const vn = (v.name || v.drugName || '').toLowerCase();
+        return vn.includes('foam') || vn.includes('trichofoam');
+      });
+      const solVehicleMatch = vehicleLines.find(v => (v.drugName || v.name || '').toLowerCase().includes('trichosol'));
+
+      const vehicleName = isFoam
+        ? (foamVehicleMatch?.name || foamVehicleMatch?.drugName || 'TrichoFoam™ Lipophilic Topical Foam Base (100 mL)')
+        : (solVehicleMatch?.name || solVehicleMatch?.drugName || 'TrichoSol™ (Fagron)');
+
+      const dosageForm = isFoam
+        ? (isEs ? 'Espuma Tópica (TrichoFoam™)' : 'Topical Scalp Foam (TrichoFoam™)')
+        : (isEs ? 'Solución Tópica' : 'Topical Scalp Solution');
+
+      const treatmentTitle = rx.treatmentType || (isFoam
+        ? (isEs ? 'Terapia Folicular Tópica en Espuma (TrichoFoam™ 100 mL)' : 'Personalized Follicular Therapy (TrichoFoam™ 100 mL)')
+        : (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'));
+
       activeBlocks.push({
-        type: 'trichosol',
-        vehicleName: solVeh,
-        dosageForm: isEs ? 'Solución Tópica' : 'Topical Scalp Solution',
-        treatmentTitle: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'),
+        type: isFoam ? 'trichofoam' : 'trichosol',
+        vehicleName,
+        dosageForm,
+        treatmentTitle,
         route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
         volume: rx.volume || '100 mL',
         customPosology: getPosologyText(rx.posology) || '',
@@ -1735,6 +1759,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           cleanLabel = isEs ? 'Rutina Pre-Lavado: TrichoOil™' : 'Pre-Wash Routine: TrichoOil™ (1-2x Wk)';
         } else if (vName.toLowerCase().includes('sol')) {
           cleanLabel = isEs ? 'Modo de Empleo: TrichoSol™ (Noche)' : 'Administration: TrichoSol™ (Nightly)';
+        } else if (vName.toLowerCase().includes('foam')) {
+          cleanLabel = isEs ? 'Modo de Empleo: TrichoFoam™ (Noche)' : 'Administration: TrichoFoam™ (Nightly)';
         } else {
           cleanLabel = isEs ? `Pauta: ${vName || `Prep ${idx + 1}`}` : `Regimen: ${vName || `Prep ${idx + 1}`}`;
         }

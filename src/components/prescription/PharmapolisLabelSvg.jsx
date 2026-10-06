@@ -8,7 +8,9 @@ import { QRCodeSVG } from 'qrcode.react';
  */
 function wrapLines(text, maxChars = 60) {
   if (!text) return [];
-  const words = String(text).trim().split(/\s+/);
+  // Ensure quantities and units (e.g. "100 mL", "30 g", "90 Capsules", "4 %") are never split across lines
+  const boundText = String(text).trim().replace(/(\d+(?:\.\d+)?)\s+([a-zA-Z%]+)\b/g, '$1\u00A0$2');
+  const words = boundText.split(/[ \t\r\n]+/);
   const lines = [];
   let current = '';
 
@@ -301,31 +303,33 @@ export default function PharmapolisLabelSvg({
     // ── RIGHT COLUMN LAYOUT: FULL HORIZONTAL SPACE UTILIZATION (826 px usable width) ──
     const b1Y = isShort ? 14 : 20;
 
-    // Utilize wide right space: with 826px usable width, a 22-25px bold font comfortably holds up to 66-68 characters on a single line
-    const titleMaxChars = isShort ? 54 : 68;
+    // Utilize wide right space: with 826px usable width, a 20-24px bold font comfortably holds up to 72-74 characters on a single line
+    const titleMaxChars = isShort ? 58 : 74;
     const titleLines = wrapLines(productTitle, titleMaxChars);
     const isMultiLine = titleLines.length > 1;
 
     let tFontSize = isShort ? 18 : 24;
     if (!isMultiLine) {
-      if (productTitle.length > 52) {
+      if (productTitle.length > 58) {
+        tFontSize = isShort ? 16 : 21;
+      } else if (productTitle.length > 44) {
         tFontSize = isShort ? 17 : 23;
       } else if (productTitle.length < 35) {
         tFontSize = isShort ? 20 : 26;
       }
     } else {
-      tFontSize = isShort ? 15 : 20;
+      tFontSize = isShort ? 15 : 19;
     }
-    const tLineGap = isShort ? 20 : 26;
+    const tLineGap = isShort ? 22 : 28;
 
     // Block 1 vertical positions:
-    const titleStartY = isShort ? 20 : 25;
+    const titleStartY = isShort ? 22 : 28;
     const titleEndY = titleStartY + ((titleLines.length - 1) * tLineGap);
-    const b1BatchY = titleEndY + (isShort ? 22 : 27);
-    const b1DividerY = b1BatchY + (isShort ? 14 : 18);
+    const b1BatchY = titleEndY + (isShort ? 24 : 30);
+    const b1DividerY = b1BatchY + (isShort ? 16 : 20);
 
-    // Block 2: Guaranteed zero collision with Block 1. Calculated dynamically from Block 1 bottom!
-    const b2Y = b1Y + b1DividerY + (isShort ? 18 : 26);
+    // Block 2: Guaranteed zero collision with Block 1. Calculated dynamically from Block 1 bottom with generous breathing space!
+    const b2Y = b1Y + b1DividerY + (isShort ? 24 : 32);
     const bSafetyY = colHeight - (isShort ? 54 : 68);
 
     return (
@@ -381,8 +385,8 @@ export default function PharmapolisLabelSvg({
           </svg>
 
           {/* Under QR Verification Details - Clean without ellipsis */}
-          <text x="230" y={backQrSize + (isShort ? 28 : 36)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#003666" letterSpacing="0.5">
-            SCAN FOR DIGITAL POSOLOGY &amp; CoA
+          <text x="230" y={backQrSize + (isShort ? 28 : 36)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="900" fill="#003666" letterSpacing="0.5">
+            SCAN FOR REFILL &amp; DIGITAL POSOLOGY
           </text>
           <text x="230" y={backQrSize + (isShort ? 46 : 60)} textAnchor="middle" fontFamily="monospace" fontSize={isShort ? 12 : 15} fontWeight="700" fill="#475569">
             med-peptides.com/rx/{fileNumber}

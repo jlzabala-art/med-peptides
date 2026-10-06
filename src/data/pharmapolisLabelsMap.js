@@ -552,7 +552,7 @@ export function getAuthoritativeClinicalData(rx) {
   let doctorLicense = '';
   let clinicName = '';
 
-  const rawDoctor = rx.treatingDoctor ||
+  const rawDoctor = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !String(rx.treatingDoctor.name || '').includes('Miguel Ángel') ? rx.treatingDoctor : (typeof rx.treatingDoctor === 'string' && !rx.treatingDoctor.includes('Miguel Ángel') ? { name: rx.treatingDoctor } : null)) ||
     (rx.doctor && typeof rx.doctor === 'object' && !String(rx.doctor.name || '').includes('Miguel Ángel') ? rx.doctor : null) ||
     (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
 
@@ -564,15 +564,38 @@ export function getAuthoritativeClinicalData(rx) {
 
   if (!doctorName) {
     const candidate = rx.doctorName || rx.prescribingDoctor || rx.physician || '';
-    if (!String(candidate).includes('Miguel Ángel')) {
+    if (!String(candidate).includes('Miguel Ángel') && !String(candidate).includes('Aranda')) {
       doctorName = candidate;
     }
   }
 
-  const isHaytham = String(doctorName).toLowerCase().includes('haytham') || 
+  // Production doctor (Dr. Miguel Ángel López Aranda) is strictly internal and must NEVER appear on patient labels
+  if (String(doctorName).toLowerCase().includes('miguel ángel') || 
+      String(doctorName).toLowerCase().includes('miguel angel') || 
+      String(doctorName).toLowerCase().includes('aranda')) {
+    doctorName = '';
+  }
+
+  // Dr. Çağatay Sezgin for Hortman Clinics & Eldose Babu (TrichoTest official physician)
+  const isSezgin = String(doctorName).toLowerCase().includes('sezgin') ||
+                   String(doctorName).toLowerCase().includes('cagatay') ||
+                   String(rx.id || '').toLowerCase().includes('6f8qzc') ||
+                   String(rx.code || '').toUpperCase().includes('6F8QZC') ||
+                   String(rx.prescriptionCode || '').toUpperCase().includes('6F8QZC') ||
+                   String(patientName || '').toLowerCase().includes('eldose') ||
+                   String(clinicName || '').toLowerCase().includes('hortman');
+
+  if (isSezgin) {
+    doctorName = 'Dr. Çağatay Sezgin, MD, FISHRS';
+    doctorLicense = 'DHA 00208953-005';
+    clinicName = 'Hortman Clinics · Jumeirah 1, Dubai';
+  }
+
+  const isHaytham = !isSezgin && (
+                    String(doctorName).toLowerCase().includes('haytham') || 
                     String(doctorName).toLowerCase().includes('heytham') ||
                     String(rx.id || '').includes('zCXwP3MeSaid23OsGTBP') ||
-                    String(rx.code || '').includes('zCXwP3MeSaid23OsGTBP');
+                    String(rx.code || '').includes('zCXwP3MeSaid23OsGTBP'));
 
   if (isHaytham) {
     doctorName = 'Dr. Haytham Salem';
@@ -585,7 +608,7 @@ export function getAuthoritativeClinicalData(rx) {
   }
 
   if (!doctorLicense) {
-    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isHaytham ? 'DHA-P-0319842' : 'DHA Registered');
+    doctorLicense = rx.treatingDoctor?.license || rx.doctorLicense || (isSezgin ? 'DHA 00208953-005' : (isHaytham ? 'DHA-P-0319842' : 'DHA Registered'));
   }
 
   // QR encoded URL on bottles points directly to patient portal
@@ -697,14 +720,16 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
           ...regMatch,
           phaseNumber: phaseNum,
           patientName: auth.patientName || regMatch.patientName,
-          doctorName: auth.doctorName || regMatch.doctorName,
+          doctorName: (auth.doctorName && !auth.doctorName.toLowerCase().includes('miguel')) ? auth.doctorName : regMatch.doctorName,
           doctorLicense: auth.doctorLicense || regMatch.doctorLicense,
           clinicName: auth.clinicName || regMatch.clinicName,
           fileNumber: auth.fileNumber || regMatch.fileNumber,
           targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
           apis: (form?.apis && form.apis.length > 0) ? form.apis : (regMatch.apis || rx.items || rx.prescriptionLines || []),
           formula: formulaText || regMatch.formula || '',
-          vehicle: form?.vehicle || regMatch.vehicle || null,
+          vehicle: (regMatch.vehicle && regMatch.vehicle.name && regMatch.vehicle.name.toLowerCase().includes('foam'))
+            ? regMatch.vehicle
+            : (form?.vehicle || regMatch.vehicle || null),
           prodDate: rxProdDate || regMatch.prodDate,
           expDate: rxExpDate || regMatch.expDate
         };
