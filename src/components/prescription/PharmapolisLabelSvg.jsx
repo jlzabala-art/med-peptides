@@ -298,7 +298,8 @@ export default function PharmapolisLabelSvg({
   if (variant === 'backQr') {
     const colY = patientBoxBottom + (isShort ? 12 : 18);
     const colHeight = footerLineY - colY - (isShort ? 12 : 18);
-    const backQrSize = isShort ? 180 : Math.min(colHeight - 130, 240);
+    const backQrSize = isShort ? 200 : Math.min(colHeight - 64, 275);
+    const qrStartY = Math.max(isShort ? 12 : 18, Math.round((colHeight - backQrSize - (isShort ? 32 : 44)) / 2));
 
     // ── RIGHT COLUMN LAYOUT: FULL HORIZONTAL SPACE UTILIZATION (826 px usable width) ──
     const b1Y = isShort ? 14 : 20;
@@ -374,7 +375,7 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(60, ${colY})`}>
           <rect x="0" y="0" width="460" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
           
-          <svg x={Math.round((460 - backQrSize) / 2)} y={isShort ? 10 : 16} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
+          <svg x={Math.round((460 - backQrSize) / 2)} y={qrStartY} width={backQrSize} height={backQrSize} viewBox={`0 0 ${backQrSize} ${backQrSize}`}>
             <QRCodeSVG
               value={targetRxUrl}
               size={backQrSize}
@@ -384,21 +385,19 @@ export default function PharmapolisLabelSvg({
             />
           </svg>
 
-          {/* Under QR Verification Details - Clean without ellipsis */}
-          <text x="230" y={backQrSize + (isShort ? 28 : 36)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="900" fill="#003666" letterSpacing="0.5">
-            SCAN FOR REFILL &amp; DIGITAL POSOLOGY
+          {/* Under QR Refill & Digital Posology Callout */}
+          <text
+            x="230"
+            y={qrStartY + backQrSize + (isShort ? 26 : 34)}
+            textAnchor="middle"
+            fontFamily="Arial, Helvetica, sans-serif"
+            fontSize={isShort ? 13 : 16}
+            fontWeight="900"
+            fill="#003666"
+            letterSpacing="0.4"
+          >
+            <tspan fill="#16a34a" fontWeight="900">✔ </tspan>SCAN FOR REFILL &amp; DIGITAL POSOLOGY
           </text>
-          <text x="230" y={backQrSize + (isShort ? 46 : 60)} textAnchor="middle" fontFamily="monospace" fontSize={isShort ? 12 : 15} fontWeight="700" fill="#475569">
-            med-peptides.com/rx/{fileNumber}
-          </text>
-          
-          {/* Status & Security Verification Pill */}
-          <g transform={`translate(230, ${backQrSize + (isShort ? 72 : 96)})`}>
-            <rect x="-160" y="-14" width="320" height={isShort ? 28 : 34} fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1.5" rx="17" />
-            <text x="0" y={isShort ? 5 : 8} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="800" fill="#065f46">
-              ✓ Verified Clinical Atlas Record
-            </text>
-          </g>
         </g>
 
         {/* RIGHT COLUMN: CLINICAL INGREDIENTS, BATCH & SAFETY */}
