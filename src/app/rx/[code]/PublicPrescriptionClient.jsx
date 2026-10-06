@@ -150,30 +150,61 @@ const PUBLIC_RX_STYLES = `
     color: #1a73e8;
     font-weight: 600;
   }
+  .rx-header-buttons-group {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
   @media (max-width: 640px) {
     .rx-header-action-toolbar {
+      width: 100% !important;
+      margin-top: 12px !important;
+    }
+    .rx-header-buttons-group {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      width: 100% !important;
+      gap: 8px !important;
+    }
+    .rx-header-action-btn {
+      height: 42px !important;
+      min-height: 42px !important;
+      font-size: 0.82rem !important;
+      border-radius: 6px !important;
+      padding: 0 12px !important;
+      box-sizing: border-box !important;
+    }
+    .rx-header-action-btn.rx-btn-text {
+      flex: 1 1 calc(50% - 6px) !important;
+      min-width: 135px !important;
+      justify-content: center !important;
+    }
+    .rx-header-action-btn.rx-btn-icon {
+      flex: 0 0 42px !important;
+      width: 42px !important;
+      min-width: 42px !important;
+      padding: 0 !important;
+      justify-content: center !important;
+    }
+  }
+  @media (max-width: 440px) {
+    .rx-header-buttons-group {
       display: grid !important;
       grid-template-columns: 1fr 1fr !important;
       width: 100% !important;
       gap: 8px !important;
-      margin-top: 12px !important;
     }
-    /* Google Cloud UX: Primary CTA spans full width on top row */
-    .rx-header-action-toolbar > :first-child {
-      grid-column: 1 / -1 !important;
+    .rx-header-action-btn.rx-btn-text {
+      flex: none !important;
       width: 100% !important;
+      min-width: 0 !important;
     }
-    .rx-header-action-toolbar > :first-child .rx-header-action-btn {
+    .rx-header-action-btn.rx-btn-icon {
+      flex: none !important;
       width: 100% !important;
-      justify-content: center !important;
-      height: 38px !important;
-      font-size: 0.82rem !important;
-    }
-    .rx-header-action-btn {
-      width: 100% !important;
-      height: 36px !important;
-      font-size: 0.78rem !important;
-      padding: 0 10px !important;
+      min-width: 0 !important;
     }
   }
 `;
@@ -2103,7 +2134,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 <div className="rx-header-action-toolbar" style={{ position: 'relative' }}>
                   {!isPatientView ? (
                     /* Doctor View: single primary CTA + icon-ghost secondaries */
-                    <div ref={docDropdownRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <div ref={docDropdownRef} className="rx-header-buttons-group">
                       {/* PRIMARY: Documents dropdown */}
                       <button
                         type="button"
@@ -2111,15 +2142,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           triggerHaptic('selection');
                           setShowDocDropdown(prev => !prev);
                         }}
-                        className="rx-header-action-btn rx-btn-primary"
+                        className="rx-header-action-btn rx-btn-primary rx-btn-text"
                         style={{
                           background: '#1a73e8',
                           color: '#ffffff',
                           border: '1px solid #1a73e8',
                           fontWeight: 600,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
                           cursor: 'pointer'
                         }}
                         title={isEs ? 'Ver monografía, guía del paciente o etiquetas' : 'View Medical Monograph, Patient Guide or Bottle Labels'}
@@ -2140,17 +2168,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <button
                         type="button"
                         onClick={() => { triggerHaptic('selection'); setShowAtlasQuotationModal(true); }}
-                        className="rx-header-action-btn"
+                        className="rx-header-action-btn rx-btn-text"
                         style={{
                           background: '#0284c7',
                           color: '#ffffff',
                           border: '1px solid #0284c7',
                           fontWeight: 650,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '0 12px'
+                          cursor: 'pointer'
                         }}
                         title={isEs ? 'Solicitar cotización oficial a Atlas' : 'Request compounding quotation to Atlas'}
                       >
@@ -2162,9 +2186,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <button
                         type="button"
                         onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
-                        className="rx-header-action-btn"
+                        className="rx-header-action-btn rx-btn-icon"
                         title={isEs ? 'Verificación QR de la prescripción' : 'QR Verification'}
-                        style={{ padding: '0 10px', minWidth: 36 }}
+                        style={{ minWidth: 36 }}
                       >
                         <QrCode size={14} color="#1a73e8" />
                       </button>
@@ -2172,9 +2196,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       {/* Doctor Public Portal Home Link */}
                       <Link
                         href={doctorPublicUrl}
-                        className="rx-header-action-btn"
+                        className="rx-header-action-btn rx-btn-icon"
                         title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
-                        style={{ padding: '0 10px', minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                        style={{ minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
                       >
                         <Home size={14} color="#1a73e8" />
                       </Link>
@@ -2248,13 +2272,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     </div>
                   ) : (
                     /* Patient View: primary CTA + icon-ghost secondaries */
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <div className="rx-header-buttons-group">
                       {/* PRIMARY: Treatment Guide */}
                       <button
                         type="button"
                         onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
-                        className="rx-header-action-btn rx-btn-primary"
-                        style={{ background: '#1a73e8', color: '#ffffff', border: '1px solid #1a73e8', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                        className="rx-header-action-btn rx-btn-primary rx-btn-text"
+                        style={{ background: '#1a73e8', color: '#ffffff', border: '1px solid #1a73e8', fontWeight: 600, cursor: 'pointer' }}
                         title={isEs ? 'Ver guía de tratamiento y PDF' : 'View treatment guide & PDF'}
                       >
                         <FileText size={14} color="#ffffff" />
@@ -2265,16 +2289,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <button
                         type="button"
                         onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
-                        className="rx-header-action-btn rx-btn-secondary"
+                        className="rx-header-action-btn rx-btn-secondary rx-btn-text"
                         style={{
                           background: '#ffffff',
                           color: '#1a73e8',
                           border: '1px solid #dadce0',
                           fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 6
+                          cursor: 'pointer'
                         }}
                         title={isEs ? 'Ver todas mis prescripciones médicas' : 'View all my prescriptions across all doctors'}
                       >
@@ -2294,9 +2315,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                             setTimeout(() => setCopied(false), 2000);
                           }
                         }}
-                        className="rx-header-action-btn"
+                        className="rx-header-action-btn rx-btn-icon"
                         title={isEs ? 'Copiar enlace' : 'Copy link'}
-                        style={{ padding: '0 10px', minWidth: 36 }}
+                        style={{ minWidth: 36 }}
                       >
                         {copied ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
                       </button>
@@ -2305,9 +2326,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <button
                         type="button"
                         onClick={() => { triggerHaptic('selection'); setShowQrModal(true); }}
-                        className="rx-header-action-btn"
+                        className="rx-header-action-btn rx-btn-icon"
                         title={isEs ? 'Verificación QR' : 'QR Verification'}
-                        style={{ padding: '0 10px', minWidth: 36 }}
+                        style={{ minWidth: 36 }}
                       >
                         <QrCode size={14} color="#1a73e8" />
                       </button>
@@ -2315,9 +2336,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       {/* Doctor Public Portal Home Link */}
                       <Link
                         href={doctorPublicUrl}
-                        className="rx-header-action-btn"
+                        className="rx-header-action-btn rx-btn-icon"
                         title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
-                        style={{ padding: '0 10px', minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                        style={{ minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
                       >
                         <Home size={14} color="#1a73e8" />
                       </Link>

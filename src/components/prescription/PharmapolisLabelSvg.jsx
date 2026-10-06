@@ -147,20 +147,37 @@ export default function PharmapolisLabelSvg({
       });
       if (filtered.length > 0) {
         return filtered.map(a => {
-          const name = a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API';
+          let name = String(a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API').trim();
           let dose = a.dosage || a.dose || a.strength || a.concentration || '';
           if (dose) {
             dose = String(dose)
               .replace(/Tópico/gi, 'Topical')
               .replace(/Oral/gi, 'Oral')
               .replace(/Dosis a calibrar/gi, 'Standard Compounded Strength')
-              .replace(/Dose to calibrate/gi, '3% Topical');
+              .replace(/Dose to calibrate/gi, '3% Topical')
+              .trim();
           } else {
             const nLower = name.toLowerCase();
             if (nLower.includes('prostaquinon')) dose = '3% Topical';
             else if (nLower.includes('minoxidil')) dose = '5% Topical';
             else if (nLower.includes('latanoprost')) dose = '0.005% Topical';
           }
+
+          // Anti-duplication engine: if name already ends with concentration/dosage that dose repeats
+          // Example: name = "Diltiazem Hydrochloride 2%", dose = "2% (0.6 g)" -> "Diltiazem Hydrochloride 2% (0.6 g)"
+          if (dose) {
+            const trailingDoseMatch = name.match(/\s+([0-9]+(?:\.[0-9]+)?\s*(?:%|mg|mcg|g|iu|fu|spu))\s*$/i);
+            if (trailingDoseMatch) {
+              const trailingUnit = trailingDoseMatch[1].replace(/\s+/g, '').toLowerCase();
+              const doseTrimmed = dose.replace(/\s+/g, '').toLowerCase();
+              if (doseTrimmed.startsWith(trailingUnit)) {
+                name = name.slice(0, trailingDoseMatch.index).trim();
+              }
+            } else if (name.toLowerCase().endsWith(dose.toLowerCase())) {
+              return name;
+            }
+          }
+
           return `${name} ${dose}`.trim();
         });
       }
@@ -281,8 +298,34 @@ export default function PharmapolisLabelSvg({
     const colHeight = footerLineY - colY - (isShort ? 12 : 18);
     const backQrSize = isShort ? 180 : Math.min(colHeight - 130, 240);
 
-    const b1Y = isShort ? 16 : 22;
-    const b2Y = isShort ? 94 : 120;
+    // ── RIGHT COLUMN LAYOUT: FULL HORIZONTAL SPACE UTILIZATION (826 px usable width) ──
+    const b1Y = isShort ? 14 : 20;
+
+    // Utilize wide right space: with 826px usable width, a 22-25px bold font comfortably holds up to 66-68 characters on a single line
+    const titleMaxChars = isShort ? 54 : 68;
+    const titleLines = wrapLines(productTitle, titleMaxChars);
+    const isMultiLine = titleLines.length > 1;
+
+    let tFontSize = isShort ? 18 : 24;
+    if (!isMultiLine) {
+      if (productTitle.length > 52) {
+        tFontSize = isShort ? 17 : 23;
+      } else if (productTitle.length < 35) {
+        tFontSize = isShort ? 20 : 26;
+      }
+    } else {
+      tFontSize = isShort ? 15 : 20;
+    }
+    const tLineGap = isShort ? 20 : 26;
+
+    // Block 1 vertical positions:
+    const titleStartY = isShort ? 20 : 25;
+    const titleEndY = titleStartY + ((titleLines.length - 1) * tLineGap);
+    const b1BatchY = titleEndY + (isShort ? 22 : 27);
+    const b1DividerY = b1BatchY + (isShort ? 14 : 18);
+
+    // Block 2: Guaranteed zero collision with Block 1. Calculated dynamically from Block 1 bottom!
+    const b2Y = b1Y + b1DividerY + (isShort ? 18 : 26);
     const bSafetyY = colHeight - (isShort ? 54 : 68);
 
     return (
@@ -358,40 +401,29 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(550, ${colY})`}>
           <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
 
-          {/* Block 1: Formulation Name & Batch Numbers - Full title wrapping, ZERO ellipsis */}
-          {(() => {
-            const titleLines = wrapLines(productTitle, isShort ? 38 : 44);
-            const isMultiLine = titleLines.length > 1;
-            const tFontSize = isShort ? (isMultiLine ? 18 : 22) : (isMultiLine ? 22 : 27);
-            const tLineGap = isShort ? 22 : 28;
-            const b1BatchY = (isShort ? 24 : 32) + (titleLines.length * tLineGap) + (isShort ? 6 : 10);
-            const b1DividerY = b1BatchY + (isShort ? 14 : 18);
-
-            return (
-              <g transform={`translate(32, ${b1Y})`}>
-                <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#64748b" letterSpacing="0.8">
-                  FORMULATION &amp; DISPENSING BATCH
-                </text>
-                {titleLines.map((line, lIdx) => (
-                  <text
-                    key={lIdx}
-                    x="0"
-                    y={(isShort ? 22 : 28) + (lIdx * tLineGap)}
-                    fontFamily="Arial, Helvetica, sans-serif"
-                    fontSize={tFontSize}
-                    fontWeight="900"
-                    fill="#000000"
-                  >
-                    {line}
-                  </text>
-                ))}
-                <text x="0" y={b1BatchY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 18} fontWeight="700" fill="#003666">
-                  Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
-                </text>
-                <line x1="0" y1={b1DividerY} x2="826" y2={b1DividerY} stroke="#e2e8f0" strokeWidth="1.6" />
-              </g>
-            );
-          })()}
+          {/* Block 1: Formulation Name & Batch Numbers - Full title utilizing width, ZERO ellipsis */}
+          <g transform={`translate(32, ${b1Y})`}>
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#64748b" letterSpacing="0.8">
+              FORMULATION &amp; DISPENSING BATCH
+            </text>
+            {titleLines.map((line, lIdx) => (
+              <text
+                key={lIdx}
+                x="0"
+                y={titleStartY + (lIdx * tLineGap)}
+                fontFamily="Arial, Helvetica, sans-serif"
+                fontSize={tFontSize}
+                fontWeight="900"
+                fill="#000000"
+              >
+                {line}
+              </text>
+            ))}
+            <text x="0" y={b1BatchY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 18} fontWeight="700" fill="#003666">
+              Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
+            </text>
+            <line x1="0" y1={b1DividerY} x2="826" y2={b1DividerY} stroke="#e2e8f0" strokeWidth="1.6" />
+          </g>
 
           {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & STRENGTH (All ingredients considered, no drops) */}
           {(() => {
@@ -410,7 +442,7 @@ export default function PharmapolisLabelSvg({
             }
 
             const baseStartY = (isShort ? 26 : 34) + (ingCount * ingLineGap) + (isShort ? 4 : 6);
-            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 46 : 54);
+            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 54 : 68);
             const baseFontSize = isShort ? (vehicleName.length > 40 ? 15 : 18) : (vehicleName.length > 45 ? 19 : 23);
             const baseLineGap = isShort ? 18 : 22;
 
@@ -515,10 +547,10 @@ export default function PharmapolisLabelSvg({
   const scanRxY = isShort ? 118 : 132;
   const scanRxSize = isShort ? 12 : 14;
 
-  // Text Wrapping with clean boundaries
-  const maxFormulaChars = 52;
+  // Text Wrapping with clean boundaries - utilizing wide right horizontal canvas (up to 1380px)
+  const maxFormulaChars = isShort ? 54 : 68;
   const formulaLines = formula ? wrapLines(formula, maxFormulaChars) : [];
-  const directionLines = wrapDirections(directions, 42, 54);
+  const directionLines = wrapDirections(directions, isShort ? 46 : 56, isShort ? 58 : 72);
 
   // Dynamic typography scale: calibrated to 9.5pt - 11.5pt physical print equivalents
   const titleFontSize = isShort ? 38 : (productTitle.length > 48 ? 44 : 50); // ~11.5 pt
