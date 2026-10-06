@@ -218,9 +218,11 @@ export const getPrescriptionColumns = (options = {}) => {
       render: (rx) => {
         const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
-        const doctor = rx.doctor?.name || rx.doctorName || '—';
+        const treatingDocName = typeof rx.treatingDoctor === 'string' ? rx.treatingDoctor : rx.treatingDoctor?.name;
+        const doctor = treatingDocName || rx.doctor?.name || rx.doctorName || rx.prescribingDoctor || '—';
         const formattedDoc = formatDoctorName(doctor);
-        const clinicName = rx.treatingDoctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
+        const treatingDocClinic = typeof rx.treatingDoctor === 'object' ? rx.treatingDoctor?.clinic : null;
+        const clinicName = treatingDocClinic || rx.doctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0, overflow: 'hidden' }}>

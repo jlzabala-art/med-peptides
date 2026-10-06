@@ -52,16 +52,16 @@ function normalizeRx(d, id) {
     status: d.status || d.state || 'active',
     state: d.state || d.status || 'active',
     treatmentTitle: d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation',
-    clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || '',
-    clinicName: d.clinicName || d.clinic || '',
+    clinic: d.clinic || d.clinicName || (typeof d.treatingDoctor === 'object' ? d.treatingDoctor?.clinic : '') || d.doctor?.clinic || '',
+    clinicName: d.clinicName || d.clinic || (typeof d.treatingDoctor === 'object' ? d.treatingDoctor?.clinic : '') || '',
     createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
     items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
     prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
     compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
     posology: getPosologyString(d.posology),
     structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
-    treatingDoctor: d.treatingDoctor ? { name: d.treatingDoctor.name, clinic: d.treatingDoctor.clinic } : null,
-    doctorName: d.doctorName || d.treatingDoctor?.name || '',
+    treatingDoctor: (typeof d.treatingDoctor === 'string' ? { name: d.treatingDoctor, clinic: d.clinic } : (d.treatingDoctor ? { name: d.treatingDoctor.name, clinic: d.treatingDoctor.clinic } : null)),
+    doctorName: (typeof d.treatingDoctor === 'string' ? d.treatingDoctor : d.treatingDoctor?.name) || d.doctorName || d.doctor?.name || d.prescribingDoctor || '',
     description: d.description || ''
   };
 }

@@ -337,12 +337,12 @@ export default function PharmapolisLabelSvg({
             />
           </svg>
 
-          {/* Under QR Verification Details */}
+          {/* Under QR Verification Details - Clean without ellipsis */}
           <text x="230" y={backQrSize + (isShort ? 28 : 36)} textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#003666" letterSpacing="0.5">
             SCAN FOR DIGITAL POSOLOGY &amp; CoA
           </text>
           <text x="230" y={backQrSize + (isShort ? 46 : 60)} textAnchor="middle" fontFamily="monospace" fontSize={isShort ? 12 : 15} fontWeight="700" fill="#475569">
-            {cleanDisplayUrl.length > 34 ? cleanDisplayUrl.slice(0, 32) + '...' : cleanDisplayUrl}
+            med-peptides.com/rx/{fileNumber}
           </text>
           
           {/* Status & Security Verification Pill */}
@@ -358,70 +358,123 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(550, ${colY})`}>
           <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
 
-          {/* Block 1: Formulation Name & Batch Numbers */}
-          <g transform={`translate(32, ${b1Y})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#64748b" letterSpacing="0.8">
-              FORMULATION &amp; DISPENSING BATCH
-            </text>
-            <text x="0" y={isShort ? 26 : 34} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 22 : 28} fontWeight="900" fill="#000000">
-              {productTitle.length > 40 ? productTitle.slice(0, 38) + '...' : productTitle}
-            </text>
-            <text x="0" y={isShort ? 52 : 66} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 15 : 19} fontWeight="700" fill="#003666">
-              Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
-            </text>
-            <line x1="0" y1={isShort ? 64 : 80} x2="826" y2={isShort ? 64 : 80} stroke="#e2e8f0" strokeWidth="1.6" />
-          </g>
+          {/* Block 1: Formulation Name & Batch Numbers - Full title wrapping, ZERO ellipsis */}
+          {(() => {
+            const titleLines = wrapLines(productTitle, isShort ? 38 : 44);
+            const isMultiLine = titleLines.length > 1;
+            const tFontSize = isShort ? (isMultiLine ? 18 : 22) : (isMultiLine ? 22 : 27);
+            const tLineGap = isShort ? 22 : 28;
+            const b1BatchY = (isShort ? 24 : 32) + (titleLines.length * tLineGap) + (isShort ? 6 : 10);
+            const b1DividerY = b1BatchY + (isShort ? 14 : 18);
 
-          {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & STRENGTH (Prominent, High-Contrast Typography) */}
-          <g transform={`translate(32, ${b2Y})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
-              ACTIVE COMPOUNDED INGREDIENTS &amp; STRENGTH
-            </text>
-            
-            {/* Active Ingredients List */}
-            {activeIngredientsList.slice(0, 3).map((ing, iIdx) => (
-              <text
-                key={iIdx}
-                x="0"
-                y={isShort ? 30 + iIdx * 34 : 40 + iIdx * 44}
-                fontFamily="Arial, Helvetica, sans-serif"
-                fontSize={isShort ? 24 : 32}
-                fontWeight="800"
-                fill="#0f172a"
-              >
-                • {ing}
-              </text>
-            ))}
+            return (
+              <g transform={`translate(32, ${b1Y})`}>
+                <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#64748b" letterSpacing="0.8">
+                  FORMULATION &amp; DISPENSING BATCH
+                </text>
+                {titleLines.map((line, lIdx) => (
+                  <text
+                    key={lIdx}
+                    x="0"
+                    y={(isShort ? 22 : 28) + (lIdx * tLineGap)}
+                    fontFamily="Arial, Helvetica, sans-serif"
+                    fontSize={tFontSize}
+                    fontWeight="900"
+                    fill="#000000"
+                  >
+                    {line}
+                  </text>
+                ))}
+                <text x="0" y={b1BatchY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 18} fontWeight="700" fill="#003666">
+                  Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
+                </text>
+                <line x1="0" y1={b1DividerY} x2="826" y2={b1DividerY} stroke="#e2e8f0" strokeWidth="1.6" />
+              </g>
+            );
+          })()}
 
-            {/* Compounding Base / Vehicle */}
-            <text
-              x="0"
-              y={isShort ? 30 + Math.min(activeIngredientsList.length, 3) * 34 + 6 : 40 + Math.min(activeIngredientsList.length, 3) * 44 + 8}
-              fontFamily="Arial, Helvetica, sans-serif"
-              fontSize={isShort ? 18 : 24}
-              fontWeight="700"
-              fill="#0369a1"
-            >
-              Base: {vehicleName.length > 50 ? vehicleName.slice(0, 48) + '...' : vehicleName}
-            </text>
-          </g>
+          {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & STRENGTH (All ingredients considered, no drops) */}
+          {(() => {
+            const ingCount = activeIngredientsList.length;
+            let ingFontSize = isShort ? 22 : 28;
+            let ingLineGap = isShort ? 30 : 38;
+            if (ingCount >= 5) {
+              ingFontSize = isShort ? 15 : 18;
+              ingLineGap = isShort ? 20 : 24;
+            } else if (ingCount === 4) {
+              ingFontSize = isShort ? 17 : 21;
+              ingLineGap = isShort ? 23 : 28;
+            } else if (ingCount === 3) {
+              ingFontSize = isShort ? 19 : 24;
+              ingLineGap = isShort ? 26 : 32;
+            }
 
-          {/* Block 3: Mandatory Precaution & Prescriber */}
+            const baseStartY = (isShort ? 26 : 34) + (ingCount * ingLineGap) + (isShort ? 4 : 6);
+            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 46 : 54);
+            const baseFontSize = isShort ? (vehicleName.length > 40 ? 15 : 18) : (vehicleName.length > 45 ? 19 : 23);
+            const baseLineGap = isShort ? 18 : 22;
+
+            return (
+              <g transform={`translate(32, ${b2Y})`}>
+                <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                  ACTIVE COMPOUNDED INGREDIENTS &amp; STRENGTH
+                </text>
+                
+                {/* 100% of Active Ingredients Rendered */}
+                {activeIngredientsList.map((ing, iIdx) => (
+                  <text
+                    key={iIdx}
+                    x="0"
+                    y={(isShort ? 26 : 34) + (iIdx * ingLineGap)}
+                    fontFamily="Arial, Helvetica, sans-serif"
+                    fontSize={ingFontSize}
+                    fontWeight="800"
+                    fill="#0f172a"
+                  >
+                    • {ing}
+                  </text>
+                ))}
+
+                {/* Compounding Base / Vehicle - Fully rendered with adaptive wrapping, ZERO ellipsis */}
+                {baseLines.map((bLine, bIdx) => (
+                  <text
+                    key={`base-${bIdx}`}
+                    x="0"
+                    y={baseStartY + (bIdx * baseLineGap)}
+                    fontFamily="Arial, Helvetica, sans-serif"
+                    fontSize={baseFontSize}
+                    fontWeight="700"
+                    fill="#0369a1"
+                  >
+                    {bLine}
+                  </text>
+                ))}
+              </g>
+            );
+          })()}
+
+          {/* Block 3: Mandatory Precaution & Prescriber - Full clinic name, ZERO ellipsis */}
           <g transform={`translate(32, ${bSafetyY})`}>
             <line x1="0" y1={isShort ? -12 : -16} x2="826" y2={isShort ? -12 : -16} stroke="#e2e8f0" strokeWidth="1.6" />
             <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#b91c1c" letterSpacing="0.4">
               {cautionText}
             </text>
-            <text
-              x="0"
-              y={isShort ? 18 : 24}
-              fontFamily="Arial, Helvetica, sans-serif"
-              fontSize={isShort ? 13 : 16}
-              fontWeight="600"
-              fill="#64748b"
-            >
-              Rx: {doctorName} • {clinicName.length > 30 ? clinicName.slice(0, 28) + '...' : clinicName} ({doctorLicense})
-            </text>
+            {(() => {
+              const rxFullText = `Rx: ${doctorName} • ${clinicName} (${doctorLicense})`;
+              const rxFontSize = isShort ? (rxFullText.length > 65 ? 12 : 13) : (rxFullText.length > 70 ? 14 : 16);
+              return (
+                <text
+                  x="0"
+                  y={isShort ? 18 : 24}
+                  fontFamily="Arial, Helvetica, sans-serif"
+                  fontSize={rxFontSize}
+                  fontWeight="600"
+                  fill="#64748b"
+                >
+                  {rxFullText}
+                </text>
+              );
+            })()}
           </g>
         </g>
 

@@ -17,8 +17,10 @@ import { resolveDoctorProfile } from '../../../services/doctorDirectoryService';
 import { toast } from 'react-hot-toast';
 
 export default function RequestAtlasQuotationModal({ rx, isOpen, onClose, onSuccess }) {
-  const initialDoctor = rx?.treatingDoctor || rx?.doctor || {};
-  const initialName = initialDoctor.name || rx?.doctorName || '';
+  const docObj = (rx?.doctor && typeof rx?.doctor === 'object') ? rx.doctor : {};
+  const treatingDocObj = (rx?.treatingDoctor && typeof rx?.treatingDoctor === 'object') ? rx.treatingDoctor : {};
+  const initialName = (typeof rx?.treatingDoctor === 'string' ? rx.treatingDoctor : treatingDocObj.name) || docObj.name || rx?.doctorName || rx?.prescribingDoctor || '';
+  const initialDoctor = { ...docObj, ...treatingDocObj };
   const resolvedInitial = initialName ? resolveDoctorProfile(initialName) : null;
 
   const [requesterName, setRequesterName] = useState(resolvedInitial?.name || initialName || '');

@@ -202,8 +202,10 @@ export async function generateMetadata({ params }) {
   const rx = await getPrescriptionData(code);
 
   const patientName = rx?.patient?.name || rx?.patientName || 'Patient';
-  const doctor = rx?.doctorName || rx?.prescribingDoctor || rx?.treatingDoctor?.name || rx?.doctor?.name || null;
-  let clinic = rx?.clinic || rx?.treatingDoctor?.clinic || 'Atlas Health Services';
+  const treatingDocName = typeof rx?.treatingDoctor === 'string' ? rx.treatingDoctor : rx?.treatingDoctor?.name;
+  const doctor = treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || null;
+  const treatingDocClinic = typeof rx?.treatingDoctor === 'object' ? rx?.treatingDoctor?.clinic : null;
+  let clinic = treatingDocClinic || rx?.doctor?.clinic || rx?.clinic || 'Atlas Health Services';
   if (clinic.toLowerCase().includes('mediluxe') || clinic.toLowerCase().includes('bedaya')) {
     clinic = 'Atlas Health Services';
   }

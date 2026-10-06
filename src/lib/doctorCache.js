@@ -1,4 +1,5 @@
 import { adminDb } from '@/lib/firebaseAdmin';
+import { KNOWN_DOCTORS_DIRECTORY } from '@/services/doctorDirectoryService';
 
 // ── In-Memory RAM Cache (Golden Rule #2) ─────────────────────────────────────
 // Layer 1: 0ms RAM cache with 10-minute TTL
@@ -98,6 +99,36 @@ async function getCachedDoctorDirectory() {
     });
   });
 
+  // Enrich with KNOWN_DOCTORS_DIRECTORY for doctors without user accounts
+  if (Array.isArray(KNOWN_DOCTORS_DIRECTORY)) {
+    for (const kd of KNOWN_DOCTORS_DIRECTORY) {
+      const existing = doctors.find(d => d.id === kd.id || slugify(d.name) === slugify(kd.name));
+      if (!existing) {
+        doctors.push({
+          id: kd.id,
+          docId: kd.id,
+          opaqueCode: getDoctorOpaqueCode(kd.id, kd),
+          nameSlug: slugify(kd.name),
+          data: {
+            displayName: kd.name,
+            name: kd.name,
+            clinic: kd.clinic || kd.clinicName,
+            specialty: kd.specialty,
+            licenseNumber: kd.license || kd.licenseNumber,
+            phone: kd.phone,
+            mobile: kd.mobile,
+            email: kd.email,
+            address: kd.address,
+            city: kd.city,
+            country: kd.country
+          },
+          name: kd.name,
+          license: kd.license || kd.licenseNumber || ''
+        });
+      }
+    }
+  }
+
   DOCTOR_DIRECTORY_CACHE.doctors = doctors;
   DOCTOR_DIRECTORY_CACHE.expiresAt = now + (15 * 60 * 1000);
   return doctors;
@@ -167,8 +198,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   rxSnap.forEach((doc) => {
     const d = doc.data();
-    const dDocName = String(d.treatingDoctor?.name || d.doctorName || d.doctor?.name || d.prescribingDoctor || '').toLowerCase();
-    const dDocId = String(d.treatingDoctor?.id || d.doctorId || d.doctor?.id || '').toLowerCase();
+    const treatingDocName = typeof d.treatingDoctor === 'string' ? d.treatingDoctor : d.treatingDoctor?.name;
+    const treatingDocId = typeof d.treatingDoctor === 'object' ? d.treatingDoctor?.id : null;
+    const dDocName = String(treatingDocName || d.doctorName || d.doctor?.name || d.prescribingDoctor || '').toLowerCase();
+    const dDocId = String(treatingDocId || d.treatingDoctorId || d.doctorId || d.doctor?.id || '').toLowerCase();
 
     const isMatch = (doctorId && dDocId === doctorId.toLowerCase()) ||
                     (cleanDoctorQuery && dDocName && (dDocName.includes(cleanDoctorQuery) || cleanDoctorQuery.includes(dDocName)));

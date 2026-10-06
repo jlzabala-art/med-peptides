@@ -68,17 +68,19 @@ function normalizePatientRx(d, id, defaultPatName) {
     status: d.status || d.state || 'active',
     state: d.state || d.status || 'active',
     treatmentTitle: d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation',
-    clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || 'Clinical Dispensary',
-    clinicName: d.clinicName || d.clinic || d.treatingDoctor?.clinic || '',
+    clinic: d.clinic || d.clinicName || (typeof d.treatingDoctor === 'object' ? d.treatingDoctor?.clinic : '') || d.doctor?.clinic || 'Clinical Dispensary',
+    clinicName: d.clinicName || d.clinic || (typeof d.treatingDoctor === 'object' ? d.treatingDoctor?.clinic : '') || '',
     createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
     items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
     prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
     compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
     posology: getPosologyString(d.posology),
     structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
-    treatingDoctor: d.treatingDoctor ? { name: formatDoctorName(d.treatingDoctor.name), clinic: d.treatingDoctor.clinic, specialty: d.treatingDoctor.specialty } : null,
-    doctorName: formatDoctorName(d.doctorName || d.treatingDoctor?.name || 'Treating Physician'),
-    doctorLicense: d.doctorLicense || d.treatingDoctor?.license || '',
+    treatingDoctor: typeof d.treatingDoctor === 'string'
+      ? { name: formatDoctorName(d.treatingDoctor), clinic: d.clinic, specialty: d.specialty || '' }
+      : (d.treatingDoctor ? { name: formatDoctorName(d.treatingDoctor.name), clinic: d.treatingDoctor.clinic, specialty: d.treatingDoctor.specialty } : null),
+    doctorName: formatDoctorName((typeof d.treatingDoctor === 'string' ? d.treatingDoctor : d.treatingDoctor?.name) || d.doctorName || d.doctor?.name || d.prescribingDoctor || 'Treating Physician'),
+    doctorLicense: d.doctorLicense || (typeof d.treatingDoctor === 'object' ? d.treatingDoctor?.license : '') || d.doctor?.license || '',
     description: d.description || ''
   };
 }

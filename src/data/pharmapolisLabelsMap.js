@@ -70,49 +70,24 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   // ── 50957: Alan Maclean Rutledge ──
   {
     id: '50957-phase-1',
-    prescriptionMatches: ['50957-B', 'RX-50957-B'],
-    patientMatches: ['alan maclean', 'rutledge'],
-    phaseNumber: 1,
-    patientName: 'Alan Maclean Rutledge',
-    fileNumber: '50957-B',
-    productName: 'Mitochondrial & Cellular Detox Formula',
-    productTitle: 'Liver & Mitochondrial Support - 90 vegetable capsules',
-    subTitle: 'Phase 1: Mitochondrial & Cellular Support',
-    dosageForm: 'Oral Route (Vegetable Capsules)',
-    volume: '90 Capsules (3 Months)',
-    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-    pharmacy: 'Pharmapolis Compounding Pharmacy',
-    formula: 'Alpha-Lipoic Acid 200 mg + Ubiquinol 100 mg + Pyrroloquinoline Quinone (PQQ) 10 mg',
-    directions: 'Take 1 capsule daily in the morning with food for 3 months.',
-    warnings: 'Gluten-free, lactose-free, dairy-free. Hypoallergenic vegetable capsules. Keep out of reach of children.',
-    prodDate: '15-09-2026',
-    expDate: '15-09-2027',
-    storage: 'Store in a cool dry place',
-    doctorName: 'Dra. Haydee Camacho Gamboa',
-    doctorLicense: 'COMB 46759',
-    clinicName: 'Clínica Dra Camacho, Barcelona',
-    batchCode: 'PHARM-2026-ALAUPI',
-    lote: '2609-MITO',
-    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT.png',
-    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT_WITH_QR.png',
-    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/RX-50957-B'
-  },
-  {
-    id: '50957-phase-2',
     prescriptionMatches: ['50957', 'RX-50957', '50957-A', 'RX-50957-A', 'RX-PHARM-2026-50957'],
     patientMatches: ['alan maclean', 'rutledge'],
-    phaseNumber: 2,
+    phaseNumber: 1,
     patientName: 'Alan Maclean Rutledge',
     fileNumber: '50957-A',
     productName: 'Proteolytic & Systemic Anti-Inflammatory Formula',
     productTitle: 'Proteolytic Formula - 270 acid-resistant vegetable capsules',
-    subTitle: 'Phase 2: Proteolytic & Anti-Inflammatory Protocol',
+    subTitle: 'Phase 1: Proteolytic & Anti-Inflammatory Protocol',
     dosageForm: 'Oral Route (Enteric Capsules)',
     volume: '270 Capsules (3 Months)',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Nattokinase 2,000 FU (100 mg) + Serrapeptase 40,000 SPU (20 mg)',
+    apis: [
+      { name: 'Nattokinase', dose: '2,000 FU (100 mg)', dosage: '100 mg (2,000 FU)', activeIngredient: 'Nattokinase' },
+      { name: 'Serrapeptase', dose: '40,000 SPU (20 mg)', dosage: '20 mg (40,000 SPU)', activeIngredient: 'Serrapeptase' }
+    ],
+    vehicle: { name: 'Acid-Resistant Vegetable Enteric Capsule Base', volume: '270 capsules' },
     directions: 'Week 1: 1 cap daily morning on empty stomach. From Week 2 onwards: 1 cap 3 times daily (morning, 5:00 PM, bedtime on empty stomach).',
     warnings: 'Acid-resistant vegetable capsules. Discontinue 3 days before blood tests. Keep out of reach of children.',
     prodDate: '15-09-2026',
@@ -127,6 +102,42 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_BACK_QR.png',
     targetRxUrl: 'https://med-peptides.com/rx/RX-50957-A'
+  },
+  {
+    id: '50957-phase-2',
+    prescriptionMatches: ['50957-B', 'RX-50957-B'],
+    patientMatches: ['alan maclean', 'rutledge'],
+    phaseNumber: 2,
+    patientName: 'Alan Maclean Rutledge',
+    fileNumber: '50957-B',
+    productName: 'Mitochondrial & Cellular Detox Formula',
+    productTitle: 'Liver & Mitochondrial Support - 90 vegetable capsules',
+    subTitle: 'Phase 2: Liver & Mitochondrial Support Protocol',
+    dosageForm: 'Oral Route (Vegetable Capsules)',
+    volume: '90 Capsules (3 Months)',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Alpha-Lipoic Acid 200 mg + Ubiquinol 100 mg + Pyrroloquinoline Quinone (PQQ) 10 mg',
+    apis: [
+      { name: 'Alpha-Lipoic Acid', dose: '200 mg', dosage: '200 mg', activeIngredient: 'Alpha-Lipoic Acid' },
+      { name: 'PQQ (Pyrroloquinoline Quinone)', dose: '10 mg', dosage: '10 mg', activeIngredient: 'Pyrroloquinoline Quinone' },
+      { name: 'Ubiquinol', dose: '100 mg', dosage: '100 mg', activeIngredient: 'Ubiquinol' }
+    ],
+    vehicle: { name: 'Hypoallergenic Vegetable Capsule Base', volume: '90 capsules' },
+    directions: 'Take 1 capsule daily in the morning with food for 3 months.',
+    warnings: 'Gluten-free, lactose-free, dairy-free. Hypoallergenic vegetable capsules. Keep out of reach of children.',
+    prodDate: '15-09-2026',
+    expDate: '15-09-2027',
+    storage: 'Store in a cool dry place',
+    doctorName: 'Dra. Haydee Camacho Gamboa',
+    doctorLicense: 'COMB 46759',
+    clinicName: 'Clínica Dra Camacho, Barcelona',
+    batchCode: 'PHARM-2026-ALAUPI',
+    lote: '2609-MITO',
+    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT.png',
+    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT_WITH_QR.png',
+    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_BACK_QR.png',
+    targetRxUrl: 'https://med-peptides.com/rx/RX-50957-B'
   },
 
   // ── 51812: Abdulla Sultan Mohamed Ahmed Alotaiba ──
@@ -699,10 +710,15 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
   if (explicitFormulations && Array.isArray(explicitFormulations) && explicitFormulations.length >= 1) {
     return explicitFormulations.map((form, fIdx) => {
       const phaseNum = form.index || (fIdx + 1);
-      // Try to find a matching label from registry by phaseNumber or title
+      const partCode = form.extra?.partCode ? String(form.extra.partCode).toUpperCase() : null;
+
+      // Match by exact partCode first (e.g. RX-50957-A vs RX-50957-B), then phaseNumber, then title
       const regMatch = matches.find(m => 
-        m.phaseNumber === phaseNum || 
-        (m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10)))
+        partCode && m.prescriptionMatches.some(pm => pm.toUpperCase() === partCode || partCode.includes(pm.toUpperCase()))
+      ) || matches.find(m => 
+        m.phaseNumber === phaseNum
+      ) || matches.find(m => 
+        m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10))
       );
 
       let formulaText = form.formula || '';
@@ -724,7 +740,7 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
           clinicName: auth.clinicName || regMatch.clinicName,
           fileNumber: auth.fileNumber || regMatch.fileNumber,
           targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
-          apis: form?.apis || regMatch.apis || rx.items || rx.prescriptionLines || [],
+          apis: (form?.apis && form.apis.length > 0) ? form.apis : (regMatch.apis || rx.items || rx.prescriptionLines || []),
           formula: formulaText || regMatch.formula || '',
           vehicle: form?.vehicle || regMatch.vehicle || null,
           prodDate: rxProdDate || regMatch.prodDate,

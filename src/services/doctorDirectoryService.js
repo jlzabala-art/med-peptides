@@ -242,8 +242,8 @@ export function formatMedicalLicense(rawLicense, doctorContext = {}) {
   const isUae = country.includes('emirates') || country.includes('uae') || country.includes('emiratos') ||
                 city.includes('dubai') || city.includes('abu dhabi') ||
                 address.includes('dubai') || address.includes('uae') || address.includes('jumeirah') ||
-                clinic.includes('novomed') || clinic.includes('arthregen') || clinic.includes('shamma') || clinic.includes('mediluxe') ||
-                name.includes('sezgin') || name.includes('haytham') || name.includes('hanieh') || name.includes('rajoo');
+                clinic.includes('novomed') || clinic.includes('arthregen') || clinic.includes('shamma') || clinic.includes('mediluxe') || clinic.includes('nova') ||
+                name.includes('sezgin') || name.includes('haytham') || name.includes('hanieh') || name.includes('rajoo') || name.includes('marina');
 
   const isSpain = country.includes('spain') || country.includes('españa') ||
                   city.includes('madrid') || city.includes('barcelona') || city.includes('valencia') || city.includes('málaga') ||

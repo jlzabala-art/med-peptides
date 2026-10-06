@@ -298,11 +298,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   // 2) Production Physician (productionDoctor):
   //    Dr. Miguel Ángel López Aranda (España, Lic. 282869584, no DHA).
   //    Strictly internal for compounding pharmacy / Fagron manufacture. NEVER shown to patient.
-  const rawCandidate = rx.treatingDoctor || 
-    (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !String(rx.doctor.name).includes('Miguel Ángel') ? rx.doctor : null) ||
-    (rx.doctorName && !String(rx.doctorName).includes('Miguel Ángel') ? { name: rx.doctorName, clinic: rx.clinic, specialty: rx.doctorSpecialty || 'Prescribing Physician' } : null) ||
-    (rx.prescribingDoctor && !String(rx.prescribingDoctor).includes('Miguel Ángel') ? { name: rx.prescribingDoctor, clinic: rx.clinic, specialty: 'Prescribing Physician' } : null) ||
-    (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor : null);
+  const docObj = (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !String(rx.doctor.name).includes('Miguel Ángel')) ? rx.doctor : {};
+  const treatingDocObj = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !String(rx.treatingDoctor.name || '').includes('Miguel Ángel')) ? rx.treatingDoctor : {};
+  const rawCandidateName = (typeof rx.treatingDoctor === 'string' && !rx.treatingDoctor.includes('Miguel Ángel') ? rx.treatingDoctor : treatingDocObj.name) ||
+    docObj.name ||
+    (rx.doctorName && !String(rx.doctorName).includes('Miguel Ángel') ? rx.doctorName : null) ||
+    (rx.prescribingDoctor && !String(rx.prescribingDoctor).includes('Miguel Ángel') ? rx.prescribingDoctor : null) ||
+    (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor.name : null) ||
+    '';
+
+  const rawCandidate = rawCandidateName ? {
+    ...docObj,
+    ...treatingDocObj,
+    name: rawCandidateName,
+    license: treatingDocObj.license || docObj.license || rx.doctorLicense || rx.doctorLicenseNumber || '',
+    clinic: treatingDocObj.clinic || docObj.clinic || rx.clinic || rx.clinicName || '',
+    specialty: treatingDocObj.specialty || docObj.specialty || docObj.title || rx.doctorSpecialty || '',
+    phone: treatingDocObj.phone || docObj.phone || rx.doctorPhone || '',
+    email: treatingDocObj.email || docObj.email || rx.doctorEmail || '',
+    id: docObj.id || treatingDocObj.id || rx.doctorId || null
+  } : null;
+
   const isCandidateMiguelAngel = Boolean(rawCandidate && String(rawCandidate.name || '').includes('Miguel Ángel'));
   const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateMiguelAngel);
 
@@ -2120,6 +2136,28 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         />
                       </button>
 
+                      {/* PRIMARY CTA: Request Quotation / Pedir Cotización (GCP Rule #9) */}
+                      <button
+                        type="button"
+                        onClick={() => { triggerHaptic('selection'); setShowAtlasQuotationModal(true); }}
+                        className="rx-header-action-btn"
+                        style={{
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          border: '1px solid #0284c7',
+                          fontWeight: 650,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '0 12px'
+                        }}
+                        title={isEs ? 'Solicitar cotización oficial a Atlas' : 'Request compounding quotation to Atlas'}
+                      >
+                        <FileText size={14} color="#ffffff" />
+                        <span>{isEs ? 'Pedir Cotización' : 'Request Quote'}</span>
+                      </button>
+
                       {/* SECONDARY: QR icon-ghost — same row, demoted weight */}
                       <button
                         type="button"
@@ -2495,12 +2533,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                 {[
                   { id: 'all', label: isEs ? 'Todo el Dossier' : 'Full Dossier', icon: Layers },
-                  { id: 'formulations', label: isEs ? 'Fórmulas & Galénica' : 'Formulations', icon: FlaskConical, count: compoundedFormulations.length },
-                  { id: 'posology', label: isEs ? 'Pauta & Modo de Empleo' : 'Regimen & Routine', icon: Clock },
-                  { id: 'traceability', label: isEs ? 'Laboratorio & Calidad UE' : 'Quality & Standards', icon: Factory },
-                  ...(genomicsData ? [{ id: 'genomics', label: isEs ? 'Farmacogenómica' : 'Genomics', icon: Dna }] : []),
-                  { id: 'patientSharing', label: isPatientView ? (isEs ? 'Contacto Médico' : 'Doctor Support') : (isEs ? 'Compartir con Paciente' : 'Patient Sharing'), icon: isPatientView ? Stethoscope : Share2 },
-                  ...(!isPatientView ? [{ id: 'quotation', label: isEs ? 'Pedir Cotización' : 'Request Quotation', icon: FileText }] : [])
+                  { id: 'treatment', label: isEs ? 'Tratamiento & Pauta' : 'Clinical Protocol', icon: FlaskConical, count: compoundedFormulations.length },
+                  { id: 'traceability', label: isEs ? 'Calidad & Trazabilidad' : 'Quality & Standards', icon: Factory }
                 ].map(tab => {
                   const isActive = activeGcpTab === tab.id;
                   const IconCmp = tab.icon;
@@ -2510,7 +2544,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       type="button"
                       onClick={() => {
                         setActiveGcpTab(tab.id);
-                        if (tab.id !== 'all') {
+                        if (tab.id === 'treatment') {
+                          setExpandedSections(prev => ({ ...prev, formulations: true, posology: true, genomics: true }));
+                        } else if (tab.id !== 'all') {
                           setExpandedSections(prev => ({ ...prev, [tab.id]: true }));
                         }
                       }}
@@ -2551,8 +2587,33 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 })}
               </div>
 
-              {/* Quick Accordion Expand/Collapse Switcher */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+              {/* Quick Actions & Accordion Expand/Collapse Switcher */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                {!isPatientView && (
+                  <button
+                    type="button"
+                    onClick={() => { triggerHaptic('selection'); setShowAtlasQuotationModal(true); }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '5px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid #0284c7',
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                    title={isEs ? 'Solicitar cotización oficial de formulación a Atlas' : 'Request compounding quotation to Atlas'}
+                  >
+                    <FileText size={12} color="#ffffff" />
+                    <span>{isEs ? 'Pedir Cotización' : 'Request Quotation'}</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={expandAllSections}
@@ -2739,7 +2800,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'formulations') && (
+        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'formulations') && (
         <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           
           {/* Section Accordion Trigger Header */}
@@ -3505,7 +3566,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'posology') && (
+        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'posology') && (
         <div id="milestones-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           
           {/* Section Accordion Trigger Header */}
@@ -4135,7 +4196,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Pharmacogenomic Clinical Guidance Card (Fagron Genomics) ───────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'genomics') && genomicsData && (
+        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'genomics') && genomicsData && (
           <div id="genomics-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
             {/* Section Accordion Trigger Header */}
             <div

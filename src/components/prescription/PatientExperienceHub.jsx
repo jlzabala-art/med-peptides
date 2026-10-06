@@ -92,8 +92,10 @@ export default function PatientExperienceHub({
   };
 
   const patientName = rx?.patient?.name || rx?.patientName || (isEs ? 'Paciente' : 'Patient');
-  const doctorName = rx?.doctor?.name || rx?.doctorName || (isEs ? 'Médico Prescriptor' : 'Prescribing Physician');
-  const clinicName = rx?.treatingDoctor?.clinic || rx?.clinic || rx?.clinicName || 'Atlas Clinical Practice';
+  const treatingDocName = typeof rx?.treatingDoctor === 'string' ? rx.treatingDoctor : rx?.treatingDoctor?.name;
+  const doctorName = treatingDocName || rx?.doctor?.name || rx?.doctorName || rx?.prescribingDoctor || (isEs ? 'Médico Prescriptor' : 'Prescribing Physician');
+  const treatingDocClinic = typeof rx?.treatingDoctor === 'object' ? rx?.treatingDoctor?.clinic : null;
+  const clinicName = treatingDocClinic || rx?.doctor?.clinic || rx?.clinic || rx?.clinicName || 'Atlas Clinical Practice';
   const normalizedStatus = normalizeRxStatus(rx?.status) || 'approved';
 
   // Check if injectable/peptide to show refrigeration notice
