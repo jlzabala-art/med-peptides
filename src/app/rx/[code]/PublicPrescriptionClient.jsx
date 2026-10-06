@@ -104,14 +104,17 @@ const PUBLIC_RX_STYLES = `
   }
 
   @media (max-width: 768px) {
-    .gcp-subtabs-strip {
-      display: none !important;
-    }
     .mobile-floating-action-bar {
       display: none !important;
     }
     .pds-content-with-sidebar {
       padding-bottom: 70px !important;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .public-sticky-action-bar {
+      display: none !important;
     }
   }
 
@@ -234,15 +237,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeDocTab, setActiveDocTab] = useState(0);
   const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
-  const [activeGcpTab, setActiveGcpTab] = useState('all'); // 'all' | 'formulations' | 'genomics' | 'posology' | 'traceability'
+  const [activeGcpTab, setActiveGcpTab] = useState('treatment'); // 'treatment' | 'roadmap' | 'traceability' | 'patientSharing'
   const [expandedSections, setExpandedSections] = useState({
-    overview: false,
-    formulations: false,
-    posology: false,
-    traceability: false,
-    genomics: false,
-    patientSharing: false,
-    quotation: false
+    overview: true,
+    formulations: true,
+    posology: true,
+    traceability: true,
+    genomics: true,
+    patientSharing: true,
+    quotation: true
   });
   const [selectedPhase, setSelectedPhase] = useState('all'); // 'all' | 'formulation-0' | 'formulation-1' | 'formulation-2'
   const [expandedPhases, setExpandedPhases] = useState({});
@@ -302,8 +305,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     const handleSectionJump = (e) => {
       const targetId = e.detail?.id;
       if (!targetId) return;
-      setActiveGcpTab('all');
-      expandAllSections();
+      if (targetId.startsWith('formulation') || targetId.includes('phase') || targetId === 'formula-card') {
+        setActiveGcpTab('treatment');
+        setExpandedSections(prev => ({ ...prev, formulations: true }));
+      } else if (targetId.includes('milestone') || targetId.includes('roadmap')) {
+        setActiveGcpTab('roadmap');
+        setExpandedSections(prev => ({ ...prev, posology: true }));
+      } else if (targetId.includes('quality') || targetId.includes('traceability') || targetId.includes('qr') || targetId.includes('docs')) {
+        setActiveGcpTab('traceability');
+        setExpandedSections(prev => ({ ...prev, traceability: true }));
+      } else if (targetId.includes('patient') || targetId.includes('sharing')) {
+        setActiveGcpTab('patientSharing');
+        setExpandedSections(prev => ({ ...prev, patientSharing: true }));
+      } else {
+        setActiveGcpTab('treatment');
+      }
     };
     window.addEventListener('OPEN_RX_SECTION', handleSectionJump);
     return () => window.removeEventListener('OPEN_RX_SECTION', handleSectionJump);
@@ -1812,11 +1828,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     const list = [];
     if (compoundedFormulations.length > 1) {
       compoundedFormulations.forEach((form, idx) => {
+        const phaseNum = form.index || (idx + 1);
         list.push({
           id: form.id,
-          label: form.vehicle?.name || form.title || (isEs ? `Preparación ${idx + 1}` : `Preparation ${idx + 1}`),
+          label: form.shortTitle || form.title || (isEs ? `Fase ${phaseNum}: Formulación` : `Phase ${phaseNum}: Formulation`),
           category: 'formula',
-          badge: form.volume || form.vehicle?.volume || null,
+          badge: form.volume || (form.apis ? `${form.apis.length} APIs` : null),
           accentColor: form.accentColor,
           icon: form.id.includes('oral') ? 'box' : (form.id.includes('oil') ? 'droplets' : 'flask')
         });
@@ -1824,7 +1841,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     } else {
       list.push({ 
         id: 'formula-card', 
-        label: isEs ? 'Fórmula Magistral' : 'Compounded Formula',
+        label: isEs ? 'Fórmula Magistral & Posología' : 'Compounded Formula & Posology',
         category: 'formula',
         icon: 'flask'
       });
@@ -1839,72 +1856,31 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       });
     }
 
-    if (compoundedFormulations.length > 1) {
-      compoundedFormulations.forEach((form, idx) => {
-        const vName = form.vehicle?.name || '';
-        let cleanLabel = '';
-        if (vName.toLowerCase().includes('oil')) {
-          cleanLabel = isEs ? 'Rutina Pre-Lavado: TrichoOil™' : 'Pre-Wash Routine: TrichoOil™ (1-2x Wk)';
-        } else if (vName.toLowerCase().includes('sol')) {
-          cleanLabel = isEs ? 'Modo de Empleo: TrichoSol™ (Noche)' : 'Administration: TrichoSol™ (Nightly)';
-        } else if (vName.toLowerCase().includes('foam')) {
-          cleanLabel = isEs ? 'Modo de Empleo: TrichoFoam™ (Noche)' : 'Administration: TrichoFoam™ (Nightly)';
-        } else {
-          cleanLabel = isEs ? `Pauta: ${vName || `Prep ${idx + 1}`}` : `Regimen: ${vName || `Prep ${idx + 1}`}`;
-        }
-        list.push({
-          id: idx === 0 ? 'posology-card' : `posology-${form.id}`,
-          label: cleanLabel,
-          category: 'posology',
-          accentColor: form.accentColor,
-          icon: 'clock'
-        });
-      });
-    } else {
-      list.push({ 
-        id: 'posology-card', 
-        label: isEs ? 'Pauta de Administración Diaria' : 'Daily Administration Regimen',
-        category: 'posology',
-        icon: 'clock'
-      });
-    }
-
     list.push({ 
       id: 'milestones-card', 
-      label: isEs ? 'Evolución Clínica' : 'Clinical Milestones',
+      label: isEs ? 'Roadmap & Hitos Clínicos' : 'Roadmap & Milestones',
       category: 'milestones',
       icon: 'calendar'
+    });
+
+    list.push({ 
+      id: 'qr-card', 
+      label: isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & EU Traceability',
+      category: 'traceability',
+      icon: 'shield'
     });
 
     list.push({ 
       id: 'patient-sharing-card', 
       label: isPatientView
         ? (isEs ? 'Contacto con Médico' : 'Doctor & Clinic Support')
-        : (isEs ? 'Compartir con Paciente' : 'Patient Communication'),
+        : (isEs ? 'Atención al Paciente' : 'Patient Care Hub'),
       category: 'patient-sharing',
       icon: isPatientView ? 'stethoscope' : 'share'
     });
 
-    if (!isPatientView) {
-      list.push({ 
-        id: 'atlas-quotation-card', 
-        label: isEs ? 'Cotización a Atlas' : 'Request to Atlas Quotation',
-        category: 'quotation',
-        icon: 'file-text'
-      });
-    }
-
-    if (docs.length > 0) {
-      list.push({ 
-        id: 'docs-card', 
-        label: isEs ? 'Documentos Adjuntos' : 'Attached Records',
-        category: 'docs',
-        icon: 'file'
-      });
-    }
-
     return list;
-  }, [compoundedFormulations, genomicsData, docs.length, isEs, isPatientView]);
+  }, [compoundedFormulations, genomicsData, isEs, isPatientView]);
 
   const handleCopyLink = async () => {
     try {
@@ -2629,15 +2605,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 {/* Column 3: Clinical Protocol & Scope (100% Real from Prescription Data) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {isEs ? 'Alcance y Régimen Posológico' : 'Clinical Regimen & Scope'}
+                    {isEs ? 'Alcance y Régimen' : 'Clinical Regimen & Scope'}
                   </span>
                   <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124' }}>
                     {rx.treatmentType || prescriptionTypeInfo.label || (isEs ? 'Protocolo Personalizado' : 'Personalized Clinical Protocol')}
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#5f6368' }}>
-                    {compoundedFormulations.length > 0 
-                      ? `${compoundedFormulations.length} Phase · ${compoundedFormulations[0]?.dosageForm || compoundedFormulations[0]?.route || rx.dispensingForm || 'Compounded Formulation'} (${compoundedFormulations[0]?.volume || '100 mL'})` 
-                      : (isEs ? 'Formulación Magistral Personalizada' : 'Precision Compounded Formulation')}
+                    {compoundedFormulations.length > 1 
+                      ? `${compoundedFormulations.length} ${isEs ? 'Fases Secuenciales' : 'Sequential Phases'} · ${compoundedFormulations.map(f => f.volume || '').filter(Boolean).join(' + ') || (compoundedFormulations[0]?.dosageForm || 'Oral')}` 
+                      : (compoundedFormulations[0]?.volume || rx.dispensingForm || (isEs ? 'Formulación Magistral' : 'Compounded Formulation'))}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#137333', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
                     <span>✓ EU GMP Certified Dispensary · Pharmapolis &amp; Fagron Quality</span>
@@ -2665,11 +2641,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               overflowX: 'auto',
               WebkitOverflowScrolling: 'touch'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, width: '100%', overflowX: 'auto' }}>
                 {[
-                  { id: 'all', label: isEs ? 'Todo el Dossier' : 'Full Dossier', icon: Layers },
-                  { id: 'treatment', label: isEs ? 'Tratamiento & Pauta' : 'Clinical Protocol', icon: FlaskConical, count: compoundedFormulations.length },
-                  { id: 'traceability', label: isEs ? 'Calidad & Trazabilidad' : 'Quality & Standards', icon: Factory }
+                  { id: 'treatment', label: isEs ? 'Formulaciones & Posología' : 'Formulations & Posology', icon: FlaskConical, count: compoundedFormulations.length },
+                  { id: 'roadmap', label: isEs ? 'Roadmap Secuencial' : 'Sequential Roadmap', icon: Layers, count: compoundedFormulations.length > 1 ? `${compoundedFormulations.length} ${isEs ? 'Fases' : 'Phases'}` : null },
+                  { id: 'traceability', label: isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & Standards', icon: Factory },
+                  { id: 'patientSharing', label: isEs ? 'Contacto & Soporte' : 'Patient Care & Support', icon: Stethoscope }
                 ].map(tab => {
                   const isActive = activeGcpTab === tab.id;
                   const IconCmp = tab.icon;
@@ -2681,7 +2658,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         setActiveGcpTab(tab.id);
                         if (tab.id === 'treatment') {
                           setExpandedSections(prev => ({ ...prev, formulations: true, posology: true, genomics: true }));
-                        } else if (tab.id !== 'all') {
+                        } else if (tab.id === 'roadmap') {
+                          setExpandedSections(prev => ({ ...prev, posology: true }));
+                        } else {
                           setExpandedSections(prev => ({ ...prev, [tab.id]: true }));
                         }
                       }}
@@ -2689,30 +2668,30 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        padding: '7px 12px',
-                        borderRadius: '8px',
+                        padding: '7px 14px',
+                        borderRadius: '6px',
                         border: 'none',
-                        background: isActive ? '#e0f2fe' : 'transparent',
-                        color: isActive ? '#0369a1' : '#64748b',
-                        fontWeight: isActive ? 750 : 550,
+                        background: isActive ? '#e8f0fe' : 'transparent',
+                        color: isActive ? '#1a73e8' : '#5f6368',
+                        fontWeight: isActive ? 650 : 500,
                         fontSize: '0.80rem',
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
                         transition: 'all 0.15s ease',
-                        borderBottom: isActive ? '2px solid #0284c7' : '2px solid transparent'
+                        borderBottom: isActive ? '2px solid #1a73e8' : '2px solid transparent'
                       }}
                     >
-                      <IconCmp size={15} style={{ color: isActive ? '#0284c7' : '#64748b', flexShrink: 0 }} />
+                      <IconCmp size={15} style={{ color: isActive ? '#1a73e8' : '#5f6368', flexShrink: 0 }} />
                       <span>{tab.label}</span>
-                      {tab.count !== undefined && (
+                      {tab.count !== undefined && tab.count !== null && (
                         <span style={{
                           fontSize: '0.66rem',
                           fontWeight: 700,
                           padding: '1px 6px',
                           borderRadius: '10px',
-                          background: isActive ? '#0284c7' : '#f1f5f9',
-                          color: isActive ? '#ffffff' : '#64748b'
+                          background: isActive ? '#1a73e8' : '#f1f3f4',
+                          color: isActive ? '#ffffff' : '#5f6368'
                         }}>
                           {tab.count}
                         </span>
@@ -2720,48 +2699,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     </button>
                   );
                 })}
-              </div>
-
-              {/* Quick Actions & Accordion Expand/Collapse Switcher */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-
-
-                <button
-                  type="button"
-                  onClick={expandAllSections}
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    border: '1px solid #e2e8f0',
-                    background: '#f8fafc',
-                    color: '#475569',
-                    fontSize: '0.70rem',
-                    fontWeight: 650,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                  title={isEs ? 'Expandir todas las secciones' : 'Expand all sections'}
-                >
-                  {isEs ? 'Expandir Todo' : 'Expand All'}
-                </button>
-                <button
-                  type="button"
-                  onClick={collapseAllSections}
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    border: '1px solid #e2e8f0',
-                    background: '#f8fafc',
-                    color: '#475569',
-                    fontSize: '0.70rem',
-                    fontWeight: 650,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                  title={isEs ? 'Colapsar todas las secciones' : 'Collapse all sections'}
-                >
-                  {isEs ? 'Colapsar Todo' : 'Collapse All'}
-                </button>
               </div>
             </div>
 
@@ -2901,61 +2838,24 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               </div>
             )}
 
-        {activeGcpTab === 'all' && (
+        {/* ── Sequential Roadmap Tab: MultiPartOverview & KPIs ────────────────────── */}
+        {activeGcpTab === 'roadmap' && (
           <MultiPartOverview
             formulations={compoundedFormulations}
             onSelectPhase={(phaseId) => {
               setSelectedPhase(phaseId);
+              setActiveGcpTab('treatment');
               setExpandedPhases(prev => ({ ...prev, [phaseId]: true }));
             }}
           />
         )}
 
         {/* ── Compounded Formulations & Dedicated Posology Architecture ──────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'formulations') && (
+        {activeGcpTab === 'treatment' && (
         <div id="formula-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           
-          {/* Section Accordion Trigger Header */}
-          <div
-            onClick={() => toggleSection('formulations')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '10px 16px',
-              background: '#f8f9fa',
-              borderRadius: '8px',
-              border: '1px solid #dadce0',
-              cursor: 'pointer',
-              userSelect: 'none'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <FlaskConical size={16} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#202124' }}>
-                    {isEs ? '1. Fórmulas Magistrales & Galénica' : '1. Compounded Formulations & Galenics'}
-                  </span>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
-                    {compoundedFormulations.length} {compoundedFormulations.length === 1 ? 'part' : 'parts'}
-                  </span>
-                </div>
-                <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                  {isEs ? 'Preparaciones magistrales calibradas al perfil del paciente' : 'Compounded preparations calibrated to patient clinical profile'}
-                </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#5f6368', fontSize: '0.74rem', fontWeight: 500 }}>
-              <span>{expandedSections.formulations ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
-              {expandedSections.formulations ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-            </div>
-          </div>
-
           {/* Google Cloud Style Phase Overview & Controls (100% Vertical & Responsive, No Horizontal Scroll) */}
-          {expandedSections.formulations && compoundedFormulations.length > 1 && (
+          {compoundedFormulations.length > 1 && (
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -3034,7 +2934,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </div>
           )}
 
-          {expandedSections.formulations && compoundedFormulations
+          {compoundedFormulations
             .map((formulation, fIdx) => {
               const isPhaseExpanded = expandedPhases[formulation.id] !== false;
               const phaseNumber = formulation.index || (fIdx + 1);
@@ -3678,7 +3578,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Biological Milestones & Evolution (90 Days) ────────────────────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'posology') && (
+        {(activeGcpTab === 'roadmap') && (
         <div id="milestones-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           
           {/* Section Accordion Trigger Header */}
@@ -3842,7 +3742,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Patient Mobile Access Portal (Private Patient Dossier & Traceability) ──────────────── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'traceability') && (!isPatientView || docs.length > 0) && (
+        {(activeGcpTab === 'traceability') && (
         <div id={!isPatientView ? "qr-card" : "docs-card"} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
           
           {/* Section Accordion Trigger Header */}
@@ -4361,7 +4261,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Section 5: Doctor & Clinical Care Hub (Patient View) vs Patient Sharing & Mobile Access (Doctor View) ── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'patientSharing') && (
+        {(activeGcpTab === 'patientSharing') && (
         <div id="patient-sharing-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           <div
             onClick={() => toggleSection('patientSharing')}
@@ -4823,7 +4723,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Section 6: Request to Atlas Quotation ── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'quotation') && !isPatientView && (
+        {(activeGcpTab === 'patientSharing' || activeGcpTab === 'quotation') && !isPatientView && (
         <div id="atlas-quotation-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
           <div
             onClick={() => toggleSection('quotation')}
@@ -5059,7 +4959,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             doctorOffice={doctorAddress}
             doctorPhone={doctorPhone}
             publicUrl={publicUrl}
-            onOpenPdf={handleDownloadQrPng}
+            onOpenPdf={() => setShowBrochureModal(true)}
             onExportExcel={handleExportExcel}
             lang={lang}
           />

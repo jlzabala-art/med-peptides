@@ -263,174 +263,7 @@ export default function PrescriptionDetailSidebar({
           </div>
         </div>
 
-        {/* Widget 2: Formulations & Vehicles Multi-Vehicle Navigator (GCP Standard) */}
-        {formulations && formulations.length > 0 && (
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '8px',
-            border: '1px solid #dadce0',
-            padding: '1rem',
-            boxShadow: 'none'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '0.65rem',
-              paddingBottom: '0.45rem',
-              borderBottom: '1px solid #f1f3f4'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                <Layers size={14} color="#1a73e8" />
-                <span>{isEs ? 'VEHÍCULOS & FÓRMULAS' : 'VEHICLES & FORMULAS'}</span>
-              </div>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: 500,
-                color: '#1a73e8',
-                background: '#e8f0fe',
-                padding: '1px 6px',
-                borderRadius: '4px',
-                border: '1px solid #d2e3fc'
-              }}>
-                {formulations.length} {formulations.length === 1 ? (isEs ? 'Vehículo' : 'Vehicle') : (isEs ? 'Vehículos' : 'Vehicles')}
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {formulations.map((form, fIdx) => {
-                const isFormActive = activeId === form.id || activeId === `posology-${form.id}`;
-                return (
-                  <div
-                    key={form.id || fIdx}
-                    onClick={() => scrollTo(form.id)}
-                    style={{
-                      padding: '9px 11px',
-                      borderRadius: '6px',
-                      border: '1px solid',
-                      borderColor: isFormActive ? '#1a73e8' : '#dadce0',
-                      background: isFormActive ? '#e8f0fe' : '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
-                      <span style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        padding: '1px 6px',
-                        borderRadius: '4px',
-                        background: '#e8f0fe',
-                        color: '#1a73e8',
-                        border: '1px solid #d2e3fc'
-                      }}>
-                        {form.vehicle?.tag || `PREP ${fIdx + 1}`}
-                      </span>
-                      {form.volume && (
-                        <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368' }}>
-                          {form.volume}
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#202124', lineHeight: 1.3 }}>
-                      {form.vehicle?.name || form.title}
-                    </div>
-
-                    <div style={{ fontSize: '0.72rem', color: '#5f6368', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <span>{form.route}</span>
-                      {form.apis?.length > 0 && (
-                        <>
-                          <span>·</span>
-                          <span style={{ fontWeight: 500, color: '#1a73e8' }}>
-                            {form.apis.length} APIs
-                          </span>
-                        </>
-                      )}
-                    </div>
-
-                    {form.posology?.regimen && (
-                      <div style={{
-                        marginTop: '6px',
-                        padding: '5px 8px',
-                        background: '#f8f9fa',
-                        border: '1px solid #dadce0',
-                        borderRadius: '4px',
-                        fontSize: '0.70rem',
-                        color: '#3c4043',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '6px',
-                        lineHeight: 1.35
-                      }}>
-                        <Clock size={12} color="#5f6368" style={{ flexShrink: 0, marginTop: '2px' }} />
-                        <span style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>
-                          {typeof form.posology?.regimen === 'object' 
-                            ? (form.posology.regimen.regimen || form.posology.regimen.summary || '') 
-                            : String(form.posology?.regimen || '')}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Widget 3: Treatment Phases (if multi-phase protocol) */}
-        {phases && phases.length > 0 && (
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            padding: '1.15rem',
-            boxShadow: '0 4px 16px rgba(0, 54, 102, 0.05)'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '0.75rem',
-              paddingBottom: '0.5rem',
-              borderBottom: '1px solid #f1f5f9'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                <Calendar size={14} color="#7c3aed" />
-                <span>{isEs ? 'FASES DE TRATAMIENTO' : 'TREATMENT PHASES'}</span>
-              </div>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#7c3aed', background: '#ede9fe', padding: '1px 6px', borderRadius: '4px' }}>
-                {phases.length} {isEs ? 'Fases' : 'Phases'}
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {phases.map((phase, pIdx) => (
-                <div key={pIdx} style={{
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
-                    {phase.name || `${isEs ? 'Fase' : 'Phase'} ${pIdx + 1}`}
-                  </div>
-                  {phase.duration && (
-                    <span style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600 }}>
-                      {phase.duration}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Widget 4: Permanent Prescription Canonical URL (GCP Standard) */}
+        {/* Widget 2: Official Clinical Actions & Exports (GCP Standard) */}
         <div style={{
           background: '#ffffff',
           borderRadius: '8px',
@@ -438,181 +271,112 @@ export default function PrescriptionDetailSidebar({
           padding: '1rem',
           boxShadow: 'none'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              <Lock size={13} color="#1a73e8" />
-              <span>{isEs ? 'URL PERMANENTE OFICIAL' : 'OFFICIAL PERMANENT URL'}</span>
-            </div>
-            <span style={{ fontSize: '0.68rem', fontWeight: 500, color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px' }}>
-              SSL Verified
-            </span>
-          </div>
-
           <div style={{
-            background: '#f8f9fa',
-            border: '1px solid #dadce0',
-            borderRadius: '4px',
-            padding: '7px 10px',
-            fontSize: '0.72rem',
-            fontWeight: 500,
-            color: '#3c4043',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            marginBottom: '0.65rem'
+            justifyContent: 'space-between',
+            marginBottom: '0.75rem',
+            paddingBottom: '0.5rem',
+            borderBottom: '1px solid #f1f3f4'
           }}>
-            <ShieldCheck size={14} color="#137333" style={{ flexShrink: 0 }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {isEs ? `Expediente digital oficial (${prescriptionCode})` : `Official digital record (${prescriptionCode})`}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <Download size={14} color="#1a73e8" />
+              <span>{isEs ? 'ACCIONES & DOCUMENTOS' : 'ACTIONS & DOCUMENTS'}</span>
+            </div>
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+              {prescriptionCode}
             </span>
           </div>
 
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {onOpenPdf && (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  onOpenPdf();
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  background: '#f8fafd',
+                  color: '#1a73e8',
+                  border: '1px solid #d2e3fc',
+                  fontWeight: 600,
+                  fontSize: '0.76rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  textAlign: 'left'
+                }}
+                title={isEs ? 'Ver dossier y monografía clínica completa en PDF' : 'View full clinical monograph & dossier in PDF'}
+              >
+                <FileText size={15} color="#1a73e8" />
+                <span>{isEs ? 'Dossier Clínico (PDF)' : 'Clinical Dossier (PDF)'}</span>
+              </button>
+            )}
+
             <button
               type="button"
-              onClick={handleCopyPermanentUrl}
+              onClick={() => {
+                triggerHaptic('selection');
+                window.print();
+              }}
               style={{
-                flex: 1,
-                display: 'inline-flex',
+                width: '100%',
+                display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: '5px',
-                padding: '7px 12px',
-                borderRadius: '4px',
-                background: '#1a73e8',
-                color: '#ffffff',
-                border: 'none',
+                gap: '8px',
+                padding: '7px 10px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                color: '#3c4043',
+                border: '1px solid #dadce0',
                 fontWeight: 500,
                 fontSize: '0.76rem',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                textAlign: 'left'
               }}
+              title={isEs ? 'Imprimir expediente oficial' : 'Print official clinical dossier'}
             >
-              {copiedUrl ? <Check size={13} /> : <Copy size={13} />}
-              <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy URL')}</span>
+              <Printer size={15} color="#5f6368" />
+              <span>{isEs ? 'Imprimir Expediente' : 'Print Official Dossier'}</span>
             </button>
-            <a
-              href={canonicalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '7px 10px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                color: '#1a73e8',
-                border: '1px solid #dadce0',
-                textDecoration: 'none',
-                fontSize: '0.76rem'
-              }}
-              title={isEs ? 'Abrir enlace directo' : 'Open permanent link'}
-            >
-              <ExternalLink size={13} />
-            </a>
-          </div>
-        </div>
 
-        {/* Widget 5: Prescribing Physician Authority (GCP Standard) */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #dadce0',
-          padding: '1rem',
-          boxShadow: 'none'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.65rem' }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: '4px',
-              background: '#e8f0fe',
-              color: '#1a73e8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Stethoscope size={16} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {doctorName ? (isEs ? 'MÉDICO TRATANTE' : 'TREATING PHYSICIAN') : (isEs ? 'PRÁCTICA CLÍNICA' : 'CLINICAL PRACTICE')}
-              </div>
-              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#202124' }}>
-                {doctorName || (isEs ? 'Centro Médico Prescriptor' : 'Licensed Clinical Practice')}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ fontSize: '0.74rem', color: '#5f6368', lineHeight: 1.45, marginBottom: '0.75rem' }}>
-            {doctorTitle && <div style={{ color: '#3c4043', fontWeight: 500 }}>{doctorTitle}</div>}
-            {doctorLicense && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#137333', fontWeight: 500, marginTop: '2px', background: '#e6f4ea', border: '1px solid #ceead6', borderRadius: '4px', padding: '1px 6px' }}>
-                <ShieldCheck size={12} />
-                <span>
-                  {doctorLicense.toUpperCase().includes('DHA') 
-                    ? `DHA Licensed · Lic. ${doctorLicense}` 
-                    : `Lic. ${doctorLicense}`}
-                </span>
-              </div>
-            )}
-            {doctorOffice && (
-              <div style={{ fontSize: '0.70rem', color: '#5f6368', marginTop: '4px' }}>
-                📍 {doctorOffice}
-              </div>
-            )}
-            {doctorPhone && (
-              <div style={{ fontSize: '0.70rem', color: '#1a73e8', marginTop: '2px' }}>
-                📞 {doctorPhone}
-              </div>
-            )}
-            {onAssignDoctor && (
+            {onExportExcel && (
               <button
                 type="button"
-                onClick={onAssignDoctor}
+                onClick={() => {
+                  triggerHaptic('selection');
+                  onExportExcel();
+                }}
                 style={{
-                  marginTop: '8px',
                   width: '100%',
-                  padding: '6px 10px',
-                  borderRadius: '4px',
-                  background: '#f8f9fa',
-                  border: '1px solid #dadce0',
-                  color: '#1a73e8',
-                  fontSize: '0.74rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px'
+                  gap: '8px',
+                  padding: '7px 10px',
+                  borderRadius: '6px',
+                  background: '#ffffff',
+                  color: '#137333',
+                  border: '1px solid #dadce0',
+                  fontWeight: 500,
+                  fontSize: '0.76rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  textAlign: 'left'
                 }}
+                title={isEs ? 'Exportar fórmula galénica a Excel' : 'Export formulation specs to Excel'}
               >
-                {doctorName ? (isEs ? '✏️ Cambiar Médico' : '✏️ Change Physician') : (isEs ? '+ Asignar Médico Tratante' : '+ Assign Treating Physician')}
+                <FileSpreadsheet size={15} color="#137333" />
+                <span>{isEs ? 'Exportar Ficha (Excel)' : 'Export Specs (Excel)'}</span>
               </button>
             )}
-          </div>
-        </div>
 
-        {/* Widget 6: Actions & Downloads (No duplicate QR graphic) */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '14px',
-          border: '1px solid #e2e8f0',
-          padding: '1.15rem',
-          boxShadow: '0 2px 10px rgba(0, 54, 102, 0.04)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {isEs ? 'ACCIONES & DESCARGAS' : 'ACTIONS & EXPORTS'}
-            </span>
-            <span style={{ fontSize: '0.64rem', fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
-              {rxId}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
               type="button"
               onClick={() => {
@@ -623,82 +387,106 @@ export default function PrescriptionDetailSidebar({
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '0.6rem 0.75rem',
-                borderRadius: '8px',
-                background: '#f0f9ff',
-                color: '#0284c7',
-                border: '1px solid #bae6fd',
-                fontWeight: 700,
+                gap: '8px',
+                padding: '7px 10px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                color: '#3c4043',
+                border: '1px solid #dadce0',
+                fontWeight: 500,
                 fontSize: '0.76rem',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                textAlign: 'left'
               }}
-              title={isEs ? 'Ir a la tarjeta de Código QR del paciente' : 'Go to Patient QR Code'}
+              title={isEs ? 'Verificación QR para dispensación' : 'QR Verification for pharmacy dispensing'}
             >
-              <QrCode size={14} color="#0284c7" />
-              <span>{isEs ? 'Ver Código QR Paciente' : 'View Patient QR Code'}</span>
+              <QrCode size={15} color="#1a73e8" />
+              <span>{isEs ? 'Código QR de Validación' : 'QR Validation Code'}</span>
             </button>
+          </div>
 
+          {/* Compact Copy URL Row */}
+          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f3f4', display: 'flex', gap: '6px' }}>
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                window.print();
-              }}
-              className="rx-print-btn"
+              onClick={handleCopyPermanentUrl}
               style={{
-                width: '100%',
-                display: 'flex',
+                flex: 1,
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '6px',
-                padding: '0.6rem 0.75rem',
-                borderRadius: '8px',
-                background: '#f8fafc',
-                color: '#003666',
-                border: '1px solid #cbd5e1',
-                fontWeight: 700,
-                fontSize: '0.76rem',
+                gap: '5px',
+                padding: '6px 10px',
+                borderRadius: '4px',
+                background: '#f8f9fa',
+                color: '#1a73e8',
+                border: '1px solid #dadce0',
+                fontWeight: 600,
+                fontSize: '0.74rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}
             >
-              <Printer size={14} color="#003666" />
-              <span>{isEs ? 'Imprimir / Guardar PDF' : 'Print / Save PDF'}</span>
+              {copiedUrl ? <Check size={13} color="#137333" /> : <Copy size={13} />}
+              <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Record Link')}</span>
             </button>
+            <a
+              href={canonicalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 9px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                color: '#5f6368',
+                border: '1px solid #dadce0',
+                textDecoration: 'none',
+                fontSize: '0.74rem'
+              }}
+              title={isEs ? 'Abrir enlace directo' : 'Open permanent link'}
+            >
+              <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
 
-            {onExportExcel && (
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  onExportExcel();
-                }}
-                className="rx-excel-btn"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  padding: '0.6rem 0.75rem',
-                  borderRadius: '8px',
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #bbf7d0',
-                  fontWeight: 700,
-                  fontSize: '0.76rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title={isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}
-              >
-                <FileSpreadsheet size={14} color="#15803d" />
-                <span>{isEs ? 'Exportar a Excel (.xlsx)' : 'Export to Excel (.xlsx)'}</span>
-              </button>
-            )}
+        {/* Widget 3: EU GMP Quality & Verification Seal (GCP Standard) */}
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #dadce0',
+          padding: '1rem',
+          boxShadow: 'none'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <ShieldCheck size={16} color="#137333" />
+            <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#137333', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'Trazabilidad & Calidad' : 'Traceability & Quality'}
+            </span>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#5f6368', lineHeight: 1.4 }}>
+            {isEs 
+              ? 'Elaboración individualizada en salas blancas bajo normativa EU GMP. Materias primas y vehículos con control analítico HPLC.'
+              : 'Compounded under cleanroom EU GMP standards with verified batch release and HPLC analytical verification.'}
+          </div>
+          <div style={{
+            marginTop: '8px',
+            padding: '5px 8px',
+            borderRadius: '4px',
+            background: '#e6f4ea',
+            border: '1px solid #ceead6',
+            color: '#137333',
+            fontSize: '0.70rem',
+            fontWeight: 600,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}>
+            <span>✓ Pharmapolis &amp; Fagron Standard</span>
           </div>
         </div>
 
@@ -799,43 +587,6 @@ export default function PrescriptionDetailSidebar({
                 <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy URL')}</span>
               </button>
             </div>
-
-            {/* Formulations & Vehicles Quick Switcher in Mobile */}
-            {formulations && formulations.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
-                  {isEs ? 'Vehículos & Preparaciones' : 'Vehicles & Formulations'}
-                </div>
-                {formulations.map((form, fIdx) => (
-                  <button
-                    key={fIdx}
-                    type="button"
-                    onClick={() => scrollTo(form.id)}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: '8px',
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a' }}>
-                        {form.vehicle?.name || form.title}
-                      </div>
-                      <div style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                        {form.route} {form.volume ? `· ${form.volume}` : ''}
-                      </div>
-                    </div>
-                    <ChevronRight size={14} color="#94a3b8" />
-                  </button>
-                ))}
-              </div>
-            )}
 
             {/* TOC Sections List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
