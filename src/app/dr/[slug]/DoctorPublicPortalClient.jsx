@@ -32,6 +32,8 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
+  FlaskConical,
+  BookOpen,
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -77,6 +79,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
+
+  // Therapeutic Pharmacopeia & Compounding APIs State (Lotusland Clinical Directory)
+  const [formularyGoal, setFormularyGoal] = useState('all');
+  const [formularySearch, setFormularySearch] = useState('');
+  const [selectedMonograph, setSelectedMonograph] = useState(null);
+  const [isInquiryOpen, setIsInquiryOpen] = useState(false);
+  const [inquiryPeptide, setInquiryPeptide] = useState(null);
 
   // ── URL Search Params Sync (Golden Rule #24: Sincronización de URL) ───────
   useEffect(() => {
@@ -201,6 +210,31 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   }, [filteredPrescriptions, filteredTasks]);
 
   const activeKpis = scopeMode === 'filtered' ? filteredKpis : globalKpis;
+
+  // Curated Bioactive Peptide Formulary (Lotusland Compounding Directory)
+  const formulary = useMemo(() => {
+    return data?.formulary || [];
+  }, [data?.formulary]);
+
+  const filteredFormulary = useMemo(() => {
+    return formulary.filter((p) => {
+      if (formularyGoal !== 'all') {
+        const goalStr = `${p.primaryGoal || ''} ${(p.goals || []).join(' ')}`.toLowerCase();
+        if (formularyGoal === 'repair' && !goalStr.includes('repair') && !goalStr.includes('tissue') && !goalStr.includes('recovery') && !goalStr.includes('gut')) return false;
+        if (formularyGoal === 'metabolic' && !goalStr.includes('fat') && !goalStr.includes('metabolic') && !goalStr.includes('weight') && !goalStr.includes('glp') && !goalStr.includes('loss')) return false;
+        if (formularyGoal === 'cognitive' && !goalStr.includes('neuro') && !goalStr.includes('cognitive') && !goalStr.includes('brain') && !goalStr.includes('semax')) return false;
+        if (formularyGoal === 'cellular' && !goalStr.includes('cellular') && !goalStr.includes('aging') && !goalStr.includes('mitochondr') && !goalStr.includes('optim') && !goalStr.includes('energy')) return false;
+      }
+      if (!formularySearch.trim()) return true;
+      const q = formularySearch.toLowerCase();
+      return (
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q) ||
+        (p.moa || '').toLowerCase().includes(q) ||
+        (p.primaryGoal || '').toLowerCase().includes(q)
+      );
+    });
+  }, [formulary, formularyGoal, formularySearch]);
 
   const handleCopyPortalLink = () => {
     triggerHaptic('selection');
@@ -604,6 +638,25 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       ]
     },
     {
+      groupTitle: 'CLINICAL REFERENCE',
+      items: [
+        {
+          id: 'formulary',
+          label: 'Compounding Pharmacopeia',
+          icon: FlaskConical,
+          href: '#formulary',
+          badge: filteredFormulary.length > 0 ? `${filteredFormulary.length}` : null
+        },
+        {
+          id: 'protocols_catalog',
+          label: 'Complete Catalog Directory',
+          icon: BookOpen,
+          action: () => window.open('/c/CAT-MU9L9GBN', '_blank'),
+          badge: 'Lotusland'
+        }
+      ]
+    },
+    {
       groupTitle: 'PATIENT INTAKE & CLINIC',
       items: [
         {
@@ -622,10 +675,21 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         }
       ]
     }
-  ], [filteredTasks.length, filteredPrescriptions.length, filteredPrescriptions]);
+  ], [filteredTasks.length, filteredPrescriptions.length, filteredPrescriptions, filteredFormulary.length]);
 
-  const handleSidebarNavigate = (item) => {
+  const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
+    if (typeof itemOrId === 'string') {
+      const targetId = itemOrId;
+      setActiveAnchor(targetId);
+      const targetEl = document.getElementById(targetId) || document.querySelector(`#${targetId}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
+    const item = itemOrId;
     if (item.action) {
       item.action();
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
@@ -723,6 +787,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             transform: translateX(0);
           }
         }
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
       `}</style>
 
       {/* ── Unified Public Header (Homogeneous with /rx/[code] & GCP Standards) ── */}
@@ -741,8 +813,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         anchorTabs={[
           { id: 'credentials', label: 'Credentials', href: '#credentials' },
           { id: 'overview', label: 'Overview', href: '#overview' },
-          { id: 'tasks', label: 'Clinical Tasks', href: '#tasks', count: pendingTasks.length },
-          { id: 'prescriptions', label: 'Prescriptions Dossier', href: '#prescriptions', count: filteredPrescriptions.length }
+          { id: 'tasks', label: 'Clinical Tasks', href: '#tasks', count: filteredTasks.length },
+          { id: 'prescriptions', label: 'Prescriptions Dossier', href: '#prescriptions', count: filteredPrescriptions.length },
+          { id: 'formulary', label: 'Compounding Pharmacopeia', href: '#formulary', count: filteredFormulary.length }
         ]}
         activeAnchorId={activeAnchor}
         isDoctorView={true}
@@ -1555,6 +1628,307 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             }}
           />
         </section>
+
+        {/* ── Section 3: Authorized Therapeutic Formulary & Compounding APIs ── */}
+        <section
+          id="formulary"
+          style={{
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            borderRadius: '8px',
+            marginTop: '32px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Section Header */}
+          <div
+            style={{
+              padding: '18px 22px',
+              borderBottom: '1px solid #dadce0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '14px',
+              background: '#ffffff'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.08rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FlaskConical size={18} style={{ color: '#003666' }} />
+                  <span>Practice Compounding Pharmacopeia & Therapeutic APIs</span>
+                </h2>
+                <span style={{ fontSize: '0.70rem', color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                  EU GMP Certified Reference
+                </span>
+              </div>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
+                Active pharmaceutical ingredients and research-backed bioactive peptides authorized by {doctor.name} for personalized magistral compounding.
+              </p>
+            </div>
+
+            {/* Direct reference button to complete directory */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <a
+                href="/c/CAT-MU9L9GBN"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  height: '34px',
+                  padding: '0 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#f8fafc',
+                  color: '#1a73e8',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                <BookOpen size={14} />
+                <span>Explore Full Pharmacopeia Directory</span>
+                <ExternalLink size={12} style={{ color: '#1a73e8' }} />
+              </a>
+            </div>
+          </div>
+
+          {/* Controls Bar: Search & Category Chips */}
+          <div
+            style={{
+              padding: '14px 22px',
+              borderBottom: '1px solid #f1f5f9',
+              background: '#fafbfc',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+              {/* Category / Goal Pills */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {[
+                  { id: 'all', label: `All APIs (${formulary.length})` },
+                  { id: 'repair', label: 'Tissue Repair & Gut' },
+                  { id: 'metabolic', label: 'Metabolic & GLP' },
+                  { id: 'cellular', label: 'Cellular Optimization' },
+                  { id: 'cognitive', label: 'Cognitive & Neuro' }
+                ].map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setFormularyGoal(g.id)}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '16px',
+                      border: formularyGoal === g.id ? '1px solid #1a73e8' : '1px solid #dadce0',
+                      background: formularyGoal === g.id ? '#e8f0fe' : '#ffffff',
+                      color: formularyGoal === g.id ? '#1a73e8' : '#475569',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.12s'
+                    }}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Instant Search Bar */}
+              <div style={{ position: 'relative', minWidth: '220px', maxWidth: '320px', flex: '1 1 220px' }}>
+                <input
+                  type="text"
+                  placeholder="Filter peptides (BPC, Semax, etc.)..."
+                  value={formularySearch}
+                  onChange={(e) => setFormularySearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '32px',
+                    padding: '0 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #dadce0',
+                    fontSize: '0.78rem',
+                    color: '#1e293b',
+                    outline: 'none',
+                    background: '#ffffff'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Peptide Cards Grid */}
+          <div style={{ padding: '20px 22px' }}>
+            {filteredFormulary.length === 0 ? (
+              <EmptyState
+                icon={FlaskConical}
+                title="No therapeutic peptides found"
+                subtitle="Try adjusting your filter or search term to explore other compound classes."
+                action={{
+                  label: "Reset Filters",
+                  onClick: () => { setFormularyGoal('all'); setFormularySearch(''); }
+                }}
+              />
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '16px'
+              }}>
+                {filteredFormulary.map((peptide) => (
+                  <div
+                    key={peptide.id}
+                    style={{
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      background: '#ffffff',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      transition: 'all 0.15s ease-in-out',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#1a73e8';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(26,115,232,0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                    }}
+                  >
+                    <div>
+                      {/* Card Top: Name & Purity Badge */}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
+                            {peptide.name}
+                          </h4>
+                          <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+                            API Compounding Grade
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: '0.66rem',
+                          fontWeight: 700,
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: '#f0fdf4',
+                          color: '#16a34a',
+                          border: '1px solid #bbf7d0',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {peptide.purity || '≥ 99% HPLC'}
+                        </span>
+                      </div>
+
+                      {/* Goal / Category pill */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                        <span style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          padding: '1px 7px',
+                          borderRadius: '12px',
+                          background: '#e0f2fe',
+                          color: '#0369a1'
+                        }}>
+                          {peptide.primaryGoal || 'Cellular Optimization'}
+                        </span>
+                        <span style={{
+                          fontSize: '0.68rem',
+                          color: '#475569',
+                          background: '#f1f5f9',
+                          padding: '1px 7px',
+                          borderRadius: '12px'
+                        }}>
+                          {peptide.route || 'Lyophilized API'}
+                        </span>
+                      </div>
+
+                      {/* MOA Snippet */}
+                      <p style={{
+                        margin: '0 0 14px 0',
+                        fontSize: '0.76rem',
+                        color: '#475569',
+                        lineHeight: 1.45,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {peptide.moa || peptide.description}
+                      </p>
+                    </div>
+
+                    {/* Card Actions: Scientific Exploration, Not Shopping */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      paddingTop: '10px',
+                      borderTop: '1px solid #f1f5f9'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMonograph(peptide)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#1a73e8',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          padding: 0
+                        }}
+                      >
+                        <Eye size={13} />
+                        <span>View Monograph</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInquiryPeptide(peptide);
+                          setIsInquiryOpen(true);
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          background: '#f8fafc',
+                          border: '1px solid #dadce0',
+                          borderRadius: '4px',
+                          color: '#334155',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          padding: '4px 8px',
+                          cursor: 'pointer',
+                          transition: 'all 0.12s'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#e8f0fe'; e.currentTarget.style.borderColor = '#1a73e8'; e.currentTarget.style.color = '#1a73e8'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#dadce0'; e.currentTarget.style.color = '#334155'; }}
+                      >
+                        <span>Inquire in Protocol</span>
+                        <ArrowUpRight size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
       </div>
 
@@ -1583,6 +1957,287 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             window.location.reload();
           }}
         />
+      )}
+
+      {/* ── Slide-In Monograph Drawer (Google Cloud Standard Pattern) ────────── */}
+      {selectedMonograph && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 60,
+            background: 'rgba(32, 33, 36, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }}
+          onClick={() => setSelectedMonograph(null)}
+        >
+          <div
+            style={{
+              width: '460px',
+              maxWidth: '92vw',
+              height: '100%',
+              background: '#ffffff',
+              boxShadow: '-8px 0 24px rgba(0,0,0,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              animation: 'slideInRight 0.2s ease-out',
+              overflowY: 'auto'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div>
+              <div
+                style={{
+                  padding: '18px 24px',
+                  borderBottom: '1px solid #dadce0',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  background: '#f8fafc'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.70rem', fontWeight: 700, textTransform: 'uppercase', color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '4px' }}>
+                      Pharmaceutical Monograph
+                    </span>
+                    <span style={{ fontSize: '0.70rem', color: '#16a34a', background: '#f0fdf4', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bbf7d0', fontWeight: 600 }}>
+                      {selectedMonograph.purity || '≥ 99% HPLC'}
+                    </span>
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#0f172a' }}>
+                    {selectedMonograph.name}
+                  </h3>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>
+                    Compounding Reference Specification · EU GMP
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedMonograph(null)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#5f6368',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Body Content */}
+              <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Therapeutic Classification */}
+                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Therapeutic Indication Target
+                  </div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>
+                    {selectedMonograph.primaryGoal || 'Cellular Optimization'}
+                  </div>
+                </div>
+
+                {/* Mechanism of Action */}
+                <div>
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: '0.82rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Mechanism of Action & Pathways
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.55 }}>
+                    {selectedMonograph.moa || selectedMonograph.description}
+                  </p>
+                </div>
+
+                {/* Analytical Quality Specs */}
+                <div>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '0.82rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Analytical Quality Specifications
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div style={{ padding: '8px 10px', background: '#fafbfc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Assay / Purity</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>{selectedMonograph.purity || '≥ 99.0%'}</div>
+                    </div>
+                    <div style={{ padding: '8px 10px', background: '#fafbfc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Regulatory Status</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>Prescription Only</div>
+                    </div>
+                    {selectedMonograph.casNumber && (
+                      <div style={{ padding: '8px 10px', background: '#fafbfc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '0.68rem', color: '#64748b' }}>CAS Number</div>
+                        <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>{selectedMonograph.casNumber}</div>
+                      </div>
+                    )}
+                    <div style={{ padding: '8px 10px', background: '#fafbfc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Dispensing Form</div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a' }}>Custom Compounded</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clinical Vigilance & Note */}
+                <div style={{ padding: '12px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', fontSize: '0.76rem', color: '#1e40af', lineHeight: 1.45 }}>
+                  <strong>Physician Authorization Required:</strong> This molecule is restricted to professional magistral formulation under authorized medical supervision. Dispensing is processed exclusively via EU GMP licensed compounding dispensaries.
+                </div>
+              </div>
+            </div>
+
+            {/* Footer CTA */}
+            <div style={{ padding: '16px 24px', borderTop: '1px solid #dadce0', background: '#f8fafc', display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const p = selectedMonograph;
+                  setSelectedMonograph(null);
+                  setInquiryPeptide(p);
+                  setIsInquiryOpen(true);
+                }}
+                style={{
+                  flex: 1,
+                  height: '40px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.3)'
+                }}
+              >
+                Inquire in Custom Regimen with {doctor.name}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Regimen Clinical Inquiry Modal ───────────────────────────────────── */}
+      {isInquiryOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 65,
+            background: 'rgba(32, 33, 36, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setIsInquiryOpen(false)}
+        >
+          <div
+            style={{
+              width: '500px',
+              maxWidth: '100%',
+              background: '#ffffff',
+              borderRadius: '8px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #dadce0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
+                  Clinical Protocol Consultation
+                </h3>
+                <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                  Attributed to {doctor.name}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsInquiryOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#5f6368', cursor: 'pointer' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ padding: '20px' }}>
+              {inquiryPeptide && (
+                <div style={{ padding: '10px 14px', background: '#e0f2fe', borderRadius: '6px', marginBottom: '14px', fontSize: '0.80rem', color: '#0369a1', fontWeight: 600 }}>
+                  Selected Principle: {inquiryPeptide.name} ({inquiryPeptide.purity || '≥ 99% HPLC'})
+                </div>
+              )}
+              <p style={{ margin: '0 0 16px 0', fontSize: '0.80rem', color: '#475569', lineHeight: 1.5 }}>
+                To integrate this active pharmaceutical ingredient into a customized medical protocol, you can initiate a digital prescription intake or schedule a clinical review.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsInquiryOpen(false);
+                    setIsIntakeOpen(true);
+                  }}
+                  style={{
+                    height: '40px',
+                    borderRadius: '6px',
+                    border: '1px solid #1a73e8',
+                    background: '#1a73e8',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Sparkles size={15} />
+                  <span>Submit Digital Prescription with AI</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleShareWhatsApp();
+                    setIsInquiryOpen(false);
+                  }}
+                  style={{
+                    height: '40px',
+                    borderRadius: '6px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#334155',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Share2 size={15} color="#16a34a" />
+                  <span>Direct WhatsApp Consultation Request</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── Sticky Clinical Operations Dock (Laptop & Mobile GCP Standard) ── */}

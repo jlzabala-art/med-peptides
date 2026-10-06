@@ -245,12 +245,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     quotation: false
   });
   const [selectedPhase, setSelectedPhase] = useState('all'); // 'all' | 'formulation-0' | 'formulation-1' | 'formulation-2'
-  const [expandedPhases, setExpandedPhases] = useState({
-    'formulation-0': false,
-    'formulation-1': false,
-    'formulation-2': false,
-    'formulation-3': false
-  });
+  const [expandedPhases, setExpandedPhases] = useState({});
   const [showLabelsModal, setShowLabelsModal] = useState(false);
   const [selectedLabelIndex, setSelectedLabelIndex] = useState(0);
   const [showSupplierRfqModal, setShowSupplierRfqModal] = useState(false);
@@ -3162,7 +3157,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               )}
 
-              {(!compoundedFormulations.length > 1 || isPhaseExpanded) && (
+              {(compoundedFormulations.length <= 1 || isPhaseExpanded) && (
               <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Preparation Master Header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem' }}>

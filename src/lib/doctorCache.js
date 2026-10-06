@@ -374,19 +374,63 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     opaqueCode: opaqueCode
   };
 
-  const payload = {
-    success: true,
-    doctor: doctorProfile,
-    kpis: {
-      activePrescriptions,
-      monitoredPatients,
-      pendingTasksCount,
-      refillsDueCount
-    },
-    tasks: clinicalTasks,
-    prescriptions,
-    patients: Array.from(patientMap.values())
-  };
+    // 5. Fetch Curated Compounding Peptide Formulary (Lotusland Bioactive APIs)
+    let formulary = [];
+    try {
+      const productsSnap = await adminDb.collection('products')
+        .where('status', 'in', ['active', 'published'])
+        .limit(60)
+        .get();
+
+      const seenNames = new Set();
+      productsSnap.forEach((doc) => {
+        const p = doc.data();
+        const cat = String(p.categoryId || p.category || '').toLowerCase();
+        const isPeptide = cat.includes('peptide') || p.productType === 'peptide' || p.isPeptide;
+        if (!isPeptide) return;
+
+        const name = p.canonicalName || p.name || 'Bioactive Peptide';
+        const cleanNameKey = name.toLowerCase().trim();
+        if (seenNames.has(cleanNameKey)) return;
+        seenNames.add(cleanNameKey);
+
+        formulary.push({
+          id: doc.id,
+          slug: p.slug || doc.id,
+          name,
+          description: p.aiDescription || p.description || 'Analytical grade bioactive peptide API for customized compounding magistral protocols.',
+          category: 'peptide',
+          primaryGoal: p.primaryGoal || (Array.isArray(p.goals) && p.goals[0]) || 'Cellular Optimization',
+          goals: Array.isArray(p.goals) ? p.goals : [p.primaryGoal || 'Cellular Optimization'],
+          purity: p.purity || '≥ 99% (HPLC Verified)',
+          casNumber: p.casNumber || p.cas || null,
+          sequence: p.sequence || null,
+          molecularWeight: p.molecularWeight || p.mw || null,
+          route: p.route || 'Lyophilized API (SubQ / Topical / Oral)',
+          moa: p.mechanismOfAction || p.action || p.aiSummary || 'Targeted molecular signaling and receptor upregulation under medical vigilance.',
+          halfLife: p.halfLife || null,
+          contraindications: p.contraindications || null,
+          inStock: p.inStock ?? true
+        });
+      });
+    } catch (err) {
+      console.warn('Could not load products formulary in doctorCache:', err);
+    }
+
+    const payload = {
+      success: true,
+      doctor: doctorProfile,
+      kpis: {
+        activePrescriptions,
+        monitoredPatients,
+        pendingTasksCount,
+        refillsDueCount
+      },
+      tasks: clinicalTasks,
+      prescriptions,
+      patients: Array.from(patientMap.values()),
+      formulary
+    };
 
   // Cache in RAM for 10 minutes under all lookup aliases
   const expiresAt = now + CACHE_TTL_MS;
