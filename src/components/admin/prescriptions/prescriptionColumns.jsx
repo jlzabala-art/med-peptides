@@ -174,6 +174,7 @@ function WorkspaceRxToggleButton({ rx }) {
         cursor: 'pointer',
         transition: 'all 0.15s ease',
         flexShrink: 0,
+        boxSizing: 'border-box',
         padding: 0
       }}
       onMouseEnter={(e) => {
@@ -213,7 +214,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'patient',
       header: 'Patient & Doctor',
-      width: '38%',
+      width: '36%',
       render: (rx) => {
         const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
@@ -299,7 +300,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'parts',
       header: 'Parts',
-      width: '14%',
+      width: '10%',
       render: (rx) => {
         let count = 1;
         if (rx._isSessionGroup) {
@@ -338,7 +339,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'date',
       header: 'Date',
-      width: '14%',
+      width: '12%',
       render: (rx) => {
         const formatAnyDate = (val) => {
           if (!val) return null;
@@ -430,9 +431,11 @@ export const getPrescriptionColumns = (options = {}) => {
       },
     },
     {
-      key: 'action',
+      key: 'actions',
       header: 'Actions',
-      width: '20%',
+      width: '180px',
+      minWidth: '180px',
+      isAction: true,
       align: 'right',
       sortable: false,
       render: (rx) => {
@@ -754,7 +757,15 @@ export const getPrescriptionColumns = (options = {}) => {
         ];
 
           return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', width: '100%', paddingRight: '12px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '6px',
+              width: '100%',
+              minWidth: '150px',
+              flexShrink: 0
+            }}>
               <WorkspaceRxToggleButton rx={rx} />
               <AppActionGroup maxVisible={2} actions={actions} />
             </div>

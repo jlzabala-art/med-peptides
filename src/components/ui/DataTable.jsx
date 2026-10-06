@@ -992,6 +992,7 @@ export default function DataTable({
                           : 'var(--text-muted)',
                       textAlign: effectiveAlign,
                       width: col.width || 'auto',
+                      minWidth: col.minWidth || (col.key === 'actions' || col.key === 'action' || col.isAction ? '175px' : 'auto'),
                       borderBottom: '1px solid var(--color-border)',
                       cursor: isSortable ? 'pointer' : 'default',
                       userSelect: 'none',
@@ -1253,7 +1254,7 @@ export default function DataTable({
                             col.key === 'name' ||
                             col.header === 'Product Name' ||
                             col.label === 'Product Name';
-                          const isActionColumn = col.key === 'actions' || col.isAction;
+                          const isActionColumn = col.key === 'actions' || col.key === 'action' || col.isAction;
                           const cellStyle = {
                             padding: isActionColumn
                               ? (isCompact ? '6px 8px 6px 4px' : '12px 12px 12px 6px')
@@ -1279,7 +1280,8 @@ export default function DataTable({
                                 textOverflow: isActionColumn ? 'clip' : 'ellipsis', 
                                 whiteSpace: col.nowrap || isActionColumn ? 'nowrap' : 'normal', 
                                 wordBreak: isActionColumn ? 'normal' : 'break-word', 
-                                maxWidth: col.width || 'none' 
+                                maxWidth: isActionColumn ? 'none' : (col.width || 'none'),
+                                minWidth: isActionColumn ? (col.minWidth || '175px') : (col.minWidth || 'auto')
                               }}
                             >
                               <div
@@ -1287,7 +1289,7 @@ export default function DataTable({
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: effectiveAlign === 'right' ? 'flex-end' : effectiveAlign === 'center' ? 'center' : 'flex-start',
-                                  minWidth: 0,
+                                  minWidth: isActionColumn ? 'max-content' : 0,
                                 }}
                               >
                                 <div style={{ 
@@ -1296,7 +1298,7 @@ export default function DataTable({
                                   textOverflow: isActionColumn ? 'clip' : 'ellipsis', 
                                   whiteSpace: col.nowrap || isActionColumn ? 'nowrap' : 'normal', 
                                   wordBreak: isActionColumn ? 'normal' : 'break-word', 
-                                  minWidth: 0, 
+                                  minWidth: isActionColumn ? 'max-content' : 0, 
                                   textAlign: effectiveAlign 
                                 }}>{cellValue}</div>
                                 {idx === activeColumns.length - 1 &&
