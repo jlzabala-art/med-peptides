@@ -328,7 +328,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
       { name: 'IGrantine-F1™', dose: '0.5% Topical', dosage: '0.5% Topical' }
     ],
     vehicle: { name: 'TrichoFoam™ Lipophilic Topical Foam Base', volume: '100 mL' },
-    directions: 'Apply at night before bedtime with a gentle massage on your scalp. Wash your scalp the next day.',
+    directions: 'Apply 2 pumps daily at bedtime onto dry scalp with gentle massage. Leave on overnight; wash scalp next morning if desired. Wash hands after use.',
     warnings: 'For topical scalp use only. Avoid contact with eyes and mucous membranes. Keep out of reach of children.',
     prodDate: '19-11-2025',
     expDate: '19-11-2026',

@@ -108,8 +108,34 @@ export default function PharmacyLabelsModal({
         const pngDataUrl = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
         downloadLink.href = pngDataUrl;
-        const cleanName = (currentItem.productName || 'Label').replace(/[^a-zA-Z0-9]/g, '_');
-        downloadLink.download = `Pharmapolis_${cleanName}_${dimensions.widthMm}x${dimensions.heightMm}mm_${activeVariant}_${dpi}DPI.png`;
+        // ── Standardized Clinical File Naming Engine (Supplier + Rx + Part + Size + Specs) ──
+        const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
+        const supplierClean = rawSupplier.replace(/Compounding|Pharmacy|L\.?L\.?C\.?/gi, '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'PHARMAPOLIS';
+
+        const rxCodeClean = String(currentItem.fileNumber || currentItem.rxCode || currentItem.id || 'RX')
+          .trim()
+          .replace(/[^a-zA-Z0-9-]/g, '')
+          .toUpperCase();
+
+        const isMultiPart = labels.length > 1 || Boolean(currentItem.phaseNumber && currentItem.phaseNumber > 0);
+        const partTag = isMultiPart ? `PART-${currentItem.phaseNumber || (selectedProductIdx + 1)}` : '';
+
+        const rawVol = String(currentItem.volume || currentItem.size || currentItem.netContent || '').trim();
+        let sizeTag = '';
+        const volMatch = rawVol.match(/(\d+(?:\.\d+)?)\s*(ml|caps?|capsules?|g|mg)?/i);
+        if (volMatch) {
+          const num = volMatch[1];
+          let unit = (volMatch[2] || '').toUpperCase();
+          if (unit.startsWith('CAP')) unit = 'CAPS';
+          sizeTag = `${num}${unit}`;
+        } else if (rawVol) {
+          sizeTag = rawVol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+        }
+
+        const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : (activeVariant === 'frontWithQr' ? 'FRONT-QR' : 'FRONT');
+
+        const nameSegments = [supplierClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean, `${dpi}DPI`].filter(Boolean);
+        downloadLink.download = `${nameSegments.join('_')}.png`;
         downloadLink.click();
         setIsGeneratingPng(false);
       };

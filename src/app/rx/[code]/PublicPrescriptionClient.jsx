@@ -968,75 +968,114 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           ? 'Cápsulas vegetales de hidroxipropilmetilcelulosa (HPMC) de liberación entérica fisiológica, 100% libres de alérgenos y dióxido de titanio. Contienen la mezcla micronizada homogénea de los principios activos farmacogenómicos para una absorción y biodisponibilidad celular superior sin causar irritación gástrica.'
           : 'Allergen-free and titanium dioxide-free vegetarian HPMC enteric capsules. Engineered for uniform dispersion and maximum systemic bioavailability of micronized botanical extracts and metabolic cofactors.';
         
-        posologyObj.title = isNutrigen 
-          ? (isEs ? 'Pauta de Administración Diaria NutriGen™ (Cápsulas)' : 'NutriGen™ Daily Oral Capsule Administration Regimen')
-          : (isEs ? 'Pauta de Administración Oral (Cápsulas)' : 'Oral Capsule Administration Regimen');
-        posologyObj.regimen = safeCustomPosology || (isEs ? '1 Cápsula Diaria por la Mañana con el Desayuno' : '1 Capsule Daily in the Morning with Breakfast');
-        posologyObj.timing = isEs ? 'Por la mañana con el desayuno y un vaso lleno de agua' : 'Morning with breakfast and a full glass of water';
-        posologyObj.duration = duration || rx.duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)');
-        posologyObj.steps = [
-          {
-            step: 1,
-            title: isEs ? 'Ingesta Diaria de la Cápsula' : 'Daily Oral Ingestion',
-            timing: isEs ? '1 Cápsula / Día' : '1 Capsule / Day',
-            instruction: isEs 
-              ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL), preferentemente junto con el desayuno o la comida principal para facilitar la absorción de los nutrientes.' 
-              : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL), ideally alongside breakfast or lunch to enhance absorption.'
-          },
-          {
-            step: 2,
-            title: isEs ? 'Momento de Administración y Cronobiología' : 'Optimal Chronobiological Timing',
-            timing: isEs ? 'Mañana / Mediodía' : 'Morning / Midday',
-            instruction: isEs 
-              ? 'Para fórmulas metabólicas y energizantes (Ginseng, Antioxidantes, Vitaminas), se recomienda tomar por la mañana. Si contiene inductores de descanso (Melatonina), tomar preferentemente 30 minutos antes de dormir.' 
-              : 'For metabolic and revitalizing botanicals (Ginseng, Antioxidants, Vitamins), ingest in the morning. If formulated with nighttime modulators like Melatonin, take 30 minutes before sleep.'
-          },
-          {
-            step: 3,
-            title: isEs ? 'Conservación y Estabilidad del Frasco' : 'Storage Conditions & Protection',
-            timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
-            instruction: isEs 
-              ? 'Mantener el frasco herméticamente cerrado con su cápsula desecante original, en lugar seco y fresco (< 25°C), protegido de la luz solar directa y la humedad ambiental.' 
-              : 'Store in a cool, dry place below 25°C (77°F), securely closed with original desiccant, protected from direct sunlight and ambient humidity.'
-          },
-          {
-            step: 4,
-            title: isEs ? 'Duración del Ciclo Terapéutico' : 'Treatment Cycle Duration',
-            timing: duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)'),
-            instruction: duration
-              ? (isEs ? `Ciclo terapéutico de ${duration}. Se recomienda seguimiento médico y reevaluación al completar el período.` : `Protocol spans a ${duration} cycle. Medical follow-up and clinical review are recommended upon cycle completion.`)
-              : (isEs 
-              ? 'Tratamiento planificado para un ciclo completo de 90 días (90 cápsulas). Se recomienda seguimiento médico y reevaluación al completar el período.' 
-              : 'Protocol spans a full 90-day cycle (90 capsules). Medical follow-up and clinical review are recommended upon cycle completion.')
-          }
-        ];
+        const apisList = apis || [];
+        const isProteolytic = apisList.some(a => {
+          const n = String(a.name || a.productName || a.activeIngredient || '').toLowerCase();
+          return n.includes('natto') || n.includes('serra') || n.includes('proteolytic');
+        }) || String(treatmentTitle || '').toLowerCase().includes('proteolytic');
+
+        if (isProteolytic) {
+          posologyObj.title = isEs ? 'Pauta de Enzimas Proteolíticas Sistémicas' : 'Systemic Proteolytic Enzymes Regimen';
+          posologyObj.regimen = safeCustomPosology || (isEs ? '1 cápsula 3 veces al día con el estómago vacío (Semana 1: 1 cap/día)' : '1 capsule 3 times daily on an empty stomach (Week 1: 1 cap/day)');
+          posologyObj.timing = isEs ? 'Con el estómago vacío: mañana en ayunas, tarde (17:00 h) y antes de dormir' : 'On empty stomach: morning fasting, late afternoon (5:00 PM), and bedtime';
+          posologyObj.duration = duration || rx.duration || (isEs ? '90 Días (270 Cápsulas)' : '90 Days (270 Capsules)');
+          posologyObj.steps = [
+            {
+              step: 1,
+              title: isEs ? 'Ingesta en Ayunas (Estómago Vacío)' : 'Fasting Administration (Empty Stomach)',
+              timing: isEs ? '30-45 min antes de comidas' : '30-45 min before meals',
+              instruction: isEs 
+                ? 'Para asegurar la absorción sistémica en el torrente sanguíneo, tome cada cápsula con agua al menos 30-45 minutos antes de comer o 2 horas después. No tomar con alimentos para evitar su digestión gástrica.' 
+                : 'To ensure optimal systemic absorption into circulation, take each capsule with water at least 30-45 minutes before meals or 2 hours after. Do not take with food to prevent gastric digestion of enzymes.'
+            },
+            {
+              step: 2,
+              title: isEs ? 'Pauta Escalonada' : 'Titration Schedule',
+              timing: isEs ? 'Semana 1 vs Semana 2+' : 'Week 1 vs Week 2+',
+              instruction: isEs 
+                ? 'Semana 1: 1 cápsula al día por la mañana en ayunas. A partir de la Semana 2: 1 cápsula 3 veces al día (mañana en ayunas, 17:00 h y al acostarse).' 
+                : 'Week 1: 1 capsule daily in the morning on an empty stomach. From Week 2 onwards: 1 capsule 3 times daily (morning fasting, 5:00 PM, and bedtime).'
+            },
+            {
+              step: 3,
+              title: isEs ? 'Conservación & Precauciones' : 'Storage & Precautions',
+              timing: isEs ? 'Lugar fresco y seco' : 'Cool, Dry Place',
+              instruction: isEs 
+                ? 'Cápsulas gastrorresistentes entéricas. Conservar protegido de la humedad. Suspender 3 días antes de cirugías programadas.' 
+                : 'Enteric acid-resistant capsules. Protect from moisture. Discontinue 3 days prior to scheduled elective surgery.'
+            }
+          ];
+        } else {
+          posologyObj.title = isNutrigen 
+            ? (isEs ? 'Pauta de Administración Diaria NutriGen™ (Cápsulas)' : 'NutriGen™ Daily Oral Capsule Administration Regimen')
+            : (isEs ? 'Pauta de Administración Oral (Cápsulas)' : 'Oral Capsule Administration Regimen');
+          posologyObj.regimen = safeCustomPosology || (isEs ? '1 Cápsula Diaria por la Mañana con el Desayuno' : '1 Capsule Daily in the Morning with Breakfast');
+          posologyObj.timing = isEs ? 'Por la mañana con el desayuno y un vaso lleno de agua' : 'Morning with breakfast and a full glass of water';
+          posologyObj.duration = duration || rx.duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)');
+          posologyObj.steps = [
+            {
+              step: 1,
+              title: isEs ? 'Ingesta Diaria de la Cápsula' : 'Daily Oral Ingestion',
+              timing: isEs ? '1 Cápsula / Día' : '1 Capsule / Day',
+              instruction: isEs 
+                ? 'Tome 1 cápsula al día acompañada de un vaso lleno de agua (200-250 mL), preferentemente junto con el desayuno o la comida principal para facilitar la absorción de los nutrientes.' 
+                : 'Ingest 1 capsule daily accompanied by a full glass of water (approx. 200-250 mL), ideally alongside breakfast or lunch to enhance absorption.'
+            },
+            {
+              step: 2,
+              title: isEs ? 'Momento de Administración y Cronobiología' : 'Optimal Chronobiological Timing',
+              timing: isEs ? 'Mañana / Mediodía' : 'Morning / Midday',
+              instruction: isEs 
+                ? 'Para fórmulas metabólicas y antioxidantes (Ubiquinol, ALA, PQQ, Vitaminas), se recomienda tomar por la mañana con la comida. Si contiene inductores de descanso (Melatonina), tomar 30 minutos antes de dormir.' 
+                : 'For metabolic and antioxidant botanicals (Ubiquinol, ALA, PQQ, Vitamins), ingest in the morning with a meal. If formulated with nighttime modulators like Melatonin, take 30 minutes before sleep.'
+            },
+            {
+              step: 3,
+              title: isEs ? 'Conservación y Estabilidad del Frasco' : 'Storage Conditions & Protection',
+              timing: isEs ? 'Temp. Ambiente < 25°C' : 'Room Temp < 25°C',
+              instruction: isEs 
+                ? 'Mantener el frasco herméticamente cerrado con su cápsula desecante original, en lugar seco y fresco (< 25°C), protegido de la luz solar directa y la humedad ambiental.' 
+                : 'Store in a cool, dry place below 25°C (77°F), securely closed with original desiccant, protected from direct sunlight and ambient humidity.'
+            },
+            {
+              step: 4,
+              title: isEs ? 'Duración del Ciclo Terapéutico' : 'Treatment Cycle Duration',
+              timing: duration || (isEs ? '90 Días (3 Meses)' : '90 Days (3 Months)'),
+              instruction: duration
+                ? (isEs ? `Ciclo terapéutico de ${duration}. Se recomienda seguimiento médico y reevaluación al completar el período.` : `Protocol spans a ${duration} cycle. Medical follow-up and clinical review are recommended upon cycle completion.`)
+                : (isEs 
+                ? 'Tratamiento planificado para un ciclo completo de 90 días (90 cápsulas). Se recomienda seguimiento médico y reevaluación al completar el período.' 
+                : 'Protocol spans a full 90-day cycle (90 capsules). Medical follow-up and clinical review are recommended upon cycle completion.')
+            }
+          ];
+        }
       } else if (isTrichoFoam) {
         accentColor = '#0891b2'; // Cyan
         accentBg = '#cffafe';
         badgeText += isEs ? ' · ESPUMA TÓPICA' : ' · TOPICAL FOAM';
         resolvedTitle = treatmentTitle || (isEs ? 'Espuma Tópica Folicular (TrichoFoam™)' : 'Follicular Topical Foam (TrichoFoam™)');
         resolvedRoute = isEs ? 'Aplicación Tópica en Espuma' : 'Topical Foam Scalp Application';
-        resolvedVolume = volume || '50 mL';
+        resolvedVolume = volume || '100 mL';
         resolvedContainer = resolvedContainer || (isEs ? 'Frasco Dosificador de Espuma con Bomba de Precisión' : 'Metered Foam Dispenser Bottle');
         vehicleObj.name = vehicleName || 'TrichoFoam™ Patented Vehicle';
         vehicleObj.specs = isEs
           ? 'Espuma de penetración rápida libre de propilenglicol con fitocomplejo TrichoTech™.'
           : 'Rapid-penetration, propylene glycol-free foam carrier formulated with TrichoTech™ phytocomplex.';
-        posologyObj.title = isEs ? 'Pauta de Administración en Espuma' : 'Topical Foam Administration Protocol';
-        posologyObj.regimen = safeCustomPosology || (isEs ? '2 Pulsaciones Diarias' : '2 Pumps Daily');
-        posologyObj.timing = isEs ? 'Por la mañana o noche sobre cuero cabelludo seco' : 'Morning or evening onto dry scalp';
+        posologyObj.title = isEs ? 'Pauta de Administración en Espuma Capilar' : 'Topical Foam Administration Protocol';
+        posologyObj.regimen = safeCustomPosology || (isEs ? '2 Pulsaciones Diarias por la Noche' : '2 Pumps Daily at Bedtime');
+        posologyObj.timing = isEs ? 'Por la noche antes de acostarse sobre cuero cabelludo limpio y seco' : 'Nightly at bedtime onto clean, dry scalp';
         posologyObj.steps = [
           {
             step: 1,
-            title: isEs ? 'Dispensación' : 'Dispense Foam',
-            timing: isEs ? '2 Pulsaciones' : '2 Pumps',
-            instruction: isEs ? 'Presione el dosificador 2 veces directamente sobre la palma o yemas.' : 'Dispense 2 metered pumps of foam onto fingertips.'
+            title: isEs ? 'Dispensación & Aplicación' : 'Dispense & Application',
+            timing: isEs ? '2 Pulsaciones (Nocturno)' : '2 Pumps (Nightly)',
+            instruction: isEs ? 'Presione el dosificador 2 veces directamente sobre las yemas de los dedos. Aplique separando mechones de cabello y masajee suavemente sobre las zonas afectadas hasta absorción completa. Dejar actuar durante la noche.' : 'Dispense 2 metered pumps of foam onto fingertips. Part hair and gently massage into affected scalp zones until fully absorbed. Leave on overnight.'
           },
           {
             step: 2,
-            title: isEs ? 'Distribución' : 'Application',
-            timing: isEs ? 'Zonas Afectadas' : 'Thinning Zones',
-            instruction: isEs ? 'Aplique separando mechones de cabello y masajee hasta absorción.' : 'Apply by parting hair and gently massage until fully absorbed.'
+            title: isEs ? 'Higiene & Aclarado' : 'Hygiene & Rinsing',
+            timing: isEs ? 'A la mañana siguiente' : 'Next Morning',
+            instruction: isEs ? 'Lave las manos inmediatamente con agua y jabón tras aplicar. Aclare o lave el cuero cabelludo a la mañana siguiente si lo desea.' : 'Wash hands thoroughly with soap and water after application. Rinse or wash scalp the following morning if desired.'
           }
         ];
       } else if (isPomade) {
@@ -1053,20 +1092,20 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           ? 'Base de pomada galénica hipoalergénica sin fragancias ni alcohol, formulada para aplicación tópica/perianal con excelente tolerancia y retención dérmica.'
           : 'Hypoallergenic, fragrance-free, and alcohol-free compounding ointment base formulated for perianal/mucosal application with high tolerance and tissue adhesion.';
         posologyObj.title = isEs ? 'Pauta de Aplicación de la Pomada Tópica' : 'Topical Pomade Administration Regimen';
-        posologyObj.regimen = safeCustomPosology || (isEs ? 'Aplicar una pequeña cantidad dos veces al día durante 2 meses' : 'Apply a pea-sized amount twice daily for 2 months');
-        posologyObj.timing = isEs ? 'Mañana y noche' : 'Morning and evening';
+        posologyObj.regimen = safeCustomPosology || (isEs ? 'Aplicar cantidad tamaño guisante dos veces al día durante 2 meses' : 'Apply a pea-sized amount twice daily for 2 months');
+        posologyObj.timing = isEs ? 'Mañana y noche (cada 12 horas) tras higiene suave' : 'Morning and evening (every 12 hours) after gentle cleansing';
         posologyObj.steps = [
           {
             step: 1,
             title: isEs ? 'Higiene & Preparación' : 'Hygiene & Cleansing',
             timing: isEs ? 'Antes de aplicar' : 'Before Application',
-            instruction: isEs ? 'Limpie y seque suavemente la zona antes de cada aplicación.' : 'Gently cleanse and dry the application area prior to each use.'
+            instruction: isEs ? 'Limpie y seque suavemente la zona perianal antes de cada aplicación.' : 'Gently cleanse and dry the perianal area prior to each use.'
           },
           {
             step: 2,
             title: isEs ? 'Dosificación de la Pomada' : 'Pomade Application',
-            timing: isEs ? 'Mañana y Noche' : 'Morning & Evening',
-            instruction: isEs ? 'Aplique una pequeña cantidad (tamaño de un guisante) en el canal anal/margen anal según indicación médica.' : 'Apply a pea-sized amount to the anal canal/anal margin as prescribed.'
+            timing: isEs ? 'Mañana y Noche (cada 12h)' : 'Morning & Evening (every 12h)',
+            instruction: isEs ? 'Aplique una pequeña cantidad (tamaño de un guisante, ~0.5-1 cm) en el canal anal / margen anal según indicación médica. Lave las manos tras el uso.' : 'Apply a pea-sized amount (approx. 0.5–1 cm) to the anal canal/margin as directed by your physician. Wash hands after use.'
           }
         ];
       } else if (isBHRT) {
@@ -1082,21 +1121,34 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         vehicleObj.specs = isEs
           ? 'Emulsión liposomal patentada que asegura la absorción transdérmica continua de hormonas bioidénticas sin transferencia indeseada.'
           : 'Patented oil-in-water liposomal compounding emulsion delivering steady transdermal absorption of bioidentical hormones.';
+
+        const fTitleLower = String(treatmentTitle || vehicleName || '').toLowerCase();
+        const apisLower = apis.map(a => (a.name || a.productName || '').toLowerCase()).join(' ');
+        const isEveningHormone = fTitleLower.includes('estradiol') || fTitleLower.includes('progesterone') || apisLower.includes('estradiol') || apisLower.includes('progesterone') || fTitleLower.includes('phase 2') || fTitleLower.includes('evening');
+        const isMorningHormone = fTitleLower.includes('testosterone') || apisLower.includes('testosterone') || fTitleLower.includes('phase 1') || fTitleLower.includes('morning');
+
         posologyObj.title = isEs ? 'Pauta de Aplicación Transdérmica BHRT' : 'Transdermal BHRT Administration Regimen';
-        posologyObj.regimen = safeCustomPosology || (isEs ? '1 Pulsación diaria según indicación' : '1 Metered pump daily as prescribed');
-        posologyObj.timing = isEs ? 'Diario sobre piel limpia y seca' : 'Daily onto clean, hairless skin';
+        posologyObj.regimen = safeCustomPosology || (isEs ? '1 Pulsación diaria (1 mL = 2 mg)' : '1 Metered pump daily (1 mL = 2 mg)');
+        posologyObj.timing = isEveningHormone
+          ? (isEs ? 'Cada noche antes de acostarse sobre muslo interno o brazo superior' : 'Every evening at bedtime onto inner thigh or upper arm')
+          : (isMorningHormone
+            ? (isEs ? 'Cada mañana sobre piel limpia del antebrazo interno o bajo abdomen' : 'Every morning onto clean skin of inner forearm or lower abdomen')
+            : (isEs ? 'Diario sobre piel limpia y seca' : 'Daily onto clean, hairless skin'));
+
         posologyObj.steps = [
           {
             step: 1,
             title: isEs ? 'Dispensación de Dosis Exacta' : 'Metered Dose Dispensing',
-            timing: isEs ? '1 Pulsación' : '1 Pump',
-            instruction: isEs ? 'Presione el dosificador Topi-Pump 1 vez sobre la zona de piel recomendada.' : 'Dispense 1 metered click/pump from the airless container onto clean skin.'
+            timing: isEs ? '1 Pulsación (1 mL = 2 mg)' : '1 Pump (1 mL = 2 mg)',
+            instruction: isEveningHormone
+              ? (isEs ? 'Presione el dosificador Topi-Pump 1 vez y aplique sobre piel limpia y seca del muslo interno o brazo superior. NUNCA aplicar sobre los senos ni mucosas.' : 'Dispense 1 metered pump from Topi-Pump container and apply onto clean, dry skin of inner thigh or upper arm. NEVER apply directly to breasts or mucous membranes.')
+              : (isEs ? 'Presione el dosificador Topi-Pump 1 vez y aplique sobre piel limpia, seca y sin vello del antebrazo interno o abdomen inferior.' : 'Dispense 1 metered pump from Topi-Pump container and apply onto clean, dry, hairless skin of inner forearm or lower abdomen.')
           },
           {
             step: 2,
             title: isEs ? 'Masaje & Absorción' : 'Absorption & Hand Hygiene',
             timing: isEs ? 'Inmediato' : 'Immediate',
-            instruction: isEs ? 'Extienda suavemente hasta que se absorba por completo. Lave las manos con agua y jabón tras la aplicación.' : 'Gently spread until fully absorbed. Wash hands thoroughly with soap and water after application.'
+            instruction: isEs ? 'Extienda suavemente hasta que se absorba por completo. Lave las manos inmediatamente con agua y jabón para evitar transferencia a terceros.' : 'Gently spread until fully absorbed. Wash hands thoroughly with soap and water immediately to prevent accidental transfer to others.'
           }
         ];
       } else {
