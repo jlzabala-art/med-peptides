@@ -37,9 +37,9 @@ import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { triggerHaptic } from '@/utils/haptics';
 
-export default function DoctorPublicPortalClient({ slug }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function DoctorPublicPortalClient({ slug, initialData = null }) {
+  const [data, setData] = useState(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState(null);
 
   // Search & Filter State (Google Cloud UX Golden Rules #7, #24, #29)
@@ -58,6 +58,9 @@ export default function DoctorPublicPortalClient({ slug }) {
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
 
   useEffect(() => {
+    // If initialData is already hydrated, only fetch in background if stale
+    if (initialData && data?.success) return;
+
     async function fetchDoctorPortal() {
       try {
         setLoading(true);
@@ -78,12 +81,15 @@ export default function DoctorPublicPortalClient({ slug }) {
       }
     }
     if (slug) fetchDoctorPortal();
-  }, [slug]);
+  }, [slug, initialData]);
 
   const doctor = data?.doctor || {};
   const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
   const allTasks = data?.tasks || [];
   const allPrescriptions = data?.prescriptions || [];
+
+  // Opaque Doctor Slug (Protects Doctor Identity in URL)
+  const opaqueCode = doctor.opaqueCode || doctor.slug || slug;
 
   // Filter Tasks
   const filteredTasks = useMemo(() => {
@@ -131,24 +137,25 @@ export default function DoctorPublicPortalClient({ slug }) {
 
   const handleCopyPortalLink = () => {
     triggerHaptic('selection');
-    navigator.clipboard?.writeText(window.location.href);
+    const portalUrl = `${window.location.origin}/dr/${opaqueCode}`;
+    navigator.clipboard?.writeText(portalUrl);
     setCopiedLink(true);
-    toast.success('Doctor public portal link copied to clipboard ✓');
+    toast.success('Codified doctor portal link copied (identity protected) ✓');
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const handleCopyIntakeLink = () => {
     triggerHaptic('selection');
-    const intakeUrl = `${window.location.origin}/rx/intake?refDoctor=${encodeURIComponent(doctor.name || '')}`;
+    const intakeUrl = `${window.location.origin}/rx/intake?refDoctor=${encodeURIComponent(opaqueCode)}`;
     navigator.clipboard?.writeText(intakeUrl);
     setCopiedIntake(true);
-    toast.success('Patient Intake Link copied with doctor attribution ✓');
+    toast.success('Patient Intake Link copied with codified attribution ✓');
     setTimeout(() => setCopiedIntake(false), 2000);
   };
 
   const handleShareWhatsApp = () => {
     triggerHaptic('light');
-    const intakeUrl = `${window.location.origin}/rx/intake?refDoctor=${encodeURIComponent(doctor.name || '')}`;
+    const intakeUrl = `${window.location.origin}/rx/intake?refDoctor=${encodeURIComponent(opaqueCode)}`;
     const text = encodeURIComponent(`Hello, you can submit your medical prescription directly to ${doctor.name} at Atlas Clinical Services here: ${intakeUrl}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };

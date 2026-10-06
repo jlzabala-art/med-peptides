@@ -1,69 +1,82 @@
 import React from 'react';
-import { adminDb } from '@/lib/firebaseAdmin';
 import DoctorPublicPortalClient from './DoctorPublicPortalClient';
+import { getDoctorPortalData } from '@/lib/doctorCache';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
-function slugify(text) {
-  return String(text || '')
-    .toLowerCase()
-    .replace(/^dr[a]?\.\s*/i, '')
-    .replace(/^dr[a]?\s*/i, '')
-    .replace(/[^\w\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-');
-}
-
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const cleanSlug = decodeURIComponent(slug || '').trim().toLowerCase();
+  const cleanSlug = decodeURIComponent(slug || '').trim();
 
-  let doctorName = 'Physician Portal';
-  let clinic = 'Atlas Clinical Network';
-  let specialty = 'Regenerative Medicine';
+  let doctorName = 'Physician Clinical Portal';
+  let clinic = 'Atlas Clinical Partner';
+  let specialty = 'Regenerative Medicine & Nutrigenomics';
+  let canonicalSlug = cleanSlug;
 
-  if (adminDb && cleanSlug) {
-    try {
-      const snap = await adminDb.collection('users').get();
-      snap.forEach((doc) => {
-        const d = doc.data();
-        const dName = d.displayName || d.name || `${d.firstName || ''} ${d.lastName || ''}`;
-        if (doc.id.toLowerCase() === cleanSlug || slugify(dName) === cleanSlug) {
-          doctorName = dName;
-          clinic = d.clinicName || d.clinic || clinic;
-          specialty = d.specialty || specialty;
-        }
-      });
-    } catch (e) {
-      console.warn('Metadata fetch error', e);
+  try {
+    const portalData = await getDoctorPortalData(cleanSlug);
+    if (portalData?.doctor) {
+      const doc = portalData.doctor;
+      doctorName = doc.name || doctorName;
+      clinic = doc.clinic || clinic;
+      specialty = doc.specialty || specialty;
+      canonicalSlug = doc.opaqueCode || cleanSlug;
     }
+  } catch (e) {
+    console.warn('Doctor metadata fetch error', e);
   }
 
+  const shareTitle = `${doctorName} | Clinical Prescriptions & Patient Portal`;
+  const shareDesc = `Official digital prescription & clinical dossier for ${doctorName} (${specialty} at ${clinic}). View posology regimens, active compounded treatments, and patient care management.`;
+  const pageUrl = `${BASE_URL}/dr/${canonicalSlug}`;
+
   return {
-    title: `${doctorName} | Clinical Prescriptions & Patient Portal`,
-    description: `Official digital prescription portal for ${doctorName} (${specialty} at ${clinic}). View posology regimens, active compounded treatments, and patient care management.`,
+    title: shareTitle,
+    description: shareDesc,
+    alternates: {
+      canonical: pageUrl
+    },
     openGraph: {
-      title: `${doctorName} — Clinical Prescriptions & Patient Portal`,
-      description: `Official digital clinical dossier for ${doctorName}. Posology regimens, compounded formulations, and patient care management.`,
-      url: `${BASE_URL}/dr/${cleanSlug}`,
+      title: shareTitle,
+      description: shareDesc,
+      url: pageUrl,
       siteName: 'Atlas Clinical Services',
+      locale: 'en_US',
+      type: 'profile',
       images: [
         {
           url: `${BASE_URL}/og-card.png`,
+          secureUrl: `${BASE_URL}/og-card.png`,
           width: 1200,
           height: 630,
+          type: 'image/png',
           alt: doctorName
         }
-      ],
-      type: 'profile'
+      ]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: shareTitle,
+      description: shareDesc,
+      images: [`${BASE_URL}/og-card.png`]
     }
   };
 }
 
 export default async function DoctorPublicPage({ params }) {
   const { slug } = await params;
-  return <DoctorPublicPortalClient slug={slug} />;
+  const cleanSlug = decodeURIComponent(slug || '').trim();
+
+  // ⚡ Preload data on server with Layer 1 RAM cache (0ms delay for instant FCP)
+  let initialData = null;
+  try {
+    initialData = await getDoctorPortalData(cleanSlug);
+  } catch (err) {
+    console.error('Error preloading doctor portal data:', err);
+  }
+
+  return <DoctorPublicPortalClient slug={cleanSlug} initialData={initialData} />;
 }

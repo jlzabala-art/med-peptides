@@ -629,6 +629,37 @@ export default function PublicPrescriptionIntakeClient() {
     }
   }, [activeDraftRx, user]);
 
+  const refDoctor = searchParams?.get('refDoctor') || searchParams?.get('doctor') || '';
+
+  // Auto-populate physicianForm if refDoctor parameter is provided in URL (opaque code or slug)
+  useEffect(() => {
+    if (!refDoctor) return;
+    async function loadRefDoctor() {
+      try {
+        const res = await fetch(`/api/doctor/${encodeURIComponent(refDoctor)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.doctor) {
+            const doc = json.doctor;
+            setPhysicianForm(prev => ({
+              ...prev,
+              name: doc.name || prev.name,
+              licenseNumber: doc.license || prev.licenseNumber,
+              clinic: doc.clinic || prev.clinic,
+              email: doc.email || prev.email,
+              phone: doc.phone || prev.phone,
+              specialty: doc.specialty || prev.specialty || 'Physician Specialist'
+            }));
+            if (doc.email) setQuotationEmail(doc.email);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to auto-populate refDoctor:', e);
+      }
+    }
+    loadRefDoctor();
+  }, [refDoctor]);
+
   // Pre-fill physician form when published in Phase 3
   useEffect(() => {
     if (publishedRx) {
