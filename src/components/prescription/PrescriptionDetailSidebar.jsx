@@ -60,6 +60,7 @@ export default function PrescriptionDetailSidebar({
   lang = 'en'
 }) {
   const isEs = lang === 'es';
+  const prescriptionCode = rxId || 'RX';
   const [activeId, setActiveId] = useState(sections[0]?.id || '');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
