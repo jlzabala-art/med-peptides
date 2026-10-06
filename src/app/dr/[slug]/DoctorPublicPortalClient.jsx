@@ -327,35 +327,53 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const taskColumns = useMemo(() => [
     {
       key: 'priority',
-      header: 'Priority',
-      width: '12%',
+      header: 'Clinical Status',
+      width: '16%',
       sortable: true,
       render: (t) => {
-        const isUrgent = t.priority === 'urgent';
-        const isHigh = t.priority === 'high';
-        const isMedium = t.priority === 'medium';
-        const color = isUrgent ? '#dc2626' : isHigh ? '#d97706' : isMedium ? '#2563eb' : '#16a34a';
-        const bg = isUrgent ? '#fef2f2' : isHigh ? '#fffbeb' : isMedium ? '#eff6ff' : '#f0fdf4';
-        const border = isUrgent ? '#fecaca' : isHigh ? '#fde68a' : isMedium ? '#bfdbfe' : '#bbf7d0';
+        let label = 'Routine';
+        let color = '#475569';
+        let bg = '#f8fafc';
+        let border = '#e2e8f0';
+
+        if (t.priority === 'action_required' || t.priority === 'urgent' || t.type === 'approval') {
+          label = 'Action Required';
+          color = '#b45309';
+          bg = '#fffbeb';
+          border = '#fde68a';
+        } else if (t.priority === 'high' || t.type === 'titration') {
+          label = 'Titration Due';
+          color = '#1d4ed8';
+          bg = '#eff6ff';
+          border = '#bfdbfe';
+        } else if (t.priority === 'medium' || t.type === 'refill') {
+          label = 'Refill Scheduled';
+          color = '#0f766e';
+          bg = '#f0fdfa';
+          border = '#99f6e4';
+        }
+
         return (
           <span
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '2px 8px',
-              borderRadius: '12px',
+              padding: '3px 8px',
+              borderRadius: '4px',
               background: bg,
               color: color,
               border: `1px solid ${border}`,
               fontSize: '0.72rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em'
+              fontWeight: 600,
+              letterSpacing: '0.01em',
+              whiteSpace: 'nowrap',
+              lineHeight: 1.2,
+              flexShrink: 0
             }}
           >
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
-            {t.priority || 'Normal'}
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
+            {label}
           </span>
         );
       }
@@ -794,6 +812,38 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             padding: 16px 14px 130px 14px;
           }
         }
+        .gcp-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 16px;
+        }
+        @media (max-width: 1100px) {
+          .gcp-kpi-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+          }
+        }
+        @media (max-width: 580px) {
+          .gcp-kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+        }
+        .gcp-kpi-card {
+          background: #ffffff;
+          border: 1px solid #dadce0;
+          border-radius: 8px;
+          padding: 16px 18px;
+          box-shadow: 0 1px 2px rgba(60,64,67,0.06);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .gcp-kpi-card:hover {
+          border-color: #bdc1c6;
+          box-shadow: 0 2px 6px rgba(60,64,67,0.12);
+        }
         @keyframes slideInLeft {
           from {
             transform: translateX(-100%);
@@ -1142,28 +1192,16 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             </div>
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '16px'
-            }}
-          >
+          <div className="gcp-kpi-grid">
             {/* KPI 1: Active Prescriptions */}
-            <div
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                padding: '16px 20px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-              }}
-            >
+            <div className="gcp-kpi-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#5f6368' }}>Active Prescriptions</span>
-                <Pill size={18} style={{ color: '#16a34a' }} />
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Active Prescriptions</span>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Pill size={16} style={{ color: '#16a34a' }} />
+                </div>
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
                 {activeKpis.activePrescriptions}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
@@ -1172,20 +1210,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             </div>
 
             {/* KPI 2: Monitored Patients */}
-            <div
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                padding: '16px 20px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-              }}
-            >
+            <div className="gcp-kpi-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#5f6368' }}>Monitored Patients</span>
-                <Users size={18} style={{ color: '#003666' }} />
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Monitored Patients</span>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Users size={16} style={{ color: '#003666' }} />
+                </div>
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
                 {activeKpis.monitoredPatients}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
@@ -1194,20 +1226,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             </div>
 
             {/* KPI 3: Pending Clinical Tasks */}
-            <div
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                padding: '16px 20px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-              }}
-            >
+            <div className="gcp-kpi-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#5f6368' }}>Pending Clinical Tasks</span>
-                <Clock size={18} style={{ color: '#d97706' }} />
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Action Tasks</span>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={16} style={{ color: '#d97706' }} />
+                </div>
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
                 {activeKpis.pendingTasksCount}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
@@ -1216,20 +1242,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             </div>
 
             {/* KPI 4: Refills & Titrations Due */}
-            <div
-              style={{
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                padding: '16px 20px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-              }}
-            >
+            <div className="gcp-kpi-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#5f6368' }}>Refills & Titrations Due</span>
-                <Sparkles size={18} style={{ color: '#2563eb' }} />
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Refills & Cycles</span>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Sparkles size={16} style={{ color: '#7c3aed' }} />
+                </div>
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#2563eb', lineHeight: 1.1 }}>
+              <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.1 }}>
                 {activeKpis.refillsDueCount}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
@@ -1362,7 +1382,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             data={filteredTasks}
             keyField="id"
             tableId={`doctor-tasks-${slug}`}
-            pagination={false}
+            pagination={true}
+            initialRowsPerPage={10}
+            alwaysShowPagination={true}
             emptyTitle="All Patient Care Tasks Up to Date"
             emptyDescription="There are no pending protocol titrations, phase adjustments, or refill authorizations requiring physician action."
             expandableRender={(task) => (
@@ -1559,7 +1581,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             keyField="id"
             tableId={`doctor-prescriptions-${slug}`}
             pagination={true}
-            initialRowsPerPage={25}
+            initialRowsPerPage={10}
+            alwaysShowPagination={true}
             emptyTitle="No Prescriptions Found"
             emptyDescription="No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
             expandableRender={(rx) => {

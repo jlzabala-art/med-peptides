@@ -313,22 +313,35 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     }
 
     // Task Type 3: Pending Prescription Sign-off (draft or pending review)
-    const signKey = `${rx.patientName.toLowerCase()}_approval_${rx.id}`;
-    if (['pending', 'draft'].includes(rx.status.toLowerCase()) && !seenPatientTasks.has(signKey)) {
-      seenPatientTasks.add(signKey);
-      clinicalTasks.push({
-        id: `task-sign-${rx.id}`,
-        rxId: rx.id,
-        code: rx.code,
-        patientName: rx.patientName,
-        type: 'approval',
-        priority: 'urgent',
-        title: `Pending Clinical Verification: ${rx.patientName}`,
-        description: `Extracted formulation requires physician clinical sign-off and dispensing authorization.`,
-        dueDate: 'Immediate',
-        actionLabel: 'Authorize Rx',
-        actionUrl: `/rx/${rx.code}`
-      });
+    // Deduplicated per patient to avoid repetitive identical notifications
+    const patientKey = rx.patientName.toLowerCase().trim();
+    if (['pending', 'draft'].includes(rx.status.toLowerCase())) {
+      const existingTask = clinicalTasks.find(t => t.type === 'approval' && t.patientName.toLowerCase().trim() === patientKey);
+      if (existingTask) {
+        // Consolidate multiple formulations into a single clear clinical action item
+        existingTask.pendingCount = (existingTask.pendingCount || 1) + 1;
+        existingTask.codes = existingTask.codes || [existingTask.code];
+        if (!existingTask.codes.includes(rx.code)) existingTask.codes.push(rx.code);
+        existingTask.title = `Clinical Verification: ${rx.patientName} (${existingTask.pendingCount} Formulations)`;
+        existingTask.description = `${existingTask.pendingCount} compounded formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) require physician clinical sign-off and dispensing authorization.`;
+      } else {
+        const phaseLabel = rx.phaseName ? ` (${rx.phaseName.replace(/^Phase\s*\d+:\s*/i, 'Phase ')})` : '';
+        clinicalTasks.push({
+          id: `task-sign-${rx.id}`,
+          rxId: rx.id,
+          code: rx.code,
+          codes: [rx.code],
+          patientName: rx.patientName,
+          type: 'approval',
+          priority: 'action_required',
+          pendingCount: 1,
+          title: `Clinical Verification: ${rx.patientName}${phaseLabel}`,
+          description: `Extracted formulation #${rx.code} requires physician clinical sign-off and dispensing authorization.`,
+          dueDate: 'Action Required',
+          actionLabel: 'Review & Sign-off',
+          actionUrl: `/rx/${rx.code}`
+        });
+      }
     }
   });
 
@@ -341,10 +354,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       code: topRx.code,
       patientName: topRx.patientName,
       type: 'milestone',
-      priority: 'normal',
+      priority: 'routine',
       title: `Clinical Milestone Follow-up: ${topRx.patientName}`,
       description: `Routine 30-day therapeutic monitoring for ${topRx.treatmentTitle}.`,
-      dueDate: 'Next 10 days',
+      dueDate: 'Scheduled',
       actionLabel: 'View Dossier',
       actionUrl: `/rx/${topRx.code}`
     });
