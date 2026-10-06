@@ -41,8 +41,19 @@ import {
   Tag,
   Smartphone
 } from '@/lib/icons';
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Home } from 'lucide-react';
+
+function slugify(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/^dr[a]?\.\s*/i, '')
+    .replace(/^dr[a]?\s*/i, '')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
 import { exportPrescriptionToXlsx } from '@/utils/exportPrescriptionToXlsx';
 import { triggerHaptic } from '@/utils/haptics';
 import toast from 'react-hot-toast';
@@ -319,8 +330,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const formattedDoctorLicense = useMemo(() => {
     return formatMedicalLicense(doctorLicense, treatingDoc);
   }, [doctorLicense, treatingDoc]);
-  const doctorWebsite = isHaytham ? 'www.mrhaytham.com' : (treatingDoc.website || '');
   const isDhaLicensed = Boolean(doctorLicense && String(doctorLicense).toUpperCase().includes('DHA'));
+
+  const doctorSlug = useMemo(() => {
+    if (rx.doctorSlug) return rx.doctorSlug;
+    if (rx.doctor?.slug) return rx.doctor.slug;
+    if (treatingDoc?.slug) return treatingDoc.slug;
+    return slugify(doctorName || 'haytham-salem');
+  }, [rx.doctorSlug, rx.doctor, treatingDoc, doctorName]);
+
+  const doctorPublicUrl = `/dr/${doctorSlug}`;
 
 
   // Pharmacogenomic test correlation & Unified Prescription Classification
@@ -725,6 +744,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       totalCount,
       vehicleName = '',
       treatmentTitle = '',
+      dosageForm = '',
       route = '',
       volume = null,
       customPosology = '',
@@ -763,13 +783,46 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
       const isTrichoFoam = vNameLower.includes('trichofoam') || vNameLower.includes('foam') || titleLower.includes('foam');
 
+      const isPomade = routeLower.includes('perianal') ||
+                       routeLower.includes('anal') ||
+                       routeLower.includes('rectal') ||
+                       titleLower.includes('pomade') ||
+                       titleLower.includes('pomada') ||
+                       titleLower.includes('ointment') ||
+                       titleLower.includes('fissure') ||
+                       vNameLower.includes('pomade') ||
+                       vNameLower.includes('ointment') ||
+                       (apis.some(a => {
+                         const an = (a.name || a.productName || a.activeIngredient || '').toLowerCase();
+                         return an.includes('diltiazem') || an.includes('lidocaine') || an.includes('pomade base') || an.includes('ointment base');
+                       }));
+
+      const isBHRT = vNameLower.includes('pentravan') ||
+                     vNameLower.includes('lipoderm') ||
+                     titleLower.includes('hormone') ||
+                     titleLower.includes('bhrt') ||
+                     titleLower.includes('transdermal') ||
+                     (apis.some(a => {
+                       const an = (a.name || a.productName || a.activeIngredient || '').toLowerCase();
+                       return (an.includes('testosterone') || an.includes('estradiol') || an.includes('progesterone')) && !an.includes('minoxidil') && !an.includes('trichosol');
+                     }));
+
+      const resolvedDosageForm = dosageForm || (
+        isTrichoOil ? (isEs ? 'Aceite Capilar Tópico' : 'Topical Scalp Oil') :
+        isOral ? (isEs ? 'Cápsulas Orales' : 'Oral Capsules') :
+        isTrichoFoam ? (isEs ? 'Espuma Tópica' : 'Topical Foam') :
+        isPomade ? (isEs ? 'Pomada Tópica Galénica' : 'Topical Pomade / Ointment') :
+        isBHRT ? (isEs ? 'Crema Transdérmica Liposomal' : 'Transdermal Liposomal Cream') :
+        (isEs ? 'Solución Tópica' : 'Topical Scalp Solution')
+      );
+
       // Theme accent color & badges
       let accentColor = '#0284c7';
       let accentBg = '#e0f2fe';
       let badgeText = isEs ? `PREPARACIÓN ${index} DE ${totalCount}` : `PREPARATION ${index} OF ${totalCount}`;
       let resolvedTitle = treatmentTitle || (isEs ? `Fórmula Magistral ${index}` : `Compounded Formulation ${index}`);
       let resolvedRoute = route || (isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application');
-      let resolvedVolume = volume || (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL'));
+      let resolvedVolume = volume || (isTrichoOil ? '30 mL' : (isOral ? '90 Capsules' : (isPomade ? '30 g' : (isBHRT ? '90 mL' : '100 mL'))));
       let resolvedContainer = containerType;
 
       let vehicleObj = {
@@ -929,6 +982,66 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             instruction: isEs ? 'Aplique separando mechones de cabello y masajee hasta absorción.' : 'Apply by parting hair and gently massage until fully absorbed.'
           }
         ];
+      } else if (isPomade) {
+        accentColor = '#d97706'; // Amber for pomade / ointment
+        accentBg = '#fef3c7';
+        badgeText += isEs ? ' · POMADA MAGISTRAL' : ' · COMPOUNDED TOPICAL POMADE';
+        resolvedTitle = treatmentTitle || (isEs ? 'Pomada Compuesta Tópica (30 g)' : 'Compounded Topical Pomade / Ointment (30 g)');
+        resolvedRoute = route || (isEs ? 'Aplicación Tópica / Perianal' : 'Topical / Perianal Application');
+        resolvedVolume = volume || rx.volume || '30 g';
+        resolvedContainer = resolvedContainer || (isEs ? 'Tarro Topacio Farmacéutico de Seguridad (30 g)' : 'Topical Pomade Jar / Tube (30 g)');
+        vehicleObj.tag = isEs ? 'BASE GALÉNICA: POMADA' : 'COMPOUNDING BASE: OINTMENT';
+        vehicleObj.name = vehicleName || 'Hypoallergenic Non-Irritating Ointment Base (q.s. 30 g)';
+        vehicleObj.specs = isEs
+          ? 'Base de pomada galénica hipoalergénica sin fragancias ni alcohol, formulada para aplicación tópica/perianal con excelente tolerancia y retención dérmica.'
+          : 'Hypoallergenic, fragrance-free, and alcohol-free compounding ointment base formulated for perianal/mucosal application with high tolerance and tissue adhesion.';
+        posologyObj.title = isEs ? 'Pauta de Aplicación de la Pomada Tópica' : 'Topical Pomade Administration Regimen';
+        posologyObj.regimen = safeCustomPosology || (isEs ? 'Aplicar una pequeña cantidad dos veces al día durante 2 meses' : 'Apply a pea-sized amount twice daily for 2 months');
+        posologyObj.timing = isEs ? 'Mañana y noche' : 'Morning and evening';
+        posologyObj.steps = [
+          {
+            step: 1,
+            title: isEs ? 'Higiene & Preparación' : 'Hygiene & Cleansing',
+            timing: isEs ? 'Antes de aplicar' : 'Before Application',
+            instruction: isEs ? 'Limpie y seque suavemente la zona antes de cada aplicación.' : 'Gently cleanse and dry the application area prior to each use.'
+          },
+          {
+            step: 2,
+            title: isEs ? 'Dosificación de la Pomada' : 'Pomade Application',
+            timing: isEs ? 'Mañana y Noche' : 'Morning & Evening',
+            instruction: isEs ? 'Aplique una pequeña cantidad (tamaño de un guisante) en el canal anal/margen anal según indicación médica.' : 'Apply a pea-sized amount to the anal canal/anal margin as prescribed.'
+          }
+        ];
+      } else if (isBHRT) {
+        accentColor = '#ea580c'; // Orange for BHRT / Hormones
+        accentBg = '#fff7ed';
+        badgeText += isEs ? ' · CREMA TRANSDÉRMICA BHRT' : ' · TRANSDERMAL BHRT CREAM';
+        resolvedTitle = treatmentTitle || (isEs ? 'Crema Transdérmica Bioidéntica (BHRT)' : 'Bioidentical Hormone Transdermal Cream (BHRT)');
+        resolvedRoute = route || (isEs ? 'Aplicación Transdérmica / Tópica' : 'Transdermal / Topical Application');
+        resolvedVolume = volume || rx.volume || '90 mL';
+        resolvedContainer = resolvedContainer || (isEs ? 'Dispensador Dosificador Airless Topi-Pump® (90 mL)' : 'Topi-Pump® Metered Airless Dispenser (90 mL)');
+        vehicleObj.tag = isEs ? 'VEHÍCULO TRANSDÉRMICO: PENTRAVAN®' : 'TRANSDERMAL CARRIER: PENTRAVAN®';
+        vehicleObj.name = vehicleName || 'Pentravan® Liposomal Transdermal Cream Base';
+        vehicleObj.specs = isEs
+          ? 'Emulsión liposomal patentada que asegura la absorción transdérmica continua de hormonas bioidénticas sin transferencia indeseada.'
+          : 'Patented oil-in-water liposomal compounding emulsion delivering steady transdermal absorption of bioidentical hormones.';
+        posologyObj.title = isEs ? 'Pauta de Aplicación Transdérmica BHRT' : 'Transdermal BHRT Administration Regimen';
+        posologyObj.regimen = safeCustomPosology || (isEs ? '1 Pulsación diaria según indicación' : '1 Metered pump daily as prescribed');
+        posologyObj.timing = isEs ? 'Diario sobre piel limpia y seca' : 'Daily onto clean, hairless skin';
+        posologyObj.steps = [
+          {
+            step: 1,
+            title: isEs ? 'Dispensación de Dosis Exacta' : 'Metered Dose Dispensing',
+            timing: isEs ? '1 Pulsación' : '1 Pump',
+            instruction: isEs ? 'Presione el dosificador Topi-Pump 1 vez sobre la zona de piel recomendada.' : 'Dispense 1 metered click/pump from the airless container onto clean skin.'
+          },
+          {
+            step: 2,
+            title: isEs ? 'Masaje & Absorción' : 'Absorption & Hand Hygiene',
+            timing: isEs ? 'Inmediato' : 'Immediate',
+            instruction: isEs ? 'Extienda suavemente hasta que se absorba por completo. Lave las manos con agua y jabón tras la aplicación.' : 'Gently spread until fully absorbed. Wash hands thoroughly with soap and water after application.'
+          }
+        ];
       } else {
         // TrichoSol / Topical Solution (Default)
         accentColor = '#0284c7'; // Blue
@@ -1010,6 +1123,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         id: `formulation-${index}`,
         index,
         isOral,
+        dosageForm: resolvedDosageForm,
         accentColor,
         accentBg,
         badge: badgeText,
@@ -1148,9 +1262,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             if (standardRef) {
               const primaryRef = standardRef.split('·')[0].trim();
               doseStr = `Ref: ${primaryRef}`;
+            } else if (n.includes('prostaquinon')) {
+              doseStr = '3% Topical';
+            } else if (n.includes('minoxidil')) {
+              doseStr = '5% Topical';
+            } else if (n.includes('latanoprost')) {
+              doseStr = '0.005% Topical';
             } else {
               doseStr = isEs ? 'Dosis a calibrar' : 'Dose to calibrate';
             }
+          }
+
+          if (doseStr && !isEs) {
+            doseStr = String(doseStr)
+              .replace(/Tópico/gi, 'Topical')
+              .replace(/Oral/gi, 'Oral')
+              .replace(/Dosis a calibrar/gi, 'Standard Compounded Strength')
+              .replace(/Dose to calibrate/gi, 'Standard Compounded Strength');
           }
 
           const dosageSafety = hasPrescribedDose
@@ -1241,10 +1369,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
     // 2. Intelligent separation of rawLines into Distinct Vehicle Formulations
     const vehicleLines = [];
-    const trichoSolItems = [];
-    const trichoOilItems = [];
-    const oralItems = [];
-    const generalItems = [];
 
     // If prescription is entirely oral / NutriGen / capsules, preserve single unified formulation block
     if (isEntirelyOral) {
@@ -1272,6 +1396,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       ];
     }
 
+    const pomadeItems = [];
+    const hormoneItems = [];
+    const trichoSolItems = [];
+    const trichoOilItems = [];
+    const oralItems = [];
+    const generalItems = [];
+
     rawLines.forEach((item) => {
       const nameLower = (item.drugName || item.drug || item.name || item.productName || item.activeIngredient || '').toLowerCase();
       const formLower = (item.dosageForm || item.form || '').toLowerCase();
@@ -1282,14 +1413,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         item.isVehicleOrBase ||
         item._isVehicleOrBase ||
         item.isVehicle ||
+        item.itemType === 'vehicle_base' ||
         formLower.includes('vehicle') ||
+        formLower.includes('base') ||
         nameLower.includes('trichosol') ||
         nameLower.includes('trichooil') ||
         nameLower.includes('trichofoam') ||
         nameLower.includes('pentravan') ||
+        nameLower.includes('ointment base') ||
+        nameLower.includes('pomade base') ||
+        nameLower.includes('cream base') ||
         nameLower.includes('vehiculo') ||
         nameLower.includes('vehicle base') ||
-        nameLower.includes('vehicle')
+        nameLower.includes('vehicle') ||
+        nameLower.includes('base (q.s.') ||
+        nameLower.includes('q.s.')
       );
 
       if (isVeh) {
@@ -1297,34 +1435,72 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         return;
       }
 
-      // Check if item belongs to Scalp care / TrichoOil (must NOT be oral)
+      // Check if item belongs to Oral Capsules / NutriGen
       const isOralRoute = routeLower.includes('oral') || formLower.includes('capsule') || formLower.includes('tablet');
-      const isOilItem = !isOralRoute && (
-                        blockLower.includes('trichooil') || 
-                        blockLower.includes('scalp care') || 
-                        blockLower.includes('higiene') || 
-                        blockLower.includes('hygiene') ||
-                        nameLower.includes('trichooil') ||
-                        (nameLower.includes('ginseng') && !isOralRoute) || 
-                        (nameLower.includes('ginkgo') && !isOralRoute) || 
-                        (nameLower.includes('vitamin e') && !isOralRoute) ||
-                        (nameLower.includes('tocopherol') && !isOralRoute));
-
-      // Check if oral
       const isOralItem = isOralRoute ||
                          blockLower.includes('oral') ||
                          blockLower.includes('capsule');
 
-      // Check if TrichoSol / Topical Solution
-      const isSolItem = blockLower.includes('trichosol') || 
-                        blockLower.includes('topical treatment') ||
-                        nameLower.includes('minoxidil') || 
-                        nameLower.includes('spironolactone') || 
-                        nameLower.includes('arginine') || 
-                        nameLower.includes('latanoprost') || 
-                        nameLower.includes('estradiol');
+      // Check if item belongs to Compounded Pomade / Ointment
+      const isPomadeItem = !isOralRoute && (
+        blockLower.includes('pomade') ||
+        blockLower.includes('pomada') ||
+        blockLower.includes('ointment') ||
+        routeLower.includes('perianal') ||
+        routeLower.includes('anal') ||
+        routeLower.includes('rectal') ||
+        nameLower.includes('diltiazem') ||
+        nameLower.includes('lidocaine') ||
+        rxTypeLower.includes('pomade') ||
+        rxTypeLower.includes('ointment') ||
+        rxDispLower.includes('ointment')
+      );
 
-      if (isOilItem) {
+      // Check if item belongs to Transdermal BHRT / Hormone Cream
+      const isHormoneItem = !isOralRoute && !isPomadeItem && !nameLower.includes('minoxidil') && !nameLower.includes('trichosol') && (
+        prescriptionTypeInfo.key === 'hormone' ||
+        blockLower.includes('hormone') ||
+        blockLower.includes('bhrt') ||
+        nameLower.includes('testosterone') ||
+        nameLower.includes('estradiol') ||
+        nameLower.includes('progesterone') ||
+        rxTypeLower.includes('transdermal') ||
+        rxTypeLower.includes('pentravan') ||
+        rxDispLower.includes('pentravan')
+      );
+
+      // Check if item belongs to Scalp care / TrichoOil
+      const isOilItem = !isOralRoute && !isPomadeItem && !isHormoneItem && (
+        blockLower.includes('trichooil') || 
+        blockLower.includes('scalp care') || 
+        blockLower.includes('higiene') || 
+        blockLower.includes('hygiene') ||
+        nameLower.includes('trichooil') ||
+        (nameLower.includes('ginseng') && !isOralRoute) || 
+        (nameLower.includes('ginkgo') && !isOralRoute) || 
+        (nameLower.includes('vitamin e') && !isOralRoute) ||
+        (nameLower.includes('tocopherol') && !isOralRoute)
+      );
+
+      // Check if TrichoSol / Topical Scalp Solution
+      const isSolItem = !isOralRoute && !isPomadeItem && !isHormoneItem && !isOilItem && (
+        blockLower.includes('trichosol') || 
+        blockLower.includes('topical treatment') ||
+        nameLower.includes('minoxidil') || 
+        nameLower.includes('spironolactone') || 
+        nameLower.includes('arginine') || 
+        nameLower.includes('latanoprost') ||
+        nameLower.includes('prostaquinon') ||
+        nameLower.includes('dutasteride') ||
+        nameLower.includes('finasteride') ||
+        nameLower.includes('cetirizine')
+      );
+
+      if (isPomadeItem) {
+        pomadeItems.push(item);
+      } else if (isHormoneItem) {
+        hormoneItems.push(item);
+      } else if (isOilItem) {
         trichoOilItems.push(item);
       } else if (isOralItem) {
         oralItems.push(item);
@@ -1337,7 +1513,11 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
     // If general items exist without specific group:
     if (generalItems.length > 0) {
-      if (trichoSolItems.length > 0 || trichoOilItems.length > 0) {
+      if (pomadeItems.length > 0 || rxTypeLower.includes('pomade') || rxTypeLower.includes('ointment')) {
+        pomadeItems.push(...generalItems);
+      } else if (hormoneItems.length > 0 || prescriptionTypeInfo.key === 'hormone' || rxTypeLower.includes('transdermal') || rxTypeLower.includes('cream')) {
+        hormoneItems.push(...generalItems);
+      } else if (trichoSolItems.length > 0 || trichoOilItems.length > 0) {
         trichoSolItems.push(...generalItems);
       } else if (oralItems.length > 0) {
         oralItems.push(...generalItems);
@@ -1349,8 +1529,44 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     // Determine how many distinct vehicle formulations exist
     const activeBlocks = [];
 
-    // Preparation A: Topical Solution (TrichoSol)
-    if (trichoSolItems.length > 0 || (trichoOilItems.length === 0 && oralItems.length === 0 && rawLines.length > 0)) {
+    // Preparation A: Compounded Topical Pomade / Ointment
+    if (pomadeItems.length > 0) {
+      const pomVeh = vehicleLines.find(v => {
+        const vn = (v.name || v.drugName || '').toLowerCase();
+        return vn.includes('base') || vn.includes('pomade') || vn.includes('ointment');
+      })?.name || 'Hypoallergenic Non-Irritating Ointment Base (q.s. 30 g)';
+      activeBlocks.push({
+        type: 'pomade',
+        vehicleName: pomVeh,
+        dosageForm: isEs ? 'Pomada Tópica Galénica' : 'Topical Pomade / Ointment',
+        treatmentTitle: rx.treatmentType || (isEs ? 'Pomada Compuesta Tópica (30 g)' : 'Compounded Topical Pomade / Ointment (30 g)'),
+        route: rx.dispensingForm || (isEs ? 'Aplicación Tópica / Perianal' : 'Topical / Perianal Application'),
+        volume: rx.volume || '30 g',
+        customPosology: getPosologyText(rx.posology) || (isEs ? 'Aplicar dos veces al día durante 2 meses' : 'Apply twice daily for 2 months as prescribed'),
+        apis: pomadeItems
+      });
+    }
+
+    // Preparation B: Transdermal BHRT Liposomal Cream
+    if (hormoneItems.length > 0) {
+      const hormVeh = vehicleLines.find(v => {
+        const vn = (v.name || v.drugName || '').toLowerCase();
+        return vn.includes('pentravan') || vn.includes('lipoderm');
+      })?.name || 'Pentravan® Liposomal Transdermal Cream Base';
+      activeBlocks.push({
+        type: 'hormone',
+        vehicleName: hormVeh,
+        dosageForm: isEs ? 'Crema Transdérmica Liposomal' : 'Transdermal Liposomal Cream',
+        treatmentTitle: rx.treatmentType || (isEs ? 'Crema Transdérmica Bioidéntica (BHRT)' : 'Bioidentical Hormone Transdermal Cream (BHRT)'),
+        route: rx.dispensingForm || (isEs ? 'Aplicación Transdérmica / Tópica' : 'Transdermal / Topical Application'),
+        volume: rx.volume || '90 mL',
+        customPosology: getPosologyText(rx.posology) || (isEs ? '1 Pulsación diaria según indicación' : '1 Metered pump daily as prescribed'),
+        apis: hormoneItems
+      });
+    }
+
+    // Preparation C: Topical Solution (TrichoSol)
+    if (trichoSolItems.length > 0 || (pomadeItems.length === 0 && hormoneItems.length === 0 && trichoOilItems.length === 0 && oralItems.length === 0 && rawLines.length > 0)) {
       const solItems = (trichoSolItems.length > 0 ? trichoSolItems : rawLines).filter(i => {
         const n = (i.drugName || i.drug || i.name || i.productName || i.activeIngredient || '').toLowerCase();
         const f = (i.dosageForm || i.form || '').toLowerCase();
@@ -1367,6 +1583,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       activeBlocks.push({
         type: 'trichosol',
         vehicleName: solVeh,
+        dosageForm: isEs ? 'Solución Tópica' : 'Topical Scalp Solution',
         treatmentTitle: rx.treatmentType || (isEs ? 'Terapia Folicular Tópica Personalizada (TrichoSol™)' : 'Personalized Follicular Therapy (TrichoSol™ Solution)'),
         route: isEs ? 'Aplicación Tópica (Cuero Cabelludo)' : 'Topical Scalp Application',
         volume: rx.volume || '100 mL',
@@ -1375,12 +1592,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       });
     }
 
-    // Preparation B: Scalp Care & Hygiene (TrichoOil)
+    // Preparation D: Scalp Care & Hygiene (TrichoOil)
     if (trichoOilItems.length > 0) {
       const oilVeh = vehicleLines.find(v => (v.name || '').toLowerCase().includes('trichooil'))?.name || 'TrichoOil™ (Fagron)';
       activeBlocks.push({
         type: 'trichooil',
         vehicleName: oilVeh,
+        dosageForm: isEs ? 'Aceite Capilar Tópico' : 'Topical Scalp Oil',
         treatmentTitle: isEs ? 'Higiene & Cuidado Folicular (TrichoOil™)' : 'Scalp Care & Hygiene (TrichoOil™)',
         route: isEs ? 'Aplicación Tópica / Masaje Capilar' : 'Topical Scalp Application & Massage',
         volume: '30 mL',
@@ -1389,11 +1607,12 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       });
     }
 
-    // Preparation C: Oral Compounded Capsules
+    // Preparation E: Oral Compounded Capsules
     if (oralItems.length > 0) {
       activeBlocks.push({
         type: 'oral',
         vehicleName: isEs ? 'Cápsulas de Gelatina / Celulosa Micronizada' : 'Micronized Compounded Hard Capsules Base',
+        dosageForm: isEs ? 'Cápsulas Orales' : 'Oral Capsules',
         treatmentTitle: isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Capsules)',
         route: isEs ? 'Vía Oral' : 'Oral Administration',
         volume: rx.volume || (isEs ? '30 Cápsulas' : '30 Compounded Capsules'),
@@ -1410,6 +1629,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         totalCount,
         vehicleName: b.vehicleName,
         treatmentTitle: b.treatmentTitle,
+        dosageForm: b.dosageForm,
         route: b.route,
         volume: b.volume,
         customPosology: b.customPosology,
@@ -1646,6 +1866,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           shortUrl={isPatientView ? patientPublicUrl : publicUrl}
           loginRedirect={isPatientView ? patientPublicUrl : publicUrl}
           hideTier2={true}
+          brandHref={doctorPublicUrl}
+          brandTitle={isEs ? `Volver a la página pública del Dr/a. ${doctorName}` : `Return to Dr. ${doctorName}'s Public Portal`}
+          doctorHomeHref={doctorPublicUrl}
+          doctorName={doctorName}
           inquiryContextType="prescription"
           inquiryEntity={{
             name: `Prescription ${rxId} — ${patientName}`,
@@ -1907,6 +2131,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         <QrCode size={14} color="#1a73e8" />
                       </button>
 
+                      {/* Doctor Public Portal Home Link */}
+                      <Link
+                        href={doctorPublicUrl}
+                        className="rx-header-action-btn"
+                        title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
+                        style={{ padding: '0 10px', minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                      >
+                        <Home size={14} color="#1a73e8" />
+                      </Link>
+
                       {/* Dropdown panel — anchored left:0 relative to this wrapper */}
                       {showDocDropdown && (
                         <div style={{
@@ -2039,6 +2273,16 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       >
                         <QrCode size={14} color="#1a73e8" />
                       </button>
+
+                      {/* Doctor Public Portal Home Link */}
+                      <Link
+                        href={doctorPublicUrl}
+                        className="rx-header-action-btn"
+                        title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
+                        style={{ padding: '0 10px', minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                      >
+                        <Home size={14} color="#1a73e8" />
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -2062,7 +2306,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   {hasTreatingDoctor ? (
                     <>
                       <div style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#202124', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span>{doctorName}</span>
+                        <Link
+                          href={doctorPublicUrl}
+                          title={isEs ? `Ir al portal clínico público del Dr/a. ${doctorName}` : `Go to Dr. ${doctorName}'s Public Clinical Portal`}
+                          style={{
+                            color: '#1a73e8',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            fontWeight: 600
+                          }}
+                        >
+                          <span>{doctorName}</span>
+                          <ExternalLink size={13} color="#1a73e8" />
+                        </Link>
                         {doctorLicense && (
                           <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                             <CopyableId value={doctorLicense} displayValue={`Lic. ${doctorLicense}`} />
@@ -2205,7 +2463,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#5f6368' }}>
                     {compoundedFormulations.length > 0 
-                      ? `${compoundedFormulations.length} Phase · ${compoundedFormulations[0]?.dosageForm || 'Topical Scalp Solution'} (${compoundedFormulations[0]?.volume || '100 mL'})` 
+                      ? `${compoundedFormulations.length} Phase · ${compoundedFormulations[0]?.dosageForm || compoundedFormulations[0]?.route || rx.dispensingForm || 'Compounded Formulation'} (${compoundedFormulations[0]?.volume || '100 mL'})` 
                       : (isEs ? 'Formulación Magistral Personalizada' : 'Precision Compounded Formulation')}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#137333', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
@@ -4802,8 +5060,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           doctorName,
           clinic,
           patientName,
-          formula: 'Latanoprost 0.005% + 17-α-Estradiol 0.05% + IGrantine-F1™ 0.5% in TrichoSol™ (3x 100ml)',
-          dosage: '1.0 ml Once Daily at Night on Dry Scalp',
+          formula: rx.formula || compoundedFormulations.map(f => f.formula || f.apis.map(a => `${a.name} ${a.dosage || ''}`.trim()).join(' + ')).filter(Boolean).join(' // ') || rx.treatmentType || 'Custom Compounded Formulation',
+          dosage: getPosologyText(rx.posology) || compoundedFormulations[0]?.posology?.regimen || 'As prescribed by physician',
           category: 'prescription',
           genomicsTest: genomicsData?.test?.shortName || null,
           slug: rxId.toLowerCase()

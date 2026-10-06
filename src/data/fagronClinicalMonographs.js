@@ -195,13 +195,24 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
   },
   '17-alpha-estradiol': {
     canonicalName: '17-α Estradiol (Alfatradiol)',
-    aliases: ['17-alpha-estradiol', '17-alfa-estradiol', 'alfatradiol', 'estradiol', 'ell-cranell', 'pantostin'],
+    aliases: ['17-alpha-estradiol', '17-alfa-estradiol', '17a-estradiol', 'alfatradiol', 'ell-cranell', 'pantostin'],
     geneTargets: ['CYP19A1', 'SRD5A1'],
     pharmacologicalClass: 'Inhibidor Local de 5α-Reductasa & Estimulador de Aromatasa',
     clinicalIndication: 'Terapia antiandrogénica tópica segura en hombres y mujeres sin feminización sistémica',
     mechanismOfAction: 'Estereoisómero no feminizante del 17-β-estradiol. Inhibe la 5α-reductasa folicular e incrementa la actividad aromatasa local en el bulbo piloso, favoreciendo la conversión de andrógenos a estrógenos protectores.',
     compatibleVehicles: ['TrichoSol™', 'TrichoFoam™'],
-    standardDosages: '0.025% - 0.05% Tópico',
+    standardDosages: '0.025% - 0.05% Topical',
+    fagronPrograms: ['TrichoTest']
+  },
+  'prostaquinon': {
+    canonicalName: 'Prostaquinon™',
+    aliases: ['prostaquinon', 'prostaquinon tm', 'prostaquinon-tm', 'prostaquinontm', 'prostaquinon fagron'],
+    geneTargets: ['PTGDR2', 'PTGDS', 'GPR44'],
+    pharmacologicalClass: 'Inhibidor Natural de Prostaglandina D2 (PGD2) & Fitocomplejo Antiinflamatorio',
+    clinicalIndication: 'Bloqueo folicular de PGD2, reducción de microinflamación perifolicular y prevención de miniaturización capilar',
+    mechanismOfAction: 'Extracto estandarizado de Nigella sativa (Fagron) rico en timoquinona. Inhibe competitivamente la unión de la prostaglandina D2 (PGD2) a sus receptores foliculares (GPR44/PTGDR2), revirtiendo la detención del crecimiento folicular y la miniaturización inducida por PGD2.',
+    compatibleVehicles: ['TrichoSol™', 'TrichoFoam™', 'TrichoOil™'],
+    standardDosages: '3% Topical (3% - 4%)',
     fagronPrograms: ['TrichoTest']
   },
   'clobetasol-propionate': {
@@ -513,6 +524,9 @@ export function getFagronClinicalMonograph(rawName) {
   }
   if (cleanInput.includes('dutasterid')) {
     return FAGRON_CLINICAL_MONOGRAPHS['dutasteride'];
+  }
+  if (cleanInput.includes('prostaquinon')) {
+    return FAGRON_CLINICAL_MONOGRAPHS['prostaquinon'];
   }
 
   return null;

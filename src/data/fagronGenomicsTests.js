@@ -34,7 +34,7 @@ export const FAGRON_GENOMICS_REGISTRY = {
       {
         pathwayEn: 'Androgen Metabolism & 5α-Reductase Sensitivity (SRD5A1 / SRD5A2)',
         pathwayEs: 'Metabolismo Androgénico & Sensibilidad a 5α-Reductasa (SRD5A1 / SRD5A2)',
-        apiMatch: ['17-alpha-estradiol', '17-a estradiol', '17-alfa-estradiol', 'estradiol', 'finasteride', 'dutasteride'],
+        apiMatch: ['17-alpha-estradiol', '17-a estradiol', '17-alfa-estradiol', 'alfatradiol', 'finasteride', 'dutasteride'],
         rationaleEn: 'Identifies genetically heightened 5α-reductase enzymatic activity. Topical 17-α-Estradiol 0.05% competitively inhibits local conversion of testosterone to DHT at the follicular level without systemic endocrine feminization.',
         rationaleEs: 'Identifica hiperactividad enzimática de 5α-reductasa. El 17-α-Estradiol al 0.05% tópico inhibe competitivamente la conversión local a DHT a nivel folicular sin efectos endocrinos sistémicos.'
       },
@@ -339,16 +339,19 @@ export function detectFagronGenomicsTest(rx) {
     };
   }
 
-  // 5. Generic Fagron Genomics indicator
+  // 5. Generic Fagron Genomics indicator (strictly verify trichology context)
   if (rx.fagron || rx.fagronDetails || rawDocType.includes('fagron') || rawProgram.includes('fagron')) {
-    const test = FAGRON_GENOMICS_REGISTRY.trichotest;
-    return {
-      isGenomicsGuided: true,
-      testKey: 'trichotest',
-      test,
-      boxId: rawBoxId || null,
-      matchedPathways: test.pathways.slice(0, 2)
-    };
+    const hasHairContext = formulaStr.includes('tricho') || formulaStr.includes('hair') || formulaStr.includes('scalp') || formulaStr.includes('follic') || formulaStr.includes('minoxidil') || formulaStr.includes('alopecia');
+    if (hasHairContext) {
+      const test = FAGRON_GENOMICS_REGISTRY.trichotest;
+      return {
+        isGenomicsGuided: true,
+        testKey: 'trichotest',
+        test,
+        boxId: rawBoxId || null,
+        matchedPathways: test.pathways.slice(0, 2)
+      };
+    }
   }
 
   return null;

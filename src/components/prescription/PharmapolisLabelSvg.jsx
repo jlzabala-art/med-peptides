@@ -103,8 +103,28 @@ export default function PharmapolisLabelSvg({
   const formula = labelData.formula || '';
   const directions = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
   const warnings = labelData.warnings || labelData.warning || 'For external / patient use only. Keep out of reach of children.';
-  const prodDate = labelData.prodDate || '15-09-2026';
-  const expDate = labelData.expDate || '15-09-2027';
+  const formatLabelDate = (val, fallback = '15-09-2026') => {
+    if (!val) return fallback;
+    if (typeof val === 'object' && (val._seconds != null || val.seconds != null)) {
+      const s = val._seconds ?? val.seconds;
+      const dt = new Date(s * 1000);
+      return `${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}-${dt.getFullYear()}`;
+    }
+    const str = String(val).trim();
+    if (str.includes('T') || (str.includes('-') && str.length > 10)) {
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+      }
+    }
+    return str.replace(/T.*$/, '');
+  };
+
+  const prodDate = formatLabelDate(labelData.prodDate, '15-09-2026');
+  const expDate = formatLabelDate(labelData.expDate, '15-09-2027');
   const storage = labelData.storage || 'Store at room temperature';
   const doctorName = labelData.doctorName || labelData.physician || 'Dr. Marina Cordeiro Fernandes';
   const clinicName = labelData.clinicName || 'NOVA Clinic Day Surgery Center, Dubai';
@@ -122,47 +142,80 @@ export default function PharmapolisLabelSvg({
       const filtered = labelData.apis.filter(a => {
         const n = (a.drugName || a.drug || a.name || a.productName || a.activeIngredient || '').toLowerCase();
         const f = (a.dosageForm || a.form || '').toLowerCase();
-        return !a.isVehicle && !a.isVehicleOrBase && !f.includes('vehicle') && !n.includes('vehicle') && !n.includes('trichosol') && !n.includes('pentravan');
+        const isVeh = a.isVehicle || a.isVehicleOrBase || a._isVehicleOrBase || a.itemType === 'vehicle_base' || f.includes('vehicle') || n.includes('vehicle') || n.includes('trichosol') || n.includes('pentravan') || n.includes('pomade base') || n.includes('ointment base');
+        return !isVeh;
       });
       if (filtered.length > 0) {
         return filtered.map(a => {
           const name = a.drugName || a.drug || a.name || a.productName || a.activeIngredient || 'API';
-          const dose = a.dosage || a.dose || a.strength || '';
+          let dose = a.dosage || a.dose || a.strength || a.concentration || '';
+          if (dose) {
+            dose = String(dose)
+              .replace(/Tópico/gi, 'Topical')
+              .replace(/Oral/gi, 'Oral')
+              .replace(/Dosis a calibrar/gi, 'Standard Compounded Strength')
+              .replace(/Dose to calibrate/gi, '3% Topical');
+          } else {
+            const nLower = name.toLowerCase();
+            if (nLower.includes('prostaquinon')) dose = '3% Topical';
+            else if (nLower.includes('minoxidil')) dose = '5% Topical';
+            else if (nLower.includes('latanoprost')) dose = '0.005% Topical';
+          }
           return `${name} ${dose}`.trim();
         });
       }
     }
     if (formula) {
       const parts = formula.split(/\s*(?:\+|\bin\b)\s*/i).map(p => p.trim()).filter(Boolean);
-      if (parts.length > 0) return parts.filter(p => !p.toLowerCase().includes('vehicle') && !p.toLowerCase().includes('trichosol'));
+      const nonVehParts = parts.filter(p => !p.toLowerCase().includes('vehicle') && !p.toLowerCase().includes('trichosol') && !p.toLowerCase().includes('pentravan') && !p.toLowerCase().includes('base'));
+      if (nonVehParts.length > 0) {
+        return nonVehParts.map(p => p.replace(/Tópico/gi, 'Topical').replace(/Oral/gi, 'Oral'));
+      }
     }
     return ['Personalized Compounded Active Formula'];
   }, [labelData.apis, formula]);
 
   const formulaLower = (formula || '').toLowerCase();
-  const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem');
+  const dFormLower = (labelData.dosageForm || '').toLowerCase();
+  const pNameLower = (labelData.productName || productTitle || '').toLowerCase();
+
+  const isPomadeOrOintment = formulaLower.includes('pomade') || formulaLower.includes('pomada') || formulaLower.includes('ointment') || formulaLower.includes('diltiazem') || dFormLower.includes('ointment') || dFormLower.includes('pomade');
+  const isHormone = formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone');
+  const isOral = dFormLower.includes('oral') || dFormLower.includes('capsule') || formulaLower.includes('capsule') || formulaLower.includes('nattokinase') || formulaLower.includes('serrapeptase');
+
   const vehicleName = labelData.vehicle?.name || 
+                      (labelData.apis?.find(a => a.itemType === 'vehicle_base' || a.isVehicleOrBase)?.name) ||
                       (isPomadeOrOintment ? 'Compounded Topical Pomade Base (30 g)' :
+                      (isHormone ? 'Pentravan® Liposomal Transdermal Cream Base' :
                       (formulaLower.includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
-                      (formulaLower.includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 'Galenic Compounding Vehicle q.s.')));
+                      (formulaLower.includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 
+                      (isOral ? 'Vegetable Acid-Resistant Capsule Base' : 'Galenic Compounding Vehicle q.s.')))));
+
+  let cautionText = 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN';
+  if (isPomadeOrOintment) {
+    cautionText = 'CAUTION: FOR TOPICAL / PERIANAL USE ONLY • KEEP OUT OF REACH OF CHILDREN';
+  } else if (isHormone) {
+    cautionText = 'CAUTION: FOR TRANSDERMAL / TOPICAL USE ONLY • KEEP OUT OF REACH OF CHILDREN';
+  } else if (isOral) {
+    cautionText = 'CAUTION: FOR ORAL USE ONLY • TAKE WITH WATER • KEEP OUT OF REACH OF CHILDREN';
+  }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // COMPONENT: PROFESSIONAL CROP MARKS & SCISSOR CUT GUIDES (✂)
+  // COMPONENT: PROFESSIONAL CROP MARKS & SOLID CUT GUIDES
   // ───────────────────────────────────────────────────────────────────────────
   const renderCutGuides = () => {
     if (!showCutGuides) return null;
     return (
       <g className="pharmacy-cut-guides" pointerEvents="none">
-        {/* Perimeter Dashed Cutting Border */}
+        {/* Perimeter Solid Fine Hairline Border - Strictly No Dashed Strokes */}
         <rect
           x="3"
           y="3"
           width={WIDTH - 6}
           height={HEIGHT - 6}
           fill="none"
-          stroke="#94a3b8"
-          strokeWidth="2.5"
-          strokeDasharray="14,10"
+          stroke="#cbd5e1"
+          strokeWidth="1.5"
           rx="2"
         />
 
@@ -357,7 +410,7 @@ export default function PharmapolisLabelSvg({
           <g transform={`translate(32, ${bSafetyY})`}>
             <line x1="0" y1={isShort ? -12 : -16} x2="826" y2={isShort ? -12 : -16} stroke="#e2e8f0" strokeWidth="1.6" />
             <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#b91c1c" letterSpacing="0.4">
-              CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN
+              {cautionText}
             </text>
             <text
               x="0"
@@ -372,8 +425,8 @@ export default function PharmapolisLabelSvg({
           </g>
         </g>
 
-        {/* ── DASHED DIVIDER LINE ── */}
-        <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="2.2" strokeDasharray="10,6" />
+        {/* ── SOLID DIVIDER LINE ── */}
+        <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="2.2" />
 
         {/* ── FOOTER ROW ── */}
         <g transform={`translate(60, ${footerTextY})`}>
@@ -539,8 +592,8 @@ export default function PharmapolisLabelSvg({
         </g>
       )}
 
-      {/* ── DASHED DIVIDER LINE ── */}
-      <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="2.2" strokeDasharray="10,6" />
+      {/* ── SOLID DIVIDER LINE ── */}
+      <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="2.2" />
 
       {/* ── FOOTER INFO ROW ── */}
       <g transform={`translate(60, ${footerTextY})`}>

@@ -16,8 +16,7 @@ export default function PharmacyLabelsModal({
   const [copiedLink, setCopiedLink] = useState(false);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
-  const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
-  const [showCutGuides, setShowCutGuides] = useState(true); // Scissor cut lines & crop marks toggle
+  const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
 
   // Sizing Presets & Custom Dimensions
   const [selectedPreset, setSelectedPreset] = useState('75x45');

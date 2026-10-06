@@ -14,7 +14,7 @@ import {
   FileText,
   Search
 } from '@/lib/icons';
-import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList } from 'lucide-react';
+import { Mail, Lock, Sparkles, LogIn, ChevronDown, LayoutDashboard, User, LogOut, FileInput, LayoutList, Home } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { triggerHaptic } from '../../utils/haptics';
 import { useAuth } from '../../context/AuthContext';
@@ -38,6 +38,12 @@ export default function PublicUnifiedHeader({
   // Custom canonical URL to copy, if any
   copyUrl,
   shortUrl,
+  // Brand logo destination and title
+  brandHref = '/c/CAT-MU9L9GBN',
+  brandTitle = 'Atlas Health Services Clinical & Healthcare Intelligence',
+  // Doctor home link & details for prescription view
+  doctorHomeHref = null,
+  doctorName = null,
   // Current supplier & slug for quick search switcher
   supplierName = null,
   currentSlug = '',
@@ -264,10 +270,36 @@ export default function PublicUnifiedHeader({
         <div className="puh-brand-row">
           <div className="puh-brand-row-inner">
             {/* Left: Brand Logo / Title */}
-            <div className="puh-brand-group">
-              <Link href="/c/CAT-MU9L9GBN" className="puh-brand-link" title="Atlas Health Services Clinical & Healthcare Intelligence">
+            <div className="puh-brand-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Link href={brandHref || "/c/CAT-MU9L9GBN"} className="puh-brand-link" title={brandTitle || "Atlas Health Services Clinical & Healthcare Intelligence"}>
                 <BrandLogo variant="light" size="compact" />
               </Link>
+
+              {doctorHomeHref && (
+                <Link
+                  href={doctorHomeHref}
+                  className="puh-doctor-home-btn"
+                  title={isSpanish ? `Página pública de ${doctorName || 'Médico'}` : `Public page of ${doctorName || 'Doctor'}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    background: 'rgba(255, 255, 255, 0.12)',
+                    border: '1px solid rgba(255, 255, 255, 0.22)',
+                    color: '#ffffff',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease',
+                    backdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Home size={13} color="#ffffff" />
+                  <span className="hide-on-extra-narrow">{doctorName ? (doctorName.startsWith('Dr') ? doctorName : `Dr. ${doctorName}`) : (isSpanish ? 'Portal del Médico' : "Doctor's Portal")}</span>
+                </Link>
+              )}
             </div>
 
             {/* Right: Actions & Tools */}

@@ -18,6 +18,17 @@ import { PRESCRIPTION_SOURCES, PRESCRIPTION_STATUSES, prescriptionSchema, prescr
 import { resolveIngredients } from './apiIngredientMatcher.js';
 import { createPatient } from './patientLinkService.js';
 import { logger } from '../utils/logger';
+import { getPharmapolisLabelsForPrescription } from '../data/pharmapolisLabelsMap.js';
+
+function slugify(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/^dr[a]?\.\s*/i, '')
+    .replace(/^dr[a]?\s*/i, '')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
 
 // ── Known Compounding Vehicles & Galenic Bases ──────────────────────────────
 export const GALENIC_VEHICLE_PATTERNS = [
@@ -380,14 +391,27 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
       const nameLower = (orig.name || '').toLowerCase();
       
       let dosageForm = block.dispensingForm || 'Magistral Component';
-      if (nameLower.includes('trichosol') || nameLower.includes('solution') || nameLower.includes('lotion')) {
+      if (nameLower.includes('pomade') || nameLower.includes('ointment') || nameLower.includes('pomada') || block.blockType === 'pomade') {
+        dosageForm = 'Topical Pomade / Ointment';
+      } else if (nameLower.includes('pentravan') || nameLower.includes('lipoderm') || block.blockType === 'hormone') {
+        dosageForm = 'Transdermal Liposomal Cream';
+      } else if (nameLower.includes('trichosol') || nameLower.includes('solution') || nameLower.includes('lotion') || block.blockType === 'trichosol') {
         dosageForm = 'Topical Solution (Vehicle)';
-      } else if (nameLower.includes('trichooil') || nameLower.includes('oil')) {
+      } else if (nameLower.includes('trichooil') || nameLower.includes('oil') || block.blockType === 'trichooil') {
         dosageForm = 'Topical Oil (Vehicle)';
-      } else if (nameLower.includes('cap') || nameLower.includes('tablet') || nameLower.includes('oral')) {
+      } else if (nameLower.includes('cap') || nameLower.includes('tablet') || nameLower.includes('oral') || block.blockType === 'oral') {
         dosageForm = 'Oral Capsule';
-      } else if (nameLower.includes('vial') || nameLower.includes('inj') || orig.route?.toLowerCase() === 'subcutaneous') {
+      } else if (nameLower.includes('vial') || nameLower.includes('inj') || orig.route?.toLowerCase() === 'subcutaneous' || block.blockType === 'injectable') {
         dosageForm = 'Injectable Vial';
+      }
+
+      let resolvedDose = orig.dosage || orig.dose || orig.strength || '';
+      if (!resolvedDose || resolvedDose === '—') {
+        if (nameLower.includes('prostaquinon')) resolvedDose = '3% Topical';
+        else if (nameLower.includes('minoxidil')) resolvedDose = '5% Topical';
+        else if (nameLower.includes('latanoprost')) resolvedDose = '0.005% Topical';
+        else if (nameLower.includes('diltiazem')) resolvedDose = '2%';
+        else if (nameLower.includes('lidocaine')) resolvedDose = '2%';
       }
 
       return {
@@ -398,10 +422,10 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         productName: r.matchedName || orig.name || '',
         sku: '',
         activeIngredient: orig.activeIngredient || orig.name || '',
-        dosage: orig.dosage || orig.dose || '',
-        dose: orig.dose || orig.dosage || '',
-        strength: orig.strength || orig.dose || '',
-        concentration: orig.strength || orig.dose || '',
+        dosage: resolvedDose,
+        dose: resolvedDose,
+        strength: orig.strength || resolvedDose,
+        concentration: orig.strength || resolvedDose,
         presentation: block.volume || '',
         category: isFagron ? 'Compounding / Genomic' : 'Peptide / Medicine',
         price: 0,
@@ -410,8 +434,8 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         formulationBlock: blockLabel,
         formulationIndex: blockIdx + 1,
         blockVolume: block.volume || null,
-        route: orig.route || (dosageForm.includes('Topical') ? 'Topical' : (dosageForm.includes('Injectable') ? 'Subcutaneous' : 'Oral')),
-        frequency: orig.frequency || (dosageForm.includes('Topical') ? 'Once daily (Night)' : 'As directed'),
+        route: orig.route || (dosageForm.includes('Pomade') ? 'Topical / Perianal' : (dosageForm.includes('Transdermal') ? 'Transdermal' : (dosageForm.includes('Topical') ? 'Topical' : (dosageForm.includes('Injectable') ? 'Subcutaneous' : 'Oral')))),
+        frequency: orig.frequency || (dosageForm.includes('Pomade') ? 'Twice daily' : (dosageForm.includes('Topical') ? 'Once daily (Night)' : 'As directed')),
         duration: orig.duration || block.duration || '30 days',
         treatmentDays: Number(block.treatmentDays) || 30,
         instructions: orig.instructions || block.posology || '',
@@ -427,7 +451,7 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         _isUnassignedProgramApi: !!r.isUnassignedProgramApi,
         _programAlert: r.programAlert || null,
         _unassignedProgramName: r.unassignedProgramName || null,
-        _isVehicleOrBase: !!orig.isVehicleOrBase || nameLower.includes('trichosol') || nameLower.includes('trichooil') || nameLower.includes('pentravan'),
+        _isVehicleOrBase: !!orig.isVehicleOrBase || orig.itemType === 'vehicle_base' || nameLower.includes('trichosol') || nameLower.includes('trichooil') || nameLower.includes('pentravan') || nameLower.includes('pomade base') || nameLower.includes('ointment base'),
       };
     });
 
@@ -458,6 +482,24 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
   const combinedVolumes = blocks.map(b => b.volume).filter(Boolean).join(', ') || null;
   const combinedDuration = blocks.find(b => b.duration)?.duration || '30 days';
 
+  // Auto-detect clinical archetype category
+  const detectedCategory = rawData.clinicalCategory || (
+    blocks.some(b => b.blockType === 'pomade' || (b.items || []).some(i => (i.name || '').toLowerCase().includes('diltiazem') || (i.name || '').toLowerCase().includes('pomade'))) ? 'compounding' :
+    blocks.some(b => b.blockType === 'hormone' || (b.items || []).some(i => (i.name || '').toLowerCase().includes('pentravan') || (i.name || '').toLowerCase().includes('testosterone') || (i.name || '').toLowerCase().includes('estradiol'))) ? 'hormone' :
+    (isFagron && (rawData.fagronDetails?.testName?.toLowerCase().includes('tricho') || blocks.some(b => (b.items || []).some(i => (i.name || '').toLowerCase().includes('trichosol'))))) ? 'trichotest' :
+    (isFagron && (rawData.fagronDetails?.testName?.toLowerCase().includes('nutri') || blocks.some(b => (b.items || []).some(i => (i.name || '').toLowerCase().includes('nattokinase'))))) ? 'nutrigen' :
+    'standard'
+  );
+
+  const resolvedDispensingForm = dispensingForm !== 'Topical Solution' ? dispensingForm : (
+    detectedCategory === 'compounding' ? 'Topical Pomade / Ointment' :
+    detectedCategory === 'hormone' ? 'Transdermal Liposomal Cream' :
+    detectedCategory === 'nutrigen' ? 'Oral Capsules' :
+    dispensingForm
+  );
+
+  const doctorSlug = slugify(doctorName);
+
   const unifiedRx = {
     ...prescriptionSchema,
     ...context,
@@ -469,6 +511,8 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     validationStatus: anyUnresolvedGlobal ? 'Needs Review' : (allUnassignedAlerts.length > 0 ? 'Review API Scope' : 'Ready'),
     quotationStatus: 'Pending',
     orderStatus: 'Pending',
+    clinicalCategory: detectedCategory,
+    doctorSlug,
     _unassignedProgramAlerts: allUnassignedAlerts,
     
     // Source categorization
@@ -502,6 +546,7 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
       specialty: rawData.doctor?.specialty || '',
       phone: rawData.doctor?.phone || '',
       email: rawData.doctor?.email || '',
+      slug: doctorSlug
     },
     clinicName: rawData.doctor?.clinicName || '',
 
@@ -511,7 +556,7 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     clinicalNotes: rawData.clinicalNotes || '',
     treatmentProgram: rawData.fagronDetails?.testName || blocks[0]?.treatmentProgram || 'Clinical Rx',
     treatmentType,
-    dispensingForm,
+    dispensingForm: resolvedDispensingForm,
     volume: combinedVolumes,
     duration: combinedDuration,
     posology: combinedPosology,
@@ -554,6 +599,16 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
       details: `Imported via Atlas AI (${allPrescriptionLines.length} products in ${blocks.length} formulation blocks)`
     }]
   };
+
+  // Pre-generate guaranteed Pharmapolis compounding bottle labels
+  try {
+    const labels = getPharmapolisLabelsForPrescription(unifiedRx, null);
+    if (labels && labels.length > 0) {
+      unifiedRx.pharmacyLabels = labels;
+    }
+  } catch (lblErr) {
+    logger.warn('[prescriptionAiService] Auto label generation warning', { error: lblErr.message });
+  }
 
   return [unifiedRx];
 }

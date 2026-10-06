@@ -70,11 +70,11 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   // ── 50957: Alan Maclean Rutledge ──
   {
     id: '50957-phase-1',
-    prescriptionMatches: ['50957', 'RX-50957', 'RX-50957-A', 'RX-PHARM-2026-50957'],
+    prescriptionMatches: ['50957-B', 'RX-50957-B'],
     patientMatches: ['alan maclean', 'rutledge'],
     phaseNumber: 1,
     patientName: 'Alan Maclean Rutledge',
-    fileNumber: '50957',
+    fileNumber: '50957-B',
     productName: 'Mitochondrial & Cellular Detox Formula',
     productTitle: 'Liver & Mitochondrial Support - 90 vegetable capsules',
     subTitle: 'Phase 1: Mitochondrial & Cellular Support',
@@ -84,7 +84,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Alpha-Lipoic Acid 200 mg + Ubiquinol 100 mg + Pyrroloquinoline Quinone (PQQ) 10 mg',
     directions: 'Take 1 capsule daily in the morning with food for 3 months.',
-    warnings: 'Gluten-free, lactose-free, dairy-free. Hypoallergenic vegetable capsules.',
+    warnings: 'Gluten-free, lactose-free, dairy-free. Hypoallergenic vegetable capsules. Keep out of reach of children.',
     prodDate: '15-09-2026',
     expDate: '15-09-2027',
     storage: 'Store in a cool dry place',
@@ -96,15 +96,15 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/50957'
+    targetRxUrl: 'https://med-peptides.com/rx/RX-50957-B'
   },
   {
     id: '50957-phase-2',
-    prescriptionMatches: ['50957', 'RX-50957', 'RX-50957-B', 'RX-PHARM-2026-50957'],
+    prescriptionMatches: ['50957', 'RX-50957', '50957-A', 'RX-50957-A', 'RX-PHARM-2026-50957'],
     patientMatches: ['alan maclean', 'rutledge'],
     phaseNumber: 2,
     patientName: 'Alan Maclean Rutledge',
-    fileNumber: '50957',
+    fileNumber: '50957-A',
     productName: 'Proteolytic & Systemic Anti-Inflammatory Formula',
     productTitle: 'Proteolytic Formula - 270 acid-resistant vegetable capsules',
     subTitle: 'Phase 2: Proteolytic & Anti-Inflammatory Protocol',
@@ -114,7 +114,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Nattokinase 2,000 FU (100 mg) + Serrapeptase 40,000 SPU (20 mg)',
     directions: 'Week 1: 1 cap daily morning on empty stomach. From Week 2 onwards: 1 cap 3 times daily (morning, 5:00 PM, bedtime on empty stomach).',
-    warnings: 'Acid-resistant vegetable capsules. Discontinue 3 days before blood tests. Start 2 weeks after FMT.',
+    warnings: 'Acid-resistant vegetable capsules. Discontinue 3 days before blood tests. Keep out of reach of children.',
     prodDate: '15-09-2026',
     expDate: '15-09-2027',
     storage: 'Store in a cool dry place',
@@ -126,37 +126,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_FRONT.png',
     frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_FRONT_WITH_QR.png',
     backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/50957'
-  },
-  {
-    id: '50957-phase-3',
-    prescriptionMatches: ['50957', 'RX-50957', 'RX-50957-C', 'RX-PHARM-2026-50957'],
-    patientMatches: ['alan maclean', 'rutledge'],
-    phaseNumber: 3,
-    patientName: 'Alan Maclean Rutledge',
-    fileNumber: '50957',
-    productName: 'Cetirizine 1% Compounded Oral Solution',
-    productTitle: 'Cetirizine 1% - Hydroalcoholic Topical scalp solution 100 ml',
-    subTitle: 'Topical / Systemic Antihistaminic Compound',
-    dosageForm: 'Oral Solution / Liquid',
-    volume: '100 mL',
-    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
-    pharmacy: 'Pharmapolis Compounding Pharmacy',
-    formula: '',
-    directions: 'Apply 1 ml to the affected areas of the scalp once daily, preferably in the evening. Gently massage into the scalp and allow to dry.',
-    warnings: 'For topical use only. Avoid contact with eyes and mucous membranes.',
-    prodDate: '19-08-2026',
-    expDate: '19-08-2027',
-    storage: 'Store at room temperature',
-    doctorName: 'Dr. Sezgin Cagatay',
-    doctorLicense: 'DHA-00013060-006',
-    clinicName: 'Hortman Clinics, Dubai',
-    batchCode: 'PHARM-2026-CET100',
-    lote: '2608-CET',
-    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_cetirizine_FRONT.png',
-    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_cetirizine_FRONT_WITH_QR.png',
-    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_cetirizine_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/50957'
+    targetRxUrl: 'https://med-peptides.com/rx/RX-50957-A'
   },
 
   // ── 51812: Abdulla Sultan Mohamed Ahmed Alotaiba ──
@@ -224,21 +194,25 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   // ── 51861: Basma Haitham K Bouzo ──
   {
     id: '51861-prep-1',
-    prescriptionMatches: ['51861', 'RX-51861', 'RX-51861-A'],
+    prescriptionMatches: ['51861', 'RX-51861', '51861-A', 'RX-51861-A'],
     patientMatches: ['basma haitham', 'bouzo'],
     phaseNumber: 1,
     patientName: 'Basma Haitham K Bouzo',
-    fileNumber: '51861',
-    productName: 'Estradiol & Follicular Stimulating Topical Solution',
-    productTitle: 'Morning Testosterone Transdermal Cream 2 mg/mL - 90 mL',
-    subTitle: 'Topical Scalp Formulation A',
-    dosageForm: 'Topical Transdermal Cream',
+    fileNumber: '51861-A',
+    productName: 'Testosterone Micronized Transdermal Cream',
+    productTitle: 'Testosterone Transdermal Cream 2 mg/mL - 90 mL',
+    subTitle: 'Bioidentical Hormone Replacement Therapy (BHRT) · Morning',
+    dosageForm: 'Topical Transdermal Cream (Pentravan®)',
     volume: '90 mL',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Testosterone Micronized USP 2 mg/mL in Pentravan® Liposomal Vehicle Base 1 mL',
+    apis: [
+      { name: 'Testosterone Micronized USP', dose: '2 mg / mL', dosage: '2 mg / mL' }
+    ],
+    vehicle: { name: 'Pentravan® Liposomal Transdermal Cream Base', volume: '90 mL' },
     directions: 'Apply 1 pump (1 mL = 2 mg) every morning to clean, hairless skin of the inner forearm or lower abdomen.',
-    warnings: 'For topical transdermal use only. Wash hands with soap after application. Avoid contact with children.',
+    warnings: 'For topical transdermal use only. Wash hands with soap after application. Avoid contact with children and pets.',
     prodDate: '15-09-2026',
     expDate: '15-09-2027',
     storage: 'Store at room temperature',
@@ -247,26 +221,30 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-TEST90',
     lote: '2609-BAS1',
-    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_FRONT.png',
-    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_FRONT_WITH_QR.png',
-    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/51861'
+    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_FRONT.png',
+    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_FRONT_WITH_QR.png',
+    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_BACK_QR.png',
+    targetRxUrl: 'https://med-peptides.com/rx/RX-51861-A'
   },
   {
     id: '51861-prep-2',
-    prescriptionMatches: ['51861', 'RX-51861', 'RX-51861-B'],
+    prescriptionMatches: ['51861', 'RX-51861', '51861-B', 'RX-51861-B'],
     patientMatches: ['basma haitham', 'bouzo'],
     phaseNumber: 2,
     patientName: 'Basma Haitham K Bouzo',
-    fileNumber: '51861',
-    productName: 'Bio-Identical Hormone & Follicular Solution',
-    productTitle: 'Evening Estradiol Transdermal Cream 2 mg/mL - 90 mL',
-    subTitle: 'Topical Scalp Formulation B',
-    dosageForm: 'Topical Transdermal Cream',
+    fileNumber: '51861-B',
+    productName: '17β-Estradiol Micronized Transdermal Cream',
+    productTitle: '17β-Estradiol Transdermal Cream 2 mg/mL - 90 mL',
+    subTitle: 'Bioidentical Hormone Replacement Therapy (BHRT) · Evening',
+    dosageForm: 'Topical Transdermal Cream (Pentravan®)',
     volume: '90 mL',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: '17β-Estradiol Micronized USP 2 mg/mL in Pentravan® Liposomal Vehicle Base 1 mL',
+    apis: [
+      { name: '17β-Estradiol Micronized USP', dose: '2 mg / mL', dosage: '2 mg / mL' }
+    ],
+    vehicle: { name: 'Pentravan® Liposomal Transdermal Cream Base', volume: '90 mL' },
     directions: 'Apply 1 pump (1 mL = 2 mg) every evening at bedtime to clean skin of the inner thigh or upper arm.',
     warnings: 'For topical transdermal use only. Do not apply directly to breasts or mucous membranes. Wash hands after use.',
     prodDate: '15-09-2026',
@@ -277,10 +255,117 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-ESTR90',
     lote: '2609-BAS2',
-    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_FRONT.png',
-    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_FRONT_WITH_QR.png',
-    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_testosterone_90ml_BACK_QR.png',
-    targetRxUrl: 'https://med-peptides.com/rx/51861'
+    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_FRONT.png',
+    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_FRONT_WITH_QR.png',
+    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51861_estradiol_90ml_BACK_QR.png',
+    targetRxUrl: 'https://med-peptides.com/rx/RX-51861-B'
+  },
+
+  // ── 51245: Aamer Reza Habib ──
+  {
+    id: '51245-prep-1',
+    prescriptionMatches: ['51245', 'RX-51245'],
+    patientMatches: ['aamer reza', 'habib', 'aamer'],
+    phaseNumber: 1,
+    patientName: 'Aamer Reza Habib',
+    fileNumber: '51245',
+    productName: 'Diltiazem 2% & Lidocaine 2% Compounded Topical Ointment',
+    productTitle: 'Diltiazem 2% + Lidocaine 2% Pomade - 30 g',
+    subTitle: 'Custom Galenic Pomade · Hypoallergenic Base (30 g)',
+    dosageForm: 'Topical Pomade / Ointment',
+    volume: '30 g',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Diltiazem Hydrochloride USP 2% (0.6 g) + Lidocaine Hydrochloride USP 2% (0.6 g) in Hypoallergenic Ointment Base q.s. 30 g',
+    apis: [
+      { name: 'Diltiazem Hydrochloride USP', dose: '2% (0.6 g)', dosage: '2% (0.6 g)' },
+      { name: 'Lidocaine Hydrochloride USP', dose: '2% (0.6 g)', dosage: '2% (0.6 g)' }
+    ],
+    vehicle: { name: 'Hypoallergenic Non-Irritating Ointment Base (q.s. 30 g)', volume: '30 g' },
+    directions: 'Apply a pea-sized amount to the affected area twice daily (morning and evening) for 2 months as prescribed.',
+    warnings: 'For topical / perianal use only. Wash hands after application. Keep out of reach of children.',
+    prodDate: '15-09-2026',
+    expDate: '15-09-2027',
+    storage: 'Store at room temperature (15°C - 25°C)',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
+    batchCode: 'PHARM-2026-DL30G',
+    lote: '2609-HAB1',
+    targetRxUrl: 'https://med-peptides.com/rx/RX-51245'
+  },
+
+  // ── 6F8QZC: Eldose Babu (Fagron TrichoTest™) ──
+  {
+    id: '6f8qzc-prep-1',
+    prescriptionMatches: ['6F8QZC', 'RX-6F8QZC', '6f8qzc2qv5YFkfiEKCyO'],
+    patientMatches: ['eldose', 'babu'],
+    phaseNumber: 1,
+    patientName: 'Eldose Babu',
+    fileNumber: 'RX-6F8QZC',
+    productName: 'Personalized Follicular Therapy (TrichoSol™ Solution)',
+    productTitle: 'TrichoSol™ Compounded Topical Solution - 100 mL',
+    subTitle: 'TrichoTest™ Personalized Follicular Therapy',
+    dosageForm: 'Topical Scalp Solution (TrichoSol™)',
+    volume: '100 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Latanoprost 0.005% + Minoxidil 5% + Prostaquinon™ 3% + Cetirizine HCl 1% + Dutasteride 0.1% + Melatonin 0.1% + IGrantine-F1 1% + Vitamin B12 0.1% + Zinc Sulfate 0.5% in TrichoSol™ 100 mL',
+    apis: [
+      { name: 'Latanoprost Fagron', dose: '0.005% Topical', dosage: '0.005% Topical' },
+      { name: 'Minoxidil', dose: '5% Topical', dosage: '5% Topical' },
+      { name: 'Prostaquinon™', dose: '3% Topical', dosage: '3% Topical' },
+      { name: 'Cetirizine HCl', dose: '1% Topical', dosage: '1% Topical' },
+      { name: 'Dutasteride', dose: '0.1% Topical', dosage: '0.1% Topical' },
+      { name: 'Melatonin', dose: '0.1% Topical', dosage: '0.1% Topical' },
+      { name: 'IGrantine-F1™', dose: '1% Topical', dosage: '1% Topical' },
+      { name: 'Vitamin B12 (Cyanocobalamin)', dose: '0.1% Topical', dosage: '0.1% Topical' },
+      { name: 'Zinc Sulfate', dose: '0.5% Topical', dosage: '0.5% Topical' }
+    ],
+    vehicle: { name: 'TrichoSol™ Liposomal Hydrophilic Base', volume: '100 mL' },
+    directions: 'Apply 1.0 mL (4-5 metered sprays) nightly at bedtime onto clean, dry scalp. Gently massage with fingertips.',
+    warnings: 'For topical scalp use only. Avoid contact with eyes and mucous membranes. Keep out of reach of children.',
+    prodDate: '15-09-2026',
+    expDate: '15-09-2027',
+    storage: 'Store at room temperature away from direct sunlight',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
+    batchCode: 'PHARM-2026-TRICHO1',
+    lote: '2609-ELD1',
+    targetRxUrl: 'https://med-peptides.com/rx/RX-6F8QZC'
+  },
+  {
+    id: '6f8qzc-prep-2',
+    prescriptionMatches: ['6F8QZC', 'RX-6F8QZC', '6f8qzc2qv5YFkfiEKCyO'],
+    patientMatches: ['eldose', 'babu'],
+    phaseNumber: 2,
+    patientName: 'Eldose Babu',
+    fileNumber: 'RX-6F8QZC',
+    productName: 'Scalp Care & Hygiene (TrichoOil™)',
+    productTitle: 'TrichoOil™ Natural Pre-Wash Lipidic Carrier - 30 mL',
+    subTitle: 'TrichoTest™ Scalp Care & Sebum Normalizing Therapy',
+    dosageForm: 'Topical Scalp Oil (TrichoOil™)',
+    volume: '30 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Ginseng Extract 2% + Vitamin E (Tocopherol) 1% in TrichoOil™ 30 mL',
+    apis: [
+      { name: 'Ginseng Extract', dose: '2% Topical', dosage: '2% Topical' },
+      { name: 'Vitamin E (Tocopherol)', dose: '1% Topical', dosage: '1% Topical' }
+    ],
+    vehicle: { name: 'TrichoOil™ Natural Lipidic Carrier', volume: '30 mL' },
+    directions: 'Apply a few drops directly to the scalp with the pipette 1-2 times weekly before washing. Massage for 3-5 min, leave for 10 min, then wash.',
+    warnings: 'For external scalp application only. Keep out of reach of children.',
+    prodDate: '15-09-2026',
+    expDate: '15-09-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
+    batchCode: 'PHARM-2026-TRICHO2',
+    lote: '2609-ELD2',
+    targetRxUrl: 'https://med-peptides.com/rx/RX-6F8QZC'
   },
 
   // ── Mohammed Ahmad Aishehhi: BOX03483AATRI ──
@@ -588,9 +673,30 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
     return false;
   });
 
-  // If explicit formulations are passed (e.g. from PublicPrescriptionClient compoundedFormulations)
-  // and there is more than 1 phase, ensure EVERY phase gets its own dedicated label!
-  if (explicitFormulations && Array.isArray(explicitFormulations) && explicitFormulations.length > 1) {
+  // Helper to format date cleanly as DD-MM-YYYY
+  const formatIsoDate = (d) => {
+    if (!d) return '15-09-2026';
+    if (typeof d === 'object' && (d._seconds || d.seconds)) {
+      const s = d._seconds ?? d.seconds;
+      const dt = new Date(s * 1000);
+      return `${String(dt.getDate()).padStart(2, '0')}-${String(dt.getMonth() + 1).padStart(2, '0')}-${dt.getFullYear()}`;
+    }
+    if (typeof d === 'string') {
+      const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+      const dClean = d.replace(/T.*$/, '');
+      if (dClean.includes('/')) return dClean.replace(/\//g, '-');
+      return dClean;
+    }
+    return '15-09-2026';
+  };
+
+  const rxProdDate = formatIsoDate(rx.dateIssued || rx.issuedDate || rx.date || rx.createdAt);
+  const rxExpDate = formatIsoDate(rx.expiryDate || rx.expDate || '2027-09-15');
+
+  // If explicit formulations are passed (from PublicPrescriptionClient compoundedFormulations),
+  // map every formulation directly so apis, vehicle, route, and posology match 100%!
+  if (explicitFormulations && Array.isArray(explicitFormulations) && explicitFormulations.length >= 1) {
     return explicitFormulations.map((form, fIdx) => {
       const phaseNum = form.index || (fIdx + 1);
       // Try to find a matching label from registry by phaseNumber or title
@@ -598,6 +704,15 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         m.phaseNumber === phaseNum || 
         (m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10)))
       );
+
+      let formulaText = form.formula || '';
+      if (!formulaText && form.apis && Array.isArray(form.apis)) {
+        formulaText = form.apis
+          .filter(a => !a.isVehicle && !a.isVehicleOrBase && a.itemType !== 'vehicle_base')
+          .map(a => `${a.name || a.activeIngredient || ''} ${a.dosage || a.dose || ''}`.trim())
+          .filter(Boolean)
+          .join(' + ');
+      }
 
       if (regMatch) {
         return {
@@ -610,23 +725,20 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
           fileNumber: auth.fileNumber || regMatch.fileNumber,
           targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
           apis: form?.apis || regMatch.apis || rx.items || rx.prescriptionLines || [],
-          formula: form?.formula || formulaText || regMatch.formula || '',
-          vehicle: form?.vehicle || null
+          formula: formulaText || regMatch.formula || '',
+          vehicle: form?.vehicle || regMatch.vehicle || null,
+          prodDate: rxProdDate || regMatch.prodDate,
+          expDate: rxExpDate || regMatch.expDate
         };
       }
 
-      // Generate dynamic label for this phase
-      const pName = form.title || form.productName || form.name || `Phase ${phaseNum} Compounded Protocol`;
-      const pForm = form.route || form.dosageForm || (form.volume?.includes('Cap') ? 'Oral Route (Plant-Based Capsules)' : 'Topical Scalp Solution');
-      const pVol = form.volume || '100 mL';
+      // Generate dynamic label for this phase / formulation
+      const pName = form.title || form.treatmentTitle || form.productName || form.name || rx.formulaName || `Phase ${phaseNum} Compounded Protocol`;
+      const pForm = form.route || form.dosageForm || (form.volume?.includes('Cap') ? 'Oral Route (Plant-Based Capsules)' : (form.volume?.includes('g') ? 'Topical Pomade / Ointment' : 'Topical Solution'));
+      const pVol = form.volume || (form.volume?.includes('g') ? '30 g' : '100 mL');
 
-      let formulaText = form.formula || '';
-      if (!formulaText && form.apis && Array.isArray(form.apis)) {
-        formulaText = form.apis.map(a => `${a.name || a.activeIngredient || ''} ${a.dosage || a.dose || ''}`.trim()).filter(Boolean).join(' + ');
-      }
-
-      const directionsText = form.posology?.regimen || form.instructions || form.directions || (form.posology?.steps ? form.posology.steps.map(s => s.text).join(' ') : 'Take / apply as directed by prescribing physician.');
-      const warningsText = form.warnings || 'For external / patient use only. Keep out of reach of children.';
+      const directionsText = form.posology?.regimen || form.instructions || form.directions || (form.posology?.steps ? form.posology.steps.map(s => s.text).join(' ') : (rx.posology?.notes || 'Take / apply as directed by prescribing physician.'));
+      const warningsText = form.warnings || rx.posology?.notes || 'For patient use as prescribed. Keep out of reach of children.';
 
       return {
         id: `${rx.id || 'rx'}-phase-${phaseNum}`,
@@ -645,8 +757,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
         vehicle: form.vehicle || null,
         directions: directionsText,
         warnings: warningsText,
-        prodDate: rx.issuedDate || rx.createdAt || '15-09-2026',
-        expDate: rx.expiryDate || '15-09-2027',
+        prodDate: rxProdDate,
+        expDate: rxExpDate,
         storage: form.storage || rx.storage || 'Store at room temperature',
         doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
         doctorLicense: auth.doctorLicense || 'DHA Registered',
@@ -707,8 +819,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       formula: formulaText,
       directions: directionsText,
       warnings: warningsText,
-      prodDate: rx.issuedDate || rx.createdAt || '15-09-2026',
-      expDate: rx.expiryDate || '15-09-2027',
+      prodDate: rxProdDate,
+      expDate: rxExpDate,
       storage: p.storage || rx.storage || 'Store at room temperature',
       doctorName: auth.doctorName || 'Dr. Marina Cordeiro Fernandes',
       doctorLicense: auth.doctorLicense || 'DHA Registered',

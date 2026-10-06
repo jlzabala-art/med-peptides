@@ -10,8 +10,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 function slugify(text) {
   return String(text || '')
     .toLowerCase()
-    .replace(/^dr\.\s*/i, '')
-    .replace(/^dr\s*/i, '')
+    .replace(/^dr[a]?\.\s*/i, '')
+    .replace(/^dr[a]?\s*/i, '')
     .replace(/[^\w\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-');
