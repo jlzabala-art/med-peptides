@@ -285,7 +285,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         patientName: rx.patientName,
         type: 'titration',
         priority: rxAgeDays > 25 ? 'high' : 'medium',
-        title: `Protocol Phase ${phaseNum} Evaluation: ${rx.patientName}`,
+        title: `Protocol Phase ${phaseNum} Evaluation`,
         description: `Treatment is at day ${rxAgeDays || 1}. Review Phase ${phaseNum} ${phaseLabel} tolerance and approve Phase ${nextPhaseNum} transition formulation.`,
         dueDate: 'Next 5 days',
         actionLabel: 'Review Protocol',
@@ -304,7 +304,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         patientName: rx.patientName,
         type: 'refill',
         priority: 'medium',
-        title: `Supply Refill Window Open: ${rx.patientName}`,
+        title: 'Prescription Supply Refill Assessment',
         description: `Patient 30-day dispensary supply reaching completion. Verify clinical adherence before refilling.`,
         dueDate: 'Next 7 days',
         actionLabel: 'Issue Refill',
@@ -322,10 +322,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         existingTask.pendingCount = (existingTask.pendingCount || 1) + 1;
         existingTask.codes = existingTask.codes || [existingTask.code];
         if (!existingTask.codes.includes(rx.code)) existingTask.codes.push(rx.code);
-        existingTask.title = `Clinical Verification: ${rx.patientName} (${existingTask.pendingCount} Formulations)`;
-        existingTask.description = `${existingTask.pendingCount} compounded formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) require physician clinical sign-off and dispensing authorization.`;
+        existingTask.title = `Prescription Dispensing Sign-off (${existingTask.pendingCount} Formulations)`;
+        existingTask.description = `${existingTask.pendingCount} compounded formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) awaiting physician clinical authorization.`;
       } else {
-        const phaseLabel = rx.phaseName ? ` (${rx.phaseName.replace(/^Phase\s*\d+:\s*/i, 'Phase ')})` : '';
+        const phaseLabel = rx.phaseName ? `: ${rx.phaseName.replace(/^Phase\s*\d+:\s*/i, 'Phase ')}` : '';
         clinicalTasks.push({
           id: `task-sign-${rx.id}`,
           rxId: rx.id,
@@ -335,9 +335,9 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
           type: 'approval',
           priority: 'action_required',
           pendingCount: 1,
-          title: `Clinical Verification: ${rx.patientName}${phaseLabel}`,
-          description: `Extracted formulation #${rx.code} requires physician clinical sign-off and dispensing authorization.`,
-          dueDate: 'Action Required',
+          title: `Prescription Dispensing Sign-off${phaseLabel}`,
+          description: `Compounded formulation #${rx.code} awaiting physician clinical authorization.`,
+          dueDate: 'Immediate',
           actionLabel: 'Review & Sign-off',
           actionUrl: `/rx/${rx.code}`
         });
@@ -355,8 +355,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       patientName: topRx.patientName,
       type: 'milestone',
       priority: 'routine',
-      title: `Clinical Milestone Follow-up: ${topRx.patientName}`,
-      description: `Routine 30-day therapeutic monitoring for ${topRx.treatmentTitle}.`,
+      title: 'Routine 30-day Clinical Milestone Follow-up',
+      description: `Routine 30-day therapeutic monitoring for ${topRx.treatmentTitle || 'compounded regimen'}.`,
       dueDate: 'Scheduled',
       actionLabel: 'View Dossier',
       actionUrl: `/rx/${topRx.code}`

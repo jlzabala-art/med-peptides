@@ -960,8 +960,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           }
         ];
       } else if (isOral) {
-        accentColor = isNutrigen ? '#059669' : '#7c3aed'; // Emerald Green for NutriGen / Purple for general oral
-        accentBg = isNutrigen ? '#ecfdf5' : '#ede9fe';
+        accentColor = isNutrigen ? '#059669' : '#1a73e8'; // Emerald Green for NutriGen / GCP Blue for general oral
+        accentBg = isNutrigen ? '#ecfdf5' : '#e8f0fe';
         badgeText += isNutrigen 
           ? (isEs ? ' · CÁPSULAS MAGISTRALES ORALES (NUTRIGEN™)' : ' · ORAL COMPOUNDED CAPSULES (NUTRIGEN™)')
           : (isEs ? ' · CÁPSULAS MAGISTRALES ORALES' : ' · ORAL COMPOUNDED CAPSULES');
@@ -2042,7 +2042,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               padding: '6px 20px',
               background: isPatientView
                 ? 'linear-gradient(90deg, #0d9488 0%, #0284c7 100%)'
-                : 'linear-gradient(90deg, #1a73e8 0%, #6d28d9 100%)',
+                : 'linear-gradient(90deg, #003666 0%, #1a73e8 100%)',
               borderBottom: '1px solid rgba(255,255,255,0.12)',
               boxShadow: '0 1px 4px rgba(0,0,0,0.18)'
             }}>

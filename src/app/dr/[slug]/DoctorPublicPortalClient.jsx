@@ -422,16 +422,26 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       header: 'Clinical Task & Action Plan',
       width: '38%',
       sortable: true,
-      render: (t) => (
-        <div>
-          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
-            {t.title}
+      render: (t) => {
+        let cleanTitle = t.title || '';
+        cleanTitle = cleanTitle.replace(/^Clinical Verification:\s*/i, '');
+        if (t.patientName && cleanTitle.startsWith(t.patientName)) {
+          cleanTitle = cleanTitle.replace(t.patientName, '').trim();
+          cleanTitle = cleanTitle.replace(/^[-:–]\s*/, '').trim();
+        }
+        if (!cleanTitle) cleanTitle = 'Prescription Sign-off';
+
+        return (
+          <div>
+            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
+              {cleanTitle}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35 }}>
+              {t.description}
+            </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35 }}>
-            {t.description}
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'patientName',
@@ -455,25 +465,31 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       header: 'Timeline',
       width: '15%',
       sortable: true,
-      render: (t) => (
-        <span
-          style={{
-            fontSize: '0.74rem',
-            fontWeight: 600,
-            padding: '2px 8px',
-            borderRadius: '4px',
-            background: '#f1f5f9',
-            color: '#334155',
-            border: '1px solid #e2e8f0',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-        >
-          <Clock size={12} style={{ color: '#64748b' }} />
-          {t.dueDate || 'Pending'}
-        </span>
-      )
+      render: (t) => {
+        let displayDue = t.dueDate;
+        if (!displayDue || displayDue === 'Action Required') {
+          displayDue = 'Immediate';
+        }
+        return (
+          <span
+            style={{
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: '#f1f5f9',
+              color: '#334155',
+              border: '1px solid #e2e8f0',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <Clock size={12} style={{ color: '#64748b' }} />
+            {displayDue}
+          </span>
+        );
+      }
     },
     {
       key: 'actions',
@@ -512,27 +528,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // ── Prescriptions Dossier Columns (DataTable Exclusive Rendering) ─────────
   const prescriptionColumns = useMemo(() => [
     {
-      key: 'code',
-      header: 'Prescription Code',
-      width: '18%',
-      sortable: true,
-      render: (rx) => (
-        <div>
-          <div style={{ fontWeight: 600, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>#{rx.code}</span>
-            <CopyableId value={rx.code} iconOnly={true} />
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Calendar size={11} />
-            <span>{rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active Regimen'}</span>
-          </div>
-        </div>
-      )
-    },
-    {
       key: 'patientName',
       header: 'Patient Dossier',
-      width: '22%',
+      width: '24%',
       sortable: true,
       render: (rx) => (
         <div>
@@ -550,7 +548,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     {
       key: 'treatmentTitle',
       header: 'Regimen & Formulations',
-      width: '32%',
+      width: '34%',
       sortable: true,
       render: (rx) => {
         const itemCount = (rx.items || []).length || (rx.prescriptionLines || []).length || 1;
@@ -579,6 +577,18 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       width: '14%',
       sortable: true,
       render: (rx) => <StatusBadge status={rx.status} />
+    },
+    {
+      key: 'createdAt',
+      header: 'Date',
+      width: '14%',
+      sortable: true,
+      render: (rx) => (
+        <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <Calendar size={12} style={{ color: '#64748b' }} />
+          <span>{rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active'}</span>
+        </div>
+      )
     },
     {
       key: 'actions',
@@ -1678,12 +1688,24 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               const itemsList = rx.items && rx.items.length > 0 ? rx.items : (rx.prescriptionLines || []);
               return (
                 <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666' }}>
-                      Formulation Details & Posology Schedule
-                    </span>
+                  {/* Google Cloud Prescription Reference Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#003666' }}>
+                        Prescription #{rx.code}
+                      </span>
+                      <CopyableId value={rx.code} iconOnly={true} />
+                      <span style={{ fontSize: '0.74rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={12} />
+                        <span>Authorized: {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active Regimen'}</span>
+                      </span>
+                      <span style={{ fontSize: '0.72rem', background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <ShieldCheck size={11} />
+                        <span>EU GMP Validated</span>
+                      </span>
+                    </div>
                     <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                      Standard: EU GMP Certified Dispensary · Pharmapolis & Fagron
+                      Dispensary: Pharmapolis & Fagron Compounding
                     </span>
                   </div>
 
