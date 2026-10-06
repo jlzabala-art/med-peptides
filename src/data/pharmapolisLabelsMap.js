@@ -746,9 +746,7 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
           targetRxUrl: auth.targetRxUrl || regMatch.targetRxUrl,
           apis: (form?.apis && form.apis.length > 0) ? form.apis : (regMatch.apis || rx.items || rx.prescriptionLines || []),
           formula: formulaText || regMatch.formula || '',
-          vehicle: (regMatch.vehicle && regMatch.vehicle.name && regMatch.vehicle.name.toLowerCase().includes('foam'))
-            ? regMatch.vehicle
-            : (form?.vehicle || regMatch.vehicle || null),
+          vehicle: regMatch.vehicle || form?.vehicle || null,
           prodDate: rxProdDate || regMatch.prodDate,
           expDate: rxExpDate || regMatch.expDate
         };

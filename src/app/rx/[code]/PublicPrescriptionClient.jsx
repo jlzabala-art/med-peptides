@@ -1404,12 +1404,43 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       return members.map((m, idx) => {
         const mItems = (m.items || m.prescriptionLines || []).filter(i => !i.isVehicleOrBase && !i._isVehicleOrBase && !i.isVehicle);
         const nutri = m.nutrigenomics || null;
+
+        const formOrRoute = String(m.dispensingForm || m.route || m.treatmentType || m.productName || m.formulaName || '').toLowerCase();
+        const mItemsLower = mItems.map(i => (i.name || i.productName || i.activeIngredient || '').toLowerCase()).join(' ');
+        const isCream = formOrRoute.includes('cream') || formOrRoute.includes('crema') || formOrRoute.includes('transdermal') || formOrRoute.includes('pentravan') || mItemsLower.includes('testosterone') || mItemsLower.includes('estradiol');
+        const isOintment = formOrRoute.includes('ointment') || formOrRoute.includes('pomade') || formOrRoute.includes('pomada');
+        const isFoam = formOrRoute.includes('foam') || formOrRoute.includes('espuma') || formOrRoute.includes('trichofoam');
+        const isLiquid = formOrRoute.includes('solution') || formOrRoute.includes('solución') || formOrRoute.includes('trichosol');
+        const isNutriOrCapsule = formOrRoute.includes('capsule') || formOrRoute.includes('cápsula') || formOrRoute.includes('oral') || Boolean(nutri);
+
+        let vehicleName = m.vehicle?.name || m.vehicleName;
+        if (!vehicleName) {
+          if (isCream) vehicleName = 'Pentravan® Liposomal Transdermal Cream Base';
+          else if (isOintment) vehicleName = isEs ? 'Base de Pomada Magistral Hipoalergénica' : 'Compounded Topical Pomade Base';
+          else if (isFoam) vehicleName = 'TrichoFoam™ Transdermal Base';
+          else if (isLiquid) vehicleName = 'TrichoSol™ Hydrophilic Solution Base';
+          else if (isNutriOrCapsule) vehicleName = isEs ? 'Base de Cápsula Magistral / Excipiente de Celulosa' : 'Micronized Compounded Hard Capsules Base';
+          else vehicleName = isEs ? 'Vehículo Galénico Magistral c.s.p.' : 'Galenic Compounding Vehicle q.s.';
+        }
+
+        let route = m.dispensingForm || m.route;
+        if (!route) {
+          if (isCream) route = isEs ? 'Vía Tópica / Transdérmica' : 'Topical / Transdermal Route';
+          else if (isOintment) route = isEs ? 'Vía Tópica' : 'Topical Application';
+          else if (isFoam || isLiquid) route = isEs ? 'Vía Tópica Capilar' : 'Topical Scalp Administration';
+          else route = isEs ? 'Vía Oral' : 'Oral Administration';
+        } else if (isCream && !route.toLowerCase().includes('transdermal') && !route.toLowerCase().includes('tópica')) {
+          route = isEs ? `${route} (Vía Transdérmica)` : `${route} (Transdermal)`;
+        } else if (isNutriOrCapsule && !route.toLowerCase().includes('oral')) {
+          route = `${route} (Oral)`;
+        }
+
         return buildVehicleData({
           index: idx + 1,
           totalCount: members.length,
-          vehicleName: isEs ? 'Base de Cápsula Magistral / Excipiente de Celulosa' : 'Micronized Compounded Hard Capsules Base',
+          vehicleName,
           treatmentTitle: m.treatmentType || `Part ${idx + 1}`,
-          route: m.dispensingForm ? `${m.dispensingForm} (Oral)` : 'Oral Administration',
+          route,
           volume: m.volume || null,
           customPosology: m.posology || '',
           duration: m.duration || '',
