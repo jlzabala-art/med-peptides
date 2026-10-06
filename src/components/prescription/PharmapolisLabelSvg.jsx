@@ -304,29 +304,9 @@ export default function PharmapolisLabelSvg({
     // ── RIGHT COLUMN LAYOUT: FULL HORIZONTAL SPACE UTILIZATION (826 px usable width) ──
     const b1Y = isShort ? 14 : 20;
 
-    // Utilize wide right space: with 826px usable width, a 20-24px bold font comfortably holds up to 72-74 characters on a single line
-    const titleMaxChars = isShort ? 58 : 74;
-    const titleLines = wrapLines(productTitle, titleMaxChars);
-    const isMultiLine = titleLines.length > 1;
-
-    let tFontSize = isShort ? 18 : 24;
-    if (!isMultiLine) {
-      if (productTitle.length > 58) {
-        tFontSize = isShort ? 16 : 21;
-      } else if (productTitle.length > 44) {
-        tFontSize = isShort ? 17 : 23;
-      } else if (productTitle.length < 35) {
-        tFontSize = isShort ? 20 : 26;
-      }
-    } else {
-      tFontSize = isShort ? 15 : 19;
-    }
-    const tLineGap = isShort ? 22 : 28;
-
-    // Block 1 vertical positions:
-    const titleStartY = isShort ? 22 : 28;
-    const titleEndY = titleStartY + ((titleLines.length - 1) * tLineGap);
-    const b1BatchY = titleEndY + (isShort ? 24 : 30);
+    // Block 1 vertical positions (Net Content / Size & Dispensing Batch - zero formulation repetition):
+    const b1SizeY = isShort ? 24 : 32;
+    const b1BatchY = b1SizeY + (isShort ? 24 : 32);
     const b1DividerY = b1BatchY + (isShort ? 16 : 20);
 
     // Block 2: Guaranteed zero collision with Block 1. Calculated dynamically from Block 1 bottom with generous breathing space!
@@ -404,24 +384,22 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(550, ${colY})`}>
           <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
 
-          {/* Block 1: Formulation Name & Batch Numbers - Full title utilizing width, ZERO ellipsis */}
+          {/* Block 1: Dispensing Batch & Net Quantity / Size (No formulation repetition) */}
           <g transform={`translate(32, ${b1Y})`}>
             <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#64748b" letterSpacing="0.8">
-              FORMULATION &amp; DISPENSING BATCH
+              DISPENSING BATCH &amp; NET QUANTITY
             </text>
-            {titleLines.map((line, lIdx) => (
-              <text
-                key={lIdx}
-                x="0"
-                y={titleStartY + (lIdx * tLineGap)}
-                fontFamily="Arial, Helvetica, sans-serif"
-                fontSize={tFontSize}
-                fontWeight="900"
-                fill="#000000"
-              >
-                {line}
-              </text>
-            ))}
+            <text
+              x="0"
+              y={b1SizeY}
+              fontFamily="Arial, Helvetica, sans-serif"
+              fontSize={isShort ? 22 : 28}
+              fontWeight="900"
+              fill="#000000"
+              letterSpacing="0.3"
+            >
+              Net Content / Size: {volume}
+            </text>
             <text x="0" y={b1BatchY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 18} fontWeight="700" fill="#003666">
               Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
             </text>
