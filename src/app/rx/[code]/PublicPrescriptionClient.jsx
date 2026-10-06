@@ -70,6 +70,7 @@ import PrescriptionBrochureModal from '@/components/prescription/PrescriptionBro
 import PrescriptionStatusQuickAction from '@/components/prescription/PrescriptionStatusQuickAction';
 import { resolveDoctorProfile, formatMedicalLicense } from '@/services/doctorDirectoryService';
 import DoctorRxSwitcherModal from '@/components/prescription/DoctorRxSwitcherModal';
+import PatientRxSwitcherModal from '@/components/prescription/PatientRxSwitcherModal';
 import PatientExperienceHub from '@/components/prescription/PatientExperienceHub';
 
 // Defensive CSS to guarantee no storefront headers, navigation, or shopping carts leak into public verification page
@@ -213,6 +214,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [showSupplierRfqModal, setShowSupplierRfqModal] = useState(false);
   const [showAtlasQuotationModal, setShowAtlasQuotationModal] = useState(false);
   const [showRxSwitcherModal, setShowRxSwitcherModal] = useState(false);
+  const [showPatientRxModal, setShowPatientRxModal] = useState(false);
 
   const togglePhase = (id) => {
     setExpandedPhases(prev => ({ ...prev, [id]: !prev[id] }));
@@ -1711,8 +1713,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   : (isEs ? 'Acceso completo · Solo visible por el médico' : 'Full clinical access · Visible to doctor only')}
               </span>
 
-              {/* Switch view link */}
-              {!isPatientView && (
+              {/* Switch view link or patient prescriptions modal button */}
+              {!isPatientView ? (
                 <a
                   href={`/rx/${rxId}?view=patient`}
                   style={{
@@ -1731,6 +1733,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   <Eye size={11} />
                   {isEs ? 'Vista Paciente' : 'Patient Preview'}
                 </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
+                  style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.72rem', fontWeight: 600,
+                    color: '#ffffff',
+                    background: 'rgba(255,255,255,0.20)',
+                    border: '1px solid rgba(255,255,255,0.35)',
+                    borderRadius: '4px',
+                    padding: '3px 10px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    transition: 'background 0.15s'
+                  }}
+                  title={isEs ? 'Ver todas las prescripciones de este paciente' : 'View all prescriptions for this patient across all doctors'}
+                >
+                  <Layers size={12} color="#ffffff" />
+                  <span>{isEs ? 'Todas Mis Recetas' : 'All My Prescriptions'}</span>
+                </button>
               )}
             </div>
           }
@@ -1952,7 +1977,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   ) : (
                     /* Patient View: primary CTA + icon-ghost secondaries */
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      {/* PRIMARY */}
+                      {/* PRIMARY: Treatment Guide */}
                       <button
                         type="button"
                         onClick={() => { triggerHaptic('selection'); setShowBrochureModal(true); }}
@@ -1962,6 +1987,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       >
                         <FileText size={14} color="#ffffff" />
                         <span>{isEs ? 'Guía de Tratamiento' : 'Treatment Guide'}</span>
+                      </button>
+
+                      {/* ALL PRESCRIPTIONS SWITCHER / HUB */}
+                      <button
+                        type="button"
+                        onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
+                        className="rx-header-action-btn rx-btn-secondary"
+                        style={{
+                          background: '#ffffff',
+                          color: '#1a73e8',
+                          border: '1px solid #dadce0',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6
+                        }}
+                        title={isEs ? 'Ver todas mis prescripciones médicas' : 'View all my prescriptions across all doctors'}
+                      >
+                        <Layers size={14} color="#1a73e8" />
+                        <span>{isEs ? 'Mis Prescripciones' : 'All My Prescriptions'}</span>
                       </button>
 
                       {/* SECONDARY: Copy icon-ghost */}
@@ -2122,6 +2168,29 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   {patient.emiratesId && (
                     <div style={{ fontSize: '0.75rem', color: '#70757a', marginTop: '1px' }}>
                       <span>National ID: <strong>{patient.emiratesId}</strong></span>
+                    </div>
+                  )}
+                  {isPatientView && (
+                    <div style={{ marginTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => { triggerHaptic('selection'); setShowPatientRxModal(true); }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          color: '#1a73e8',
+                          fontSize: '0.74rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                      >
+                        <Layers size={12} color="#1a73e8" />
+                        <span>{isEs ? 'Ver todas las recetas de este paciente →' : 'View all prescriptions for this patient →'}</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -4785,6 +4854,22 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           currentRxId={rxId}
           doctorName={doctorName}
           lang={lang}
+        />
+      )}
+
+      {/* ── Patient Prescriptions Switcher Modal (patient view only - cross-physician record) ── */}
+      {isPatientView && (
+        <PatientRxSwitcherModal
+          isOpen={showPatientRxModal}
+          onClose={() => setShowPatientRxModal(false)}
+          currentRxId={rxId}
+          patientName={patientName}
+          patientId={rx.patientId || patient?.id}
+          patientPhone={patient?.phone}
+          patientEmail={patient?.email}
+          lang={lang}
+          onOpenBrochure={() => setShowBrochureModal(true)}
+          onRequestRefill={() => setShowAtlasQuotationModal(true)}
         />
       )}
     </div>

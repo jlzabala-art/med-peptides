@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Stethoscope, Download, Copy, Trash2, Loader2, Sparkles, FileText,
   Tag, Package, RotateCcw, MessageCircle, Eye, RefreshCw, Merge,
-  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2
+  ClipboardCheck, Syringe, Send, Receipt, Share2, Briefcase, Building2, Bookmark
 } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 
@@ -163,8 +163,10 @@ function WorkspaceRxToggleButton({ rx }) {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '28px',
-        height: '28px',
+        width: '30px',
+        height: '30px',
+        minWidth: '30px',
+        minHeight: '30px',
         borderRadius: '4px',
         backgroundColor: isInWorkspace ? '#e8f0fe' : '#ffffff',
         border: isInWorkspace ? '1px solid #d2e3fc' : '1px solid #dadce0',
@@ -193,7 +195,12 @@ function WorkspaceRxToggleButton({ rx }) {
         }
       }}
     >
-      <Briefcase size={14} color={isInWorkspace ? '#1a73e8' : '#5f6368'} />
+      <Bookmark
+        size={15}
+        strokeWidth={1.8}
+        fill={isInWorkspace ? '#1a73e8' : 'none'}
+        color={isInWorkspace ? '#1a73e8' : '#5f6368'}
+      />
     </button>
   );
 }
@@ -245,7 +252,7 @@ export const getPrescriptionColumns = (options = {}) => {
               overflow: 'hidden',
               whiteSpace: 'nowrap'
             }}>
-              <Stethoscope size={12} color="#1a73e8" style={{ flexShrink: 0 }} />
+              <Stethoscope size={12} color="#5f6368" style={{ flexShrink: 0 }} />
               <span 
                 title={formattedDoc}
                 style={{ 
@@ -312,19 +319,17 @@ export const getPrescriptionColumns = (options = {}) => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
                 fontSize: '0.74rem',
                 fontWeight: isMulti ? 600 : 500,
                 padding: '2px 8px',
-                borderRadius: '12px',
-                background: isMulti ? '#e6f4ea' : '#f1f3f4',
-                color: isMulti ? '#137333' : '#5f6368',
-                border: isMulti ? '1px solid #ceead6' : '1px solid #dadce0',
+                borderRadius: '4px',
+                background: isMulti ? '#e8f0fe' : '#f1f3f4',
+                color: isMulti ? '#1a73e8' : '#5f6368',
+                border: isMulti ? '1px solid #d2e3fc' : '1px solid #dadce0',
                 whiteSpace: 'nowrap'
               }}
             >
-              <span>{isMulti ? '📦' : '💊'}</span>
-              <span>{count} {count === 1 ? 'part' : 'parts'}</span>
+              {count} {count === 1 ? 'part' : 'parts'}
             </span>
           </div>
         );

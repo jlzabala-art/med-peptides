@@ -309,7 +309,7 @@ export default function StickyBulkActionBar({
                 title={action.label}
               >
                 {IconComp && <IconComp size={14} />}
-                <span>{action.label.replace(/\s*\(\d+\)\s*$/, '').trim()}</span>
+                <span>{String(action.label || '').replace(/^[\p{Emoji}\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '').replace(/\s*\(\d+\)\s*$/, '').trim()}</span>
               </button>
             );
           })

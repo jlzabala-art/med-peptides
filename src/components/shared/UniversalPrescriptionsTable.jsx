@@ -422,7 +422,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
                   whiteSpace: 'nowrap'
                 }}
               >
-                <span>{typeInfo.emoji}</span>
                 <span>{typeInfo.label}</span>
                 {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
               </span>
@@ -539,7 +538,6 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               whiteSpace: 'nowrap'
             }}
           >
-            <span>{typeInfo.emoji}</span>
             <span>{typeInfo.label}</span>
             {typeInfo.sublabel && <span style={{ opacity: 0.85, fontWeight: 400 }}>· {typeInfo.sublabel}</span>}
           </span>
@@ -550,7 +548,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
             color: isImport ? '#1a73e8' : '#5f6368',
             border: isImport ? '1px solid #bfdbfe' : '1px solid #dadce0',
           }}>
-            {isImport ? '↑ Import' : '✏ Manual'}
+            {isImport ? 'Imported' : 'Manual'}
           </span>
           <span style={{ fontSize: '0.72rem', color: '#5f6368' }}>{sourceLabel}</span>
         </div>
@@ -697,7 +695,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const bulkActions = useMemo(() => {
     const actions = [
       {
-        label: '📦 Send to Workspace',
+        label: 'Send to Workspace',
         icon: Package,
         onClick: (selectedRows) => {
           if (!selectedRows || selectedRows.length === 0) return;
@@ -850,7 +848,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         }
       },
       {
-        label: '📄 Export CSV',
+        label: 'Export CSV',
         icon: Download,
         onClick: (selectedRows) => {
           if (!selectedRows || selectedRows.length === 0) return;
@@ -866,7 +864,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         }
       },
       {
-        label: '✨ Enrich with AI',
+        label: 'Enrich with AI',
         icon: Sparkles,
         onClick: async (selectedRows) => {
           if (!selectedRows || selectedRows.length === 0) return;
@@ -884,7 +882,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               console.warn('Bulk enrich error for', rx.id, err);
             }
           }
-          toast.success(`✨ ${successCount} de ${selectedRows.length} prescripciones enriquecidas con éxito`, { id: toastId });
+          toast.success(`${successCount} of ${selectedRows.length} prescriptions enriched successfully`, { id: toastId });
           refresh && refresh();
         }
       }
@@ -892,7 +890,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
 
     if (canGenerateLabels) {
       actions.push({
-        label: '🏷️ Pharmapolis Stickers',
+        label: 'Pharmapolis Stickers',
         icon: Tag,
         onClick: async (selectedRows) => {
           if (!selectedRows || selectedRows.length === 0) return;
@@ -988,11 +986,11 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       onChange: (val) => updateUrlParam('type', val),
       options: [
         { label: 'All Programs', value: '' },
-        { label: '🧬 TrichoTest™ (Follicular DNA)', value: 'trichotest' },
-        { label: '🧬 NutriGen™ (Oral Chrono)', value: 'nutrigen' },
-        { label: '⚡ Hormones · BHRT / TRT', value: 'hormone' },
-        { label: '💉 Peptides · SubQ Vials', value: 'peptide' },
-        { label: '💊 Compounding Rx (Galenic)', value: 'compounding' }
+        { label: 'TrichoTest™ (Follicular DNA)', value: 'trichotest' },
+        { label: 'NutriGen™ (Oral Chrono)', value: 'nutrigen' },
+        { label: 'Hormones · BHRT / TRT', value: 'hormone' },
+        { label: 'Peptides · SubQ Vials', value: 'peptide' },
+        { label: 'Compounding Rx (Galenic)', value: 'compounding' }
       ]
     },
     {
@@ -1040,8 +1038,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       onChange: (val) => updateUrlParam('source', val),
       options: [
         { label: 'All Sources', value: '' },
-        { label: '🧬 Imported (NutriGen / Fagron)', value: 'fagron' },
-        { label: '✏️ Manual Entry', value: 'manual' }
+        { label: 'Imported (NutriGen / Fagron)', value: 'fagron' },
+        { label: 'Manual Entry', value: 'manual' }
       ]
     }
   ], [workspaceFilter, activeWsRxIds.length, rangeFilter, typeFilter, statusFilter, doctorFilter, patientFilter, sourceFilter, doctorOptions, patientOptions, updateUrlParam]);
@@ -1049,7 +1047,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const activeChips = useMemo(() => {
     const chips = [];
     if (workspaceFilter === '1' || workspaceFilter === 'true') {
-      chips.push({ key: 'workspace', label: 'Workspace', value: '💼 In Active Workspace', onRemove: () => updateUrlParam('workspace', '') });
+      chips.push({ key: 'workspace', label: 'Workspace', value: 'In Active Workspace', onRemove: () => updateUrlParam('workspace', '') });
     }
     if (statusFilter) {
       chips.push({ key: 'status', label: 'Status', value: statusFilter, onRemove: () => updateUrlParam('status', '') });
