@@ -56,9 +56,37 @@ function formatDoctorName(name) {
     .replace(/\bFishrs\b/, 'FISHRS');
 }
 
+function normalizePatientRx(d, id, defaultPatName) {
+  if (!d) return null;
+  const docId = id || d.id || d.prescriptionNumber || d.code || '';
+  return {
+    id: docId,
+    prescriptionNumber: d.prescriptionNumber || d.code || docId,
+    code: d.code || d.prescriptionNumber || docId,
+    patientName: d.patientName || d.patient?.name || defaultPatName || 'Patient',
+    patient: d.patient ? { name: d.patient.name, alias: d.patient.alias, dob: d.patient.dob } : null,
+    status: d.status || d.state || 'active',
+    state: d.state || d.status || 'active',
+    treatmentTitle: d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation',
+    clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || 'Clinical Dispensary',
+    clinicName: d.clinicName || d.clinic || d.treatingDoctor?.clinic || '',
+    createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
+    items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
+    prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
+    compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
+    posology: getPosologyString(d.posology),
+    structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
+    treatingDoctor: d.treatingDoctor ? { name: formatDoctorName(d.treatingDoctor.name), clinic: d.treatingDoctor.clinic, specialty: d.treatingDoctor.specialty } : null,
+    doctorName: formatDoctorName(d.doctorName || d.treatingDoctor?.name || 'Treating Physician'),
+    doctorLicense: d.doctorLicense || d.treatingDoctor?.license || '',
+    description: d.description || ''
+  };
+}
+
 export default function PatientRxSwitcherModal({
   isOpen,
   onClose,
+  currentRx = null,
   currentRxId = '',
   patientName = '',
   patientId = '',
@@ -68,7 +96,15 @@ export default function PatientRxSwitcherModal({
   onOpenBrochure = null,
   onRequestRefill = null
 }) {
-  const [prescriptions, setPrescriptions] = useState([]);
+  const initialSeed = useMemo(() => {
+    if (currentRx) {
+      const norm = normalizePatientRx(currentRx, currentRxId || currentRx.id, patientName);
+      return norm ? [norm] : [];
+    }
+    return [];
+  }, [currentRx, currentRxId, patientName]);
+
+  const [prescriptions, setPrescriptions] = useState(initialSeed);
   const [loading, setLoading] = useState(false);
   const [isBackgroundUpdating, setIsBackgroundUpdating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +116,17 @@ export default function PatientRxSwitcherModal({
   const overlayRef = useRef(null);
   const searchRef = useRef(null);
   const isEs = lang === 'es';
+
+  // Keep current active prescription available immediately
+  useEffect(() => {
+    if (initialSeed.length > 0) {
+      setPrescriptions(prev => {
+        if (prev.length === 0) return initialSeed;
+        const exists = prev.some(p => p.id === initialSeed[0].id || p.code === initialSeed[0].code);
+        return exists ? prev : [initialSeed[0], ...prev];
+      });
+    }
+  }, [initialSeed]);
 
   const STATUS_META = {
     approved:   { label: isEs ? 'Aprobada'    : 'Approved',   color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
@@ -106,7 +153,7 @@ export default function PatientRxSwitcherModal({
     { id: 'completed', label: isEs ? 'Completadas' : 'Completed' },
   ];
 
-  // ── Multi-Tier Fetch (RAM -> localStorage -> Firestore SWR) ────────────────
+  // ── Multi-Tier Fetch (RAM -> localStorage -> Server Admin SDK API) ─────────
   const fetchPrescriptions = useCallback(async (forceRefresh = false) => {
     const normName = (patientName || '').toLowerCase().trim();
     const normId = (patientId || '').toLowerCase().trim();
@@ -140,90 +187,55 @@ export default function PatientRxSwitcherModal({
       }
     }
 
-    if (!hasCachedData) {
+    if (!hasCachedData && initialSeed.length === 0) {
       setLoading(true);
     } else {
       setIsBackgroundUpdating(true);
     }
 
-    // 3. Tier 3: Firestore Query (Background SWR)
+    // 3. Tier 3: Fetch from Secure Server API
     try {
-      const prescRef = collection(db, 'prescriptions');
-      const q1 = query(prescRef, orderBy('createdAt', 'desc'), limit(100));
-      const snap = await getDocs(q1);
-      const results = [];
+      const activeRxKey = currentRxId || currentRx?.id || '';
+      const params = new URLSearchParams();
+      params.set('scope', 'patient');
+      if (patientName) params.set('patientName', patientName);
+      if (patientId) params.set('patientId', patientId);
+      if (activeRxKey) params.set('currentRxId', activeRxKey);
 
-      snap.forEach((doc) => {
-        const d = doc.data();
-        const dPatientName = (d.patientName || d.patient?.name || '').toLowerCase().trim();
-        const dPatientId = (d.patientId || d.patient?.id || doc.id).toLowerCase().trim();
+      const res = await fetch(`/api/prescriptions/switcher-list?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-        // Cross-Doctor Matching: matches the patient regardless of prescribing physician
-        const isMatch = (
-          (normId && (dPatientId === normId || dPatientId.includes(normId))) ||
-          (normName && dPatientName && (dPatientName === normName || dPatientName.includes(normName) || normName.includes(dPatientName))) ||
-          (doc.id === currentRxId) ||
-          (d.prescriptionNumber === currentRxId) ||
-          (d.code === currentRxId)
-        );
+      let results = [];
+      if (data && data.success && Array.isArray(data.prescriptions)) {
+        results = data.prescriptions;
+      }
 
-        if (isMatch) {
-          results.push({
-            id: doc.id,
-            prescriptionNumber: d.prescriptionNumber || d.code || doc.id,
-            code: d.code || d.prescriptionNumber || doc.id,
-            patientName: d.patientName || d.patient?.name || patientName,
-            patient: d.patient ? { name: d.patient.name, alias: d.patient.alias, dob: d.patient.dob } : null,
-            status: d.status || d.state || 'active',
-            state: d.state || d.status || 'active',
-            treatmentTitle: d.treatmentTitle || d.description || d.program || 'Personalized Formulation',
-            clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || 'Clinical Dispensary',
-            clinicName: d.clinicName || d.clinic || d.treatingDoctor?.clinic || '',
-            createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
-            items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
-            prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
-            compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
-            posology: getPosologyString(d.posology),
-            structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
-            treatingDoctor: d.treatingDoctor ? { name: formatDoctorName(d.treatingDoctor.name), clinic: d.treatingDoctor.clinic, specialty: d.treatingDoctor.specialty } : null,
-            doctorName: formatDoctorName(d.doctorName || d.treatingDoctor?.name || 'Treating Physician'),
-            doctorLicense: d.doctorLicense || d.treatingDoctor?.license || '',
-            description: d.description || ''
-          });
-        }
-      });
+      // Guarantee current active prescription is included
+      if (initialSeed.length > 0 && !results.some(r => r.id === initialSeed[0].id || r.code === initialSeed[0].code)) {
+        results = [initialSeed[0], ...results];
+      }
 
-      // Deduplicate by ID
-      const uniqueResults = [];
-      const seen = new Set();
-      results.forEach(r => {
-        if (!seen.has(r.id)) {
-          seen.add(r.id);
-          uniqueResults.push(r);
-        }
-      });
+      if (results.length > 0) {
+        setPrescriptions(results);
+        _PATIENT_RX_RAM_CACHE.set(cacheKey, { data: results, timestamp: Date.now() });
 
-      setPrescriptions(uniqueResults);
-
-      _PATIENT_RX_RAM_CACHE.set(cacheKey, { data: uniqueResults, timestamp: Date.now() });
-
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify({ data: uniqueResults, timestamp: Date.now() }));
-        } catch {
-          // ignore storage quota
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(storageKey, JSON.stringify({ data: results, timestamp: Date.now() }));
+          } catch {}
         }
       }
     } catch (err) {
-      console.warn('PatientRxSwitcher: fetch failed', err);
-      if (!hasCachedData) {
-        setPrescriptions([]);
+      console.warn('PatientRxSwitcher: server fetch failed', err);
+      if (!hasCachedData && initialSeed.length > 0) {
+        setPrescriptions(initialSeed);
       }
     } finally {
       setLoading(false);
       setIsBackgroundUpdating(false);
     }
-  }, [patientName, patientId, currentRxId]);
+  }, [patientName, patientId, currentRxId, currentRx, initialSeed]);
 
   useEffect(() => {
     if (isOpen) {

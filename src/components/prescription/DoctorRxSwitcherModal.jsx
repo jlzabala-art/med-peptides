@@ -40,14 +40,49 @@ function getPosologyString(raw) {
   return String(raw);
 }
 
+function normalizeRx(d, id) {
+  if (!d) return null;
+  const docId = id || d.id || d.prescriptionNumber || d.code || '';
+  return {
+    id: docId,
+    prescriptionNumber: d.prescriptionNumber || d.code || docId,
+    code: d.code || d.prescriptionNumber || docId,
+    patientName: d.patientName || d.patient?.name || 'Patient',
+    patient: d.patient ? { name: d.patient.name, alias: d.patient.alias } : null,
+    status: d.status || d.state || 'active',
+    state: d.state || d.status || 'active',
+    treatmentTitle: d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation',
+    clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || '',
+    clinicName: d.clinicName || d.clinic || '',
+    createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
+    items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
+    prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
+    compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
+    posology: getPosologyString(d.posology),
+    structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
+    treatingDoctor: d.treatingDoctor ? { name: d.treatingDoctor.name, clinic: d.treatingDoctor.clinic } : null,
+    doctorName: d.doctorName || d.treatingDoctor?.name || '',
+    description: d.description || ''
+  };
+}
+
 export default function DoctorRxSwitcherModal({
   isOpen,
   onClose,
+  currentRx = null,
   currentRxId = '',
   doctorName = '',
   lang = 'en',
 }) {
-  const [prescriptions, setPrescriptions] = useState([]);
+  const initialSeed = useMemo(() => {
+    if (currentRx) {
+      const norm = normalizeRx(currentRx, currentRxId || currentRx.id);
+      return norm ? [norm] : [];
+    }
+    return [];
+  }, [currentRx, currentRxId]);
+
+  const [prescriptions, setPrescriptions] = useState(initialSeed);
   const [loading, setLoading] = useState(false);
   const [isBackgroundUpdating, setIsBackgroundUpdating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,6 +93,17 @@ export default function DoctorRxSwitcherModal({
   const overlayRef = useRef(null);
   const searchRef = useRef(null);
   const isEs = lang === 'es';
+
+  // Keep current active prescription available immediately
+  useEffect(() => {
+    if (initialSeed.length > 0) {
+      setPrescriptions(prev => {
+        if (prev.length === 0) return initialSeed;
+        const exists = prev.some(p => p.id === initialSeed[0].id || p.code === initialSeed[0].code);
+        return exists ? prev : [initialSeed[0], ...prev];
+      });
+    }
+  }, [initialSeed]);
 
   const STATUS_META = {
     approved:   { label: isEs ? 'Aprobada'    : 'Approved',   color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
@@ -85,7 +131,7 @@ export default function DoctorRxSwitcherModal({
     { id: 'completed', label: isEs ? 'Completadas' : 'Completed' },
   ];
 
-  // ── Multi-Tier Fetch (RAM -> localStorage -> Firestore SWR) ────────────────
+  // ── Multi-Tier Fetch (RAM -> localStorage -> Server Admin SDK API) ─────────
   const fetchPrescriptions = useCallback(async (forceRefresh = false) => {
     const normalizedDoctor = (doctorName || '').toLowerCase().replace('dr. ', '').replace('dr ', '').trim();
     const cacheKey = `rx_list_${normalizedDoctor || 'all'}`;
@@ -109,7 +155,6 @@ export default function DoctorRxSwitcherModal({
             if (parsed && Array.isArray(parsed.data) && parsed.data.length > 0) {
               setPrescriptions(parsed.data);
               hasCachedData = true;
-              // Warm up RAM cache
               _RX_RAM_CACHE.set(cacheKey, { data: parsed.data, timestamp: parsed.timestamp || now });
             }
           }
@@ -119,76 +164,54 @@ export default function DoctorRxSwitcherModal({
       }
     }
 
-    // If no cache was found, show full loader. If cached data was loaded, revalidate quietly in background!
-    if (!hasCachedData) {
+    if (!hasCachedData && initialSeed.length === 0) {
       setLoading(true);
     } else {
       setIsBackgroundUpdating(true);
     }
 
-    // 3. Tier 3: Firestore Query (Background SWR)
+    // 3. Tier 3: Fetch from Secure Server API (bypasses public client Firestore rule limitations)
     try {
-      const prescRef = collection(db, 'prescriptions');
-      const q1 = query(prescRef, orderBy('createdAt', 'desc'), limit(60));
-      const snap = await getDocs(q1);
-      const results = [];
+      const activeRxKey = currentRxId || currentRx?.id || '';
+      const params = new URLSearchParams();
+      params.set('scope', 'doctor');
+      if (doctorName) params.set('doctorName', doctorName);
+      if (activeRxKey) params.set('currentRxId', activeRxKey);
 
-      snap.forEach((doc) => {
-        const d = doc.data();
-        const dName = (
-          d.treatingDoctor?.name || d.doctorName || d.doctor?.name || d.prescribingDoctor || ''
-        ).toLowerCase();
+      const res = await fetch(`/api/prescriptions/switcher-list?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-        if (!normalizedDoctor || dName.includes(normalizedDoctor)) {
-          // Normalize and project lightweight clean record
-          results.push({
-            id: doc.id,
-            prescriptionNumber: d.prescriptionNumber || '',
-            code: d.code || '',
-            patientName: d.patientName || d.patient?.name || '',
-            patient: d.patient ? { name: d.patient.name, alias: d.patient.alias } : null,
-            status: d.status || d.state || 'active',
-            state: d.state || d.status || 'active',
-            treatmentTitle: d.treatmentTitle || d.description || d.program || '',
-            clinic: d.clinic || d.clinicName || d.treatingDoctor?.clinic || '',
-            clinicName: d.clinicName || d.clinic || '',
-            createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
-            items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
-            prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
-            compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
-            // Defensive sanitization: ensure string posology to prevent React Error #31
-            posology: getPosologyString(d.posology),
-            structuredPosology: d.structuredPosology ? { summary: getPosologyString(d.structuredPosology) } : null,
-            treatingDoctor: d.treatingDoctor ? { name: d.treatingDoctor.name, clinic: d.treatingDoctor.clinic } : null,
-            doctorName: d.doctorName || '',
-            description: d.description || ''
-          });
-        }
-      });
+      let results = [];
+      if (data && data.success && Array.isArray(data.prescriptions)) {
+        results = data.prescriptions;
+      }
 
-      setPrescriptions(results);
+      // Guarantee current active prescription is included
+      if (initialSeed.length > 0 && !results.some(r => r.id === initialSeed[0].id || r.code === initialSeed[0].code)) {
+        results = [initialSeed[0], ...results];
+      }
 
-      // Save to Tier 1 RAM Cache
-      _RX_RAM_CACHE.set(cacheKey, { data: results, timestamp: Date.now() });
+      if (results.length > 0) {
+        setPrescriptions(results);
+        _RX_RAM_CACHE.set(cacheKey, { data: results, timestamp: Date.now() });
 
-      // Save to Tier 2 localStorage
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify({ data: results, timestamp: Date.now() }));
-        } catch {
-          // Ignore potential localStorage quota errors
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(storageKey, JSON.stringify({ data: results, timestamp: Date.now() }));
+          } catch {}
         }
       }
     } catch (err) {
-      console.warn('DoctorRxSwitcher: fetch failed', err);
-      if (!hasCachedData) {
-        setPrescriptions([]);
+      console.warn('DoctorRxSwitcher: server fetch failed', err);
+      if (!hasCachedData && initialSeed.length > 0) {
+        setPrescriptions(initialSeed);
       }
     } finally {
       setLoading(false);
       setIsBackgroundUpdating(false);
     }
-  }, [doctorName]);
+  }, [doctorName, currentRxId, currentRx, initialSeed]);
 
   useEffect(() => {
     if (isOpen) {

@@ -4851,6 +4851,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         <DoctorRxSwitcherModal
           isOpen={showRxSwitcherModal}
           onClose={() => setShowRxSwitcherModal(false)}
+          currentRx={rx}
           currentRxId={rxId}
           doctorName={doctorName}
           lang={lang}
@@ -4862,6 +4863,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         <PatientRxSwitcherModal
           isOpen={showPatientRxModal}
           onClose={() => setShowPatientRxModal(false)}
+          currentRx={rx}
           currentRxId={rxId}
           patientName={patientName}
           patientId={rx.patientId || patient?.id}

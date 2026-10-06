@@ -404,8 +404,21 @@ export default function AdminPhysiciansTab() {
   const getPatientsCount = (d) => d.patientCount ?? 0;
   const getOrdersData = (d) => ({ count: d.orderCount ?? 0, revenue: d.totalRevenue ?? 0 });
 
+  // Order physicians by number of patients and prescriptions descending
+  const sortedDoctors = React.useMemo(() => {
+    return [...finalFilteredDoctors].sort((a, b) => {
+      const ptsA = (getPatientsCount(a) || a.prescriptionCount || 0);
+      const ptsB = (getPatientsCount(b) || b.prescriptionCount || 0);
+      if (ptsB !== ptsA) return ptsB - ptsA;
+      const rxA = a.prescriptionCount || 0;
+      const rxB = b.prescriptionCount || 0;
+      if (rxB !== rxA) return rxB - rxA;
+      return 0;
+    });
+  }, [finalFilteredDoctors]);
+
   const handleBulkExportCSV = () => {
-    const items = finalFilteredDoctors.filter(d => selectedIds.includes(d.id));
+    const items = sortedDoctors.filter(d => selectedIds.includes(d.id));
     if (!items.length) return;
     exportToCSV(
       items.map(d => ({
@@ -851,7 +864,7 @@ export default function AdminPhysiciansTab() {
         searchPlaceholder="Search physicians by name, email, clinic..."
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        resultCount={loading && !algoliaLoading ? undefined : finalFilteredDoctors.length}
+        resultCount={loading && !algoliaLoading ? undefined : sortedDoctors.length}
         bulkActions={[
           { label: 'Export CSV', icon: <Archive size={14} />, onClick: handleBulkExportCSV },
           { label: 'Assign Protocol', icon: <ClipboardList size={14} />, onClick: () => { notifier.info('Assign Protocol modal coming soon'); setSelectedIds([]); } },
@@ -864,7 +877,7 @@ export default function AdminPhysiciansTab() {
         onSelectionChange={setSelectedIds}
         filters={activeFilters}
         filterOptions={filterOptionsConfig}
-        data={finalFilteredDoctors}
+        data={sortedDoctors}
         columns={columns}
         onRowClick={(d) => setSelectedDoctor(d)}
         mobileCardComponent={MobileDoctorCard}

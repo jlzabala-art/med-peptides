@@ -1141,78 +1141,52 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
 
         mobileOverflowActions={[
           { label: 'Share Intake Portal', icon: Share2, onClick: () => setIsShareIntakeWhatsAppOpen(true) },
-          { label: 'Import with AI', icon: Sparkles, onClick: () => setIsIntakeOpen(true) },
-          { label: 'New Prescription', icon: FilePlus, onClick: () => openDrawer('rx-builder', 'new') },
+          { label: 'Import from AI', icon: Sparkles, onClick: () => setIsIntakeOpen(true) },
           { label: 'From Clinical Protocol', icon: Stethoscope, onClick: () => setIsProtocolSearchOpen(true) },
+          { label: 'New Prescription', icon: FilePlus, onClick: () => openDrawer('rx-builder', 'new') },
           { label: 'Export CSV', icon: Download, onClick: handleExportCsv }
         ]}
         actions={!readOnly ? (
           <div className="prescriptions-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {/* Secondary Action: Share Intake Portal (Link, WhatsApp, QR) */}
+            {/* Secondary Action: Share Intake Portal (Google Cloud Console standard) */}
             <button
               type="button"
               onClick={() => setIsShareIntakeWhatsAppOpen(true)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
                 height: '36px',
                 padding: '0 14px',
-                borderRadius: '8px',
+                borderRadius: '6px',
                 background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                color: '#0f172a',
-                fontWeight: 600,
+                border: '1px solid #dadce0',
+                color: '#3c4043',
+                fontWeight: 500,
                 fontSize: '0.84rem',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                whiteSpace: 'nowrap'
+                transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.08)',
+                whiteSpace: 'nowrap',
+                fontFamily: 'inherit'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#ffffff'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f8f9fa';
+                e.currentTarget.style.borderColor = '#c6c6c6';
+                e.currentTarget.style.color = '#202124';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = '#dadce0';
+                e.currentTarget.style.color = '#3c4043';
+              }}
               title="Share public prescription intake link (WhatsApp, direct URL, QR with attribution)"
             >
-              <Share2 size={15} style={{ color: '#003666' }} />
+              <Share2 size={15} style={{ color: '#5f6368' }} />
               <span>Share Intake Portal</span>
             </button>
 
-            {/* AI Action: Import with AI (PDF / Fagron Report) */}
-            <button
-              type="button"
-              onClick={() => setIsIntakeOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                height: '36px',
-                padding: '0 14px',
-                borderRadius: '8px',
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                color: '#1d4ed8',
-                fontWeight: 600,
-                fontSize: '0.84rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                boxShadow: '0 1px 2px rgba(29,78,216,0.05)',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#dbeafe';
-                e.currentTarget.style.borderColor = '#93c5fd';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#eff6ff';
-                e.currentTarget.style.borderColor = '#bfdbfe';
-              }}
-              title="Import and digitize medical prescription or Fagron Genomics report with Atlas AI"
-            >
-              <Sparkles size={15} style={{ color: '#2563eb' }} />
-              <span>Import with AI</span>
-            </button>
-
-            {/* Primary Action: New Prescription with Non-Redundant Creation Options */}
+            {/* Primary Action: New Prescription with Dropdown Options (Import from AI & From Clinical Protocol) */}
             <PrimarySplitButton 
               mainAction={{
                 label: "New Prescription",
@@ -1223,8 +1197,17 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               }}
               dropdownActions={[
                 {
+                  id: 'import-ai',
+                  label: "Import from AI",
+                  icon: <Sparkles size={16} style={{ color: '#1a73e8' }} />,
+                  description: "Digitize and extract from PDF or report",
+                  onClick: () => setIsIntakeOpen(true)
+                },
+                {
+                  id: 'from-protocol',
                   label: "From Clinical Protocol",
-                  icon: <Stethoscope size={15} style={{ color: '#003666' }} />,
+                  icon: <Stethoscope size={16} style={{ color: '#1a73e8' }} />,
+                  description: "Create formulation from clinical protocol",
                   onClick: () => setIsProtocolSearchOpen(true)
                 }
               ]}
