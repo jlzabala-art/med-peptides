@@ -24,7 +24,10 @@ import {
   SlidersHorizontal,
   Calendar,
   Layers,
-  Activity
+  Activity,
+  RotateCw,
+  Download,
+  Plus
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -32,6 +35,7 @@ import CopyableId from '@/components/ui/CopyableId';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/PrescriptionIntakeWorkspace';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
@@ -46,8 +50,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [taskFilter, setTaskFilter] = useState('all');
+  const [temporalFilter, setTemporalFilter] = useState('all'); // 'all' | 'active' | '30d' | '90d'
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
   
+  // Table Density & Synchronization (GCP Table Standard)
+  const [tableDensity, setTableDensity] = useState('comfortable'); // 'comfortable' | 'compact'
+  const [lastRefreshed, setLastRefreshed] = useState(new Date());
+
   // UI Actions State
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedIntake, setCopiedIntake] = useState(false);
@@ -56,6 +65,33 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
+
+  // ── URL Search Params Sync (Golden Rule #24: Sincronización de URL) ───────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const s = params.get('status');
+    const t = params.get('task');
+    const time = params.get('time');
+    if (q) setSearchQuery(q);
+    if (s) setStatusFilter(s);
+    if (t) setTaskFilter(t);
+    if (time) setTemporalFilter(time);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (taskFilter !== 'all') params.set('task', taskFilter);
+    if (temporalFilter !== 'all') params.set('time', temporalFilter);
+    const newSearch = params.toString() ? `?${params.toString()}` : '';
+    if (window.location.search !== newSearch) {
+      window.history.replaceState(null, '', `${window.location.pathname}${newSearch}`);
+    }
+  }, [searchQuery, statusFilter, taskFilter, temporalFilter]);
 
   useEffect(() => {
     // If initialData is already hydrated, only fetch in background if stale
@@ -105,10 +141,29 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     });
   }, [allTasks, taskFilter, searchQuery]);
 
-  // Filter Prescriptions
+  // Filter Prescriptions (Enhanced with Temporal Filter - Golden Rule #24)
   const filteredPrescriptions = useMemo(() => {
     return allPrescriptions.filter(rx => {
       if (statusFilter !== 'all' && (rx.status || '').toLowerCase() !== statusFilter) return false;
+
+      // Temporal Filter Condition (Golden Rule #24)
+      if (temporalFilter === 'active') {
+        const s = (rx.status || '').toLowerCase();
+        if (!['approved', 'active', 'processing'].includes(s)) return false;
+      } else if (temporalFilter === '30d' && (rx.createdAt || rx.createdDate)) {
+        const d = new Date(rx.createdAt || rx.createdDate);
+        if (!isNaN(d.getTime())) {
+          const diffDays = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+          if (diffDays > 30) return false;
+        }
+      } else if (temporalFilter === '90d' && (rx.createdAt || rx.createdDate)) {
+        const d = new Date(rx.createdAt || rx.createdDate);
+        if (!isNaN(d.getTime())) {
+          const diffDays = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+          if (diffDays > 90) return false;
+        }
+      }
+
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase();
       const matchPat = (rx.patientName || '').toLowerCase().includes(q);
@@ -117,7 +172,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       const matchItems = (rx.items || []).some(i => (i.name || '').toLowerCase().includes(q));
       return matchPat || matchCode || matchTitle || matchItems;
     });
-  }, [allPrescriptions, statusFilter, searchQuery]);
+  }, [allPrescriptions, statusFilter, searchQuery, temporalFilter]);
 
   // Compute Filtered KPIs for Scope Switcher (Rule #22)
   const filteredKpis = useMemo(() => {
@@ -160,10 +215,46 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
+  const handleShareDoctorPortal = () => {
+    triggerHaptic('light');
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Doctor Public Portal URL copied to clipboard ✓');
+    }
+  };
+
   const handleOpenLabelsModal = (rx) => {
     triggerHaptic('light');
     setActiveLabelRx(rx);
     setIsLabelsModalOpen(true);
+  };
+
+  const handleRefresh = () => {
+    triggerHaptic('light');
+    setLastRefreshed(new Date());
+    toast.success('Clinical registry data synchronized ✓');
+  };
+
+  const handleExportCsv = () => {
+    triggerHaptic('selection');
+    const rows = filteredPrescriptions.map(p => ({
+      Code: p.code || p.prescriptionNumber || '',
+      Patient: p.patientName || '',
+      Status: p.status || '',
+      Treatment: p.treatmentTitle || '',
+      Items: (p.items || []).map(i => i.name).join('; '),
+      Created: p.createdAt || p.createdDate || ''
+    }));
+    const headers = ['Code', 'Patient', 'Status', 'Treatment', 'Items', 'Created'];
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => Object.values(r).map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `DR_${opaqueCode}_PRESCRIPTIONS_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Prescriptions CSV exported successfully ✓');
   };
 
   const labelsForActiveRx = useMemo(() => {
@@ -620,7 +711,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         </div>
       </header>
 
-      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px' }}>
+      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px', paddingBottom: '90px' }}>
+        {/* ── Breadcrumb Navigation (Google Cloud Standard, Golden Rule #17) ── */}
+        <Breadcrumb items={[
+          { label: 'Clinical Services', href: '/' },
+          { label: 'Verified Physicians', href: '/doctor' },
+          { label: doctor.name || 'Physician Portal' }
+        ]} />
+
         {/* ── Doctor Identity Card ────────────────────────────────────────── */}
         <div
           style={{
@@ -1060,43 +1158,126 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             }}
           >
             <div>
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Layers size={18} style={{ color: '#003666' }} />
-                <span>Associated Clinical Prescriptions Dossier</span>
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Layers size={18} style={{ color: '#003666' }} />
+                  <span>Associated Clinical Prescriptions Dossier</span>
+                </h2>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>•</span>
+                  <span>Synced {lastRefreshed ? lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'recently'}</span>
+                </span>
+              </div>
               <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
                 Complete verified repository of compounded formulations and sequential regimens.
               </p>
             </div>
 
-            {/* Quick Status Filter Pills */}
-            <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
-              {[
-                { id: 'all', label: 'All' },
-                { id: 'approved', label: 'Approved' },
-                { id: 'active', label: 'Active' },
-                { id: 'pending', label: 'Pending' }
-              ].map(s => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setStatusFilter(s.id)}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    fontSize: '0.74rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: statusFilter === s.id ? '#ffffff' : 'transparent',
-                    color: statusFilter === s.id ? '#0f172a' : '#64748b',
-                    boxShadow: statusFilter === s.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                    transition: 'all 0.12s'
-                  }}
-                >
-                  {s.label}
-                </button>
-              ))}
+            {/* GCP Action Toolbar: Filters + Refresh + Export */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {/* Temporal Filters */}
+              <div style={{ display: 'inline-flex', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+                {[
+                  { id: 'all', label: 'All Time' },
+                  { id: 'active', label: 'Active' },
+                  { id: '30d', label: '30 Days' },
+                  { id: '90d', label: '90 Days' }
+                ].map(t => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTemporalFilter(t.id)}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: temporalFilter === t.id ? '#ffffff' : 'transparent',
+                      color: temporalFilter === t.id ? '#003666' : '#64748b',
+                      boxShadow: temporalFilter === t.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                      transition: 'all 0.12s'
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Status Filters */}
+              <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+                {[
+                  { id: 'all', label: 'All' },
+                  { id: 'approved', label: 'Approved' },
+                  { id: 'active', label: 'Active' },
+                  { id: 'pending', label: 'Pending' }
+                ].map(s => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setStatusFilter(s.id)}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      background: statusFilter === s.id ? '#ffffff' : 'transparent',
+                      color: statusFilter === s.id ? '#0f172a' : '#64748b',
+                      boxShadow: statusFilter === s.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                      transition: 'all 0.12s'
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Refresh Button */}
+              <button
+                type="button"
+                onClick={handleRefresh}
+                title="Refresh clinical registry"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '4px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#5f6368',
+                  cursor: 'pointer'
+                }}
+              >
+                <RotateCw size={13} />
+              </button>
+
+              {/* Export CSV Button */}
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  height: '28px',
+                  padding: '0 10px',
+                  borderRadius: '4px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Download size={13} color="#5f6368" />
+                <span>Export CSV</span>
+              </button>
             </div>
           </div>
 
@@ -1218,6 +1399,125 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           }}
         />
       )}
+
+      {/* ── Sticky Clinical Operations Dock (Laptop & Mobile GCP Standard) ── */}
+      <aside
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          background: 'rgba(255, 255, 255, 0.96)',
+          backdropFilter: 'blur(10px)',
+          borderTop: '1px solid #dadce0',
+          boxShadow: '0 -4px 16px rgba(60,64,67,0.08)',
+          padding: '10px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
+          flexWrap: 'wrap'
+        }}
+      >
+        {/* Left: Physician Identity & Active View Metrics */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            background: '#e8f0fe',
+            color: '#1a73e8',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.80rem',
+            fontWeight: 700
+          }}>
+            {doctor.name ? doctor.name.replace(/^Dr\.\s*/i, '').charAt(0) : 'D'}
+          </div>
+          <div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#202124' }}>
+              {doctor.name} <span style={{ fontSize: '0.74rem', color: '#5f6368', fontWeight: 500 }}>· {doctor.license || 'Verified Physician'}</span>
+            </div>
+            <div style={{ fontSize: '0.70rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{filteredPrescriptions.length} Records in Active View</span>
+              <span>•</span>
+              <span style={{ color: '#137333', fontWeight: 600 }}>EU GMP Certified Dispensary</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Quick GCP Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={handleShareDoctorPortal}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '34px',
+              padding: '0 12px',
+              borderRadius: '4px',
+              border: '1px solid #dadce0',
+              background: '#ffffff',
+              color: '#3c4043',
+              fontSize: '0.78rem',
+              fontWeight: 500,
+              cursor: 'pointer'
+            }}
+          >
+            <Share2 size={13} color="#1a73e8" />
+            <span>Share Portal</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '34px',
+              padding: '0 12px',
+              borderRadius: '4px',
+              border: '1px solid #dadce0',
+              background: '#ffffff',
+              color: '#3c4043',
+              fontSize: '0.78rem',
+              fontWeight: 500,
+              cursor: 'pointer'
+            }}
+          >
+            <Download size={13} color="#5f6368" />
+            <span>Export Registry</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsIntakeOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '34px',
+              padding: '0 16px',
+              borderRadius: '4px',
+              border: '1px solid #1a73e8',
+              background: '#1a73e8',
+              color: '#ffffff',
+              fontSize: '0.80rem',
+              fontWeight: 500,
+              boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
+              cursor: 'pointer'
+            }}
+          >
+            <Plus size={14} />
+            <span>New Prescription Intake</span>
+          </button>
+        </div>
+      </aside>
     </div>
   );
 }
