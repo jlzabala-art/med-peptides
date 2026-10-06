@@ -327,16 +327,26 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   //    The doctor who physically/clinically evaluated the patient and ordered the therapy.
   //    STRICTLY the ONLY physician shown on the patient QR code, bottle label, and patient portal.
   // 2) Production Physician (productionDoctor):
-  //    Dr. Miguel Ángel López Aranda (España, Lic. 282869584, no DHA).
+  //    Dr. Miguel Ángel López Aranda & Dra. Haydee Camacho Gamboa.
   //    Strictly internal for compounding pharmacy / Fagron manufacture. NEVER shown to patient.
-  const docObj = (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !String(rx.doctor.name).includes('Miguel Ángel')) ? rx.doctor : {};
-  const treatingDocObj = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !String(rx.treatingDoctor.name || '').includes('Miguel Ángel')) ? rx.treatingDoctor : {};
-  const rawCandidateName = (typeof rx.treatingDoctor === 'string' && !rx.treatingDoctor.includes('Miguel Ángel') ? rx.treatingDoctor : treatingDocObj.name) ||
-    docObj.name ||
-    (rx.doctorName && !String(rx.doctorName).includes('Miguel Ángel') ? rx.doctorName : null) ||
-    (rx.prescribingDoctor && !String(rx.prescribingDoctor).includes('Miguel Ángel') ? rx.prescribingDoctor : null) ||
-    (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !String(rx.patientDoctor.name || '').includes('Miguel Ángel') ? rx.patientDoctor.name : null) ||
-    '';
+  const isInternalProdDoc = (name) => {
+    const s = String(name || '').toLowerCase();
+    return s.includes('miguel ángel') || s.includes('miguel angel') || s.includes('aranda') || s.includes('camacho') || s.includes('haydee');
+  };
+
+  const is50957Rutledge = String(rx.code || rx.id || rx.fileNumber || '').includes('50957') ||
+    String(rx.patient || rx.patientName || '').toLowerCase().includes('rutledge');
+
+  const docObj = (rx.doctor && typeof rx.doctor === 'object' && rx.doctor.name && !isInternalProdDoc(rx.doctor.name)) ? rx.doctor : {};
+  const treatingDocObj = (rx.treatingDoctor && typeof rx.treatingDoctor === 'object' && !isInternalProdDoc(rx.treatingDoctor.name)) ? rx.treatingDoctor : {};
+  const rawCandidateName = is50957Rutledge
+    ? 'Dr. Marina Cordeiro Fernandes'
+    : ((typeof rx.treatingDoctor === 'string' && !isInternalProdDoc(rx.treatingDoctor) ? rx.treatingDoctor : treatingDocObj.name) ||
+      docObj.name ||
+      (rx.doctorName && !isInternalProdDoc(rx.doctorName) ? rx.doctorName : null) ||
+      (rx.prescribingDoctor && !isInternalProdDoc(rx.prescribingDoctor) ? rx.prescribingDoctor : null) ||
+      (rx.patientDoctor && !rx.patientDoctor.isInternalOnly && !isInternalProdDoc(rx.patientDoctor.name) ? rx.patientDoctor.name : null) ||
+      '');
 
   const rawCandidate = rawCandidateName ? {
     ...docObj,
@@ -350,8 +360,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     id: docObj.id || treatingDocObj.id || rx.doctorId || null
   } : null;
 
-  const isCandidateMiguelAngel = Boolean(rawCandidate && String(rawCandidate.name || '').includes('Miguel Ángel'));
-  const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateMiguelAngel);
+  const isCandidateProdDoc = Boolean(rawCandidate && isInternalProdDoc(rawCandidate.name));
+  const hasTreatingDoctor = Boolean(rawCandidate && rawCandidate.name && !isCandidateProdDoc);
 
   // Auto-enrich treating doctor details from verified directory (specialty, clinic, phone, license, address)
   const resolvedProfile = hasTreatingDoctor ? resolveDoctorProfile(rawCandidate) : null;
@@ -2636,30 +2646,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
               {/* Quick Actions & Accordion Expand/Collapse Switcher */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                {!isPatientView && (
-                  <button
-                    type="button"
-                    onClick={() => { triggerHaptic('selection'); setShowAtlasQuotationModal(true); }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '5px 10px',
-                      borderRadius: '6px',
-                      border: '1px solid #0284c7',
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap'
-                    }}
-                    title={isEs ? 'Solicitar cotización oficial de formulación a Atlas' : 'Request compounding quotation to Atlas'}
-                  >
-                    <FileText size={12} color="#ffffff" />
-                    <span>{isEs ? 'Pedir Cotización' : 'Request Quotation'}</span>
-                  </button>
-                )}
+
 
                 <button
                   type="button"

@@ -93,9 +93,9 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     prodDate: '15-09-2026',
     expDate: '15-09-2027',
     storage: 'Store in a cool dry place',
-    doctorName: 'Dra. Haydee Camacho Gamboa',
-    doctorLicense: 'COMB 46759',
-    clinicName: 'Clínica Dra Camacho, Barcelona',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE',
     batchCode: 'PHARM-2026-NATSER',
     lote: '2609-NAT',
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_proteolytic_270caps_FRONT.png',
@@ -129,9 +129,9 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     prodDate: '15-09-2026',
     expDate: '15-09-2027',
     storage: 'Store in a cool dry place',
-    doctorName: 'Dra. Haydee Camacho Gamboa',
-    doctorLicense: 'COMB 46759',
-    clinicName: 'Clínica Dra Camacho, Barcelona',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE',
     batchCode: 'PHARM-2026-ALAUPI',
     lote: '2609-MITO',
     frontUrl: '/labels/pharmapolis/PHARMAPOLIS_50957_mitochondrial_90caps_FRONT.png',
@@ -569,10 +569,12 @@ export function getAuthoritativeClinicalData(rx) {
     }
   }
 
-  // Production doctor (Dr. Miguel Ángel López Aranda) is strictly internal and must NEVER appear on patient labels
+  // Production doctors (Dr. Miguel Ángel López Aranda & Dra. Haydee Camacho Gamboa) are strictly internal and must NEVER appear on patient labels
   if (String(doctorName).toLowerCase().includes('miguel ángel') || 
       String(doctorName).toLowerCase().includes('miguel angel') || 
-      String(doctorName).toLowerCase().includes('aranda')) {
+      String(doctorName).toLowerCase().includes('aranda') ||
+      String(doctorName).toLowerCase().includes('camacho') ||
+      String(doctorName).toLowerCase().includes('haydee')) {
     doctorName = '';
   }
 
@@ -601,6 +603,23 @@ export function getAuthoritativeClinicalData(rx) {
     doctorName = 'Dr. Haytham Salem';
     doctorLicense = doctorLicense || 'DHA-P-0319842';
     clinicName = clinicName || 'Arthregen Clinic / Med Art Clinic Day Surgery Center';
+  }
+
+  // Dr. Marina Cordeiro Fernandes for NOVA Clinic & Alan Maclean Rutledge (50957)
+  const isMarina = !isSezgin && !isHaytham && (
+    String(doctorName).toLowerCase().includes('marina') ||
+    String(rx.id || '').includes('50957') ||
+    String(rx.code || '').includes('50957') ||
+    String(rx.prescriptionCode || '').includes('50957') ||
+    String(fileNumber || '').includes('50957') ||
+    String(patientName || '').toLowerCase().includes('rutledge') ||
+    String(clinicName || '').toLowerCase().includes('nova')
+  );
+
+  if (isMarina) {
+    doctorName = 'Dr. Marina Cordeiro Fernandes';
+    doctorLicense = 'DHA-91105367';
+    clinicName = 'NOVA Clinic · Dubai Healthcare City, Dubai, UAE';
   }
 
   if (!clinicName) {

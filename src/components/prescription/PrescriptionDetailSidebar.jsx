@@ -453,12 +453,17 @@ export default function PrescriptionDetailSidebar({
             borderRadius: '4px',
             padding: '7px 10px',
             fontSize: '0.72rem',
-            fontFamily: 'monospace',
-            color: '#202124',
-            wordBreak: 'break-all',
+            fontWeight: 500,
+            color: '#3c4043',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
             marginBottom: '0.65rem'
           }}>
-            {canonicalUrl}
+            <ShieldCheck size={14} color="#137333" style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {isEs ? `Expediente digital oficial (${prescriptionCode})` : `Official digital record (${prescriptionCode})`}
+            </span>
           </div>
 
           <div style={{ display: 'flex', gap: '6px' }}>
@@ -764,11 +769,12 @@ export default function PrescriptionDetailSidebar({
               flexDirection: 'column',
               gap: '6px'
             }}>
-              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>
-                {isEs ? 'URL Permanente' : 'Permanent URL'}
+              <div style={{ fontSize: '0.70rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <ShieldCheck size={12} color="#166534" />
+                <span>{isEs ? 'Expediente Clínico Digital' : 'Digital Clinical Record'}</span>
               </div>
-              <div style={{ fontSize: '0.72rem', fontFamily: 'monospace', color: '#1e293b', wordBreak: 'break-all' }}>
-                {canonicalUrl}
+              <div style={{ fontSize: '0.72rem', color: '#1e293b', fontWeight: 600 }}>
+                {isEs ? `Expediente oficial verificado (${prescriptionCode})` : `Official verified record (${prescriptionCode})`}
               </div>
               <button
                 type="button"
