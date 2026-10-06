@@ -133,6 +133,7 @@ export default function PharmapolisLabelSvg({
   const doctorLicense = labelData.doctorLicense || 'DHA-91105367';
   const batchCode = labelData.batchCode || 'PHARM-2026-B948';
   const lote = labelData.lote || '2609-PLV';
+  const volume = labelData.volume || labelData.netVolume || labelData.size || labelData.netContent || labelData.totalVolume || labelData.quantity || '100 mL';
   
   // Unique QR URL strictly bound to this prescription (pointing to patient view)
   const targetRxUrl = labelData.targetRxUrl || labelData.url || `https://med-peptides.com/rx/${fileNumber}?view=patient`;
