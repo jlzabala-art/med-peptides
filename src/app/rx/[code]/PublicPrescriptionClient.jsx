@@ -2959,175 +2959,117 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               }}
             >
               {/* Individual Phase Accordion Header - 100% Mobile Responsive (GCP Standard) */}
-              {compoundedFormulations.length > 1 && (
-                <div
-                  onClick={() => togglePhase(formulation.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 16px',
-                    background: isPhaseExpanded ? '#f8f9fa' : '#ffffff',
-                    borderBottom: isPhaseExpanded ? '1px solid #dadce0' : 'none',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    flexWrap: 'wrap',
-                    gap: '10px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 280px' }}>
-                    <span style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      background: '#1a73e8',
-                      color: '#ffffff',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      {phaseNumber}
-                    </span>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.94rem', fontWeight: 700, color: '#202124' }}>
-                          Phase {phaseNumber}: {formulation.title}
-                        </span>
-                        {formulation.duration && (
-                          <span style={{ fontSize: '0.70rem', color: '#1967d2', background: '#e8f0fe', border: '1px solid #d2e3fc', borderRadius: '4px', padding: '1px 8px', fontWeight: 600 }}>
-                            {formulation.duration}
-                          </span>
-                        )}
-                        <span style={{ fontSize: '0.72rem', color: '#5f6368', background: '#f1f3f4', padding: '1px 8px', borderRadius: '4px' }}>
-                          {formulation.apis.length} APIs · {formulation.volume}
-                        </span>
-                        {formulation.posology?.timing && (
-                          <span style={{ fontSize: '0.70rem', color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', borderRadius: '4px', padding: '1px 8px', fontWeight: 600 }}>
-                            🕒 {formulation.posology.timing}
-                          </span>
-                        )}
-                      </div>
-                      {formulation.subtitle && (
-                        <div style={{ fontSize: '0.75rem', color: '#5f6368', marginTop: '3px' }}>
-                          {formulation.subtitle}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                    {phaseLabel && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const idx = prescriptionLabels.findIndex(l => l.id === phaseLabel.id);
-                          setSelectedLabelIndex(idx >= 0 ? idx : 0);
-                          setShowLabelsModal(true);
-                        }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          background: '#f1f3f4',
-                          border: '1px solid #dadce0',
-                          color: '#1a73e8',
-                          fontSize: '0.70rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s'
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#e8f0fe'; e.currentTarget.style.borderColor = '#1a73e8'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f3f4'; e.currentTarget.style.borderColor = '#dadce0'; }}
-                      >
-                        <Tag size={11} color="#1a73e8" />
-                        <span>{isEs ? 'Etiqueta 7.5×4.5 cm' : 'Label (7.5×4.5 cm)'}</span>
-                      </button>
-                    )}
-                    <span style={{ color: '#5f6368', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>{isPhaseExpanded ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
-                      {isPhaseExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {(compoundedFormulations.length <= 1 || isPhaseExpanded) && (
-              <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Preparation Master Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1.1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {/* Unified Authoritative Formulation Header (GCP Card Header) */}
+              <div
+                onClick={() => togglePhase(formulation.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  background: isPhaseExpanded ? '#f8fafc' : '#ffffff',
+                  borderBottom: isPhaseExpanded ? '1px solid #dadce0' : 'none',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 320px' }}>
                   <div style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: '12px',
-                    background: `linear-gradient(135deg, ${formulation.accentColor || '#0284c7'}, ${formulation.accentColor || '#0284c7'}dd)`,
+                    width: 36,
+                    height: 36,
+                    borderRadius: '8px',
+                    background: formulation.accentColor ? `${formulation.accentColor}15` : '#eff6ff',
+                    color: formulation.accentColor || '#1a73e8',
+                    border: `1px solid ${formulation.accentColor ? `${formulation.accentColor}33` : '#bfdbfe'}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#ffffff',
-                    flexShrink: 0,
-                    boxShadow: `0 4px 12px ${(formulation.accentColor || '#0284c7')}33`
+                    flexShrink: 0
                   }}>
                     {formulation.isOral || formulation.route?.toLowerCase().includes('oral') || formulation.title?.toLowerCase().includes('cápsula') || formulation.title?.toLowerCase().includes('capsule') ? (
-                      <Pill size={22} />
+                      <Pill size={18} />
                     ) : (formulation.id.includes('oil') || formulation.title?.toLowerCase().includes('oil')) ? (
-                      <Droplets size={22} />
+                      <Droplets size={18} />
                     ) : (
-                      <FlaskConical size={22} />
+                      <FlaskConical size={18} />
                     )}
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '2px' }}>
                       <span style={{
-                        fontSize: '0.7rem',
+                        fontSize: '0.68rem',
                         fontWeight: 800,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        color: formulation.accentColor || '#0284c7',
-                        background: formulation.accentBg || '#e0f2fe',
-                        padding: '2px 8px',
-                        borderRadius: '6px'
+                        letterSpacing: '0.04em',
+                        color: formulation.accentColor || '#003666',
+                        background: formulation.accentBg || '#f1f5f9',
+                        padding: '1px 7px',
+                        borderRadius: '4px'
                       }}>
-                        {formulation.badge}
+                        {isEs ? `FASE ${phaseNumber} DE ${compoundedFormulations.length}` : `PHASE ${phaseNumber} OF ${compoundedFormulations.length}`} · {formulation.route || (isEs ? 'VÍA ORAL' : 'ORAL ROUTE')}
                       </span>
-                      <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
-                        {formulation.route}
+                      {formulation.duration && (
+                        <span style={{ fontSize: '0.68rem', color: '#1967d2', background: '#e8f0fe', border: '1px solid #d2e3fc', borderRadius: '4px', padding: '1px 7px', fontWeight: 600 }}>
+                          {formulation.duration}
+                        </span>
+                      )}
+                      <span style={{ fontSize: '0.68rem', color: '#475569', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1px 7px', borderRadius: '4px', fontWeight: 600 }}>
+                        {formulation.apis.length} APIs · {formulation.volume}
                       </span>
                     </div>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
                       {formulation.title}
                     </h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#64748b' }}>
-                      {formulation.subtitle}
-                    </p>
+                    {formulation.subtitle && (
+                      <p style={{ margin: '2px 0 0', fontSize: '0.76rem', color: '#64748b' }}>
+                        {formulation.subtitle}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {formulation.volume && (
-                    <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '4px 11px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                      {formulation.volume}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                  {phaseLabel && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const idx = prescriptionLabels.findIndex(l => l.id === phaseLabel.id);
+                        setSelectedLabelIndex(idx >= 0 ? idx : 0);
+                        setShowLabelsModal(true);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '4px 10px',
+                        borderRadius: '4px',
+                        background: '#ffffff',
+                        border: '1px solid #dadce0',
+                        color: '#1a73e8',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#e8f0fe'; e.currentTarget.style.borderColor = '#1a73e8'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
+                    >
+                      <Tag size={12} color="#1a73e8" />
+                      <span>{isEs ? 'Etiqueta 7.5×4.5 cm' : 'Label (7.5×4.5 cm)'}</span>
+                    </button>
                   )}
-                  {formulation.duration && (
-                    <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 11px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                      {formulation.duration}
-                    </span>
-                  )}
-                  {rx.fagron?.boxId && fIdx === 0 && (
-                    <span style={{ background: '#fdf4ff', color: '#9333ea', border: '1px solid #f0abfc', padding: '4px 11px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700 }}>
-                      Sample: {rx.fagron.boxId}
-                    </span>
-                  )}
+                  <span style={{ color: '#5f6368', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>{isPhaseExpanded ? (isEs ? 'Colapsar' : 'Collapse') : (isEs ? 'Expandir' : 'Expand')}</span>
+                    {isPhaseExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </span>
                 </div>
               </div>
 
+              {(compoundedFormulations.length <= 1 || isPhaseExpanded) && (
+              <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Sub-Section 1: Compounding Vehicle / Base Carrier */}
               <div style={{
                 background: '#f8fafc',
@@ -3157,7 +3099,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
                       {formulation.vehicle.name}
                     </span>
-                    {formulation.vehicle.volume && (
+                    {formulation.vehicle.volume && formulation.vehicle.volume !== formulation.volume && (
                       <span style={{
                         fontSize: '0.78rem',
                         fontWeight: 800,

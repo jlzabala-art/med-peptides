@@ -255,6 +255,18 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     });
   }, [formulary, formularyGoal, formularySearch]);
 
+  const formularyCounts = useMemo(() => {
+    const counts = { all: formulary.length, repair: 0, metabolic: 0, cellular: 0, cognitive: 0 };
+    formulary.forEach(p => {
+      const goalStr = `${p.primaryGoal || ''} ${(p.goals || []).join(' ')}`.toLowerCase();
+      if (goalStr.includes('repair') || goalStr.includes('tissue') || goalStr.includes('recovery') || goalStr.includes('gut')) counts.repair++;
+      if (goalStr.includes('fat') || goalStr.includes('metabolic') || goalStr.includes('weight') || goalStr.includes('glp') || goalStr.includes('loss')) counts.metabolic++;
+      if (goalStr.includes('cellular') || goalStr.includes('aging') || goalStr.includes('mitochondr') || goalStr.includes('optim') || goalStr.includes('energy')) counts.cellular++;
+      if (goalStr.includes('neuro') || goalStr.includes('cognitive') || goalStr.includes('brain') || goalStr.includes('semax')) counts.cognitive++;
+    });
+    return counts;
+  }, [formulary]);
+
   const handleCopyPortalLink = () => {
     triggerHaptic('selection');
     const portalUrl = `${window.location.origin}/dr/${opaqueCode}`;
@@ -824,6 +836,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           max-width: 1320px;
           padding: 24px 28px 120px 28px;
           margin: 0 auto;
+        }
+        @media (min-width: 1024px) {
+          .doctor-bottom-dock {
+            display: none !important;
+          }
+          .gcp-portal-main {
+            padding-bottom: 40px !important;
+          }
         }
         .gcp-mobile-nav-trigger {
           display: none;
@@ -1770,6 +1790,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 <span style={{ fontSize: '0.70rem', color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
                   EU GMP Certified Reference
                 </span>
+                <span style={{ fontSize: '0.70rem', color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                  Showing {filteredFormulary.length} of {formulary.length} Reference APIs
+                </span>
               </div>
               <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
                 Active pharmaceutical ingredients and research-backed bioactive peptides authorized by {doctor.name} for personalized magistral compounding.
@@ -1820,11 +1843,11 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               {/* Category / Goal Pills */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {[
-                  { id: 'all', label: `All APIs (${formulary.length})` },
-                  { id: 'repair', label: 'Tissue Repair & Gut' },
-                  { id: 'metabolic', label: 'Metabolic & GLP' },
-                  { id: 'cellular', label: 'Cellular Optimization' },
-                  { id: 'cognitive', label: 'Cognitive & Neuro' }
+                  { id: 'all', label: `All APIs (${formularyCounts.all})` },
+                  { id: 'repair', label: `Tissue Repair & Gut (${formularyCounts.repair})` },
+                  { id: 'metabolic', label: `Metabolic & GLP (${formularyCounts.metabolic})` },
+                  { id: 'cellular', label: `Cellular Optimization (${formularyCounts.cellular})` },
+                  { id: 'cognitive', label: `Cognitive & Neuro (${formularyCounts.cognitive})` }
                 ].map((g) => (
                   <button
                     key={g.id}
@@ -2347,8 +2370,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         </div>
       )}
 
-      {/* ── Sticky Clinical Operations Dock (Laptop & Mobile GCP Standard) ── */}
+      {/* ── Sticky Clinical Operations Dock (Mobile & Tablet GCP Standard) ── */}
       <aside
+        className="doctor-bottom-dock"
         style={{
           position: 'fixed',
           bottom: 0,
