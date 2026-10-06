@@ -27,7 +27,12 @@ import {
   Activity,
   RotateCw,
   Download,
-  Plus
+  Plus,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -36,6 +41,7 @@ import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
 import DataTable from '@/components/ui/DataTable';
 import EmptyState from '@/components/ui/EmptyState';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/PrescriptionIntakeWorkspace';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
@@ -61,6 +67,12 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedIntake, setCopiedIntake] = useState(false);
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
+
+  // Language & Clinical Sidebar Navigation State (GCP Standard)
+  const [lang, setLang] = useState('en');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [activeAnchor, setActiveAnchor] = useState('overview');
 
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
@@ -538,6 +550,97 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     }
   ], []);
 
+  const sidebarNavGroups = useMemo(() => [
+    {
+      groupTitle: 'CLINICAL WORKSPACE',
+      items: [
+        {
+          id: 'overview',
+          label: 'Overview & KPIs',
+          icon: BarChart3,
+          href: '#overview',
+          badge: null
+        },
+        {
+          id: 'tasks',
+          label: 'Pending To-Do Queue',
+          icon: Clock,
+          href: '#tasks',
+          badge: filteredTasks.length > 0 ? `${filteredTasks.length}` : null,
+          badgeColor: filteredTasks.length > 0 ? '#d97706' : '#64748b'
+        },
+        {
+          id: 'prescriptions',
+          label: 'Prescriptions Dossier',
+          icon: Layers,
+          href: '#prescriptions',
+          badge: filteredPrescriptions.length > 0 ? `${filteredPrescriptions.length}` : null
+        }
+      ]
+    },
+    {
+      groupTitle: 'COMPOUNDING & QUALITY',
+      items: [
+        {
+          id: 'formulations',
+          label: 'Active Formulations',
+          icon: Pill,
+          href: '#prescriptions',
+          badge: null
+        },
+        {
+          id: 'labels',
+          label: 'Pharmapolis Bottle Labels',
+          icon: Tag,
+          action: () => {
+            if (filteredPrescriptions[0]) {
+              handleOpenLabelsModal(filteredPrescriptions[0]);
+            } else {
+              toast('No active prescriptions to view labels.');
+            }
+          },
+          badge: 'EU GMP'
+        }
+      ]
+    },
+    {
+      groupTitle: 'PATIENT INTAKE & CLINIC',
+      items: [
+        {
+          id: 'intake',
+          label: 'Share Patient Intake',
+          icon: Share2,
+          action: handleCopyIntakeLink,
+          badge: '1-Click'
+        },
+        {
+          id: 'credentials',
+          label: 'DHA License & Profile',
+          icon: ShieldCheck,
+          href: '#credentials',
+          badge: 'Verified'
+        }
+      ]
+    }
+  ], [filteredTasks.length, filteredPrescriptions.length, filteredPrescriptions]);
+
+  const handleSidebarNavigate = (item) => {
+    triggerHaptic('light');
+    if (item.action) {
+      item.action();
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
+    if (item.href) {
+      setActiveAnchor(item.id);
+      const targetEl = document.querySelector(item.href);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
@@ -565,250 +668,329 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#1e293b', paddingBottom: '5rem' }}>
-      {/* ── Top Clinical Bar (Sticky GCP Page Header Pattern, Rule #9) ────── */}
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 40,
-          background: '#ffffff',
-          borderBottom: '1px solid #dadce0',
-          padding: '12px 24px',
-          boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              background: '#003666',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-            }}
-          >
-            <Stethoscope size={20} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>{doctor.name}</span>
-              <span
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  padding: '1px 8px',
-                  borderRadius: '12px',
-                  background: '#f0fdf4',
-                  color: '#16a34a',
-                  border: '1px solid #bbf7d0',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <ShieldCheck size={12} /> Verified Physician
-              </span>
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-              {doctor.specialty} • {doctor.clinic}
-            </div>
-          </div>
-        </div>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#1e293b' }}>
+      <style jsx global>{`
+        .gcp-portal-layout {
+          display: flex;
+          min-height: calc(100vh - 100px);
+          background: #f8fafc;
+          position: relative;
+        }
+        .gcp-clinical-sidebar {
+          width: 250px;
+          flex-shrink: 0;
+          background: #ffffff;
+          border-right: 1px solid #dadce0;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          position: sticky;
+          top: 100px;
+          height: calc(100vh - 100px);
+          transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 25;
+          overflow-y: auto;
+        }
+        .gcp-clinical-sidebar.collapsed {
+          width: 64px;
+        }
+        .gcp-portal-main {
+          flex: 1;
+          min-width: 0;
+          max-width: 1320px;
+          padding: 24px 28px 120px 28px;
+          margin: 0 auto;
+        }
+        .gcp-mobile-nav-trigger {
+          display: none;
+        }
+        @media (max-width: 900px) {
+          .gcp-clinical-sidebar {
+            display: none !important;
+          }
+          .gcp-mobile-nav-trigger {
+            display: inline-flex !important;
+          }
+          .gcp-portal-main {
+            padding: 16px 14px 130px 14px;
+          }
+        }
+        @keyframes slideInLeft {
+          from {
+            transform: translateX(-100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
 
-        {/* Header Actions: GCP Standard Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={handleCopyIntakeLink}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              height: '36px',
-              padding: '0 14px',
-              borderRadius: '6px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              color: '#3c4043',
-              fontSize: '0.84rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'background 0.15s, border-color 0.15s',
-              fontFamily: 'inherit'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = '#f8f9fa'; e.currentTarget.style.borderColor = '#c6c6c6'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = '#dadce0'; }}
-            title="Copy dedicated patient intake registration link"
-          >
-            {copiedIntake ? <Check size={15} style={{ color: '#16a34a' }} /> : <Copy size={15} style={{ color: '#5f6368' }} />}
-            <span>{copiedIntake ? 'Intake Link Copied' : 'Share Intake Portal'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleShareWhatsApp}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              height: '36px',
-              padding: '0 14px',
-              borderRadius: '6px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              color: '#3c4043',
-              fontSize: '0.84rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'background 0.15s',
-              fontFamily: 'inherit'
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#f8f9fa')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#ffffff')}
-            title="Send patient prescription intake invitation via WhatsApp"
-          >
-            <Share2 size={15} style={{ color: '#16a34a' }} />
-            <span>WhatsApp Invite</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsIntakeOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              height: '36px',
-              padding: '0 14px',
-              borderRadius: '6px',
-              background: '#003666',
-              border: '1px solid #003666',
-              color: '#ffffff',
-              fontSize: '0.84rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-              transition: 'background 0.15s',
-              fontFamily: 'inherit'
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#00284d')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#003666')}
-            title="Upload and extract medical prescription with Atlas AI"
-          >
-            <Sparkles size={15} />
-            <span>Submit Rx with AI</span>
-          </button>
-        </div>
-      </header>
-
-      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px', paddingBottom: '90px' }}>
-        {/* ── Breadcrumb Navigation (Google Cloud Standard, Golden Rule #17) ── */}
-        <Breadcrumb items={[
+      {/* ── Unified Public Header (Homogeneous with /rx/[code] & GCP Standards) ── */}
+      <PublicUnifiedHeader
+        track="protocols"
+        lang={lang}
+        onLangChange={setLang}
+        brandHref={`/dr/${slug}`}
+        doctorHomeHref={`/dr/${slug}`}
+        doctorName={doctor.name}
+        breadcrumb={[
           { label: 'Clinical Services', href: '/' },
           { label: 'Verified Physicians', href: '/doctor' },
           { label: doctor.name || 'Physician Portal' }
-        ]} />
+        ]}
+        anchorTabs={[
+          { id: 'credentials', label: 'Credentials', href: '#credentials' },
+          { id: 'overview', label: 'Overview', href: '#overview' },
+          { id: 'tasks', label: 'Clinical Tasks', href: '#tasks', count: pendingTasks.length },
+          { id: 'prescriptions', label: 'Prescriptions Dossier', href: '#prescriptions', count: filteredPrescriptions.length }
+        ]}
+        activeAnchorId={activeAnchor}
+        isDoctorView={true}
+        onImportRx={() => setIsIntakeOpen(true)}
+        onSwitchRx={() => handleSidebarNavigate('prescriptions')}
+        rxSwitcherCount={doctorPrescriptions.length}
+      />
 
-        {/* ── Doctor Identity Card ────────────────────────────────────────── */}
-        <div
-          style={{
-            background: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            padding: '24px',
-            marginBottom: '24px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '20px'
-          }}
+      {/* ── Portal Layout with Left Collapsible Clinical Rail (GCP Standard) ── */}
+      <div className="gcp-portal-layout">
+        {/* Left Clinical Sidebar */}
+        <aside
+          className={`gcp-clinical-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
+          aria-label="Clinical Navigation Sidebar"
         >
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.4rem',
-                fontWeight: 700,
-                boxShadow: '0 2px 8px rgba(0,54,102,0.18)'
-              }}
-            >
-              {doctor.name?.replace('Dr. ', '').charAt(0) || 'D'}
-            </div>
-            <div>
-              <h1 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                {doctor.name}
-              </h1>
-              <p style={{ margin: '4px 0 8px 0', fontSize: '0.88rem', color: '#475569', fontWeight: 500 }}>
-                {doctor.specialty} • {doctor.clinic}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#64748b' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldCheck size={14} style={{ color: '#0d9488' }} />
-                  <span>Medical License:</span>
-                  <CopyableId value={doctor.license} iconOnly={false} />
-                </div>
-                {doctor.location && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <MapPin size={14} style={{ color: '#64748b' }} />
-                    <span>{doctor.location}</span>
+          <div style={{ flex: 1, overflowY: 'auto', padding: isSidebarCollapsed ? '12px 6px' : '12px 0' }}>
+            {sidebarNavGroups.map((group, gIdx) => (
+              <div key={gIdx} style={{ marginBottom: isSidebarCollapsed ? '12px' : '16px' }}>
+                {!isSidebarCollapsed && (
+                  <div
+                    style={{
+                      padding: '8px 16px 4px 16px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#5f6368',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em'
+                    }}
+                  >
+                    {group.group}
                   </div>
                 )}
-                {doctor.email && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Mail size={14} style={{ color: '#64748b' }} />
-                    <span>{doctor.email}</span>
-                  </div>
-                )}
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeAnchor === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleSidebarNavigate(item.id)}
+                      title={item.label}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
+                        gap: '10px',
+                        padding: isSidebarCollapsed ? '10px 0' : '9px 16px',
+                        border: 'none',
+                        borderLeft: isActive ? '3px solid #1a73e8' : '3px solid transparent',
+                        background: isActive ? '#e8f0fe' : 'transparent',
+                        color: isActive ? '#1a73e8' : '#3c4043',
+                        fontSize: '0.82rem',
+                        fontWeight: isActive ? 600 : 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.12s, color 0.12s',
+                        borderRadius: isSidebarCollapsed ? '6px' : '0'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) e.currentTarget.style.background = '#f1f3f4';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                        <Icon size={17} style={{ color: isActive ? '#1a73e8' : '#5f6368', flexShrink: 0 }} />
+                        {!isSidebarCollapsed && (
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.label}
+                          </span>
+                        )}
+                      </div>
+                      {!isSidebarCollapsed && typeof item.badge === 'number' && (
+                        <span
+                          style={{
+                            fontSize: '0.70rem',
+                            fontWeight: 600,
+                            padding: '1px 6px',
+                            borderRadius: '10px',
+                            background: isActive ? '#1a73e8' : '#e8eaed',
+                            color: isActive ? '#ffffff' : '#3c4043'
+                          }}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
-            </div>
+            ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          {/* Bottom Rail Collapse Toggle */}
+          <div
+            style={{
+              padding: '10px 12px',
+              borderTop: '1px solid #dadce0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: isSidebarCollapsed ? 'center' : 'space-between'
+            }}
+          >
+            {!isSidebarCollapsed && (
+              <span style={{ fontSize: '0.72rem', color: '#5f6368', fontWeight: 500 }}>
+                Clinical Navigator
+              </span>
+            )}
             <button
               type="button"
-              onClick={handleCopyPortalLink}
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               style={{
-                height: '34px',
-                padding: '0 12px',
-                borderRadius: '6px',
-                background: '#f8fafc',
-                border: '1px solid #cbd5e1',
-                color: '#334155',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#5f6368',
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.1)'
               }}
             >
-              {copiedLink ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
-              <span>{copiedLink ? 'Link Copied' : 'Copy Portal URL'}</span>
+              {isSidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
             </button>
           </div>
-        </div>
+        </aside>
+
+        {/* ── Main Clinical Content Container ─────────────────────────────── */}
+        <main className="gcp-portal-main">
+          {/* ── Doctor Identity Card ────────────────────────────────────────── */}
+          <div
+            id="credentials"
+            style={{
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              borderRadius: '8px',
+              padding: '24px',
+              marginBottom: '24px',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '20px'
+            }}
+          >
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
+                  boxShadow: '0 2px 8px rgba(0,54,102,0.18)'
+                }}
+              >
+                {doctor.name?.replace('Dr. ', '').charAt(0) || 'D'}
+              </div>
+              <div>
+                <h1 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  {doctor.name}
+                </h1>
+                <p style={{ margin: '4px 0 8px 0', fontSize: '0.88rem', color: '#475569', fontWeight: 500 }}>
+                  {doctor.specialty} • {doctor.clinic}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#64748b' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldCheck size={14} style={{ color: '#0d9488' }} />
+                    <span>Medical License:</span>
+                    <CopyableId value={doctor.license} iconOnly={false} />
+                  </div>
+                  {doctor.location && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <MapPin size={14} style={{ color: '#64748b' }} />
+                      <span>{doctor.location}</span>
+                    </div>
+                  )}
+                  {doctor.email && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Mail size={14} style={{ color: '#64748b' }} />
+                      <span>{doctor.email}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="gcp-mobile-nav-trigger"
+                onClick={() => setIsMobileSidebarOpen(true)}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  background: '#e8f0fe',
+                  border: '1px solid #1a73e8',
+                  color: '#1a73e8',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Menu size={15} />
+                <span>Clinical Menu</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyPortalLink}
+                style={{
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  color: '#334155',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {copiedLink ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
+                <span>{copiedLink ? 'Link Copied' : 'Copy Portal URL'}</span>
+              </button>
+            </div>
+          </div>
 
         {/* ── 4 Core Operational KPIs & Scope Switcher (Google Cloud Rule #22) ─ */}
-        <div style={{ marginBottom: '24px' }}>
+        <div id="overview" style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>
@@ -1024,6 +1206,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
         {/* ── Table 1: Pending Clinical Tasks & To-Do Actions (DataTable Universal) ── */}
         <section
+          id="tasks"
           style={{
             background: '#ffffff',
             border: '1px solid #dadce0',
@@ -1137,6 +1320,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
         {/* ── Table 2: Associated Clinical Prescriptions Dossier (DataTable Universal) ── */}
         <section
+          id="prescriptions"
           style={{
             background: '#ffffff',
             border: '1px solid #dadce0',
@@ -1372,6 +1556,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           />
         </section>
       </main>
+      </div>
 
       {/* ── Official Compounding Bottle Labels Modal (Direct from Doctor Portal) ── */}
       {isLabelsModalOpen && activeLabelRx && (
@@ -1518,6 +1703,192 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </button>
         </div>
       </aside>
+
+      {/* ── Mobile Clinical Navigation Drawer (Off-Canvas, Rule #23) ─────── */}
+      {isMobileSidebarOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 60,
+            background: 'rgba(32, 33, 36, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex'
+          }}
+          onClick={() => setIsMobileSidebarOpen(false)}
+        >
+          <div
+            style={{
+              width: '300px',
+              maxWidth: '85vw',
+              height: '100%',
+              background: '#ffffff',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              animation: 'slideInLeft 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div>
+              <div
+                style={{
+                  padding: '16px 20px',
+                  borderBottom: '1px solid #dadce0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: '#f8fafc'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: '50%',
+                      background: '#003666',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    {doctor.name ? doctor.name.replace(/^Dr\.\s*/i, '').charAt(0) : 'D'}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>{doctor.name}</div>
+                    <div style={{ fontSize: '0.74rem', color: '#64748b' }}>Clinical Operations</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#5f6368',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Drawer Navigation Links */}
+              <div style={{ padding: '12px 0' }}>
+                {sidebarNavGroups.map((group, gIdx) => (
+                  <div key={gIdx} style={{ marginBottom: '14px' }}>
+                    <div
+                      style={{
+                        padding: '6px 20px',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        color: '#5f6368',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em'
+                      }}
+                    >
+                      {group.group}
+                    </div>
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = activeAnchor === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setIsMobileSidebarOpen(false);
+                            handleSidebarNavigate(item.id);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px 20px',
+                            border: 'none',
+                            borderLeft: isActive ? '3px solid #1a73e8' : '3px solid transparent',
+                            background: isActive ? '#e8f0fe' : 'transparent',
+                            color: isActive ? '#1a73e8' : '#3c4043',
+                            fontSize: '0.88rem',
+                            fontWeight: isActive ? 600 : 500,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <Icon size={18} style={{ color: isActive ? '#1a73e8' : '#5f6368' }} />
+                            <span>{item.label}</span>
+                          </div>
+                          {typeof item.badge === 'number' && (
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                borderRadius: '10px',
+                                background: isActive ? '#1a73e8' : '#e8eaed',
+                                color: isActive ? '#ffffff' : '#3c4043'
+                              }}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Drawer Bottom CTA */}
+            <div style={{ padding: '16px', borderTop: '1px solid #dadce0', background: '#f8fafc' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileSidebarOpen(false);
+                  setIsIntakeOpen(true);
+                }}
+                style={{
+                  width: '100%',
+                  height: '42px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontSize: '0.86rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.3)'
+                }}
+              >
+                <Sparkles size={16} />
+                <span>New Prescription Intake</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
