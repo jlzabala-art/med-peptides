@@ -382,6 +382,26 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         .limit(60)
         .get();
 
+      function sanitizeString(val, fallback = '') {
+        if (!val) return fallback;
+        if (typeof val === 'string') return val.trim();
+        if (typeof val === 'number') return String(val);
+        if (typeof val === 'object') {
+          if (typeof val.summary === 'string') return val.summary.trim();
+          if (typeof val.description === 'string') return val.description.trim();
+          if (typeof val.text === 'string') return val.text.trim();
+          if (typeof val.content === 'string') return val.content.trim();
+          if (Array.isArray(val)) {
+            return val
+              .map(item => (typeof item === 'object' ? (item.summary || item.name || item.label || '') : String(item)))
+              .filter(Boolean)
+              .join(', ');
+          }
+          return fallback;
+        }
+        return String(val);
+      }
+
       const seenNames = new Set();
       productsSnap.forEach((doc) => {
         const p = doc.data();
@@ -389,27 +409,43 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         const isPeptide = cat.includes('peptide') || p.productType === 'peptide' || p.isPeptide;
         if (!isPeptide) return;
 
-        const name = p.canonicalName || p.name || 'Bioactive Peptide';
+        const name = sanitizeString(p.canonicalName || p.name, 'Bioactive Peptide');
         const cleanNameKey = name.toLowerCase().trim();
         if (seenNames.has(cleanNameKey)) return;
         seenNames.add(cleanNameKey);
+
+        const primaryGoal = sanitizeString(p.primaryGoal || (Array.isArray(p.goals) && p.goals[0]), 'Cellular Optimization');
+        const goals = Array.isArray(p.goals)
+          ? p.goals.map(g => sanitizeString(g)).filter(Boolean)
+          : [primaryGoal];
+
+        const rawMoa = p.mechanismOfAction || p.action || p.aiSummary;
+        const moa = sanitizeString(rawMoa, 'Targeted molecular signaling and receptor upregulation under medical vigilance.');
+        const description = sanitizeString(p.aiDescription || p.description, 'Analytical grade bioactive peptide API for customized compounding magistral protocols.');
+        const purity = sanitizeString(p.purity, '≥ 99% (HPLC Verified)');
+        const route = sanitizeString(p.route, 'Lyophilized API (SubQ / Topical / Oral)');
+        const casNumber = sanitizeString(p.casNumber || p.cas, null);
+        const sequence = sanitizeString(p.sequence, null);
+        const molecularWeight = sanitizeString(p.molecularWeight || p.mw, null);
+        const halfLife = sanitizeString(p.halfLife, null);
+        const contraindications = sanitizeString(p.contraindications, null);
 
         formulary.push({
           id: doc.id,
           slug: p.slug || doc.id,
           name,
-          description: p.aiDescription || p.description || 'Analytical grade bioactive peptide API for customized compounding magistral protocols.',
+          description,
           category: 'peptide',
-          primaryGoal: p.primaryGoal || (Array.isArray(p.goals) && p.goals[0]) || 'Cellular Optimization',
-          goals: Array.isArray(p.goals) ? p.goals : [p.primaryGoal || 'Cellular Optimization'],
-          purity: p.purity || '≥ 99% (HPLC Verified)',
-          casNumber: p.casNumber || p.cas || null,
-          sequence: p.sequence || null,
-          molecularWeight: p.molecularWeight || p.mw || null,
-          route: p.route || 'Lyophilized API (SubQ / Topical / Oral)',
-          moa: p.mechanismOfAction || p.action || p.aiSummary || 'Targeted molecular signaling and receptor upregulation under medical vigilance.',
-          halfLife: p.halfLife || null,
-          contraindications: p.contraindications || null,
+          primaryGoal,
+          goals,
+          purity,
+          casNumber,
+          sequence,
+          molecularWeight,
+          route,
+          moa,
+          halfLife,
+          contraindications,
           inStock: p.inStock ?? true
         });
       });

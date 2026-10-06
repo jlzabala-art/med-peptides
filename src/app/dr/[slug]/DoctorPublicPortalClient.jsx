@@ -49,6 +49,21 @@ import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { triggerHaptic } from '@/utils/haptics';
 
+function safeRenderText(val, fallback = '') {
+  if (!val) return fallback;
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number') return String(val);
+  if (typeof val === 'object') {
+    if (typeof val.summary === 'string') return val.summary;
+    if (typeof val.description === 'string') return val.description;
+    if (typeof val.text === 'string') return val.text;
+    if (typeof val.content === 'string') return val.content;
+    if (Array.isArray(val)) return val.map(x => safeRenderText(x)).filter(Boolean).join(', ');
+    return fallback;
+  }
+  return String(val);
+}
+
 export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const [data, setData] = useState(initialData || null);
   const [loading, setLoading] = useState(!initialData);
@@ -228,10 +243,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       if (!formularySearch.trim()) return true;
       const q = formularySearch.toLowerCase();
       return (
-        (p.name || '').toLowerCase().includes(q) ||
-        (p.description || '').toLowerCase().includes(q) ||
-        (p.moa || '').toLowerCase().includes(q) ||
-        (p.primaryGoal || '').toLowerCase().includes(q)
+        safeRenderText(p.name).toLowerCase().includes(q) ||
+        safeRenderText(p.description).toLowerCase().includes(q) ||
+        safeRenderText(p.moa).toLowerCase().includes(q) ||
+        safeRenderText(p.primaryGoal).toLowerCase().includes(q)
       );
     });
   }, [formulary, formularyGoal, formularySearch]);
@@ -1863,7 +1878,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden'
                       }}>
-                        {peptide.moa || peptide.description}
+                        {safeRenderText(peptide.moa) || safeRenderText(peptide.description)}
                       </p>
                     </div>
 
@@ -2048,7 +2063,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     Therapeutic Indication Target
                   </div>
                   <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>
-                    {selectedMonograph.primaryGoal || 'Cellular Optimization'}
+                    {safeRenderText(selectedMonograph.primaryGoal, 'Cellular Optimization')}
                   </div>
                 </div>
 
@@ -2058,7 +2073,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     Mechanism of Action & Pathways
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.80rem', color: '#334155', lineHeight: 1.55 }}>
-                    {selectedMonograph.moa || selectedMonograph.description}
+                    {safeRenderText(selectedMonograph.moa) || safeRenderText(selectedMonograph.description)}
                   </p>
                 </div>
 
