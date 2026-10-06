@@ -81,11 +81,11 @@ export default function PharmapolisLabelSvg({
   const isShort = HEIGHT < 720; // e.g. 90x38 mm (633 px)
   const isMediumHeight = HEIGHT >= 720 && HEIGHT < 850; // e.g. 100x50 mm (750 px)
 
-  // Pin footer elements dynamically to bottom of canvas
-  const footerLineY = HEIGHT - (isShort ? 94 : isMediumHeight ? 104 : 116);
-  const footerTextY = HEIGHT - (isShort ? 58 : isMediumHeight ? 64 : 70);
-  const footerFontSize = isShort ? 26 : isMediumHeight ? 29 : 32; // ~8 pt physical print size
-  const footerLineGap = isShort ? 34 : 40;
+  // Pin footer elements dynamically to bottom of canvas (Compact EU GMP / USP technical specs bar)
+  const footerLineY = HEIGHT - (isShort ? 44 : isMediumHeight ? 50 : 56);
+  const footerTextY = HEIGHT - (isShort ? 16 : isMediumHeight ? 18 : 20);
+  const footerFontSize = isShort ? 14 : isMediumHeight ? 16 : 17; // ~5.5-6 pt technical print size
+  const footerLineGap = 0; // single-line compact footer, zero vertical waste
 
   // Header & Patient Box coordinates
   const headerY = isShort ? 24 : 32;
@@ -303,16 +303,16 @@ export default function PharmapolisLabelSvg({
     const qrStartY = Math.max(isShort ? 12 : 18, Math.round((colHeight - backQrSize - (isShort ? 32 : 44)) / 2));
 
     // ── RIGHT COLUMN LAYOUT: FULL HORIZONTAL SPACE UTILIZATION (826 px usable width) ──
-    const b1Y = isShort ? 14 : 20;
+    const b1Y = isShort ? 14 : 18;
 
-    // Block 1 vertical positions (Net Content / Size & Dispensing Batch - zero formulation repetition):
-    const b1SizeY = isShort ? 24 : 32;
-    const b1BatchY = b1SizeY + (isShort ? 24 : 32);
-    const b1DividerY = b1BatchY + (isShort ? 16 : 20);
+    // Block 1: Dispensing Batch & Net Quantity / Size
+    const b1SizeY = isShort ? 20 : 25;
+    const b1BatchY = b1SizeY + (isShort ? 20 : 25);
+    const b1DividerY = b1BatchY + (isShort ? 14 : 16);
 
-    // Block 2: Guaranteed zero collision with Block 1. Calculated dynamically from Block 1 bottom with generous breathing space!
-    const b2Y = b1Y + b1DividerY + (isShort ? 24 : 32);
-    const bSafetyY = colHeight - (isShort ? 54 : 68);
+    // Block 2: Ingredients & Compounding Base
+    const b2Y = b1Y + b1DividerY + (isShort ? 14 : 18);
+    const bSafetyY = colHeight - (isShort ? 46 : 56);
 
     return (
       <svg
@@ -381,105 +381,135 @@ export default function PharmapolisLabelSvg({
           </text>
         </g>
 
-        {/* RIGHT COLUMN: CLINICAL INGREDIENTS, BATCH & SAFETY */}
+        {/* RIGHT COLUMN: CLINICAL INGREDIENTS, BATCH, POSOLOGY & SAFETY */}
         <g transform={`translate(550, ${colY})`}>
           <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
 
-          {/* Block 1: Dispensing Batch & Net Quantity / Size (No formulation repetition) */}
+          {/* Block 1: Dispensing Batch & Net Quantity / Size */}
           <g transform={`translate(32, ${b1Y})`}>
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#64748b" letterSpacing="0.8">
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 14} fontWeight="800" fill="#64748b" letterSpacing="0.8">
               DISPENSING BATCH &amp; NET QUANTITY
             </text>
             <text
               x="0"
               y={b1SizeY}
               fontFamily="Arial, Helvetica, sans-serif"
-              fontSize={isShort ? 22 : 28}
+              fontSize={isShort ? 20 : 25}
               fontWeight="900"
               fill="#000000"
               letterSpacing="0.3"
             >
               Net Content / Size: {volume}
             </text>
-            <text x="0" y={b1BatchY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 18} fontWeight="700" fill="#003666">
+            <text x="0" y={b1BatchY} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="700" fill="#003666">
               Batch: <tspan fontFamily="monospace" fontWeight="800">{batchCode}</tspan> • Lote: <tspan fontFamily="monospace" fontWeight="800">{lote}</tspan>
             </text>
             <line x1="0" y1={b1DividerY} x2="826" y2={b1DividerY} stroke="#e2e8f0" strokeWidth="1.6" />
           </g>
 
-          {/* Block 2: ACTIVE COMPOUNDED INGREDIENTS & STRENGTH (All ingredients considered, no drops) */}
+          {/* Block 2 & Block 3: ACTIVE COMPOUNDED INGREDIENTS & HIGH-PRIORITY CLINICAL POSOLOGY */}
           {(() => {
             const ingCount = activeIngredientsList.length;
-            let ingFontSize = isShort ? 22 : 28;
-            let ingLineGap = isShort ? 30 : 38;
+            let ingFontSize = isShort ? 18 : 22;
+            let ingLineGap = isShort ? 24 : 29;
             if (ingCount >= 5) {
-              ingFontSize = isShort ? 15 : 18;
-              ingLineGap = isShort ? 20 : 24;
-            } else if (ingCount === 4) {
-              ingFontSize = isShort ? 17 : 21;
-              ingLineGap = isShort ? 23 : 28;
-            } else if (ingCount === 3) {
-              ingFontSize = isShort ? 19 : 24;
-              ingLineGap = isShort ? 26 : 32;
+              ingFontSize = isShort ? 14 : 16;
+              ingLineGap = isShort ? 18 : 22;
+            } else if (ingCount >= 3) {
+              ingFontSize = isShort ? 16 : 19;
+              ingLineGap = isShort ? 21 : 25;
             }
 
-            const baseStartY = (isShort ? 26 : 34) + (ingCount * ingLineGap) + (isShort ? 4 : 6);
-            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 54 : 68);
-            const baseFontSize = isShort ? (vehicleName.length > 40 ? 15 : 18) : (vehicleName.length > 45 ? 19 : 23);
-            const baseLineGap = isShort ? 18 : 22;
+            const baseStartY = (isShort ? 22 : 28) + (ingCount * ingLineGap) + (isShort ? 2 : 4);
+            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 54 : 66);
+            const baseFontSize = isShort ? (vehicleName.length > 40 ? 13 : 15) : (vehicleName.length > 45 ? 15 : 17);
+            const baseLineGap = isShort ? 16 : 20;
+            const b2TotalHeight = baseStartY + (baseLines.length * baseLineGap);
+
+            // Dynamic Posology Box placement
+            const b3Y = b2Y + b2TotalHeight + (isShort ? 12 : 16);
+            const posologyLines = wrapLines(directions, isShort ? 50 : 60);
+            const posFontSize = isShort ? 15 : 19;
+            const posLineGap = isShort ? 20 : 25;
+            const posBoxHeight = (isShort ? 30 : 38) + (posologyLines.length * posLineGap);
 
             return (
-              <g transform={`translate(32, ${b2Y})`}>
-                <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 14 : 17} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
-                  ACTIVE COMPOUNDED INGREDIENTS &amp; STRENGTH
-                </text>
-                
-                {/* 100% of Active Ingredients Rendered */}
-                {activeIngredientsList.map((ing, iIdx) => (
-                  <text
-                    key={iIdx}
-                    x="0"
-                    y={(isShort ? 26 : 34) + (iIdx * ingLineGap)}
-                    fontFamily="Arial, Helvetica, sans-serif"
-                    fontSize={ingFontSize}
-                    fontWeight="800"
-                    fill="#0f172a"
-                  >
-                    • {ing}
+              <>
+                {/* Block 2: Ingredients & Base */}
+                <g transform={`translate(32, ${b2Y})`}>
+                  <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 15} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                    ACTIVE COMPOUNDED INGREDIENTS &amp; STRENGTH
                   </text>
-                ))}
+                  
+                  {activeIngredientsList.map((ing, iIdx) => (
+                    <text
+                      key={iIdx}
+                      x="0"
+                      y={(isShort ? 22 : 28) + (iIdx * ingLineGap)}
+                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontSize={ingFontSize}
+                      fontWeight="800"
+                      fill="#0f172a"
+                    >
+                      • {ing}
+                    </text>
+                  ))}
 
-                {/* Compounding Base / Vehicle - Fully rendered with adaptive wrapping, ZERO ellipsis */}
-                {baseLines.map((bLine, bIdx) => (
-                  <text
-                    key={`base-${bIdx}`}
-                    x="0"
-                    y={baseStartY + (bIdx * baseLineGap)}
-                    fontFamily="Arial, Helvetica, sans-serif"
-                    fontSize={baseFontSize}
-                    fontWeight="700"
-                    fill="#0369a1"
-                  >
-                    {bLine}
+                  {baseLines.map((bLine, bIdx) => (
+                    <text
+                      key={`base-${bIdx}`}
+                      x="0"
+                      y={baseStartY + (bIdx * baseLineGap)}
+                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontSize={baseFontSize}
+                      fontWeight="700"
+                      fill="#0369a1"
+                    >
+                      {bLine}
+                    </text>
+                  ))}
+                </g>
+
+                {/* Block 3: DEDICATED CLINICAL POSOLOGY & DIRECTIONS FOR USE */}
+                <g transform={`translate(32, ${b3Y})`}>
+                  <rect x="0" y="0" width="826" height={posBoxHeight} fill="#f8fafc" stroke="#bae6fd" strokeWidth="1.5" rx="6" />
+                  <rect x="0" y="0" width="6" height={posBoxHeight} fill="#0284c7" rx="3" />
+                  
+                  <text x="18" y={isShort ? 18 : 22} fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 14} fontWeight="900" fill="#0284c7" letterSpacing="0.8">
+                    DIRECTIONS FOR USE / PRESCRIBED POSOLOGY
                   </text>
-                ))}
-              </g>
+
+                  {posologyLines.map((pLine, pIdx) => (
+                    <text
+                      key={`pos-${pIdx}`}
+                      x="18"
+                      y={(isShort ? 38 : 46) + (pIdx * posLineGap)}
+                      fontFamily="Arial, Helvetica, sans-serif"
+                      fontSize={posFontSize}
+                      fontWeight="700"
+                      fill="#0f172a"
+                    >
+                      {pLine}
+                    </text>
+                  ))}
+                </g>
+              </>
             );
           })()}
 
-          {/* Block 3: Mandatory Precaution & Prescriber - Full clinic name, ZERO ellipsis */}
+          {/* Block 4: Mandatory Precaution & Prescriber */}
           <g transform={`translate(32, ${bSafetyY})`}>
-            <line x1="0" y1={isShort ? -12 : -16} x2="826" y2={isShort ? -12 : -16} stroke="#e2e8f0" strokeWidth="1.6" />
-            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 13 : 16} fontWeight="800" fill="#b91c1c" letterSpacing="0.4">
+            <line x1="0" y1={isShort ? -10 : -14} x2="826" y2={isShort ? -10 : -14} stroke="#e2e8f0" strokeWidth="1.6" />
+            <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 15} fontWeight="800" fill="#b91c1c" letterSpacing="0.4">
               {cautionText}
             </text>
             {(() => {
               const rxFullText = `Rx: ${doctorName} • ${clinicName} (${doctorLicense})`;
-              const rxFontSize = isShort ? (rxFullText.length > 65 ? 12 : 13) : (rxFullText.length > 70 ? 14 : 16);
+              const rxFontSize = isShort ? (rxFullText.length > 65 ? 11 : 12) : (rxFullText.length > 70 ? 13 : 15);
               return (
                 <text
                   x="0"
-                  y={isShort ? 18 : 24}
+                  y={isShort ? 16 : 22}
                   fontFamily="Arial, Helvetica, sans-serif"
                   fontSize={rxFontSize}
                   fontWeight="600"
@@ -495,16 +525,13 @@ export default function PharmapolisLabelSvg({
         {/* ── SOLID DIVIDER LINE ── */}
         <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="2.2" />
 
-        {/* ── FOOTER ROW ── */}
+        {/* ── FOOTER ROW: COMPACT EU GMP SPECS (Dates on left, Storage on right in clean technical font) ── */}
         <g transform={`translate(60, ${footerTextY})`}>
           <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
-            Prod. date: <tspan fontWeight="400">{prodDate}</tspan>
+            Mfg: <tspan fontWeight="400">{prodDate}</tspan> • Exp: <tspan fontWeight="400">{expDate}</tspan>
           </text>
-          <text x="0" y={footerLineGap} fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
-            Storage: <tspan fontWeight="400">{storage}</tspan>
-          </text>
-          <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
-            Exp. date: <tspan fontWeight="400">{expDate}</tspan>
+          <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#475569">
+            Storage: <tspan fontWeight="500" fill="#0f172a">{storage}</tspan>
           </text>
         </g>
 
@@ -630,7 +657,7 @@ export default function PharmapolisLabelSvg({
         </text>
       ))}
 
-      {/* ── DIRECTIONS FOR USE ── */}
+      {/* ── DIRECTIONS FOR USE / PRESCRIBED POSOLOGY ── */}
       {directionLines.length > 0 && (
         <g>
           <text
@@ -638,10 +665,11 @@ export default function PharmapolisLabelSvg({
             y={directionsStartY}
             fontFamily="Arial, Helvetica, sans-serif"
             fontSize={dirFontSize}
-            fontWeight="800"
-            fill="#000000"
+            fontWeight="900"
+            fill="#0284c7"
+            letterSpacing="0.4"
           >
-            Directions for use: <tspan fontWeight="500" fill="#1e293b">{directionLines[0]}</tspan>
+            Directions for use: <tspan fontWeight="700" fill="#0f172a">{directionLines[0]}</tspan>
           </text>
           {directionLines.slice(1).map((line, idx) => (
             <text
@@ -650,8 +678,8 @@ export default function PharmapolisLabelSvg({
               y={directionsStartY + (idx + 1) * dirLineGap}
               fontFamily="Arial, Helvetica, sans-serif"
               fontSize={dirFontSize}
-              fontWeight="500"
-              fill="#1e293b"
+              fontWeight="600"
+              fill="#0f172a"
             >
               {line}
             </text>
@@ -662,16 +690,13 @@ export default function PharmapolisLabelSvg({
       {/* ── SOLID DIVIDER LINE ── */}
       <line x1="60" y1={footerLineY} x2="1440" y2={footerLineY} stroke="#000000" strokeWidth="2.2" />
 
-      {/* ── FOOTER INFO ROW ── */}
+      {/* ── FOOTER ROW: COMPACT EU GMP SPECS (Dates on left, Storage on right in clean technical font) ── */}
       <g transform={`translate(60, ${footerTextY})`}>
         <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
-          Prod. date: <tspan fontWeight="400">{prodDate}</tspan>
+          Mfg: <tspan fontWeight="400">{prodDate}</tspan> • Exp: <tspan fontWeight="400">{expDate}</tspan>
         </text>
-        <text x="0" y={footerLineGap} fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
-          Storage: <tspan fontWeight="400">{storage}</tspan>
-        </text>
-        <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#000000">
-          Exp. date: <tspan fontWeight="400">{expDate}</tspan>
+        <text x="1380" y="0" textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={footerFontSize} fontWeight="700" fill="#475569">
+          Storage: <tspan fontWeight="500" fill="#0f172a">{storage}</tspan>
         </text>
       </g>
 
