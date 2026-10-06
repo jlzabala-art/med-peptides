@@ -1,41 +1,40 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { 
   Stethoscope, 
-  Search, 
   Share2, 
   Copy, 
   Check, 
   ExternalLink, 
   Clock, 
-  Calendar, 
   Pill, 
-  Layers, 
   Sparkles, 
   FileText, 
   Users, 
   AlertCircle, 
-  ChevronDown, 
-  ChevronRight, 
   ArrowUpRight, 
   ShieldCheck, 
   MapPin, 
-  Building2, 
-  Phone, 
   Mail, 
   CheckCircle2, 
-  RefreshCw,
-  Plus,
-  FilePlus,
-  HelpCircle
+  Tag,
+  Eye,
+  SlidersHorizontal,
+  Calendar,
+  Layers,
+  Activity
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
 import GlobalSearchBar from '@/components/ui/GlobalSearchBar';
+import DataTable from '@/components/ui/DataTable';
+import EmptyState from '@/components/ui/EmptyState';
 import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/PrescriptionIntakeWorkspace';
+import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
+import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { triggerHaptic } from '@/utils/haptics';
 
 export default function DoctorPublicPortalClient({ slug }) {
@@ -43,14 +42,20 @@ export default function DoctorPublicPortalClient({ slug }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Search & Filter State
+  // Search & Filter State (Google Cloud UX Golden Rules #7, #24, #29)
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [taskFilter, setTaskFilter] = useState('all');
-  const [expandedRows, setExpandedRows] = useState({});
+  const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
+  
+  // UI Actions State
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedIntake, setCopiedIntake] = useState(false);
   const [isIntakeOpen, setIsIntakeOpen] = useState(false);
+
+  // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
+  const [activeLabelRx, setActiveLabelRx] = useState(null);
+  const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchDoctorPortal() {
@@ -76,20 +81,28 @@ export default function DoctorPublicPortalClient({ slug }) {
   }, [slug]);
 
   const doctor = data?.doctor || {};
-  const kpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
+  const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
   const allTasks = data?.tasks || [];
   const allPrescriptions = data?.prescriptions || [];
 
   // Filter Tasks
   const filteredTasks = useMemo(() => {
-    if (taskFilter === 'all') return allTasks;
-    return allTasks.filter(t => t.type === taskFilter);
-  }, [allTasks, taskFilter]);
+    return allTasks.filter(t => {
+      if (taskFilter !== 'all' && t.type !== taskFilter) return false;
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      const matchTitle = (t.title || '').toLowerCase().includes(q);
+      const matchDesc = (t.description || '').toLowerCase().includes(q);
+      const matchPatient = (t.patientName || '').toLowerCase().includes(q);
+      const matchCode = (t.code || '').toLowerCase().includes(q);
+      return matchTitle || matchDesc || matchPatient || matchCode;
+    });
+  }, [allTasks, taskFilter, searchQuery]);
 
   // Filter Prescriptions
   const filteredPrescriptions = useMemo(() => {
     return allPrescriptions.filter(rx => {
-      if (statusFilter !== 'all' && rx.status.toLowerCase() !== statusFilter) return false;
+      if (statusFilter !== 'all' && (rx.status || '').toLowerCase() !== statusFilter) return false;
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase();
       const matchPat = (rx.patientName || '').toLowerCase().includes(q);
@@ -100,10 +113,21 @@ export default function DoctorPublicPortalClient({ slug }) {
     });
   }, [allPrescriptions, statusFilter, searchQuery]);
 
-  const toggleRow = (id) => {
-    triggerHaptic('light');
-    setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  // Compute Filtered KPIs for Scope Switcher (Rule #22)
+  const filteredKpis = useMemo(() => {
+    const activeRxCount = filteredPrescriptions.filter(p => ['approved', 'active'].includes((p.status || '').toLowerCase())).length;
+    const uniquePatients = new Set(filteredPrescriptions.map(p => p.patientName).filter(Boolean)).size;
+    const pendingTasks = filteredTasks.length;
+    const refillsDue = filteredTasks.filter(t => t.type === 'refill' || t.type === 'titration').length;
+    return {
+      activePrescriptions: activeRxCount,
+      monitoredPatients: uniquePatients,
+      pendingTasksCount: pendingTasks,
+      refillsDueCount: refillsDue
+    };
+  }, [filteredPrescriptions, filteredTasks]);
+
+  const activeKpis = scopeMode === 'filtered' ? filteredKpis : globalKpis;
 
   const handleCopyPortalLink = () => {
     triggerHaptic('selection');
@@ -128,6 +152,293 @@ export default function DoctorPublicPortalClient({ slug }) {
     const text = encodeURIComponent(`Hello, you can submit your medical prescription directly to ${doctor.name} at Atlas Clinical Services here: ${intakeUrl}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
+
+  const handleOpenLabelsModal = (rx) => {
+    triggerHaptic('light');
+    setActiveLabelRx(rx);
+    setIsLabelsModalOpen(true);
+  };
+
+  const labelsForActiveRx = useMemo(() => {
+    if (!activeLabelRx) return [];
+    return getPharmapolisLabelsForPrescription(activeLabelRx, null);
+  }, [activeLabelRx]);
+
+  // ── Pending Clinical Tasks Columns (DataTable Exclusive Rendering) ───────
+  const taskColumns = useMemo(() => [
+    {
+      key: 'priority',
+      header: 'Priority',
+      width: '12%',
+      sortable: true,
+      render: (t) => {
+        const isUrgent = t.priority === 'urgent';
+        const isHigh = t.priority === 'high';
+        const isMedium = t.priority === 'medium';
+        const color = isUrgent ? '#dc2626' : isHigh ? '#d97706' : isMedium ? '#2563eb' : '#16a34a';
+        const bg = isUrgent ? '#fef2f2' : isHigh ? '#fffbeb' : isMedium ? '#eff6ff' : '#f0fdf4';
+        const border = isUrgent ? '#fecaca' : isHigh ? '#fde68a' : isMedium ? '#bfdbfe' : '#bbf7d0';
+        return (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              background: bg,
+              color: color,
+              border: `1px solid ${border}`,
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em'
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
+            {t.priority || 'Normal'}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'title',
+      header: 'Clinical Task & Action Plan',
+      width: '38%',
+      sortable: true,
+      render: (t) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
+            {t.title}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35 }}>
+            {t.description}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'patientName',
+      header: 'Patient & Reference',
+      width: '20%',
+      sortable: true,
+      render: (t) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.84rem' }}>
+            {t.patientName}
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Rx:</span>
+            <CopyableId value={t.code} iconOnly={false} />
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'dueDate',
+      header: 'Timeline',
+      width: '15%',
+      sortable: true,
+      render: (t) => (
+        <span
+          style={{
+            fontSize: '0.74rem',
+            fontWeight: 600,
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: '#f1f5f9',
+            color: '#334155',
+            border: '1px solid #e2e8f0',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}
+        >
+          <Clock size={12} style={{ color: '#64748b' }} />
+          {t.dueDate || 'Pending'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Action',
+      width: '15%',
+      align: 'right',
+      render: (t) => (
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+          <Link
+            href={t.actionUrl}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              height: '30px',
+              padding: '0 12px',
+              borderRadius: '4px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              color: '#003666',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+              transition: 'all 0.12s'
+            }}
+          >
+            <span>{t.actionLabel}</span>
+            <ArrowUpRight size={13} />
+          </Link>
+        </div>
+      )
+    }
+  ], []);
+
+  // ── Prescriptions Dossier Columns (DataTable Exclusive Rendering) ─────────
+  const prescriptionColumns = useMemo(() => [
+    {
+      key: 'code',
+      header: 'Prescription Code',
+      width: '18%',
+      sortable: true,
+      render: (rx) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>#{rx.code}</span>
+            <CopyableId value={rx.code} iconOnly={true} />
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Calendar size={11} />
+            <span>{rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active Regimen'}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'patientName',
+      header: 'Patient Dossier',
+      width: '22%',
+      sortable: true,
+      render: (rx) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
+            {rx.patientName}
+          </div>
+          {rx.patient?.dob && (
+            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+              DOB: {rx.patient.dob}
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'treatmentTitle',
+      header: 'Regimen & Formulations',
+      width: '32%',
+      sortable: true,
+      render: (rx) => {
+        const itemCount = (rx.items || []).length || (rx.prescriptionLines || []).length || 1;
+        return (
+          <div>
+            <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.84rem' }}>
+              {rx.treatmentTitle || 'Personalized Compounded Regimen'}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, color: '#334155' }}>
+                {itemCount} formulation{itemCount > 1 ? 's' : ''}
+              </span>
+              {rx.posology && (
+                <span style={{ color: '#0d9488', fontWeight: 500 }}>
+                  {rx.posology.length > 36 ? `${rx.posology.slice(0, 36)}...` : rx.posology}
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: '14%',
+      sortable: true,
+      render: (rx) => <StatusBadge status={rx.status} />
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: '14%',
+      align: 'right',
+      render: (rx) => (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
+          <Link
+            href={`/rx/${rx.code}`}
+            style={{
+              height: '30px',
+              padding: '0 10px',
+              borderRadius: '4px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              color: '#003666',
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              textDecoration: 'none'
+            }}
+            title="Open complete clinical monograph and posology dossier"
+          >
+            <span>Dossier</span>
+            <ExternalLink size={12} />
+          </Link>
+          <button
+            type="button"
+            onClick={() => handleOpenLabelsModal(rx)}
+            title="View vector pharmacy compounding bottle label"
+            style={{
+              height: '30px',
+              width: '30px',
+              borderRadius: '4px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              color: '#0284c7',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.12s'
+            }}
+          >
+            <Tag size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const url = `${window.location.origin}/rx/${rx.code}?view=patient`;
+              navigator.clipboard?.writeText(url);
+              toast.success('Patient direct link copied ✓');
+            }}
+            title="Copy direct patient-facing prescription link"
+            style={{
+              height: '30px',
+              width: '30px',
+              borderRadius: '4px',
+              background: '#ffffff',
+              border: '1px solid #dadce0',
+              color: '#5f6368',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Share2 size={13} />
+          </button>
+        </div>
+      )
+    }
+  ], []);
 
   if (loading) {
     return (
@@ -157,7 +468,7 @@ export default function DoctorPublicPortalClient({ slug }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#1e293b', paddingBottom: '5rem' }}>
-      {/* ── Top Clinical Bar ─────────────────────────────────────────────── */}
+      {/* ── Top Clinical Bar (Sticky GCP Page Header Pattern, Rule #9) ────── */}
       <header
         style={{
           position: 'sticky',
@@ -391,18 +702,69 @@ export default function DoctorPublicPortalClient({ slug }) {
           </div>
         </div>
 
-        {/* ── 4 Core Operational KPIs (Google Cloud Rule #22) ─────────────── */}
+        {/* ── 4 Core Operational KPIs & Scope Switcher (Google Cloud Rule #22) ─ */}
         <div style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>
                 Operational Metrics
               </span>
-              <span style={{ fontSize: '0.72rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '4px', padding: '1px 6px', fontWeight: 600 }}>
-                Live Clinical Scope
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  background: scopeMode === 'filtered' ? '#f0fdf4' : '#eff6ff',
+                  color: scopeMode === 'filtered' ? '#16a34a' : '#1d4ed8',
+                  border: `1px solid ${scopeMode === 'filtered' ? '#bbf7d0' : '#bfdbfe'}`,
+                  borderRadius: '4px',
+                  padding: '2px 8px',
+                  fontWeight: 600
+                }}
+              >
+                {scopeMode === 'filtered' 
+                  ? `Active Filters View (${filteredPrescriptions.length} matching rx)` 
+                  : `Global Practice View (${allPrescriptions.length} total rx)`}
               </span>
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Updated in real-time</span>
+
+            {/* Scope Switcher (Rule #22) */}
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
+              <button
+                type="button"
+                onClick={() => setScopeMode('global')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: scopeMode === 'global' ? '#ffffff' : 'transparent',
+                  color: scopeMode === 'global' ? '#0f172a' : '#64748b',
+                  boxShadow: scopeMode === 'global' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                  transition: 'all 0.12s'
+                }}
+              >
+                Global Database
+              </button>
+              <button
+                type="button"
+                onClick={() => setScopeMode('filtered')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: scopeMode === 'filtered' ? '#ffffff' : 'transparent',
+                  color: scopeMode === 'filtered' ? '#0f172a' : '#64748b',
+                  boxShadow: scopeMode === 'filtered' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                  transition: 'all 0.12s'
+                }}
+              >
+                Matching Filters
+              </button>
+            </div>
           </div>
 
           <div
@@ -412,7 +774,7 @@ export default function DoctorPublicPortalClient({ slug }) {
               gap: '16px'
             }}
           >
-            {/* KPI 1 */}
+            {/* KPI 1: Active Prescriptions */}
             <div
               style={{
                 background: '#ffffff',
@@ -427,14 +789,14 @@ export default function DoctorPublicPortalClient({ slug }) {
                 <Pill size={18} style={{ color: '#16a34a' }} />
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
-                {kpis.activePrescriptions}
+                {activeKpis.activePrescriptions}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
                 Compounded posology regimens under treatment
               </div>
             </div>
 
-            {/* KPI 2 */}
+            {/* KPI 2: Monitored Patients */}
             <div
               style={{
                 background: '#ffffff',
@@ -449,14 +811,14 @@ export default function DoctorPublicPortalClient({ slug }) {
                 <Users size={18} style={{ color: '#003666' }} />
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
-                {kpis.monitoredPatients}
+                {activeKpis.monitoredPatients}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
                 Unique patient dossiers managed
               </div>
             </div>
 
-            {/* KPI 3 */}
+            {/* KPI 3: Pending Clinical Tasks */}
             <div
               style={{
                 background: '#ffffff',
@@ -471,14 +833,14 @@ export default function DoctorPublicPortalClient({ slug }) {
                 <Clock size={18} style={{ color: '#d97706' }} />
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
-                {kpis.pendingTasksCount}
+                {activeKpis.pendingTasksCount}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
                 Actionable reviews & titrations required
               </div>
             </div>
 
-            {/* KPI 4 */}
+            {/* KPI 4: Refills & Titrations Due */}
             <div
               style={{
                 background: '#ffffff',
@@ -493,7 +855,7 @@ export default function DoctorPublicPortalClient({ slug }) {
                 <Sparkles size={18} style={{ color: '#2563eb' }} />
               </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#2563eb', lineHeight: 1.1 }}>
-                {kpis.refillsDueCount}
+                {activeKpis.refillsDueCount}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
                 Upcoming supply cycles within 14 days
@@ -502,32 +864,96 @@ export default function DoctorPublicPortalClient({ slug }) {
           </div>
         </div>
 
-        {/* ── Priority Clinical Action Board (Patient-Centric To-Do List) ─── */}
+        {/* ── Global Search Bar with Integrated GCP Filter Chips (Rule #7) ─── */}
+        <div style={{ marginBottom: '28px' }}>
+          <GlobalSearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search patient, prescription code, active compounds, formulation..."
+            resultCount={filteredPrescriptions.length}
+            namespace={`doctor-${slug}`}
+            size="lg"
+            filters={[
+              statusFilter !== 'all' && {
+                key: 'status',
+                label: 'Status',
+                value: statusFilter.toUpperCase(),
+                onRemove: () => setStatusFilter('all')
+              },
+              taskFilter !== 'all' && {
+                key: 'task',
+                label: 'Task Type',
+                value: taskFilter.toUpperCase(),
+                onRemove: () => setTaskFilter('all')
+              }
+            ].filter(Boolean)}
+            filterOptions={[
+              {
+                key: 'status',
+                label: 'Status',
+                options: [
+                  { label: 'All Statuses', value: 'all' },
+                  { label: 'Approved', value: 'approved' },
+                  { label: 'Active', value: 'active' },
+                  { label: 'Pending', value: 'pending' },
+                  { label: 'Draft', value: 'draft' }
+                ],
+                value: statusFilter,
+                onChange: setStatusFilter
+              },
+              {
+                key: 'task',
+                label: 'Tasks',
+                options: [
+                  { label: 'All Tasks', value: 'all' },
+                  { label: 'Titrations', value: 'titration' },
+                  { label: 'Refills', value: 'refill' },
+                  { label: 'Sign-offs', value: 'approval' }
+                ],
+                value: taskFilter,
+                onChange: setTaskFilter
+              }
+            ]}
+          />
+        </div>
+
+        {/* ── Table 1: Pending Clinical Tasks & To-Do Actions (DataTable Universal) ── */}
         <section
           style={{
             background: '#ffffff',
             border: '1px solid #dadce0',
             borderRadius: '8px',
-            padding: '20px 24px',
-            marginBottom: '28px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+            marginBottom: '32px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+          <div
+            style={{
+              padding: '16px 20px',
+              borderBottom: '1px solid #dadce0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
+              background: '#ffffff'
+            }}
+          >
             <div>
               <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Clock size={18} style={{ color: '#003666' }} />
-                <span>Patient Care To-Do List & Clinical Actions</span>
+                <span>Patient Care To-Do List & Pending Clinical Actions</span>
               </h2>
               <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
                 Automated clinical vigilance based on treatment schedules, phase titrations, and intake submissions.
               </p>
             </div>
 
-            {/* Task Filters */}
+            {/* Quick Task Filter Pills */}
             <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
               {[
-                { id: 'all', label: 'All Tasks' },
+                { id: 'all', label: 'All' },
                 { id: 'titration', label: 'Titrations' },
                 { id: 'refill', label: 'Refills' },
                 { id: 'approval', label: 'Sign-offs' }
@@ -540,7 +966,7 @@ export default function DoctorPublicPortalClient({ slug }) {
                     padding: '4px 10px',
                     borderRadius: '4px',
                     border: 'none',
-                    fontSize: '0.76rem',
+                    fontSize: '0.74rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     background: taskFilter === f.id ? '#ffffff' : 'transparent',
@@ -555,98 +981,56 @@ export default function DoctorPublicPortalClient({ slug }) {
             </div>
           </div>
 
-          {filteredTasks.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
-              <CheckCircle2 size={24} style={{ color: '#16a34a', margin: '0 auto 8px auto' }} />
-              All patient clinical tasks and protocol titrations are up to date.
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {filteredTasks.map((task) => {
-                const isUrgent = task.priority === 'urgent';
-                const isHigh = task.priority === 'high';
-                return (
-                  <div
-                    key={task.id}
+          <DataTable
+            columns={taskColumns}
+            data={filteredTasks}
+            keyField="id"
+            tableId={`doctor-tasks-${slug}`}
+            pagination={false}
+            emptyTitle="All Patient Care Tasks Up to Date"
+            emptyDescription="There are no pending protocol titrations, phase adjustments, or refill authorizations requiring physician action."
+            expandableRender={(task) => (
+              <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#003666' }}>
+                    Clinical Rationale & Action Details
+                  </span>
+                  <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                    Trigger: Automated Chronobiological Protocol Monitor
+                  </span>
+                </div>
+                <p style={{ margin: '0 0 12px 0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                  {task.description}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Link
+                    href={task.actionUrl}
                     style={{
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '12px 16px',
-                      borderRadius: '6px',
-                      background: isUrgent ? '#fef2f2' : isHigh ? '#fffbeb' : '#f8fafc',
-                      border: `1px solid ${isUrgent ? '#fecaca' : isHigh ? '#fde68a' : '#e2e8f0'}`,
-                      gap: '16px',
-                      flexWrap: 'wrap'
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '4px',
+                      background: '#003666',
+                      color: '#ffffff',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      textDecoration: 'none'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: '260px' }}>
-                      <div
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          background: isUrgent ? '#dc2626' : isHigh ? '#d97706' : '#2563eb',
-                          marginTop: '6px',
-                          flexShrink: 0
-                        }}
-                      />
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>
-                            {task.title}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: '0.7rem',
-                              fontWeight: 700,
-                              textTransform: 'uppercase',
-                              padding: '1px 6px',
-                              borderRadius: '4px',
-                              background: isUrgent ? '#fee2e2' : isHigh ? '#fef3c7' : '#eff6ff',
-                              color: isUrgent ? '#b91c1c' : isHigh ? '#b45309' : '#1d4ed8'
-                            }}
-                          >
-                            {task.dueDate}
-                          </span>
-                        </div>
-                        <p style={{ margin: '3px 0 0 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.35 }}>
-                          {task.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Link
-                        href={task.actionUrl}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          height: '32px',
-                          padding: '0 12px',
-                          borderRadius: '6px',
-                          background: '#ffffff',
-                          border: '1px solid #dadce0',
-                          color: '#003666',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-                        }}
-                      >
-                        <span>{task.actionLabel}</span>
-                        <ArrowUpRight size={13} />
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                    <span>Execute {task.actionLabel}</span>
+                    <ArrowUpRight size={13} />
+                  </Link>
+                  <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                    Reference Prescription #{task.code}
+                  </span>
+                </div>
+              </div>
+            )}
+          />
         </section>
 
-        {/* ── Prescriptions Master Table (Master-Detail Design) ────────────── */}
+        {/* ── Table 2: Associated Clinical Prescriptions Dossier (DataTable Universal) ── */}
         <section
           style={{
             background: '#ffffff',
@@ -656,294 +1040,164 @@ export default function DoctorPublicPortalClient({ slug }) {
             overflow: 'hidden'
           }}
         >
-          {/* Table Header Bar */}
           <div
             style={{
               padding: '16px 20px',
-              borderBottom: '1px solid #e2e8f0',
+              borderBottom: '1px solid #dadce0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: '12px'
+              gap: '12px',
+              background: '#ffffff'
             }}
           >
             <div>
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                Clinical Prescriptions Dossier
+              <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Layers size={18} style={{ color: '#003666' }} />
+                <span>Associated Clinical Prescriptions Dossier</span>
               </h2>
-              <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+              <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
                 Complete verified repository of compounded formulations and sequential regimens.
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Status Filter Pills */}
-              <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
-                {[
-                  { id: 'all', label: 'All' },
-                  { id: 'approved', label: 'Approved' },
-                  { id: 'active', label: 'Active' },
-                  { id: 'pending', label: 'Pending' }
-                ].map(s => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setStatusFilter(s.id)}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      background: statusFilter === s.id ? '#ffffff' : 'transparent',
-                      color: statusFilter === s.id ? '#0f172a' : '#64748b',
-                      boxShadow: statusFilter === s.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-                    }}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
+            {/* Quick Status Filter Pills */}
+            <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '3px', gap: '2px' }}>
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'approved', label: 'Approved' },
+                { id: 'active', label: 'Active' },
+                { id: 'pending', label: 'Pending' }
+              ].map(s => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setStatusFilter(s.id)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    background: statusFilter === s.id ? '#ffffff' : 'transparent',
+                    color: statusFilter === s.id ? '#0f172a' : '#64748b',
+                    boxShadow: statusFilter === s.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.12s'
+                  }}
+                >
+                  {s.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Table Search Bar */}
-          <div style={{ padding: '12px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-            <div style={{ position: 'relative', width: '100%', maxWidth: '420px' }}>
-              <Search
-                size={15}
-                style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
-              />
-              <input
-                type="text"
-                placeholder="Search patient, formulation, active ingredient..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  height: '34px',
-                  padding: '0 12px 0 34px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  fontSize: '0.82rem',
-                  color: '#1e293b',
-                  outline: 'none',
-                  fontFamily: 'inherit'
-                }}
-              />
-            </div>
-          </div>
+          <DataTable
+            columns={prescriptionColumns}
+            data={filteredPrescriptions}
+            keyField="id"
+            tableId={`doctor-prescriptions-${slug}`}
+            pagination={true}
+            initialRowsPerPage={25}
+            emptyTitle="No Prescriptions Found"
+            emptyDescription="No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
+            expandableRender={(rx) => {
+              const itemsList = rx.items && rx.items.length > 0 ? rx.items : (rx.prescriptionLines || []);
+              return (
+                <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666' }}>
+                      Formulation Details & Posology Schedule
+                    </span>
+                    <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                      Standard: EU GMP Certified Dispensary · Pharmapolis & Fagron
+                    </span>
+                  </div>
 
-          {/* Table Rows */}
-          {filteredPrescriptions.length === 0 ? (
-            <div style={{ padding: '3rem 1rem' }}>
-              <EmptyState
-                icon={FileText}
-                title="No Prescriptions Found"
-                subtitle="Try adjusting your search criteria or upload a new patient prescription."
-              />
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #dadce0', color: '#475569', fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    <th style={{ padding: '10px 16px', width: '40px' }}></th>
-                    <th style={{ padding: '10px 16px' }}>Prescription Code</th>
-                    <th style={{ padding: '10px 16px' }}>Patient</th>
-                    <th style={{ padding: '10px 16px' }}>Regimen & Scope</th>
-                    <th style={{ padding: '10px 16px' }}>Status</th>
-                    <th style={{ padding: '10px 16px', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPrescriptions.map((rx) => {
-                    const isExpanded = !!expandedRows[rx.id];
-                    const itemCount = (rx.items || []).length || (rx.prescriptionLines || []).length;
-                    return (
-                      <React.Fragment key={rx.id}>
-                        <tr
-                          onClick={() => toggleRow(rx.id)}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                    {/* Active Formulations List */}
+                    <div>
+                      <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Active Ingredients & Vehicles ({itemsList.length})
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {itemsList.map((it, idx) => (
+                          <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', background: '#ffffff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                            <span style={{ fontWeight: 500, color: '#1e293b' }}>{it.name}</span>
+                            <span style={{ color: '#0d9488', fontWeight: 600 }}>{it.dose || it.vehicle || '-'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Posology Protocol & Quick Actions */}
+                    <div>
+                      <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Sequential Clinical Schedule
+                      </div>
+                      <div style={{ background: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '6px', padding: '10px 12px', fontSize: '0.8rem', color: '#134e4a', lineHeight: 1.4 }}>
+                        {rx.posology || 'Administer as directed by treating physician according to physiological circadian cycle.'}
+                      </div>
+
+                      <div style={{ marginTop: '12px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <Link
+                          href={`/rx/${rx.code}`}
                           style={{
-                            borderBottom: '1px solid #f1f5f9',
-                            cursor: 'pointer',
-                            background: isExpanded ? '#f8fafc' : '#ffffff',
-                            transition: 'background 0.12s'
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            color: '#003666',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
                           }}
-                          onMouseEnter={(e) => { if (!isExpanded) e.currentTarget.style.background = '#fdfefe'; }}
-                          onMouseLeave={(e) => { if (!isExpanded) e.currentTarget.style.background = '#ffffff'; }}
                         >
-                          {/* Chevron Trigger */}
-                          <td style={{ padding: '12px 16px', textAlign: 'center', color: '#94a3b8' }}>
-                            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                          </td>
-
-                          {/* Code */}
-                          <td style={{ padding: '12px 16px' }}>
-                            <div style={{ fontWeight: 600, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span>#{rx.code}</span>
-                              <CopyableId value={rx.code} iconOnly={true} />
-                            </div>
-                            <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-                              {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active'}
-                            </div>
-                          </td>
-
-                          {/* Patient */}
-                          <td style={{ padding: '12px 16px' }}>
-                            <div style={{ fontWeight: 600, color: '#0f172a' }}>{rx.patientName}</div>
-                            {rx.patient?.dob && (
-                              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                                DOB: {rx.patient.dob}
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Regimen */}
-                          <td style={{ padding: '12px 16px' }}>
-                            <div style={{ fontWeight: 500, color: '#1e293b' }}>
-                              {rx.treatmentTitle || 'Personalized Clinical Regimen'}
-                            </div>
-                            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>
-                                {itemCount} active formulations
-                              </span>
-                              {rx.posology && (
-                                <span style={{ color: '#0d9488', fontWeight: 500 }}>
-                                  {rx.posology.length > 40 ? `${rx.posology.slice(0, 40)}...` : rx.posology}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Status */}
-                          <td style={{ padding: '12px 16px' }}>
-                            <StatusBadge status={rx.status} />
-                          </td>
-
-                          {/* Actions */}
-                          <td style={{ padding: '12px 16px', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                              <Link
-                                href={`/rx/${rx.code}`}
-                                style={{
-                                  height: '30px',
-                                  padding: '0 10px',
-                                  borderRadius: '4px',
-                                  background: '#ffffff',
-                                  border: '1px solid #dadce0',
-                                  color: '#003666',
-                                  fontSize: '0.76rem',
-                                  fontWeight: 600,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  textDecoration: 'none'
-                                }}
-                              >
-                                <span>Dossier</span>
-                                <ExternalLink size={12} />
-                              </Link>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const url = `${window.location.origin}/rx/${rx.code}?view=patient`;
-                                  navigator.clipboard?.writeText(url);
-                                  toast.success('Patient direct link copied ✓');
-                                }}
-                                title="Copy patient-facing prescription link"
-                                style={{
-                                  height: '30px',
-                                  width: '30px',
-                                  borderRadius: '4px',
-                                  background: '#ffffff',
-                                  border: '1px solid #dadce0',
-                                  color: '#5f6368',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                              >
-                                <Share2 size={13} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-
-                        {/* Master-Detail Expanded Section */}
-                        {isExpanded && (
-                          <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                            <td colSpan={6} style={{ padding: '16px 24px 20px 48px' }}>
-                              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px 20px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
-                                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#003666' }}>
-                                    Formulation Details & Posology Schedule
-                                  </span>
-                                  <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                                    Standard: EU GMP Certified Dispensary
-                                  </span>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                                  {/* Formulations List */}
-                                  <div>
-                                    <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
-                                      Active Ingredients & Vehicles ({itemCount})
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                      {(rx.items && rx.items.length > 0 ? rx.items : rx.prescriptionLines || []).map((it, idx) => (
-                                        <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', background: '#f8fafc', padding: '6px 10px', borderRadius: '4px' }}>
-                                          <span style={{ fontWeight: 500, color: '#1e293b' }}>{it.name}</span>
-                                          <span style={{ color: '#0d9488', fontWeight: 600 }}>{it.dose || it.vehicle || '-'}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  {/* Posology Protocol */}
-                                  <div>
-                                    <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
-                                      Sequential Clinical Schedule
-                                    </div>
-                                    <div style={{ background: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '6px', padding: '10px 12px', fontSize: '0.8rem', color: '#134e4a', lineHeight: 1.4 }}>
-                                      {rx.posology || 'Administer as directed by treating physician according to physiological circadian cycle.'}
-                                    </div>
-                                    <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
-                                      <Link
-                                        href={`/rx/${rx.code}`}
-                                        style={{
-                                          fontSize: '0.76rem',
-                                          fontWeight: 600,
-                                          color: '#003666',
-                                          textDecoration: 'none',
-                                          display: 'inline-flex',
-                                          alignItems: 'center',
-                                          gap: '4px'
-                                        }}
-                                      >
-                                        <span>Open Full Clinical Monograph & Quality Standards</span>
-                                        <ArrowUpRight size={12} />
-                                      </Link>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                          <span>Open Full Clinical Monograph & Quality Standards</span>
+                          <ArrowUpRight size={13} />
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenLabelsModal(rx)}
+                          style={{
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            color: '#0284c7',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Tag size={13} />
+                          <span>View Official Bottle Labels</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }}
+          />
         </section>
       </main>
+
+      {/* ── Official Compounding Bottle Labels Modal (Direct from Doctor Portal) ── */}
+      {isLabelsModalOpen && activeLabelRx && (
+        <PharmacyLabelsModal
+          isOpen={isLabelsModalOpen}
+          onClose={() => {
+            setIsLabelsModalOpen(false);
+            setActiveLabelRx(null);
+          }}
+          labels={labelsForActiveRx}
+          initialLabelIndex={0}
+          isEs={false}
+        />
+      )}
 
       {/* ── AI Prescription Intake Workspace (Attributed to this Physician) ── */}
       {isIntakeOpen && (

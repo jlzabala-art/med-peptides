@@ -17,6 +17,14 @@ export default function PharmacyLabelsModal({
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
+  const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
+
+  // Sync selected index when opened or changed from outside
+  React.useEffect(() => {
+    if (initialLabelIndex != null && initialLabelIndex >= 0 && labels && initialLabelIndex < labels.length) {
+      setSelectedProductIdx(initialLabelIndex);
+    }
+  }, [initialLabelIndex, labels]);
 
   // Sizing Presets & Custom Dimensions
   const [selectedPreset, setSelectedPreset] = useState('75x45');
