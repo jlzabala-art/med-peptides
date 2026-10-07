@@ -2738,7 +2738,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, width: '100%', overflowX: 'auto' }}>
                 {[
-                  { id: 'treatment', label: isEs ? 'Formulaciones & Posología' : 'Formulations & Posology', icon: FlaskConical, count: compoundedFormulations.length },
+                  { id: 'treatment', label: isEs ? 'Prescripción & Posología' : 'Prescription & Posology', icon: Pill, count: compoundedFormulations.length },
                   { id: 'roadmap', label: isEs ? 'Roadmap Secuencial' : 'Sequential Roadmap', icon: Layers, count: compoundedFormulations.length > 1 ? `${compoundedFormulations.length} ${isEs ? 'Fases' : 'Phases'}` : null },
                   { id: 'traceability', label: isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & Standards', icon: Factory },
                   { id: 'patientSharing', label: isEs ? 'Contacto & Soporte' : 'Patient Care & Support', icon: Stethoscope }

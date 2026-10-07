@@ -35,6 +35,7 @@ import {
   FlaskConical,
   BookOpen,
   Loader2,
+  Search,
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -47,6 +48,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import PublicUnifiedHeader from '@/components/shared/PublicUnifiedHeader';
 import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/PrescriptionIntakeWorkspace';
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
+import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { triggerHaptic } from '@/utils/haptics';
 
@@ -73,6 +75,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // Search & Filter State (Google Cloud UX Golden Rules #7, #24, #29)
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [patientFilter, setPatientFilter] = useState('all');
   const [taskFilter, setTaskFilter] = useState('all');
   const [temporalFilter, setTemporalFilter] = useState('all'); // 'all' | 'active' | '30d' | '90d'
   const [scopeMode, setScopeMode] = useState('global'); // 'global' | 'filtered' (Rule #22 Scope Switcher)
@@ -95,10 +98,11 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // Modal for Viewing Pharmacy Labels Directly from Doctor Portal
   const [activeLabelRx, setActiveLabelRx] = useState(null);
   const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
+  const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
 
   // GCP Resource Inspector Drawer State (Golden Rule #4: Master-Detail sin abandonar contexto)
   const [selectedInspectorItem, setSelectedInspectorItem] = useState(null);
-  const [inspectorTab, setInspectorTab] = useState('dossier'); // 'dossier' | 'formulations' | 'dispensary'
+  const [inspectorTab, setInspectorTab] = useState('dossier'); // 'dossier' | 'items' | 'dispensary'
   const [signingTaskId, setSigningTaskId] = useState(null);
 
   // Auto-collapse sidebar on laptops (< 1200px) to prevent table clipping (GCP UX Standard)
@@ -174,12 +178,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const allPrescriptions = data?.prescriptions || [];
   const allProtocols = data?.protocols || [];
 
-  const [protocolCategory, setProtocolCategory] = useState('all');
   const [activeSection, setActiveSection] = useState('overview');
+
+  const [isDiscoveryDrawerOpen, setIsDiscoveryDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const sectionIds = ['overview', 'tasks', 'prescriptions', 'protocols', 'formulary', 'diagnostics', 'patients'];
+    const sectionIds = ['overview', 'tasks', 'prescriptions', 'diagnostics', 'patients'];
     const handleScroll = () => {
       const scrollPos = window.scrollY + 120;
       for (let i = sectionIds.length - 1; i >= 0; i--) {
@@ -194,31 +199,20 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Filter Protocols
-  const filteredProtocols = useMemo(() => {
-    let list = allProtocols;
-    if (protocolCategory !== 'all') {
-      list = list.filter(p => {
-        const cat = String(p.category || '').toLowerCase();
-        if (protocolCategory === 'metabolic') return cat.includes('metabol') || cat.includes('weight') || cat.includes('incretin');
-        if (protocolCategory === 'regenerative') return cat.includes('regen') || cat.includes('tissue') || cat.includes('recovery');
-        if (protocolCategory === 'longevity') return cat.includes('long') || cat.includes('cellular') || cat.includes('anti-aging');
-        if (protocolCategory === 'neuro') return cat.includes('neuro') || cat.includes('cognit') || cat.includes('sleep');
-        if (protocolCategory === 'immune') return cat.includes('immun') || cat.includes('resilien');
-        return true;
-      });
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(p =>
-        (p.title || '').toLowerCase().includes(q) ||
-        (p.summary || '').toLowerCase().includes(q) ||
-        (p.category || '').toLowerCase().includes(q) ||
-        (p.compounds || []).some(c => String(c).toLowerCase().includes(q))
-      );
-    }
-    return list;
-  }, [allProtocols, protocolCategory, searchQuery]);
+  // ── Global ⌘K / Ctrl+K & Escape Key Listener (GCP UX Standard) ─────────────
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsDiscoveryDrawerOpen((prev) => !prev);
+      } else if (e.key === 'Escape') {
+        if (isDiscoveryDrawerOpen) setIsDiscoveryDrawerOpen(false);
+        if (isCredentialsModalOpen) setIsCredentialsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDiscoveryDrawerOpen, isCredentialsModalOpen]);
 
   // Opaque Doctor Slug (Protects Doctor Identity in URL)
   const opaqueCode = doctor.opaqueCode || doctor.slug || slug;
@@ -226,7 +220,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // Filter Tasks
   const filteredTasks = useMemo(() => {
     return allTasks.filter(t => {
-      if (taskFilter !== 'all' && t.type !== taskFilter) return false;
+      if (taskFilter !== 'all') {
+        if (taskFilter === 'refill') {
+          if (t.type !== 'refill' && t.type !== 'cycles') return false;
+        } else if (t.type !== taskFilter) {
+          return false;
+        }
+      }
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase();
       const matchTitle = (t.title || '').toLowerCase().includes(q);
@@ -237,10 +237,35 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     });
   }, [allTasks, taskFilter, searchQuery]);
 
-  // Filter Prescriptions (Enhanced with Temporal Filter - Golden Rule #24)
+  // Unique Monitored Patients List (for quick clinical dossier filter)
+  const uniquePatientList = useMemo(() => {
+    const set = new Set();
+    allPrescriptions.forEach(p => {
+      if (p.patientName) set.add(p.patientName.trim());
+    });
+    return Array.from(set).sort();
+  }, [allPrescriptions]);
+
+  // Filter Prescriptions (Enhanced with Temporal & Patient Filter - Golden Rules #22, #24)
   const filteredPrescriptions = useMemo(() => {
     return allPrescriptions.filter(rx => {
-      if (statusFilter !== 'all' && (rx.status || '').toLowerCase() !== statusFilter) return false;
+      // Patient Filter
+      if (patientFilter !== 'all') {
+        const pat = (rx.patientName || '').toLowerCase().trim();
+        if (pat !== patientFilter.toLowerCase().trim()) return false;
+      }
+
+      // Status Filter: 'active' encompasses both 'active' and 'approved' clinical posologies
+      if (statusFilter !== 'all') {
+        const s = (rx.status || '').toLowerCase();
+        if (statusFilter === 'active') {
+          if (!['active', 'approved'].includes(s)) return false;
+        } else if (statusFilter === 'approved') {
+          if (s !== 'approved') return false;
+        } else if (s !== statusFilter) {
+          return false;
+        }
+      }
 
       // Temporal Filter Condition (Golden Rule #24)
       if (temporalFilter === 'active') {
@@ -268,7 +293,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       const matchItems = (rx.items || []).some(i => (i.name || '').toLowerCase().includes(q));
       return matchPat || matchCode || matchTitle || matchItems;
     });
-  }, [allPrescriptions, statusFilter, searchQuery, temporalFilter]);
+  }, [allPrescriptions, statusFilter, patientFilter, searchQuery, temporalFilter]);
 
   // Compute Filtered KPIs for Scope Switcher (Rule #22)
   const filteredKpis = useMemo(() => {
@@ -526,7 +551,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       triggerHaptic('success');
       toast.success(
         codesToSign.length > 1
-          ? `${codesToSign.length} formulations signed & authorized for compounding ✓`
+          ? `${codesToSign.length} prescriptions signed & authorized for compounding ✓`
           : `Prescription #${codesToSign[0]} signed & authorized for compounding ✓`
       );
     } catch (err) {
@@ -539,6 +564,30 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
   // ── Pending Clinical Tasks Columns (DataTable Exclusive Rendering) ───────
   const taskColumns = useMemo(() => [
+    {
+      key: 'patientName',
+      header: 'Patient Dossier',
+      width: '26%',
+      sortable: true,
+      render: (t) => {
+        const dob = t.patient?.dob || t.patientDob || t.dob || (
+          allPrescriptions.find(p => p.patientName && t.patientName && p.patientName.toLowerCase().trim() === t.patientName.toLowerCase().trim())?.patient?.dob
+        );
+
+        return (
+          <div>
+            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
+              {t.patientName}
+            </div>
+            {dob && (
+              <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                DOB: {dob}
+              </div>
+            )}
+          </div>
+        );
+      }
+    },
     {
       key: 'title',
       header: 'Clinical Task & Action Plan',
@@ -587,17 +636,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </div>
         );
       }
-    },
-    {
-      key: 'patientName',
-      header: 'Patient',
-      width: '26%',
-      sortable: true,
-      render: (t) => (
-        <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.85rem' }}>
-          {t.patientName}
-        </div>
-      )
     },
     {
       key: 'actions',
@@ -696,7 +734,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 e.stopPropagation();
                 handleRowClickTask(t);
               }}
-              title="Review formulation details in slide-over Inspector Drawer"
+              title="Review prescription details in slide-over Inspector Drawer"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -719,7 +757,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         );
       }
     }
-  ], [signingTaskId, handleSignOffPrescription]);
+  ], [signingTaskId, handleSignOffPrescription, allPrescriptions]);
 
   // ── Prescriptions Dossier Columns (DataTable Exclusive Rendering) ─────────
   const prescriptionColumns = useMemo(() => [
@@ -743,7 +781,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     },
     {
       key: 'treatmentTitle',
-      header: 'Regimen & Formulations',
+      header: 'Prescription Regimen',
       width: '34%',
       sortable: true,
       render: (rx) => {
@@ -783,7 +821,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             </div>
             <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <span style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, color: '#334155' }}>
-                {itemCount} formulation{itemCount > 1 ? 's' : ''}
+                {itemCount} prescription item{itemCount > 1 ? 's' : ''}
               </span>
               {protoUrl && (
                 <span style={{ fontSize: '0.68rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
@@ -1182,13 +1220,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       groupTitle: 'COMPOUNDING & QUALITY',
       items: [
         {
-          id: 'formulations',
-          label: 'Active Formulations',
-          icon: Pill,
-          href: '#prescriptions',
-          badge: null
-        },
-        {
           id: 'labels',
           label: 'Pharmapolis Bottle Labels',
           icon: Tag,
@@ -1208,16 +1239,16 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       items: [
         {
           id: 'protocols',
-          label: 'Clinical Protocols',
+          label: 'Clinical Protocols (77)',
           icon: BookOpen,
-          href: '#protocols',
+          action: () => setIsDiscoveryDrawerOpen(true),
           badge: filteredProtocols.length > 0 ? `${filteredProtocols.length}` : '77'
         },
         {
           id: 'formulary',
           label: 'Compounding Pharmacopeia',
           icon: FlaskConical,
-          href: '#formulary',
+          action: () => setIsDiscoveryDrawerOpen(true),
           badge: filteredFormulary.length > 0 ? `${filteredFormulary.length}` : null
         },
         {
@@ -1250,7 +1281,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           id: 'credentials',
           label: 'DHA License & Profile',
           icon: ShieldCheck,
-          href: '#credentials',
+          action: () => setIsCredentialsModalOpen(true),
           badge: 'Verified'
         }
       ]
@@ -1259,6 +1290,17 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
+    const id = typeof itemOrId === 'string' ? itemOrId : itemOrId?.id;
+    if (id === 'protocols' || id === 'formulary') {
+      setIsDiscoveryDrawerOpen(true);
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
+    if (id === 'credentials') {
+      setIsCredentialsModalOpen(true);
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      return;
+    }
     if (typeof itemOrId === 'string') {
       const targetId = itemOrId;
       setActiveAnchor(targetId);
@@ -1356,6 +1398,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         .gcp-mobile-nav-trigger {
           display: none;
         }
+        .gcp-mobile-doctor-capsule {
+          display: none;
+        }
         @media (max-width: 900px) {
           .gcp-clinical-sidebar {
             display: none !important;
@@ -1363,8 +1408,11 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           .gcp-mobile-nav-trigger {
             display: inline-flex !important;
           }
+          .gcp-mobile-doctor-capsule {
+            display: flex !important;
+          }
           .gcp-portal-main {
-            padding: 16px 14px 130px 14px;
+            padding: 14px 14px 130px 14px;
           }
         }
         .gcp-kpi-grid {
@@ -1425,20 +1473,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         brandHref={`/dr/${slug}`}
         doctorHomeHref={`/dr/${slug}`}
         doctorName={doctor.name}
-        breadcrumb={[
-          { label: 'Clinical Services', href: '/' },
-          { label: 'Verified Physicians', href: '/doctor' },
-          { label: doctor.name || 'Physician Portal' }
-        ]}
-        anchorTabs={[
-          { id: 'credentials', label: 'Credentials', href: '#credentials' },
-          { id: 'overview', label: 'Overview', href: '#overview' },
-          { id: 'tasks', label: 'Clinical Tasks', href: '#tasks', count: filteredTasks.length },
-          { id: 'prescriptions', label: 'Prescriptions Dossier', href: '#prescriptions', count: filteredPrescriptions.length },
-          { id: 'formulary', label: 'Compounding Pharmacopeia', href: '#formulary', count: filteredFormulary.length },
-          { id: 'diagnostics', label: 'Diagnostic Panels', href: '#diagnostics', count: 4 }
-        ]}
-        activeAnchorId={activeAnchor}
+        hideTier2={true}
         isDoctorView={true}
         onImportRx={() => setIsIntakeOpen(true)}
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
@@ -1532,6 +1567,288 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             ))}
           </div>
 
+          {/* Persistent AI Clinical Intelligence Search Sticker (Google Cloud UX Principle) */}
+          <div style={{ padding: isSidebarCollapsed ? '8px 6px' : '10px 12px', borderTop: '1px solid #dadce0', background: '#f8fafc' }}>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsDiscoveryDrawerOpen(true);
+              }}
+              title="Open Clinical Intelligence & Algolia Search Engine (⌘K)"
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: isSidebarCollapsed ? 'column' : 'row',
+                alignItems: 'center',
+                justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
+                gap: '8px',
+                padding: isSidebarCollapsed ? '8px 4px' : '8px 10px',
+                borderRadius: '6px',
+                border: '1px solid #c7d2fe',
+                background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
+                color: '#312e81',
+                cursor: 'pointer',
+                textAlign: 'left',
+                boxShadow: '0 1px 2px rgba(67, 56, 202, 0.08)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '5px', background: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#ffffff' }}>
+                  <Sparkles size={13} />
+                </div>
+                {!isSidebarCollapsed && (
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#1e1b4b', lineHeight: 1.2 }}>
+                      Clinical Search
+                    </div>
+                    <div style={{ fontSize: '0.64rem', color: '#4338ca', fontWeight: 500, lineHeight: 1.1 }}>
+                      77 Protos · Pharmacopeia
+                    </div>
+                  </div>
+                )}
+              </div>
+              {!isSidebarCollapsed && (
+                <kbd style={{ fontSize: '0.64rem', padding: '1px 5px', borderRadius: '3px', background: '#ffffff', color: '#4338ca', border: '1px solid #c7d2fe', fontWeight: 600 }}>
+                  ⌘K
+                </kbd>
+              )}
+            </button>
+          </div>
+
+          {/* ── Persistent Doctor Identity Sticker (Laptop / Desktop Google Cloud Standard) ── */}
+          <div
+            style={{
+              padding: isSidebarCollapsed ? '10px 4px' : '12px 14px',
+              borderTop: '1px solid #dadce0',
+              background: '#f8fafc',
+              position: 'relative'
+            }}
+          >
+            {!isSidebarCollapsed ? (
+              <>
+                <div
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setIsCredentialsModalOpen(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    marginBottom: '8px',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    padding: '2px',
+                    transition: 'background 0.12s'
+                  }}
+                  title="Click to view full verified physician credentials"
+                >
+                  <div
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.95rem',
+                      fontWeight: 700,
+                      flexShrink: 0,
+                      boxShadow: '0 2px 6px rgba(0,54,102,0.18)',
+                      position: 'relative'
+                    }}
+                  >
+                    {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: '-1px',
+                        right: '-1px',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        background: '#16a34a',
+                        border: '2px solid #ffffff'
+                      }}
+                      title="DHA Verified Active Practice"
+                    />
+                  </div>
+
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: '0.84rem',
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        lineHeight: 1.2,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                      title={doctor.name}
+                    >
+                      {doctor.name}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.68rem',
+                        color: '#64748b',
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                      title={`${doctor.specialty} • ${doctor.clinic}`}
+                    >
+                      {doctor.specialty}
+                    </div>
+                  </div>
+                </div>
+
+                {/* License & Verification Capsule */}
+                <div
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    padding: '5px 8px',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '6px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
+                    <ShieldCheck size={13} style={{ color: '#0d9488', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.68rem', color: '#475569', fontWeight: 600 }}>DHA:</span>
+                    <span style={{ fontSize: '0.68rem', color: '#0f172a', fontWeight: 600, fontFamily: 'monospace' }}>
+                      {doctor.license}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      navigator.clipboard?.writeText(doctor.license);
+                      toast.success('DHA License copied ✓');
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '2px',
+                      color: '#64748b',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="Copy DHA license number"
+                  >
+                    <Copy size={11} />
+                  </button>
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setIsCredentialsModalOpen(true);
+                    }}
+                    style={{
+                      height: '26px',
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: '0.70rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                    title="View full doctor credentials & verified profile"
+                  >
+                    <Eye size={11} />
+                    <span>Credentials</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyIntakeLink}
+                    style={{
+                      height: '26px',
+                      borderRadius: '4px',
+                      border: '1px solid #bfdbfe',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      fontSize: '0.70rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}
+                    title="Share patient intake questionnaire"
+                  >
+                    <Share2 size={11} />
+                    <span>Share Intake</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setIsCredentialsModalOpen(true);
+                  }}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.92rem',
+                    fontWeight: 700,
+                    border: '2px solid #ffffff',
+                    boxShadow: '0 2px 6px rgba(0,54,102,0.2)',
+                    cursor: 'pointer',
+                    position: 'relative'
+                  }}
+                  title={`${doctor.name} - ${doctor.specialty} (Click for credentials)`}
+                >
+                  {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: '-1px',
+                      right: '-1px',
+                      width: '9px',
+                      height: '9px',
+                      borderRadius: '50%',
+                      background: '#16a34a',
+                      border: '1.5px solid #ffffff'
+                    }}
+                  />
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Bottom Rail Collapse Toggle */}
           <div
             style={{
@@ -1572,113 +1889,110 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
         {/* ── Main Clinical Content Container ─────────────────────────────── */}
         <main className="gcp-portal-main">
-          {/* ── Doctor Identity Card ────────────────────────────────────────── */}
+          {/* ── Mobile Doctor Identity Capsule (Rendered only on screens <= 900px, removed from main flow on desktop) ── */}
           <div
-            id="credentials"
+            className="gcp-mobile-doctor-capsule"
             style={{
               background: '#ffffff',
               border: '1px solid #dadce0',
               borderRadius: '8px',
-              padding: '24px',
-              marginBottom: '24px',
+              padding: '8px 12px',
+              marginBottom: '16px',
               boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-              display: 'flex',
-              alignItems: 'flex-start',
+              alignItems: 'center',
               justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '20px'
+              gap: '10px'
             }}
           >
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div
+              onClick={() => {
+                triggerHaptic('light');
+                setIsCredentialsModalOpen(true);
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, cursor: 'pointer' }}
+              title="Click to view verified doctor credentials & DHA license"
+            >
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.4rem',
+                  fontSize: '0.84rem',
                   fontWeight: 700,
-                  boxShadow: '0 2px 8px rgba(0,54,102,0.18)'
+                  flexShrink: 0
                 }}
               >
-                {doctor.name?.replace('Dr. ', '').charAt(0) || 'D'}
+                {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
               </div>
-              <div>
-                <h1 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  {doctor.name}
-                </h1>
-                <p style={{ margin: '4px 0 8px 0', fontSize: '0.88rem', color: '#475569', fontWeight: 500 }}>
-                  {doctor.specialty} • {doctor.clinic}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '0.8rem', color: '#64748b' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ShieldCheck size={14} style={{ color: '#0d9488' }} />
-                    <span>Medical License:</span>
-                    <CopyableId value={doctor.license} iconOnly={false} />
-                  </div>
-                  {doctor.location && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <MapPin size={14} style={{ color: '#64748b' }} />
-                      <span>{doctor.location}</span>
-                    </div>
-                  )}
-                  {doctor.email && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Mail size={14} style={{ color: '#64748b' }} />
-                      <span>{doctor.email}</span>
-                    </div>
-                  )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {doctor.name}
+                  </span>
+                  <span style={{ fontSize: '0.60rem', fontWeight: 700, background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', padding: '1px 5px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                    DHA Verified ✓
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {doctor.specialty} • {doctor.license}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setIsCredentialsModalOpen(true);
+                }}
+                style={{
+                  height: '28px',
+                  padding: '0 8px',
+                  borderRadius: '4px',
+                  border: '1px solid #cbd5e1',
+                  background: '#f8fafc',
+                  color: '#334155',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                title="View Doctor Credentials & License"
+              >
+                <ShieldCheck size={12} style={{ color: '#0d9488' }} />
+                <span>Info</span>
+              </button>
+
               <button
                 type="button"
                 className="gcp-mobile-nav-trigger"
                 onClick={() => setIsMobileSidebarOpen(true)}
                 style={{
-                  height: '34px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  background: '#e8f0fe',
+                  height: '28px',
+                  padding: '0 8px',
+                  borderRadius: '4px',
                   border: '1px solid #1a73e8',
+                  background: '#e8f0fe',
                   color: '#1a73e8',
-                  fontSize: '0.8rem',
+                  fontSize: '0.72rem',
                   fontWeight: 600,
-                  cursor: 'pointer',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Menu size={15} />
-                <span>Clinical Menu</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCopyPortalLink}
-                style={{
-                  height: '34px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  color: '#334155',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '4px'
                 }}
+                title="Open Navigation Menu"
               >
-                {copiedLink ? <Check size={14} style={{ color: '#16a34a' }} /> : <Copy size={14} />}
-                <span>{copiedLink ? 'Link Copied' : 'Copy Portal URL'}</span>
+                <Menu size={13} />
+                <span>Menu</span>
               </button>
             </div>
           </div>
@@ -1740,6 +2054,33 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </div>
 
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsCredentialsModalOpen(true);
+              }}
+              style={{
+                height: '30px',
+                padding: '0 10px',
+                borderRadius: '4px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#3c4043',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                whiteSpace: 'nowrap'
+              }}
+              title="View physician credentials and profile popup"
+            >
+              <ShieldCheck size={13} style={{ color: '#0d9488' }} />
+              <span>Doctor Profile</span>
+            </button>
+
             <button
               type="button"
               onClick={handleCopyIntakeLink}
@@ -1833,7 +2174,21 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
           <div className="gcp-kpi-grid">
             {/* KPI 1: Active Prescriptions */}
-            <div className="gcp-kpi-card">
+            <div
+              className="gcp-kpi-card"
+              onClick={() => {
+                triggerHaptic('light');
+                setStatusFilter('active');
+                setPatientFilter('all');
+                setTemporalFilter('all');
+                setSearchQuery('');
+                setScopeMode('filtered');
+                document.getElementById('prescriptions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toast.success(`Filtered table: Showing ${activeKpis.activePrescriptions} active prescriptions`, { id: 'kpi-filter' });
+              }}
+              style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+              title="Click to view Active Prescriptions in table below"
+            >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Active Prescriptions</span>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1843,13 +2198,28 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
                 {activeKpis.activePrescriptions}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
-                Compounded posology regimens under treatment
+              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Compounded posology regimens</span>
+                <span style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 600 }}>Filter table →</span>
               </div>
             </div>
 
             {/* KPI 2: Monitored Patients */}
-            <div className="gcp-kpi-card">
+            <div
+              className="gcp-kpi-card"
+              onClick={() => {
+                triggerHaptic('light');
+                setStatusFilter('all');
+                setPatientFilter('all');
+                setTemporalFilter('all');
+                setSearchQuery('');
+                setScopeMode('global');
+                document.getElementById('prescriptions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toast.success(`Displaying all ${globalKpis.monitoredPatients} monitored patient dossiers`, { id: 'kpi-filter' });
+              }}
+              style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+              title="Click to view Monitored Patients directory"
+            >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Monitored Patients</span>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1859,13 +2229,25 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#202124', lineHeight: 1.1 }}>
                 {activeKpis.monitoredPatients}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
-                Unique patient dossiers managed
+              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Unique patient dossiers managed</span>
+                <span style={{ fontSize: '0.70rem', color: '#003666', fontWeight: 600 }}>View patients →</span>
               </div>
             </div>
 
             {/* KPI 3: Pending Clinical Tasks */}
-            <div className="gcp-kpi-card">
+            <div
+              className="gcp-kpi-card"
+              onClick={() => {
+                triggerHaptic('light');
+                setTaskFilter('all');
+                setSearchQuery('');
+                document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toast.success(`Showing all ${activeKpis.pendingTasksCount} actionable clinical tasks`, { id: 'kpi-filter' });
+              }}
+              style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+              title="Click to view Action Tasks in to-do list below"
+            >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Action Tasks</span>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1875,13 +2257,26 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#d97706', lineHeight: 1.1 }}>
                 {activeKpis.pendingTasksCount}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
-                Actionable reviews & titrations required
+              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Actionable reviews & titrations</span>
+                <span style={{ fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>View tasks →</span>
               </div>
             </div>
 
             {/* KPI 4: Refills & Titrations Due */}
-            <div className="gcp-kpi-card">
+            <div
+              className="gcp-kpi-card"
+              onClick={() => {
+                triggerHaptic('light');
+                setTaskFilter('refill');
+                setSearchQuery('');
+                setScopeMode('filtered');
+                document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toast.success(`Filtered To-Do Queue: Showing ${activeKpis.refillsDueCount} refills due`, { id: 'kpi-filter' });
+              }}
+              style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+              title="Click to view Refill & Renewal Tasks in to-do list"
+            >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Refills & Cycles</span>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1891,8 +2286,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ fontSize: '1.9rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1.1 }}>
                 {activeKpis.refillsDueCount}
               </div>
-              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px' }}>
-                Upcoming supply cycles within 14 days
+              <div style={{ fontSize: '0.74rem', color: '#70757a', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Upcoming supply cycles (14 days)</span>
+                <span style={{ fontSize: '0.70rem', color: '#7c3aed', fontWeight: 600 }}>Filter refills →</span>
               </div>
             </div>
           </div>
@@ -1903,7 +2299,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           <GlobalSearchBar
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search patient, prescription code, active compounds, formulation..."
+            placeholder="Search patient, prescription code, active compounds..."
             resultCount={filteredPrescriptions.length}
             namespace={`doctor-${slug}`}
             size="lg"
@@ -2175,7 +2571,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 </span>
               </div>
               <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
-                Complete verified repository of compounded formulations and sequential regimens.
+                Complete verified repository of compounded prescriptions and clinical regimens.
               </p>
             </div>
 
@@ -2214,8 +2610,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
                 {[
                   { id: 'all', label: 'All' },
+                  { id: 'active', label: 'Active & Approved' },
                   { id: 'approved', label: 'Approved' },
-                  { id: 'active', label: 'Active' },
                   { id: 'pending', label: 'Pending' }
                 ].map(s => (
                   <button
@@ -2238,6 +2634,36 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     {s.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Patient Selector Filter (Google Cloud Standard) */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '2px 8px', gap: '5px' }}>
+                <Users size={12} style={{ color: patientFilter === 'all' ? '#64748b' : '#003666' }} />
+                <select
+                  value={patientFilter}
+                  onChange={(e) => {
+                    setPatientFilter(e.target.value);
+                    if (e.target.value !== 'all') {
+                      toast.success(`Filtered for patient: ${e.target.value}`);
+                    }
+                  }}
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    background: 'transparent',
+                    border: 'none',
+                    color: patientFilter === 'all' ? '#64748b' : '#003666',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    padding: '3px 0'
+                  }}
+                  title="Filter table by patient dossier"
+                >
+                  <option value="all">All Patients ({uniquePatientList.length})</option>
+                  {uniquePatientList.map(pName => (
+                    <option key={pName} value={pName}>{pName}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Refresh Button */}
@@ -2323,7 +2749,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                    {/* Active Formulations List */}
+                    {/* Active Prescription Items List */}
                     <div>
                       <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
                         Active Ingredients & Vehicles ({itemsList.length})
@@ -2412,469 +2838,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 </div>
               );
             }}
-          />
-        </section>
-
-        {/* ── Section: Evidence-Based Clinical Protocols & Pathways (The Medical Evidence) ── */}
-        <section
-          id="protocols"
-          style={{
-            background: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            marginTop: '32px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              padding: '18px 22px',
-              borderBottom: '1px solid #dadce0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '14px',
-              background: '#ffffff'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <BookOpen size={18} style={{ color: '#003666' }} />
-                  <span>Evidence-Based Clinical Protocols & Treatment Pathways</span>
-                </h2>
-                <span style={{ fontSize: '0.70rem', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                  {filteredProtocols.length} Active Protocols
-                </span>
-                <span style={{ fontSize: '0.70rem', color: '#166534', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                  Peer-Reviewed Titration Pathways
-                </span>
-              </div>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
-                Standardized titration curves, chronobiological receptor management, and companion biomarker calibration for physician practice.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <a
-                href="/proto"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#003666',
-                  color: '#ffffff',
-                  border: '1px solid #002244',
-                  borderRadius: '4px',
-                  padding: '6px 14px',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  boxShadow: '0 1px 2px rgba(0,54,102,0.18)'
-                }}
-              >
-                <span>Complete Protocols Registry</span>
-                <ExternalLink size={12} />
-              </a>
-            </div>
-          </div>
-
-          {/* Filter Pills */}
-          <div style={{ padding: '12px 22px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginRight: '4px' }}>
-              Specialty Category:
-            </span>
-            {[
-              { id: 'all', label: 'All Protocols' },
-              { id: 'metabolic', label: 'Metabolism & GLP-1' },
-              { id: 'regenerative', label: 'Tissue Repair & Gut' },
-              { id: 'longevity', label: 'Cellular Longevity' },
-              { id: 'neuro', label: 'Neuro & Sleep' },
-              { id: 'immune', label: 'Immune Resilience' }
-            ].map(cat => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setProtocolCategory(cat.id);
-                }}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '14px',
-                  border: protocolCategory === cat.id ? '1px solid #003666' : '1px solid #cbd5e1',
-                  background: protocolCategory === cat.id ? '#003666' : '#ffffff',
-                  color: protocolCategory === cat.id ? '#ffffff' : '#334155',
-                  fontSize: '0.74rem',
-                  fontWeight: protocolCategory === cat.id ? 650 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.12s'
-                }}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Protocols Cards Grid */}
-          <div style={{ padding: '20px 22px' }}>
-            {filteredProtocols.length === 0 ? (
-              <EmptyState
-                icon={BookOpen}
-                title="No clinical protocols match the current filters"
-                subtitle="Try resetting the category filter or adjusting search query keywords."
-                action={{
-                  label: 'View All Protocols',
-                  onClick: () => setProtocolCategory('all')
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                  gap: '16px'
-                }}
-              >
-                {filteredProtocols.map(proto => (
-                  <div
-                    key={proto.id || proto.slug}
-                    style={{
-                      border: '1px solid #dadce0',
-                      borderRadius: '8px',
-                      background: '#ffffff',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      transition: 'border-color 0.15s, box-shadow 0.15s',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#1a73e8';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(26,115,232,0.12)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#dadce0';
-                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(60,64,67,0.04)';
-                    }}
-                  >
-                    <div>
-                      {/* Top Badges */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#003666', background: '#f0f7ff', border: '1px solid #c8e1ff', padding: '2px 8px', borderRadius: '12px' }}>
-                          {proto.category || 'Integrative'}
-                        </span>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                          <Clock size={11} />
-                          <span>{proto.durationWeeks || 8} Weeks Titration</span>
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <a
-                        href={proto.dossierUrl || `/proto/${proto.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                      >
-                        <h4 style={{ margin: '0 0 6px 0', fontSize: '0.94rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
-                          {proto.title}
-                        </h4>
-                      </a>
-
-                      {/* Summary */}
-                      <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
-                        {proto.summary && proto.summary.length > 140 ? `${proto.summary.slice(0, 140)}...` : (proto.summary || 'Evidence-based structured clinical protocol for practitioner supervision.')}
-                      </p>
-
-                      {/* Active Compounds Involved */}
-                      {Array.isArray(proto.compounds) && proto.compounds.length > 0 && (
-                        <div style={{ marginBottom: '12px' }}>
-                          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                            Formulated Substances & APIs:
-                          </div>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                            {proto.compounds.slice(0, 4).map((c, i) => (
-                              <span
-                                key={i}
-                                style={{
-                                  fontSize: '0.70rem',
-                                  fontWeight: 500,
-                                  background: '#f8fafc',
-                                  border: '1px solid #e2e8f0',
-                                  color: '#1e293b',
-                                  padding: '2px 6px',
-                                  borderRadius: '3px'
-                                }}
-                              >
-                                {typeof c === 'string' ? c : (c.name || 'API')}
-                              </span>
-                            ))}
-                            {proto.compounds.length > 4 && (
-                              <span style={{ fontSize: '0.70rem', color: '#64748b', padding: '2px 4px' }}>
-                                +{proto.compounds.length - 4} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '8px' }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('light');
-                          const intakeUrl = `${window.location.origin}/intake?protocol=${proto.slug}&dr=${opaqueCode}`;
-                          navigator.clipboard?.writeText(intakeUrl);
-                          toast.success(`Intake link for ${proto.title} copied to clipboard ✓`);
-                        }}
-                        style={{
-                          background: '#f8fafc',
-                          border: '1px solid #dadce0',
-                          color: '#334155',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}
-                        title="Copy patient intake link with this protocol pre-selected"
-                      >
-                        <Share2 size={11} />
-                        <span>Prescribe Intake</span>
-                      </button>
-
-                      <a
-                        href={proto.dossierUrl || `/proto/${proto.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          background: '#ffffff',
-                          border: '1px solid #1a73e8',
-                          color: '#1a73e8',
-                          borderRadius: '4px',
-                          padding: '4px 10px',
-                          fontSize: '0.74rem',
-                          fontWeight: 600,
-                          textDecoration: 'none',
-                          boxShadow: '0 1px 2px rgba(26,115,232,0.06)'
-                        }}
-                      >
-                        <span>View Protocol Dossier</span>
-                        <ExternalLink size={10} />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ── Section 3: Authorized Therapeutic Formulary & Compounding APIs ── */}
-        <section
-          id="formulary"
-          style={{
-            background: '#ffffff',
-            border: '1px solid #dadce0',
-            borderRadius: '8px',
-            marginTop: '32px',
-            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Section Header */}
-          <div
-            style={{
-              padding: '18px 22px',
-              borderBottom: '1px solid #dadce0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '14px',
-              background: '#ffffff'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '1.08rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FlaskConical size={18} style={{ color: '#003666' }} />
-                  <span>Practice Compounding Pharmacopeia & Therapeutic APIs</span>
-                </h2>
-                <span style={{ fontSize: '0.70rem', color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                  EU GMP Certified Reference
-                </span>
-                <span style={{ fontSize: '0.70rem', color: '#1a73e8', background: '#e8f0fe', border: '1px solid #d2e3fc', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                  Showing {filteredFormulary.length} of {formulary.length} Reference APIs
-                </span>
-              </div>
-              <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
-                Active pharmaceutical ingredients and research-backed bioactive peptides authorized by {doctor.name} for personalized magistral compounding.
-              </p>
-            </div>
-
-            {/* Direct reference button to complete directory */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <a
-                href="https://med-peptides.com/c/CAT-MUWWS6JL"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  height: '34px',
-                  padding: '0 14px',
-                  borderRadius: '6px',
-                  border: '1px solid #dadce0',
-                  background: '#f8fafc',
-                  color: '#1a73e8',
-                  fontSize: '0.80rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  transition: 'all 0.15s'
-                }}
-              >
-                <BookOpen size={14} />
-                <span>Explore Full Pharmacopeia Directory</span>
-                <ExternalLink size={12} style={{ color: '#1a73e8' }} />
-              </a>
-            </div>
-          </div>
-
-          {/* Controls Bar: Search & Category Chips */}
-          <div
-            style={{
-              padding: '14px 22px',
-              borderBottom: '1px solid #f1f5f9',
-              background: '#fafbfc',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-              {/* Category / Goal Pills */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {[
-                  { id: 'all', label: `All APIs (${formularyCounts.all})` },
-                  { id: 'repair', label: `Tissue Repair & Gut (${formularyCounts.repair})` },
-                  { id: 'metabolic', label: `Metabolic & GLP (${formularyCounts.metabolic})` },
-                  { id: 'cellular', label: `Cellular Optimization (${formularyCounts.cellular})` },
-                  { id: 'cognitive', label: `Cognitive & Neuro (${formularyCounts.cognitive})` }
-                ].map((g) => (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => setFormularyGoal(g.id)}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: '16px',
-                      border: formularyGoal === g.id ? '1px solid #1a73e8' : '1px solid #dadce0',
-                      background: formularyGoal === g.id ? '#e8f0fe' : '#ffffff',
-                      color: formularyGoal === g.id ? '#1a73e8' : '#475569',
-                      fontSize: '0.74rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.12s'
-                    }}
-                  >
-                    {g.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Instant Search Bar */}
-              <div style={{ position: 'relative', minWidth: '220px', maxWidth: '320px', flex: '1 1 220px' }}>
-                <input
-                  type="text"
-                  placeholder="Filter peptides (BPC, Semax, etc.)..."
-                  value={formularySearch}
-                  onChange={(e) => setFormularySearch(e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '32px',
-                    padding: '0 10px',
-                    borderRadius: '6px',
-                    border: '1px solid #dadce0',
-                    fontSize: '0.78rem',
-                    color: '#1e293b',
-                    outline: 'none',
-                    background: '#ffffff'
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DataTable
-            columns={pharmacopeiaColumns}
-            data={filteredFormulary}
-            keyField="id"
-            tableId={`doctor-pharmacopeia-${slug}`}
-            pagination={true}
-            initialRowsPerPage={10}
-            alwaysShowPagination={true}
-            onRowClick={(p) => setSelectedMonograph(p)}
-            emptyTitle="No Reference APIs Found"
-            emptyDescription="Try adjusting your filter or search keywords to explore authorized pharmaceutical ingredients."
-            emptyActionLabel="Reset Filters"
-            onEmptyAction={() => { setFormularyGoal('all'); setFormularySearch(''); }}
-            expandableRender={(peptide) => (
-              <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                  <span style={{ fontSize: '0.80rem', fontWeight: 750, color: '#003666' }}>
-                    Mechanism of Action (MOA) & Receptor Pathways
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: '#16a34a', background: '#f0fdf4', padding: '1px 8px', borderRadius: '4px', border: '1px solid #bbf7d0', fontWeight: 600 }}>
-                    Analytical Purity: {peptide.purity || '≥ 99% HPLC'}
-                  </span>
-                </div>
-                <p style={{ margin: '0 0 12px 0', fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
-                  {safeRenderText(peptide.moa) || safeRenderText(peptide.description)}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                    Target Axis: <strong style={{ color: '#0f172a' }}>{peptide.primaryGoal || 'Cellular Longevity'}</strong> · Vehicle: <strong style={{ color: '#0f172a' }}>{peptide.route || 'Lyophilized API'}</strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMonograph(peptide)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '5px 12px',
-                      borderRadius: '4px',
-                      background: '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <BookOpen size={12} />
-                    <span>Open Complete Clinical Monograph</span>
-                  </button>
-                </div>
-              </div>
-            )}
           />
         </section>
 
@@ -3750,6 +3713,106 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </div>
             </div>
 
+            {/* Mobile Drawer Doctor Identity Sticker */}
+            <div style={{ padding: '14px 18px', borderTop: '1px solid #dadce0', background: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.92rem',
+                    fontWeight: 700,
+                    flexShrink: 0
+                  }}
+                >
+                  {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {doctor.name}
+                  </div>
+                  <div style={{ fontSize: '0.70rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {doctor.specialty}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '6px 10px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <ShieldCheck size={13} style={{ color: '#0d9488' }} />
+                  <span style={{ fontSize: '0.70rem', color: '#475569', fontWeight: 600 }}>DHA:</span>
+                  <span style={{ fontSize: '0.70rem', color: '#0f172a', fontWeight: 600, fontFamily: 'monospace' }}>{doctor.license}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    navigator.clipboard?.writeText(doctor.license);
+                    toast.success('DHA License copied ✓');
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#64748b' }}
+                  title="Copy DHA license"
+                >
+                  <Copy size={12} />
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileSidebarOpen(false);
+                    setIsCredentialsModalOpen(true);
+                  }}
+                  style={{
+                    height: '30px',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#334155',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Eye size={12} />
+                  <span>Full Profile</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileSidebarOpen(false);
+                    handleCopyIntakeLink();
+                  }}
+                  style={{
+                    height: '30px',
+                    borderRadius: '4px',
+                    border: '1px solid #bfdbfe',
+                    background: '#eff6ff',
+                    color: '#1d4ed8',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Share2 size={12} />
+                  <span>Share Intake</span>
+                </button>
+              </div>
+            </div>
+
             {/* Drawer Bottom CTA */}
             <div style={{ padding: '16px', borderTop: '1px solid #dadce0', background: '#f8fafc' }}>
               <button
@@ -3934,7 +3997,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               >
                 {[
                   { id: 'dossier', label: 'Clinical Dossier', icon: FileText },
-                  { id: 'formulations', label: `Formulations (${itemsList.length || 1})`, icon: FlaskConical },
+                  { id: 'items', label: `Prescription Items (${itemsList.length || 1})`, icon: Pill },
                   { id: 'dispensary', label: 'Quality & Tracking', icon: ShieldCheck }
                 ].map((t) => {
                   const Icon = t.icon;
@@ -4079,7 +4142,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                           }}>
                             {isSigned
                               ? `Prescription digitally authorized by ${doctor.name || 'Treating Physician'} for compounding and release.`
-                              : (item?.description || `Compounded formulation awaiting physician electronic sign-off.`)}
+                              : (item?.description || `Compounded prescription awaiting physician electronic sign-off.`)}
                           </div>
 
                           {!isSigned ? (
@@ -4151,14 +4214,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   </>
                 )}
 
-                {inspectorTab === 'formulations' && (
+                {inspectorTab === 'items' && (
                   <>
                     <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
-                      Active Compounded Ingredients & Formulations ({itemsList.length || 1})
+                      Active Compounded Ingredients & Prescription Items ({itemsList.length || 1})
                     </div>
                     {itemsList.length === 0 ? (
                       <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '6px', fontSize: '0.8rem', color: '#64748b', textAlign: 'center' }}>
-                        Custom personalized galenic blend under formulation review.
+                        Custom personalized prescription regimen under clinical review.
                       </div>
                     ) : (
                       itemsList.map((it, idx) => (
@@ -4320,6 +4383,356 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </div>
         );
       })()}
+
+      {/* ── Slide-Over Clinical Intelligence & Algolia Search Drawer (Google Cloud UX Principle) ── */}
+      {isDiscoveryDrawerOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1000,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            background: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(4px)',
+            transition: 'opacity 0.2s ease'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsDiscoveryDrawerOpen(false);
+            }
+          }}
+        >
+          <aside
+            style={{
+              width: '100%',
+              maxWidth: '1240px',
+              height: '100vh',
+              background: '#f8fafc',
+              boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              animation: 'slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Drawer Header */}
+            <div
+              style={{
+                padding: '16px 24px',
+                background: '#ffffff',
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #003666 0%, #1e40af 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff'
+                  }}
+                >
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
+                      Clinical Intelligence & Algolia Search Engine
+                    </h2>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', background: '#e0e7ff', color: '#4338ca' }}>
+                      ⌘K Instant
+                    </span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                    Interactive search across 77 evidence-based protocols & bioactive compounding APIs
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <kbd
+                  style={{
+                    fontSize: '0.70rem',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    background: '#f1f5f9',
+                    color: '#475569',
+                    border: '1px solid #cbd5e1',
+                    fontWeight: 600
+                  }}
+                >
+                  ESC to close
+                </kbd>
+                <button
+                  type="button"
+                  onClick={() => setIsDiscoveryDrawerOpen(false)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    border: '1px solid #e2e8f0',
+                    background: '#ffffff',
+                    color: '#64748b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                  title="Close Discovery Drawer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Drawer Body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+              <ClinicalIntelligenceBanner
+                protocols={data?.protocols || []}
+                formulary={data?.formulary || []}
+                opaqueDoctorCode={doctor?.opaqueCode || slug}
+              />
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* ── Official Physician Credentials & Profile Popup Modal ─────────────── */}
+      {isCredentialsModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 1100,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsCredentialsModalOpen(false);
+            }
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '680px',
+              background: '#ffffff',
+              borderRadius: '12px',
+              boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08)',
+              padding: '24px',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button Top Right */}
+            <button
+              type="button"
+              onClick={() => setIsCredentialsModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                width: '32px',
+                height: '32px',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                background: '#f8fafc',
+                color: '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+              title="Close Popup"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Doctor Identity Card (Exact Layout from Screenshot) */}
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', paddingRight: '40px' }}>
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.45rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  boxShadow: '0 2px 8px rgba(0,54,102,0.18)',
+                  position: 'relative'
+                }}
+              >
+                {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: '0px',
+                    right: '0px',
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#16a34a',
+                    border: '2px solid #ffffff'
+                  }}
+                  title="DHA Verified Active Practice"
+                />
+              </div>
+
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
+                  {doctor.name}
+                </h2>
+                <p style={{ margin: '4px 0 8px 0', fontSize: '0.88rem', color: '#475569', fontWeight: 500, lineHeight: 1.35 }}>
+                  {doctor.specialty} • {doctor.clinic}
+                </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '0.80rem', color: '#64748b' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldCheck size={14} style={{ color: '#0d9488', flexShrink: 0 }} />
+                    <span>Medical License:</span>
+                    <CopyableId value={doctor.license} iconOnly={false} />
+                  </div>
+                  {doctor.location && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <MapPin size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                      <span>{doctor.location}</span>
+                    </div>
+                  )}
+                  {doctor.email && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Mail size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                      <span>{doctor.email}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons Row (Exact layout from screenshot with Copy Portal URL) */}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                type="button"
+                onClick={handleShareDoctorPortal}
+                style={{
+                  height: '36px',
+                  padding: '0 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#3c4043',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                }}
+              >
+                <Copy size={14} />
+                <span>Copy Portal URL</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyIntakeLink}
+                style={{
+                  height: '36px',
+                  padding: '0 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #1a73e8',
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Share2 size={14} />
+                <span>Share Patient Intake</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleShareWhatsApp();
+                  setIsCredentialsModalOpen(false);
+                }}
+                style={{
+                  height: '36px',
+                  padding: '0 14px',
+                  borderRadius: '6px',
+                  border: '1px solid #bbf7d0',
+                  background: '#f0fdf4',
+                  color: '#15803d',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <ExternalLink size={14} />
+                <span>WhatsApp Consultation</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCredentialsModalOpen(false);
+                  setIsIntakeOpen(true);
+                }}
+                style={{
+                  height: '36px',
+                  padding: '0 16px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: '#003666',
+                  color: '#ffffff',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginLeft: 'auto',
+                  boxShadow: '0 2px 4px rgba(0,54,102,0.18)'
+                }}
+              >
+                <Sparkles size={14} />
+                <span>Submit Prescription</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

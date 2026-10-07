@@ -328,6 +328,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         rxId: rx.id,
         code: rx.code,
         patientName: rx.patientName,
+        patient: rx.patient || null,
+        patientDob: rx.patient?.dob || null,
         type: 'titration',
         priority: rxAgeDays > 25 ? 'high' : 'medium',
         title: `Protocol Phase ${phaseNum} Evaluation`,
@@ -347,6 +349,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         rxId: rx.id,
         code: rx.code,
         patientName: rx.patientName,
+        patient: rx.patient || null,
+        patientDob: rx.patient?.dob || null,
         type: 'refill',
         priority: 'medium',
         title: 'Prescription Supply Refill Assessment',
@@ -367,6 +371,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         existingTask.pendingCount = (existingTask.pendingCount || 1) + 1;
         existingTask.codes = existingTask.codes || [existingTask.code];
         if (!existingTask.codes.includes(rx.code)) existingTask.codes.push(rx.code);
+        if (!existingTask.patient && rx.patient) existingTask.patient = rx.patient;
+        if (!existingTask.patientDob && rx.patient?.dob) existingTask.patientDob = rx.patient.dob;
         existingTask.title = `Prescription Dispensing Sign-off (${existingTask.pendingCount} Formulations)`;
         existingTask.description = `${existingTask.pendingCount} compounded formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) awaiting physician clinical authorization.`;
       } else {
@@ -377,6 +383,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
           code: rx.code,
           codes: [rx.code],
           patientName: rx.patientName,
+          patient: rx.patient || null,
+          patientDob: rx.patient?.dob || null,
           type: 'approval',
           priority: 'action_required',
           pendingCount: 1,
@@ -398,6 +406,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       rxId: topRx.id,
       code: topRx.code,
       patientName: topRx.patientName,
+      patient: topRx.patient || null,
+      patientDob: topRx.patient?.dob || null,
       type: 'milestone',
       priority: 'routine',
       title: 'Routine 30-day Clinical Milestone Follow-up',
@@ -408,11 +418,11 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     });
   }
 
-  // 4. Compute GCP Standard KPIs
+  // 4. Compute GCP Standard KPIs (Server-calculated for instant 0ms response)
   const activePrescriptions = prescriptions.filter(p => ['approved', 'active'].includes(p.status.toLowerCase())).length;
   const monitoredPatients = patientMap.size;
   const pendingTasksCount = clinicalTasks.length;
-  const refillsDueCount = clinicalTasks.filter(t => t.type === 'refill' || t.type === 'titration').length;
+  const refillsDueCount = clinicalTasks.filter(t => t.type === 'refill').length;
 
   const nameSlug = slugify(cleanDoctorName);
 
