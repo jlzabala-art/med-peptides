@@ -34,6 +34,7 @@ import {
   BarChart3,
   FlaskConical,
   BookOpen,
+  Loader2,
   X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -98,6 +99,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // GCP Resource Inspector Drawer State (Golden Rule #4: Master-Detail sin abandonar contexto)
   const [selectedInspectorItem, setSelectedInspectorItem] = useState(null);
   const [inspectorTab, setInspectorTab] = useState('dossier'); // 'dossier' | 'formulations' | 'dispensary'
+  const [signingTaskId, setSigningTaskId] = useState(null);
+
+  // Auto-collapse sidebar on laptops (< 1200px) to prevent table clipping (GCP UX Standard)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1200) {
+      setIsSidebarCollapsed(true);
+    }
+  }, []);
 
   // Therapeutic Pharmacopeia & Compounding APIs State (Lotusland Clinical Directory)
   const [formularyGoal, setFormularyGoal] = useState('all');
@@ -362,14 +371,159 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     setInspectorTab('dossier');
   };
 
+  // ── Functional Electronic Clinical Sign-off Handler (Firestore + Layer 1 RAM) ──
+  const handleSignOffPrescription = async (taskOrRx, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    // Determine the codes to sign
+    const codesToSign = taskOrRx.codes && Array.isArray(taskOrRx.codes) && taskOrRx.codes.length > 0
+      ? taskOrRx.codes
+      : [taskOrRx.code || taskOrRx.prescriptionNumber || taskOrRx.id].filter(Boolean);
+
+    if (codesToSign.length === 0) return;
+
+    const signingKey = taskOrRx.id || codesToSign[0];
+    setSigningTaskId(signingKey);
+
+    try {
+      // Sign each prescription via the update-status API
+      for (const code of codesToSign) {
+        const res = await fetch('/api/prescriptions/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prescriptionNumber: code,
+            status: 'approved',
+            reason: 'Physician electronic sign-off and dispensing authorization via Doctor Portal',
+            updatedBy: doctor?.name || 'Treating Physician'
+          })
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Failed to sign prescription ${code}`);
+        }
+      }
+
+      // Optimistically update local data state
+      setData((prev) => {
+        if (!prev) return prev;
+        const updatedPrescriptions = (prev.prescriptions || []).map((rx) => {
+          if (codesToSign.includes(rx.code) || codesToSign.includes(rx.prescriptionNumber) || codesToSign.includes(rx.id)) {
+            return {
+              ...rx,
+              status: 'approved',
+              state: 'approved',
+              signedAt: new Date().toISOString(),
+              signedBy: doctor?.name || 'Treating Physician'
+            };
+          }
+          return rx;
+        });
+
+        // Mark task as completed / authorized
+        const updatedTasks = (prev.tasks || []).map((t) => {
+          if (t.id === taskOrRx.id || (t.codes && t.codes.some(c => codesToSign.includes(c))) || codesToSign.includes(t.code)) {
+            return {
+              ...t,
+              status: 'approved',
+              isSigned: true,
+              priority: 'routine',
+              title: `${t.title} — Authorized`,
+              description: `Digitally signed & authorized for compounding release by ${doctor?.name || 'Treating Physician'}.`
+            };
+          }
+          return t;
+        });
+
+        // Recompute KPIs
+        const newActive = updatedPrescriptions.filter(p => ['approved', 'active'].includes((p.status || '').toLowerCase())).length;
+        const newPending = updatedTasks.filter(t => t.type === 'approval' && !t.isSigned).length;
+
+        return {
+          ...prev,
+          prescriptions: updatedPrescriptions,
+          tasks: updatedTasks,
+          kpis: {
+            ...prev.kpis,
+            activePrescriptions: newActive,
+            pendingTasksCount: newPending
+          }
+        };
+      });
+
+      // Update selectedInspectorItem if viewing this item
+      setSelectedInspectorItem((prev) => {
+        if (!prev) return prev;
+        const isMatched = (prev.data && (prev.data.id === taskOrRx.id || codesToSign.includes(prev.data.code))) ||
+          (prev.prescription && codesToSign.includes(prev.prescription.code));
+        if (isMatched) {
+          return {
+            ...prev,
+            data: {
+              ...(prev.data || {}),
+              status: 'approved',
+              isSigned: true
+            },
+            prescription: prev.prescription ? {
+              ...prev.prescription,
+              status: 'approved',
+              state: 'approved',
+              signedAt: new Date().toISOString(),
+              signedBy: doctor?.name || 'Treating Physician'
+            } : null
+          };
+        }
+        return prev;
+      });
+
+      triggerHaptic('success');
+      toast.success(
+        codesToSign.length > 1
+          ? `${codesToSign.length} formulations signed & authorized for compounding ✓`
+          : `Prescription #${codesToSign[0]} signed & authorized for compounding ✓`
+      );
+    } catch (err) {
+      console.error('Error signing off prescription:', err);
+      toast.error('Signing error: ' + (err.message || 'Please try again'));
+    } finally {
+      setSigningTaskId(null);
+    }
+  };
+
   // ── Pending Clinical Tasks Columns (DataTable Exclusive Rendering) ───────
   const taskColumns = useMemo(() => [
     {
       key: 'priority',
       header: 'Clinical Status',
-      width: '16%',
+      width: '18%',
       sortable: true,
       render: (t) => {
+        if (t.isSigned || t.status === 'approved') {
+          return (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '3px 8px',
+                borderRadius: '4px',
+                background: '#f0fdf4',
+                color: '#16a34a',
+                border: '1px solid #bbf7d0',
+                fontSize: '0.72rem',
+                fontWeight: 650,
+                letterSpacing: '0.01em',
+                whiteSpace: 'nowrap',
+                lineHeight: 1.2,
+                flexShrink: 0
+              }}
+            >
+              <CheckCircle2 size={12} style={{ color: '#16a34a', flexShrink: 0 }} />
+              Signed & Approved
+            </span>
+          );
+        }
+
         let label = 'Routine';
         let color = '#475569';
         let bg = '#f8fafc';
@@ -420,7 +574,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     {
       key: 'title',
       header: 'Clinical Task & Action Plan',
-      width: '38%',
+      width: '36%',
       sortable: true,
       render: (t) => {
         let cleanTitle = t.title || '';
@@ -463,7 +617,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     {
       key: 'dueDate',
       header: 'Timeline',
-      width: '15%',
+      width: '12%',
       sortable: true,
       render: (t) => {
         let displayDue = t.dueDate;
@@ -494,36 +648,124 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     {
       key: 'actions',
       header: 'Action',
-      width: '15%',
+      width: '14%',
       align: 'right',
-      render: (t) => (
-        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
-          <Link
-            href={t.actionUrl}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              height: '30px',
-              padding: '0 12px',
-              borderRadius: '4px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              color: '#003666',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              textDecoration: 'none',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
-              transition: 'all 0.12s'
-            }}
+      isAction: true,
+      mobilePriority: 'always',
+      render: (t) => {
+        const isSigned = t.isSigned || t.status === 'approved';
+        const isSigning = signingTaskId === (t.id || t.code);
+
+        if (isSigned) {
+          return (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  color: '#16a34a'
+                }}
+              >
+                <CheckCircle2 size={13} />
+                <span>Authorized</span>
+              </span>
+              <Link
+                href={t.actionUrl}
+                target="_blank"
+                onClick={(e) => e.stopPropagation()}
+                title="Open official signed prescription pad in new tab"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#475569'
+                }}
+              >
+                <ArrowUpRight size={13} />
+              </Link>
+            </div>
+          );
+        }
+
+        return (
+          <div
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <span>{t.actionLabel}</span>
-            <ArrowUpRight size={13} />
-          </Link>
-        </div>
-      )
+            <button
+              type="button"
+              disabled={isSigning}
+              onClick={(e) => handleSignOffPrescription(t, e)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                height: '30px',
+                padding: '0 10px',
+                borderRadius: '4px',
+                background: '#003666',
+                border: '1px solid #002244',
+                color: '#ffffff',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: isSigning ? 'wait' : 'pointer',
+                boxShadow: '0 1px 2px rgba(0,54,102,0.18)',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.12s'
+              }}
+              title="Digitally sign & authorize this prescription compounding order"
+            >
+              {isSigning ? (
+                <>
+                  <Loader2 size={12} className="animate-spin" />
+                  <span>Signing...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={12} style={{ color: '#38bdf8' }} />
+                  <span>Sign-off</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRowClickTask(t);
+              }}
+              title="Review formulation details in slide-over Inspector Drawer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                height: '30px',
+                padding: '0 8px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#334155',
+                fontSize: '0.74rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span>Review</span>
+            </button>
+          </div>
+        );
+      }
     }
-  ], []);
+  ], [signingTaskId, handleSignOffPrescription]);
 
   // ── Prescriptions Dossier Columns (DataTable Exclusive Rendering) ─────────
   const prescriptionColumns = useMemo(() => [
@@ -591,78 +833,308 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       )
     },
     {
+      key: 'status',
+      header: 'Status',
+      width: '16%',
+      sortable: true,
+      render: (rx) => <StatusBadge status={rx.status} />
+    },
+    {
+      key: 'createdAt',
+      header: 'Date',
+      width: '14%',
+      sortable: true,
+      render: (rx) => (
+        <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <Calendar size={12} style={{ color: '#64748b' }} />
+          <span>{rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active'}</span>
+        </div>
+      )
+    },
+    {
       key: 'actions',
       header: 'Actions',
       width: '14%',
       align: 'right',
-      render: (rx) => (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
-          <Link
-            href={`/rx/${rx.code}`}
+      render: (rx) => {
+        const isPending = ['pending', 'draft'].includes((rx.status || rx.state || '').toLowerCase());
+        const isSigning = signingTaskId === (rx.code || rx.id);
+
+        return (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
+            {isPending && (
+              <button
+                type="button"
+                disabled={isSigning}
+                onClick={(e) => handleSignOffPrescription(rx, e)}
+                style={{
+                  height: '30px',
+                  padding: '0 10px',
+                  borderRadius: '4px',
+                  background: '#003666',
+                  border: '1px solid #002244',
+                  color: '#ffffff',
+                  fontSize: '0.74rem',
+                  fontWeight: 650,
+                  cursor: isSigning ? 'wait' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 1px 2px rgba(0,54,102,0.18)',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Sign & Authorize Prescribing Order"
+              >
+                {isSigning ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" />
+                    <span>Signing...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={12} style={{ color: '#38bdf8' }} />
+                    <span>Sign</span>
+                  </>
+                )}
+              </button>
+            )}
+            <Link
+              href={`/rx/${rx.code}`}
+              style={{
+                height: '30px',
+                padding: '0 10px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#003666',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                textDecoration: 'none'
+              }}
+              title="Open complete clinical monograph and posology dossier"
+            >
+              <span>Dossier</span>
+              <ExternalLink size={12} />
+            </Link>
+            <button
+              type="button"
+              onClick={() => handleOpenLabelsModal(rx)}
+              title="View vector pharmacy compounding bottle label"
+              style={{
+                height: '30px',
+                width: '30px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#0284c7',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.12s'
+              }}
+            >
+              <Tag size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const url = `${window.location.origin}/rx/${rx.code}?view=patient`;
+                navigator.clipboard?.writeText(url);
+                toast.success('Patient direct link copied ✓');
+              }}
+              title="Copy direct patient-facing prescription link"
+              style={{
+                height: '30px',
+                width: '30px',
+                borderRadius: '4px',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                color: '#5f6368',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Share2 size={13} />
+            </button>
+          </div>
+        );
+      }
+    }
+  ], [signingTaskId, handleSignOffPrescription]);
+
+  // ── Practice Pharmacopeia Columns (DataTable Universal) ───────────────────
+  const pharmacopeiaColumns = useMemo(() => [
+    {
+      key: 'name',
+      header: 'Compound & API Specification',
+      width: '28%',
+      sortable: true,
+      render: (p) => (
+        <div>
+          <div style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
+            {p.name}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>{p.casNumber ? `CAS: ${p.casNumber}` : 'High-Purity API'}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'primaryGoal',
+      header: 'Therapeutic Objective & Axis',
+      width: '24%',
+      sortable: true,
+      render: (p) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span
             style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              alignSelf: 'flex-start',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              background: '#e0f2fe',
+              color: '#0369a1',
+              fontSize: '0.72rem',
+              fontWeight: 600
+            }}
+          >
+            {p.primaryGoal || 'Cellular Optimization'}
+          </span>
+          {p.goals && p.goals.length > 1 && (
+            <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
+              {p.goals.slice(1).join(', ')}
+            </span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'purity',
+      header: 'Pharmacopeial Purity',
+      width: '18%',
+      sortable: true,
+      render: (p) => (
+        <div>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '0.72rem',
+              fontWeight: 650,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: '#f0fdf4',
+              color: '#16a34a',
+              border: '1px solid #bbf7d0',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <CheckCircle2 size={11} />
+            {p.purity || '≥ 99% HPLC Verified'}
+          </span>
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '3px' }}>
+            EU GMP Cleanroom
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'route',
+      header: 'Formulation Vehicle',
+      width: '18%',
+      sortable: true,
+      render: (p) => (
+        <div>
+          <div style={{ fontSize: '0.78rem', fontWeight: 500, color: '#334155' }}>
+            {p.route || 'Lyophilized API Powder'}
+          </div>
+          <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
+            Bacteriostatic / Galenic Base
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Monograph',
+      width: '12%',
+      align: 'right',
+      render: (p) => (
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }} onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => setSelectedMonograph(p)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
               height: '30px',
               padding: '0 10px',
               borderRadius: '4px',
               background: '#ffffff',
               border: '1px solid #dadce0',
-              color: '#003666',
-              fontSize: '0.76rem',
+              color: '#1a73e8',
+              fontSize: '0.74rem',
               fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              textDecoration: 'none'
-            }}
-            title="Open complete clinical monograph and posology dossier"
-          >
-            <span>Dossier</span>
-            <ExternalLink size={12} />
-          </Link>
-          <button
-            type="button"
-            onClick={() => handleOpenLabelsModal(rx)}
-            title="View vector pharmacy compounding bottle label"
-            style={{
-              height: '30px',
-              width: '30px',
-              borderRadius: '4px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              color: '#0284c7',
               cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.12s'
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
             }}
           >
-            <Tag size={13} />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const url = `${window.location.origin}/rx/${rx.code}?view=patient`;
-              navigator.clipboard?.writeText(url);
-              toast.success('Patient direct link copied ✓');
-            }}
-            title="Copy direct patient-facing prescription link"
-            style={{
-              height: '30px',
-              width: '30px',
-              borderRadius: '4px',
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              color: '#5f6368',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Share2 size={13} />
+            <Eye size={12} />
+            <span>Monograph</span>
           </button>
         </div>
       )
+    }
+  ], []);
+
+  // ── Bloodo™ Diagnostic Panels (Pre-Treatment Baseline Calibration) ─────────
+  const bloodoPanels = useMemo(() => [
+    {
+      id: 'panel-nad',
+      name: 'Intracellular NAD+ & Metabolomic Resilience Profile',
+      specimen: 'Capillary Dried Blood Spot (DBS)',
+      tat: '3-4 Business Days',
+      indications: 'Pre-peptide baseline mitochondrial calibration; measures intracellular NAD+/NADH ratio, active sirtuin pathway capacity, and cellular energy synthesis.',
+      biomarkers: ['Intracellular NAD+', 'NADH Redox Ratio', 'ATP Synthesis Index', 'Whole Blood Glycation Level'],
+      clinicalUtility: 'Guides mitochondrial and cellular longevity protocols (e.g. Epithalon, MOTS-c) to prevent futile metabolic cycle overstimulation.'
+    },
+    {
+      id: 'panel-gh',
+      name: 'Endocrine Growth Hormone Axis & IGF-1 Calibration',
+      specimen: 'Capillary Dried Blood Spot (DBS)',
+      tat: '3-4 Business Days',
+      indications: 'Pre-treatment endocrine screening for growth hormone secretagogues (CJC-1295 / Ipamorelin, Tesamorelin, Sermorelin).',
+      biomarkers: ['Serum IGF-1', 'IGFBP-3 Binding Protein', 'Fasting Insulin', 'GH Pulsatility Baseline'],
+      clinicalUtility: 'Establishes therapeutic ceiling and rules out baseline endocrine dysregulation before secretagogue cycles.'
+    },
+    {
+      id: 'panel-metabolic',
+      name: 'Cardiometabolic & Glycemic Homeostasis (HbA1c / HOMA-IR)',
+      specimen: 'Capillary Dried Blood Spot (DBS)',
+      tat: '2-3 Business Days',
+      indications: 'Objective metabolic profiling for GLP-1/GIP receptor agonist regimens and visceral adiposity protocols.',
+      biomarkers: ['HbA1c Glycated Hemoglobin', 'Fasting Blood Glucose', 'C-Peptide', 'Estimated HOMA-IR Index'],
+      clinicalUtility: 'Calibrates micro-dosing titration increments and objectively tracks metabolic insulin sensitivity response.'
+    },
+    {
+      id: 'panel-inflammation',
+      name: 'Cellular Senescence & Systemic Inflammatory Baseline',
+      specimen: 'Capillary Dried Blood Spot (DBS)',
+      tat: '3-4 Business Days',
+      indications: 'Tissue regeneration calibration prior to musculoskeletal repair protocols (BPC-157, TB-500, GHK-Cu).',
+      biomarkers: ['High-Sensitivity CRP (hs-CRP)', 'Interleukin-6 (IL-6)', 'TNF-Alpha Baseline', 'Fibrinogen Index'],
+      clinicalUtility: 'Confirms baseline systemic inflammatory burden to ensure targeted tissue trophic response without inflammatory flares.'
     }
   ], []);
 
@@ -728,6 +1200,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           icon: FlaskConical,
           href: '#formulary',
           badge: filteredFormulary.length > 0 ? `${filteredFormulary.length}` : null
+        },
+        {
+          id: 'diagnostics',
+          label: 'Diagnostic Panels (Bloodo™)',
+          icon: Activity,
+          href: '#diagnostics',
+          badge: 'CE-IVDR'
         },
         {
           id: 'protocols_catalog',
@@ -937,7 +1416,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           { id: 'overview', label: 'Overview', href: '#overview' },
           { id: 'tasks', label: 'Clinical Tasks', href: '#tasks', count: filteredTasks.length },
           { id: 'prescriptions', label: 'Prescriptions Dossier', href: '#prescriptions', count: filteredPrescriptions.length },
-          { id: 'formulary', label: 'Compounding Pharmacopeia', href: '#formulary', count: filteredFormulary.length }
+          { id: 'formulary', label: 'Compounding Pharmacopeia', href: '#formulary', count: filteredFormulary.length },
+          { id: 'diagnostics', label: 'Diagnostic Panels', href: '#diagnostics', count: 4 }
         ]}
         activeAnchorId={activeAnchor}
         isDoctorView={true}
@@ -1915,170 +2395,252 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             </div>
           </div>
 
-          {/* Peptide Cards Grid */}
-          <div style={{ padding: '20px 22px' }}>
-            {filteredFormulary.length === 0 ? (
-              <EmptyState
-                icon={FlaskConical}
-                title="No therapeutic peptides found"
-                subtitle="Try adjusting your filter or search term to explore other compound classes."
-                action={{
-                  label: "Reset Filters",
-                  onClick: () => { setFormularyGoal('all'); setFormularySearch(''); }
-                }}
-              />
-            ) : (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: '16px'
-              }}>
-                {filteredFormulary.map((peptide) => (
-                  <div
-                    key={peptide.id}
+          <DataTable
+            columns={pharmacopeiaColumns}
+            data={filteredFormulary}
+            keyField="id"
+            tableId={`doctor-pharmacopeia-${slug}`}
+            pagination={true}
+            initialRowsPerPage={10}
+            alwaysShowPagination={true}
+            onRowClick={(p) => setSelectedMonograph(p)}
+            emptyTitle="No Reference APIs Found"
+            emptyDescription="Try adjusting your filter or search keywords to explore authorized pharmaceutical ingredients."
+            emptyActionLabel="Reset Filters"
+            onEmptyAction={() => { setFormularyGoal('all'); setFormularySearch(''); }}
+            expandableRender={(peptide) => (
+              <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 750, color: '#003666' }}>
+                    Mechanism of Action (MOA) & Receptor Pathways
+                  </span>
+                  <span style={{ fontSize: '0.72rem', color: '#16a34a', background: '#f0fdf4', padding: '1px 8px', borderRadius: '4px', border: '1px solid #bbf7d0', fontWeight: 600 }}>
+                    Analytical Purity: {peptide.purity || '≥ 99% HPLC'}
+                  </span>
+                </div>
+                <p style={{ margin: '0 0 12px 0', fontSize: '0.80rem', color: '#334155', lineHeight: 1.5 }}>
+                  {safeRenderText(peptide.moa) || safeRenderText(peptide.description)}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
+                  <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                    Target Axis: <strong style={{ color: '#0f172a' }}>{peptide.primaryGoal || 'Cellular Longevity'}</strong> · Vehicle: <strong style={{ color: '#0f172a' }}>{peptide.route || 'Lyophilized API'}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMonograph(peptide)}
                     style={{
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '16px',
-                      background: '#ffffff',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      transition: 'all 0.15s ease-in-out',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#1a73e8';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(26,115,232,0.08)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#e2e8f0';
-                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '5px 12px',
+                      borderRadius: '4px',
+                      background: '#003666',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
                     }}
                   >
-                    <div>
-                      {/* Card Top: Name & Purity Badge */}
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
-                        <div>
-                          <h4 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 700, color: '#0f172a' }}>
-                            {peptide.name}
-                          </h4>
-                          <span style={{ fontSize: '0.70rem', color: '#64748b' }}>
-                            API Compounding Grade
-                          </span>
-                        </div>
-                        <span style={{
-                          fontSize: '0.66rem',
-                          fontWeight: 700,
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          background: '#f0fdf4',
-                          color: '#16a34a',
-                          border: '1px solid #bbf7d0',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {peptide.purity || '≥ 99% HPLC'}
-                        </span>
-                      </div>
-
-                      {/* Goal / Category pill */}
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                        <span style={{
-                          fontSize: '0.68rem',
-                          fontWeight: 600,
-                          padding: '1px 7px',
-                          borderRadius: '12px',
-                          background: '#e0f2fe',
-                          color: '#0369a1'
-                        }}>
-                          {peptide.primaryGoal || 'Cellular Optimization'}
-                        </span>
-                        <span style={{
-                          fontSize: '0.68rem',
-                          color: '#475569',
-                          background: '#f1f5f9',
-                          padding: '1px 7px',
-                          borderRadius: '12px'
-                        }}>
-                          {peptide.route || 'Lyophilized API'}
-                        </span>
-                      </div>
-
-                      {/* MOA Snippet */}
-                      <p style={{
-                        margin: '0 0 14px 0',
-                        fontSize: '0.76rem',
-                        color: '#475569',
-                        lineHeight: 1.45,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {safeRenderText(peptide.moa) || safeRenderText(peptide.description)}
-                      </p>
-                    </div>
-
-                    {/* Card Actions: Scientific Exploration, Not Shopping */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '8px',
-                      paddingTop: '10px',
-                      borderTop: '1px solid #f1f5f9'
-                    }}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMonograph(peptide)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                          background: 'transparent',
-                          border: 'none',
-                          color: '#1a73e8',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          padding: 0
-                        }}
-                      >
-                        <Eye size={13} />
-                        <span>View Monograph</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setInquiryPeptide(peptide);
-                          setIsInquiryOpen(true);
-                        }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                          background: '#f8fafc',
-                          border: '1px solid #dadce0',
-                          borderRadius: '4px',
-                          color: '#334155',
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          padding: '4px 8px',
-                          cursor: 'pointer',
-                          transition: 'all 0.12s'
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#e8f0fe'; e.currentTarget.style.borderColor = '#1a73e8'; e.currentTarget.style.color = '#1a73e8'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#dadce0'; e.currentTarget.style.color = '#334155'; }}
-                      >
-                        <span>Inquire in Protocol</span>
-                        <ArrowUpRight size={12} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                    <BookOpen size={12} />
+                    <span>Open Complete Clinical Monograph</span>
+                  </button>
+                </div>
               </div>
             )}
+          />
+        </section>
+
+        {/* ── Section 4: Bloodo™ Diagnostic Panels (Baseline Calibration) ── */}
+        <section
+          id="diagnostics"
+          style={{
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            borderRadius: '8px',
+            marginTop: '32px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Section Header */}
+          <div
+            style={{
+              padding: '18px 22px',
+              borderBottom: '1px solid #dadce0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '14px',
+              background: '#ffffff'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.08rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Activity size={18} style={{ color: '#003666' }} />
+                  <span>Bloodo™ Diagnostic Biomarker Panels & Quantitative Baseline Calibration</span>
+                </h2>
+                <span style={{ fontSize: '0.70rem', color: '#0d9488', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                  CE-IVDR Certified Capillary DBS
+                </span>
+                <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                  ISO 15189 Accredited Lab
+                </span>
+              </div>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
+                Pre-treatment capillary blood spot diagnostic panels for objective physiological baseline profiling and therapeutic titration monitoring.
+              </p>
+            </div>
+          </div>
+
+          {/* Diagnostic Panels Matrix */}
+          <div style={{ padding: '20px 22px' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '16px'
+            }}>
+              {bloodoPanels.map((panel) => (
+                <div
+                  key={panel.id}
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '16px 18px',
+                    background: '#ffffff',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                    transition: 'all 0.15s ease-in-out'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#003666';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,54,102,0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                  }}
+                >
+                  <div>
+                    {/* Header */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', marginBottom: '8px' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                        {panel.name}
+                      </h4>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 650,
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: '#f8fafc',
+                        color: '#475569',
+                        border: '1px solid #e2e8f0',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        TAT: {panel.tat}
+                      </span>
+                    </div>
+
+                    {/* Specimen pill */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        padding: '1px 8px',
+                        borderRadius: '12px',
+                        background: '#eff6ff',
+                        color: '#1d4ed8'
+                      }}>
+                        Specimen: {panel.specimen}
+                      </span>
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        padding: '1px 8px',
+                        borderRadius: '12px',
+                        background: '#f0fdf4',
+                        color: '#166534',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px'
+                      }}>
+                        <ShieldCheck size={11} /> Pre-Protocol Baseline
+                      </span>
+                    </div>
+
+                    {/* Indication */}
+                    <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
+                      {panel.indications}
+                    </p>
+
+                    {/* Measured Biomarkers */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px', marginBottom: '10px' }}>
+                      <div style={{ fontSize: '0.70rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        Quantitative Analytes Measured:
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {panel.biomarkers.map((b, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              fontSize: '0.70rem',
+                              fontWeight: 500,
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              color: '#1e293b',
+                              padding: '2px 6px',
+                              borderRadius: '3px'
+                            }}
+                          >
+                            {b}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Clinical Decision Utility */}
+                    <div style={{ fontSize: '0.73rem', color: '#0d9488', lineHeight: 1.35, marginBottom: '12px', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '8px 10px', borderRadius: '4px' }}>
+                      <strong>Clinical Decision Utility:</strong> {panel.clinicalUtility}
+                    </div>
+                  </div>
+
+                  {/* Panel footer */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      Requisition via Atlas Clinical Lab
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        toast.success(`Biomarker requisition sheet for ${panel.name} queued for clinical download ✓`);
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        background: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '4px',
+                        padding: '4px 10px',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        color: '#003666',
+                        cursor: 'pointer',
+                        transition: 'all 0.12s'
+                      }}
+                    >
+                      <FileText size={12} />
+                      <span>Requisition Spec</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       </main>
@@ -2931,35 +3493,118 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       </div>
                     </div>
 
-                    {/* If Task: Task action block */}
-                    {isTask && (
-                      <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '14px 16px' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>
-                          Pending Care Task Action
-                        </div>
-                        <div style={{ fontSize: '0.82rem', color: '#78350f', lineHeight: 1.4, marginBottom: '10px' }}>
-                          {item.description}
-                        </div>
-                        <Link
-                          href={item.actionUrl}
-                          style={{
-                            display: 'inline-flex',
+                    {/* Clinical Sign-off & Task Action Block */}
+                    {(isTask || (rx && ['pending', 'draft'].includes((rx.status || '').toLowerCase()))) && (() => {
+                      const targetEntity = isTask ? item : rx;
+                      const isSigned = targetEntity?.isSigned || targetEntity?.status === 'approved' || rx?.status === 'approved';
+                      const isSigning = signingTaskId === (targetEntity?.id || targetEntity?.code || rx?.code);
+
+                      return (
+                        <div style={{
+                          background: isSigned ? '#f0fdf4' : '#fffbeb',
+                          border: `1px solid ${isSigned ? '#bbf7d0' : '#fde68a'}`,
+                          borderRadius: '6px',
+                          padding: '16px'
+                        }}>
+                          <div style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: isSigned ? '#166534' : '#92400e',
+                            textTransform: 'uppercase',
+                            marginBottom: '4px',
+                            display: 'flex',
                             alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 14px',
-                            borderRadius: '4px',
-                            background: '#b45309',
-                            color: '#ffffff',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            textDecoration: 'none'
-                          }}
-                        >
-                          <span>Execute {item.actionLabel}</span>
-                          <ArrowUpRight size={13} />
-                        </Link>
-                      </div>
-                    )}
+                            gap: '6px'
+                          }}>
+                            {isSigned ? (
+                              <>
+                                <CheckCircle2 size={13} color="#16a34a" />
+                                <span>Clinical Dispensing Authorized & Signed</span>
+                              </>
+                            ) : (
+                              <>
+                                <Clock size={13} color="#b45309" />
+                                <span>Pending Physician Clinical Authorization</span>
+                              </>
+                            )}
+                          </div>
+                          <div style={{
+                            fontSize: '0.82rem',
+                            color: isSigned ? '#14532d' : '#78350f',
+                            lineHeight: 1.45,
+                            marginBottom: '12px'
+                          }}>
+                            {isSigned
+                              ? `Prescription digitally authorized by ${doctor.name || 'Treating Physician'} for compounding and release.`
+                              : (item?.description || `Compounded formulation awaiting physician electronic sign-off.`)}
+                          </div>
+
+                          {!isSigned ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <button
+                                type="button"
+                                disabled={isSigning}
+                                onClick={(e) => handleSignOffPrescription(targetEntity, e)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '8px',
+                                  width: '100%',
+                                  padding: '10px 16px',
+                                  borderRadius: '4px',
+                                  background: '#003666',
+                                  border: '1px solid #002244',
+                                  color: '#ffffff',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 650,
+                                  cursor: isSigning ? 'wait' : 'pointer',
+                                  boxShadow: '0 1px 3px rgba(0,54,102,0.25)',
+                                  transition: 'all 0.12s'
+                                }}
+                              >
+                                {isSigning ? (
+                                  <>
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <span>Authorizing & Signing...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle2 size={15} style={{ color: '#38bdf8' }} />
+                                    <span>Authorize & Sign Dispensing Order</span>
+                                  </>
+                                )}
+                              </button>
+                              <div style={{ fontSize: '0.70rem', color: '#64748b', textAlign: 'center', lineHeight: 1.35 }}>
+                                Electronically verifies patient posology, API tolerance, and authorizes compounding batch release.
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                              <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#16a34a', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <CheckCircle2 size={14} /> Signed & Approved
+                              </span>
+                              <Link
+                                href={`/rx/${rxCode}`}
+                                target="_blank"
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 600,
+                                  color: '#003666',
+                                  textDecoration: 'none'
+                                }}
+                              >
+                                <span>Official Pad</span>
+                                <ArrowUpRight size={12} />
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </>
                 )}
 

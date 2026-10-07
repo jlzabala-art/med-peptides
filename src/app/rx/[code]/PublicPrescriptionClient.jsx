@@ -43,7 +43,7 @@ import {
 } from '@/lib/icons';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { RotateCcw, Home } from 'lucide-react';
+import { RotateCcw, Home, Loader2 } from 'lucide-react';
 
 function slugify(text) {
   return String(text || '')
@@ -428,6 +428,37 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const [currentStatus, setCurrentStatus] = useState(() => {
     return String(rx.status || rx.state || rx.fagronStatus || rx.orderStatus || 'approved').toLowerCase().trim();
   });
+  const [isSigning, setIsSigning] = useState(false);
+
+  const handleDoctorSignOff = async () => {
+    setIsSigning(true);
+    triggerHaptic('selection');
+    try {
+      const res = await fetch('/api/prescriptions/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prescriptionId: rx?.id,
+          prescriptionNumber: rx?.prescriptionNumber || rx?.code || rxId,
+          status: 'approved',
+          reason: 'Physician electronic sign-off and dispensing authorization',
+          updatedBy: rx?.doctor?.name || 'Treating Physician'
+        })
+      });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Failed to sign prescription');
+      }
+      setCurrentStatus('approved');
+      triggerHaptic('success');
+      toast.success(isEs ? 'Receta firmada y autorizada para formulación ✓' : 'Prescription digitally signed & authorized for compounding release ✓');
+    } catch (e) {
+      console.error('Sign-off error:', e);
+      toast.error(isEs ? 'Error al firmar: ' + (e.message || '') : 'Signing error: ' + (e.message || 'Please try again'));
+    } finally {
+      setIsSigning(false);
+    }
+  };
 
   const currentStatusMeta = useMemo(() => {
     const s = String(currentStatus || 'active').toLowerCase().trim();
@@ -1239,6 +1270,15 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         posologyObj.dosageInstructions = extra.dosageInstructions;
       }
 
+      if (extra?.posologySteps && Array.isArray(extra.posologySteps) && extra.posologySteps.length > 0) {
+        posologyObj.steps = extra.posologySteps.map((s, sIdx) => ({
+          step: s.stepNumber || (sIdx + 1),
+          title: s.title || (isEs ? `Paso ${sIdx + 1}` : `Step ${sIdx + 1}`),
+          timing: s.timing || '',
+          instruction: s.instruction || ''
+        }));
+      }
+
       return {
         id: `formulation-${index}`,
         index,
@@ -1257,6 +1297,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         extra,
         container: resolvedContainer,
         vehicle: vehicleObj,
+        safetyWarnings: extra?.safetyWarnings || [],
         apis: apis.filter(api => {
           const an = (api.drugName || api.drug || api.productName || api.name || api.activeIngredient || '').toLowerCase();
           const af = (api.dosageForm || api.form || '').toLowerCase();
@@ -1427,10 +1468,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       };
     };
 
-    // 1. If explicit multi-block formulations already exist on the rx document
-    if (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0) {
-      const totalBlocks = rx.formulationBlocks.length;
-      return rx.formulationBlocks.map((block, idx) => {
+    // 1. If explicit sequential phases or multi-block formulations exist on the rx document
+    const explicitPhases = (Array.isArray(rx.phases) && rx.phases.length > 0)
+      ? rx.phases
+      : (Array.isArray(rx.formulationBlocks) && rx.formulationBlocks.length > 0 ? rx.formulationBlocks : null);
+
+    if (explicitPhases && explicitPhases.length > 0) {
+      const totalBlocks = explicitPhases.length;
+      return explicitPhases.map((block, idx) => {
         const rawBlockItems = block.apis || block.items || [];
         
         // Strictly separate vehicle excipients from true active ingredients (APIs)
@@ -1441,22 +1486,32 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
         const activeApis = rawBlockItems.filter(i => i !== vehicleItem && !i.isVehicleOrBase && !i._isVehicleOrBase);
         
-        let detectedVehicleName = block.vehicle?.name || block.vehicleName;
+        let detectedVehicleName = block.vehicle?.name || block.vehicleBase?.name || block.vehicleName;
         if (!detectedVehicleName && vehicleItem) {
           detectedVehicleName = vehicleItem.name || vehicleItem.productName || vehicleItem.activeIngredient;
         }
 
+        const phaseNum = block.phaseNumber || (idx + 1);
+        const resolvedPhaseTitle = block.phaseName || block.treatmentType || block.treatmentProgram || `Phase ${phaseNum}`;
+
         return buildVehicleData({
-          index: idx + 1,
+          index: phaseNum,
           totalCount: totalBlocks,
           vehicleName: detectedVehicleName,
-          treatmentTitle: block.treatmentType || block.treatmentProgram || '',
-          route: block.route || block.dispensingForm || '',
-          volume: block.volume || vehicleItem?.dose || null,
+          treatmentTitle: resolvedPhaseTitle,
+          route: block.route || block.dispensingForm || block.administrationRoute || '',
+          volume: block.volume || block.packaging?.volume || vehicleItem?.dose || null,
           customPosology: block.posology || '',
           customInstructions: block.instructions || '',
           apis: activeApis,
-          containerType: block.container || ''
+          containerType: block.packaging?.containerType || block.container || '',
+          duration: block.duration || '',
+          extra: {
+            phaseName: block.phaseName || null,
+            timeOfDay: block.timeOfDay || null,
+            posologySteps: Array.isArray(block.posologySteps) ? block.posologySteps : [],
+            safetyWarnings: Array.isArray(block.safetyWarnings) ? block.safetyWarnings : []
+          }
         });
       });
     }
@@ -2178,39 +2233,49 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                         <span style={{ color: '#5f6368', fontWeight: 400 }}>#{rxId}</span>
                       </h1>
 
-                      {/* GCP Status Badge — role=status for a11y */}
-                      <span
-                        role="status"
-                        aria-label={`${isEs ? 'Estado' : 'Status'}: ${currentStatusMeta.label}`}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          background: currentStatusMeta.bg,
-                          color: currentStatusMeta.color,
-                          border: `1px solid ${currentStatusMeta.border}`,
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.04em',
-                          lineHeight: 1.2,
-                          userSelect: 'none',
-                          cursor: 'default'
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: '50%',
-                            background: currentStatusMeta.color,
-                            flexShrink: 0
-                          }}
+                      {/* GCP Status Badge / Interactive Quick Action for Doctor */}
+                      {!isPatientView ? (
+                        <PrescriptionStatusQuickAction
+                          status={currentStatus}
+                          prescriptionId={rx?.id}
+                          prescriptionNumber={rx?.prescriptionNumber || rx?.code || rxId}
+                          onStatusChange={(newSt) => setCurrentStatus(newSt)}
+                          isEs={isEs}
                         />
-                        <span>{currentStatusMeta.label}</span>
-                      </span>
+                      ) : (
+                        <span
+                          role="status"
+                          aria-label={`${isEs ? 'Estado' : 'Status'}: ${currentStatusMeta.label}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            background: currentStatusMeta.bg,
+                            color: currentStatusMeta.color,
+                            border: `1px solid ${currentStatusMeta.border}`,
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                            lineHeight: 1.2,
+                            userSelect: 'none',
+                            cursor: 'default'
+                          }}
+                        >
+                          <span
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              background: currentStatusMeta.color,
+                              flexShrink: 0
+                            }}
+                          />
+                          <span>{currentStatusMeta.label}</span>
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#5f6368', marginTop: '2px' }}>
                       {isEs
@@ -2225,6 +2290,36 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   {!isPatientView ? (
                     /* Doctor View: single primary CTA + icon-ghost secondaries */
                     <div ref={docDropdownRef} className="rx-header-buttons-group">
+                      {/* PRIMARY: Sign & Authorize Dispensing Order (if draft/pending) */}
+                      {['draft', 'pending'].includes(currentStatus) && (
+                        <button
+                          type="button"
+                          disabled={isSigning}
+                          onClick={handleDoctorSignOff}
+                          className="rx-header-action-btn rx-btn-primary rx-btn-text"
+                          style={{
+                            background: '#003666',
+                            color: '#ffffff',
+                            border: '1px solid #002244',
+                            fontWeight: 650,
+                            cursor: isSigning ? 'wait' : 'pointer'
+                          }}
+                          title={isEs ? 'Firmar y autorizar formulación magistral' : 'Digitally sign and authorize prescription compounding'}
+                        >
+                          {isSigning ? (
+                            <>
+                              <Loader2 size={13} className="animate-spin" />
+                              <span>{isEs ? 'Firmando...' : 'Signing...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 size={13} style={{ color: '#38bdf8' }} />
+                              <span>{isEs ? 'Firmar Receta' : 'Sign & Authorize'}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+
                       {/* PRIMARY: Documents dropdown */}
                       <button
                         type="button"
@@ -3188,8 +3283,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                             gap: '3px'
                           }}>
                             {formulation.isOral 
-                              ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') ? `💊 ${api.dosage}` : `💊 ${api.dosage} / cápsula`) 
-                              : api.dosage}
+                              ? (String(api.dosage).includes('Ref:') || String(api.dosage).includes('Dosis') || String(api.dosage).includes('Dose') || String(api.dosage).toLowerCase().includes('/ cap') || String(api.dosage).toLowerCase().includes('/cap')
+                                  ? `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}` 
+                                  : `💊 ${String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')} / capsule`) 
+                              : String(api.dosage).replace(/cápsulas?/gi, 'capsules').replace(/cápsula/gi, 'capsule')}
                           </span>
                           {api.dosageSafety?.evaluated && (
                             <span 
@@ -3443,74 +3540,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   ))}
                 </div>
               </div>
-
-              {/* Physical Bottle Label Card (7.5 × 4.5 cm) */}
-              {phaseLabel && (
-                <div style={{
-                  background: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '10px',
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '10px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: '8px',
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <QrCode size={18} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a' }}>
-                        {isEs ? `Etiqueta de Frasco Pharmapolis (7.5 × 4.5 cm) — ${phaseLabel.productName}` : `Pharmapolis Compounding Bottle Label (7.5 × 4.5 cm) — ${phaseLabel.productName}`}
-                      </div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                        {isEs ? 'Frontal, Trasera con QR de Trazabilidad y Frontal con Micro-QR (1500 × 900 px)' : 'Front, Back QR Traceability, and Front Micro-QR variants ready for printing'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const idx = prescriptionLabels.findIndex(l => l.id === phaseLabel.id);
-                      setSelectedLabelIndex(idx >= 0 ? idx : 0);
-                      setShowLabelsModal(true);
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '7px 16px',
-                      borderRadius: '4px',
-                      background: '#1a73e8',
-                      color: '#ffffff',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      border: '1px solid #1a73e8',
-                      boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-                      cursor: 'pointer',
-                      transition: 'background 0.15s'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
-                  >
-                    <Eye size={14} />
-                    <span>{isEs ? 'Ver / Descargar Etiqueta' : 'View / Download Label'}</span>
-                  </button>
-                </div>
-              )}
               </div>
               )}
             </div>

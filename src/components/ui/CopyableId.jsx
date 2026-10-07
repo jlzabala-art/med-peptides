@@ -10,7 +10,7 @@ import { triggerHaptic } from '../../utils/haptics';
  * GCP-inspired component to display IDs that can be copied with a single click.
  * Golden Rule #11.
  */
-export default function CopyableId({ value, displayValue = null, iconOnly = false }) {
+export default function CopyableId({ value, displayValue = null, iconOnly = false, maxLength = 24, truncate = false }) {
   const [copied, setCopied] = useState(false);
 
   if (!value) return <span style={{ color: 'var(--text-muted)' }}>—</span>;
@@ -24,6 +24,12 @@ export default function CopyableId({ value, displayValue = null, iconOnly = fals
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const displayText = displayValue || (
+    truncate && value.length > maxLength
+      ? `${value.substring(0, maxLength)}...`
+      : (value.length > maxLength ? `${value.substring(0, maxLength)}...` : value)
+  );
+
   return (
     <div
       onClick={handleCopy}
@@ -31,8 +37,9 @@ export default function CopyableId({ value, displayValue = null, iconOnly = fals
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.35rem',
-        fontFamily: 'monospace',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
         fontSize: '0.8rem',
+        fontWeight: 500,
         color: 'var(--text-secondary, #475569)',
         cursor: 'pointer',
         padding: iconOnly ? '4px' : '2px 6px',
@@ -50,7 +57,7 @@ export default function CopyableId({ value, displayValue = null, iconOnly = fals
         e.currentTarget.style.borderColor = 'transparent';
       }}
     >
-      {!iconOnly && <span>{displayValue || (value.length > 8 ? value.substring(0, 8) + '...' : value)}</span>}
+      {!iconOnly && <span>{displayText}</span>}
       {copied ? (
         <Check size={iconOnly ? 14 : 12} color="#10b981" />
       ) : (

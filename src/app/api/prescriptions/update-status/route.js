@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { invalidateRxCache } from '@/app/rx/[code]/page';
+import { invalidateDoctorCache } from '@/lib/doctorCache';
 
 export const PRE_DISPENSED_STATUSES = [
   'draft',
@@ -136,6 +137,9 @@ export async function POST(request) {
         if (prescriptionNumber) invalidateRxCache(prescriptionNumber);
         if (existingData.prescriptionNumber) invalidateRxCache(existingData.prescriptionNumber);
         if (existingData.boxId) invalidateRxCache(existingData.boxId);
+      }
+      if (typeof invalidateDoctorCache === 'function') {
+        invalidateDoctorCache();
       }
     } catch (_) {}
 
