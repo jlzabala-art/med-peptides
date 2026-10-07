@@ -263,6 +263,108 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       const treatmentTitle = d.phaseName || d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation';
       const protoSlug = d.protocolSlug || d.protocolId || resolveProtocolSlug({ treatmentTitle, phaseName: d.phaseName, items: d.items });
 
+      // 1. Resolve structured parts/formulations (Schema B: nested apis, Schema C: formulas, Schema D: phases/formulationBlocks)
+      let resolvedParts = [];
+      let resolvedItems = [];
+
+      // Check Schema: d.formulas
+      if (Array.isArray(d.formulas) && d.formulas.length > 0) {
+        resolvedParts = d.formulas.map((form, fIdx) => {
+          const partApis = Array.isArray(form.components) ? form.components.map(c => ({
+            name: c.apiName || c.name || c.drugName || '',
+            dose: c.dosage ? `${c.dosage} ${c.units || ''}`.trim() : (c.dose || ''),
+            productId: c.productId || null
+          })) : [];
+          return {
+            partNumber: fIdx + 1,
+            title: form.formulaName || `Part ${fIdx + 1}`,
+            vehicle: form.base || '',
+            posology: form.posology || '',
+            apis: partApis
+          };
+        });
+      }
+      // Check Schema: d.items with nested apis (e.g. Matthew Taylor RX-MT-0903)
+      else if (Array.isArray(d.items) && d.items.some(i => Array.isArray(i.apis) && i.apis.length > 0)) {
+        resolvedParts = d.items.map((item, iIdx) => {
+          const partApis = Array.isArray(item.apis) ? item.apis.map(a => ({
+            name: a.name || a.drugName || a.activeIngredient || '',
+            dose: a.strength || a.dose || a.dosage || '',
+            productId: a.productId || null
+          })) : [];
+          return {
+            partNumber: iIdx + 1,
+            title: item.productName || item.title || item.name || `Part ${iIdx + 1}`,
+            format: item.format || item.dosageForm || '',
+            volume: item.volume || '',
+            posology: item.directions || item.posology || '',
+            storage: item.storage || '',
+            apis: partApis
+          };
+        });
+      }
+      // Check Schema: explicit phases or formulationBlocks
+      else if (Array.isArray(d.phases) && d.phases.length > 0) {
+        resolvedParts = d.phases.map((ph, pIdx) => ({
+          partNumber: ph.phaseNumber || (pIdx + 1),
+          title: ph.phaseName || ph.title || `Part ${pIdx + 1}`,
+          vehicle: ph.vehicle?.name || ph.vehicleName || '',
+          volume: ph.volume || '',
+          posology: getPosologyString(ph.posology),
+          apis: (ph.apis || ph.items || []).map(a => ({
+            name: a.name || a.drugName || a.activeIngredient || '',
+            dose: a.dose || a.dosage || a.strength || '',
+            category: a.category || '',
+            therapeuticClass: a.therapeuticClass || '',
+            mechanism: a.mechanism || a.mechanismOfAction || '',
+            cellularTarget: a.cellularTarget || ''
+          }))
+        }));
+      }
+
+      // Flatten items into resolvedItems
+      if (resolvedParts.length > 0) {
+        resolvedParts.forEach((p, pIdx) => {
+          (p.apis || []).forEach(a => {
+            resolvedItems.push({
+              ...a,
+              partNumber: p.partNumber || (pIdx + 1),
+              partTitle: p.title,
+              vehicle: p.vehicle || p.title || '',
+              volume: p.volume || '',
+              format: p.format || ''
+            });
+          });
+        });
+      } else if (Array.isArray(d.items) && d.items.length > 0) {
+        resolvedItems = d.items.map(i => ({
+          id: i.id,
+          name: i.name || i.drugName || i.activeIngredient || i.productName || i.title || '',
+          dose: i.dose || i.dosage || i.strength || i.concentration || '',
+          activeIngredient: i.activeIngredient || '',
+          category: i.category || '',
+          therapeuticClass: i.therapeuticClass || '',
+          mechanism: i.mechanism || i.mechanismOfAction || '',
+          cellularTarget: i.cellularTarget || '',
+          instructions: i.instructions || '',
+          vehicle: i.vehicle || '',
+          _isVehicleOrBase: i._isVehicleOrBase,
+          format: i.format || null,
+          volume: i.volume || null
+        }));
+      } else if (Array.isArray(d.prescriptionLines) && d.prescriptionLines.length > 0) {
+        resolvedItems = d.prescriptionLines.map(i => ({
+          name: i.drugName || i.name || '',
+          dose: i.strength || i.dosage || i.dose || '',
+          instructions: i.instructions || ''
+        }));
+      } else if (Array.isArray(d.compounds) && d.compounds.length > 0) {
+        resolvedItems = d.compounds.map(i => ({
+          name: i.name || '',
+          dose: i.dose || i.dosage || ''
+        }));
+      }
+
       prescriptions.push({
         id: doc.id,
         prescriptionNumber: d.prescriptionNumber || d.code || doc.id,
@@ -277,11 +379,15 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         protocolUrl: protoSlug ? `/proto/${protoSlug}` : null,
         phaseName: d.phaseName || null,
         partNumber: d.partNumber != null ? Number(d.partNumber) : null,
-        isMultiPart: !!d.isMultiPart,
-        totalParts: d.totalParts || null,
+        isMultiPart: !!d.isMultiPart || resolvedParts.length > 1,
+        totalParts: d.totalParts || (resolvedParts.length > 1 ? resolvedParts.length : null),
         clinic: d.clinic || d.clinicName || doctorDoc.clinicName || doctorDoc.clinic || 'Clinical Dispensary',
         createdAt: d.createdAt ? (d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt.seconds ? d.createdAt.seconds * 1000 : String(d.createdAt))) : null,
-        items: Array.isArray(d.items) ? d.items.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle, _isVehicleOrBase: i._isVehicleOrBase })) : [],
+        items: resolvedItems,
+        parts: resolvedParts.length > 0 ? resolvedParts : null,
+        formulas: Array.isArray(d.formulas) ? d.formulas : null,
+        stickers: Array.isArray(d.stickers) ? d.stickers : [],
+        volume: d.volume || null,
         prescriptionLines: Array.isArray(d.prescriptionLines) ? d.prescriptionLines.map(i => ({ name: i.name, dose: i.dose, vehicle: i.vehicle })) : [],
         compounds: Array.isArray(d.compounds) ? d.compounds.map(i => ({ name: i.name, dose: i.dose })) : [],
         posology: getPosologyString(d.posology),
@@ -292,57 +398,59 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     }
   });
 
-  // Sort: sequential phases grouped by patient, then date descending
+  // Sort: prescriptions grouped by patient, then date descending
   prescriptions.sort((a, b) => {
-    if (a.patientName === b.patientName && a.partNumber != null && b.partNumber != null) {
-      return a.partNumber - b.partNumber;
-    }
     const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return tB - tA;
   });
 
   // 3. Generate Patient-Centric Clinical Tasks (Deduplicated per patient)
+  // ONLY real clinical actions: imported/pending prescription review & sign-off
   const clinicalTasks = [];
   const seenPatientTasks = new Set();
   const now = Date.now();
 
   prescriptions.forEach((rx) => {
     const rxAgeDays = rx.createdAt ? Math.floor((now - new Date(rx.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    
-    // Task Type 1: Protocol Phase Progression / Titration Check
-    const isMultiPhase = rx.isMultiPart || rx.partNumber != null ||
-                         String(rx.treatmentTitle || '').toLowerCase().includes('phase') ||
-                         String(rx.posology || '').toLowerCase().includes('phase') ||
-                         (Array.isArray(rx.items) && rx.items.length >= 4);
+    const patientKey = rx.patientName.toLowerCase().trim();
+    const rxStatus = String(rx.status || '').toLowerCase();
 
-    const titrationKey = `${rx.patientName.toLowerCase()}_titration`;
-    if (isMultiPhase && rx.status === 'approved' && !seenPatientTasks.has(titrationKey)) {
-      seenPatientTasks.add(titrationKey);
-      const phaseNum = rx.partNumber || 1;
-      const nextPhaseNum = phaseNum + 1;
-      const phaseLabel = rx.phaseName ? `(${rx.phaseName.replace(/^Phase\s*\d+:\s*/i, '')})` : '';
-
-      clinicalTasks.push({
-        id: `task-phase-${rx.id}`,
-        rxId: rx.id,
-        code: rx.code,
-        patientName: rx.patientName,
-        patient: rx.patient || null,
-        patientDob: rx.patient?.dob || null,
-        type: 'titration',
-        priority: rxAgeDays > 25 ? 'high' : 'medium',
-        title: `Protocol Phase ${phaseNum} Evaluation`,
-        description: `Treatment is at day ${rxAgeDays || 1}. Review Phase ${phaseNum} ${phaseLabel} tolerance and approve Phase ${nextPhaseNum} transition formulation.`,
-        dueDate: 'Next 5 days',
-        actionLabel: 'Review Protocol',
-        actionUrl: `/rx/${rx.code}`
-      });
+    // Clinical Action 1: Pending / Imported Prescription Review & Clinical Sign-off
+    if (['pending', 'draft', 'imported', 'review'].includes(rxStatus)) {
+      const existingTask = clinicalTasks.find(t => t.type === 'approval' && t.patientName.toLowerCase().trim() === patientKey);
+      if (existingTask) {
+        existingTask.pendingCount = (existingTask.pendingCount || 1) + 1;
+        existingTask.codes = existingTask.codes || [existingTask.code];
+        if (!existingTask.codes.includes(rx.code)) existingTask.codes.push(rx.code);
+        if (!existingTask.patient && rx.patient) existingTask.patient = rx.patient;
+        if (!existingTask.patientDob && rx.patient?.dob) existingTask.patientDob = rx.patient.dob;
+        existingTask.title = `Prescription Verification & Sign-off (${existingTask.pendingCount} Formulations)`;
+        existingTask.description = `${existingTask.pendingCount} imported formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) awaiting physician clinical verification.`;
+      } else {
+        clinicalTasks.push({
+          id: `task-sign-${rx.id}`,
+          rxId: rx.id,
+          code: rx.code,
+          codes: [rx.code],
+          patientName: rx.patientName,
+          patient: rx.patient || null,
+          patientDob: rx.patient?.dob || null,
+          type: 'approval',
+          priority: 'action_required',
+          pendingCount: 1,
+          title: `Prescription Verification & Sign-off`,
+          description: `Imported compounded formulation #${rx.code} awaiting physician clinical verification and authorization.`,
+          dueDate: 'Immediate',
+          actionLabel: 'Review & Sign-off',
+          actionUrl: `/rx/${rx.code}`
+        });
+      }
     }
 
-    // Task Type 2: Refill / Quotation Follow-up (30-day supply approaching completion)
-    const refillKey = `${rx.patientName.toLowerCase()}_refill`;
-    if (rxAgeDays >= 20 && rxAgeDays <= 45 && rx.status === 'approved' && !seenPatientTasks.has(refillKey)) {
+    // Clinical Action 2: Routine Supply Refill Assessment (30-day supply approaching completion)
+    const refillKey = `${patientKey}_refill`;
+    if (rxAgeDays >= 25 && rxAgeDays <= 45 && rxStatus === 'approved' && !seenPatientTasks.has(refillKey)) {
       seenPatientTasks.add(refillKey);
       clinicalTasks.push({
         id: `task-refill-${rx.id}`,
@@ -359,42 +467,6 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         actionLabel: 'Issue Refill',
         actionUrl: `/rx/${rx.code}`
       });
-    }
-
-    // Task Type 3: Pending Prescription Sign-off (draft or pending review)
-    // Deduplicated per patient to avoid repetitive identical notifications
-    const patientKey = rx.patientName.toLowerCase().trim();
-    if (['pending', 'draft'].includes(rx.status.toLowerCase())) {
-      const existingTask = clinicalTasks.find(t => t.type === 'approval' && t.patientName.toLowerCase().trim() === patientKey);
-      if (existingTask) {
-        // Consolidate multiple formulations into a single clear clinical action item
-        existingTask.pendingCount = (existingTask.pendingCount || 1) + 1;
-        existingTask.codes = existingTask.codes || [existingTask.code];
-        if (!existingTask.codes.includes(rx.code)) existingTask.codes.push(rx.code);
-        if (!existingTask.patient && rx.patient) existingTask.patient = rx.patient;
-        if (!existingTask.patientDob && rx.patient?.dob) existingTask.patientDob = rx.patient.dob;
-        existingTask.title = `Prescription Dispensing Sign-off (${existingTask.pendingCount} Formulations)`;
-        existingTask.description = `${existingTask.pendingCount} compounded formulations (${existingTask.codes.map(c => '#' + c).join(', ')}) awaiting physician clinical authorization.`;
-      } else {
-        const phaseLabel = rx.phaseName ? `: ${rx.phaseName.replace(/^Phase\s*\d+:\s*/i, 'Phase ')}` : '';
-        clinicalTasks.push({
-          id: `task-sign-${rx.id}`,
-          rxId: rx.id,
-          code: rx.code,
-          codes: [rx.code],
-          patientName: rx.patientName,
-          patient: rx.patient || null,
-          patientDob: rx.patient?.dob || null,
-          type: 'approval',
-          priority: 'action_required',
-          pendingCount: 1,
-          title: `Prescription Dispensing Sign-off${phaseLabel}`,
-          description: `Compounded formulation #${rx.code} awaiting physician clinical authorization.`,
-          dueDate: 'Immediate',
-          actionLabel: 'Review & Sign-off',
-          actionUrl: `/rx/${rx.code}`
-        });
-      }
     }
   });
 

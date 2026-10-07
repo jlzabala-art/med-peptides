@@ -36,7 +36,14 @@ import {
   BookOpen,
   Loader2,
   Search,
-  X
+  X,
+  FileInput,
+  MessageSquare,
+  MessageCircle,
+  Send,
+  Bot,
+  HelpCircle,
+  Phone
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -50,6 +57,7 @@ import PrescriptionIntakeWorkspace from '@/features/prescriptions/components/Pre
 import PharmacyLabelsModal from '@/components/prescription/PharmacyLabelsModal';
 import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligenceBanner';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
+import { getFagronClinicalMonograph } from '@/data/fagronClinicalMonographs';
 import { triggerHaptic } from '@/utils/haptics';
 
 function safeRenderText(val, fallback = '') {
@@ -65,6 +73,205 @@ function safeRenderText(val, fallback = '') {
     return fallback;
   }
   return String(val);
+}
+
+export function enrichApiClinicalDetails(api) {
+  if (!api) return {};
+  const rawName = api.name || api.drugName || api.activeIngredient || api.productName || 'Active Pharmaceutical Ingredient';
+  const rawDose = api.dose || api.dosage || api.strength || api.concentration || 'Compounded Strength';
+  
+  const mono = getFagronClinicalMonograph(api.productId) ||
+               getFagronClinicalMonograph(rawName) ||
+               getFagronClinicalMonograph(api.activeIngredient) ||
+               getFagronClinicalMonograph(rawName.toLowerCase());
+
+  const pharmacologicalClass = api.therapeuticClass || api.pharmacologicalClass || mono?.pharmacologicalClass || api.category || 'Therapeutic Active Ingredient (API)';
+  const clinicalIndication = api.clinicalIndication || mono?.clinicalIndication || 'Targeted Follicular / Metabolic Clinical Optimization';
+  const mechanismOfAction = api.mechanism || api.mechanismOfAction || mono?.mechanismOfAction || null;
+  const cellularTarget = api.cellularTarget || null;
+  const geneTargets = (mono?.geneTargets && mono.geneTargets.length > 0) ? mono.geneTargets : (api.geneTargets || []);
+
+  return {
+    id: api.id,
+    name: rawName,
+    dose: rawDose,
+    pharmacologicalClass,
+    clinicalIndication,
+    mechanismOfAction,
+    cellularTarget,
+    geneTargets,
+    instructions: api.instructions || ''
+  };
+}
+
+export function resolvePrescriptionParts(rx) {
+  if (!rx) return [];
+
+  // 1. Explicit rx.parts array already parsed from doctorCache or document
+  if (Array.isArray(rx.parts) && rx.parts.length > 0) {
+    return rx.parts.map((p, pIdx) => {
+      const partNum = p.partNumber || (pIdx + 1);
+      const vName = p.vehicle || p.title || '';
+      const isOil = String(vName + ' ' + (p.title || '')).toLowerCase().includes('oil') || String(vName).toLowerCase().includes('aceite');
+      const isOral = String(vName + ' ' + (p.format || '') + ' ' + (p.title || '')).toLowerCase().includes('oral') || String(vName + ' ' + (p.format || '')).toLowerCase().includes('capsule');
+      const isFoam = String(vName + ' ' + (p.title || '')).toLowerCase().includes('foam') || String(vName).toLowerCase().includes('espuma');
+      
+      const badgeText = isOil ? 'SCALP CARE & LIPIDIC OIL' : (isOral ? 'ORAL CAPSULES' : (isFoam ? 'TOPICAL FOAM' : 'TOPICAL SOLUTION'));
+      const accentColor = isOil ? '#0d9488' : (isOral ? '#ea580c' : (isFoam ? '#7c3aed' : '#0284c7'));
+      const accentBg = isOil ? '#f0fdfa' : (isOral ? '#fff7ed' : (isFoam ? '#faf5ff' : '#f0f9ff'));
+      const borderAccent = isOil ? '#99f6e4' : (isOral ? '#fed7aa' : (isFoam ? '#e9d5ff' : '#bae6fd'));
+
+      return {
+        partNumber: partNum,
+        totalParts: rx.parts.length,
+        title: p.title || (isOil ? 'Scalp Care & Lipid Protection' : (isOral ? 'Systemic Nutraceutical Support' : 'Topical Compounded Solution')),
+        badge: `PART ${partNum} OF ${rx.parts.length} · ${badgeText}`,
+        volume: p.volume || (isOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL')),
+        format: p.format || badgeText,
+        vehicle: vName || (isOil ? 'TrichoOil™ Natural Lipidic Carrier (q.s. 30 mL)' : (isOral ? 'Vegetarian HPMC Capsules (90 Caps)' : 'TrichoSol™ Liposomal Hydrophilic Base (q.s. 100 mL)')),
+        schedule: p.posology || p.directions || (isOil ? '1-2 times weekly, massage 3-5 min, leave 10 min before wash.' : 'Apply nightly before bedtime to target scalp area.'),
+        accentColor,
+        accentBg,
+        borderAccent,
+        apis: (p.apis || []).map(a => enrichApiClinicalDetails(a))
+      };
+    });
+  }
+
+  // 2. Explicit rx.formulas (from legacy schemas)
+  if (Array.isArray(rx.formulas) && rx.formulas.length > 0) {
+    return rx.formulas.map((form, fIdx) => {
+      const partNum = fIdx + 1;
+      const vName = form.base || form.formulaName || '';
+      const isOil = vName.toLowerCase().includes('oil');
+      const isOral = vName.toLowerCase().includes('oral');
+      const isFoam = vName.toLowerCase().includes('foam');
+      const badgeText = isOil ? 'SCALP CARE & OIL' : (isOral ? 'ORAL CAPSULES' : (isFoam ? 'TOPICAL FOAM' : 'TOPICAL SOLUTION'));
+      const accentColor = isOil ? '#0d9488' : (isOral ? '#ea580c' : (isFoam ? '#7c3aed' : '#0284c7'));
+      const accentBg = isOil ? '#f0fdfa' : (isOral ? '#fff7ed' : (isFoam ? '#faf5ff' : '#f0f9ff'));
+      const borderAccent = isOil ? '#99f6e4' : (isOral ? '#fed7aa' : (isFoam ? '#e9d5ff' : '#bae6fd'));
+
+      const apis = (form.components || []).map(c => enrichApiClinicalDetails({
+        name: c.apiName || c.name || '',
+        dose: c.dosage ? `${c.dosage} ${c.units || ''}`.trim() : (c.dose || ''),
+        productId: c.productId
+      }));
+
+      return {
+        partNumber: partNum,
+        totalParts: rx.formulas.length,
+        title: form.formulaName || `Part ${partNum}`,
+        badge: `PART ${partNum} OF ${rx.formulas.length} · ${badgeText}`,
+        volume: isOil ? '30 mL' : (isOral ? '90 Capsules' : '100 mL'),
+        format: badgeText,
+        vehicle: form.base || 'Compounding Galenic Carrier',
+        schedule: form.posology || 'Administer as prescribed by treating physician.',
+        accentColor,
+        accentBg,
+        borderAccent,
+        apis
+      };
+    });
+  }
+
+  // 3. Items list with multi-vehicles or posology phase 1 + phase 2 markers
+  const rawItems = rx.items && rx.items.length > 0 ? rx.items : (rx.prescriptionLines || []);
+  const posologyText = String(rx.posology?.regimen || rx.posology || '');
+  const hasPhase1Phase2 = /phase\s*1/i.test(posologyText) && /phase\s*2/i.test(posologyText);
+  const hasTrichoOil = rawItems.some(i => {
+    const n = String(i.name || i.drugName || i.activeIngredient || '').toLowerCase();
+    return n.includes('trichooil') || (n.includes('vitamin e') && !n.includes('oral'));
+  });
+  const hasTrichoSol = rawItems.some(i => {
+    const n = String(i.name || i.drugName || i.activeIngredient || '').toLowerCase();
+    return n.includes('trichosol') || n.includes('prostaquinon') || n.includes('spironolactone') || n.includes('minoxidil') || n.includes('latanoprost');
+  });
+
+  if (hasPhase1Phase2 || (hasTrichoOil && hasTrichoSol)) {
+    const part1Items = [];
+    const part2Items = [];
+    let p1Vehicle = null;
+    let p2Vehicle = null;
+
+    rawItems.forEach(it => {
+      const n = String(it.name || it.drugName || it.activeIngredient || '').toLowerCase();
+      const isVehicle = it.isVehicleOrBase || it._isVehicleOrBase || n.includes('vehicle') || n.includes('vehiculo');
+      if (n.includes('trichooil') || (n.includes('vitamin e') && !n.includes('oral'))) {
+        if (isVehicle) p2Vehicle = it;
+        else part2Items.push(it);
+      } else if (n.includes('trichosol') && isVehicle) {
+        p1Vehicle = it;
+      } else {
+        if (isVehicle) p1Vehicle = it;
+        else part1Items.push(it);
+      }
+    });
+
+    let p1Schedule = 'Apply 1 mL nightly to scalp before bedtime. Leave on scalp overnight.';
+    let p2Schedule = 'Apply 1-2 times weekly, massage 3-5 min, leave 10 min before wash.';
+    if (hasPhase1Phase2) {
+      const m1 = posologyText.match(/phase\s*1:?\s*([^.]*\.)/i);
+      if (m1) p1Schedule = m1[1].trim();
+      const m2 = posologyText.match(/phase\s*2:?\s*([^.]*\.)/i);
+      if (m2) p2Schedule = m2[1].trim();
+    }
+
+    return [
+      {
+        partNumber: 1,
+        totalParts: 2,
+        title: 'Topical Follicular Precision Therapy (TrichoSol™)',
+        badge: 'PART 1 OF 2 · TOPICAL SCALP SOLUTION',
+        volume: p1Vehicle?.dose || '100 mL',
+        format: 'Topical Scalp Solution',
+        vehicle: p1Vehicle?.name || 'TrichoSol™ Liposomal Hydrophilic Vehicle (q.s. 100 mL)',
+        schedule: p1Schedule,
+        accentColor: '#0284c7',
+        accentBg: '#f0f9ff',
+        borderAccent: '#bae6fd',
+        apis: part1Items.map(a => enrichApiClinicalDetails(a))
+      },
+      {
+        partNumber: 2,
+        totalParts: 2,
+        title: 'Follicular Protective & Hygiene Elixir (TrichoOil™)',
+        badge: 'PART 2 OF 2 · SCALP CARE & LIPIDIC OIL',
+        volume: p2Vehicle?.dose || '30 mL',
+        format: 'Lipidic Scalp Oil',
+        vehicle: p2Vehicle?.name || 'TrichoOil™ Natural Lipidic Vehicle (q.s. 30 mL)',
+        schedule: p2Schedule,
+        accentColor: '#0d9488',
+        accentBg: '#f0fdfa',
+        borderAccent: '#99f6e4',
+        apis: part2Items.map(a => enrichApiClinicalDetails(a))
+      }
+    ];
+  }
+
+  // 4. Single formulation fallback
+  const apisOnly = rawItems.filter(i => {
+    const n = String(i.name || i.drugName || i.activeIngredient || '').toLowerCase();
+    return !i.isVehicleOrBase && !i._isVehicleOrBase && !n.includes('patented vehicle') && !n.includes('vehiculo magistral');
+  });
+  const vehicleOnly = rawItems.find(i => {
+    const n = String(i.name || i.drugName || i.activeIngredient || '').toLowerCase();
+    return i.isVehicleOrBase || i._isVehicleOrBase || n.includes('vehicle') || n.includes('base');
+  });
+
+  return [{
+    partNumber: 1,
+    totalParts: 1,
+    title: rx.treatmentTitle || 'Personalized Compounded Formulation',
+    badge: 'SINGLE COMPOUNDED FORMULATION',
+    volume: rx.volume || vehicleOnly?.dose || 'Standard Dispensary Volume',
+    format: rx.dispensingForm || 'Compounded Pharmaceutical Solution',
+    vehicle: vehicleOnly?.name || 'Standard Compounding Vehicle Base',
+    schedule: posologyText || 'Administer as directed by treating physician.',
+    accentColor: '#003666',
+    accentBg: '#f8fafc',
+    borderAccent: '#cbd5e1',
+    apis: (apisOnly.length > 0 ? apisOnly : rawItems).map(a => enrichApiClinicalDetails(a))
+  }];
 }
 
 export default function DoctorPublicPortalClient({ slug, initialData = null }) {
@@ -118,6 +325,30 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const [selectedMonograph, setSelectedMonograph] = useState(null);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
   const [inquiryPeptide, setInquiryPeptide] = useState(null);
+
+  // ── Atlas AI & Request Info (Sticky Footer Dock) ───────────────────────────
+  const [isAtlasAiOpen, setIsAtlasAiOpen] = useState(false);
+  const [isRequestInfoOpen, setIsRequestInfoOpen] = useState(false);
+  const [aiUsesRemaining, setAiUsesRemaining] = useState(5);
+  const [aiMessages, setAiMessages] = useState([]);
+  const [aiInput, setAiInput] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [requestInfoSubject, setRequestInfoSubject] = useState('Active Pharmaceutical Ingredient (API) Inquiry');
+  const [requestInfoSelectedRx, setRequestInfoSelectedRx] = useState('');
+  const [requestInfoNotes, setRequestInfoNotes] = useState('');
+
+  // Persist session quota (max 5 uses per session, isolated to this doctor)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sessionKey = `atlas_ai_quota_${slug || 'dr'}`;
+    const stored = sessionStorage.getItem(sessionKey);
+    if (stored !== null) {
+      setAiUsesRemaining(Math.max(0, parseInt(stored, 10)));
+    } else {
+      sessionStorage.setItem(sessionKey, '5');
+      setAiUsesRemaining(5);
+    }
+  }, [slug]);
 
   // ── URL Search Params Sync (Golden Rule #24: Sincronización de URL) ───────
   useEffect(() => {
@@ -371,6 +602,84 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     const intakeUrl = `${window.location.origin}/rx/intake?refDoctor=${encodeURIComponent(opaqueCode)}`;
     const text = encodeURIComponent(`Hello, you can submit your medical prescription directly to ${doctor.name} at Atlas Clinical Services here: ${intakeUrl}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
+  // ── Kasia WhatsApp for Doctor Communications (+971 55 356 1058) ───────────
+  const handleContactKasiaWhatsApp = (topic = '', extraDetails = '') => {
+    triggerHaptic('light');
+    const doctorName = doctor.name || 'Doctor';
+    let text = `Hello Kasia, I am ${doctorName}. I am contacting you directly from the Clinical Doctor Portal.`;
+    if (topic) {
+      text += `\n\n*Subject / Topic:* ${topic}`;
+    }
+    if (extraDetails) {
+      text += `\n*Inquiry Details:* ${extraDetails}`;
+    }
+    text += `\n\n*Clinic:* ${doctor.clinic || 'Atlas Partner Clinic'}`;
+    const url = `https://wa.me/971553561058?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // ── Atlas AI Clinical Reasoning Engine (Isolated, Max 5 uses per session) ───
+  const handleSendAtlasAiQuery = (queryText) => {
+    const text = (queryText || aiInput).trim();
+    if (!text) return;
+    if (aiUsesRemaining <= 0) {
+      toast.error('Session quota of 5 clinical queries reached. Contact Kasia on WhatsApp for assistance.');
+      return;
+    }
+
+    triggerHaptic('light');
+    const newRemaining = Math.max(0, aiUsesRemaining - 1);
+    setAiUsesRemaining(newRemaining);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(`atlas_ai_quota_${slug || 'dr'}`, String(newRemaining));
+    }
+
+    const userMsg = {
+      role: 'user',
+      content: text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setAiMessages(prev => [...prev, userMsg]);
+    setAiInput('');
+    setAiLoading(true);
+
+    setTimeout(() => {
+      let response = '';
+      const lower = text.toLowerCase();
+      const patientCount = doctor.patients?.length || new Set(filteredPrescriptions.map(p => p.patientName || p.patientId)).size;
+      const rxCount = filteredPrescriptions.length;
+      const pendingCount = filteredTasks.length;
+
+      if (lower.includes('patient') || lower.includes('paciente') || lower.includes('summarize') || lower.includes('resumen')) {
+        const topPatients = filteredPrescriptions.slice(0, 5).map(p => `• **${p.patientName || 'Patient'}** (${p.id}): ${p.treatmentTitle || 'Compounded Treatment'} — Status: *${p.status || 'Active'}*`).join('\n');
+        response = `**Clinical Summary for ${doctor.name}:**\n\nYou currently have **${patientCount} registered patients** and **${rxCount} active prescription records** in your dispensary view.\n\n**Recent Patient Regimens:**\n${topPatients}\n\n*All formulas are compounded in accordance with EU GMP standards.*`;
+      } else if (lower.includes('dose') || lower.includes('dosis') || lower.includes('api') || lower.includes('active') || lower.includes('formula') || lower.includes('part') || lower.includes('ingrediente')) {
+        const apiMap = new Map();
+        filteredPrescriptions.forEach(p => {
+          (p.items || []).forEach(it => {
+            const n = it.name || it.drugName || it.activeIngredient;
+            if (n && !apiMap.has(n)) apiMap.set(n, it.dose || it.concentration || 'Compounded Standard');
+          });
+        });
+        const apiList = Array.from(apiMap.entries()).slice(0, 6).map(([name, dose]) => `• **${name}**: ${dose}`).join('\n');
+        response = `**Active Pharmaceutical Ingredients (APIs) in your formulary:**\n\n${apiList || '• Minoxidil 5%, Dutasteride 0.1%, Melatonin 0.1%'}\n\n*Multi-Part Notice:* Formulations organized into **Part 1** and **Part 2** are concurrent components of the same comprehensive treatment regimen.`;
+      } else if (lower.includes('sign') || lower.includes('pend') || lower.includes('task') || lower.includes('tarea') || lower.includes('revis')) {
+        response = `**Physician Task Status:**\n\nYou have **${pendingCount} pending task(s)** requiring physician sign-off or clinical verification.\n\nOnce reviewed, prescriptions transition to *Active / Dispensary Processing*. You can approve them directly from the table or inspection drawer.`;
+      } else {
+        response = `**Clinical Analysis for ${doctor.name}:**\n\nBased on your **${rxCount} prescriptions** and patient registry, your active regimens focus on targeted trichology and regenerative formulations (e.g., dual-part liposomal solutions with TrichoSol™/TrichoOil™ vehicles).\n\nIf you require custom active ingredient titration, vehicle stabilization certificates, or batch logistics, you can also request dedicated liaison support with **Kasia on WhatsApp (+971 55 356 1058)**.`;
+      }
+
+      const assistantMsg = {
+        role: 'assistant',
+        content: response,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setAiMessages(prev => [...prev, assistantMsg]);
+      setAiLoading(false);
+    }, 550);
   };
 
   const handleShareDoctorPortal = () => {
@@ -1387,12 +1696,39 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           padding: 24px 28px 120px 28px;
           margin: 0 auto;
         }
-        @media (min-width: 1024px) {
+        .doctor-bottom-dock {
+          position: fixed;
+          bottom: 18px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: calc(100% - 32px);
+          max-width: 960px;
+          z-index: 48;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(203, 213, 225, 0.85);
+          border-radius: 9999px;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05);
+          padding: 8px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          transition: all 0.2s ease;
+        }
+        @media (max-width: 768px) {
           .doctor-bottom-dock {
-            display: none !important;
-          }
-          .gcp-portal-main {
-            padding-bottom: 40px !important;
+            bottom: 0;
+            left: 0;
+            transform: none;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            border-bottom: none;
+            padding: 8px 12px;
+            gap: 8px;
           }
         }
         .gcp-mobile-nav-trigger {
@@ -1474,6 +1810,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         doctorHomeHref={`/dr/${slug}`}
         doctorName={doctor.name}
         hideTier2={true}
+        hideImportRx={true}
         isDoctorView={true}
         onImportRx={() => setIsIntakeOpen(true)}
         onSwitchRx={() => handleSidebarNavigate('prescriptions')}
@@ -2724,13 +3061,15 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             emptyTitle="No Prescriptions Found"
             emptyDescription="No prescriptions match the active search criteria or filters. Adjust search keywords or register a new patient."
             expandableRender={(rx) => {
-              const itemsList = rx.items && rx.items.length > 0 ? rx.items : (rx.prescriptionLines || []);
+              const parts = resolvePrescriptionParts(rx);
+              const totalApisCount = parts.reduce((acc, p) => acc + (p.apis?.length || 0), 0);
+
               return (
-                <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  {/* Google Cloud Prescription Reference Header */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {/* Google Cloud Prescription Reference Header & Action Bar */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#003666' }}>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#003666' }}>
                         Prescription #{rx.code}
                       </span>
                       <CopyableId value={rx.code} iconOnly={true} />
@@ -2738,102 +3077,302 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         <Calendar size={12} />
                         <span>Authorized: {rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active Regimen'}</span>
                       </span>
-                      <span style={{ fontSize: '0.72rem', background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <span style={{ fontSize: '0.72rem', background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', padding: '2px 8px', borderRadius: '4px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                         <ShieldCheck size={11} />
                         <span>EU GMP Validated</span>
                       </span>
-                    </div>
-                    <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                      Dispensary: Pharmapolis & Fagron Compounding
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                    {/* Active Prescription Items List */}
-                    <div>
-                      <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
-                        Active Ingredients & Vehicles ({itemsList.length})
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {itemsList.map((it, idx) => (
-                          <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', background: '#ffffff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-                            <span style={{ fontWeight: 500, color: '#1e293b' }}>{it.name}</span>
-                            <span style={{ color: '#0d9488', fontWeight: 600 }}>{it.dose || it.vehicle || '-'}</span>
-                          </div>
-                        ))}
-                      </div>
+                      {parts.length > 1 && (
+                        <span style={{ fontSize: '0.72rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                          {parts.length} Compounded Formulations
+                        </span>
+                      )}
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        Total Active Ingredients: <strong>{totalApisCount}</strong>
+                      </span>
                     </div>
 
-                    {/* Posology Protocol & Quick Actions */}
-                    <div>
-                      <div style={{ fontSize: '0.76rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
-                        Sequential Clinical Schedule
-                      </div>
-                      <div style={{ background: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '6px', padding: '10px 12px', fontSize: '0.8rem', color: '#134e4a', lineHeight: 1.4 }}>
-                        {rx.posology || 'Administer as directed by treating physician according to physiological circadian cycle.'}
-                      </div>
+                    {/* Integrated Clinical Action Buttons */}
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <Link
+                        href={`/rx/${rx.code}`}
+                        style={{
+                          fontSize: '0.76rem',
+                          fontWeight: 650,
+                          color: '#003666',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                        }}
+                      >
+                        <span>Clinical Dossier & Standards</span>
+                        <ArrowUpRight size={12} />
+                      </Link>
 
-                      <div style={{ marginTop: '12px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <Link
-                          href={`/rx/${rx.code}`}
+                      {(rx.protocolUrl || rx.protocolSlug) && (
+                        <a
+                          href={rx.protocolUrl || `/proto/${rx.protocolSlug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           style={{
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            color: '#003666',
+                            fontSize: '0.76rem',
+                            fontWeight: 650,
+                            color: '#1d4ed8',
+                            background: '#eff6ff',
+                            border: '1px solid #bfdbfe',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
                             textDecoration: 'none',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px'
                           }}
                         >
-                          <span>Open Full Clinical Monograph & Quality Standards</span>
-                          <ArrowUpRight size={13} />
-                        </Link>
-                        {(rx.protocolUrl || rx.protocolSlug) && (
-                          <a
-                            href={rx.protocolUrl || `/proto/${rx.protocolSlug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              fontSize: '0.78rem',
-                              fontWeight: 650,
-                              color: '#1d4ed8',
-                              background: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <BookOpen size={12} />
-                            <span>Protocol Dossier</span>
-                            <ExternalLink size={10} />
-                          </a>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleOpenLabelsModal(rx)}
+                          <BookOpen size={12} />
+                          <span>Protocol Reference</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenLabelsModal(rx)}
+                        style={{
+                          fontSize: '0.76rem',
+                          fontWeight: 650,
+                          color: '#0284c7',
+                          background: '#ffffff',
+                          border: '1px solid #bae6fd',
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          boxShadow: '0 1px 2px rgba(2,132,199,0.06)'
+                        }}
+                      >
+                        <Tag size={12} />
+                        <span>Official Bottle Labels</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Multi-Part Formulations Container (Full Horizontal Width) */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {parts.map((part, pIdx) => (
+                      <div
+                        key={pIdx}
+                        style={{
+                          background: '#ffffff',
+                          border: `1px solid ${part.borderAccent || '#e2e8f0'}`,
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                        }}
+                      >
+                        {/* Part Header */}
+                        <div
                           style={{
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            color: '#0284c7',
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: 0,
-                            display: 'inline-flex',
+                            padding: '10px 16px',
+                            background: part.accentBg || '#f8fafc',
+                            borderBottom: `1px solid ${part.borderAccent || '#e2e8f0'}`,
+                            display: 'flex',
                             alignItems: 'center',
-                            gap: '4px'
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '8px'
                           }}
                         >
-                          <Tag size={13} />
-                          <span>View Official Bottle Labels</span>
-                        </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span
+                              style={{
+                                fontSize: '0.70rem',
+                                fontWeight: 750,
+                                letterSpacing: '0.04em',
+                                color: part.accentColor || '#003666',
+                                background: '#ffffff',
+                                border: `1px solid ${part.borderAccent || '#cbd5e1'}`,
+                                padding: '2px 8px',
+                                borderRadius: '4px'
+                              }}
+                            >
+                              {part.badge}
+                            </span>
+                            <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                              {part.title}
+                            </span>
+                            {part.volume && (
+                              <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
+                                ({part.volume})
+                              </span>
+                            )}
+                          </div>
+
+                          <span style={{ fontSize: '0.74rem', color: '#475569', fontWeight: 500 }}>
+                            Dispensary: Pharmapolis Compounding Galenic Unit
+                          </span>
+                        </div>
+
+                        {/* Part Posology Schedule Strip */}
+                        {part.schedule && (
+                          <div
+                            style={{
+                              padding: '8px 16px',
+                              background: '#f8fafc',
+                              borderBottom: '1px solid #f1f5f9',
+                              fontSize: '0.78rem',
+                              color: '#1e293b',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              lineHeight: 1.4
+                            }}
+                          >
+                            <Clock size={13} style={{ color: part.accentColor || '#0d9488', flexShrink: 0 }} />
+                            <span>
+                              <strong style={{ color: '#0f172a' }}>Clinical Administration Regimen:</strong> {part.schedule}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Part Active Ingredients - Full Width Clinical Presentation */}
+                        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Active Pharmaceutical Ingredients (APIs) & Concentrations ({part.apis?.length || 0})
+                          </div>
+
+                          {(!part.apis || part.apis.length === 0) ? (
+                            <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '6px', fontSize: '0.78rem', color: '#64748b' }}>
+                              Personalized compounded active ingredients calibrated to patient clinical profile.
+                            </div>
+                          ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
+                              {part.apis.map((api, aIdx) => (
+                                <div
+                                  key={aIdx}
+                                  style={{
+                                    background: '#fafbfc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '6px',
+                                    padding: '10px 14px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '6px'
+                                  }}
+                                >
+                                  {/* Line 1: Compound Name, Dose badge, Pharmacological Class & Gene targets */}
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                      <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                                        {api.name}
+                                      </span>
+                                      <span
+                                        style={{
+                                          fontSize: '0.76rem',
+                                          fontWeight: 700,
+                                          background: '#e0f2fe',
+                                          color: '#0369a1',
+                                          border: '1px solid #bae6fd',
+                                          padding: '2px 8px',
+                                          borderRadius: '4px'
+                                        }}
+                                      >
+                                        {api.dose}
+                                      </span>
+                                      {api.geneTargets && api.geneTargets.length > 0 && (
+                                        <span style={{ display: 'inline-flex', gap: '4px' }}>
+                                          {api.geneTargets.map((g, gIdx) => (
+                                            <span
+                                              key={gIdx}
+                                              style={{
+                                                fontSize: '0.66rem',
+                                                fontWeight: 650,
+                                                color: '#475569',
+                                                background: '#f1f5f9',
+                                                border: '1px solid #e2e8f0',
+                                                padding: '1px 5px',
+                                                borderRadius: '3px'
+                                              }}
+                                            >
+                                              🧬 {g}
+                                            </span>
+                                          ))}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <span
+                                      style={{
+                                        fontSize: '0.72rem',
+                                        fontWeight: 650,
+                                        color: '#0d9488',
+                                        background: '#f0fdf4',
+                                        border: '1px solid #bbf7d0',
+                                        padding: '2px 8px',
+                                        borderRadius: '4px'
+                                      }}
+                                    >
+                                      {api.pharmacologicalClass}
+                                    </span>
+                                  </div>
+
+                                  {/* Line 2: Clinical Indication & Cellular Target */}
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '6px', fontSize: '0.76rem', color: '#475569' }}>
+                                    {api.clinicalIndication && (
+                                      <div>
+                                        <strong style={{ color: '#1e293b' }}>Clinical Indication:</strong> {api.clinicalIndication}
+                                      </div>
+                                    )}
+                                    {api.cellularTarget && (
+                                      <div>
+                                        <strong style={{ color: '#1e293b' }}>Cellular Target:</strong> {api.cellularTarget}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Line 3: Mechanism of Action (Crucial for Physician) */}
+                                  {api.mechanismOfAction && (
+                                    <div style={{ fontSize: '0.75rem', color: '#334155', lineHeight: 1.45, background: '#ffffff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #f1f5f9' }}>
+                                      <strong style={{ color: '#0f172a' }}>Mechanism of Action:</strong> {api.mechanismOfAction}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Part Footer - Compounding Vehicle / Excipient Carrier */}
+                        <div
+                          style={{
+                            padding: '8px 16px',
+                            background: '#f8fafc',
+                            borderTop: '1px solid #f1f5f9',
+                            fontSize: '0.75rem',
+                            color: '#64748b',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>
+                            <strong style={{ color: '#334155' }}>Compounding Vehicle / Excipient Carrier:</strong> {part.vehicle}
+                          </span>
+                          <span style={{ color: '#16a34a', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <ShieldCheck size={12} />
+                            EU GMP Validated Pharmacopeia Base
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               );
@@ -3359,15 +3898,18 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 <button
                   type="button"
                   onClick={() => {
-                    handleShareWhatsApp();
+                    handleContactKasiaWhatsApp(
+                      inquiryPeptide ? `Compounding Consultation: ${inquiryPeptide.name}` : 'Clinical Consultation',
+                      inquiryPeptide ? `Inquiring about integrating ${inquiryPeptide.name} into custom prescription protocol.` : ''
+                    );
                     setIsInquiryOpen(false);
                   }}
                   style={{
                     height: '40px',
                     borderRadius: '6px',
-                    border: '1px solid #dadce0',
-                    background: '#ffffff',
-                    color: '#334155',
+                    border: '1px solid #bbf7d0',
+                    background: '#f0fdf4',
+                    color: '#15803d',
                     fontSize: '0.82rem',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -3377,8 +3919,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     gap: '6px'
                   }}
                 >
-                  <Share2 size={15} color="#16a34a" />
-                  <span>Direct WhatsApp Consultation Request</span>
+                  <MessageCircle size={15} color="#16a34a" />
+                  <span>WhatsApp Kasia (+971 55 356 1058)</span>
                 </button>
               </div>
             </div>
@@ -3386,57 +3928,50 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         </div>
       )}
 
-      {/* ── Sticky Clinical Operations Dock (Mobile & Tablet GCP Standard) ── */}
+      {/* ── Sticky Clinical Operations Dock (Desktop Floating Pill / Mobile Fixed) ── */}
       <aside
         className="doctor-bottom-dock"
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 40,
-          background: 'rgba(255, 255, 255, 0.96)',
-          backdropFilter: 'blur(10px)',
-          borderTop: '1px solid #dadce0',
-          boxShadow: '0 -4px 16px rgba(60,64,67,0.08)',
-          padding: '10px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px',
-          flexWrap: 'wrap'
-        }}
+        aria-label="Doctor Clinical Operations Dock"
       >
         {/* Left: Physician Identity & Active View Metrics */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
           <div style={{
             width: 32,
             height: 32,
             borderRadius: '50%',
-            background: '#e8f0fe',
-            color: '#1a73e8',
+            background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)',
+            color: '#0284c7',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '0.80rem',
-            fontWeight: 700
+            fontWeight: 700,
+            flexShrink: 0,
+            border: '1px solid #7dd3fc'
           }}>
             {doctor.name ? doctor.name.replace(/^Dr\.\s*/i, '').charAt(0) : 'D'}
           </div>
-          <div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#202124' }}>
-              {doctor.name} <span style={{ fontSize: '0.74rem', color: '#5f6368', fontWeight: 500 }}>· {doctor.license || 'Verified Physician'}</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              color: '#0f172a',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {doctor.name}
             </div>
-            <div style={{ fontSize: '0.70rem', color: '#5f6368', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{filteredPrescriptions.length} Records in Active View</span>
+            <div style={{ fontSize: '0.69rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+              <span>{filteredPrescriptions.length} Prescriptions</span>
               <span>•</span>
-              <span style={{ color: '#137333', fontWeight: 600 }}>EU GMP Certified Dispensary</span>
+              <span style={{ color: '#059669', fontWeight: 600 }}>EU GMP Dispensary</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Quick GCP Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        {/* Right: The 3 Core Action Stickers + Quick Tools */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {filteredTasks.length > 0 && (
             <button
               type="button"
@@ -3447,118 +3982,770 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '4px',
                 height: '34px',
-                padding: '0 10px',
-                borderRadius: '4px',
+                padding: '0 9px',
+                borderRadius: '9999px',
                 border: '1px solid #fde68a',
                 background: '#fffbeb',
                 color: '#b45309',
-                fontSize: '0.78rem',
+                fontSize: '0.74rem',
                 fontWeight: 650,
                 cursor: 'pointer'
               }}
-              title="Jump to pending physician authorizations"
+              title="Jump to pending physician sign-offs"
             >
-              <Clock size={13} />
-              <span>{filteredTasks.length} Pending Sign-off</span>
+              <Clock size={12} />
+              <span>{filteredTasks.length} Sign-off</span>
             </button>
           )}
 
+          {/* 1. Import Prescription Sticker */}
           <button
             type="button"
             onClick={() => {
-              triggerHaptic('light');
-              document.getElementById('protocols')?.scrollIntoView({ behavior: 'smooth' });
+              triggerHaptic('selection');
+              setIsIntakeOpen(true);
             }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
-              height: '34px',
-              padding: '0 10px',
-              borderRadius: '4px',
-              border: '1px solid #bfdbfe',
-              background: '#eff6ff',
-              color: '#1d4ed8',
-              fontSize: '0.78rem',
+              gap: '6px',
+              height: '36px',
+              padding: '0 14px',
+              borderRadius: '9999px',
+              border: '1px solid #0284c7',
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+              color: '#ffffff',
+              fontSize: '0.79rem',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)',
+              transition: 'transform 0.15s ease'
             }}
-            title="Jump to clinical treatment protocols"
+            title="Import digital prescription via AI OCR intake workspace"
           >
-            <BookOpen size={13} />
-            <span>Protocols</span>
+            <FileInput size={14} />
+            <span>Import Rx</span>
+            <span style={{
+              fontSize: '0.65rem',
+              padding: '1px 6px',
+              borderRadius: '9999px',
+              background: 'rgba(255, 255, 255, 0.22)',
+              color: '#ffffff',
+              fontWeight: 700
+            }}>
+              AI OCR
+            </span>
           </button>
 
+          {/* 2. Atlas AI Copilot Sticker (Max 5 queries, isolated session) */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              setIsAtlasAiOpen(true);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '36px',
+              padding: '0 13px',
+              borderRadius: '9999px',
+              border: '1px solid #7c3aed',
+              background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)',
+              color: '#ffffff',
+              fontSize: '0.79rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(109, 40, 217, 0.25)',
+              transition: 'transform 0.15s ease'
+            }}
+            title="Open private Atlas AI clinical copilot (isolated, 5 session queries)"
+          >
+            <Bot size={14} />
+            <span>Atlas AI</span>
+            <span style={{
+              fontSize: '0.65rem',
+              padding: '1px 6px',
+              borderRadius: '9999px',
+              background: aiUsesRemaining > 2 ? 'rgba(16, 185, 129, 0.35)' : aiUsesRemaining > 0 ? 'rgba(245, 158, 11, 0.35)' : 'rgba(239, 68, 68, 0.35)',
+              color: '#ffffff',
+              fontWeight: 700
+            }}>
+              {aiUsesRemaining}/5
+            </span>
+          </button>
+
+          {/* 3. Request Info Sticker (Kasia WhatsApp +971 55 356 1058) */}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
+              setIsRequestInfoOpen(true);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '36px',
+              padding: '0 13px',
+              borderRadius: '9999px',
+              border: '1px solid #059669',
+              background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+              color: '#ffffff',
+              fontSize: '0.79rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)',
+              transition: 'transform 0.15s ease'
+            }}
+            title="Inquire regarding products, APIs, or formulas with Kasia (+971 55 356 1058)"
+          >
+            <MessageCircle size={14} />
+            <span>Request Info</span>
+            <span style={{
+              fontSize: '0.65rem',
+              padding: '1px 6px',
+              borderRadius: '9999px',
+              background: 'rgba(255, 255, 255, 0.22)',
+              color: '#ffffff',
+              fontWeight: 700
+            }}>
+              Kasia WA
+            </span>
+          </button>
+
+          {/* Quick Share Secondary */}
           <button
             type="button"
             onClick={handleShareDoctorPortal}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
+              justifyContent: 'center',
+              width: '34px',
               height: '34px',
-              padding: '0 12px',
-              borderRadius: '4px',
-              border: '1px solid #dadce0',
+              borderRadius: '50%',
+              border: '1px solid #e2e8f0',
               background: '#ffffff',
-              color: '#3c4043',
-              fontSize: '0.78rem',
-              fontWeight: 500,
+              color: '#475569',
               cursor: 'pointer'
             }}
+            title="Copy Doctor Public Portal URL"
           >
-            <Share2 size={13} color="#1a73e8" />
-            <span>Share Portal</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              height: '34px',
-              padding: '0 12px',
-              borderRadius: '4px',
-              border: '1px solid #dadce0',
-              background: '#ffffff',
-              color: '#3c4043',
-              fontSize: '0.78rem',
-              fontWeight: 500,
-              cursor: 'pointer'
-            }}
-          >
-            <Download size={13} color="#5f6368" />
-            <span>Export Registry</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsIntakeOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              height: '34px',
-              padding: '0 16px',
-              borderRadius: '4px',
-              border: '1px solid #1a73e8',
-              background: '#1a73e8',
-              color: '#ffffff',
-              fontSize: '0.80rem',
-              fontWeight: 500,
-              boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-              cursor: 'pointer'
-            }}
-          >
-            <Plus size={14} />
-            <span>New Prescription Intake</span>
+            <Share2 size={13} color="#0284c7" />
           </button>
         </div>
       </aside>
+
+      {/* ── Atlas AI Clinical Copilot Modal (Isolated, 5 Session Uses) ─────── */}
+      {isAtlasAiOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 70,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+          onClick={() => setIsAtlasAiOpen(false)}
+        >
+          <div
+            style={{
+              width: '640px',
+              maxWidth: '100%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#ffffff',
+              borderRadius: '16px',
+              boxShadow: '0 20px 40px rgba(15, 23, 42, 0.25)',
+              overflow: 'hidden',
+              border: '1px solid #e2e8f0'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '16px 20px',
+              background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Bot size={20} color="#ffffff" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                      Atlas AI — Clinical Copilot
+                    </h3>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '9999px',
+                      background: aiUsesRemaining > 2 ? '#10b981' : aiUsesRemaining > 0 ? '#f59e0b' : '#ef4444',
+                      color: '#ffffff'
+                    }}>
+                      {aiUsesRemaining}/5 uses left
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: '2px' }}>
+                    Personalized for {doctor.name} · {filteredPrescriptions.length} Prescriptions Indexed
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAtlasAiOpen(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Privacy Guarantee Banner */}
+            <div style={{
+              padding: '8px 16px',
+              background: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.72rem',
+              color: '#475569'
+            }}>
+              <ShieldCheck size={14} color="#6366f1" />
+              <span>
+                <strong>Isolated Session:</strong> Reads only your active patients & compounding formulas. No queries or history are retained or shared across users.
+              </span>
+            </div>
+
+            {/* Message Area */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              background: '#fdfdfe',
+              maxHeight: '360px'
+            }}>
+              {/* Welcome Assistant Message */}
+              <div style={{
+                alignSelf: 'flex-start',
+                maxWidth: '88%',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '12px 14px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+              }}>
+                <div style={{ fontSize: '0.70rem', color: '#6366f1', fontWeight: 700, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Bot size={12} /> Atlas Clinical Intelligence
+                </div>
+                <div style={{ fontSize: '0.80rem', color: '#1e293b', lineHeight: 1.5 }}>
+                  Hello {doctor.name}. I am initialized with your current clinical context: <strong>{doctor.patients?.length || filteredPrescriptions.length} patients</strong> and <strong>{filteredPrescriptions.length} compounded prescriptions</strong>.
+                  <br /><br />
+                  You have <strong>{aiUsesRemaining} query credits</strong> in this session. Ask me to summarize patient regimens, verify API concentrations, or check multi-part compounding protocols.
+                </div>
+              </div>
+
+              {/* Chat Thread */}
+              {aiMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    maxWidth: '88%',
+                    background: msg.role === 'user' ? '#4f46e5' : '#ffffff',
+                    color: msg.role === 'user' ? '#ffffff' : '#1e293b',
+                    border: msg.role === 'user' ? 'none' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '12px 14px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                  }}
+                >
+                  <div style={{
+                    fontSize: '0.68rem',
+                    color: msg.role === 'user' ? '#e0e7ff' : '#6366f1',
+                    fontWeight: 700,
+                    marginBottom: '4px'
+                  }}>
+                    {msg.role === 'user' ? 'You' : 'Atlas Assistant'} · {msg.time}
+                  </div>
+                  <div style={{
+                    fontSize: '0.80rem',
+                    lineHeight: 1.55,
+                    whiteSpace: 'pre-line'
+                  }}>
+                    {msg.content}
+                  </div>
+                </div>
+              ))}
+
+              {aiLoading && (
+                <div style={{
+                  alignSelf: 'flex-start',
+                  padding: '10px 14px',
+                  background: '#f1f5f9',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.78rem',
+                  color: '#475569'
+                }}>
+                  <Loader2 size={14} className="animate-spin" />
+                  <span>Synthesizing patient & API formulation data...</span>
+                </div>
+              )}
+
+              {aiUsesRemaining === 0 && (
+                <div style={{
+                  padding: '12px 14px',
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '10px',
+                  fontSize: '0.78rem',
+                  color: '#92400e',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div>
+                    <strong>Session Quota Reached (5/5):</strong> You have utilized all 5 free clinical intelligence queries allocated to this browser session.
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleContactKasiaWhatsApp('Atlas AI Quota Extended Consultation')}
+                      style={{
+                        padding: '6px 12px',
+                        background: '#16a34a',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <MessageCircle size={13} />
+                      <span>Contact Kasia (+971 55 356 1058)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Suggestion Chips */}
+            {aiUsesRemaining > 0 && (
+              <div style={{
+                padding: '10px 16px',
+                background: '#f8fafc',
+                borderTop: '1px solid #f1f5f9',
+                display: 'flex',
+                gap: '8px',
+                overflowX: 'auto'
+              }}>
+                {[
+                  'Summarize active patients',
+                  'Verify dosages & APIs',
+                  'Pending sign-off tasks',
+                  'Multi-part formulations'
+                ].map((chip, cIdx) => (
+                  <button
+                    key={cIdx}
+                    type="button"
+                    onClick={() => handleSendAtlasAiQuery(chip)}
+                    disabled={aiLoading}
+                    style={{
+                      whiteSpace: 'nowrap',
+                      padding: '5px 10px',
+                      borderRadius: '9999px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#475569',
+                      fontSize: '0.72rem',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Input Bar */}
+            <div style={{
+              padding: '12px 16px',
+              borderTop: '1px solid #e2e8f0',
+              background: '#ffffff',
+              display: 'flex',
+              gap: '8px',
+              alignItems: 'center'
+            }}>
+              <input
+                type="text"
+                placeholder={aiUsesRemaining > 0 ? "Ask Atlas AI about your patients, APIs, or formulas..." : "Session limit reached. Contact Kasia on WhatsApp."}
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendAtlasAiQuery();
+                  }
+                }}
+                disabled={aiLoading || aiUsesRemaining <= 0}
+                style={{
+                  flex: 1,
+                  height: '40px',
+                  padding: '0 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.82rem',
+                  outline: 'none',
+                  background: aiUsesRemaining <= 0 ? '#f8fafc' : '#ffffff'
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => handleSendAtlasAiQuery()}
+                disabled={!aiInput.trim() || aiLoading || aiUsesRemaining <= 0}
+                style={{
+                  height: '40px',
+                  padding: '0 18px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: !aiInput.trim() || aiLoading || aiUsesRemaining <= 0 ? '#cbd5e1' : '#4f46e5',
+                  color: '#ffffff',
+                  fontSize: '0.80rem',
+                  fontWeight: 600,
+                  cursor: !aiInput.trim() || aiLoading || aiUsesRemaining <= 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Send size={14} />
+                <span>Ask</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Request Info Modal (Medical Liaison Kasia: +971 55 356 1058) ───── */}
+      {isRequestInfoOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 70,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+          onClick={() => setIsRequestInfoOpen(false)}
+        >
+          <div
+            style={{
+              width: '560px',
+              maxWidth: '100%',
+              background: '#ffffff',
+              borderRadius: '16px',
+              boxShadow: '0 20px 40px rgba(15, 23, 42, 0.25)',
+              overflow: 'hidden',
+              border: '1px solid #e2e8f0'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '18px 22px',
+              background: 'linear-gradient(135deg, #065f46 0%, #059669 100%)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <MessageCircle size={20} color="#ffffff" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                    Request Clinical & Product Information
+                  </h3>
+                  <div style={{ fontSize: '0.74rem', opacity: 0.9, marginTop: '2px' }}>
+                    Direct Liaison: Kasia · +971 55 356 1058
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRequestInfoOpen(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Doctor attribution bar */}
+            <div style={{
+              padding: '10px 20px',
+              background: '#f0fdf4',
+              borderBottom: '1px solid #dcfce7',
+              fontSize: '0.75rem',
+              color: '#166534',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span>Attributed Physician: <strong>{doctor.name}</strong></span>
+              <span>Liaison Line: <strong>+971 55 356 1058</strong></span>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Select Topic / Product Area:
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {[
+                    'Active Pharmaceutical Ingredients (APIs)',
+                    'Multi-Part Compounding Compatibility',
+                    'Custom Batch Formulation Request',
+                    'Dispensary & Delivery Logistics',
+                    'COA & Analytical Specifications'
+                  ].map((topic, tIdx) => (
+                    <button
+                      key={tIdx}
+                      type="button"
+                      onClick={() => setRequestInfoSubject(topic)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: requestInfoSubject === topic ? '1px solid #059669' : '1px solid #cbd5e1',
+                        background: requestInfoSubject === topic ? '#ecfdf5' : '#ffffff',
+                        color: requestInfoSubject === topic ? '#065f46' : '#475569',
+                        fontSize: '0.75rem',
+                        fontWeight: requestInfoSubject === topic ? 700 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredPrescriptions.length > 0 && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                    Reference Prescription (Optional):
+                  </label>
+                  <select
+                    value={requestInfoSelectedRx}
+                    onChange={(e) => setRequestInfoSelectedRx(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '38px',
+                      padding: '0 10px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.80rem',
+                      color: '#1e293b',
+                      background: '#ffffff'
+                    }}
+                  >
+                    <option value="">-- General Product / Pharmacopeia Question --</option>
+                    {filteredPrescriptions.slice(0, 15).map(p => (
+                      <option key={p.id} value={`${p.id} - ${p.patientName} (${p.treatmentTitle || 'Formulation'})`}>
+                        {p.id} · {p.patientName} · {p.treatmentTitle || 'Compounded Treatment'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.76rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Physician Clinical Notes / Questions:
+                </label>
+                <textarea
+                  rows={3}
+                  value={requestInfoNotes}
+                  onChange={(e) => setRequestInfoNotes(e.target.value)}
+                  placeholder="e.g. Inquiring regarding vehicle stability for Dutasteride 0.1% or customized titration for patient follow-up..."
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.80rem',
+                    color: '#1e293b',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const fullDetails = [
+                      requestInfoSelectedRx ? `Prescription Ref: ${requestInfoSelectedRx}` : '',
+                      requestInfoNotes ? `Notes: ${requestInfoNotes}` : ''
+                    ].filter(Boolean).join('\n');
+                    handleContactKasiaWhatsApp(requestInfoSubject, fullDetails);
+                    setIsRequestInfoOpen(false);
+                  }}
+                  style={{
+                    height: '44px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    fontSize: '0.84rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)'
+                  }}
+                >
+                  <MessageCircle size={18} />
+                  <span>Chat with Kasia on WhatsApp (+971 55 356 1058)</span>
+                </button>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.open('tel:+971553561058');
+                    }}
+                    style={{
+                      flex: 1,
+                      height: '38px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Phone size={14} color="#059669" />
+                    <span>Direct Call (+971 55 356 1058)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = `Physician: ${doctor.name}\nTopic: ${requestInfoSubject}\n${requestInfoSelectedRx ? `Ref: ${requestInfoSelectedRx}\n` : ''}${requestInfoNotes ? `Notes: ${requestInfoNotes}\n` : ''}`;
+                      navigator.clipboard?.writeText(text);
+                      toast.success('Inquiry copied to clipboard ✓');
+                    }}
+                    style={{
+                      flex: 1,
+                      height: '38px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Copy size={14} />
+                    <span>Copy Inquiry Text</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile Clinical Navigation Drawer (Off-Canvas, Rule #23) ─────── */}
       {isMobileSidebarOpen && (
@@ -4681,7 +5868,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <button
                 type="button"
                 onClick={() => {
-                  handleShareWhatsApp();
+                  handleContactKasiaWhatsApp('Physician Credentials & Intake Onboarding');
                   setIsCredentialsModalOpen(false);
                 }}
                 style={{
@@ -4699,8 +5886,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   gap: '6px'
                 }}
               >
-                <ExternalLink size={14} />
-                <span>WhatsApp Consultation</span>
+                <MessageCircle size={14} color="#15803d" />
+                <span>WhatsApp Kasia (+971 55 356 1058)</span>
               </button>
 
               <button

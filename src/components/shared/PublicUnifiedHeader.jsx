@@ -70,6 +70,7 @@ export default function PublicUnifiedHeader({
   hideContactButton = false,
   // Doctor-only: enables Import Rx and Prescriptions Switcher buttons
   isDoctorView = false,
+  hideImportRx = false,
   onImportRx = null,
   onSwitchRx = null,
   rxSwitcherCount = 0,
@@ -348,8 +349,8 @@ export default function PublicUnifiedHeader({
                 </span>
               </button>
 
-              {/* Doctor-only: Import Prescription button (hidden on /rx/intake itself) */}
-              {isDoctorView && pathname !== '/rx/intake' && (
+              {/* Doctor-only: Import Prescription button (hidden on /rx/intake itself or if hideImportRx is true) */}
+              {isDoctorView && pathname !== '/rx/intake' && !hideImportRx && (
                 <button
                   type="button"
                   className="puh-btn puh-btn-import-rx hide-on-extra-narrow"
