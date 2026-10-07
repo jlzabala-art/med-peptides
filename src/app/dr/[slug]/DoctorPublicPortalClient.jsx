@@ -567,6 +567,17 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     });
   }, [formulary, formularyGoal, formularySearch]);
 
+  const filteredProtocols = useMemo(() => {
+    return allProtocols.filter(proto => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      const matchTitle = (proto.title || proto.name || '').toLowerCase().includes(q);
+      const matchCategory = (proto.category || '').toLowerCase().includes(q);
+      const matchDesc = (proto.description || '').toLowerCase().includes(q);
+      return matchTitle || matchCategory || matchDesc;
+    });
+  }, [allProtocols, searchQuery]);
+
   const formularyCounts = useMemo(() => {
     const counts = { all: formulary.length, repair: 0, metabolic: 0, cellular: 0, cognitive: 0 };
     formulary.forEach(p => {
