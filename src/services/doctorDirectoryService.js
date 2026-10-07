@@ -119,6 +119,42 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     phone: '+971 4 384 5678',
     email: 'dr.marina@novaclinic.ae',
     license: 'DHA-91105367'
+  },
+  {
+    id: 'raffanie-lucenio',
+    name: 'Raffanie Lucenio',
+    aliases: ['raffanie lucenio', 'dr. raffanie lucenio', 'dr raffanie lucenio', 'dr raffanie', 'raffanie', 'lucenio'],
+    title: 'Dr.',
+    specialty: 'Trichology & Aesthetic Medicine',
+    clinic: 'The Masters Medical Center',
+    clinicName: 'The Masters Medical Center',
+    clinicId: 'i1Dgcnn0sFtxMyewe1qJ',
+    address: 'Building 81, Street 555, Leabaib Zone 70',
+    city: 'Doha',
+    country: 'Qatar',
+    phone: '+974 4444 3431',
+    clinicPhone: '+974 4444 3431',
+    website: 'https://themasters.qa',
+    email: 'raffanie@themasters.qa',
+    license: 'QCHP Registered'
+  },
+  {
+    id: 'dr-miguel-angel-lopez-aranda',
+    name: 'Dr. Miguel Ángel López Aranda',
+    aliases: [
+      'dr. miguel ángel lópez aranda', 'miguel angel lopez aranda', 'dr miguel angel', 
+      'lopez aranda', 'dr. lopez aranda', 'miguel angel lopez', 'dr miguel angel lopez'
+    ],
+    title: 'Dr.',
+    specialty: 'Cirujano Capilar & Médico Prescriptor de Producción Magistral',
+    clinic: 'Clínica Capilar Dr. López Aranda',
+    clinicName: 'Clínica Capilar Dr. López Aranda',
+    country: 'España',
+    city: 'Madrid',
+    license: 'Lic. 282869584',
+    isProductionDoctor: true,
+    hasDHA: false,
+    purpose: 'compounding_production_order'
   }
 ];
 
