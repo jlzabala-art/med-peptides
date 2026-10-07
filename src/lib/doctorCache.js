@@ -387,13 +387,27 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     opaqueCode: opaqueCode
   };
 
-    // 5. Fetch Curated Compounding Peptide Formulary (Lotusland Bioactive APIs)
+    // 5. Fetch Curated Compounding Active Pharmaceutical Ingredients (APIs - CAT-MUWWS6JL)
     let formulary = [];
     try {
-      const productsSnap = await adminDb.collection('products')
-        .where('status', 'in', ['active', 'published'])
-        .limit(60)
-        .get();
+      const [snap1, snap2] = await Promise.all([
+        adminDb.collection('products')
+          .where('supplierIds', 'array-contains', 'supplier-lotusland')
+          .where('status', 'in', ['active', 'published'])
+          .limit(100)
+          .get()
+          .catch(() => ({ docs: [] })),
+        adminDb.collection('products')
+          .where('supplierId', '==', 'supplier-lotusland')
+          .where('status', 'in', ['active', 'published'])
+          .limit(100)
+          .get()
+          .catch(() => ({ docs: [] }))
+      ]);
+
+      const docMap = new Map();
+      snap1.docs?.forEach(d => docMap.set(d.id, { id: d.id, ...d.data() }));
+      snap2.docs?.forEach(d => docMap.set(d.id, { id: d.id, ...d.data() }));
 
       function sanitizeString(val, fallback = '') {
         if (!val) return fallback;
@@ -415,28 +429,49 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         return String(val);
       }
 
-      const seenNames = new Set();
-      productsSnap.forEach((doc) => {
-        const p = doc.data();
-        const cat = String(p.categoryId || p.category || '').toLowerCase();
-        const isPeptide = cat.includes('peptide') || p.productType === 'peptide' || p.isPeptide;
-        if (!isPeptide) return;
+      const GOAL_LABEL_MAP = {
+        fat_loss: 'Metabolic & Fat Loss',
+        weight_management: 'Metabolic & Weight Management',
+        tissue_repair: 'Tissue Repair & Gut',
+        anti_aging: 'Cellular Recovery & Anti-Aging',
+        cellular: 'Cellular Optimization',
+        cognitive: 'Cognitive & Neuro',
+        muscle_growth: 'Hypertrophy & Growth',
+        libido_wellness: 'Hormonal & Sexual Wellness',
+        general_health: 'General Health & Immunity',
+        supplies: 'Clinical Solvents & Supplies',
+        compounding_material: 'Compounding Solvents & Supplies'
+      };
 
-        const name = sanitizeString(p.canonicalName || p.name, 'Bioactive Peptide');
+      const seenNames = new Set();
+      docMap.forEach((p, docId) => {
+        const rawName = p.canonicalName || p.name;
+        if (!rawName) return;
+        const name = sanitizeString(rawName, 'Bioactive Peptide API');
         const cleanNameKey = name.toLowerCase().trim();
         if (seenNames.has(cleanNameKey)) return;
         seenNames.add(cleanNameKey);
 
-        const primaryGoal = sanitizeString(p.primaryGoal || (Array.isArray(p.goals) && p.goals[0]), 'Cellular Optimization');
-        const goals = Array.isArray(p.goals)
-          ? p.goals.map(g => sanitizeString(g)).filter(Boolean)
+        const rawGoal = p.primaryGoal || (Array.isArray(p.goals) && p.goals[0]) || 'Cellular Optimization';
+        const primaryGoal = GOAL_LABEL_MAP[rawGoal] || (typeof rawGoal === 'string' ? rawGoal.replace(/_/g, ' ') : 'Cellular Optimization');
+
+        const goals = Array.isArray(p.goals) && p.goals.length > 0
+          ? p.goals.map(g => GOAL_LABEL_MAP[g] || (typeof g === 'string' ? g.replace(/_/g, ' ') : sanitizeString(g))).filter(Boolean)
           : [primaryGoal];
 
         const rawMoa = p.mechanismOfAction || p.action || p.aiSummary;
         const moa = sanitizeString(rawMoa, 'Targeted molecular signaling and receptor upregulation under medical vigilance.');
-        const description = sanitizeString(p.aiDescription || p.description, 'Analytical grade bioactive peptide API for customized compounding magistral protocols.');
+        const description = sanitizeString(p.aiDescription || p.description, 'High-purity active pharmaceutical ingredient (API) for customized magistral compounding formulations.');
         const purity = sanitizeString(p.purity, '≥ 99% (HPLC Verified)');
-        const route = sanitizeString(p.route, 'Lyophilized API (SubQ / Topical / Oral)');
+
+        // Compounding API presentation: Pure API substances, not finished patient vials
+        let apiForm = 'Lyophilized Pure API Powder';
+        if (p.productType === 'raw_material' || p.category === 'raw_material') {
+          apiForm = 'Bulk API Powder (Sub-Batch)';
+        } else if (p.productType === 'solvent' || p.category === 'compounding_material') {
+          apiForm = 'Sterile Compounding Reconstitution Solvent';
+        }
+
         const casNumber = sanitizeString(p.casNumber || p.cas, null);
         const sequence = sanitizeString(p.sequence, null);
         const molecularWeight = sanitizeString(p.molecularWeight || p.mw, null);
@@ -444,26 +479,65 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         const contraindications = sanitizeString(p.contraindications, null);
 
         formulary.push({
-          id: doc.id,
-          slug: p.slug || doc.id,
+          id: docId,
+          slug: p.slug || docId,
           name,
           description,
-          category: 'peptide',
+          category: 'api_peptide',
           primaryGoal,
           goals,
           purity,
           casNumber,
           sequence,
           molecularWeight,
-          route,
+          route: apiForm,
+          apiForm,
           moa,
           halfLife,
           contraindications,
-          inStock: p.inStock ?? true
+          inStock: p.inStock ?? true,
+          supplierId: 'supplier-lotusland',
+          catalogRef: 'CAT-MUWWS6JL'
         });
       });
     } catch (err) {
       console.warn('Could not load products formulary in doctorCache:', err);
+    }
+
+    // 6. Fetch Certified Bloodo™ Diagnostic Panels (All 6 CE-IVDR products)
+    let bloodoPanels = [];
+    try {
+      const bloodoSnap = await adminDb.collection('products')
+        .where('supplierId', '==', 'supplier-bloodo')
+        .get();
+
+      bloodoSnap.forEach(d => {
+        const bp = d.data();
+        if (bp.status === 'published' || bp.status === 'active') {
+          bloodoPanels.push({
+            id: d.id,
+            slug: bp.slug || d.id,
+            name: bp.name,
+            description: bp.description || bp.shortDescription || '',
+            price: bp.price || null,
+            biomarkers: Array.isArray(bp.biomarkers) && bp.biomarkers.length > 0
+              ? bp.biomarkers
+              : (bp.name.includes('Cortisol')
+                  ? ['Free Cortisol', 'Total Cortisol', 'Morning CAR Index']
+                  : bp.name.includes('Testosterone')
+                  ? ['Total Testosterone', 'Bioavailable Testosterone Index']
+                  : ['Target Analytes']),
+            presentation: bp.presentation || 'Capillary Dried Blood Spot (DBS)',
+            specimen: 'Capillary Dried Blood Spot (DBS)',
+            tat: bp.tat || '3-4 Business Days',
+            indications: bp.indications || bp.shortDescription || (bp.description ? bp.description.slice(0, 160) + '...' : 'Pre-protocol baseline diagnostic evaluation.'),
+            clinicalUtility: bp.clinicalUtility || 'Objective physiological baseline quantification prior to magistral peptide protocols.',
+            datasheetUrl: `/p/${bp.slug || d.id}`
+          });
+        }
+      });
+    } catch (bErr) {
+      console.warn('Could not load bloodo products in doctorCache:', bErr);
     }
 
     const payload = {
@@ -478,7 +552,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       tasks: clinicalTasks,
       prescriptions,
       patients: Array.from(patientMap.values()),
-      formulary
+      formulary,
+      bloodoPanels
     };
 
   // Cache in RAM for 10 minutes under all lookup aliases

@@ -493,88 +493,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   // ── Pending Clinical Tasks Columns (DataTable Exclusive Rendering) ───────
   const taskColumns = useMemo(() => [
     {
-      key: 'priority',
-      header: 'Clinical Status',
-      width: '18%',
-      sortable: true,
-      render: (t) => {
-        if (t.isSigned || t.status === 'approved') {
-          return (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '3px 8px',
-                borderRadius: '4px',
-                background: '#f0fdf4',
-                color: '#16a34a',
-                border: '1px solid #bbf7d0',
-                fontSize: '0.72rem',
-                fontWeight: 650,
-                letterSpacing: '0.01em',
-                whiteSpace: 'nowrap',
-                lineHeight: 1.2,
-                flexShrink: 0
-              }}
-            >
-              <CheckCircle2 size={12} style={{ color: '#16a34a', flexShrink: 0 }} />
-              Signed & Approved
-            </span>
-          );
-        }
-
-        let label = 'Routine';
-        let color = '#475569';
-        let bg = '#f8fafc';
-        let border = '#e2e8f0';
-
-        if (t.priority === 'action_required' || t.priority === 'urgent' || t.type === 'approval') {
-          label = 'Action Required';
-          color = '#b45309';
-          bg = '#fffbeb';
-          border = '#fde68a';
-        } else if (t.priority === 'high' || t.type === 'titration') {
-          label = 'Titration Due';
-          color = '#1d4ed8';
-          bg = '#eff6ff';
-          border = '#bfdbfe';
-        } else if (t.priority === 'medium' || t.type === 'refill') {
-          label = 'Refill Scheduled';
-          color = '#0f766e';
-          bg = '#f0fdfa';
-          border = '#99f6e4';
-        }
-
-        return (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '3px 8px',
-              borderRadius: '4px',
-              background: bg,
-              color: color,
-              border: `1px solid ${border}`,
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              letterSpacing: '0.01em',
-              whiteSpace: 'nowrap',
-              lineHeight: 1.2,
-              flexShrink: 0
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
-            {label}
-          </span>
-        );
-      }
-    },
-    {
       key: 'title',
       header: 'Clinical Task & Action Plan',
-      width: '36%',
+      width: '54%',
       sortable: true,
       render: (t) => {
         let cleanTitle = t.title || '';
@@ -585,10 +506,33 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         }
         if (!cleanTitle) cleanTitle = 'Prescription Sign-off';
 
+        const isSigned = t.isSigned || t.status === 'approved';
+
         return (
           <div>
-            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.86rem' }}>
-              {cleanTitle}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 650, color: '#0f172a', fontSize: '0.86rem' }}>
+                {cleanTitle}
+              </span>
+              {isSigned && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.68rem',
+                    fontWeight: 650,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    background: '#f0fdf4',
+                    color: '#16a34a',
+                    border: '1px solid #bbf7d0'
+                  }}
+                >
+                  <CheckCircle2 size={11} />
+                  Authorized
+                </span>
+              )}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '3px', lineHeight: 1.35 }}>
               {t.description}
@@ -599,56 +543,19 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     },
     {
       key: 'patientName',
-      header: 'Patient & Reference',
-      width: '20%',
+      header: 'Patient',
+      width: '26%',
       sortable: true,
       render: (t) => (
-        <div>
-          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.84rem' }}>
-            {t.patientName}
-          </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Rx:</span>
-            <CopyableId value={t.code} iconOnly={false} />
-          </div>
+        <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.85rem' }}>
+          {t.patientName}
         </div>
       )
     },
     {
-      key: 'dueDate',
-      header: 'Timeline',
-      width: '12%',
-      sortable: true,
-      render: (t) => {
-        let displayDue = t.dueDate;
-        if (!displayDue || displayDue === 'Action Required') {
-          displayDue = 'Immediate';
-        }
-        return (
-          <span
-            style={{
-              fontSize: '0.74rem',
-              fontWeight: 600,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              background: '#f1f5f9',
-              color: '#334155',
-              border: '1px solid #e2e8f0',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            <Clock size={12} style={{ color: '#64748b' }} />
-            {displayDue}
-          </span>
-        );
-      }
-    },
-    {
       key: 'actions',
       header: 'Action',
-      width: '14%',
+      width: '20%',
       align: 'right',
       isAction: true,
       mobilePriority: 'always',
@@ -833,25 +740,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       )
     },
     {
-      key: 'status',
-      header: 'Status',
-      width: '16%',
-      sortable: true,
-      render: (rx) => <StatusBadge status={rx.status} />
-    },
-    {
-      key: 'createdAt',
-      header: 'Date',
-      width: '14%',
-      sortable: true,
-      render: (rx) => (
-        <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <Calendar size={12} style={{ color: '#64748b' }} />
-          <span>{rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : 'Active'}</span>
-        </div>
-      )
-    },
-    {
       key: 'actions',
       header: 'Actions',
       width: '14%',
@@ -972,7 +860,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const pharmacopeiaColumns = useMemo(() => [
     {
       key: 'name',
-      header: 'Compound & API Specification',
+      header: 'Active Pharmaceutical Ingredient (API)',
       width: '28%',
       sortable: true,
       render: (p) => (
@@ -982,6 +870,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </div>
           <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span>{p.casNumber ? `CAS: ${p.casNumber}` : 'High-Purity API'}</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ color: '#003666', fontWeight: 600 }}>Pure Compounding Substance</span>
           </div>
         </div>
       )
@@ -1049,16 +939,16 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     },
     {
       key: 'route',
-      header: 'Formulation Vehicle',
+      header: 'API Compounding Specification',
       width: '18%',
       sortable: true,
       render: (p) => (
         <div>
-          <div style={{ fontSize: '0.78rem', fontWeight: 500, color: '#334155' }}>
-            {p.route || 'Lyophilized API Powder'}
+          <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1e293b' }}>
+            {p.apiForm || p.route || 'Lyophilized API Powder'}
           </div>
           <div style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '2px' }}>
-            Bacteriostatic / Galenic Base
+            Active Pharmaceutical Ingredient
           </div>
         </div>
       )
@@ -1098,45 +988,86 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     }
   ], []);
 
-  // ── Bloodo™ Diagnostic Panels (Pre-Treatment Baseline Calibration) ─────────
-  const bloodoPanels = useMemo(() => [
-    {
-      id: 'panel-nad',
-      name: 'Intracellular NAD+ & Metabolomic Resilience Profile',
-      specimen: 'Capillary Dried Blood Spot (DBS)',
-      tat: '3-4 Business Days',
-      indications: 'Pre-peptide baseline mitochondrial calibration; measures intracellular NAD+/NADH ratio, active sirtuin pathway capacity, and cellular energy synthesis.',
-      biomarkers: ['Intracellular NAD+', 'NADH Redox Ratio', 'ATP Synthesis Index', 'Whole Blood Glycation Level'],
-      clinicalUtility: 'Guides mitochondrial and cellular longevity protocols (e.g. Epithalon, MOTS-c) to prevent futile metabolic cycle overstimulation.'
-    },
-    {
-      id: 'panel-gh',
-      name: 'Endocrine Growth Hormone Axis & IGF-1 Calibration',
-      specimen: 'Capillary Dried Blood Spot (DBS)',
-      tat: '3-4 Business Days',
-      indications: 'Pre-treatment endocrine screening for growth hormone secretagogues (CJC-1295 / Ipamorelin, Tesamorelin, Sermorelin).',
-      biomarkers: ['Serum IGF-1', 'IGFBP-3 Binding Protein', 'Fasting Insulin', 'GH Pulsatility Baseline'],
-      clinicalUtility: 'Establishes therapeutic ceiling and rules out baseline endocrine dysregulation before secretagogue cycles.'
-    },
-    {
-      id: 'panel-metabolic',
-      name: 'Cardiometabolic & Glycemic Homeostasis (HbA1c / HOMA-IR)',
-      specimen: 'Capillary Dried Blood Spot (DBS)',
-      tat: '2-3 Business Days',
-      indications: 'Objective metabolic profiling for GLP-1/GIP receptor agonist regimens and visceral adiposity protocols.',
-      biomarkers: ['HbA1c Glycated Hemoglobin', 'Fasting Blood Glucose', 'C-Peptide', 'Estimated HOMA-IR Index'],
-      clinicalUtility: 'Calibrates micro-dosing titration increments and objectively tracks metabolic insulin sensitivity response.'
-    },
-    {
-      id: 'panel-inflammation',
-      name: 'Cellular Senescence & Systemic Inflammatory Baseline',
-      specimen: 'Capillary Dried Blood Spot (DBS)',
-      tat: '3-4 Business Days',
-      indications: 'Tissue regeneration calibration prior to musculoskeletal repair protocols (BPC-157, TB-500, GHK-Cu).',
-      biomarkers: ['High-Sensitivity CRP (hs-CRP)', 'Interleukin-6 (IL-6)', 'TNF-Alpha Baseline', 'Fibrinogen Index'],
-      clinicalUtility: 'Confirms baseline systemic inflammatory burden to ensure targeted tissue trophic response without inflammatory flares.'
+  // ── Bloodo™ Diagnostic Panels (All 6 CE-IVDR Certified Panels) ─────────────
+  const bloodoPanels = useMemo(() => {
+    if (Array.isArray(data?.bloodoPanels) && data.bloodoPanels.length === 6) {
+      return data.bloodoPanels;
     }
-  ], []);
+    return [
+      {
+        id: 'bloodo-nad-level-test',
+        slug: 'bloodo-nad-level-test',
+        name: 'Bloodo™ NAD Level Test',
+        specimen: 'Capillary Dried Blood Spot (DBS)',
+        tat: '3-4 Business Days',
+        indications: 'CE-IVDR certified quantitative capillary dried blood spot diagnostic test measuring total cellular NAD (NAD+ and NADH). Essential for cellular bioenergetics, sirtuin activation, and PARP-mediated DNA repair.',
+        biomarkers: ['Total Cellular NAD (NAD+ and NADH)', 'Intracellular Redox Potential', 'ATP Synthesis Capacity'],
+        clinicalUtility: 'Objectively tracks intracellular NAD depletion and verifies clinical bioavailability before and during peptide & longevity protocols.',
+        price: '$199',
+        datasheetUrl: '/p/bloodo-nad-level-test'
+      },
+      {
+        id: 'cortisol-test',
+        slug: 'cortisol-test',
+        name: 'Bloodo™ Cortisol Test',
+        specimen: 'Capillary Dried Blood Spot (DBS)',
+        tat: '2-3 Business Days',
+        indications: 'Measures free and total morning awakening cortisol from capillary dried blood spot. Evaluates Hypothalamic-Pituitary-Adrenal (HPA) axis balance and chronic allostatic stress burden.',
+        biomarkers: ['Free Morning Cortisol', 'Total Serum-Equivalent Cortisol', 'Cortisol Awakening Response (CAR)', 'HPA Axis Stress Index'],
+        clinicalUtility: 'Identifies adrenal exhaustion, circadian misalignment, or hypercortisolemia prior to secretagogue or metabolic peptide cycles.',
+        price: '$79',
+        datasheetUrl: '/p/cortisol-test'
+      },
+      {
+        id: 'hemoglobin-a1c-hba1c-test',
+        slug: 'hemoglobin-a1c-hba1c-test',
+        name: 'Bloodo™ Hemoglobin A1c (HbA1c) Test',
+        specimen: 'Capillary Dried Blood Spot (DBS)',
+        tat: '2-3 Business Days',
+        indications: 'CE-IVDR certified dried blood spot assay quantifying 90-day glycemic exposure via NGSP/IFCC traceable chromatography at LifeLab1 (Vilnius, Lithuania).',
+        biomarkers: ['Glycated Hemoglobin (% HbA1c / mmol/mol)', 'Estimated Average Glucose (eAG)', 'Insulin Sensitivity Profile'],
+        clinicalUtility: 'Guides and benchmarks micro-dosing titration for GLP-1/GIP receptor agonists (Tirzepatide, Semaglutide, Retatrutide) and metabolic therapy.',
+        price: '$59',
+        datasheetUrl: '/p/hemoglobin-a1c-hba1c-test'
+      },
+      {
+        id: 'omega-ratio-test',
+        slug: 'omega-ratio-test',
+        name: 'Bloodo™ Omega Ratio & Index Test',
+        specimen: 'Capillary Dried Blood Spot (DBS)',
+        tat: '3-4 Business Days',
+        indications: 'Erythrocyte membrane fatty acid chromatography (GC-MS) measuring cardioprotective Omega-3 Index, Omega-6/Omega-3 ratio, and AA/EPA inflammatory index.',
+        biomarkers: ['Omega-3 Index (EPA + DHA %)', 'Omega-6 / Omega-3 Ratio', 'AA / EPA Inflammatory Ratio', 'Trans-Fatty Acids Index'],
+        clinicalUtility: 'Establishes cellular membrane fluidity and inflammatory balance prior to tissue regeneration peptide protocols (BPC-157, TB-500, GHK-Cu).',
+        price: '$79',
+        datasheetUrl: '/p/omega-ratio-test'
+      },
+      {
+        id: 'testosterone-test',
+        slug: 'testosterone-test',
+        name: 'Bloodo™ Testosterone+ Test',
+        specimen: 'Capillary Dried Blood Spot (DBS)',
+        tat: '3-4 Business Days',
+        indications: 'High-resolution LC-MS/MS capillary blood assay calibrated to CDC hormone standardization standards for total and bioavailable testosterone.',
+        biomarkers: ['Total Testosterone', 'Bioavailable Testosterone Index', 'Free Androgen Ratio'],
+        clinicalUtility: 'Baseline and follow-up endocrine profiling for vitality protocols, secretagogue therapy (CJC-1295 / Ipamorelin), and hormone optimization.',
+        price: '$99',
+        datasheetUrl: '/p/testosterone-test'
+      },
+      {
+        id: 'vitamin-d-test',
+        slug: 'vitamin-d-test',
+        name: 'Bloodo™ Vitamin D Test',
+        specimen: 'Capillary Dried Blood Spot (DBS)',
+        tat: '2-3 Business Days',
+        indications: 'CE-IVDR certified quantitative assay measuring total 25-hydroxyvitamin D [25(OH)D2 + 25(OH)D3] via gold-standard LC-MS/MS with DEQAS certified accuracy.',
+        biomarkers: ['Total 25-Hydroxyvitamin D [25(OH)D2 + 25(OH)D3]', '25(OH)D3 Active Fraction', 'Immune Competence Marker'],
+        clinicalUtility: 'Optimizes immune competence, bone mineralization, genomic transcription regulation, and hormone receptor sensitivity.',
+        price: '$59',
+        datasheetUrl: '/p/vitamin-d-test'
+      }
+    ];
+  }, [data?.bloodoPanels]);
 
   const sidebarNavGroups = useMemo(() => [
     {
@@ -1212,7 +1143,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           id: 'protocols_catalog',
           label: 'Complete Catalog Directory',
           icon: BookOpen,
-          action: () => window.open('/c/CAT-MU9L9GBN', '_blank'),
+          action: () => window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank'),
           badge: 'Lotusland'
         }
       ]
@@ -1967,10 +1898,41 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             emptyDescription="There are no pending protocol titrations, phase adjustments, or refill authorizations requiring physician action."
             expandableRender={(task) => (
               <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#003666' }}>
-                    Clinical Rationale & Action Details
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#003666' }}>
+                      Clinical Action Details
+                    </span>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe'
+                    }}>
+                      <Clock size={11} />
+                      Timeline: {task.dueDate || 'Immediate'}
+                    </span>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      background: task.isSigned || task.status === 'approved' ? '#f0fdf4' : '#fffbeb',
+                      color: task.isSigned || task.status === 'approved' ? '#16a34a' : '#b45309',
+                      border: `1px solid ${task.isSigned || task.status === 'approved' ? '#bbf7d0' : '#fde68a'}`
+                    }}>
+                      {task.isSigned || task.status === 'approved' ? 'Signed & Authorized' : 'Pending Authorization'}
+                    </span>
+                  </div>
                   <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
                     Trigger: Automated Chronobiological Protocol Monitor
                   </span>
@@ -1978,7 +1940,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 <p style={{ margin: '0 0 12px 0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
                   {task.description}
                 </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <Link
                     href={task.actionUrl}
                     style={{
@@ -1997,9 +1959,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     <span>Execute {task.actionLabel}</span>
                     <ArrowUpRight size={13} />
                   </Link>
-                  <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-                    Reference Prescription #{task.code}
-                  </span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontSize: '0.74rem', color: '#64748b' }}>Reference Prescription:</span>
+                    <CopyableId value={task.code} iconOnly={false} />
+                  </div>
                 </div>
               </div>
             )}
@@ -2051,7 +2014,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ display: 'inline-flex', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '2px', gap: '2px' }}>
                 {[
                   { id: 'all', label: 'All Time' },
-                  { id: 'active', label: 'Active' },
                   { id: '30d', label: '30 Days' },
                   { id: '90d', label: '90 Days' }
                 ].map(t => (
@@ -2304,7 +2266,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             {/* Direct reference button to complete directory */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <a
-                href="/c/CAT-MU9L9GBN"
+                href="https://med-peptides.com/c/CAT-MUWWS6JL"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -2483,14 +2445,14 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   <span>Bloodo™ Diagnostic Biomarker Panels & Quantitative Baseline Calibration</span>
                 </h2>
                 <span style={{ fontSize: '0.70rem', color: '#0d9488', background: '#f0fdfa', border: '1px solid #99f6e4', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                  CE-IVDR Certified Capillary DBS
+                  6 CE-IVDR Certified Capillary DBS Tests
                 </span>
                 <span style={{ fontSize: '0.70rem', color: '#64748b', background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
                   ISO 15189 Accredited Lab
                 </span>
               </div>
               <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
-                Pre-treatment capillary blood spot diagnostic panels for objective physiological baseline profiling and therapeutic titration monitoring.
+                All 6 certified pre-treatment diagnostic panels for objective physiological baseline profiling. Click any test to open its complete public analytical datasheet.
               </p>
             </div>
           </div>
@@ -2528,9 +2490,23 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   <div>
                     {/* Header */}
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', marginBottom: '8px' }}>
-                      <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
-                        {panel.name}
-                      </h4>
+                      <a
+                        href={`/p/${panel.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                          {panel.name}
+                        </h4>
+                        <ExternalLink size={13} style={{ color: '#1a73e8', flexShrink: 0 }} />
+                      </a>
                       <span style={{
                         fontSize: '0.68rem',
                         fontWeight: 650,
@@ -2609,34 +2585,36 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   </div>
 
                   {/* Panel footer */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '12px' }}>
                     <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                       Requisition via Atlas Clinical Lab
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        toast.success(`Biomarker requisition sheet for ${panel.name} queued for clinical download ✓`);
-                      }}
+                    <a
+                      href={`/p/${panel.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => triggerHaptic('light')}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
                         background: '#ffffff',
-                        border: '1px solid #dadce0',
+                        border: '1px solid #1a73e8',
                         borderRadius: '4px',
                         padding: '4px 10px',
                         fontSize: '0.74rem',
                         fontWeight: 600,
-                        color: '#003666',
+                        color: '#1a73e8',
+                        textDecoration: 'none',
                         cursor: 'pointer',
-                        transition: 'all 0.12s'
+                        transition: 'all 0.12s',
+                        boxShadow: '0 1px 2px rgba(26,115,232,0.06)'
                       }}
                     >
                       <FileText size={12} />
-                      <span>Requisition Spec</span>
-                    </button>
+                      <span>Public Datasheet</span>
+                      <ExternalLink size={10} />
+                    </a>
                   </div>
                 </div>
               ))}
@@ -3447,6 +3425,26 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               <div style={{ flex: 1, overflowY: 'auto', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {inspectorTab === 'dossier' && (
                   <>
+                    {/* Clinical Task & Action Scheduling */}
+                    {isTask && (
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#003666', textTransform: 'uppercase' }}>
+                            Clinical Action & Timeline
+                          </span>
+                          <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Clock size={11} /> Timeline: {item.dueDate || 'Immediate'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                          {item.title}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '4px', lineHeight: 1.45 }}>
+                          {item.description}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Patient Information Card */}
                     <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px 16px' }}>
                       <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: '8px' }}>
