@@ -172,6 +172,53 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
   const allTasks = data?.tasks || [];
   const allPrescriptions = data?.prescriptions || [];
+  const allProtocols = data?.protocols || [];
+
+  const [protocolCategory, setProtocolCategory] = useState('all');
+  const [activeSection, setActiveSection] = useState('overview');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sectionIds = ['overview', 'tasks', 'prescriptions', 'protocols', 'formulary', 'diagnostics', 'patients'];
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 120;
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sectionIds[i]);
+        if (el && el.offsetTop <= scrollPos) {
+          setActiveSection(sectionIds[i]);
+          break;
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Filter Protocols
+  const filteredProtocols = useMemo(() => {
+    let list = allProtocols;
+    if (protocolCategory !== 'all') {
+      list = list.filter(p => {
+        const cat = String(p.category || '').toLowerCase();
+        if (protocolCategory === 'metabolic') return cat.includes('metabol') || cat.includes('weight') || cat.includes('incretin');
+        if (protocolCategory === 'regenerative') return cat.includes('regen') || cat.includes('tissue') || cat.includes('recovery');
+        if (protocolCategory === 'longevity') return cat.includes('long') || cat.includes('cellular') || cat.includes('anti-aging');
+        if (protocolCategory === 'neuro') return cat.includes('neuro') || cat.includes('cognit') || cat.includes('sleep');
+        if (protocolCategory === 'immune') return cat.includes('immun') || cat.includes('resilien');
+        return true;
+      });
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(p =>
+        (p.title || '').toLowerCase().includes(q) ||
+        (p.summary || '').toLowerCase().includes(q) ||
+        (p.category || '').toLowerCase().includes(q) ||
+        (p.compounds || []).some(c => String(c).toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [allProtocols, protocolCategory, searchQuery]);
 
   // Opaque Doctor Slug (Protects Doctor Identity in URL)
   const opaqueCode = doctor.opaqueCode || doctor.slug || slug;
@@ -701,18 +748,52 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       sortable: true,
       render: (rx) => {
         const itemCount = (rx.items || []).length || (rx.prescriptionLines || []).length || 1;
+        const protoUrl = rx.protocolUrl || (rx.protocolSlug ? `/proto/${rx.protocolSlug}` : null);
+
         return (
           <div>
-            <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.84rem' }}>
-              {rx.treatmentTitle || 'Personalized Compounded Regimen'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              {protoUrl ? (
+                <a
+                  href={protoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  title="Open evidence-based clinical protocol dossier in new tab"
+                  style={{
+                    fontWeight: 650,
+                    color: '#003666',
+                    fontSize: '0.84rem',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  <span>{rx.treatmentTitle || 'Personalized Compounded Regimen'}</span>
+                  <ExternalLink size={11} style={{ color: '#1a73e8', flexShrink: 0 }} />
+                </a>
+              ) : (
+                <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.84rem' }}>
+                  {rx.treatmentTitle || 'Personalized Compounded Regimen'}
+                </span>
+              )}
             </div>
             <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <span style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, color: '#334155' }}>
                 {itemCount} formulation{itemCount > 1 ? 's' : ''}
               </span>
+              {protoUrl && (
+                <span style={{ fontSize: '0.68rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                  <BookOpen size={10} />
+                  <span>Protocol Dossier</span>
+                </span>
+              )}
               {rx.posology && (
                 <span style={{ color: '#0d9488', fontWeight: 500 }}>
-                  {rx.posology.length > 36 ? `${rx.posology.slice(0, 36)}...` : rx.posology}
+                  {rx.posology.length > 32 ? `${rx.posology.slice(0, 32)}...` : rx.posology}
                 </span>
               )}
             </div>
@@ -1126,6 +1207,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       groupTitle: 'CLINICAL REFERENCE',
       items: [
         {
+          id: 'protocols',
+          label: 'Clinical Protocols',
+          icon: BookOpen,
+          href: '#protocols',
+          badge: filteredProtocols.length > 0 ? `${filteredProtocols.length}` : '77'
+        },
+        {
           id: 'formulary',
           label: 'Compounding Pharmacopeia',
           icon: FlaskConical,
@@ -1137,12 +1225,12 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           label: 'Diagnostic Panels (Bloodo™)',
           icon: Activity,
           href: '#diagnostics',
-          badge: 'CE-IVDR'
+          badge: '6 Tests'
         },
         {
           id: 'protocols_catalog',
           label: 'Complete Catalog Directory',
-          icon: BookOpen,
+          icon: ExternalLink,
           action: () => window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank'),
           badge: 'Lotusland'
         }
@@ -1167,7 +1255,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         }
       ]
     }
-  ], [filteredTasks.length, filteredPrescriptions.length, filteredPrescriptions, filteredFormulary.length]);
+  ], [filteredTasks.length, filteredPrescriptions.length, filteredPrescriptions, filteredFormulary.length, filteredProtocols.length]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -1594,6 +1682,89 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </button>
             </div>
           </div>
+
+        {/* ── Sticky Sub-Navigation Bar (ScrollSpy GCP Style) ── */}
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 20,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid #dadce0',
+            margin: '0 -28px 24px -28px',
+            padding: '10px 28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            overflowX: 'auto',
+            boxShadow: '0 2px 4px rgba(60,64,67,0.04)'
+          }}
+        >
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            {[
+              { id: 'overview', label: 'Overview' },
+              { id: 'tasks', label: `Actions (${filteredTasks.length})`, highlight: filteredTasks.length > 0 },
+              { id: 'prescriptions', label: `Prescriptions (${filteredPrescriptions.length})` },
+              { id: 'protocols', label: `Protocols (${filteredProtocols.length || 77})` },
+              { id: 'formulary', label: 'Pharmacopeia (APIs)' },
+              { id: 'diagnostics', label: 'Bloodo™ Tests (6)' },
+              { id: 'patients', label: `Patients (${data?.patients?.length || 0})` }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  const el = document.getElementById(tab.id);
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  setActiveSection(tab.id);
+                }}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '16px',
+                  border: activeSection === tab.id ? '1px solid #003666' : '1px solid #e2e8f0',
+                  background: activeSection === tab.id ? '#003666' : '#ffffff',
+                  color: activeSection === tab.id ? '#ffffff' : (tab.highlight ? '#b45309' : '#475569'),
+                  fontSize: '0.76rem',
+                  fontWeight: activeSection === tab.id ? 650 : 500,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.12s'
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={handleCopyIntakeLink}
+              style={{
+                height: '30px',
+                padding: '0 10px',
+                borderRadius: '4px',
+                border: '1px solid #1a73e8',
+                background: '#e8f0fe',
+                color: '#1a73e8',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                whiteSpace: 'nowrap'
+              }}
+              title="Copy personalized patient intake questionnaire link"
+            >
+              <Share2 size={12} />
+              <span>Share Patient Intake</span>
+            </button>
+          </div>
+        </div>
 
         {/* ── 4 Core Operational KPIs & Scope Switcher (Google Cloud Rule #22) ─ */}
         <div id="overview" style={{ marginBottom: '24px' }}>
@@ -2192,6 +2363,30 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                           <span>Open Full Clinical Monograph & Quality Standards</span>
                           <ArrowUpRight size={13} />
                         </Link>
+                        {(rx.protocolUrl || rx.protocolSlug) && (
+                          <a
+                            href={rx.protocolUrl || `/proto/${rx.protocolSlug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '0.78rem',
+                              fontWeight: 650,
+                              color: '#1d4ed8',
+                              background: '#eff6ff',
+                              border: '1px solid #bfdbfe',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <BookOpen size={12} />
+                            <span>Protocol Dossier</span>
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleOpenLabelsModal(rx)}
@@ -2218,6 +2413,276 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               );
             }}
           />
+        </section>
+
+        {/* ── Section: Evidence-Based Clinical Protocols & Pathways (The Medical Evidence) ── */}
+        <section
+          id="protocols"
+          style={{
+            background: '#ffffff',
+            border: '1px solid #dadce0',
+            borderRadius: '8px',
+            marginTop: '32px',
+            boxShadow: '0 1px 2px rgba(60,64,67,0.06)',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              padding: '18px 22px',
+              borderBottom: '1px solid #dadce0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '14px',
+              background: '#ffffff'
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BookOpen size={18} style={{ color: '#003666' }} />
+                  <span>Evidence-Based Clinical Protocols & Treatment Pathways</span>
+                </h2>
+                <span style={{ fontSize: '0.70rem', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                  {filteredProtocols.length} Active Protocols
+                </span>
+                <span style={{ fontSize: '0.70rem', color: '#166534', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                  Peer-Reviewed Titration Pathways
+                </span>
+              </div>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.80rem', color: '#64748b' }}>
+                Standardized titration curves, chronobiological receptor management, and companion biomarker calibration for physician practice.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <a
+                href="/proto"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#003666',
+                  color: '#ffffff',
+                  border: '1px solid #002244',
+                  borderRadius: '4px',
+                  padding: '6px 14px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: '0 1px 2px rgba(0,54,102,0.18)'
+                }}
+              >
+                <span>Complete Protocols Registry</span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
+          </div>
+
+          {/* Filter Pills */}
+          <div style={{ padding: '12px 22px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#475569', textTransform: 'uppercase', marginRight: '4px' }}>
+              Specialty Category:
+            </span>
+            {[
+              { id: 'all', label: 'All Protocols' },
+              { id: 'metabolic', label: 'Metabolism & GLP-1' },
+              { id: 'regenerative', label: 'Tissue Repair & Gut' },
+              { id: 'longevity', label: 'Cellular Longevity' },
+              { id: 'neuro', label: 'Neuro & Sleep' },
+              { id: 'immune', label: 'Immune Resilience' }
+            ].map(cat => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setProtocolCategory(cat.id);
+                }}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '14px',
+                  border: protocolCategory === cat.id ? '1px solid #003666' : '1px solid #cbd5e1',
+                  background: protocolCategory === cat.id ? '#003666' : '#ffffff',
+                  color: protocolCategory === cat.id ? '#ffffff' : '#334155',
+                  fontSize: '0.74rem',
+                  fontWeight: protocolCategory === cat.id ? 650 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.12s'
+                }}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Protocols Cards Grid */}
+          <div style={{ padding: '20px 22px' }}>
+            {filteredProtocols.length === 0 ? (
+              <EmptyState
+                icon={BookOpen}
+                title="No clinical protocols match the current filters"
+                subtitle="Try resetting the category filter or adjusting search query keywords."
+                action={{
+                  label: 'View All Protocols',
+                  onClick: () => setProtocolCategory('all')
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                  gap: '16px'
+                }}
+              >
+                {filteredProtocols.map(proto => (
+                  <div
+                    key={proto.id || proto.slug}
+                    style={{
+                      border: '1px solid #dadce0',
+                      borderRadius: '8px',
+                      background: '#ffffff',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      transition: 'border-color 0.15s, box-shadow 0.15s',
+                      boxShadow: '0 1px 2px rgba(60,64,67,0.04)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#1a73e8';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(26,115,232,0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#dadce0';
+                      e.currentTarget.style.boxShadow = '0 1px 2px rgba(60,64,67,0.04)';
+                    }}
+                  >
+                    <div>
+                      {/* Top Badges */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 650, color: '#003666', background: '#f0f7ff', border: '1px solid #c8e1ff', padding: '2px 8px', borderRadius: '12px' }}>
+                          {proto.category || 'Integrative'}
+                        </span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <Clock size={11} />
+                          <span>{proto.durationWeeks || 8} Weeks Titration</span>
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <a
+                        href={proto.dossierUrl || `/proto/${proto.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        <h4 style={{ margin: '0 0 6px 0', fontSize: '0.94rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                          {proto.title}
+                        </h4>
+                      </a>
+
+                      {/* Summary */}
+                      <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
+                        {proto.summary && proto.summary.length > 140 ? `${proto.summary.slice(0, 140)}...` : (proto.summary || 'Evidence-based structured clinical protocol for practitioner supervision.')}
+                      </p>
+
+                      {/* Active Compounds Involved */}
+                      {Array.isArray(proto.compounds) && proto.compounds.length > 0 && (
+                        <div style={{ marginBottom: '12px' }}>
+                          <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
+                            Formulated Substances & APIs:
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {proto.compounds.slice(0, 4).map((c, i) => (
+                              <span
+                                key={i}
+                                style={{
+                                  fontSize: '0.70rem',
+                                  fontWeight: 500,
+                                  background: '#f8fafc',
+                                  border: '1px solid #e2e8f0',
+                                  color: '#1e293b',
+                                  padding: '2px 6px',
+                                  borderRadius: '3px'
+                                }}
+                              >
+                                {typeof c === 'string' ? c : (c.name || 'API')}
+                              </span>
+                            ))}
+                            {proto.compounds.length > 4 && (
+                              <span style={{ fontSize: '0.70rem', color: '#64748b', padding: '2px 4px' }}>
+                                +{proto.compounds.length - 4} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '10px', marginTop: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('light');
+                          const intakeUrl = `${window.location.origin}/intake?protocol=${proto.slug}&dr=${opaqueCode}`;
+                          navigator.clipboard?.writeText(intakeUrl);
+                          toast.success(`Intake link for ${proto.title} copied to clipboard ✓`);
+                        }}
+                        style={{
+                          background: '#f8fafc',
+                          border: '1px solid #dadce0',
+                          color: '#334155',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        title="Copy patient intake link with this protocol pre-selected"
+                      >
+                        <Share2 size={11} />
+                        <span>Prescribe Intake</span>
+                      </button>
+
+                      <a
+                        href={proto.dossierUrl || `/proto/${proto.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: '#ffffff',
+                          border: '1px solid #1a73e8',
+                          color: '#1a73e8',
+                          borderRadius: '4px',
+                          padding: '4px 10px',
+                          fontSize: '0.74rem',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                          boxShadow: '0 1px 2px rgba(26,115,232,0.06)'
+                        }}
+                      >
+                        <span>View Protocol Dossier</span>
+                        <ExternalLink size={10} />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
         {/* ── Section 3: Authorized Therapeutic Formulary & Compounding APIs ── */}
@@ -2579,9 +3044,35 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     </div>
 
                     {/* Clinical Decision Utility */}
-                    <div style={{ fontSize: '0.73rem', color: '#0d9488', lineHeight: 1.35, marginBottom: '12px', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '8px 10px', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '0.73rem', color: '#0d9488', lineHeight: 1.35, marginBottom: '10px', background: '#f0fdfa', border: '1px solid #ccfbf1', padding: '8px 10px', borderRadius: '4px' }}>
                       <strong>Clinical Decision Utility:</strong> {panel.clinicalUtility}
                     </div>
+
+                    {/* Companion Evidence Protocol Link */}
+                    {panel.associatedProtocolTitle && (
+                      <div style={{ marginBottom: '10px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '4px', padding: '7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: '0.71rem', color: '#1d4ed8', fontWeight: 600 }}>
+                          Baseline for: <strong>{panel.associatedProtocolTitle}</strong>
+                        </div>
+                        <a
+                          href={panel.associatedProtocolUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '0.70rem',
+                            fontWeight: 700,
+                            color: '#1d4ed8',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                          }}
+                        >
+                          <span>Protocol Guide</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   {/* Panel footer */}
@@ -2983,6 +3474,60 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
         {/* Right: Quick GCP Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {filteredTasks.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                document.getElementById('tasks')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                height: '34px',
+                padding: '0 10px',
+                borderRadius: '4px',
+                border: '1px solid #fde68a',
+                background: '#fffbeb',
+                color: '#b45309',
+                fontSize: '0.78rem',
+                fontWeight: 650,
+                cursor: 'pointer'
+              }}
+              title="Jump to pending physician authorizations"
+            >
+              <Clock size={13} />
+              <span>{filteredTasks.length} Pending Sign-off</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              document.getElementById('protocols')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              height: '34px',
+              padding: '0 10px',
+              borderRadius: '4px',
+              border: '1px solid #bfdbfe',
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title="Jump to clinical treatment protocols"
+          >
+            <BookOpen size={13} />
+            <span>Protocols</span>
+          </button>
+
           <button
             type="button"
             onClick={handleShareDoctorPortal}

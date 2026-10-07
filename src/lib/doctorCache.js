@@ -66,6 +66,48 @@ function getPosologyString(raw) {
 }
 
 /**
+ * Resolves corresponding evidence-based public protocol slug (/proto/[slug])
+ */
+export function resolveProtocolSlug(rx) {
+  if (rx?.protocolSlug) return rx.protocolSlug;
+  if (rx?.protocolId) return rx.protocolId;
+  
+  const text = `${rx?.treatmentTitle || ''} ${rx?.phaseName || ''} ${(rx?.items || []).map(i => i.name).join(' ')}`.toLowerCase();
+  
+  if (text.includes('tirzepatide') || text.includes('gip') || text.includes('glp-1') || text.includes('retatrutide')) {
+    return 'u0b4lq4Ol664bfv2BscE';
+  }
+  if (text.includes('semaglutide') || text.includes('weight') || text.includes('metabolic')) {
+    return 'wm_001';
+  }
+  if (text.includes('bpc') && text.includes('tb')) {
+    return 'bpc-157-tb-500-protocol';
+  }
+  if (text.includes('bpc-157') || text.includes('bpc 157') || text.includes('tissue') || text.includes('gut')) {
+    return 'bpc-157-tb-500-protocol';
+  }
+  if (text.includes('nad') || text.includes('cellular')) {
+    return 'Ks2ThxuWoPmWzc3UW06R';
+  }
+  if (text.includes('1mq') || text.includes('amino')) {
+    return '5-amino-1mq-metabolic';
+  }
+  if (text.includes('selank') || text.includes('neuro') || text.includes('cognitive') || text.includes('pinealon')) {
+    return 'lxv-neuro-restoration-12w';
+  }
+  if (text.includes('dsip') || text.includes('sleep') || text.includes('cns')) {
+    return 'dsip-bpc-157-cns-rest-protocol';
+  }
+  if (text.includes('bremelanotide') || text.includes('pt-141') || text.includes('libido')) {
+    return 'pt-141-bremelanotide-on-demand-libido-enhancement';
+  }
+  if (text.includes('thymosin') || text.includes('immune')) {
+    return 'thymosin-alpha-1-immune-resilience';
+  }
+  return null;
+}
+
+/**
  * Fetches the directory of doctors from Firestore (cached in RAM for 15 mins).
  */
 async function getCachedDoctorDirectory() {
@@ -219,6 +261,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
       // Priority to phaseName for multi-phase protocols
       const treatmentTitle = d.phaseName || d.treatmentTitle || d.description || d.treatmentProgram || d.program || 'Personalized Formulation';
+      const protoSlug = d.protocolSlug || d.protocolId || resolveProtocolSlug({ treatmentTitle, phaseName: d.phaseName, items: d.items });
 
       prescriptions.push({
         id: doc.id,
@@ -230,6 +273,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         status: d.status || d.state || 'active',
         state: d.state || d.status || 'active',
         treatmentTitle: treatmentTitle,
+        protocolSlug: protoSlug,
+        protocolUrl: protoSlug ? `/proto/${protoSlug}` : null,
         phaseName: d.phaseName || null,
         partNumber: d.partNumber != null ? Number(d.partNumber) : null,
         isMultiPart: !!d.isMultiPart,
@@ -514,9 +559,33 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       bloodoSnap.forEach(d => {
         const bp = d.data();
         if (bp.status === 'published' || bp.status === 'active') {
+          const bpSlug = bp.slug || d.id;
+          let assocProtoSlug = null;
+          let assocProtoTitle = null;
+
+          if (bpSlug.includes('nad')) {
+            assocProtoSlug = 'Ks2ThxuWoPmWzc3UW06R';
+            assocProtoTitle = 'NAD+ Cellular Restoration Protocol';
+          } else if (bpSlug.includes('cortisol')) {
+            assocProtoSlug = 'dsip-bpc-157-cns-rest-protocol';
+            assocProtoTitle = 'DSIP + BPC-157 CNS Rest Protocol';
+          } else if (bpSlug.includes('hemoglobin') || bpSlug.includes('hba1c')) {
+            assocProtoSlug = 'u0b4lq4Ol664bfv2BscE';
+            assocProtoTitle = 'Advanced GLP-1/GIP Metabolic Recomposition';
+          } else if (bpSlug.includes('omega')) {
+            assocProtoSlug = 'bpc-157-tb-500-protocol';
+            assocProtoTitle = 'BPC-157 & TB-500 Tissue Repair Protocol';
+          } else if (bpSlug.includes('testosterone')) {
+            assocProtoSlug = 'pt-141-bremelanotide-on-demand-libido-enhancement';
+            assocProtoTitle = 'PT-141 & Endocrine Vitality Protocol';
+          } else if (bpSlug.includes('vitamin-d')) {
+            assocProtoSlug = 'thymosin-alpha-1-immune-resilience';
+            assocProtoTitle = 'Thymosin Alpha-1 Immune Resilience Protocol';
+          }
+
           bloodoPanels.push({
             id: d.id,
-            slug: bp.slug || d.id,
+            slug: bpSlug,
             name: bp.name,
             description: bp.description || bp.shortDescription || '',
             price: bp.price || null,
@@ -532,12 +601,50 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
             tat: bp.tat || '3-4 Business Days',
             indications: bp.indications || bp.shortDescription || (bp.description ? bp.description.slice(0, 160) + '...' : 'Pre-protocol baseline diagnostic evaluation.'),
             clinicalUtility: bp.clinicalUtility || 'Objective physiological baseline quantification prior to magistral peptide protocols.',
-            datasheetUrl: `/p/${bp.slug || d.id}`
+            datasheetUrl: `/p/${bpSlug}`,
+            associatedProtocolSlug: assocProtoSlug,
+            associatedProtocolTitle: assocProtoTitle,
+            associatedProtocolUrl: assocProtoSlug ? `/proto/${assocProtoSlug}` : null
           });
         }
       });
     } catch (bErr) {
       console.warn('Could not load bloodo products in doctorCache:', bErr);
+    }
+
+    // 7. Fetch Evidence-Based Clinical Protocols Directory (protocols collection)
+    let protocols = [];
+    try {
+      const pSnap = await adminDb.collection('protocols')
+        .where('status', 'in', ['active', 'published'])
+        .limit(30)
+        .get();
+
+      let pDocs = pSnap.docs;
+      if (!pDocs || pDocs.length < 6) {
+        const fallbackSnap = await adminDb.collection('protocols').limit(30).get();
+        pDocs = fallbackSnap.docs;
+      }
+
+      pDocs.forEach(d => {
+        const p = d.data();
+        const pSlug = p.slug || d.id;
+        const compounds = Array.isArray(p.peptides) ? p.peptides : (Array.isArray(p.products) ? p.products : (Array.isArray(p.compounds) ? p.compounds : []));
+
+        protocols.push({
+          id: d.id,
+          slug: pSlug,
+          title: p.title || p.name || 'Clinical Therapeutic Protocol',
+          category: p.category || p.categoryId || 'Integrative',
+          durationWeeks: p.durationWeeks || p.duration || 8,
+          summary: p.summary || p.description || p.aiSummary || 'Structured chronobiological dosing protocol under physician vigilance.',
+          compounds: compounds.map(c => typeof c === 'string' ? c : (c.name || c.canonicalName || 'Active Peptide API')),
+          status: p.status || 'active',
+          dossierUrl: `/proto/${pSlug}`
+        });
+      });
+    } catch (pErr) {
+      console.warn('Could not load protocols in doctorCache:', pErr);
     }
 
     const payload = {
@@ -553,7 +660,8 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       prescriptions,
       patients: Array.from(patientMap.values()),
       formulary,
-      bloodoPanels
+      bloodoPanels,
+      protocols
     };
 
   // Cache in RAM for 10 minutes under all lookup aliases
