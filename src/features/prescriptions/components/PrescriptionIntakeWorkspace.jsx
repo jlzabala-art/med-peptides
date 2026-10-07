@@ -6,7 +6,7 @@ import {
   Upload, X, CheckCircle2, Activity, AlertCircle, Save, FileText,
   Beaker, Sparkles, ExternalLink, RefreshCw, UserCheck, ShieldAlert,
   Calendar, Stethoscope, Dna, Info, Copy, Check, ArrowRight, Phone,
-  FileSpreadsheet, Eye
+  FileSpreadsheet, Eye, Clock
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import StandardDrawer from '../../../components/ui/StandardDrawer';
@@ -339,27 +339,51 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       }}>
         {savedPrescriptionsResult ? (
           <div style={{ width: '100%', maxWidth: '840px', margin: '0 auto', padding: '1rem 0', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* Header banner */}
+            {/* Two-Phase Intake Header Banner */}
             <div style={{
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
               borderRadius: '12px',
-              padding: '1.5rem',
+              padding: '1.4rem 1.6rem',
               display: 'flex',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               gap: '1rem',
-              boxShadow: '0 2px 8px rgba(22, 163, 74, 0.06)'
+              boxShadow: '0 2px 8px rgba(217, 119, 6, 0.08)'
             }}>
-              <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                <CheckCircle2 size={24} />
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                <Clock size={24} />
               </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#166534' }}>
-                  ¡Prescripción guardada exitosamente en la base de datos!
-                </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#15803d', lineHeight: 1.5 }}>
-                  Los datos clínicos, pautas de posología y fórmulas magistrales se han sincronizado en Firestore. Ya puedes consultar o compartir la receta online oficial con el paciente.
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#92400e' }}>
+                    Formulación Registrada en Modo Borrador (Draft)
+                  </h3>
+                  <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
+                    ⏳ SLA de Validación: ~24 Horas
+                  </span>
+                </div>
+                <p style={{ margin: '6px 0 12px 0', fontSize: '0.86rem', color: '#78350f', lineHeight: 1.5 }}>
+                  El documento ha sido extraído digitalmente y guardado en <strong>Modo Borrador</strong>. El equipo farmacéutico clínico de <strong>Atlas AI</strong> está verificando las conversiones moleculares, la compatibilidad de vehículos y las dosis. Una vez validada (habitualmente en 24 horas), la prescripción se reflejará como <strong>Autorizada</strong> en su dispensario oficial.
                 </p>
+
+                {/* 2-Phase Stepper Tracker */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', marginTop: '10px' }}>
+                  <div style={{ background: '#ffffff', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#16a34a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>✓</div>
+                    <div>
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#166534' }}>Fase 1: Ingesta Digital</div>
+                      <div style={{ fontSize: '0.70rem', color: '#15803d' }}>Documento extraído y clasificado</div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#d97706', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>2</div>
+                    <div>
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#92400e' }}>Fase 2: Validación Atlas AI</div>
+                      <div style={{ fontSize: '0.70rem', color: '#b45309' }}>En curso • Conversión molecular (~24h)</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -392,8 +416,8 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       </div>
                     </div>
 
-                    <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
-                      En Línea Activa
+                    <span style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: '12px', fontSize: '0.74rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={11} /> Borrador • En Revisión Atlas AI (24h)
                     </span>
                   </div>
 

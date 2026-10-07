@@ -1288,7 +1288,34 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       header: 'Status',
       width: '14%',
       sortable: true,
-      render: (rx) => <StatusBadge status={rx.status} />
+      render: (rx) => {
+        const isDraftOrReview = ['draft', 'pending', 'awaiting_validation'].includes(String(rx.status || '').toLowerCase()) || rx.ingestionStage === 'awaiting_atlas_review';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <StatusBadge status={rx.status || 'active'} />
+            {isDraftOrReview && (
+              <span
+                style={{
+                  fontSize: '0.67rem',
+                  color: '#b45309',
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '8px',
+                  padding: '1px 6px',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  width: 'fit-content'
+                }}
+                title="Atlas AI Clinical Pharmacist molecular conversion review in progress (~24h SLA)"
+              >
+                <Clock size={10} /> Atlas AI Review (~24h)
+              </span>
+            )}
+          </div>
+        );
+      }
     },
     {
       key: 'createdAt',
@@ -2579,6 +2606,59 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           isFiltered={scopeMode === 'filtered' || !!apiFilter}
         />
 
+        {/* ── Two-Phase Intake Alert Banner (Draft Awaiting Atlas AI Review) ──── */}
+        {allPrescriptions.some(p => ['draft', 'pending', 'awaiting_validation'].includes(String(p.status || '').toLowerCase()) || p.ingestionStage === 'awaiting_atlas_review') && (
+          <div
+            style={{
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              flexWrap: 'wrap'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b45309', flexShrink: 0 }}>
+                <Clock size={16} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#92400e', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>Two-Phase Ingestion Workflow: Formulations Under Atlas AI Clinical Review</span>
+                  <span style={{ fontSize: '0.70rem', background: '#fde68a', color: '#78350f', padding: '1px 6px', borderRadius: '8px', fontWeight: 700 }}>24h SLA</span>
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#78350f', marginTop: '2px' }}>
+                  Recently imported formulations are saved in Draft mode. Our Atlas AI pharmacotherapy team is currently verifying molecular conversions, excipients, and posology. They will automatically be authorized within 24 hours.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter('draft');
+                document.getElementById('prescriptions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              style={{
+                fontSize: '0.76rem',
+                fontWeight: 650,
+                color: '#b45309',
+                background: '#ffffff',
+                border: '1px solid #fde68a',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Filter Drafts →
+            </button>
+          </div>
+        )}
+
         {/* ── Global Search Bar with Integrated GCP Filter Chips (Rule #7) ─── */}
         <div style={{ marginBottom: '28px' }}>
           <GlobalSearchBar
@@ -3055,8 +3135,76 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               const parts = resolvePrescriptionParts(rx);
               const totalApisCount = parts.reduce((acc, p) => acc + (p.apis?.length || 0), 0);
 
+              const isAwaitingAtlasReview = rx.status === 'draft' || rx.ingestionStage === 'awaiting_atlas_review' || rx.state === 'draft';
+
               return (
                 <div style={{ background: '#f8fafc', padding: '16px 20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  {/* Two-Phase Clinical Intake Tracker Banner (Draft SLA SLA) */}
+                  {isAwaitingAtlasReview && (
+                    <div style={{
+                      background: '#fffbeb',
+                      border: '1px solid #fde68a',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      marginBottom: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <Clock size={16} color="#d97706" />
+                          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#92400e' }}>
+                            Phase 2 in Progress: Atlas AI & Clinical Pharmacist Validation
+                          </span>
+                          <span style={{
+                            fontSize: '0.70rem',
+                            background: '#fef3c7',
+                            color: '#b45309',
+                            padding: '2px 8px',
+                            borderRadius: '999px',
+                            fontWeight: 700,
+                            border: '1px solid #fcd34d'
+                          }}>
+                            ETA: ~24 Hours
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: '#78350f', fontWeight: 600 }}>
+                          Current Mode: <strong>Draft / Clinical Review</strong>
+                        </span>
+                      </div>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '8px',
+                        paddingTop: '6px',
+                        borderTop: '1px dashed #fcd34d'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>✓</div>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a' }}>1. Digital Intake</div>
+                            <div style={{ fontSize: '0.66rem', color: '#64748b' }}>Parsed to Draft</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fef3c7', padding: '6px 10px', borderRadius: '6px', border: '1px solid #fcd34d' }}>
+                          <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fde68a', color: '#92400e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>2</div>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#92400e' }}>2. Atlas AI Review</div>
+                            <div style={{ fontSize: '0.66rem', color: '#b45309' }}>Pharmacist verification (~24h)</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', opacity: 0.7 }}>
+                          <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#e2e8f0', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.68rem', fontWeight: 800 }}>3</div>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>3. Dispensary Authorization</div>
+                            <div style={{ fontSize: '0.66rem', color: '#94a3b8' }}>Active for Fulfillment</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Google Cloud Prescription Reference Header & Action Bar */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

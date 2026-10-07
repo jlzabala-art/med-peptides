@@ -393,7 +393,10 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         posology: getPosologyString(d.posology),
         structuredPosology: d.structuredPosology || null,
         vehicles: Array.isArray(d.vehicles) ? d.vehicles : [],
-        notes: d.notes || d.clinicalNotes || ''
+        notes: d.notes || d.clinicalNotes || '',
+        ingestionStage: d.ingestionStage || null,
+        reviewEtaHours: d.reviewEtaHours || 24,
+        validationStatus: d.validationStatus || null
       });
     }
   });
@@ -492,6 +495,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   // 4. Compute GCP Standard KPIs (Server-calculated for instant 0ms response)
   const activePrescriptions = prescriptions.filter(p => ['approved', 'active'].includes(p.status.toLowerCase())).length;
+  const draftIntakesCount = prescriptions.filter(p => ['draft', 'pending', 'awaiting_validation'].includes(p.status.toLowerCase()) || p.ingestionStage === 'awaiting_atlas_review').length;
   const monitoredPatients = patientMap.size;
   const pendingTasksCount = clinicalTasks.length;
   const refillsDueCount = clinicalTasks.filter(t => t.type === 'refill').length;
@@ -745,6 +749,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       doctor: doctorProfile,
       kpis: {
         activePrescriptions,
+        draftIntakesCount,
         monitoredPatients,
         pendingTasksCount,
         refillsDueCount

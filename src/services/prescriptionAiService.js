@@ -795,9 +795,14 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
         }
       }
 
-      // Prepare payload with Firestore serverTimestamps
+      // Prepare payload with Firestore serverTimestamps (Two-Phase Ingestion Workflow)
       const payload = {
         ...rx,
+        status: rx.status || 'draft',
+        state: rx.state || 'draft',
+        ingestionStage: 'awaiting_atlas_review',
+        reviewEtaHours: 24,
+        validationStatus: rx.validationStatus || 'Under Clinical Review',
         patientId: patientId || rx.patientId || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -824,6 +829,9 @@ export async function savePrescriptionsToFirestore(prescriptionsToSave = [], opt
         patientName: payload.patientName || payload.patient?.name || 'Patient',
         treatmentType: payload.treatmentType || 'Formulation',
         lineCount: payload.prescriptionLines?.length || 0,
+        status: payload.status,
+        ingestionStage: 'awaiting_atlas_review',
+        reviewEtaHours: 24,
         rxUrl: `/rx/${officialCode}`,
       });
     } catch (err) {
