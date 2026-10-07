@@ -463,7 +463,7 @@ export default function GlobalSearchBar({
               e.stopPropagation();
               setIsQrModalOpen(true);
             }}
-            title="Escanear QR de vial o producto"
+            title="Scan vial or product QR barcode"
             style={{
               background: 'transparent',
               border: 'none',

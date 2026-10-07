@@ -292,16 +292,18 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
      * Step 4 (Maintenance & Hygiene): Wash hands thoroughly with soap and water immediately; storage instructions.
 
 5. CLINICIAN & CLINIC ATTRIBUTION:
-   - Extract the prescribing physician name (e.g. "Dr. Marina Cordeiro Fernandes"), medical license (e.g. "DHA-P-03..."), clinic name (e.g. "Nova Plastic Surgery Clinic", "NOVA Clinic"), and address/city (e.g. "Dubai, UAE").`;
+   - Extract the prescribing physician name (e.g. "Dr. Marina Cordeiro Fernandes"), medical license (e.g. "DHA-P-03..."), clinic name (e.g. "Nova Plastic Surgery Clinic", "NOVA Clinic"), and address/city (e.g. "Dubai, UAE").
 
-    // Modern Gemini Engines with automated resilience & fallback cascade
+5. FAGRON TELOTEST & TELOMERE REPORTS:
+   - If the document contains "THE TELOTEST FORMULA™", "TeloTest", "Telomeres", or BOX ID with "...AATEL" (e.g. "BOX03049AATEL"):
+     * Set 'documentType' to "FagronGenomics" and 'clinicalCategory' to "compounding" or "standard".
+     * Set 'fagronDetails.testName' to "TeloTest" and extract the Box ID.
+     * Extract Part 1 (Transdermal Pentravan formula, e.g. Metformin, Testosterone, Astaxanthin) and Part 2 (Oral Capsules formula, e.g. Turmeric dry extract, Coenzyme Q10, N-Acetyl-L-Cysteine) as distinct sequential formulationBlocks!`;
+
+    // Verified Google GenAI models for multimodal extraction
     const CANDIDATE_MODELS = [
-      'gemini-3.5-flash',
-      'gemini-3.5-flash-lite',
       'gemini-flash-lite-latest',
-      'gemini-3.6-flash',
-      'gemini-3.8-flash',
-      'gemini-3.7-flash',
+      'gemini-3-flash-preview',
       'gemini-flash-latest'
     ];
     let response = null;

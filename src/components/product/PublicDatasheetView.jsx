@@ -36,7 +36,8 @@ import {
   ZoomIn,
   Beaker,
   Microscope,
-  ClipboardList
+  ClipboardList,
+  ChevronDown
 } from '@/lib/icons';
 import ImageModal from '@/snippets/ImageModal';
 import { 

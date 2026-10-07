@@ -423,6 +423,83 @@ export const FAGRON_CLINICAL_MONOGRAPHS = {
     compatibleVehicles: ['Cápsulas Orales Micronizadas', 'TrichoSol™'],
     standardDosages: '10 mg - 50 mg Oral Diaria · 0.2% - 0.5% Tópico',
     fagronPrograms: ['TrichoTest', 'NutriGen']
+  },
+  'metformin': {
+    canonicalName: 'Metformin Hydrochloride (Metformina)',
+    aliases: ['metformin', 'metformina', 'metformin hcl', 'glucophage'],
+    geneTargets: ['AMPK', 'PRKAA1', 'MTOR', 'TERT'],
+    pharmacologicalClass: 'AMPK Activator & Telomeric Cellular Longevity Modulator',
+    clinicalIndication: 'Decelerates telomere attrition, promotes autophagy, downregulates mTOR, and modulates metabolic senescence',
+    mechanismOfAction: 'Activates AMP-activated protein kinase (AMPK) and suppresses mTOR signaling, mimicking caloric restriction. Promotes DNA damage repair pathways and preserves telomeric integrity during cellular replication cycles.',
+    compatibleVehicles: ['Pentravan® Transdermal Base', 'Liposomal Gel', 'Oral Capsules'],
+    standardDosages: '50 mg - 100 mg Transdermal (e.g. 88 mg/g) · 500 mg - 1000 mg Oral',
+    fagronPrograms: ['TeloTest', 'Compounding']
+  },
+  'testosterone': {
+    canonicalName: 'Testosterone (Micronized USP / Bioidentical)',
+    aliases: ['testosterone', 'testosterona', 'testosterone bioidentical', 'testo'],
+    geneTargets: ['AR', 'TERT', 'CYP19A1'],
+    pharmacologicalClass: 'Bioidentical Androgen Receptor Modulator & Telomerase Promoter',
+    clinicalIndication: 'Restores physiological tissue regeneration, stimulates telomerase reverse transcriptase (TERT), and prevents sarcopenia',
+    mechanismOfAction: 'Upregulates telomerase enzyme activity (TERT expression) via androgen receptor-mediated transcriptional activation. Stimulates cellular protein synthesis, tissue repair, and bone/muscle anabolism in transdermal delivery.',
+    compatibleVehicles: ['Pentravan® Transdermal Base', 'Liposomal Transdermal Cream'],
+    standardDosages: '1 mg - 5 mg/g Transdermal (e.g. 3 mg/g Pentravan)',
+    fagronPrograms: ['TeloTest', 'BHRT']
+  },
+  'astaxanthin': {
+    canonicalName: 'Astaxanthin (Haematococcus pluvialis extract)',
+    aliases: ['astaxanthin', 'astaxantina', 'asta', 'astaxanthin microencapsulated'],
+    geneTargets: ['NRF2', 'SOD2', 'GPX1', 'CAT'],
+    pharmacologicalClass: 'Super-Antioxidant Xanthophyll Carotenoid & Membrane Shield',
+    clinicalIndication: 'Quenches singlet oxygen, halts telomeric DNA oxidative cross-linking, and protects mitochondrial membranes',
+    mechanismOfAction: 'Spans the cellular lipid bilayer with polar end groups, neutralizing reactive oxygen species (ROS) with 6,000x greater efficacy than Vitamin C. Protects telomeric repeat sequences (TTAGGG) against oxidative fragmentation.',
+    compatibleVehicles: ['Pentravan® Transdermal Base', 'Oral Softgels', 'Vegetarian Capsules'],
+    standardDosages: '10 mg - 25 mg/g Transdermal (e.g. 17 mg/g) · 4 mg - 12 mg Oral',
+    fagronPrograms: ['TeloTest', 'NutriGen']
+  },
+  'turmeric-dry-extract': {
+    canonicalName: 'Turmeric Dry Extract (Curcuma longa 95% Curcuminoids)',
+    aliases: ['turmeric dry extract', 'turmeric', 'curcuma', 'curcuma longa', 'curcumin', 'curcumina'],
+    geneTargets: ['NFKB1', 'COX2', 'TNF', 'SIRT1'],
+    pharmacologicalClass: 'Phytochemical NF-κB Inhibitor & Telomeric Sirtuin Activator',
+    clinicalIndication: 'Suppresses systemic chronic micro-inflammation (inflammaging) and protects genomic chromatin structure',
+    mechanismOfAction: 'Potent blocker of IκB kinase (IKK) and NF-κB nuclear translocation. Upregulates SIRT1 expression and defends telomere repeat domains against inflammatory decay and free radical damage.',
+    compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Phytosome Oral Capsules'],
+    standardDosages: '200 mg - 500 mg Oral Daily',
+    fagronPrograms: ['TeloTest', 'NutriGen']
+  },
+  'coenzyme-q10': {
+    canonicalName: 'Coenzyme Q10 (Ubiquinone / Ubiquinol)',
+    aliases: ['oral coenzyme q10', 'coenzyme q10', 'coenzima q10', 'coq10', 'ubiquinone', 'ubiquinol'],
+    geneTargets: ['COQ2', 'UQCRB', 'PPARG'],
+    pharmacologicalClass: 'Mitochondrial Bioenergetic Carrier & Intracellular Antioxidant',
+    clinicalIndication: 'Optimizes ATP production, reduces mitochondrial superoxide generation, and preserves stem cell telomeres',
+    mechanismOfAction: 'Crucial electron transporter in complexes I/II to complex III of the inner mitochondrial respiratory chain. Regenerates alpha-tocopherol and shields mitochondrial and nuclear DNA from metabolic oxidative stress.',
+    compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Liposomal Oral Suspension'],
+    standardDosages: '40 mg - 100 mg Oral Daily',
+    fagronPrograms: ['TeloTest', 'NutriGen']
+  },
+  'n-acetyl-l-cysteine': {
+    canonicalName: 'N-Acetyl L-Cysteine (Acetilcystein / NAC)',
+    aliases: ['acetilcystein', 'acetilcisteina', 'n-acetyl l-cystein', 'n-acetyl cysteine', 'nac', 'n-acetylcysteine'],
+    geneTargets: ['GCLC', 'GSS', 'GSR'],
+    pharmacologicalClass: 'Intracellular Glutathione (GSH) Rate-Limiting Precursor',
+    clinicalIndication: 'Enhances cellular detox, replenishes intracellular glutathione, and protects against telomeric shortening',
+    mechanismOfAction: 'Direct source of bioavailable sulfhydryl (-SH) groups. Acts as the rate-limiting substrate for glutathione synthesis (GSH), providing the principal endogenous enzymatic antioxidant defense for chromosomal telomeres.',
+    compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Oral Sachet'],
+    standardDosages: '100 mg - 600 mg Oral Daily',
+    fagronPrograms: ['TeloTest', 'NutriGen']
+  },
+  'siliciumax': {
+    canonicalName: 'SiliciuMax™ (Stabilized Orthosilicic Acid on Marine Collagen)',
+    aliases: ['siliciumax', 'siliciumax tm', 'silicio organico', 'orthosilicic acid', 'silicon'],
+    geneTargets: ['COL1A1', 'COL3A1', 'ELN'],
+    pharmacologicalClass: 'Bioavailable Organic Silicon & Extracellular Matrix Restorer',
+    clinicalIndication: 'Strengthens dermal and vascular extracellular matrix, supports vascular elasticity and cellular integrity',
+    mechanismOfAction: 'Provides bioavailable monomeric orthosilicic acid, cross-linking glycosaminoglycans and stabilizing collagen and elastin networks against age-dependent matrix metalloproteinase (MMP) breakdown.',
+    compatibleVehicles: ['Hygrocaps Vegetarian Capsules', 'Oral Powder'],
+    standardDosages: '100 mg - 300 mg Oral Daily',
+    fagronPrograms: ['TeloTest', 'NutriGen']
   }
 };
 

@@ -729,6 +729,17 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       console.warn('Could not load protocols in doctorCache:', pErr);
     }
 
+    // 8. Enrich each prescription with tailored Lotusland Peptide Recommendation
+    const enrichedPrescriptions = prescriptions.map(rx => {
+      if (!rx.lotuslandRecommendation) {
+        rx.lotuslandRecommendation = getPrescriptionLotuslandMatch(rx);
+      }
+      return rx;
+    });
+
+    // 9. Compute Server-Side Clinical Analytics & Practice-Wide Lotusland Peptide Synergy
+    const serverAnalytics = computeServerAnalytics(enrichedPrescriptions);
+
     const payload = {
       success: true,
       doctor: doctorProfile,
@@ -739,11 +750,12 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
         refillsDueCount
       },
       tasks: clinicalTasks,
-      prescriptions,
+      prescriptions: enrichedPrescriptions,
       patients: Array.from(patientMap.values()),
       formulary,
       bloodoPanels,
-      protocols
+      protocols,
+      serverAnalytics
     };
 
   // Cache in RAM for 10 minutes under all lookup aliases
@@ -755,3 +767,444 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
 
   return payload;
 }
+
+/**
+ * Resolves tailored matching Lotusland peptide for an individual prescription
+ */
+export function getPrescriptionLotuslandMatch(rx) {
+  if (rx?.lotuslandRecommendation) return rx.lotuslandRecommendation;
+
+  const allText = `${rx?.treatmentTitle || ''} ${rx?.treatmentProgram || ''} ${rx?.phaseName || ''} ${(rx?.items || []).map(i => `${i.name} ${i.activeIngredient || ''}`).join(' ')} ${Array.isArray(rx?.parts) ? rx.parts.flatMap(p => (p.apis || []).map(a => `${a.name} ${a.cellularTarget || ''}`)).join(' ') : ''}`.toLowerCase();
+
+  if (
+    allText.includes('metformin') ||
+    allText.includes('telotest') ||
+    allText.includes('telomere') ||
+    allText.includes('resveratrol') ||
+    allText.includes('ubiquinol') ||
+    allText.includes('methylcobalamin') ||
+    allText.includes('astaxanthin')
+  ) {
+    return {
+      peptideName: 'Epithalon 10 mg / vial',
+      supplier: 'Lotusland Clinical Formulary',
+      catalogCode: 'lotus-epithalon-10mg',
+      matchScore: '99% Formulative Synergy',
+      targetCategory: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence',
+      pharmaRationale:
+        'Induces targeted heterochromatin de-condensation and transcriptional upregulation of the human Telomerase Reverse Transcriptase (TERT) catalytic subunit via direct Ala-Glu-Asp-Gly peptide binding. Restores Hayflick replicative limit in aging follicular bulge stem cells, directly counteracting replicative exhaustion identified in genomic telomere attrition evaluations.',
+      associatedProtocol: {
+        slug: 'epithalon-telomere-extension',
+        title: 'Epithalon Telomere Extension Cycle',
+        url: '/proto/epithalon-telomere-extension'
+      }
+    };
+  }
+
+  if (
+    allText.includes('fue') ||
+    allText.includes('graft') ||
+    allText.includes('prp') ||
+    allText.includes('surgery') ||
+    allText.includes('wound') ||
+    allText.includes('surgical')
+  ) {
+    return {
+      peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
+      supplier: 'Lotusland Clinical Formulary',
+      catalogCode: 'lotus-glow-blend',
+      matchScore: '99% Graft Synergy',
+      targetCategory: 'Triple Angiogenic Bioregulator & Microvascular Graft Take',
+      pharmaRationale:
+        'Synergistic tri-peptide complex engineered for acute follicular graft revascularization. BPC-157 stimulates early growth response-1 (egr-1) and nitric oxide modulation for microvascular stability; TB-500 (Thymosin β4 fragment) enhances actin filament sequestering for rapid endothelial migration into ischemic recipient beds; GHK upregulates extracellular matrix collagen synthesis and reduces inflammatory metalloproteinase (MMP-1/2) degradation.',
+      associatedProtocol: {
+        slug: 'bpc-157-tb-500-protocol',
+        title: 'BPC-157 & TB-500 Tissue Repair Protocol',
+        url: '/proto/bpc-157-tb-500-protocol'
+      }
+    };
+  }
+
+  if (
+    allText.includes('minoxidil') ||
+    allText.includes('dutasteride') ||
+    allText.includes('finasteride') ||
+    allText.includes('spironolactone') ||
+    allText.includes('latanoprost') ||
+    allText.includes('melatonin') ||
+    allText.includes('saw palmetto') ||
+    allText.includes('scalp') ||
+    allText.includes('trichosol') ||
+    allText.includes('trichooil')
+  ) {
+    return {
+      peptideName: 'GHK-Cu (Human Copper Peptide) 50 mg / vial',
+      supplier: 'Lotusland Clinical Formulary',
+      catalogCode: 'lotus-ghk-cu-50mg',
+      matchScore: '98% Formulative Synergy',
+      targetCategory: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
+      pharmaRationale:
+        'Potent follicular bioregulator stimulating dermal papilla fibroblast proliferation, downregulating TGF-β1 (the primary transcriptional driver of catagen transition and follicular miniaturization), and inducing VEGF/bFGF microvascular angiogenesis. Exhibits profound pharmacodynamic synergy with Minoxidil and Dutasteride/Finasteride regimens by accelerating anagen re-entry without androgenic receptor competition.',
+      associatedProtocol: {
+        slug: 'melanogenesis-density-protocol-zt-ghk-cu',
+        title: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
+        url: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
+      }
+    };
+  }
+
+  return {
+    peptideName: 'BPC-157 10 mg / vial',
+    supplier: 'Lotusland Clinical Formulary',
+    catalogCode: 'lotus-bpc-157-10mg',
+    matchScore: '95% Biological Synergy',
+    targetCategory: 'Endothelial Nitric Oxide Signaling & Cytoprotection',
+    pharmaRationale:
+      'Penta-decapeptide accelerating local tissue repair through endothelial nitric oxide synthase (eNOS) upregulation and VEGFR2 phosphorylation, modulating local inflammatory cytokines and stabilizing cellular extracellular matrices.',
+    associatedProtocol: {
+      slug: 'bpc-157-tb-500-protocol',
+      title: 'BPC-157 & TB-500 Protocol',
+      url: '/proto/bpc-157-tb-500-protocol'
+    }
+  };
+}
+
+/**
+ * Helper to calculate SVG donut slice path on the server
+ */
+export function getDonutSlice(startAngle, endAngle, innerR, outerR, cx, cy) {
+  const startRad = (startAngle - 90) * (Math.PI / 180);
+  const endRad = (endAngle - 90) * (Math.PI / 180);
+
+  const x1 = cx + outerR * Math.cos(startRad);
+  const y1 = cy + outerR * Math.sin(startRad);
+  const x2 = cx + outerR * Math.cos(endRad);
+  const y2 = cy + outerR * Math.sin(endRad);
+
+  const x3 = cx + innerR * Math.cos(endRad);
+  const y3 = cy + innerR * Math.sin(endRad);
+  const x4 = cx + innerR * Math.cos(startRad);
+  const y4 = cy + innerR * Math.sin(startRad);
+
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+  return `M ${x1} ${y1} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+}
+
+/**
+ * Computes all clinical analytics metrics on the server (Layer 1 Cache)
+ * Avoids any client-side loops or performance bottlenecks.
+ */
+export function computeServerAnalytics(prescriptions = []) {
+  if (!Array.isArray(prescriptions) || prescriptions.length === 0) {
+    return {
+      serverComputed: true,
+      computedAt: Date.now(),
+      monthlyVolume: [],
+      monthlyData: [],
+      maxMonthlyCount: 1,
+      avgMonthlyRx: 0,
+      topApis: [],
+      allTopApis: [],
+      cohorts: { singleRx: { count: 0, pct: 0 }, twoRxs: { count: 0, pct: 0 }, multiRxs: { count: 0, pct: 0 }, totalPatients: 0 },
+      cohortData: { totalPatients: 0, single: 0, double: 0, chronic: 0, singlePct: 0, doublePct: 0, chronicPct: 0, avgRx: 0, slices: [], cohorts: [] },
+      complexity: { singleCount: 0, multiCount: 0, singlePct: 0, multiPct: 0, total: 0 },
+      complexityData: { singleCount: 0, multiCount: 0, singlePct: 0, multiPct: 0, total: 0 },
+      summary: { totalPrescriptions: 0, uniquePatients: 0, uniqueApis: 0, multiPartRatio: 0 },
+      lotuslandPracticeRecommendations: []
+    };
+  }
+
+  // 1. Monthly Volume Timeline
+  const monthMap = {};
+  prescriptions.forEach(rx => {
+    let d = rx.dateIssued || rx.createdAt || rx.date;
+    let dt = new Date(d);
+    if (isNaN(dt.getTime())) {
+      if (typeof d === 'string' && d.includes('/')) {
+        const p = d.split('/');
+        if (p.length === 3) dt = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+      }
+      if (isNaN(dt.getTime())) dt = new Date();
+    }
+    const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const label = `${monthNames[dt.getMonth()]} ${dt.getFullYear()}`;
+
+    if (!monthMap[key]) {
+      monthMap[key] = { monthKey: key, label, count: 0, active: 0, multipart: 0, year: dt.getFullYear(), month: dt.getMonth() };
+    }
+    monthMap[key].count += 1;
+    if (rx.status === 'active' || rx.status === 'approved') monthMap[key].active += 1;
+    if (rx.isMultiPart || (Array.isArray(rx.parts) && rx.parts.length > 1)) monthMap[key].multipart += 1;
+  });
+
+  const monthlyVolume = Object.values(monthMap).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+  const monthlyData = monthlyVolume.slice(-8).map(m => ({
+    key: m.monthKey,
+    label: m.label,
+    count: m.count,
+    active: m.active,
+    multipart: m.multipart
+  }));
+  const maxMonthlyCount = monthlyData.length > 0 ? Math.max(...monthlyData.map(m => m.count), 1) : 1;
+  const avgMonthlyRx = monthlyData.length > 0 ? (monthlyData.reduce((acc, m) => acc + m.count, 0) / monthlyData.length).toFixed(1) : 0;
+
+  // 2. Normalized Top APIs
+  const apiCounts = {};
+  const normalizeName = (raw) => {
+    if (!raw) return '';
+    const clean = String(raw).trim();
+    const lower = clean.toLowerCase();
+    if (lower.includes('minoxidil')) return 'Minoxidil';
+    if (lower.includes('dutasteride')) return 'Dutasteride';
+    if (lower.includes('finasteride')) return 'Finasteride';
+    if (lower.includes('spironolactone')) return 'Spironolactone';
+    if (lower.includes('latanoprost')) return 'Latanoprost';
+    if (lower.includes('melatonin')) return 'Melatonin';
+    if (lower.includes('saw palmetto') || lower.includes('serenoa')) return 'Saw Palmetto';
+    if (lower.includes('metformin')) return 'Metformin';
+    if (lower.includes('testosterone')) return 'Testosterone';
+    if (lower.includes('astaxanthin')) return 'Astaxanthin';
+    if (lower.includes('turmeric') || lower.includes('curcumin')) return 'Turmeric Extract';
+    if (lower.includes('coenzyme q10') || lower.includes('coq10') || lower.includes('ubiquinol')) return 'Coenzyme Q10 / Ubiquinol';
+    if (lower.includes('cysteine') || lower.includes('nac')) return 'N-Acetyl-L-Cysteine (NAC)';
+    if (lower.includes('arginine')) return 'L-Arginine';
+    if (lower.includes('ginkgo')) return 'Ginkgo biloba';
+    if (lower.includes('ginseng')) return 'Panax Ginseng';
+    if (lower.includes('caffeine')) return 'Caffeine';
+    if (lower.includes('vitamin b12') || lower.includes('cyanocobalamin') || lower.includes('methylcobalamin')) return 'Vitamin B12 (Cobalamin)';
+    if (lower.includes('vitamin e') || lower.includes('tocoferol')) return 'Vitamin E (Tocopherol)';
+    if (lower.includes('panthenol')) return 'D-Panthenol';
+    if (lower.includes('cetirizine')) return 'Cetirizine HCl';
+    if (lower.includes('resveratrol')) return 'Trans-Resveratrol';
+    if (lower.includes('theanine')) return 'L-Theanine';
+    if (lower.includes('glycine') && !lower.includes('bisglycinate')) return 'Glycine';
+    if (lower.includes('magnesium')) return 'Magnesium Bisglycinate';
+    if (lower.includes('tmg') || lower.includes('betaine')) return 'Trimethylglycine (TMG)';
+    return clean;
+  };
+
+  const getApiMeta = (apiName) => {
+    const name = String(apiName).toLowerCase();
+    if (name.includes('minoxidil')) return { category: 'Vasodilator & Microvascular Growth Factor', color: '#0d9488', bg: '#f0fdfa' };
+    if (name.includes('dutasteride') || name.includes('finasteride') || name.includes('spironolactone') || name.includes('saw palmetto')) {
+      return { category: '5α-Reductase & Androgen Blockade', color: '#1a73e8', bg: '#eff6ff' };
+    }
+    if (name.includes('metformin') || name.includes('resveratrol') || name.includes('epithalon')) {
+      return { category: 'Telomere & Genomic Activator', color: '#7c3aed', bg: '#f5f3ff' };
+    }
+    if (name.includes('astaxanthin') || name.includes('coenzyme') || name.includes('cysteine') || name.includes('nac') || name.includes('ubiquinol')) {
+      return { category: 'Mitochondrial & Antioxidant Shield', color: '#ea580c', bg: '#fff7ed' };
+    }
+    if (name.includes('latanoprost')) return { category: 'Prostaglandin F2α Agonist', color: '#059669', bg: '#ecfdf5' };
+    if (name.includes('melatonin') || name.includes('theanine') || name.includes('glycine') || name.includes('magnesium')) {
+      return { category: 'Neuro-Circadian Modulator', color: '#6366f1', bg: '#eef2ff' };
+    }
+    if (name.includes('arginine') || name.includes('ginkgo') || name.includes('ginseng')) {
+      return { category: 'Microcirculation & Bioregulator', color: '#0284c7', bg: '#f0f9ff' };
+    }
+    return { category: 'Targeted API Compound', color: '#5f6368', bg: '#f8f9fa' };
+  };
+
+  prescriptions.forEach(rx => {
+    const seenInRx = new Set();
+    const extractApi = raw => {
+      const isVehicle = raw?.isVehicleOrBase || raw?._isVehicleOrBase || String(raw?.name || '').toLowerCase().includes('trichosol') || String(raw?.name || '').toLowerCase().includes('trichooil') || String(raw?.name || '').toLowerCase().includes('vehicle');
+      if (isVehicle) return;
+      const n = normalizeName(raw?.name || raw?.activeIngredient || raw);
+      if (n && !seenInRx.has(n)) {
+        seenInRx.add(n);
+        apiCounts[n] = (apiCounts[n] || 0) + 1;
+      }
+    };
+
+    if (Array.isArray(rx.parts) && rx.parts.length > 0) {
+      rx.parts.forEach(p => (p.apis || []).forEach(extractApi));
+    }
+    if (Array.isArray(rx.items) && rx.items.length > 0) {
+      rx.items.forEach(extractApi);
+    }
+  });
+
+  const totalRxCount = prescriptions.length;
+  const topApis = Object.entries(apiCounts)
+    .map(([name, count]) => {
+      const meta = getApiMeta(name);
+      return {
+        name,
+        count,
+        percentage: totalRxCount > 0 ? Math.round((count / totalRxCount) * 100) : 0,
+        category: meta.category,
+        color: meta.color,
+        bg: meta.bg,
+        meta: {
+          category: meta.category,
+          color: meta.color,
+          bg: meta.bg
+        }
+      };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  // 3. Patient Cohorts with Pre-computed SVG Geometry
+  const patientPrescriptionCounts = {};
+  prescriptions.forEach(rx => {
+    const patientKey = rx.patientId || rx.patient?.id || rx.patientName || rx.code;
+    if (patientKey) {
+      patientPrescriptionCounts[patientKey] = (patientPrescriptionCounts[patientKey] || 0) + 1;
+    }
+  });
+
+  const totalPatients = Object.keys(patientPrescriptionCounts).length;
+  let singleRxPatients = 0;
+  let twoRxsPatients = 0;
+  let multiRxsPatients = 0;
+
+  Object.values(patientPrescriptionCounts).forEach(count => {
+    if (count === 1) singleRxPatients++;
+    else if (count === 2) twoRxsPatients++;
+    else multiRxsPatients++;
+  });
+
+  const singlePct = totalPatients > 0 ? Math.round((singleRxPatients / totalPatients) * 100) : 0;
+  const doublePct = totalPatients > 0 ? Math.round((twoRxsPatients / totalPatients) * 100) : 0;
+  const chronicPct = Math.max(0, 100 - singlePct - doublePct);
+  const avgRx = (totalRxCount / Math.max(totalPatients, 1)).toFixed(1);
+
+  const cohortsList = [
+    { id: 'single', label: '1 Rx (Initial Regimen)', count: singleRxPatients, pct: singlePct, color: '#1a73e8' },
+    { id: 'double', label: '2 Rxs (Treatment Follow-up)', count: twoRxsPatients, pct: doublePct, color: '#0d9488' },
+    { id: 'chronic', label: '3+ Rxs (Continuous Care)', count: multiRxsPatients, pct: chronicPct, color: '#7c3aed' }
+  ];
+
+  const slices = [];
+  let curAngle = 0;
+  cohortsList.forEach(c => {
+    const angle = (c.pct / 100) * 360;
+    if (angle > 0) {
+      slices.push({
+        ...c,
+        path: getDonutSlice(curAngle, curAngle + angle, 36, 52, 60, 60),
+        startAngle: curAngle,
+        endAngle: curAngle + angle
+      });
+      curAngle += angle;
+    }
+  });
+
+  const cohorts = {
+    singleRx: { count: singleRxPatients, pct: singlePct },
+    twoRxs: { count: twoRxsPatients, pct: doublePct },
+    multiRxs: { count: multiRxsPatients, pct: chronicPct },
+    totalPatients
+  };
+
+  const cohortData = {
+    totalPatients,
+    single: singleRxPatients,
+    double: twoRxsPatients,
+    chronic: multiRxsPatients,
+    singlePct,
+    doublePct,
+    chronicPct,
+    avgRx,
+    slices,
+    cohorts: cohortsList
+  };
+
+  // 4. Formulation Complexity
+  let multiCount = 0;
+  let singleCount = 0;
+  prescriptions.forEach(rx => {
+    const isMulti = rx.isMultiPart === true || (Array.isArray(rx.parts) && rx.parts.length > 1);
+    if (isMulti) multiCount++;
+    else singleCount++;
+  });
+
+  const complexityData = {
+    singleCount,
+    multiCount,
+    singlePct: totalRxCount > 0 ? Math.round((singleCount / totalRxCount) * 100) : 0,
+    multiPct: totalRxCount > 0 ? Math.round((multiCount / totalRxCount) * 100) : 0,
+    total: totalRxCount
+  };
+
+  // 5. Practice-Wide Lotusland Recommendations
+  const lotuslandPracticeRecommendations = [
+    {
+      id: 'lotus-rec-ghk-cu',
+      peptideName: 'GHK-Cu (Human Copper Peptide) 50 mg / vial',
+      supplier: 'Lotusland Clinical Formulary',
+      catalogCode: 'lotus-ghk-cu-50mg',
+      matchScore: '98% Practice Fit',
+      targetIndication: 'Trichological Follicular Rejuvenation & Dermal Papilla Stimulation',
+      pharmacologicalClass: 'Tripeptide-Copper Bioregulator & Follicular Matrix Mitogen',
+      synergisticApis: ['Minoxidil 4-5%', 'Spironolactone 1%', 'Dutasteride 0.5%', 'Latanoprost 0.005%'],
+      pharmaRationale:
+        'Potent follicular bioregulator stimulating dermal papilla fibroblast proliferation, downregulating TGF-β1 (the primary transcriptional driver of catagen transition and follicular miniaturization), and inducing VEGF/bFGF microvascular angiogenesis. Exhibits pronounced pharmacodynamic synergy with Minoxidil 5% and 5α-reductase inhibitors by accelerating anagen re-entry without androgenic receptor competition.',
+      associatedProtocol: {
+        slug: 'melanogenesis-density-protocol-zt-ghk-cu',
+        title: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
+        url: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
+      }
+    },
+    {
+      id: 'lotus-rec-glow',
+      peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
+      supplier: 'Lotusland Clinical Formulary',
+      catalogCode: 'lotus-glow-blend',
+      matchScore: '96% Practice Fit',
+      targetIndication: 'Post-FUE Graft Integration, Microvascular Perfusion & Scalp Wound Healing',
+      pharmacologicalClass: 'Triple Bio-Regenerative Angiogenesis & Cytoprotective Complex',
+      synergisticApis: ['PRP (Platelet-Rich Plasma)', 'TrichoOil Lipids', 'Arginine', 'Vitamin E'],
+      pharmaRationale:
+        'Synergistic tri-peptide complex engineered for rapid follicular graft revascularization. BPC-157 activates early growth response-1 (egr-1) and nitric oxide modulation for microvascular stability; TB-500 (Thymosin β4 fragment) accelerates actin filament sequestration driving keratinocyte and endothelial migration into ischemic recipient beds; GHK upregulates pro-collagen synthesis and reduces inflammatory metalloproteinase (MMP-1/MMP-2) degradation.',
+      associatedProtocol: {
+        slug: 'bpc-157-tb-500-protocol',
+        title: 'BPC-157 & TB-500 Tissue Repair Protocol',
+        url: '/proto/bpc-157-tb-500-protocol'
+      }
+    },
+    {
+      id: 'lotus-rec-epithalon',
+      peptideName: 'Epithalon 10 mg / vial',
+      supplier: 'Lotusland Clinical Formulary',
+      catalogCode: 'lotus-epithalon-10mg',
+      matchScore: '94% Practice Fit',
+      targetIndication: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence Retardation',
+      pharmacologicalClass: 'Synthetic Epigenetic Telomerase Bioregulator (Ala-Glu-Asp-Gly)',
+      synergisticApis: ['Metformin', 'Ubiquinol / CoQ10', 'Trans-Resveratrol', 'N-Acetyl-L-Cysteine'],
+      pharmaRationale:
+        'Synthetic Ala-Glu-Asp-Gly pineal biomimetic peptide inducing direct heterochromatin de-condensation and transcriptional upregulation of human Telomerase Reverse Transcriptase (TERT) catalytic subunit. Directly restores telomeric length in aging follicular bulge stem cells, counteracting replicative senescence identified in systemic telomere attrition evaluations (e.g., TeloTest).',
+      associatedProtocol: {
+        slug: 'epithalon-telomere-extension',
+        title: 'Epithalon Telomere Extension Cycle',
+        url: '/proto/epithalon-telomere-extension'
+      }
+    }
+  ];
+
+  return {
+    serverComputed: true,
+    computedAt: Date.now(),
+    monthlyVolume,
+    monthlyData,
+    maxMonthlyCount,
+    avgMonthlyRx,
+    topApis: topApis.slice(0, 5),
+    allTopApis: topApis,
+    cohorts,
+    cohortData,
+    complexity: complexityData,
+    complexityData,
+    summary: {
+      totalPrescriptions: totalRxCount,
+      uniquePatients: totalPatients,
+      uniqueApis: Object.keys(apiCounts).length,
+      multiPartRatio: complexityData.multiPct
+    },
+    lotuslandPracticeRecommendations
+  };
+}
+
