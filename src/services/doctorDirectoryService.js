@@ -155,6 +155,27 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     isProductionDoctor: true,
     hasDHA: false,
     purpose: 'compounding_production_order'
+  },
+  {
+    id: 'dra-haydee-camacho-gamboa',
+    name: 'Dra. Haydee Camacho Gamboa',
+    aliases: [
+      'dra. haydee camacho', 'haydee camacho', 'dr. haydee camacho', 'dra haydee camacho gamboa',
+      'dra haydee camacho', 'dra. camacho', 'dra camacho', 'haydee camacho gamboa'
+    ],
+    title: 'Dra.',
+    specialty: 'Terapia Hormonal Bioidéntica (BHRT) & Medicina Antienvejecimiento',
+    clinic: 'Clínica Dra. Camacho',
+    clinicName: 'Clínica Dra. Camacho',
+    clinicId: 'clinica-dra-camacho-barcelona',
+    address: 'Carrer d\'Aribau 162-166, Entresuelo O',
+    city: 'Barcelona',
+    country: 'España',
+    phone: '+34 606 767 420',
+    email: 'info@dracamacho.com',
+    website: 'https://dracamacho.com',
+    license: 'COMB 46759',
+    authority: 'COMB'
   }
 ];
 
