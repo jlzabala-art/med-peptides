@@ -127,7 +127,7 @@ const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
     label: 'Formulary & Knowledge',
     emoji: '🧬',
     items: [
-      { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'catalog', label: 'Atlas Formulary', icon: ShoppingBag },
       { id: 'protocols', label: 'Clinical Protocols', icon: FlaskConical },
       { id: 'shared-info', label: 'Shared with Me', icon: Share2 },
     ],
@@ -171,7 +171,7 @@ const DOCTOR_NAV_GROUPS = [
     label: 'Formulary & Knowledge',
     emoji: '🧬',
     items: [
-      { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'catalog', label: 'Atlas Formulary', icon: ShoppingBag },
       { id: 'protocols', label: 'Clinical Protocols', icon: FlaskConical },
       { id: 'shared-info', label: 'Shared with Me', icon: Share2 },
       { id: 'research', label: 'Research & Insights', icon: FlaskConical },

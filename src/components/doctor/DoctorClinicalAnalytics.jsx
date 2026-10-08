@@ -398,10 +398,10 @@ export default function DoctorClinicalAnalytics({
     }
     return [
       {
-        id: 'lotus-rec-ghk-cu',
+        id: 'atlas-rec-ghk-cu',
         peptideName: 'GHK-Cu (Human Copper Peptide) 50 mg / vial',
-        supplier: 'Lotusland Clinical Formulary',
-        catalogCode: 'lotus-ghk-cu-50mg',
+        supplier: 'Atlas Clinical Formulary',
+        catalogCode: 'atlas-ghk-cu-50mg',
         matchScore: '98% Practice Fit',
         targetIndication: 'Trichological Follicular Rejuvenation & Dermal Papilla Stimulation',
         pharmacologicalClass: 'Tripeptide-Copper Bioregulator & Follicular Matrix Mitogen',
@@ -414,10 +414,10 @@ export default function DoctorClinicalAnalytics({
         }
       },
       {
-        id: 'lotus-rec-glow',
+        id: 'atlas-rec-glow',
         peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
-        supplier: 'Lotusland Clinical Formulary',
-        catalogCode: 'lotus-glow-blend',
+        supplier: 'Atlas Clinical Formulary',
+        catalogCode: 'atlas-glow-blend',
         matchScore: '96% Practice Fit',
         targetIndication: 'Post-FUE Graft Integration, Microvascular Perfusion & Scalp Wound Healing',
         pharmacologicalClass: 'Triple Bio-Regenerative Angiogenesis & Cytoprotective Complex',
@@ -430,10 +430,10 @@ export default function DoctorClinicalAnalytics({
         }
       },
       {
-        id: 'lotus-rec-epithalon',
+        id: 'atlas-rec-epithalon',
         peptideName: 'Epithalon 10 mg / vial',
-        supplier: 'Lotusland Clinical Formulary',
-        catalogCode: 'lotus-epithalon-10mg',
+        supplier: 'Atlas Clinical Formulary',
+        catalogCode: 'atlas-epithalon-10mg',
         matchScore: '94% Practice Fit',
         targetIndication: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence Retardation',
         pharmacologicalClass: 'Synthetic Epigenetic Telomerase Bioregulator (Ala-Glu-Asp-Gly)',
@@ -1223,7 +1223,7 @@ export default function DoctorClinicalAnalytics({
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#1e1b4b', letterSpacing: '-0.01em' }}>
-                      Recommended Peptide Augmentations · Lotusland Clinical Formulary
+                      Recommended Peptide Augmentations · Atlas Clinical Formulary
                     </h4>
                     <span
                       style={{

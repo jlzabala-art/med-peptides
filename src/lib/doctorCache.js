@@ -792,8 +792,8 @@ export function getPrescriptionLotuslandMatch(rx) {
   ) {
     return {
       peptideName: 'Epithalon 10 mg / vial',
-      supplier: 'Lotusland Clinical Formulary',
-      catalogCode: 'lotus-epithalon-10mg',
+      supplier: 'Atlas Clinical Formulary',
+      catalogCode: 'atlas-epithalon-10mg',
       matchScore: '99% Formulative Synergy',
       targetCategory: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence',
       pharmaRationale:
@@ -816,8 +816,8 @@ export function getPrescriptionLotuslandMatch(rx) {
   ) {
     return {
       peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
-      supplier: 'Lotusland Clinical Formulary',
-      catalogCode: 'lotus-glow-blend',
+      supplier: 'Atlas Clinical Formulary',
+      catalogCode: 'atlas-glow-blend',
       matchScore: '99% Graft Synergy',
       targetCategory: 'Triple Angiogenic Bioregulator & Microvascular Graft Take',
       pharmaRationale:
@@ -844,8 +844,8 @@ export function getPrescriptionLotuslandMatch(rx) {
   ) {
     return {
       peptideName: 'GHK-Cu (Human Copper Peptide) 50 mg / vial',
-      supplier: 'Lotusland Clinical Formulary',
-      catalogCode: 'lotus-ghk-cu-50mg',
+      supplier: 'Atlas Clinical Formulary',
+      catalogCode: 'atlas-ghk-cu-50mg',
       matchScore: '98% Formulative Synergy',
       targetCategory: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
       pharmaRationale:
@@ -860,8 +860,8 @@ export function getPrescriptionLotuslandMatch(rx) {
 
   return {
     peptideName: 'BPC-157 10 mg / vial',
-    supplier: 'Lotusland Clinical Formulary',
-    catalogCode: 'lotus-bpc-157-10mg',
+    supplier: 'Atlas Clinical Formulary',
+    catalogCode: 'atlas-bpc-157-10mg',
     matchScore: '95% Biological Synergy',
     targetCategory: 'Endothelial Nitric Oxide Signaling & Cytoprotection',
     pharmaRationale:
@@ -1135,13 +1135,13 @@ export function computeServerAnalytics(prescriptions = []) {
     total: totalRxCount
   };
 
-  // 5. Practice-Wide Lotusland Recommendations
+  // 5. Practice-Wide Atlas Recommendations
   const lotuslandPracticeRecommendations = [
     {
-      id: 'lotus-rec-ghk-cu',
+      id: 'atlas-rec-ghk-cu',
       peptideName: 'GHK-Cu (Human Copper Peptide) 50 mg / vial',
-      supplier: 'Lotusland Clinical Formulary',
-      catalogCode: 'lotus-ghk-cu-50mg',
+      supplier: 'Atlas Clinical Formulary',
+      catalogCode: 'atlas-ghk-cu-50mg',
       matchScore: '98% Practice Fit',
       targetIndication: 'Trichological Follicular Rejuvenation & Dermal Papilla Stimulation',
       pharmacologicalClass: 'Tripeptide-Copper Bioregulator & Follicular Matrix Mitogen',
@@ -1155,10 +1155,10 @@ export function computeServerAnalytics(prescriptions = []) {
       }
     },
     {
-      id: 'lotus-rec-glow',
+      id: 'atlas-rec-glow',
       peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
-      supplier: 'Lotusland Clinical Formulary',
-      catalogCode: 'lotus-glow-blend',
+      supplier: 'Atlas Clinical Formulary',
+      catalogCode: 'atlas-glow-blend',
       matchScore: '96% Practice Fit',
       targetIndication: 'Post-FUE Graft Integration, Microvascular Perfusion & Scalp Wound Healing',
       pharmacologicalClass: 'Triple Bio-Regenerative Angiogenesis & Cytoprotective Complex',
@@ -1172,10 +1172,10 @@ export function computeServerAnalytics(prescriptions = []) {
       }
     },
     {
-      id: 'lotus-rec-epithalon',
+      id: 'atlas-rec-epithalon',
       peptideName: 'Epithalon 10 mg / vial',
-      supplier: 'Lotusland Clinical Formulary',
-      catalogCode: 'lotus-epithalon-10mg',
+      supplier: 'Atlas Clinical Formulary',
+      catalogCode: 'atlas-epithalon-10mg',
       matchScore: '94% Practice Fit',
       targetIndication: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence Retardation',
       pharmacologicalClass: 'Synthetic Epigenetic Telomerase Bioregulator (Ala-Glu-Asp-Gly)',

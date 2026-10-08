@@ -1694,7 +1694,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       items: [
         {
           id: 'labels',
-          label: 'Pharmapolis Bottle Labels',
+          label: 'Prescription Bottle Labels',
           icon: Tag,
           action: () => {
             if (filteredPrescriptions[0]) {
@@ -1735,7 +1735,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           label: 'Complete Catalog Directory',
           icon: ExternalLink,
           action: () => window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank'),
-          badge: 'Lotusland'
+          badge: 'Atlas'
         }
       ]
     },
@@ -1746,7 +1746,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           id: 'recommendations',
           label: 'Peptide Formulations & AI Synergy',
           icon: Sparkles,
-          badge: 'Lotusland'
+          badge: 'Atlas'
         },
         {
           id: 'intake',
@@ -1792,6 +1792,17 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank');
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
+    }
+
+    if (id === 'prescriptions') {
+      setQuickRxFilter('all');
+      setStatusFilter('all');
+      setPatientFilter('all');
+      setTemporalFilter('all');
+      setApiFilter(null);
+    }
+    if (id === 'tasks') {
+      setTaskFilter('all');
     }
 
     // Single active view routing (GCP Standard: only show selected menu item)
@@ -3652,7 +3663,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                             </button>
 
                             <span style={{ fontSize: '0.74rem', color: '#475569', fontWeight: 500 }}>
-                              Dispensary: Pharmapolis Galenic Unit
+                              Dispensary: Atlas Certified Galenic Unit
                             </span>
                           </div>
                         </div>
@@ -3829,7 +3840,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '0.72rem', background: '#e0e7ff', color: '#4338ca', border: '1px solid #c7d2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                             <Sparkles size={11} />
-                            <span>Recommended Lotusland Augmentation</span>
+                            <span>Recommended Atlas Augmentation</span>
                           </span>
                           <span style={{ fontSize: '0.86rem', fontWeight: 750, color: '#0f172a' }}>
                             {rx.lotuslandRecommendation.peptideName}
@@ -5928,7 +5939,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     <button
                       type="button"
                       onClick={() => handleOpenLabelsModal(rx)}
-                      title="View Pharmapolis pharmacy bottle labels"
+                      title="View prescription bottle labels"
                       style={{
                         width: '32px',
                         height: '32px',
@@ -6236,7 +6247,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         EU GMP Certified Cleanroom Dispensary
                       </div>
                       <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b', lineHeight: 1.4 }}>
-                        Formulated under ISO Class 5 Laminar Airflow with HPLC purity certification by Pharmapolis & Fagron Compounding Solutions.
+                        Formulated under ISO Class 5 Laminar Airflow with HPLC purity certification by Atlas Certified Compounding Solutions.
                       </p>
                     </div>
 
@@ -6277,10 +6288,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     {rx && (
                       <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '6px', padding: '14px 16px' }}>
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', marginBottom: '6px' }}>
-                          Pharmapolis Bottle Label
+                          Prescription Bottle Label
                         </div>
                         <p style={{ margin: '0 0 10px 0', fontSize: '0.76rem', color: '#0c4a6e', lineHeight: 1.4 }}>
-                          Direct access to vector print templates formatted for Pharmapolis amber pharmaceutical bottles.
+                          Direct access to vector print templates formatted for amber pharmaceutical bottles.
                         </p>
                         <button
                           type="button"
