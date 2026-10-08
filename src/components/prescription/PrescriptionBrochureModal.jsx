@@ -201,9 +201,9 @@ const detectTreatmentModality = (rx = {}, formulations = []) => {
       type: 'topical_pomade',
       label: 'Compounded Galenic Topical Ointment',
       indication: 'Targeted Microcirculatory & Local Anesthetic Therapy',
-      summaryBadge: 'Hypoallergenic Galenic Pomade Base',
-      defaultVehicle: 'Compounded Hypoallergenic Non-Irritating Ointment Base',
-      vehicleDesc: 'Compounded Hypoallergenic Ointment Base (Non-irritating, soothing occlusive carrier)',
+      summaryBadge: 'Fragrance & Alcohol Free Hypoallergenic Base',
+      defaultVehicle: 'Compounded Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free)',
+      vehicleDesc: 'Compounded Hypoallergenic Ointment Base (Fragrance-free and alcohol-free, non-irritating soothing occlusive carrier)',
       storageGuidelines: [
         'Store at room temperature (15–25°C) in a dry place protected from humidity.',
         'Keep tube or jar tightly closed immediately after dispensing.',
@@ -410,7 +410,7 @@ const getVehicleDescription = (vehicleName = '', modalityType = 'scalp_hair') =>
     return 'Pentravan® Liposomal Cream (Fagron) (Patented transdermal liposomal emulsion base for optimal dermal and systemic bioavailability, alcohol-free)';
   }
   if (v.includes('pomade') || v.includes('ointment') || v.includes('pomada')) {
-    return 'Compounded Hypoallergenic Ointment Base (Non-irritating, soothing occlusive galenic carrier)';
+    return 'Compounded Hypoallergenic Ointment Base (Fragrance and alcohol-free, non-irritating soothing occlusive galenic carrier)';
   }
   if (v.includes('capsule') || v.includes('cápsula') || v.includes('vegetable')) {
     return 'Hypoallergenic Vegetable Enteric Capsule Base (100% plant-derived cellulose, gluten-free, dairy-free)';
@@ -436,7 +436,7 @@ const getVehicleDescription = (vehicleName = '', modalityType = 'scalp_hair') =>
     return 'Pentravan® Liposomal Cream (Fagron) (Patented transdermal liposomal carrier, alcohol-free)';
   }
   if (modalityType === 'topical_pomade') {
-    return 'Compounded Hypoallergenic Ointment Base (Soothing non-irritating galenic vehicle)';
+    return 'Compounded Hypoallergenic Ointment Base (Fragrance and alcohol-free, soothing non-irritating galenic vehicle)';
   }
   if (modalityType === 'oral_protocol') {
     return 'Hypoallergenic Vegetable Enteric Capsule Base (Preservative-free plant cellulose)';

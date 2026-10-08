@@ -108,7 +108,14 @@ export default function PharmapolisLabelSvg({
   const fileNumber = labelData.fileNumber || labelData.fileNo || labelData.rxCode || labelData.id || '51857';
   const productTitle = labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Protocol';
   const formula = labelData.formula || '';
-  const directions = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
+  const rawDirections = labelData.directions || labelData.instructions || 'Take / apply as directed by prescribing physician.';
+  const directions = React.useMemo(() => {
+    let d = String(rawDirections).trim();
+    // Normalize and remove redundant trailing "as prescribed"
+    d = d.replace(/[,.]?\s*as\s+prescribed\.?$/i, '').trim();
+    if (d && !d.endsWith('.')) d += '.';
+    return d || 'Take / apply as directed by prescribing physician.';
+  }, [rawDirections]);
   const warnings = labelData.warnings || labelData.warning || 'For external / patient use only. Keep out of reach of children.';
   const formatLabelDate = (val, fallback = '15-09-2026') => {
     if (!val) return fallback;
@@ -208,13 +215,21 @@ export default function PharmapolisLabelSvg({
   const isHormone = formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone');
   const isOral = dFormLower.includes('oral') || dFormLower.includes('capsule') || formulaLower.includes('capsule') || formulaLower.includes('nattokinase') || formulaLower.includes('serrapeptase');
 
-  const vehicleName = labelData.vehicle?.name || 
+  let vehicleName = labelData.vehicle?.name || 
                       (labelData.apis?.find(a => a.itemType === 'vehicle_base' || a.isVehicleOrBase)?.name) ||
-                      (isPomadeOrOintment ? 'Compounded Topical Pomade Base (30 g)' :
+                      (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)' :
                       (isHormone ? 'Pentravan® Liposomal Transdermal Cream Base' :
                       (formulaLower.includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
                       (formulaLower.includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 
                       (isOral ? 'Vegetable Acid-Resistant Capsule Base' : 'Galenic Compounding Vehicle q.s.')))));
+
+  // Standardize all pomade and ointment bases to explicitly specify Fragrance & Alcohol Free
+  if (isPomadeOrOintment && vehicleName) {
+    const vLower = vehicleName.toLowerCase();
+    if (!vLower.includes('fragrance') || !vLower.includes('alcohol')) {
+      vehicleName = 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)';
+    }
+  }
 
   let cautionText = 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN';
   if (isPomadeOrOintment) {
@@ -426,8 +441,8 @@ export default function PharmapolisLabelSvg({
             }
 
             const baseStartY = (isShort ? 22 : 28) + (ingCount * ingLineGap) + (isShort ? 2 : 4);
-            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 54 : 66);
-            const baseFontSize = isShort ? (vehicleName.length > 40 ? 13 : 15) : (vehicleName.length > 45 ? 15 : 17);
+            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 65 : 88);
+            const baseFontSize = isShort ? (vehicleName.length > 40 ? 13 : 15) : (vehicleName.length > 55 ? 15 : 17);
             const baseLineGap = isShort ? 16 : 20;
             const b2TotalHeight = baseStartY + (baseLines.length * baseLineGap);
 

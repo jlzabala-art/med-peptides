@@ -43,7 +43,7 @@ import {
 } from '@/lib/icons';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { RotateCcw, Home, Loader2 } from 'lucide-react';
+import { RotateCcw, Home, Loader2, AlertTriangle } from 'lucide-react';
 
 function slugify(text) {
   return String(text || '')
@@ -1129,7 +1129,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         resolvedVolume = volume || rx.volume || '30 g';
         resolvedContainer = resolvedContainer || (isEs ? 'Tarro Topacio Farmacéutico de Seguridad (30 g)' : 'Topical Pomade Jar / Tube (30 g)');
         vehicleObj.tag = isEs ? 'BASE GALÉNICA: POMADA' : 'COMPOUNDING BASE: OINTMENT';
-        vehicleObj.name = vehicleName || 'Hypoallergenic Non-Irritating Ointment Base (q.s. 30 g)';
+        vehicleObj.name = vehicleName || 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)';
         vehicleObj.specs = isEs
           ? 'Base de pomada galénica hipoalergénica sin fragancias ni alcohol, formulada para aplicación tópica/perianal con excelente tolerancia y retención dérmica.'
           : 'Hypoallergenic, fragrance-free, and alcohol-free compounding ointment base formulated for perianal/mucosal application with high tolerance and tissue adhesion.';
@@ -1534,7 +1534,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         let vehicleName = m.vehicle?.name || m.vehicleName;
         if (!vehicleName) {
           if (isCream) vehicleName = 'Pentravan® Liposomal Transdermal Cream Base';
-          else if (isOintment) vehicleName = isEs ? 'Base de Pomada Magistral Hipoalergénica' : 'Compounded Topical Pomade Base';
+          else if (isOintment) vehicleName = isEs ? 'Base de Pomada Hipoalergénica (Sin Fragancia ni Alcohol)' : 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)';
           else if (isFoam) vehicleName = 'TrichoFoam™ Transdermal Base';
           else if (isLiquid) vehicleName = 'TrichoSol™ Hydrophilic Solution Base';
           else if (isNutriOrCapsule) vehicleName = isEs ? 'Base de Cápsula Magistral / Excipiente de Celulosa' : 'Micronized Compounded Hard Capsules Base';
@@ -1567,7 +1567,10 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             partCode: m.prescriptionNumber || m.prescriptionCode || m.id,
             phaseName: m.phaseName || null,
             nutrigenomics: nutri,
-            dosageInstructions: m.dosageInstructions || null
+            dosageInstructions: m.dosageInstructions || null,
+            specialCompoundingRequirements: m.specialCompoundingRequirements || (idx === 0 ? rx.specialCompoundingRequirements : null) || null,
+            clinicalMilestones: m.clinicalMilestones || (idx === 0 ? rx.clinicalMilestones : null) || null,
+            criticalPrecautions: m.criticalPrecautions || (idx === 0 ? rx.criticalPrecautions : null) || null
           }
         });
       });
@@ -1597,7 +1600,13 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           route: routeText,
           volume: volText,
           customPosology: posologyText,
-          apis: activeApis.length > 0 ? activeApis : rawLines
+          apis: activeApis.length > 0 ? activeApis : rawLines,
+          extra: {
+            partCode: rx.prescriptionNumber || rx.prescriptionCode || rx.id,
+            specialCompoundingRequirements: rx.specialCompoundingRequirements || null,
+            clinicalMilestones: rx.clinicalMilestones || null,
+            criticalPrecautions: rx.criticalPrecautions || null
+          }
         })
       ];
     }
@@ -1740,7 +1749,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       const pomVeh = vehicleLines.find(v => {
         const vn = (v.name || v.drugName || '').toLowerCase();
         return vn.includes('base') || vn.includes('pomade') || vn.includes('ointment');
-      })?.name || 'Hypoallergenic Non-Irritating Ointment Base (q.s. 30 g)';
+      })?.name || 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)';
       activeBlocks.push({
         type: 'pomade',
         vehicleName: pomVeh,
@@ -1748,7 +1757,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         treatmentTitle: rx.treatmentType || (isEs ? 'Pomada Compuesta Tópica (30 g)' : 'Compounded Topical Pomade / Ointment (30 g)'),
         route: rx.dispensingForm || (isEs ? 'Aplicación Tópica / Perianal' : 'Topical / Perianal Application'),
         volume: rx.volume || '30 g',
-        customPosology: getPosologyText(rx.posology) || (isEs ? 'Aplicar dos veces al día durante 2 meses' : 'Apply twice daily for 2 months as prescribed'),
+        customPosology: getPosologyText(rx.posology) || (isEs ? 'Aplicar dos veces al día durante 2 meses' : 'Apply twice daily for 2 months'),
         apis: pomadeItems
       });
     }
@@ -3225,6 +3234,56 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
               </div>
 
+              {/* Sub-Section 1b: Special Compounding Requirements & Galenic Purity Badges */}
+              {Array.isArray(formulation.extra?.specialCompoundingRequirements) && formulation.extra.specialCompoundingRequirements.length > 0 && (
+                <div style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '0.85rem 1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.55rem',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)'
+                }}>
+                  <div style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    color: '#475569',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <CheckCircle2 size={14} color="#059669" />
+                    <span>{isEs ? 'Requisitos Galénicos de Formulación & Pureza (Clean Label)' : 'Galenic Purity Standards & Compounding Requirements'}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {formulation.extra.specialCompoundingRequirements.map((req, rIdx) => (
+                      <span
+                        key={rIdx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          fontSize: '0.74rem',
+                          fontWeight: 600,
+                          color: '#0f766e',
+                          background: '#f0fdfa',
+                          border: '1px solid #ccfbf1',
+                          padding: '3px 9px',
+                          borderRadius: '6px'
+                        }}
+                      >
+                        <span style={{ fontSize: '0.75rem', color: '#0d9488' }}>✓</span>
+                        <span>{req}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Sub-Section 2: Compounded Active Ingredients (APIs) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -3408,6 +3467,37 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </details>
               )}
 
+              {/* Sub-Section 2c: Clinical Protocol Initiation Milestone */}
+              {Array.isArray(formulation.extra?.clinicalMilestones) && formulation.extra.clinicalMilestones.length > 0 && (
+                <div style={{
+                  background: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  borderLeft: '4px solid #0284c7',
+                  borderRadius: '10px',
+                  padding: '0.95rem 1.15rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.35rem',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)'
+                }}>
+                  {formulation.extra.clinicalMilestones.map((ms, mIdx) => (
+                    <div key={ms.id || mIdx} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1rem' }}>🗓️</span>
+                        <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0369a1' }}>
+                          {ms.title}: {ms.timing}
+                        </span>
+                      </div>
+                      {ms.description && (
+                        <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#0c4a6e', lineHeight: 1.5, paddingLeft: '26px' }}>
+                          {ms.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Sub-Section 3: Dedicated Posology Protocol FOR THIS SPECIFIC VEHICLE */}
               <div 
                 id={fIdx === 0 ? "posology-card" : `posology-${formulation.id}`}
@@ -3539,6 +3629,62 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     </div>
                   ))}
                 </div>
+
+                {/* Sub-Section 3b: Critical Medical Safety Alerts & Pre-Procedure Guidance */}
+                {Array.isArray(formulation.extra?.criticalPrecautions) && formulation.extra.criticalPrecautions.length > 0 && (
+                  <div style={{
+                    background: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    borderLeft: '4px solid #d97706',
+                    borderRadius: '10px',
+                    padding: '0.95rem 1.15rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.65rem',
+                    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)'
+                  }}>
+                    <div style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      color: '#92400e',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <AlertTriangle size={15} color="#d97706" />
+                      <span>{isEs ? 'Instrucciones Críticas de Seguridad y Manejo Pre-Procedimiento' : 'Critical Clinical Safety Alerts & Pre-Procedure Guidance'}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {formulation.extra.criticalPrecautions.map((prec, pIdx) => (
+                        <div key={prec.id || pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                          <span style={{
+                            fontSize: '0.70rem',
+                            fontWeight: 800,
+                            color: prec.severity === 'critical' ? '#991b1b' : '#92400e',
+                            background: prec.severity === 'critical' ? '#fee2e2' : '#fef3c7',
+                            border: `1px solid ${prec.severity === 'critical' ? '#fecaca' : '#fde68a'}`,
+                            padding: '2px 7px',
+                            borderRadius: '4px',
+                            whiteSpace: 'nowrap',
+                            marginTop: '1px'
+                          }}>
+                            {prec.title || (isEs ? 'Aviso Médico' : 'Medical Notice')}
+                          </span>
+                          <div style={{ fontSize: '0.79rem', color: '#78350f', lineHeight: 1.45 }}>
+                            <strong>{prec.instruction}</strong>
+                            {prec.rationale && (
+                              <span style={{ display: 'block', fontSize: '0.73rem', color: '#92400e', marginTop: '2px' }}>
+                                {prec.rationale}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               </div>
               )}

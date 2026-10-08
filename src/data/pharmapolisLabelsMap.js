@@ -282,18 +282,18 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     fileNumber: '51245',
     productName: 'Diltiazem 2% & Lidocaine 2% Compounded Topical Ointment',
     productTitle: 'Diltiazem 2% + Lidocaine 2% Pomade - 30 g',
-    subTitle: 'Custom Galenic Pomade · Hypoallergenic Base (30 g)',
+    subTitle: 'Custom Galenic Pomade · Fragrance & Alcohol Free Hypoallergenic Base (30 g)',
     dosageForm: 'Topical Pomade / Ointment',
     volume: '30 g',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
-    formula: 'Diltiazem Hydrochloride USP 2% (0.6 g) + Lidocaine Hydrochloride USP 2% (0.6 g) in Hypoallergenic Ointment Base q.s. 30 g',
+    formula: 'Diltiazem Hydrochloride USP 2% (0.6 g) + Lidocaine Hydrochloride USP 2% (0.6 g) in Hypoallergenic Ointment Base (Fragrance & Alcohol Free) q.s. 30 g',
     apis: [
       { name: 'Diltiazem Hydrochloride USP', dose: '2% (0.6 g)', dosage: '2% (0.6 g)' },
       { name: 'Lidocaine Hydrochloride USP', dose: '2% (0.6 g)', dosage: '2% (0.6 g)' }
     ],
-    vehicle: { name: 'Hypoallergenic Non-Irritating Ointment Base (q.s. 30 g)', volume: '30 g' },
-    directions: 'Apply a pea-sized amount to the affected area twice daily (morning and evening) for 2 months as prescribed.',
+    vehicle: { name: 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)', volume: '30 g' },
+    directions: 'Apply a pea-sized amount to the affected area twice daily (morning and evening) for 2 months.',
     warnings: 'For topical / perianal use only. Wash hands after application. Keep out of reach of children.',
     prodDate: '15-09-2026',
     expDate: '15-09-2027',
@@ -303,6 +303,9 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
     batchCode: 'PHARM-2026-DL30G',
     lote: '2609-HAB1',
+    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_51245_diltiazem_30g_FRONT.png',
+    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51245_diltiazem_30g_FRONT_WITH_QR.png',
+    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_51245_diltiazem_30g_BACK_QR.png',
     targetRxUrl: 'https://med-peptides.com/rx/RX-51245'
   },
 
@@ -716,10 +719,19 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       const phaseNum = form.index || (fIdx + 1);
       const partCode = form.extra?.partCode ? String(form.extra.partCode).toUpperCase() : null;
 
-      // Match by exact partCode first (e.g. RX-50957-A vs RX-50957-B), then phaseNumber, then title
+      // Match by exact partCode first (e.g. RX-50957-A vs RX-50957-B), then by active ingredient overlap, then phaseNumber, then title
       const regMatch = matches.find(m => 
-        partCode && m.prescriptionMatches.some(pm => pm.toUpperCase() === partCode || partCode.includes(pm.toUpperCase()))
-      ) || matches.find(m => 
+        partCode && m.prescriptionMatches.some(pm => pm.toUpperCase() === partCode)
+      ) || matches.find(m => {
+        if (!form.apis || !Array.isArray(form.apis) || !m.apis || !Array.isArray(m.apis)) return false;
+        return m.apis.some(ma => {
+          const maName = (ma.name || ma.activeIngredient || '').toLowerCase();
+          return form.apis.some(fa => {
+            const faName = (fa.name || fa.activeIngredient || '').toLowerCase();
+            return maName && faName && (maName.includes(faName) || faName.includes(maName));
+          });
+        });
+      }) || matches.find(m => 
         m.phaseNumber === phaseNum
       ) || matches.find(m => 
         m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10))

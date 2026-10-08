@@ -219,8 +219,13 @@ async function generateBackLabelSvg(data, qrSvg) {
       <!-- ROW 3: QUALITY SPECIFICATIONS & SPECIAL REQUIREMENTS -->
       <g transform="translate(30, 285)">
         <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="800" fill="#64748b" letter-spacing="0.8">COMPOUNDING SPECIFICATIONS &amp; PURITY</text>
+        ${(data.productTitle || '').toLowerCase().includes('pomade') || (data.productTitle || '').toLowerCase().includes('ointment') ? `
+        <text x="0" y="26" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f172a">• Hypoallergenic ointment base: 100% Fragrance-free and alcohol-free.</text>
+        <text x="0" y="52" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f172a">• Non-irritating soothing carrier: Safe for sensitive cutaneous and perianal mucosa.</text>
+        ` : `
         <text x="0" y="26" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f172a">• Hypoallergenic formulation: Zero gluten, zero lactose, zero dairy.</text>
         <text x="0" y="52" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f172a">• No bromelain, no sunflower lecithin, no seed oils in capsule fill.</text>
+        `}
         <text x="0" y="78" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f172a">• HPLC Verified Raw Materials &gt; 98.5% Active Pharmaceutical Purity.</text>
         <text x="0" y="104" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#16a34a">✓ Tamper-evident seal intact upon dispensary release.</text>
       </g>
@@ -554,6 +559,31 @@ const PRESCRIPTIONS_CATALOG = [
     batchCode: 'PHARM-2026-MT-OIL',
     lote: '2609-MT2',
     url: 'https://med-peptides.com/rx/RX-MT-0903'
+  },
+  // 16. Aamer Reza Habib - Diltiazem 2% + Lidocaine 2% Pomade - 30 g (RX-51245)
+  {
+    codeId: '51245_diltiazem_30g',
+    rxCode: 'RX-51245',
+    fileNumber: '51245',
+    patientName: 'Aamer Reza Habib',
+    productTitle: 'Diltiazem 2% + Lidocaine 2% Pomade - 30 g',
+    formula: 'Diltiazem Hydrochloride USP 2% (0.6 g) + Lidocaine Hydrochloride USP 2% (0.6 g) in Hypoallergenic Ointment Base (Fragrance & Alcohol Free) q.s. 30 g',
+    apis: [
+      { name: 'Diltiazem Hydrochloride USP', dose: '2% (0.6 g)', dosage: '2% (0.6 g)' },
+      { name: 'Lidocaine Hydrochloride USP', dose: '2% (0.6 g)', dosage: '2% (0.6 g)' }
+    ],
+    vehicle: { name: 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)', volume: '30 g' },
+    directions: 'Apply a pea-sized amount to the affected area twice daily (morning and evening) for 2 months.',
+    warnings: 'For topical / perianal use only. Wash hands after application. Keep out of reach of children.',
+    prodDate: '15-09-2026',
+    expDate: '15-09-2027',
+    storage: 'Store at room temperature (15°C - 25°C)',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic Day Surgery Center, Dubai',
+    batchCode: 'PHARM-2026-DL30G',
+    lote: '2609-HAB1',
+    url: 'https://med-peptides.com/rx/RX-51245'
   }
 ];
 

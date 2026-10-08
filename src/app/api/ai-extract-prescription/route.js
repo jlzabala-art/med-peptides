@@ -282,7 +282,7 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
      * In Transdermal BHRT creams: APIs are Testosterone, 17β-Estradiol, Progesterone. The vehicle is Pentravan® Liposomal Transdermal Cream Base (set in vehicleBase, or mark isVehicleOrBase: true).
      * In Scalp lotions: APIs are Minoxidil, Latanoprost, Finasteride. The vehicle is TrichoSol™ or TrichoOil™.
      * In Compounded Oral Capsules: APIs such as Ubiquinol, Saw Palmetto, Red Yeast Rice, Berberine, Citrus Bergamot, Chromium, CoQ10. The vehicle is Vegetarian / Gelatin Capsules. NOTE: Custom oral capsules from clinic doctors are 'compounding' (CompoundingFormula), NOT 'nutrigen'.
-     * In Perianal/Topical Pomades: APIs are Diltiazem, Lidocaine. The vehicle is Hypoallergenic Pomade Base.
+     * In Perianal/Topical Pomades: APIs are Diltiazem, Lidocaine. The vehicle is Hypoallergenic Non-Irritating Pomade/Ointment Base (Fragrance & Alcohol Free).
 
 4. STEP-BY-STEP POSOLOGY PROTOCOL:
    - For each formulation block, construct structured 'posologySteps':
