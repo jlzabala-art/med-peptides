@@ -1531,13 +1531,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         const isLiquid = formOrRoute.includes('solution') || formOrRoute.includes('solución') || formOrRoute.includes('trichosol');
         const isNutriOrCapsule = formOrRoute.includes('capsule') || formOrRoute.includes('cápsula') || formOrRoute.includes('oral') || Boolean(nutri);
 
-        let vehicleName = m.vehicle?.name || m.vehicleName;
+        let vehicleName = m.vehicle?.name || (typeof m.vehicle === 'string' ? m.vehicle : null) || m.vehicleName;
         if (!vehicleName) {
+          const reqs = m.formulationRequirements || m.specialCompoundingRequirements || rx.formulationRequirements || rx.specialCompoundingRequirements || '';
+          const reqsLower = String(reqs).toLowerCase();
+          const isVegCaps = reqsLower.includes('vegetable') || reqsLower.includes('gluten') || reqsLower.includes('sin gluten') || reqsLower.includes('lactose');
+
           if (isCream) vehicleName = 'Pentravan® Liposomal Transdermal Cream Base';
           else if (isOintment) vehicleName = isEs ? 'Base de Pomada Hipoalergénica (Sin Fragancia ni Alcohol)' : 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)';
           else if (isFoam) vehicleName = 'TrichoFoam™ Transdermal Base';
           else if (isLiquid) vehicleName = 'TrichoSol™ Hydrophilic Solution Base';
-          else if (isNutriOrCapsule) vehicleName = isEs ? 'Base de Cápsula Magistral / Excipiente de Celulosa' : 'Micronized Compounded Hard Capsules Base';
+          else if (isNutriOrCapsule) vehicleName = isVegCaps ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : (isEs ? 'Cápsulas Vegetales / Excipiente de Celulosa' : 'Vegetable Acid-Resistant Capsule Base');
           else vehicleName = isEs ? 'Vehículo Galénico Magistral c.s.p.' : 'Galenic Compounding Vehicle q.s.';
         }
 
@@ -1848,13 +1852,20 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
     // Preparation E: Oral Compounded Capsules
     if (oralItems.length > 0) {
+      const reqs = rx.formulationRequirements || rx.specialCompoundingRequirements || rx.vehicle || '';
+      const reqsLower = String(typeof reqs === 'string' ? reqs : reqs?.name || '').toLowerCase();
+      const isVegCaps = reqsLower.includes('vegetable') || reqsLower.includes('gluten') || reqsLower.includes('sin gluten') || reqsLower.includes('lactose');
+      const oralVehName = isVegCaps
+        ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.'
+        : (isEs ? 'Cápsulas Vegetales / Celulosa Micronizada' : 'Vegetable Acid-Resistant Capsule Base');
+
       activeBlocks.push({
         type: 'oral',
-        vehicleName: isEs ? 'Cápsulas de Gelatina / Celulosa Micronizada' : 'Micronized Compounded Hard Capsules Base',
-        dosageForm: isEs ? 'Cápsulas Orales' : 'Oral Capsules',
-        treatmentTitle: isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Capsules)',
+        vehicleName: oralVehName,
+        dosageForm: isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Route (Vegetable Capsules)',
+        treatmentTitle: rx.treatmentType || (isEs ? 'Soporte Nutracéutico Sistémico (Cápsulas)' : 'Systemic Follicular & Nutraceutical Support (Capsules)'),
         route: isEs ? 'Vía Oral' : 'Oral Administration',
-        volume: rx.volume || (isEs ? '30 Cápsulas' : '30 Compounded Capsules'),
+        volume: rx.volume || (isEs ? '60 Cápsulas' : '60 Compounded Capsules'),
         customPosology: getPosologyText(rx.posology) || (isEs ? '1 Cápsula Diaria con la Cena' : '1 Capsule Daily with Dinner / Bedtime'),
         apis: oralItems
       });

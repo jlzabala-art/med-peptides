@@ -137,8 +137,8 @@ export default function PharmapolisLabelSvg({
     return str.replace(/T.*$/, '');
   };
 
-  const prodDate = formatLabelDate(labelData.prodDate, '15-09-2026');
-  const expDate = formatLabelDate(labelData.expDate, '15-09-2027');
+  const prodDate = formatLabelDate(labelData.prodDate || labelData.mfgDate, '05-10-2026');
+  const expDate = formatLabelDate(labelData.expDate, '04-10-2027');
   const storage = labelData.storage || 'Store at room temperature';
   const doctorName = labelData.doctorName || labelData.physician || 'Dr. Marina Cordeiro Fernandes';
   const clinicName = labelData.clinicName || 'NOVA Clinic Day Surgery Center, Dubai';
@@ -215,13 +215,17 @@ export default function PharmapolisLabelSvg({
   const isHormone = formulaLower.includes('testosterone') || formulaLower.includes('estradiol') || formulaLower.includes('progesterone') || formulaLower.includes('pentravan') || pNameLower.includes('testosterone') || pNameLower.includes('estradiol') || pNameLower.includes('hormone');
   const isOral = dFormLower.includes('oral') || dFormLower.includes('capsule') || formulaLower.includes('capsule') || formulaLower.includes('nattokinase') || formulaLower.includes('serrapeptase');
 
-  let vehicleName = labelData.vehicle?.name || 
+  let vehicleName = (typeof labelData.vehicle === 'string' ? labelData.vehicle : labelData.vehicle?.name) || 
                       (labelData.apis?.find(a => a.itemType === 'vehicle_base' || a.isVehicleOrBase)?.name) ||
                       (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)' :
                       (isHormone ? 'Pentravan® Liposomal Transdermal Cream Base' :
                       (formulaLower.includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
                       (formulaLower.includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 
-                      (isOral ? 'Vegetable Acid-Resistant Capsule Base' : 'Galenic Compounding Vehicle q.s.')))));
+                      (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.')))));
+
+  if (isOral && vehicleName.toLowerCase().includes('micronized compounded hard capsules')) {
+    vehicleName = 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
+  }
 
   // Standardize all pomade and ointment bases to explicitly specify Fragrance & Alcohol Free
   if (isPomadeOrOintment && vehicleName) {

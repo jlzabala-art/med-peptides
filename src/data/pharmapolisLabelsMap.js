@@ -704,8 +704,8 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
   });
 
   // Helper to format date cleanly as DD-MM-YYYY
-  const formatIsoDate = (d) => {
-    if (!d) return '15-09-2026';
+  const formatIsoDate = (d, fallback = '05-10-2026') => {
+    if (!d) return fallback;
     if (typeof d === 'object' && (d._seconds || d.seconds)) {
       const s = d._seconds ?? d.seconds;
       const dt = new Date(s * 1000);
@@ -718,11 +718,11 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       if (dClean.includes('/')) return dClean.replace(/\//g, '-');
       return dClean;
     }
-    return '15-09-2026';
+    return fallback;
   };
 
-  const rxProdDate = formatIsoDate(rx.dateIssued || rx.issuedDate || rx.date || rx.createdAt);
-  const rxExpDate = formatIsoDate(rx.expiryDate || rx.expDate || '2027-09-15');
+  const rxProdDate = formatIsoDate(rx.mfgDate || rx.prodDate || rx.dateIssued || rx.issuedDate || rx.date || rx.createdAt, '05-10-2026');
+  const rxExpDate = formatIsoDate(rx.expDate || rx.expiryDate, '04-10-2027');
 
   // If explicit formulations are passed (from PublicPrescriptionClient compoundedFormulations),
   // map every formulation directly so apis, vehicle, route, and posology match 100%!
