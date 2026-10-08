@@ -495,7 +495,48 @@ const PRESCRIPTIONS_CATALOG = [
     url: 'https://med-peptides.com/rx/BOX03483AATRI'
   },
 
-  // 12. Mangesh Sakharkar - TrichoSol (RX-MS-0903)
+  // 12. Julien Boiteux - TrichoTest Solution 100 mL (BOX03529AATRI - Part 1)
+  {
+    codeId: 'box03529_trichosol_100ml',
+    rxCode: 'BOX03529AATRI',
+    fileNumber: 'BOX03529AATRI',
+    patientName: 'Julien Boiteux',
+    productTitle: 'TrichoTest™ Precision Topical Scalp Solution - 100 mL',
+    formula: 'Minoxidil 4% + Spironolactone 1% + Arginine 1.5% in TrichoSol™ 100 mL',
+    directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
+    warnings: 'For topical scalp use only. Leave on scalp as long as possible. Wash scalp the next day.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-TRI-BOX03529',
+    lote: '2609-JB1',
+    url: 'https://med-peptides.com/rx/BOX03529AATRI'
+  },
+  // 13. Julien Boiteux - TrichoOil 30 mL (BOX03529AATRI - Part 2)
+  {
+    codeId: 'box03529_trichooil_30ml',
+    rxCode: 'BOX03529AATRI',
+    fileNumber: 'BOX03529AATRI',
+    patientName: 'Julien Boiteux',
+    productTitle: 'Scalp Care and Hygiene Lipid Elixir (TrichoOil™) - 30 mL',
+    formula: 'Ginseng 2% + Ginkgo biloba 2.5% + Vitamin E (Tocopherol) 5% in TrichoOil™ 30 mL',
+    directions: '1-2 times / week, massage for 3-5 minutes and leave it on for 10 min before washing your hair.',
+    warnings: 'For topical scalp use only. Store away from direct sunlight.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-OIL-BOX03529',
+    lote: '2609-JB2',
+    url: 'https://med-peptides.com/rx/BOX03529AATRI'
+  },
+
+  // 14. Mangesh Sakharkar - TrichoSol (RX-MS-0903)
   {
     codeId: 'mangesh_trichosol_100ml',
     rxCode: 'RX-MS-0903',
@@ -652,12 +693,23 @@ async function run() {
     const frontQrSvg = await generateFrontLabelSvg(item, { withMicroQr: true, qrSvg: microQrSvg });
     const frontQrPngBuffer = await sharp(Buffer.from(frontQrSvg)).png().toBuffer();
     const frontQrFilename = `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.png`;
-    const frontQrPath = path.join(OUTPUT_DIR, frontQrFilename);
-    fs.writeFileSync(frontQrPath, frontQrPngBuffer);
-
+    fs.writeFileSync(path.join(OUTPUT_DIR, frontQrFilename), frontQrPngBuffer);
     const frontQrPdfBytes = await createPdfFromPngBuffer(frontQrPngBuffer, 75, 45);
     const frontQrPdfFilename = `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.pdf`;
     fs.writeFileSync(path.join(OUTPUT_DIR, frontQrPdfFilename), frontQrPdfBytes);
+
+    // Export copies directly to ~/Downloads for immediate client use
+    const DOWNLOADS_DIR = '/Users/joseluiszabala/Downloads';
+    if (fs.existsSync(DOWNLOADS_DIR) && (item.fileNumber === 'BOX03529AATRI' || item.patientName === 'Julien Boiteux')) {
+      const partTag = item.codeId.includes('trichosol') ? 'PART-1_TRICHOSOL_100ML' : 'PART-2_TRICHOOIL_30ML';
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT.png`), frontPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT.pdf`), frontPdfBytes);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_BACK_QR.png`), backPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_BACK_QR.pdf`), backPdfBytes);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT_WITH_QR.png`), frontQrPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT_WITH_QR.pdf`), frontQrPdfBytes);
+      console.log(`📥 [Downloads] Copied Julien Boiteux labels (${partTag}) to ~/Downloads`);
+    }
 
     generatedFiles.push({
       patient: item.patientName,

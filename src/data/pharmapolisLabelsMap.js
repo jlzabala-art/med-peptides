@@ -388,6 +388,80 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     targetRxUrl: 'https://med-peptides.com/rx/BOX03483AATRI'
   },
 
+  // ── Julien Boiteux: BOX03529AATRI ──
+  {
+    id: 'box03529-trichotest-part1',
+    prescriptionMatches: ['BOX03529AATRI', 'BOX03529', 'RX-BOX03529AATRI', 'RX-20261001-16AD'],
+    patientMatches: ['julien', 'boiteux'],
+    phaseNumber: 1,
+    patientName: 'Julien Boiteux',
+    fileNumber: 'BOX03529AATRI',
+    productName: 'TrichoTest™ Precision Topical Scalp Solution - 100 mL',
+    productTitle: 'TrichoTest™ Precision Topical Scalp Solution - 100 mL',
+    subTitle: 'Targeted Anti-Androgenic & Vasodilatory Complex (Phase 1)',
+    dosageForm: 'Topical Scalp Solution (TrichoSol™)',
+    volume: '100 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Minoxidil 4% + Spironolactone 1% + Arginine 1.5% in TrichoSol™ 100 mL',
+    apis: [
+      { name: 'Minoxidil', dose: '4%', dosage: '4%', activeIngredient: 'Minoxidil' },
+      { name: 'Spironolactone', dose: '1%', dosage: '1%', activeIngredient: 'Spironolactone' },
+      { name: 'L-Arginine', dose: '1.5%', dosage: '1.5%', activeIngredient: 'L-Arginine' }
+    ],
+    vehicle: { name: 'TrichoSol™ Patented Hydrophilic Phytocomplex Carrier', volume: '100 mL' },
+    directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
+    warnings: 'For topical scalp use only. Leave on scalp as long as possible. Wash scalp the next day.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-TRI-BOX03529',
+    lote: '2609-JB1',
+    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichosol_100ml_FRONT.png',
+    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichosol_100ml_FRONT_WITH_QR.png',
+    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichosol_100ml_BACK_QR.png',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+  },
+  {
+    id: 'box03529-trichotest-part2',
+    prescriptionMatches: ['BOX03529AATRI', 'BOX03529', 'RX-BOX03529AATRI', 'RX-20261001-16AD'],
+    patientMatches: ['julien', 'boiteux'],
+    phaseNumber: 2,
+    patientName: 'Julien Boiteux',
+    fileNumber: 'BOX03529AATRI',
+    productName: 'Scalp Care and Hygiene Lipid Elixir (TrichoOil™) - 30 mL',
+    productTitle: 'Scalp Care and Hygiene Lipid Elixir (TrichoOil™) - 30 mL',
+    subTitle: 'Scalp Care & Lipid Conditioning (Phase 2)',
+    dosageForm: 'Topical Scalp Oil (TrichoOil™)',
+    volume: '30 mL',
+    dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
+    pharmacy: 'Pharmapolis Compounding Pharmacy',
+    formula: 'Ginseng 2% + Ginkgo biloba 2.5% + Vitamin E (Tocopherol) 5% in TrichoOil™ 30 mL',
+    apis: [
+      { name: 'Ginseng', dose: '2%', dosage: '2%', activeIngredient: 'Panax Ginseng Extract' },
+      { name: 'Ginkgo biloba', dose: '2.5%', dosage: '2.5%', activeIngredient: 'Ginkgo biloba Extract' },
+      { name: 'Vitamin E (Tocopherol)', dose: '5%', dosage: '5%', activeIngredient: 'Alpha-Tocopherol' }
+    ],
+    vehicle: { name: 'TrichoOil™ Natural Lipidic Carrier', volume: '30 mL' },
+    directions: '1-2 times / week, massage for 3-5 minutes and leave it on for 10 min before washing your hair.',
+    warnings: 'For topical scalp use only. Store away from direct sunlight.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-OIL-BOX03529',
+    lote: '2609-JB2',
+    frontUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichooil_30ml_FRONT.png',
+    frontWithQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichooil_30ml_FRONT_WITH_QR.png',
+    backQrUrl: '/labels/pharmapolis/PHARMAPOLIS_box03529_trichooil_30ml_BACK_QR.png',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+  },
+
   // ── Mangesh Sakharkar: RX-MS-0903 ──
   {
     id: 'mangesh-oral',
@@ -599,14 +673,20 @@ export function getAuthoritativeClinicalData(rx) {
                    String(rx.id || '').toLowerCase().includes('6f8qzc') ||
                    String(rx.code || '').toUpperCase().includes('6F8QZC') ||
                    String(rx.prescriptionCode || '').toUpperCase().includes('6F8QZC') ||
+                   String(rx.boxId || rx.fileNumber || rx.code || '').toUpperCase().includes('BOX03529') ||
+                   String(rx.boxId || rx.fileNumber || rx.code || '').toUpperCase().includes('BOX03483') ||
+                   String(patientName || '').toLowerCase().includes('julien') ||
                    String(patientName || '').toLowerCase().includes('eldose') ||
                    String(clinicName || '').toLowerCase().includes('hortman');
 
   if (isSezgin) {
-    doctorName = 'Dr. Çağatay Sezgin, MD, FISHRS';
-    doctorLicense = 'DHA 00208953-005';
-    clinicName = 'Hortman Clinics · Jumeirah 1, Dubai';
+    const isEldose = String(patientName || '').toLowerCase().includes('eldose') || String(rx.id || '').toLowerCase().includes('6f8qzc');
+    doctorName = isEldose ? 'Dr. Çağatay Sezgin, MD, FISHRS' : 'Dr. Sezgin Cagatay';
+    doctorLicense = isEldose ? 'DHA 00208953-005' : 'DHA-00013060-006';
+    clinicName = isEldose ? 'Hortman Clinics · Jumeirah 1, Dubai' : 'Hortman Clinics, Dubai';
   }
+
+
 
   const isHaytham = !isSezgin && (
                     String(doctorName).toLowerCase().includes('haytham') || 
