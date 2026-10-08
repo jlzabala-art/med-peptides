@@ -733,11 +733,11 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
       console.warn('Could not load protocols in doctorCache:', pErr);
     }
 
-    // 8. Enrich each prescription with tailored Lotusland Peptide Recommendation
+    // 8. Enrich each prescription with tailored Atlas Recommendations (Peptides & Colway)
     const enrichedPrescriptions = prescriptions.map(rx => {
-      if (!rx.lotuslandRecommendation) {
-        rx.lotuslandRecommendation = getPrescriptionLotuslandMatch(rx);
-      }
+      const recs = getPrescriptionAtlasRecommendations(rx);
+      rx.atlasRecommendations = recs;
+      rx.lotuslandRecommendation = recs.peptide;
       return rx;
     });
 
@@ -773,106 +773,15 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
   return payload;
 }
 
-/**
- * Resolves tailored matching Lotusland peptide for an individual prescription
- */
-export function getPrescriptionLotuslandMatch(rx) {
-  if (rx?.lotuslandRecommendation) return rx.lotuslandRecommendation;
+import {
+  getPrescriptionAtlasRecommendations,
+  getPrescriptionLotuslandMatch
+} from '@/services/atlasRecommendationsEngine';
 
-  const allText = `${rx?.treatmentTitle || ''} ${rx?.treatmentProgram || ''} ${rx?.phaseName || ''} ${(rx?.items || []).map(i => `${i.name} ${i.activeIngredient || ''}`).join(' ')} ${Array.isArray(rx?.parts) ? rx.parts.flatMap(p => (p.apis || []).map(a => `${a.name} ${a.cellularTarget || ''}`)).join(' ') : ''}`.toLowerCase();
-
-  if (
-    allText.includes('metformin') ||
-    allText.includes('telotest') ||
-    allText.includes('telomere') ||
-    allText.includes('resveratrol') ||
-    allText.includes('ubiquinol') ||
-    allText.includes('methylcobalamin') ||
-    allText.includes('astaxanthin')
-  ) {
-    return {
-      peptideName: 'Epithalon 10 mg / vial',
-      supplier: 'Atlas Clinical Formulary',
-      catalogCode: 'atlas-epithalon-10mg',
-      matchScore: '99% Formulative Synergy',
-      targetCategory: 'Telomerase Catalytic Activation & Follicular Stem Cell Senescence',
-      pharmaRationale:
-        'Induces targeted heterochromatin de-condensation and transcriptional upregulation of the human Telomerase Reverse Transcriptase (TERT) catalytic subunit via direct Ala-Glu-Asp-Gly peptide binding. Restores Hayflick replicative limit in aging follicular bulge stem cells, directly counteracting replicative exhaustion identified in genomic telomere attrition evaluations.',
-      associatedProtocol: {
-        slug: 'epithalon-telomere-extension',
-        title: 'Epithalon Telomere Extension Cycle',
-        url: '/proto/epithalon-telomere-extension'
-      }
-    };
-  }
-
-  if (
-    allText.includes('fue') ||
-    allText.includes('graft') ||
-    allText.includes('prp') ||
-    allText.includes('surgery') ||
-    allText.includes('wound') ||
-    allText.includes('surgical')
-  ) {
-    return {
-      peptideName: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
-      supplier: 'Atlas Clinical Formulary',
-      catalogCode: 'atlas-glow-blend',
-      matchScore: '99% Graft Synergy',
-      targetCategory: 'Triple Angiogenic Bioregulator & Microvascular Graft Take',
-      pharmaRationale:
-        'Synergistic tri-peptide complex engineered for acute follicular graft revascularization. BPC-157 stimulates early growth response-1 (egr-1) and nitric oxide modulation for microvascular stability; TB-500 (Thymosin β4 fragment) enhances actin filament sequestering for rapid endothelial migration into ischemic recipient beds; GHK upregulates extracellular matrix collagen synthesis and reduces inflammatory metalloproteinase (MMP-1/2) degradation.',
-      associatedProtocol: {
-        slug: 'bpc-157-tb-500-protocol',
-        title: 'BPC-157 & TB-500 Tissue Repair Protocol',
-        url: '/proto/bpc-157-tb-500-protocol'
-      }
-    };
-  }
-
-  if (
-    allText.includes('minoxidil') ||
-    allText.includes('dutasteride') ||
-    allText.includes('finasteride') ||
-    allText.includes('spironolactone') ||
-    allText.includes('latanoprost') ||
-    allText.includes('melatonin') ||
-    allText.includes('saw palmetto') ||
-    allText.includes('scalp') ||
-    allText.includes('trichosol') ||
-    allText.includes('trichooil')
-  ) {
-    return {
-      peptideName: 'GHK-Cu (Human Copper Peptide) 50 mg / vial',
-      supplier: 'Atlas Clinical Formulary',
-      catalogCode: 'atlas-ghk-cu-50mg',
-      matchScore: '98% Formulative Synergy',
-      targetCategory: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
-      pharmaRationale:
-        'Potent follicular bioregulator stimulating dermal papilla fibroblast proliferation, downregulating TGF-β1 (the primary transcriptional driver of catagen transition and follicular miniaturization), and inducing VEGF/bFGF microvascular angiogenesis. Exhibits profound pharmacodynamic synergy with Minoxidil and Dutasteride/Finasteride regimens by accelerating anagen re-entry without androgenic receptor competition.',
-      associatedProtocol: {
-        slug: 'melanogenesis-density-protocol-zt-ghk-cu',
-        title: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
-        url: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
-      }
-    };
-  }
-
-  return {
-    peptideName: 'BPC-157 10 mg / vial',
-    supplier: 'Atlas Clinical Formulary',
-    catalogCode: 'atlas-bpc-157-10mg',
-    matchScore: '95% Biological Synergy',
-    targetCategory: 'Endothelial Nitric Oxide Signaling & Cytoprotection',
-    pharmaRationale:
-      'Penta-decapeptide accelerating local tissue repair through endothelial nitric oxide synthase (eNOS) upregulation and VEGFR2 phosphorylation, modulating local inflammatory cytokines and stabilizing cellular extracellular matrices.',
-    associatedProtocol: {
-      slug: 'bpc-157-tb-500-protocol',
-      title: 'BPC-157 & TB-500 Protocol',
-      url: '/proto/bpc-157-tb-500-protocol'
-    }
-  };
-}
+export {
+  getPrescriptionAtlasRecommendations,
+  getPrescriptionLotuslandMatch
+};
 
 /**
  * Helper to calculate SVG donut slice path on the server

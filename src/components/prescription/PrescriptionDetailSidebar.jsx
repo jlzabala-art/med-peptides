@@ -165,6 +165,7 @@ export default function PrescriptionDetailSidebar({
     if (iconType === 'stethoscope' || id.includes('doctor') || id.includes('clinical')) return Stethoscope;
     if (iconType === 'shield' || id.includes('qr')) return ShieldCheck;
     if (iconType === 'file' || id.includes('doc')) return FileText;
+    if (iconType === 'sparkles' || id.includes('recommendation') || id.includes('synergy')) return Sparkles;
     if (iconType === 'share' || id.includes('sharing')) return ExternalLink;
     if (id.includes('formula')) return FlaskConical;
     return List;

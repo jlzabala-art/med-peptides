@@ -66,6 +66,7 @@ import ClinicalIntelligenceBanner from '@/components/doctor/ClinicalIntelligence
 import DoctorClinicalAnalytics from '@/components/doctor/DoctorClinicalAnalytics';
 import { getPharmapolisLabelsForPrescription } from '@/data/pharmapolisLabelsMap';
 import { getFagronClinicalMonograph } from '@/data/fagronClinicalMonographs';
+import { getPrescriptionAtlasRecommendations } from '@/services/atlasRecommendationsEngine';
 import { triggerHaptic } from '@/utils/haptics';
 
 function safeRenderText(val, fallback = '') {
@@ -1710,6 +1711,13 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           label: 'Diagnóstico & Biomarcadores',
           icon: Activity,
           badge: '6 Tests'
+        },
+        {
+          id: 'recommendations',
+          label: 'Atlas Recommendations',
+          icon: Sparkles,
+          badge: 'Synergy',
+          badgeColor: '#7c3aed'
         },
         {
           id: 'protocols_catalog',
@@ -3671,65 +3679,151 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     ))}
                   </div>
 
-                  {/* Tailored Lotusland Peptide Synergy Card for this Prescription */}
-                  {rx.lotuslandRecommendation && (
-                    <div
-                      style={{
-                        marginTop: '16px',
-                        padding: '14px 18px',
-                        background: '#ffffff',
-                        border: '1px solid #c7d2fe',
-                        borderRadius: '8px',
-                        boxShadow: '0 1px 3px rgba(67, 56, 202, 0.05)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '0.72rem', background: '#e0e7ff', color: '#4338ca', border: '1px solid #c7d2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Sparkles size={11} />
-                            <span>Recommended Atlas Augmentation</span>
-                          </span>
-                          <span style={{ fontSize: '0.86rem', fontWeight: 750, color: '#0f172a' }}>
-                            {rx.lotuslandRecommendation.peptideName}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650 }}>
-                          {rx.lotuslandRecommendation.matchScore || 'High Therapeutic Synergy'}
-                        </span>
-                      </div>
+                  {/* Tailored Atlas Clinical Recommendations (Bioactive Peptides & Colway Scalp Care) */}
+                  {(() => {
+                    const atlasRec = rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx);
+                    if (!atlasRec?.peptide && !atlasRec?.colway) return null;
 
-                      <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.5, background: '#f8fafc', padding: '8px 12px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '10px' }}>
-                        <strong style={{ color: '#0f172a' }}>Pharmacological Mechanism & Synergy: </strong>
-                        {rx.lotuslandRecommendation.pharmaRationale}
-                      </div>
+                    return (
+                      <div
+                        style={{
+                          marginTop: '16px',
+                          padding: '16px 18px',
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)'
+                        }}
+                      >
+                        {/* Header with Detected APIs */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.72rem', background: '#e0e7ff', color: '#4338ca', border: '1px solid #c7d2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <Sparkles size={11} />
+                              <span>Atlas Clinical Recommendations</span>
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                              Adjuvant care based on molecular analysis of this formulation:
+                            </span>
+                          </div>
 
-                      {rx.lotuslandRecommendation.associatedProtocol && (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                          <a
-                            href={rx.lotuslandRecommendation.associatedProtocol.url || `/proto/${rx.lotuslandRecommendation.associatedProtocol.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              fontSize: '0.74rem',
-                              fontWeight: 650,
-                              color: '#1d4ed8',
-                              background: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              padding: '5px 12px',
-                              borderRadius: '4px',
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px'
-                            }}
-                          >
-                            <span>Associated Protocol: {rx.lotuslandRecommendation.associatedProtocol.title}</span>
-                            <ArrowUpRight size={12} />
-                          </a>
+                          {/* Detected APIs Badges */}
+                          {atlasRec.detectedApis && atlasRec.detectedApis.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.70rem', color: '#475569', fontWeight: 600 }}>Detected APIs:</span>
+                              {atlasRec.detectedApis.slice(0, 4).map((api, aIdx) => (
+                                <span key={aIdx} style={{ fontSize: '0.68rem', background: '#ffffff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '1px 6px', borderRadius: '4px', fontWeight: 650, fontFamily: 'monospace' }}>
+                                  {api}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )}
+
+                        {/* Dual Recommendations Grid (Peptide & Colway) */}
+                        <div style={{ display: 'grid', gridTemplateColumns: atlasRec.colway ? 'repeat(auto-fit, minmax(280px, 1fr))' : '1fr', gap: '12px' }}>
+                          {/* 1. Bioactive Biomimetic Peptide (Strictly no Lotusland brand on screen) */}
+                          {atlasRec.peptide && (
+                            <div style={{ background: '#ffffff', border: '1px solid #c7d2fe', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                  <span style={{ fontSize: '0.68rem', fontWeight: 750, color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                    Bioactive Peptide Signaler
+                                  </span>
+                                  <span style={{ fontSize: '0.68rem', color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 650 }}>
+                                    {atlasRec.peptide.matchScore || 'High Synergy'}
+                                  </span>
+                                </div>
+                                <h4 style={{ margin: '0 0 6px 0', fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                                  {atlasRec.peptide.peptideName}
+                                </h4>
+                                <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '8px' }}>
+                                  <strong style={{ color: '#0f172a' }}>Synergy Rationale: </strong>
+                                  {atlasRec.peptide.pharmaRationale}
+                                </div>
+                              </div>
+
+                              {atlasRec.peptide.associatedProtocol && (
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                                  <a
+                                    href={atlasRec.peptide.associatedProtocol.url || `/proto/${atlasRec.peptide.associatedProtocol.slug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      fontSize: '0.72rem',
+                                      fontWeight: 650,
+                                      color: '#1d4ed8',
+                                      background: '#eff6ff',
+                                      border: '1px solid #bfdbfe',
+                                      padding: '4px 10px',
+                                      borderRadius: '4px',
+                                      textDecoration: 'none',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                  >
+                                    <span>Protocol: {atlasRec.peptide.associatedProtocol.title}</span>
+                                    <ArrowUpRight size={11} />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* 2. Scalp Barrier & Extracellular Matrix Support (Colway Clinical Care) */}
+                          {atlasRec.colway && (
+                            <div style={{ background: '#ffffff', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                  <span style={{ fontSize: '0.68rem', fontWeight: 750, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                    Colway Scalp Care &amp; ECM
+                                  </span>
+                                  <span style={{ fontSize: '0.68rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 650 }}>
+                                    {atlasRec.colway.matchScore || 'Barrier Support'}
+                                  </span>
+                                </div>
+                                <h4 style={{ margin: '0 0 6px 0', fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>
+                                  {atlasRec.colway.productName}
+                                </h4>
+                                <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '8px' }}>
+                                  <strong style={{ color: '#0f172a' }}>Clinical Rationale: </strong>
+                                  {atlasRec.colway.clinicalRationale}
+                                </div>
+                                <div style={{ fontSize: '0.70rem', color: '#64748b', fontStyle: 'italic', marginBottom: '8px' }}>
+                                  💡 {atlasRec.colway.routineAdvice}
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                                <a
+                                  href={atlasRec.colway.catalogUrl || `/p/${atlasRec.colway.catalogSlug}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    fontSize: '0.72rem',
+                                    fontWeight: 650,
+                                    color: '#047857',
+                                    background: '#ecfdf5',
+                                    border: '1px solid #a7f3d0',
+                                    padding: '4px 10px',
+                                    borderRadius: '4px',
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  <span>View Colway Clinical Datasheet</span>
+                                  <ArrowUpRight size={11} />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             }}
@@ -4081,6 +4175,231 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 </button>
               </div>
             )}
+
+            {/* Main Recommendations Header (GCP Standard) */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#e0e7ff', color: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Sparkles size={18} />
+                  </div>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#202124' }}>
+                    Atlas Recommendations &amp; Clinical Synergies
+                  </h2>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
+                  Biochemical and adjuvant care analysis derived from active TrichoTest™ pharmacogenetic prescriptions.
+                  Designed to preserve the scalp barrier, optimize cuticular Extracellular Matrix (ECM), and stimulate follicular papilla signaling.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '4px 10px', borderRadius: '4px', fontWeight: 650 }}>
+                  ✓ Molecular Analysis Active
+                </span>
+                <span style={{ fontSize: '0.74rem', background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '4px', fontWeight: 650 }}>
+                  Evidence-Based Adjuvants
+                </span>
+              </div>
+            </div>
+
+            {/* Prescriptions Analysis Cards List */}
+            {(() => {
+              const rxsWithRecs = allPrescriptions.map(rx => ({
+                rx,
+                recs: rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx)
+              })).filter(item => item.recs?.peptide || item.recs?.colway);
+
+              if (rxsWithRecs.length === 0) {
+                return (
+                  <EmptyState
+                    icon={Sparkles}
+                    title="No Active Prescriptions with Adjuvants"
+                    subtitle="Import a TrichoTest™ pharmacogenetic formulation or create a prescription to generate automated adjuvant recommendations."
+                    action={{
+                      label: "Import / New Rx",
+                      onClick: () => setIsIntakeOpen(true)
+                    }}
+                  />
+                );
+              }
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {rxsWithRecs.map(({ rx, recs }, idx) => (
+                    <div
+                      key={rx.id || idx}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #dadce0',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        boxShadow: '0 1px 3px rgba(60,64,67,0.06)'
+                      }}
+                    >
+                      {/* Prescription Header Row */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#202124' }}>
+                              {rx.treatmentTitle || 'Compounded Prescription'}
+                            </span>
+                            <CopyableId value={rx.id || rx.code} />
+                            {recs.isTrichoTest && (
+                              <span style={{ fontSize: '0.68rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                TrichoTest™ Precision
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
+                            Patient: <strong style={{ color: '#202124' }}>{rx.patientName || 'Clinical Patient'}</strong> • Code: {rx.code || rx.id}
+                          </div>
+                        </div>
+
+                        {/* Detected APIs in this Rx */}
+                        {recs.detectedApis && recs.detectedApis.length > 0 && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>Analyzed APIs:</span>
+                            {recs.detectedApis.map((api, aIdx) => (
+                              <span key={aIdx} style={{ fontSize: '0.70rem', background: '#f8f9fa', color: '#202124', border: '1px solid #dadce0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650, fontFamily: 'monospace' }}>
+                                {api}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 2-Column Responsive Recommendations Grid */}
+                      <div style={{ display: 'grid', gridTemplateColumns: recs.colway ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr', gap: '16px' }}>
+                        {/* 1. Bioactive Biomimetic Peptide (Strictly NO Lotusland on screen) */}
+                        {recs.peptide && (
+                          <div style={{
+                            background: '#ffffff',
+                            border: '1px solid #c7d2fe',
+                            borderRadius: '8px',
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            boxShadow: '0 1px 2px rgba(67, 56, 202, 0.04)'
+                          }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#e0e7ff', padding: '2px 8px', borderRadius: '4px' }}>
+                                  Bioactive Peptide Signaler
+                                </span>
+                                <span style={{ fontSize: '0.70rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650 }}>
+                                  {recs.peptide.matchScore || 'High Synergy'}
+                                </span>
+                              </div>
+                              <h3 style={{ margin: '0 0 6px 0', fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                                {recs.peptide.peptideName}
+                              </h3>
+                              <p style={{ margin: '0 0 10px 0', fontSize: '0.75rem', color: '#64748b' }}>
+                                {recs.peptide.category}
+                              </p>
+                              <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.5, background: '#f8fafc', padding: '10px 12px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '10px' }}>
+                                <strong style={{ color: '#0f172a' }}>Pharmacological Mechanism &amp; Synergy: </strong>
+                                {recs.peptide.pharmaRationale}
+                              </div>
+                            </div>
+
+                            {recs.peptide.associatedProtocol && (
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                                <a
+                                  href={recs.peptide.associatedProtocol.url || `/proto/${recs.peptide.associatedProtocol.slug}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    fontSize: '0.74rem',
+                                    fontWeight: 650,
+                                    color: '#1d4ed8',
+                                    background: '#eff6ff',
+                                    border: '1px solid #bfdbfe',
+                                    padding: '6px 12px',
+                                    borderRadius: '4px',
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                  }}
+                                >
+                                  <span>Explore Protocol: {recs.peptide.associatedProtocol.title}</span>
+                                  <ArrowUpRight size={13} />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 2. Scalp Barrier & Extracellular Matrix Support (Colway Clinical Care) */}
+                        {recs.colway && (
+                          <div style={{
+                            background: '#ffffff',
+                            border: '1px solid #a7f3d0',
+                            borderRadius: '8px',
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            boxShadow: '0 1px 2px rgba(4, 120, 87, 0.04)'
+                          }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>
+                                  Colway Scalp Care &amp; ECM
+                                </span>
+                                <span style={{ fontSize: '0.70rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650 }}>
+                                  {recs.colway.matchScore || 'Barrier Support'}
+                                </span>
+                              </div>
+                              <h3 style={{ margin: '0 0 4px 0', fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
+                                {recs.colway.productName}
+                              </h3>
+                              <p style={{ margin: '0 0 10px 0', fontSize: '0.75rem', color: '#059669', fontWeight: 600 }}>
+                                {recs.colway.brand} • {recs.colway.regulatoryNotice}
+                              </p>
+                              <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.5, background: '#f8fafc', padding: '10px 12px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '10px' }}>
+                                <strong style={{ color: '#0f172a' }}>Clinical Rationale: </strong>
+                                {recs.colway.clinicalRationale}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: '#475569', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px 10px', borderRadius: '6px', marginBottom: '10px' }}>
+                                <strong style={{ color: '#166534' }}>Recommended Routine: </strong>
+                                {recs.colway.routineAdvice}
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                              <a
+                                href={recs.colway.catalogUrl || `/p/${recs.colway.catalogSlug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  fontSize: '0.74rem',
+                                  fontWeight: 650,
+                                  color: '#047857',
+                                  background: '#ecfdf5',
+                                  border: '1px solid #a7f3d0',
+                                  padding: '6px 12px',
+                                  borderRadius: '4px',
+                                  textDecoration: 'none',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px'
+                                }}
+                              >
+                                <span>View Colway Clinical Datasheet</span>
+                                <ArrowUpRight size={13} />
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
           </section>
         )}
