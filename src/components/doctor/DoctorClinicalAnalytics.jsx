@@ -586,8 +586,8 @@ export default function DoctorClinicalAnalytics({
           <div 
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
-              gap: '20px'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '18px'
             }}
           >
             {/* ── CARD 1: Monthly Prescription Volume ──────────────────────── */}
@@ -600,7 +600,9 @@ export default function DoctorClinicalAnalytics({
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                position: 'relative'
+                position: 'relative',
+                boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <div>
@@ -730,7 +732,9 @@ export default function DoctorClinicalAnalytics({
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <div>
@@ -889,7 +893,9 @@ export default function DoctorClinicalAnalytics({
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <div>
@@ -1000,7 +1006,9 @@ export default function DoctorClinicalAnalytics({
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <div>

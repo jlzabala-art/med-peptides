@@ -373,6 +373,9 @@ export default function PharmacyLabelsModal({
         }
         .gcp-footer-desktop-specs {
           display: block;
+          min-width: 0;
+          flex: 1 1 auto;
+          overflow: hidden;
         }
         .gcp-footer-mobile-specs {
           display: none;
@@ -381,11 +384,14 @@ export default function PharmacyLabelsModal({
           display: flex;
           align-items: center;
           gap: 8px;
+          flex-shrink: 0;
+          flex-wrap: wrap;
         }
         .gcp-footer-secondary-grid {
           display: flex;
           align-items: center;
           gap: 8px;
+          flex-shrink: 0;
         }
         .gcp-btn-primary {
           display: inline-flex;
@@ -436,6 +442,53 @@ export default function PharmacyLabelsModal({
         }
         .gcp-btn-copy:hover {
           color: #202124;
+        }
+
+        /* ── Laptop Screen Breakpoint (641px - 1040px) ── */
+        @media (min-width: 641px) and (max-width: 1040px) {
+          .gcp-labels-dialog {
+            max-width: 96vw;
+            max-height: 94vh;
+          }
+          .gcp-labels-sticky-footer {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            padding: 10px 16px;
+          }
+          .gcp-footer-desktop-specs {
+            text-align: center;
+            width: 100%;
+          }
+          .gcp-footer-desktop-specs > div {
+            justify-content: center;
+          }
+          .gcp-footer-actions-wrap {
+            width: 100%;
+            justify-content: center;
+            gap: 8px;
+          }
+        }
+
+        /* ── Compact Laptop Viewport Height (<= 850px) ── */
+        @media (max-height: 850px) {
+          .gcp-labels-dialog {
+            max-height: 96vh;
+          }
+          .gcp-labels-header {
+            padding: 8px 14px;
+          }
+          .gcp-labels-body {
+            padding: 8px 14px;
+            gap: 6px;
+          }
+          .gcp-labels-sticky-footer {
+            padding: 8px 14px;
+          }
+          .gcp-btn-primary, .gcp-btn-secondary {
+            height: 32px;
+            font-size: 0.78rem;
+          }
         }
 
         /* ── Responsive Mobile Rules (Google Cloud Mobile UX Standards) ── */

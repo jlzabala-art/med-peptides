@@ -1690,24 +1690,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       ]
     },
     {
-      groupTitle: 'COMPOUNDING & QUALITY',
-      items: [
-        {
-          id: 'labels',
-          label: 'Prescription Bottle Labels',
-          icon: Tag,
-          action: () => {
-            if (filteredPrescriptions[0]) {
-              handleOpenLabelsModal(filteredPrescriptions[0]);
-            } else {
-              toast('No active prescriptions to view labels.');
-            }
-          },
-          badge: 'EU GMP'
-        }
-      ]
-    },
-    {
       groupTitle: 'CLINICAL REFERENCE',
       items: [
         {
@@ -1776,15 +1758,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     }
     if (id === 'intake') {
       handleCopyIntakeLink();
-      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
-      return;
-    }
-    if (id === 'labels') {
-      if (filteredPrescriptions[0]) {
-        handleOpenLabelsModal(filteredPrescriptions[0]);
-      } else {
-        toast('No active prescriptions to view labels.');
-      }
       if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
       return;
     }
@@ -1879,19 +1852,86 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           left: 50%;
           transform: translateX(-50%);
           width: calc(100% - 32px);
-          max-width: 960px;
+          max-width: 860px;
           z-index: 48;
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.96);
           backdrop-filter: blur(14px);
-          border: 1px solid rgba(203, 213, 225, 0.85);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(203, 213, 225, 0.9);
           border-radius: 9999px;
           box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.05);
-          padding: 8px 16px;
+          padding: 8px 14px;
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+          justify-content: center;
+          gap: 10px;
           transition: all 0.2s ease;
+        }
+        .doctor-bottom-dock-actions {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+        .doctor-dock-btn {
+          height: 36px;
+          padding: 0 14px;
+          border-radius: 9999px;
+          font-size: 0.80rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.15s ease;
+          white-space: nowrap;
+          border: 1px solid transparent;
+        }
+        .doctor-dock-btn-primary {
+          background: #1a73e8;
+          color: #ffffff;
+          border-color: #1a73e8;
+          box-shadow: 0 1px 3px rgba(26, 115, 232, 0.35);
+        }
+        .doctor-dock-btn-primary:hover {
+          background: #1557b0;
+          border-color: #1557b0;
+          box-shadow: 0 2px 6px rgba(26, 115, 232, 0.45);
+        }
+        .doctor-dock-btn-secondary {
+          background: #ffffff;
+          color: #374151;
+          border-color: #d1d5db;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+        .doctor-dock-btn-secondary:hover {
+          background: #f8fafc;
+          border-color: #1a73e8;
+          color: #1a73e8;
+        }
+        .doctor-dock-btn-whatsapp {
+          background: #f0fdf4;
+          color: #15803d;
+          border-color: #bbf7d0;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+        .doctor-dock-btn-whatsapp:hover {
+          background: #dcfce7;
+          border-color: #86efac;
+          color: #166534;
+        }
+        .doctor-dock-btn-ai {
+          background: #f5f3ff;
+          color: #4f46e5;
+          border-color: #ddd6fe;
+          box-shadow: 0 1px 2px rgba(79, 70, 229, 0.08);
+        }
+        .doctor-dock-btn-ai:hover {
+          background: #ede9fe;
+          border-color: #c4b5fd;
+          color: #4338ca;
         }
         @media (max-width: 768px) {
           .doctor-bottom-dock {
@@ -1904,29 +1944,21 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             border-left: none;
             border-right: none;
             border-bottom: none;
-            padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;
-            gap: 8px;
+            padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) 10px;
             box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.12);
           }
-          .doctor-bottom-dock-identity {
-            display: none !important;
-          }
           .doctor-bottom-dock-actions {
-            width: 100% !important;
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 8px !important;
-            justify-content: stretch !important;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            justify-content: flex-start;
+            padding: 2px 4px;
+            -webkit-overflow-scrolling: touch;
           }
-          .doctor-bottom-dock-actions button {
-            width: 100% !important;
-            justify-content: center !important;
-            padding: 0 4px !important;
-            height: 42px !important;
-            font-size: 0.76rem !important;
-          }
-          .doctor-bottom-dock-actions button span:nth-of-type(2) {
-            display: none !important;
+          .doctor-dock-btn {
+            height: 36px;
+            padding: 0 12px;
+            font-size: 0.74rem;
+            flex-shrink: 0;
           }
         }
         .gcp-mobile-nav-trigger {
@@ -2337,157 +2369,6 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               {activeAnchor === 'recommendations' && 'Peptide Formulations & Clinical Synergy'}
             </h1>
           </div>
-
-          {/* Standard GCP Action Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {/* Primary Action Button (GCP Blue) */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setIsIntakeOpen(true);
-              }}
-              style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '4px',
-                border: 'none',
-                background: '#1a73e8',
-                color: '#ffffff',
-                fontSize: '0.80rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 1px 2px rgba(60,64,67,0.3)',
-                transition: 'background 0.12s'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
-              title="Import or create a new clinical prescription"
-            >
-              <Plus size={15} />
-              <span>Import / New Rx</span>
-            </button>
-
-            {/* Secondary Action: Share Intake */}
-            <button
-              type="button"
-              onClick={handleCopyIntakeLink}
-              style={{
-                height: '34px',
-                padding: '0 12px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#1a73e8',
-                fontSize: '0.80rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'background 0.12s'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
-              title="Copy personalized patient intake questionnaire link"
-            >
-              <Share2 size={13} />
-              <span>Share Intake</span>
-            </button>
-
-            {/* Secondary Action: Doctor Profile */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsCredentialsModalOpen(true);
-              }}
-              style={{
-                height: '34px',
-                padding: '0 12px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#3c4043',
-                fontSize: '0.80rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'background 0.12s'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
-              title="View physician profile & verified credentials"
-            >
-              <ShieldCheck size={14} style={{ color: '#137333' }} />
-              <span>Doctor Profile</span>
-            </button>
-
-            {/* Secondary Action: Atlas AI Copilot */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setIsAtlasAiOpen(true);
-              }}
-              style={{
-                height: '34px',
-                padding: '0 12px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#1a73e8',
-                fontSize: '0.80rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'background 0.12s'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
-              title="Open Atlas AI clinical copilot"
-            >
-              <Bot size={14} />
-              <span>Atlas AI ({aiUsesRemaining}/5)</span>
-            </button>
-
-            {/* Secondary Action: Contact / WhatsApp */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setIsRequestInfoOpen(true);
-              }}
-              style={{
-                height: '34px',
-                padding: '0 12px',
-                borderRadius: '4px',
-                border: '1px solid #dadce0',
-                background: '#ffffff',
-                color: '#137333',
-                fontSize: '0.80rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'background 0.12s'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
-              title="Contact Atlas Clinical Affairs via WhatsApp"
-            >
-              <MessageCircle size={14} />
-              <span>WhatsApp</span>
-            </button>
-          </div>
         </header>
 
         {/* ── View 1: Practice Overview & Core Operational KPIs (Google Cloud Rule #22) ─ */}
@@ -2759,6 +2640,30 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </div>
               <span style={{ fontSize: '0.78rem', color: '#1a73e8', fontWeight: 600 }}>Browse →</span>
             </div>
+          </div>
+
+          {/* ── Deep Clinical Analytics & Prescribing Intelligence (Rule #22) ── */}
+          <div style={{ marginTop: '24px' }}>
+            <DoctorClinicalAnalytics
+              prescriptions={scopeMode === 'filtered' ? filteredPrescriptions : allPrescriptions}
+              serverAnalytics={data?.serverAnalytics}
+              onSelectApi={(apiName) => {
+                if (apiFilter && apiFilter.toLowerCase() === apiName.toLowerCase()) {
+                  setApiFilter(null);
+                  toast('Cleared active API filter', { id: 'api-filter' });
+                } else {
+                  setApiFilter(apiName);
+                  handleSidebarNavigate('prescriptions');
+                  toast.success(`Filtered table: showing ${apiName} formulations`, { id: 'api-filter' });
+                }
+              }}
+              selectedApiFilter={apiFilter}
+              onClearApiFilter={() => {
+                setApiFilter(null);
+                toast('Cleared active API filter', { id: 'api-filter' });
+              }}
+              isFiltered={scopeMode === 'filtered' || !!apiFilter}
+            />
           </div>
         </div>
         )}
@@ -4235,30 +4140,65 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </div>
             )}
 
-            <DoctorClinicalAnalytics
-              prescriptions={scopeMode === 'filtered' ? filteredPrescriptions : allPrescriptions}
-              serverAnalytics={data?.serverAnalytics}
-              onSelectApi={(apiName) => {
-                if (apiFilter && apiFilter.toLowerCase() === apiName.toLowerCase()) {
-                  setApiFilter(null);
-                  toast('Cleared active API filter', { id: 'api-filter' });
-                } else {
-                  setApiFilter(apiName);
-                  handleSidebarNavigate('prescriptions');
-                  toast.success(`Filtered table: showing ${apiName} formulations`, { id: 'api-filter' });
-                }
-              }}
-              selectedApiFilter={apiFilter}
-              onClearApiFilter={() => {
-                setApiFilter(null);
-                toast('Cleared active API filter', { id: 'api-filter' });
-              }}
-              isFiltered={scopeMode === 'filtered' || !!apiFilter}
-            />
           </section>
         )}
       </main>
       </div>
+
+      {/* ── Fixed Bottom Actions Dock ("Sticker" Footer for Laptop & Mobile) ── */}
+      <footer className="doctor-bottom-dock" role="toolbar" aria-label="Physician Quick Actions">
+        <div className="doctor-bottom-dock-actions">
+          <button
+            type="button"
+            className="doctor-dock-btn doctor-dock-btn-primary"
+            onClick={() => setIsIntakeOpen(true)}
+            title="Import or create a new compounded prescription"
+          >
+            <Plus size={15} />
+            <span>Import / New Rx</span>
+          </button>
+
+          <button
+            type="button"
+            className="doctor-dock-btn doctor-dock-btn-secondary"
+            onClick={handleCopyIntakeLink}
+            title="Copy patient intake link to clipboard"
+          >
+            <Share2 size={14} />
+            <span>Share Intake</span>
+          </button>
+
+          <button
+            type="button"
+            className="doctor-dock-btn doctor-dock-btn-secondary"
+            onClick={() => setIsCredentialsModalOpen(true)}
+            title="View physician profile and credentials"
+          >
+            <ShieldCheck size={14} color="#16a34a" />
+            <span>Doctor Profile</span>
+          </button>
+
+          <button
+            type="button"
+            className="doctor-dock-btn doctor-dock-btn-ai"
+            onClick={() => setIsAtlasAiOpen(true)}
+            title="Atlas AI clinical query credits"
+          >
+            <Bot size={14} />
+            <span>Atlas AI ({aiUsesRemaining}/5)</span>
+          </button>
+
+          <button
+            type="button"
+            className="doctor-dock-btn doctor-dock-btn-whatsapp"
+            onClick={() => setIsRequestInfoOpen(true)}
+            title="Request clinical assistance via WhatsApp"
+          >
+            <MessageCircle size={14} />
+            <span>WhatsApp</span>
+          </button>
+        </div>
+      </footer>
 
       {/* ── Official Compounding Bottle Labels Modal (Direct from Doctor Portal) ── */}
       {isLabelsModalOpen && activeLabelRx && (
