@@ -347,11 +347,15 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   const [requestInfoSelectedRx, setRequestInfoSelectedRx] = useState('');
   const [requestInfoNotes, setRequestInfoNotes] = useState('');
 
-  // ── Patient Posology Handout & Quick Status Filter State ──────────────────
   const [isHandoutOpen, setIsHandoutOpen] = useState(false);
   const [handoutRx, setHandoutRx] = useState(null);
   const [quickRxFilter, setQuickRxFilter] = useState('all'); // 'all' | 'pending' | 'active' | 'multipart'
   const [apiFilter, setApiFilter] = useState(null); // Active pharmaceutical ingredient filter from Analytics
+
+  // Atlas Recommendations UI State (Consolidated Master Catalog)
+  const [recCategoryFilter, setRecCategoryFilter] = useState('all'); // 'all' | 'peptides' | 'colway'
+  const [recSearchQuery, setRecSearchQuery] = useState('');
+  const [expandedRecId, setExpandedRecId] = useState(null);
 
   // Persist session quota (max 5 uses per session, isolated to this doctor)
   useEffect(() => {
@@ -4238,299 +4242,526 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           </section>
         )}
 
-        {/* ── View 7: Peptide Formulations & Clinical Synergy (Direct View) ── */}
-        {activeAnchor === 'recommendations' && (
-          <section
-            id="recommendations"
-            style={{
-              background: '#ffffff',
-              border: '1px solid #dadce0',
-              borderRadius: '8px',
-              padding: '24px',
-              marginBottom: '32px',
-              boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
-            }}
-          >
-            {/* Two-Phase Intake Alert Banner */}
-            {allPrescriptions.some(p => ['draft', 'pending', 'awaiting_validation'].includes(String(p.status || '').toLowerCase()) || p.ingestionStage === 'awaiting_atlas_review') && (
-              <div
-                style={{
-                  background: '#fffbeb',
-                  border: '1px solid #fde68a',
-                  borderRadius: '8px',
-                  padding: '12px 16px',
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  flexWrap: 'wrap'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b45309', flexShrink: 0 }}>
-                    <Clock size={16} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#92400e', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>Two-Phase Ingestion Workflow: Formulations Under Atlas AI Clinical Review</span>
-                      <span style={{ fontSize: '0.70rem', background: '#fde68a', color: '#78350f', padding: '1px 6px', borderRadius: '8px', fontWeight: 700 }}>24h SLA</span>
+        {/* ── View 7: Consolidated Master Atlas Recommendations (Clean & Non-Repetitive) ── */}
+        {activeAnchor === 'recommendations' && (() => {
+          // 1. Process all prescriptions with their analyzed recs once
+          const analyzedItems = allPrescriptions.map(rx => ({
+            rx,
+            recs: rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx)
+          }));
+
+          const ghkMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-ghk-cu-50mg');
+          const glowMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-glow-blend');
+          const epithalonMatches = analyzedItems.filter(item => item.recs?.peptide?.catalogCode === 'atlas-epithalon-10mg');
+          const colwayMatches = analyzedItems.filter(item => Boolean(item.recs?.colway));
+
+          const masterSolutions = [
+            {
+              id: 'atlas-ghk-cu-50mg',
+              category: 'peptide',
+              badge: 'BIOACTIVE PEPTIDE SIGNALER',
+              title: 'GHK-Cu (Copper Tripeptide-1) 50 mg / vial',
+              badgeColor: '#4338ca',
+              badgeBg: '#e0e7ff',
+              borderColor: '#c7d2fe',
+              matchScore: '98% Synergy',
+              target: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
+              summary: 'Bioestimulador folicular de alta afinidad que estimula la proliferación de fibroblastos papilares, bloquea la miniaturización inducida por TGF-β1 y acelera la reentrada en fase anágena en sinergia con Minoxidil y antiandrógenos.',
+              synergisticApis: ['Minoxidil', 'Finasteride', 'Dutasteride', 'Spironolactone', 'Latanoprost', 'TrichoSol'],
+              matchingItems: ghkMatches,
+              protocolTitle: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
+              protocolUrl: '/proto/melanogenesis-density-protocol-zt-ghk-cu'
+            },
+            {
+              id: 'atlas-glow-blend',
+              category: 'peptide',
+              badge: 'TRIPLE REGENERATIVE COMPLEX',
+              title: 'GLOW (BPC-157 / TB-500 / GHK) 10 mg | 10 mg | 75 mg',
+              badgeColor: '#0369a1',
+              badgeBg: '#e0f2fe',
+              borderColor: '#bae6fd',
+              matchScore: '99% Graft Synergy',
+              target: 'Post-FUE Revascularization & Microvascular Graft Take',
+              summary: 'Complejo tri-peptídico biocompatible para la integración acelerada de injertos capilares, estabilidad microvascular vía óxido nítrico y migración temprana de queratinocitos hacia el lecho receptor.',
+              synergisticApis: ['PRP (Platelet-Rich Plasma)', 'Micro-injertos FUE', 'TrichoOil Lipids', 'L-Arginina', 'Vitamina E'],
+              matchingItems: glowMatches,
+              protocolTitle: 'BPC-157 & TB-500 Tissue Repair Protocol',
+              protocolUrl: '/proto/bpc-157-tb-500-protocol'
+            },
+            {
+              id: 'atlas-epithalon-10mg',
+              category: 'peptide',
+              badge: 'EPIGENETIC TELOMERE REGULATOR',
+              title: 'Epithalon (Ala-Glu-Asp-Gly) 10 mg / vial',
+              badgeColor: '#7c3aed',
+              badgeBg: '#ede9fe',
+              borderColor: '#ddd6fe',
+              matchScore: '99% Longevity Synergy',
+              target: 'Telomerase Activation & Bulge Stem Cell Longevity',
+              summary: 'Péptido biomimético pineal que induce descondensación de heterocromatina y activa la transcripción de TERT, protegiendo las células madre del bulbo folicular contra la senescencia celular prematura.',
+              synergisticApis: ['Metformina', 'TeloTest™ Genomic Panels', 'CoQ10 / Ubiquinol', 'Trans-Resveratrol', 'NAC'],
+              matchingItems: epithalonMatches,
+              protocolTitle: 'Epithalon Telomere Extension Cycle',
+              protocolUrl: '/proto/epithalon-telomere-extension'
+            },
+            {
+              id: 'colway-hair-system',
+              category: 'colway',
+              badge: 'SCALP BARRIER INTEGRITY & NATIVE ECM',
+              title: 'Colway Hair Strengthening System (2-Step Routine)',
+              badgeColor: '#047857',
+              badgeBg: '#d1fae5',
+              borderColor: '#a7f3d0',
+              matchScore: '99% Barrier Support',
+              target: 'Cuticular ECM Preservation & Vehicle Irritation Prevention',
+              summary: 'Tropocolágeno nativo biológicamente activo y flavonoides microcirculatorios (diosmina) diseñados para calmar el estrato córneo, sellar la cutícula y neutralizar la irritación o deslipidación inducida por vehículos hidroalcohólicos.',
+              synergisticApis: ['TrichoSol Base Magistral', 'Minoxidil Tópico', 'Inhibidores 5αR tópicos', 'TrichoOil'],
+              matchingItems: colwayMatches,
+              protocolTitle: 'Ver Ficha Técnica Colway (Champú & Acondicionador)',
+              protocolUrl: '/p/colway-strengthening-shampoo'
+            }
+          ];
+
+          // Filter by Category and Search Query
+          const filteredSolutions = masterSolutions.filter(sol => {
+            if (recCategoryFilter === 'peptides' && sol.category !== 'peptide') return false;
+            if (recCategoryFilter === 'colway' && sol.category !== 'colway') return false;
+            if (recSearchQuery.trim()) {
+              const q = recSearchQuery.toLowerCase().trim();
+              const matchTitle = sol.title.toLowerCase().includes(q);
+              const matchTarget = sol.target.toLowerCase().includes(q);
+              const matchApis = sol.synergisticApis.some(api => api.toLowerCase().includes(q));
+              const matchPatients = sol.matchingItems.some(item => 
+                (item.rx.patientName || '').toLowerCase().includes(q) ||
+                (item.rx.code || item.rx.id || '').toLowerCase().includes(q)
+              );
+              return matchTitle || matchTarget || matchApis || matchPatients;
+            }
+            return true;
+          });
+
+          const totalCoveredRxs = new Set(
+            masterSolutions.flatMap(s => s.matchingItems.map(item => item.rx.id || item.rx.code))
+          ).size;
+
+          return (
+            <section
+              id="recommendations"
+              style={{
+                background: '#ffffff',
+                border: '1px solid #dadce0',
+                borderRadius: '8px',
+                padding: '24px',
+                marginBottom: '32px',
+                boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+              }}
+            >
+              {/* Top GCP Header & Practice Metrics */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#e0e7ff', color: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Sparkles size={18} />
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#78350f', marginTop: '2px' }}>
-                      Recently imported formulations are saved in Draft mode. Our Atlas AI pharmacotherapy team is currently verifying molecular conversions, excipients, and posology.
-                    </div>
+                    <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#202124' }}>
+                      Atlas Recommendations &amp; Clinical Synergies
+                    </h2>
                   </div>
+                  <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
+                    Catálogo maestro de coadyuvantes moleculares y cuidado de barrera cutánea. Consolida las 4 sinergias clave sin repeticiones, vinculadas automáticamente a las prescripciones activas de tu clínica.
+                  </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStatusFilter('draft');
-                    handleSidebarNavigate('prescriptions');
-                  }}
-                  style={{
-                    fontSize: '0.76rem',
-                    fontWeight: 650,
-                    color: '#b45309',
-                    background: '#ffffff',
-                    border: '1px solid #fde68a',
+
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{
+                    fontSize: '0.74rem',
+                    background: '#f8fafc',
+                    color: '#0f172a',
+                    border: '1px solid #e2e8f0',
                     padding: '6px 12px',
                     borderRadius: '6px',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Filter Drafts →
-                </button>
-              </div>
-            )}
-
-            {/* Main Recommendations Header (GCP Standard) */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#e0e7ff', color: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Sparkles size={18} />
+                    fontWeight: 650,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <Users size={14} style={{ color: '#2563eb' }} />
+                    <span><strong>{totalCoveredRxs}</strong> de {allPrescriptions.length} recetas con sinergia</span>
                   </div>
-                  <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#202124' }}>
-                    Atlas Recommendations &amp; Clinical Synergies
-                  </h2>
+                  <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '6px 12px', borderRadius: '6px', fontWeight: 650 }}>
+                    ✓ 4 Soluciones Maestras
+                  </span>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
-                  Biochemical and adjuvant care analysis derived from active TrichoTest™ pharmacogenetic prescriptions.
-                  Designed to preserve the scalp barrier, optimize cuticular Extracellular Matrix (ECM), and stimulate follicular papilla signaling.
-                </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '4px 10px', borderRadius: '4px', fontWeight: 650 }}>
-                  ✓ Molecular Analysis Active
-                </span>
-                <span style={{ fontSize: '0.74rem', background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '4px', fontWeight: 650 }}>
-                  Evidence-Based Adjuvants
-                </span>
-              </div>
-            </div>
+              {/* Filter Tabs & Patient Search Controls */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                padding: '12px 16px',
+                background: '#f8fafd',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                marginBottom: '20px'
+              }}>
+                {/* Category Pills */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => setRecCategoryFilter('all')}
+                    style={{
+                      padding: '5px 12px',
+                      fontSize: '0.76rem',
+                      fontWeight: 650,
+                      borderRadius: '6px',
+                      border: '1px solid',
+                      borderColor: recCategoryFilter === 'all' ? '#2563eb' : '#d1d5db',
+                      background: recCategoryFilter === 'all' ? '#eff6ff' : '#ffffff',
+                      color: recCategoryFilter === 'all' ? '#1d4ed8' : '#4b5563',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    Todas ({masterSolutions.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecCategoryFilter('peptides')}
+                    style={{
+                      padding: '5px 12px',
+                      fontSize: '0.76rem',
+                      fontWeight: 650,
+                      borderRadius: '6px',
+                      border: '1px solid',
+                      borderColor: recCategoryFilter === 'peptides' ? '#4338ca' : '#d1d5db',
+                      background: recCategoryFilter === 'peptides' ? '#e0e7ff' : '#ffffff',
+                      color: recCategoryFilter === 'peptides' ? '#3730a3' : '#4b5563',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    Péptidos Bioactivos (3)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecCategoryFilter('colway')}
+                    style={{
+                      padding: '5px 12px',
+                      fontSize: '0.76rem',
+                      fontWeight: 650,
+                      borderRadius: '6px',
+                      border: '1px solid',
+                      borderColor: recCategoryFilter === 'colway' ? '#047857' : '#d1d5db',
+                      background: recCategoryFilter === 'colway' ? '#ecfdf5' : '#ffffff',
+                      color: recCategoryFilter === 'colway' ? '#065f46' : '#4b5563',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    Barrera &amp; Colágeno ECM (1)
+                  </button>
+                </div>
 
-            {/* Prescriptions Analysis Cards List */}
-            {(() => {
-              const rxsWithRecs = allPrescriptions.map(rx => ({
-                rx,
-                recs: rx.atlasRecommendations || getPrescriptionAtlasRecommendations(rx)
-              })).filter(item => item.recs?.peptide || item.recs?.colway);
-
-              if (rxsWithRecs.length === 0) {
-                return (
-                  <EmptyState
-                    icon={Sparkles}
-                    title="No Active Prescriptions with Adjuvants"
-                    subtitle="Import a TrichoTest™ pharmacogenetic formulation or create a prescription to generate automated adjuvant recommendations."
-                    action={{
-                      label: "Import / New Rx",
-                      onClick: () => setIsIntakeOpen(true)
+                {/* Instant Search Bar */}
+                <div style={{ position: 'relative', minWidth: '280px', flex: '1', maxWidth: '420px' }}>
+                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    value={recSearchQuery}
+                    onChange={(e) => setRecSearchQuery(e.target.value)}
+                    placeholder="Buscar por paciente, código o fármaco (ej. Minoxidil)..."
+                    style={{
+                      width: '100%',
+                      padding: '6px 30px 6px 30px',
+                      fontSize: '0.78rem',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      outline: 'none',
+                      background: '#ffffff',
+                      color: '#1e293b'
                     }}
                   />
-                );
-              }
-
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  {rxsWithRecs.map(({ rx, recs }, idx) => (
-                    <div
-                      key={rx.id || idx}
+                  {recSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setRecSearchQuery('')}
                       style={{
-                        background: '#ffffff',
-                        border: '1px solid #dadce0',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        boxShadow: '0 1px 3px rgba(60,64,67,0.06)'
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#94a3b8',
+                        padding: 0
                       }}
                     >
-                      {/* Prescription Header Row */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid #f1f3f4', paddingBottom: '12px' }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#202124' }}>
-                              {rx.treatmentTitle || 'Compounded Prescription'}
-                            </span>
-                            <CopyableId value={rx.id || rx.code} />
-                            {recs.isTrichoTest && (
-                              <span style={{ fontSize: '0.68rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                                TrichoTest™ Precision
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: '0.76rem', color: '#5f6368', marginTop: '2px' }}>
-                            Patient: <strong style={{ color: '#202124' }}>{rx.patientName || 'Clinical Patient'}</strong> • Code: {rx.code || rx.id}
-                          </div>
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Master Solutions Cards Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
+                {filteredSolutions.map((sol) => {
+                  const isExpanded = expandedRecId === sol.id;
+                  const count = sol.matchingItems.length;
+
+                  return (
+                    <div
+                      key={sol.id}
+                      style={{
+                        background: '#ffffff',
+                        border: `1px solid ${sol.borderColor}`,
+                        borderRadius: '10px',
+                        padding: '18px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div>
+                        {/* Top Badge & Match Pill */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 750,
+                            color: sol.badgeColor,
+                            background: sol.badgeBg,
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.03em'
+                          }}>
+                            {sol.badge}
+                          </span>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            color: '#047857',
+                            background: '#ecfdf5',
+                            border: '1px solid #a7f3d0',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontWeight: 700
+                          }}>
+                            {sol.matchScore}
+                          </span>
                         </div>
 
-                        {/* Detected APIs in this Rx */}
-                        {recs.detectedApis && recs.detectedApis.length > 0 && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>Analyzed APIs:</span>
-                            {recs.detectedApis.map((api, aIdx) => (
-                              <span key={aIdx} style={{ fontSize: '0.70rem', background: '#f8f9fa', color: '#202124', border: '1px solid #dadce0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650, fontFamily: 'monospace' }}>
+                        {/* Title & Target */}
+                        <h3 style={{ margin: '0 0 4px 0', fontSize: '0.98rem', fontWeight: 800, color: '#0f172a' }}>
+                          {sol.title}
+                        </h3>
+                        <div style={{ fontSize: '0.76rem', color: sol.badgeColor, fontWeight: 650, marginBottom: '8px' }}>
+                          🎯 {sol.target}
+                        </div>
+
+                        {/* Summary Rationale (2 lines max) */}
+                        <p style={{ margin: '0 0 12px 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.45 }}>
+                          {sol.summary}
+                        </p>
+
+                        {/* Synergistic APIs in Practice */}
+                        <div style={{ marginBottom: '14px' }}>
+                          <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
+                            Sinergia comprobada con:
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {sol.synergisticApis.map((api, aIdx) => (
+                              <span
+                                key={aIdx}
+                                style={{
+                                  fontSize: '0.70rem',
+                                  background: '#f8fafc',
+                                  color: '#334155',
+                                  border: '1px solid #e2e8f0',
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  fontWeight: 600
+                                }}
+                              >
                                 {api}
                               </span>
                             ))}
                           </div>
-                        )}
-                      </div>
+                        </div>
 
-                      {/* 2-Column Responsive Recommendations Grid */}
-                      <div style={{ display: 'grid', gridTemplateColumns: recs.colway ? 'repeat(auto-fit, minmax(320px, 1fr))' : '1fr', gap: '16px' }}>
-                        {/* 1. Bioactive Biomimetic Peptide (Strictly NO Lotusland on screen) */}
-                        {recs.peptide && (
-                          <div style={{
-                            background: '#ffffff',
-                            border: '1px solid #c7d2fe',
-                            borderRadius: '8px',
-                            padding: '16px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            boxShadow: '0 1px 2px rgba(67, 56, 202, 0.04)'
-                          }}>
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#e0e7ff', padding: '2px 8px', borderRadius: '4px' }}>
-                                  Bioactive Peptide Signaler
-                                </span>
-                                <span style={{ fontSize: '0.70rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650 }}>
-                                  {recs.peptide.matchScore || 'High Synergy'}
-                                </span>
-                              </div>
-                              <h3 style={{ margin: '0 0 6px 0', fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                                {recs.peptide.peptideName}
-                              </h3>
-                              <p style={{ margin: '0 0 10px 0', fontSize: '0.75rem', color: '#64748b' }}>
-                                {recs.peptide.category}
-                              </p>
-                              <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.5, background: '#f8fafc', padding: '10px 12px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '10px' }}>
-                                <strong style={{ color: '#0f172a' }}>Pharmacological Mechanism &amp; Synergy: </strong>
-                                {recs.peptide.pharmaRationale}
-                              </div>
+                        {/* Practice Match Accordion Pill */}
+                        <div style={{
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '8px 12px',
+                          marginBottom: '14px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#1e293b', fontWeight: 650 }}>
+                              <Users size={14} style={{ color: count > 0 ? '#2563eb' : '#94a3b8' }} />
+                              <span>
+                                {count > 0 
+                                  ? `Aplica a ${count} paciente${count > 1 ? 's' : ''} en tu clínica`
+                                  : 'Sin pacientes activos vinculados actualmente'}
+                              </span>
                             </div>
 
-                            {recs.peptide.associatedProtocol && (
-                              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
-                                <a
-                                  href={recs.peptide.associatedProtocol.url || `/proto/${recs.peptide.associatedProtocol.slug}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    fontSize: '0.74rem',
-                                    fontWeight: 650,
-                                    color: '#1d4ed8',
-                                    background: '#eff6ff',
-                                    border: '1px solid #bfdbfe',
-                                    padding: '6px 12px',
-                                    borderRadius: '4px',
-                                    textDecoration: 'none',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px'
-                                  }}
-                                >
-                                  <span>Explore Protocol: {recs.peptide.associatedProtocol.title}</span>
-                                  <ArrowUpRight size={13} />
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* 2. Scalp Barrier & Extracellular Matrix Support (Colway Clinical Care) */}
-                        {recs.colway && (
-                          <div style={{
-                            background: '#ffffff',
-                            border: '1px solid #a7f3d0',
-                            borderRadius: '8px',
-                            padding: '16px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            boxShadow: '0 1px 2px rgba(4, 120, 87, 0.04)'
-                          }}>
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ fontSize: '0.70rem', fontWeight: 750, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>
-                                  Colway Scalp Care &amp; ECM
-                                </span>
-                                <span style={{ fontSize: '0.70rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: '4px', fontWeight: 650 }}>
-                                  {recs.colway.matchScore || 'Barrier Support'}
-                                </span>
-                              </div>
-                              <h3 style={{ margin: '0 0 4px 0', fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                                {recs.colway.productName}
-                              </h3>
-                              <p style={{ margin: '0 0 10px 0', fontSize: '0.75rem', color: '#059669', fontWeight: 600 }}>
-                                {recs.colway.brand} • {recs.colway.regulatoryNotice}
-                              </p>
-                              <div style={{ fontSize: '0.76rem', color: '#334155', lineHeight: 1.5, background: '#f8fafc', padding: '10px 12px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '10px' }}>
-                                <strong style={{ color: '#0f172a' }}>Clinical Rationale: </strong>
-                                {recs.colway.clinicalRationale}
-                              </div>
-                              <div style={{ fontSize: '0.74rem', color: '#475569', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px 10px', borderRadius: '6px', marginBottom: '10px' }}>
-                                <strong style={{ color: '#166534' }}>Recommended Routine: </strong>
-                                {recs.colway.routineAdvice}
-                              </div>
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
-                              <a
-                                href={recs.colway.catalogUrl || `/p/${recs.colway.catalogSlug}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            {count > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedRecId(isExpanded ? null : sol.id)}
                                 style={{
-                                  fontSize: '0.74rem',
-                                  fontWeight: 650,
-                                  color: '#047857',
-                                  background: '#ecfdf5',
-                                  border: '1px solid #a7f3d0',
-                                  padding: '6px 12px',
-                                  borderRadius: '4px',
-                                  textDecoration: 'none',
-                                  display: 'inline-flex',
+                                  display: 'flex',
                                   alignItems: 'center',
-                                  gap: '5px'
+                                  gap: '3px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 650,
+                                  color: '#2563eb',
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px'
                                 }}
                               >
-                                <span>View Colway Clinical Datasheet</span>
-                                <ArrowUpRight size={13} />
-                              </a>
-                            </div>
+                                <span>{isExpanded ? 'Ocultar' : `Ver lista (${count})`}</span>
+                                {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                              </button>
+                            )}
                           </div>
-                        )}
+
+                          {/* Expanded Patients List */}
+                          {isExpanded && count > 0 && (
+                            <div style={{
+                              marginTop: '8px',
+                              paddingTop: '8px',
+                              borderTop: '1px solid #e2e8f0',
+                              maxHeight: '160px',
+                              overflowY: 'auto',
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              gap: '5px'
+                            }}>
+                              {sol.matchingItems.map(({ rx }, pIdx) => {
+                                const patName = rx.patientName || 'Paciente';
+                                const rxCode = rx.code || rx.id;
+                                return (
+                                  <Link
+                                    key={pIdx}
+                                    href={`/rx/${rxCode}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      fontSize: '0.70rem',
+                                      fontWeight: 600,
+                                      color: '#1e40af',
+                                      background: '#ffffff',
+                                      border: '1px solid #bfdbfe',
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      textDecoration: 'none',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      transition: 'all 0.15s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.background = '#dbeafe';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.background = '#ffffff';
+                                    }}
+                                    title={`Abrir prescripción de ${patName}`}
+                                  >
+                                    <span>👤 {patName}</span>
+                                    <span style={{ color: '#64748b', fontSize: '0.65rem' }}>#{rxCode}</span>
+                                    <ArrowUpRight size={10} />
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Direct Action Link */}
+                      <div style={{ paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                        <a
+                          href={sol.protocolUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '0.76rem',
+                            fontWeight: 650,
+                            color: sol.category === 'colway' ? '#047857' : '#1d4ed8',
+                            background: sol.category === 'colway' ? '#ecfdf5' : '#eff6ff',
+                            border: `1px solid ${sol.category === 'colway' ? '#a7f3d0' : '#bfdbfe'}`,
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            width: '100%',
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.opacity = '0.85';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.opacity = '1';
+                          }}
+                        >
+                          <span>{sol.protocolTitle}</span>
+                          <ArrowUpRight size={14} />
+                        </a>
                       </div>
                     </div>
-                  ))}
-                </div>
-              );
-            })()}
+                  );
+                })}
+              </div>
 
-          </section>
-        )}
+              {filteredSolutions.length === 0 && (
+                <div style={{
+                  padding: '36px 20px',
+                  textAlign: 'center',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                  border: '1px dashed #cbd5e1',
+                  color: '#64748b'
+                }}>
+                  <p style={{ margin: 0, fontSize: '0.85rem' }}>
+                    No se encontraron soluciones que coincidan con &ldquo;{recSearchQuery}&rdquo;.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRecSearchQuery('');
+                      setRecCategoryFilter('all');
+                    }}
+                    style={{
+                      marginTop: '8px',
+                      fontSize: '0.76rem',
+                      color: '#2563eb',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: 650
+                    }}
+                  >
+                    Restablecer filtros
+                  </button>
+                </div>
+              )}
+            </section>
+          );
+        })()}
       </main>
       </div>
 
