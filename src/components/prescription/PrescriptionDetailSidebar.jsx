@@ -48,6 +48,8 @@ export default function PrescriptionDetailSidebar({
   formulations = [],
   phases = [],
   rxId = '',
+  patientName = '',
+  patient = null,
   doctorName = '',
   doctorTitle = '',
   doctorLicense = '',
@@ -183,6 +185,45 @@ export default function PrescriptionDetailSidebar({
           gap: '1.15rem'
         }}
       >
+        {/* Patient Identity Badge in Sidebar */}
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          padding: '12px 14px',
+          boxShadow: '0 2px 8px rgba(0, 54, 102, 0.04)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <div style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: '0.88rem',
+            flexShrink: 0
+          }}>
+            {patientName?.charAt(0) || 'P'}
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {isEs ? 'Paciente Registrado' : 'Registered Patient'}
+            </div>
+            <div style={{ fontSize: '0.88rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {patientName || 'Patient'}
+            </div>
+            <div style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+              <span>Ref: {prescriptionCode}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Widget 1: On This Dossier (TOC) */}
         <div style={{
           background: '#ffffff',
@@ -631,29 +672,42 @@ export default function PrescriptionDetailSidebar({
               })}
             </div>
 
-            {/* Prescribing Doctor Summary in Mobile Drawer */}
+            {/* Registered Patient Summary in Mobile Drawer */}
             <div style={{
               background: '#f8fafc',
               border: '1px solid #e2e8f0',
               borderRadius: '10px',
               padding: '1rem',
-              marginTop: 'auto'
+              marginTop: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
             }}>
-              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
-                {isEs ? 'MÉDICO PRESCRIPTOR' : 'PRESCRIBING PHYSICIAN'}
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '0.86rem',
+                flexShrink: 0
+              }}>
+                {patientName?.charAt(0) || 'P'}
               </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
-                {doctorName}
-              </div>
-              <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <div>{doctorTitle}</div>
-                {doctorLicense && (
-                  <div style={{ color: '#047857', fontWeight: 700 }}>
-                    {doctorLicense.toUpperCase().includes('DHA') 
-                      ? `DHA Licensed · Lic. ${doctorLicense}` 
-                      : `Lic. ${doctorLicense}`}
-                  </div>
-                )}
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+                  {isEs ? 'PACIENTE REGISTRADO' : 'REGISTERED PATIENT'}
+                </div>
+                <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {patientName || 'Patient'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>
+                  Ref: {prescriptionCode}
+                </div>
               </div>
             </div>
           </div>

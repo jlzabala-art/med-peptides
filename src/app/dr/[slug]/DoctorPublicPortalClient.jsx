@@ -18,6 +18,9 @@ import {
   ShieldCheck, 
   MapPin, 
   Mail, 
+  Edit3,
+  User,
+  Save,
   CheckCircle2, 
   Tag,
   Eye,
@@ -417,6 +420,66 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
   }, [slug, initialData]);
 
   const doctor = data?.doctor || {};
+
+  // Physician Profile Editing State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    title: '',
+    specialty: '',
+    clinic: '',
+    license: '',
+    phone: '',
+    email: '',
+    location: ''
+  });
+
+  useEffect(() => {
+    if (doctor?.name) {
+      setProfileForm({
+        name: doctor.name || '',
+        title: doctor.title || 'Dr.',
+        specialty: doctor.specialty || '',
+        clinic: doctor.clinic || '',
+        license: doctor.license || '',
+        phone: doctor.phone || '',
+        email: doctor.email || '',
+        location: doctor.location || ''
+      });
+    }
+  }, [doctor?.name, doctor?.title, doctor?.specialty, doctor?.clinic, doctor?.license, doctor?.phone, doctor?.email, doctor?.location]);
+
+  const handleSaveProfile = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      setIsSavingProfile(true);
+      triggerHaptic('medium');
+      const res = await fetch(`/api/doctor/${encodeURIComponent(slug)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileForm)
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to update profile');
+      }
+      setData(prev => ({
+        ...prev,
+        doctor: {
+          ...prev?.doctor,
+          ...profileForm
+        }
+      }));
+      setIsEditingProfile(false);
+      toast.success('Perfil médico actualizado con éxito');
+    } catch (err) {
+      console.error('Error updating doctor profile:', err);
+      toast.error(err.message || 'Error al actualizar el perfil');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
   const globalKpis = data?.kpis || { activePrescriptions: 0, monitoredPatients: 0, pendingTasksCount: 0, refillsDueCount: 0 };
   const allTasks = data?.tasks || [];
   const allPrescriptions = data?.prescriptions || [];
@@ -2142,52 +2205,117 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             ))}
           </div>
 
-          {/* Persistent AI Clinical Intelligence Search Sticker (Google Cloud UX Principle) */}
+          {/* Physician Portal Owner Identity Card & Profile Manager */}
           <div style={{ padding: isSidebarCollapsed ? '8px 6px' : '10px 12px', borderTop: '1px solid #dadce0', background: '#f8fafc' }}>
             <button
               type="button"
               onClick={() => {
                 triggerHaptic('light');
-                setIsDiscoveryDrawerOpen(true);
+                setIsCredentialsModalOpen(true);
               }}
-              title="Open Clinical Intelligence & Algolia Search Engine (⌘K)"
+              title={`Ver y gestionar perfil médico: ${doctor.name || 'Médico Titular'}`}
               style={{
                 width: '100%',
                 display: 'flex',
-                flexDirection: isSidebarCollapsed ? 'column' : 'row',
+                flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: isSidebarCollapsed ? 'center' : 'space-between',
                 gap: '8px',
-                padding: isSidebarCollapsed ? '8px 4px' : '8px 10px',
-                borderRadius: '6px',
-                border: '1px solid #c7d2fe',
-                background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
-                color: '#312e81',
+                padding: isSidebarCollapsed ? '6px 4px' : '8px 10px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                background: '#ffffff',
+                color: '#0f172a',
                 cursor: 'pointer',
                 textAlign: 'left',
-                boxShadow: '0 1px 2px rgba(67, 56, 202, 0.08)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
                 transition: 'all 0.15s ease'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '5px', background: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#ffffff' }}>
-                  <Sparkles size={13} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                {/* Avatar Circle with Verified Indicator */}
+                <div
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.80rem',
+                    position: 'relative',
+                    boxShadow: '0 1px 3px rgba(0,54,102,0.2)'
+                  }}
+                >
+                  {doctor.name?.replace(/^Dr\.\s*/i, '').charAt(0) || 'D'}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: '-1px',
+                      right: '-1px',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#16a34a',
+                      border: '1.5px solid #ffffff'
+                    }}
+                    title="DHA Verified Active"
+                  />
                 </div>
+
                 {!isSidebarCollapsed && (
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#1e1b4b', lineHeight: 1.2 }}>
-                      Clinical Search
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        lineHeight: 1.25,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {doctor.name || 'Treating Physician'}
                     </div>
-                    <div style={{ fontSize: '0.64rem', color: '#4338ca', fontWeight: 500, lineHeight: 1.1 }}>
-                      77 Protos · Pharmacopeia
+                    <div
+                      style={{
+                        fontSize: '0.64rem',
+                        color: '#0d9488',
+                        fontWeight: 600,
+                        lineHeight: 1.15,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {doctor.clinic || doctor.specialty || 'Verified Medical Practice'}
                     </div>
                   </div>
                 )}
               </div>
+
               {!isSidebarCollapsed && (
-                <kbd style={{ fontSize: '0.64rem', padding: '1px 5px', borderRadius: '3px', background: '#ffffff', color: '#4338ca', border: '1px solid #c7d2fe', fontWeight: 600 }}>
-                  ⌘K
-                </kbd>
+                <div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '5px',
+                    background: '#f1f5f9',
+                    color: '#64748b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                  title="Ver y editar perfil médico"
+                >
+                  <Edit3 size={12} />
+                </div>
               )}
             </button>
           </div>

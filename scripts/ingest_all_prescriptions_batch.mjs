@@ -81,10 +81,10 @@ async function run() {
     intakeState: 'verified_active',
     isAtlasRegistered: true,
     isPublicIntake: false,
-    date: '15/09/2026',
-    duration: '3 months',
-    quantity: '90 acid-resistant vegetable capsules',
-    volume: '90 capsules',
+    date: '23/09/2026',
+    duration: '2 months',
+    quantity: '60 capsules (2 Months)',
+    volume: '60 capsules (2 Months)',
     pdfUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     imageUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     gdriveSource: 'https://drive.google.com/file/d/1ZDOYu7kXUcy65AJE-X9pVnFHKYSH5PJs/view?usp=drive_link',
@@ -121,11 +121,11 @@ async function run() {
       country: 'United Arab Emirates'
     },
     formula: 'Ubiquinol 250 mg + Saw Palmetto Extract 250 mg',
-    dosageInstructions: 'Take 1 capsule every morning with breakfast for 3 months.',
+    dosageInstructions: 'Take 1 dose once daily with breakfast for 2 months.',
     posology: {
-      regimen: '1 capsule daily in the morning with food.',
+      regimen: 'Take 1 dose once daily with breakfast.',
       timing: 'Morning with breakfast',
-      notes: 'Take with food containing healthy fats to maximize ubiquinol bioavailability.'
+      notes: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.'
     },
     clinicalWarnings: [
       'Store in a cool, dry place away from direct sunlight.',
@@ -188,10 +188,10 @@ async function run() {
     intakeState: 'verified_active',
     isAtlasRegistered: true,
     isPublicIntake: false,
-    date: '15/09/2026',
-    duration: '3 months',
-    quantity: '90 acid-resistant vegetable capsules',
-    volume: '90 capsules',
+    date: '23/09/2026',
+    duration: '2 months',
+    quantity: '120 capsules (2 Months)',
+    volume: '120 capsules (2 Months)',
     pdfUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     imageUrl: '/prescriptions/RX-51857-Amna-Alotaiba.png',
     gdriveSource: 'https://drive.google.com/file/d/1ZDOYu7kXUcy65AJE-X9pVnFHKYSH5PJs/view?usp=drive_link',
@@ -228,11 +228,11 @@ async function run() {
       country: 'United Arab Emirates'
     },
     formula: 'Red Yeast Rice 600 mg + Berberine 500 mg + Citrus Bergamot 500 mg + Chromium Picolinate 100 mcg',
-    dosageInstructions: 'Take 1 capsule daily in the evening with dinner for 3 months.',
+    dosageInstructions: 'Take 1 dose with lunch and 1 dose with dinner for 2 months.',
     posology: {
-      regimen: '1 capsule daily in the evening with dinner.',
-      timing: 'Evening with dinner',
-      notes: 'HMG-CoA reductase synthesis peaks overnight; evening dosing optimizes hepatic lipid regulation.'
+      regimen: 'Take 1 dose with lunch and 1 dose with dinner.',
+      timing: 'With lunch and with dinner (twice daily)',
+      notes: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.'
     },
     clinicalWarnings: [
       'Do not consume with excessive grapefruit juice.',
@@ -247,10 +247,10 @@ async function run() {
       'Hypoallergenic excipients: zero gluten, zero lactose, zero dairy'
     ],
     prescriptionLines: [
-      { drugName: 'Red Yeast Rice', strength: '600 mg', instructions: '1 cap daily evening with dinner' },
-      { drugName: 'Berberine HCl', strength: '500 mg', instructions: '1 cap daily evening with dinner' },
-      { drugName: 'Citrus Bergamot', strength: '500 mg', instructions: '1 cap daily evening with dinner' },
-      { drugName: 'Chromium Picolinate', strength: '100 mcg', instructions: '1 cap daily evening with dinner' }
+      { drugName: 'Red Yeast Rice', strength: '600 mg', instructions: '1 dose with lunch and 1 dose with dinner' },
+      { drugName: 'Berberine HCl', strength: '500 mg', instructions: '1 dose with lunch and 1 dose with dinner' },
+      { drugName: 'Citrus Bergamot', strength: '500 mg', instructions: '1 dose with lunch and 1 dose with dinner' },
+      { drugName: 'Chromium Picolinate', strength: '100 mcg', instructions: '1 dose with lunch and 1 dose with dinner' }
     ],
     items: [
       {

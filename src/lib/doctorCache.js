@@ -1122,3 +1122,52 @@ export function computeServerAnalytics(prescriptions = []) {
   };
 }
 
+/**
+ * Updates physician profile in Firestore and purges memory cache.
+ * Adheres to Golden Rule #2 (Firestore authoritative source of truth).
+ */
+export async function updateDoctorProfile(slug, updates = {}) {
+  if (!slug || !updates) return null;
+  const cleanSlug = decodeURIComponent(slug).trim().toLowerCase();
+
+  // Find matching doctor
+  const doctors = await getCachedDoctorDirectory();
+  const matchedDoc = doctors.find(doc => {
+    return doc.opaqueCode.toLowerCase() === cleanSlug ||
+           doc.id.toLowerCase() === cleanSlug ||
+           doc.nameSlug === cleanSlug ||
+           doc.nameSlug.replace(/-/g, '') === cleanSlug.replace(/-/g, '') ||
+           (doc.license && doc.license.toLowerCase() === cleanSlug);
+  });
+
+  const docId = matchedDoc?.id || cleanSlug;
+
+  if (adminDb) {
+    const payload = {
+      ...updates,
+      displayName: updates.name || updates.displayName || '',
+      name: updates.name || '',
+      specialty: updates.specialty || '',
+      clinic: updates.clinic || updates.clinicName || '',
+      clinicName: updates.clinic || updates.clinicName || '',
+      licenseNumber: updates.license || updates.licenseNumber || '',
+      license: updates.license || updates.licenseNumber || '',
+      phone: updates.phone || '',
+      email: updates.email || '',
+      location: updates.location || '',
+      title: updates.title || 'Dr.',
+      role: 'doctor',
+      updatedAt: new Date().toISOString()
+    };
+
+    // Update in Firestore users collection
+    await adminDb.collection('users').doc(docId).set(payload, { merge: true });
+
+    // Invalidate caches
+    invalidateDoctorCache();
+  }
+
+  // Return fresh hydrated data
+  return await getDoctorPortalData(slug, { forceRefresh: true });
+}
+

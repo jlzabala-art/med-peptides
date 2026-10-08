@@ -1,4 +1,4 @@
-import { getDoctorPortalData } from '@/lib/doctorCache';
+import { getDoctorPortalData, updateDoctorProfile } from '@/lib/doctorCache';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +24,34 @@ export async function GET(request, { params }) {
       }
     });
   } catch (error) {
-    console.error('API /api/doctor/[slug] error:', error);
+    console.error('API GET /api/doctor/[slug] error:', error);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * PUT /api/doctor/[slug]
+ * Updates physician profile in Firestore and invalidates cache.
+ */
+export async function PUT(request, { params }) {
+  try {
+    const { slug } = await params;
+    const cleanSlug = decodeURIComponent(slug || '').trim();
+    const body = await request.json();
+
+    const updatedData = await updateDoctorProfile(cleanSlug, body);
+
+    if (!updatedData || !updatedData.success) {
+      return Response.json({ success: false, error: 'Failed to update physician profile' }, { status: 400 });
+    }
+
+    return Response.json(updatedData, {
+      headers: {
+        'Cache-Control': 'no-store'
+      }
+    });
+  } catch (error) {
+    console.error('API PUT /api/doctor/[slug] error:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
