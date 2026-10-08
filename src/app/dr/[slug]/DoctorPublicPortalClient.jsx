@@ -3116,203 +3116,174 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </p>
             </div>
 
-            {/* GCP Action Toolbar: Filters + Refresh + Export */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {/* Temporal Filters */}
-              <div style={{ display: 'inline-flex', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '2px', gap: '2px' }}>
-                {[
-                  { id: 'all', label: 'All Time' },
-                  { id: '30d', label: '30 Days' },
-                  { id: '90d', label: '90 Days' }
-                ].map(t => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTemporalFilter(t.id)}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      background: temporalFilter === t.id ? '#ffffff' : 'transparent',
-                      color: temporalFilter === t.id ? '#003666' : '#64748b',
-                      boxShadow: temporalFilter === t.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                      transition: 'all 0.12s'
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Status Filters */}
-              <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: '6px', padding: '2px', gap: '2px' }}>
-                {[
-                  { id: 'all', label: 'All' },
-                  { id: 'active', label: 'Active & Approved' },
-                  { id: 'approved', label: 'Approved' },
-                  { id: 'pending', label: 'Pending' }
-                ].map(s => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setStatusFilter(s.id)}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      background: statusFilter === s.id ? '#ffffff' : 'transparent',
-                      color: statusFilter === s.id ? '#0f172a' : '#64748b',
-                      boxShadow: statusFilter === s.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                      transition: 'all 0.12s'
-                    }}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Patient Selector Filter (Google Cloud Standard) */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '2px 8px', gap: '5px' }}>
-                <Users size={12} style={{ color: patientFilter === 'all' ? '#64748b' : '#003666' }} />
-                <select
-                  value={patientFilter}
-                  onChange={(e) => {
-                    setPatientFilter(e.target.value);
-                    if (e.target.value !== 'all') {
-                      toast.success(`Filtered for patient: ${e.target.value}`);
-                    }
-                  }}
-                  style={{
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    background: 'transparent',
-                    border: 'none',
-                    color: patientFilter === 'all' ? '#64748b' : '#003666',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    padding: '3px 0'
-                  }}
-                  title="Filter table by patient dossier"
-                >
-                  <option value="all">All Patients ({uniquePatientList.length})</option>
-                  {uniquePatientList.map(pName => (
-                    <option key={pName} value={pName}>{pName}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Refresh Button */}
-              <button
-                type="button"
-                onClick={handleRefresh}
-                title="Refresh clinical registry"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '4px',
-                  border: '1px solid #dadce0',
-                  background: '#ffffff',
-                  color: '#5f6368',
-                  cursor: 'pointer'
-                }}
-              >
-                <RotateCw size={13} />
-              </button>
-
-              {/* Export CSV Button */}
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  height: '28px',
-                  padding: '0 10px',
-                  borderRadius: '4px',
-                  border: '1px solid #dadce0',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                <Download size={13} color="#5f6368" />
-                <span>Export CSV</span>
-              </button>
-
-              {/* Primary Action Button: Import / New Prescription (AI Intake) */}
-              <button
-                type="button"
-                onClick={() => setIsIntakeOpen(true)}
-                title="Import prescription document via Atlas AI Intake (Multi-format & 2-Phase SLA)"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  height: '28px',
-                  padding: '0 12px',
-                  borderRadius: '4px',
-                  border: '1px solid #1a73e8',
-                  background: '#1a73e8',
-                  color: '#ffffff',
-                  fontSize: '0.74rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(26,115,232,0.2)'
-                }}
-              >
-                <Plus size={13} />
-                <span>+ Import / New Rx (AI)</span>
-              </button>
-            </div>
+            {/* Header Action: Refresh Button */}
+            <button
+              type="button"
+              onClick={handleRefresh}
+              title="Refresh clinical registry"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '4px',
+                border: '1px solid #dadce0',
+                background: '#ffffff',
+                color: '#5f6368',
+                cursor: 'pointer',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafd'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}
+            >
+              <RotateCw size={14} />
+            </button>
           </div>
 
-          {/* ── Quick Status Filter Chips (Proposal #3: Chips de 1-Clic) ──────── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Quick Filter:
-            </span>
-            {[
-              { id: 'all', label: `All (${quickCounts.all})`, color: '#003666', bg: '#f1f5f9' },
-              { id: 'pending', label: `🟡 Awaiting Sign-off / Review (${quickCounts.pending})`, color: '#b45309', bg: '#fffbeb' },
-              { id: 'active', label: `🟢 Active in Dispensary (${quickCounts.active})`, color: '#15803d', bg: '#f0fdf4' },
-              { id: 'multipart', label: `🔵 Multi-Part Formulations (${quickCounts.multipart})`, color: '#1d4ed8', bg: '#eff6ff' }
-            ].map(chip => (
-              <button
-                key={chip.id}
-                type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setQuickRxFilter(chip.id);
-                }}
-                style={{
-                  height: '28px',
-                  padding: '0 12px',
-                  borderRadius: '9999px',
-                  border: quickRxFilter === chip.id ? `2px solid ${chip.color}` : '1px solid #cbd5e1',
-                  background: quickRxFilter === chip.id ? chip.bg : '#ffffff',
-                  color: chip.color,
-                  fontSize: '0.74rem',
-                  fontWeight: quickRxFilter === chip.id ? 750 : 550,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  boxShadow: quickRxFilter === chip.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
-                }}
-              >
-                {chip.label}
-              </button>
-            ))}
+          {/* ── Search Bar with Integrated Filters (Golden Rule #7) ──────── */}
+          <div style={{ padding: '16px 20px 14px 20px', background: '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
+            <GlobalSearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search by patient name, prescription code (e.g. RX-2024-001), active compound (Minoxidil, Finasteride...), or status..."
+              resultCount={filteredPrescriptions.length}
+              namespace={`doctor-prescriptions-${slug}`}
+              size="lg"
+              filters={[
+                statusFilter !== 'all' && {
+                  key: 'status',
+                  label: 'Status',
+                  value: statusFilter === 'active' ? 'ACTIVE & APPROVED' : statusFilter.toUpperCase(),
+                  onRemove: () => setStatusFilter('all')
+                },
+                patientFilter !== 'all' && {
+                  key: 'patient',
+                  label: 'Patient',
+                  value: patientFilter,
+                  onRemove: () => setPatientFilter('all')
+                },
+                temporalFilter !== 'all' && {
+                  key: 'time',
+                  label: 'Period',
+                  value: temporalFilter === '30d' ? '30 Days' : '90 Days',
+                  onRemove: () => setTemporalFilter('all')
+                },
+                quickRxFilter !== 'all' && {
+                  key: 'quick',
+                  label: 'Filter',
+                  value: quickRxFilter === 'pending' ? 'Awaiting Review' : quickRxFilter === 'active' ? 'Active Dispensary' : 'Multi-Part',
+                  onRemove: () => setQuickRxFilter('all')
+                },
+                apiFilter && {
+                  key: 'api',
+                  label: 'Active API',
+                  value: apiFilter,
+                  onRemove: () => setApiFilter(null)
+                }
+              ].filter(Boolean)}
+              filterOptions={[
+                {
+                  key: 'status',
+                  label: 'Status',
+                  options: [
+                    { label: 'All Statuses', value: 'all' },
+                    { label: 'Active & Approved', value: 'active' },
+                    { label: 'Approved', value: 'approved' },
+                    { label: 'Pending', value: 'pending' }
+                  ],
+                  value: statusFilter,
+                  onChange: setStatusFilter
+                },
+                {
+                  key: 'patient',
+                  label: 'Patient',
+                  options: [
+                    { label: `All Patients (${uniquePatientList.length})`, value: 'all' },
+                    ...uniquePatientList.map(pName => ({ label: pName, value: pName }))
+                  ],
+                  value: patientFilter,
+                  onChange: setPatientFilter
+                },
+                {
+                  key: 'time',
+                  label: 'Period',
+                  options: [
+                    { label: 'All Time', value: 'all' },
+                    { label: '30 Days', value: '30d' },
+                    { label: '90 Days', value: '90d' }
+                  ],
+                  value: temporalFilter,
+                  onChange: setTemporalFilter
+                }
+              ]}
+            />
+
+            {/* Quick Status / Category Filter Chips */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Quick Filter:
+              </span>
+              {[
+                { id: 'all', label: `All (${quickCounts.all})`, color: '#003666', bg: '#f1f5f9' },
+                { id: 'pending', label: `🟡 Awaiting Sign-off / Review (${quickCounts.pending})`, color: '#b45309', bg: '#fffbeb' },
+                { id: 'active', label: `🟢 Active in Dispensary (${quickCounts.active})`, color: '#137333', bg: '#f0fdf4' },
+                { id: 'multipart', label: `🔵 Multi-Part Formulations (${quickCounts.multipart})`, color: '#1a73e8', bg: '#eff6ff' }
+              ].map(chip => (
+                <button
+                  key={chip.id}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setQuickRxFilter(chip.id);
+                  }}
+                  style={{
+                    height: '28px',
+                    padding: '0 12px',
+                    borderRadius: '9999px',
+                    border: quickRxFilter === chip.id ? `2px solid ${chip.color}` : '1px solid #dadce0',
+                    background: quickRxFilter === chip.id ? chip.bg : '#ffffff',
+                    color: chip.color,
+                    fontSize: '0.74rem',
+                    fontWeight: quickRxFilter === chip.id ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    boxShadow: quickRxFilter === chip.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))}
+
+              {(searchQuery || statusFilter !== 'all' || patientFilter !== 'all' || temporalFilter !== 'all' || quickRxFilter !== 'all' || apiFilter) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('all');
+                    setPatientFilter('all');
+                    setTemporalFilter('all');
+                    setQuickRxFilter('all');
+                    setApiFilter(null);
+                    toast.success('Filters reset');
+                  }}
+                  style={{
+                    height: '28px',
+                    padding: '0 10px',
+                    borderRadius: '4px',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
+                    color: '#d93025',
+                    fontSize: '0.72rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    marginLeft: 'auto'
+                  }}
+                >
+                  Reset filters
+                </button>
+              )}
+            </div>
           </div>
 
           <DataTable
