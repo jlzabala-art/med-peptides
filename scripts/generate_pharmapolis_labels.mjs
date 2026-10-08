@@ -710,6 +710,15 @@ async function run() {
       fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT_WITH_QR.pdf`), frontQrPdfBytes);
       console.log(`📥 [Downloads] Copied Julien Boiteux labels (${partTag}) to ~/Downloads`);
     }
+    if (fs.existsSync(DOWNLOADS_DIR) && (item.fileNumber === 'BOX03483AATRI' || item.patientName.includes('Aishehhi'))) {
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT.png`), frontPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT.pdf`), frontPdfBytes);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_BACK_QR.png`), backPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_BACK_QR.pdf`), backPdfBytes);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT_WITH_QR.png`), frontQrPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT_WITH_QR.pdf`), frontQrPdfBytes);
+      console.log(`📥 [Downloads] Copied Mohammed Ahmad Aishehhi labels (BOX03483AATRI) to ~/Downloads`);
+    }
 
     generatedFiles.push({
       patient: item.patientName,
