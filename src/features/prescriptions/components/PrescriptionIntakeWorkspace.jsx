@@ -54,14 +54,14 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     setFilePreview(URL.createObjectURL(droppedFile));
 
     try {
-      toast.loading('Analizando prescripción con Atlas Clinical AI...', { id: 'ai-intake' });
+      toast.loading('Extracting prescription data with Atlas Clinical AI...', { id: 'ai-intake' });
       
       // 1. Multimodal Gemini extraction
       const aiData = await extractPrescriptionFromDocument(droppedFile);
       setRawAiData(aiData);
 
       // 2. Normalize to canonical schema & resolve catalog ingredients
-      toast.loading('Mapeando fármacos contra catálogo...', { id: 'ai-intake' });
+      toast.loading('Matching ingredients against clinical pharmacopeia...', { id: 'ai-intake' });
       const normalized = await normalizeExtractedPrescriptions(aiData, {
         currentUser: user,
       });
@@ -71,16 +71,16 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       setNormalizedRxList(deduplicated);
 
       toast.success(
-        `Extracción completada (${deduplicated.length} ${deduplicated.length === 1 ? 'prescripción' : 'formulaciones'})`,
+        `Extraction complete (${deduplicated.length} ${deduplicated.length === 1 ? 'prescription' : 'compounded formulations'})`,
         { id: 'ai-intake' }
       );
     } catch (err) {
       console.error('[PrescriptionIntakeWorkspace] Error:', err);
       let rawMsg = String(err?.message || '');
-      let cleanMsg = 'Error al analizar el documento con Atlas AI';
+      let cleanMsg = 'Error analyzing prescription with Atlas AI';
 
       if (/503|UNAVAILABLE|high demand|saturad|peak demand|capacity|spikes in demand|temporarily|busy/i.test(rawMsg)) {
-        cleanMsg = 'El servicio de Atlas AI está temporalmente saturado por alta demanda. Por favor, reintente en unos instantes.';
+        cleanMsg = 'Atlas AI service is temporarily experiencing high demand. Please retry in a few moments.';
       } else if (rawMsg && !rawMsg.startsWith('{')) {
         cleanMsg = rawMsg;
       }
@@ -129,7 +129,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       copy[rxIndex] = rx;
       return copy;
     });
-    toast.success(`Ingrediente vinculado a: ${selectedProduct.name}`);
+    toast.success(`Ingredient mapped to: ${selectedProduct.name}`);
   };
 
   const handleCopyRxUrl = (url, rxNumber) => {
@@ -137,7 +137,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     const fullUrl = `${window.location.origin}${url}`;
     navigator?.clipboard?.writeText(fullUrl);
     setCopiedUrl(rxNumber);
-    toast.success('Enlace de la receta online copiado al portapapeles ✓');
+    toast.success('Online prescription dossier link copied to clipboard ✓');
     setTimeout(() => setCopiedUrl(null), 2500);
   };
 
@@ -154,7 +154,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
   // Save directly to Firestore using canonical schema
   const handleConfirmSave = async (overrideDuplicate = false) => {
     if (!normalizedRxList.length) {
-      toast.error('No hay prescripciones para guardar.');
+      toast.error('No prescriptions available to save.');
       return;
     }
 
@@ -167,7 +167,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
     setIsSaving(true);
     setShowDuplicateModal(false);
     try {
-      toast.loading('Guardando prescripciones en Firestore...', { id: 'save-intake' });
+      toast.loading('Registering prescriptions in Atlas clinical database...', { id: 'save-intake' });
       
       const result = await savePrescriptionsToFirestore(normalizedRxList, {
         alsoCreatePatient,
@@ -176,9 +176,9 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       });
 
       if (result.errors?.length > 0) {
-        toast.error(`Guardado parcial con advertencias: ${result.errors[0]}`, { id: 'save-intake' });
+        toast.error(`Saved with advisories: ${result.errors[0]}`, { id: 'save-intake' });
       } else {
-        toast.success(`¡${result.savedCount} prescripción(es) guardadas con éxito!`, { id: 'save-intake' });
+        toast.success(`Successfully saved ${result.savedCount} prescription(s)!`, { id: 'save-intake' });
       }
 
       onSaveSuccess && onSaveSuccess(result.savedIds);
@@ -190,7 +190,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       }
     } catch (err) {
       console.error('Save error:', err);
-      toast.error(`Error al guardar: ${err.message}`, { id: 'save-intake' });
+      toast.error(`Error saving prescription: ${err.message}`, { id: 'save-intake' });
     } finally {
       setIsSaving(false);
     }
@@ -239,8 +239,8 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
       <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
-      title="Importar Prescripción con IA"
-      subtitle="Sube una receta médica o informe Fagron Genomics (PDF/Imagen). Atlas AI extraerá y validará los datos clínicos automáticamente."
+      title="AI Clinical Prescription Intake Workspace"
+      subtitle="Upload printed clinic orders, handwritten doctor prescriptions, or Fagron Genomics reports. Atlas AI extracts molecules, dosages, and posology with two-phase clinical verification."
       width="90vw"
       footer={
         savedPrescriptionsResult ? (
@@ -252,7 +252,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <Upload size={14} />
-              <span>Importar Otra Prescripción</span>
+              <span>Import Another Prescription</span>
             </button>
             <button
               type="button"
@@ -260,14 +260,14 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               onClick={onClose}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: '150px', justifyContent: 'center' }}
             >
-              <span>Ver en Tabla de Prescripciones</span>
+              <span>View in Prescriptions Table</span>
               <ArrowRight size={15} />
             </button>
           </div>
         ) : (
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <button className="gcp-btn-secondary" onClick={onClose}>Cancelar</button>
+              <button className="gcp-btn-secondary" onClick={onClose}>Cancel</button>
               {normalizedRxList.length > 0 && (
                 <>
                   <button
@@ -277,7 +277,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                   >
                     <ExternalLink size={15} />
-                    <span>Abrir en Creador de Recetas</span>
+                    <span>Open in Regimen Builder</span>
                   </button>
 
                   <button
@@ -285,21 +285,21 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     className="gcp-btn-secondary"
                     onClick={() => {
                       if (normalizedRxList[0]) {
-                        toast.loading('Generando Excel...', { id: 'ws-excel' });
-                        const res = exportPrescriptionToXlsx(normalizedRxList[0], { lang: 'es' });
+                        toast.loading('Generating Excel file...', { id: 'ws-excel' });
+                        const res = exportPrescriptionToXlsx(normalizedRxList[0], { lang: 'en' });
                         if (res?.success) {
-                          toast.success(`Exportado a Excel: ${res.filename} (${res.itemCount} items)`, { id: 'ws-excel' });
+                          toast.success(`Exported to Excel: ${res.filename} (${res.itemCount} items)`, { id: 'ws-excel' });
                         } else {
-                          toast.error('Error al exportar a Excel', { id: 'ws-excel' });
+                          toast.error('Failed to export Excel file', { id: 'ws-excel' });
                         }
                       }
                     }}
                     disabled={isSaving}
                     style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#15803d' }}
-                    title="Exportar prescripción analizada a Excel (.xlsx)"
+                    title="Export structured prescription to Excel (.xlsx)"
                   >
                     <FileSpreadsheet size={15} color="#15803d" />
-                    <span>Exportar a Excel</span>
+                    <span>Export to Excel</span>
                   </button>
                 </>
               )}
@@ -315,12 +315,12 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 {isSaving ? (
                   <>
                     <RefreshCw size={16} className="spin-slow" />
-                    <span>Guardando...</span>
+                    <span>Saving...</span>
                   </>
                 ) : (
                   <>
                     <Save size={16} />
-                    <span>Guardar Prescripción</span>
+                    <span>Save Prescription (Draft)</span>
                   </>
                 )}
               </button>
@@ -356,14 +356,14 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#92400e' }}>
-                    Formulación Registrada en Modo Borrador (Draft)
+                    Formulation Registered in Draft Mode
                   </h3>
                   <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fcd34d', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
-                    ⏳ SLA de Validación: ~24 Horas
+                    ⏳ Validation SLA: ~24 Hours
                   </span>
                 </div>
                 <p style={{ margin: '6px 0 12px 0', fontSize: '0.86rem', color: '#78350f', lineHeight: 1.5 }}>
-                  El documento ha sido extraído digitalmente y guardado en <strong>Modo Borrador</strong>. El equipo farmacéutico clínico de <strong>Atlas AI</strong> está verificando las conversiones moleculares, la compatibilidad de vehículos y las dosis. Una vez validada (habitualmente en 24 horas), la prescripción se reflejará como <strong>Autorizada</strong> en su dispensario oficial.
+                  The prescription has been digitally parsed and saved in <strong>Draft Mode</strong>. The <strong>Atlas AI Clinical Pharmacotherapy</strong> team is verifying molecular conversions, vehicle compatibility, and dosages. Once verified (typically within 24 hours), the prescription will be marked as <strong>Authorized</strong> in your official dispensary repository.
                 </p>
 
                 {/* 2-Phase Stepper Tracker */}
@@ -371,16 +371,16 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                   <div style={{ background: '#ffffff', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#16a34a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>✓</div>
                     <div>
-                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#166534' }}>Fase 1: Ingesta Digital</div>
-                      <div style={{ fontSize: '0.70rem', color: '#15803d' }}>Documento extraído y clasificado</div>
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#166534' }}>Phase 1: Digital Ingestion</div>
+                      <div style={{ fontSize: '0.70rem', color: '#15803d' }}>Document extracted & classified</div>
                     </div>
                   </div>
 
                   <div style={{ background: '#ffffff', border: '1px solid #fde68a', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#d97706', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>2</div>
                     <div>
-                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#92400e' }}>Fase 2: Validación Atlas AI</div>
-                      <div style={{ fontSize: '0.70rem', color: '#b45309' }}>En curso • Conversión molecular (~24h)</div>
+                      <div style={{ fontSize: '0.80rem', fontWeight: 700, color: '#92400e' }}>Phase 2: Atlas Pharmacist QA</div>
+                      <div style={{ fontSize: '0.70rem', color: '#b45309' }}>In progress · Molecular QA (~24h SLA)</div>
                     </div>
                   </div>
                 </div>
@@ -411,13 +411,13 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                           {saved.patientName} • {saved.treatmentType}
                         </div>
                         <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                          {saved.lineCount} componentes formulados • Código Oficial: <code style={{ color: '#003666', fontWeight: 800 }}>{saved.prescriptionNumber}</code>
+                          {saved.lineCount} formulated ingredients • Official Code: <code style={{ color: '#003666', fontWeight: 800 }}>{saved.prescriptionNumber}</code>
                         </div>
                       </div>
                     </div>
 
                     <span style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: '12px', fontSize: '0.74rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <Clock size={11} /> Borrador • En Revisión Atlas AI (24h)
+                      <Clock size={11} /> Draft · Under Atlas AI Review (24h)
                     </span>
                   </div>
 
@@ -439,7 +439,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       }}
                     >
                       <ExternalLink size={14} />
-                      <span>Ver Receta Online ({saved.prescriptionNumber})</span>
+                      <span>View Online Prescription ({saved.prescriptionNumber})</span>
                     </a>
 
                     <button
@@ -457,11 +457,11 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       }}
                     >
                       {copiedUrl === saved.prescriptionNumber ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-                      <span>{copiedUrl === saved.prescriptionNumber ? 'Enlace Copiado ✓' : 'Copiar Enlace para el Paciente'}</span>
+                      <span>{copiedUrl === saved.prescriptionNumber ? 'Link Copied ✓' : 'Copy Patient Direct Link'}</span>
                     </button>
 
                     <a
-                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hola ${saved.patientName}, aquí tiene su receta médica oficial digitalizada con acceso clínico validado:\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com'}${saved.rxUrl}\n\nCódigo de Verificación: ${saved.prescriptionNumber}`)}`}
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello ${saved.patientName}, here is your official digitized medical prescription with validated clinical access:\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com'}${saved.rxUrl}\n\nVerification Code: ${saved.prescriptionNumber}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="gcp-btn-secondary"
@@ -502,10 +502,41 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
         }}>
           {!filePreview ? (
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              {/* WhatsApp Quick Share Banner */}
+              {/* Two-Phase Clinical Verification Protocol Banner */}
               <div style={{
                 margin: '1rem 1rem 0',
-                padding: '0.75rem 1rem',
+                padding: '0.85rem 1rem',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                boxShadow: '0 1px 3px rgba(15,23,42,0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldAlert size={15} color="#1a73e8" />
+                    <span>Two-Phase Clinical Assurance Protocol</span>
+                  </span>
+                  <span style={{ fontSize: '0.70rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '1px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                    24h Pharmacist QA SLA
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '6px', marginTop: '2px' }}>
+                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '6px', padding: '6px 8px', fontSize: '0.73rem', color: '#334155' }}>
+                    <strong style={{ color: '#1a73e8' }}>Phase 1 · Instant Ingestion:</strong> AI extracts molecules & registers a structured Draft.
+                  </div>
+                  <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '6px', padding: '6px 8px', fontSize: '0.73rem', color: '#334155' }}>
+                    <strong style={{ color: '#d97706' }}>Phase 2 · Pharmacist QA:</strong> Atlas compounding pharmacists verify excipients & posology.
+                  </div>
+                </div>
+              </div>
+
+              {/* WhatsApp Quick Mobile Share Banner */}
+              <div style={{
+                margin: '0.75rem 1rem 0',
+                padding: '0.65rem 1rem',
                 background: '#f0fdf4',
                 border: '1px solid #bbf7d0',
                 borderRadius: '10px',
@@ -516,21 +547,21 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 flexWrap: 'wrap'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Phone size={16} style={{ color: '#16a34a' }} />
-                  <span style={{ fontSize: '0.8rem', color: '#15803d', fontWeight: 600 }}>
-                    ¿Prefieres que el paciente o doctor suba el informe desde su móvil?
+                  <Phone size={15} style={{ color: '#16a34a' }} />
+                  <span style={{ fontSize: '0.78rem', color: '#15803d', fontWeight: 600 }}>
+                    Prefer patient or doctor to upload directly from mobile?
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsShareModalOpen(true)}
                   style={{
-                    background: '#25D366',
+                    background: '#16a34a',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '6px',
-                    padding: '5px 10px',
-                    fontSize: '0.75rem',
+                    padding: '5px 12px',
+                    fontSize: '0.74rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     display: 'inline-flex',
@@ -539,10 +570,11 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                   }}
                 >
                   <Phone size={12} />
-                  <span>Enviar Portal por WhatsApp</span>
+                  <span>Send Mobile Upload Link via WhatsApp</span>
                 </button>
               </div>
 
+              {/* Universal Multi-Format Dropzone */}
               <div
                 {...getRootProps()}
                 style={{
@@ -551,9 +583,9 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '2.5rem 1.5rem',
+                  padding: '1.75rem 1.25rem',
                   border: `2px dashed ${isDragActive ? '#3b82f6' : '#cbd5e1'}`,
-                  margin: '1rem',
+                  margin: '0.75rem 1rem 1rem',
                   borderRadius: '12px',
                   backgroundColor: isDragActive ? '#eff6ff' : '#ffffff',
                   cursor: 'pointer',
@@ -563,27 +595,47 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               >
                 <input {...getInputProps()} />
                 <div style={{
-                  padding: '1.25rem',
+                  padding: '1rem',
                   backgroundColor: '#eff6ff',
                   color: '#2563eb',
                   borderRadius: '50%',
-                  marginBottom: '1rem',
+                  marginBottom: '0.75rem',
                   boxShadow: '0 4px 12px rgba(37,99,235,0.1)'
                 }}>
-                  <Upload size={36} />
+                  <Upload size={32} />
                 </div>
-                <p style={{ margin: 0, fontWeight: 600, color: '#0f172a', fontSize: '1rem' }}>
-                  {isDragActive ? 'Suelta el documento aquí...' : 'Arrastra y suelta la prescripción aquí'}
+                <p style={{ margin: 0, fontWeight: 700, color: '#0f172a', fontSize: '1rem' }}>
+                  {isDragActive ? 'Drop prescription file here...' : 'Drag & drop prescription document here'}
                 </p>
-                <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#64748b', maxWidth: '280px' }}>
-                  Soporta archivos <strong>PDF</strong>, <strong>JPG</strong>, <strong>PNG</strong> de clínicas o informes <strong>Fagron Genomics</strong>.
+                <p style={{ margin: '0.35rem 0 0.75rem', fontSize: '0.80rem', color: '#64748b', maxWidth: '380px', lineHeight: 1.45 }}>
+                  Universal AI intake: parses printed hospital orders, handwritten doctor notes, Fagron Genomics reports, and compounding worksheets.
                 </p>
+
+                {/* Multi-format Pill Badges */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', flexWrap: 'wrap', maxWidth: '420px', marginBottom: '0.85rem' }}>
+                  <span style={{ fontSize: '0.67rem', fontWeight: 600, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', padding: '2px 7px', borderRadius: '12px' }}>
+                    📄 Hospital & Clinic EMR / EHR
+                  </span>
+                  <span style={{ fontSize: '0.67rem', fontWeight: 600, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', padding: '2px 7px', borderRadius: '12px' }}>
+                    ✍️ Handwritten Doctor Rx
+                  </span>
+                  <span style={{ fontSize: '0.67rem', fontWeight: 600, background: '#fdf2f8', color: '#be185d', border: '1px solid #fbcfe8', padding: '2px 7px', borderRadius: '12px' }}>
+                    🧬 Fagron Genomics Panels
+                  </span>
+                  <span style={{ fontSize: '0.67rem', fontWeight: 600, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 7px', borderRadius: '12px' }}>
+                    🧪 Compounding Formulas
+                  </span>
+                  <span style={{ fontSize: '0.67rem', fontWeight: 600, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 7px', borderRadius: '12px' }}>
+                    📸 PDF · JPG · PNG
+                  </span>
+                </div>
+
                 <button
                   type="button"
                   className="gcp-btn-secondary"
-                  style={{ marginTop: '1.25rem', fontSize: '0.85rem', pointerEvents: 'none' }}
+                  style={{ fontSize: '0.82rem', pointerEvents: 'none' }}
                 >
-                  Seleccionar archivo del equipo
+                  Browse Files on Device
                 </button>
               </div>
             </div>
@@ -706,19 +758,19 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
             {!file ? (
               <div style={{ textAlign: 'center', color: '#64748b', marginTop: '5rem' }}>
                 <FileText size={48} opacity={0.25} style={{ margin: '0 auto 1rem' }} />
-                <p style={{ fontWeight: 500, margin: 0 }}>Carga un documento para comenzar</p>
-                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                  Atlas AI identificará automáticamente si es una receta médica estándar o un informe Fagron.
+                <p style={{ fontWeight: 600, margin: 0, color: '#334155' }}>Upload a prescription document to begin</p>
+                <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '0.35rem', maxWidth: '340px', margin: '0.35rem auto 0', lineHeight: 1.45 }}>
+                  Atlas AI automatically classifies printed hospital EMRs, handwritten prescriptions, or Fagron genomics panels.
                 </p>
               </div>
             ) : isProcessing ? (
               <div style={{ textAlign: 'center', color: '#2563eb', marginTop: '4rem' }}>
                 <Activity size={44} className="spin-slow" style={{ margin: '0 auto 1rem' }} />
                 <p style={{ fontWeight: 600, fontSize: '1rem', margin: 0, color: '#0f172a' }}>
-                  Extrayendo datos clínicos...
+                  Extracting clinical data & active ingredients...
                 </p>
                 <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.35rem' }}>
-                  Identificando principios activos, concentraciones y posología con IA multimodal.
+                  Identifying molecules, concentrations, and posology with multimodal clinical vision AI.
                 </p>
               </div>
             ) : error ? (
@@ -734,7 +786,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               }}>
                 <AlertCircle size={20} color="#dc2626" style={{ marginTop: '2px', flexShrink: 0 }} />
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Error de procesamiento</h4>
+                  <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Processing Error</h4>
                   <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>{error}</p>
                 </div>
               </div>
@@ -758,11 +810,11 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       <ShieldAlert size={20} color="#d97706" style={{ flexShrink: 0 }} />
                       <div>
                         <div style={{ fontSize: '0.84rem', color: '#92400e', fontWeight: 600 }}>
-                          Posible Duplicado Detectado: {dupReason || 'Ya existe un registro con idéntico Box ID o Paciente + Fecha en la base de datos.'}
+                          Potential Duplicate Detected: {dupReason || 'A record with identical Box ID or Patient + Date already exists in the registry.'}
                         </div>
                         {existingCode && (
                           <div style={{ fontSize: '0.78rem', color: '#b45309', marginTop: '2px' }}>
-                            Prescripción existente: <strong>{existingCode}</strong> {existingPatient ? `(${existingPatient})` : ''} {existingDate ? `— ${existingDate}` : ''}
+                            Existing prescription: <strong>{existingCode}</strong> {existingPatient ? `(${existingPatient})` : ''} {existingDate ? `— ${existingDate}` : ''}
                           </div>
                         )}
                       </div>
@@ -776,7 +828,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                           style={{ fontSize: '0.78rem', padding: '0.35rem 0.65rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                         >
                           <Eye size={13} />
-                          <span>Ver Existente</span>
+                          <span>View Existing</span>
                         </button>
                       </div>
                     )}
@@ -797,7 +849,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <AlertCircle size={16} color="#d97706" />
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#92400e' }}>
-                        Validaciones Clínicas de Seguridad ({clinicalValidation.warnings.length})
+                        Clinical Safety Validations ({clinicalValidation.warnings.length})
                       </span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', paddingLeft: '1.5rem' }}>
@@ -823,26 +875,26 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div>
                       <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
-                        Paciente
+                        Patient Profile
                       </span>
                       <h4 style={{ margin: '0.1rem 0 0', fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>
-                        {normalizedRxList[0]?.patientName || 'Paciente desconocido'}
+                        {normalizedRxList[0]?.patientName || 'Unknown Patient'}
                       </h4>
                       {rawAiData?.patient?.dob && (
                         <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                          Nacimiento: {rawAiData.patient.dob} {rawAiData.patient.gender ? `(${rawAiData.patient.gender})` : ''}
+                          DOB: {rawAiData.patient.dob} {rawAiData.patient.gender ? `(${rawAiData.patient.gender})` : ''}
                         </span>
                       )}
                     </div>
 
                     <div>
                       <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>
-                        Médico / Prescriptor
+                        Prescribing Physician
                       </span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.1rem' }}>
                         <Stethoscope size={14} color="#64748b" />
                         <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0f172a' }}>
-                          {normalizedRxList[0]?.doctorName || 'Médico no especificado'}
+                          {normalizedRxList[0]?.doctorName || 'Unspecified Physician'}
                         </span>
                       </div>
                       {normalizedRxList[0]?.doctorLicense && (
@@ -869,7 +921,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       style={{ cursor: 'pointer' }}
                     />
                     <label htmlFor="autoCreatePatient" style={{ fontSize: '0.8rem', color: '#475569', cursor: 'pointer', margin: 0 }}>
-                      Vincular o registrar automáticamente el perfil del paciente en el CRM
+                      Automatically link or register patient profile in Atlas Clinical CRM
                     </label>
                   </div>
                 </div>
@@ -888,12 +940,12 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#be185d' }}>
                       <Dna size={16} />
                       <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                        Detalles Fagron Genomics (BOX: {rawAiData.fagronDetails.boxId || 'N/A'})
+                        Fagron Genomics Details (BOX: {rawAiData.fagronDetails.boxId || 'N/A'})
                       </span>
                     </div>
                     {rawAiData.fagronDetails.reportDate && (
                       <span style={{ fontSize: '0.78rem', color: '#9d174d' }}>
-                        Fecha del Informe: {rawAiData.fagronDetails.reportDate}
+                        Report Date: {rawAiData.fagronDetails.reportDate}
                       </span>
                     )}
                     {rawAiData.fagronDetails.geneticBiomarkers?.length > 0 && (
@@ -920,10 +972,10 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      Formulaciones ({normalizedRxList.length})
+                      Compounded Formulations ({normalizedRxList.length})
                     </span>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      {normalizedRxList.reduce((sum, r) => sum + (r.prescriptionLines?.length || 0), 0)} principios activos totales
+                      {normalizedRxList.reduce((sum, r) => sum + (r.prescriptionLines?.length || 0), 0)} active pharmaceutical ingredients
                     </span>
                   </div>
 
@@ -941,11 +993,11 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                         <div>
                           <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-                            {rxItem.treatmentType || `Formulación ${rxIdx + 1}`}
+                            {rxItem.treatmentType || `Formulation ${rxIdx + 1}`}
                           </h4>
                           {rxItem.volume && (
                             <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                              Volumen/Presentación: {rxItem.volume} {rxItem.dispensingForm ? `(${rxItem.dispensingForm})` : ''}
+                              Volume / Delivery: {rxItem.volume} {rxItem.dispensingForm ? `(${rxItem.dispensingForm})` : ''}
                             </span>
                           )}
                         </div>
@@ -959,7 +1011,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                           color: rxItem.validationStatus === 'Ready' ? '#166534' : '#92400e',
                           border: `1px solid ${rxItem.validationStatus === 'Ready' ? '#bbf7d0' : '#fde68a'}`
                         }}>
-                          {rxItem.validationStatus === 'Ready' ? '✓ Listo para Prescribir' : '⚠ Revisión de Catálogo'}
+                          {rxItem.validationStatus === 'Ready' ? '✓ Ready to Prescribe' : '⚠ Catalogue Review Required'}
                         </span>
                       </div>
 
@@ -1023,7 +1075,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                                   backgroundColor: line._isPlaceholder ? '#ffedd5' : '#dcfce7',
                                   color: line._isPlaceholder ? '#9a3412' : '#15803d'
                                 }}>
-                                  {line._isPlaceholder ? 'Placeholder' : 'En Catálogo'}
+                                  {line._isPlaceholder ? 'Placeholder Active' : 'Verified in Catalogue'}
                                 </span>
                               </div>
                             </div>
@@ -1032,7 +1084,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                             {line._needsProductMapping && (
                               <div style={{ marginTop: '0.25rem', paddingTop: '0.4rem', borderTop: '1px dashed #fed7aa' }}>
                                 <span style={{ fontSize: '0.72rem', color: '#9a3412', display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>
-                                  Mapear a un producto existente del catálogo (opcional):
+                                  Map to an existing product in the Formulary catalogue (optional):
                                 </span>
                                 <AlgoliaProductPicker
                                   onProductSelect={(prod) => handleProductMapped(rxIdx, lineIdx, prod)}
@@ -1103,10 +1155,10 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
             </div>
             <div style={{ flex: 1 }}>
               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#1e293b' }}>
-                Prescripción Posiblemente Duplicada
+                Potential Duplicate Prescription Detected
               </h3>
               <p style={{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: '#64748b', lineHeight: 1.45 }}>
-                {dupReason || 'Se ha detectado un registro existente con el mismo Box ID o con el mismo paciente y fecha de prescripción.'}
+                {dupReason || 'An existing clinical record with matching Box ID, patient name, or prescription date was detected.'}
               </p>
             </div>
           </div>
@@ -1123,9 +1175,9 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               flexDirection: 'column',
               gap: '0.35rem'
             }}>
-              <div><strong>Código Existente:</strong> <span style={{ fontFamily: 'monospace' }}>{existingCode}</span></div>
-              {existingPatient && <div><strong>Paciente:</strong> {existingPatient}</div>}
-              {existingDate && <div><strong>Fecha Registro:</strong> {existingDate}</div>}
+              <div><strong>Existing Code:</strong> <span style={{ fontFamily: 'monospace' }}>{existingCode}</span></div>
+              {existingPatient && <div><strong>Patient:</strong> {existingPatient}</div>}
+              {existingDate && <div><strong>Registered Date:</strong> {existingDate}</div>}
               {existingBox && <div><strong>Box ID:</strong> {existingBox}</div>}
             </div>
           )}
@@ -1151,7 +1203,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 }}
               >
                 <Eye size={15} />
-                <span>Ver Prescripción Existente</span>
+                <span>View Existing Prescription Record</span>
               </button>
             )}
 
@@ -1173,7 +1225,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
               }}
             >
               <Save size={15} />
-              <span>Cargar de Todos Modos (Crear Nueva Versión)</span>
+              <span>Import Anyway (Create Revision / New Intake)</span>
             </button>
 
             <button
@@ -1189,7 +1241,7 @@ export default function PrescriptionIntakeWorkspace({ isOpen, onClose, onSaveSuc
                 color: '#64748b'
               }}
             >
-              Cancelar y Revisar
+              Cancel and Return
             </button>
           </div>
         </div>

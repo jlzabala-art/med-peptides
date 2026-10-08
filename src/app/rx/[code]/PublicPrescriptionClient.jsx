@@ -3871,7 +3871,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
         {/* ── Patient Mobile Access Portal (Private Patient Dossier & Traceability) ──────────────── */}
         {(activeGcpTab === 'traceability') && (
-        <div id={!isPatientView ? "qr-card" : "docs-card"} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div id="quality-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
           
           {/* Section Accordion Trigger Header */}
           <div
@@ -3890,23 +3890,21 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: 32, height: 32, borderRadius: '4px', background: '#e8f0fe', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {!isPatientView ? <Factory size={16} /> : <FileText size={16} />}
+                <Factory size={16} />
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
-                    {!isPatientView 
-                      ? (isEs ? '3. Laboratorio, Calidad & Trazabilidad Farmacopea UE' : '3. Quality, Laboratory & EU Traceability')
-                      : (isEs ? '3. Documentos Oficiales Adjuntos' : '3. Official Attached Clinical Documents')}
+                    {isEs ? '3. Laboratorio, Calidad & Trazabilidad Farmacopea UE' : '3. Quality, Laboratory & EU Traceability'}
                   </span>
                   <span style={{ fontSize: '0.68rem', fontWeight: 500, padding: '1px 8px', borderRadius: '10px', background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc' }}>
-                    {!isPatientView ? (isEs ? 'Estándar Farmacopea · Lote UE' : 'GMP Standards · EU Batch Tracked') : `${docs.length} Docs`}
+                    {isEs ? 'Estándar Farmacopea · Lote UE' : 'GMP Standards · EU Batch Tracked'}
                   </span>
                 </div>
                 <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
-                  {!isPatientView
-                    ? (isEs ? 'Control de calidad magistral, estándares de farmacopea y verificación técnica' : 'Compounding batch quality standards, cleanroom release assays and mobile verification')
-                    : (isEs ? 'Previsualización de documentos y recetas oficiales' : 'Official prescription pad and compounding technical records')}
+                  {isEs 
+                    ? 'Control de calidad magistral, estándares de farmacopea y verificación técnica' 
+                    : 'Compounding batch quality standards, cleanroom release assays and mobile verification'}
                 </div>
               </div>
             </div>
@@ -3918,7 +3916,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
 
           {expandedSections.traceability && (
           <React.Fragment>
-          {!isPatientView && (
           <div style={{
             background: '#ffffff',
             borderRadius: '16px',
@@ -4169,167 +4166,6 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
             </div>
           </div>
         </div>
-        )}
-
-        {/* ── Official Attached Documents Tabs & Preview ──────────────────────────── */}
-        {docs.length > 0 && (
-          <div id="docs-card" style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            padding: '1.5rem',
-            boxShadow: '0 4px 20px rgba(15, 23, 42, 0.05)',
-            marginBottom: '1.5rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <div style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff'
-                }}>
-                  <FileText size={20} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-                    {isEs ? `Documentos Oficiales Adjuntos (${docs.length})` : `Official Attached Clinical Documents (${docs.length})`}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                    {isEs ? 'Previsualización de la receta médica oficial y la ficha técnica de formulación magistral' : 'Preview official signed prescription pad and compounding technical records'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Document Selector Pills */}
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
-                {docs.map((d, dIdx) => (
-                  <button
-                    key={dIdx}
-                    type="button"
-                    onClick={() => setActiveDocTab(dIdx)}
-                    style={{
-                      padding: '0.45rem 0.85rem',
-                      borderRadius: '8px',
-                      border: activeDocTab === dIdx ? '1px solid #6366f1' : '1px solid #cbd5e1',
-                      background: activeDocTab === dIdx ? '#eff6ff' : '#ffffff',
-                      color: activeDocTab === dIdx ? '#4f46e5' : '#475569',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {d.category === 'signed_rx' 
-                      ? (isEs ? '📄 Receta Médica Oficial' : '📄 Official Signed Pad') 
-                      : (isEs ? '🖼️ Ficha de Formulación' : '🖼️ Compounding Record')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Active Document Viewer */}
-            {docs[activeDocTab] && (
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-                      {docs[activeDocTab].title || docs[activeDocTab].name}
-                    </h4>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>
-                      {docs[activeDocTab].uploadedBy || (isEs ? 'Expediente médico confidencial' : 'Confidential clinical record')}
-                    </p>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => setPreviewDoc(docs[activeDocTab])}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '0.45rem 0.85rem',
-                        borderRadius: '8px',
-                        background: '#6366f1',
-                        color: '#ffffff',
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
-                        border: 'none',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Maximize2 size={13} />
-                      <span>{isEs ? 'Pantalla Completa' : 'Full Screen'}</span>
-                    </button>
-
-                    {docs[activeDocTab].url && (
-                      <a
-                        href={docs[activeDocTab].url}
-                        target="_blank"
-                        rel="noreferrer"
-                        download
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '0.45rem 0.75rem',
-                          borderRadius: '8px',
-                          background: '#ffffff',
-                          border: '1px solid #cbd5e1',
-                          color: '#475569',
-                          fontSize: '0.78rem',
-                          fontWeight: 700,
-                          textDecoration: 'none'
-                        }}
-                      >
-                        <Download size={13} />
-                        <span>{isEs ? 'Descargar' : 'Download'}</span>
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Inline Embedded Preview */}
-                <div style={{
-                  height: 480,
-                  width: '100%',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  background: '#ffffff',
-                  border: '1px solid #cbd5e1'
-                }}>
-                  {docs[activeDocTab].type?.includes('pdf') || docs[activeDocTab].url?.endsWith('.pdf') ? (
-                    <iframe 
-                      src={`${docs[activeDocTab].url}#toolbar=0&navpanes=0`} 
-                      style={{ width: '100%', height: '100%', border: 'none' }}
-                      title="PDF Preview"
-                    />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
-                      <img 
-                        src={docs[activeDocTab].url} 
-                        alt="Document Preview"
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
         </React.Fragment>
         )}
         </div>

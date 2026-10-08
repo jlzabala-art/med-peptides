@@ -244,106 +244,204 @@ export default function PatientExperienceHub({
             </button>
           </div>
 
-          {/* 4 Cards Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-            gap: '10px'
-          }}>
-            {/* Card 1: Cotización Directa */}
-            <div style={{
-              background: '#f8f9fa',
-              border: '1px solid #dadce0',
-              borderRadius: '6px',
-              padding: '10px 12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: 26, height: 26, borderRadius: '4px', background: '#eff6ff', color: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CreditCard size={14} />
+          {/* Scoped CSS for responsive 2x2 Google Cloud Grid */}
+          <style>{`
+            .patient-capabilities-grid-2x2 {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 12px;
+            }
+            @media (max-width: 680px) {
+              .patient-capabilities-grid-2x2 {
+                grid-template-columns: 1fr;
+                gap: 10px;
+              }
+            }
+            .patient-capability-card {
+              background: #ffffff;
+              border: 1px solid #dadce0;
+              border-radius: 8px;
+              padding: 12px 14px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              transition: all 0.15s ease-in-out;
+              box-shadow: 0 1px 2px rgba(60,64,67,0.04);
+            }
+            .patient-capability-card:hover {
+              border-color: #bdc1c6;
+              box-shadow: 0 2px 6px rgba(60,64,67,0.08);
+            }
+          `}</style>
+
+          {/* 4 Cards 2x2 Grid (GCP Standard) */}
+          <div className="patient-capabilities-grid-2x2">
+            {/* Card 1: Formulation Quote */}
+            <div className="patient-capability-card">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '6px',
+                    background: '#e8f0fe',
+                    border: '1px solid #d2e3fc',
+                    color: '#1a73e8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <CreditCard size={15} />
+                  </div>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124' }}>
+                    {isEs ? '1. Solicitud de Cotización' : '1. Formulation Quote'}
+                  </span>
                 </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
-                  {isEs ? '1. Solicitud de Cotización' : '1. Formulation Quote'}
+                <span style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#e8f0fe',
+                  color: '#1a73e8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {isEs ? '1-Clic' : '1-Click Quote'}
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: '#5f6368', lineHeight: 1.4 }}>
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45, paddingLeft: '38px' }}>
                 {isEs 
                   ? 'El paciente puede solicitar presupuesto oficial o autorizar la preparación magistral en 1 clic sin desplazarse.'
                   : 'Patient can request official compounding quotation or authorize preparation in 1 click without clinic visits.'}
               </p>
             </div>
 
-            {/* Card 2: Comunicación Controlada */}
-            <div style={{
-              background: '#f8f9fa',
-              border: '1px solid #dadce0',
-              borderRadius: '6px',
-              padding: '10px 12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: 26, height: 26, borderRadius: '4px', background: '#e6f4ea', color: '#137333', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <MessageCircle size={14} />
+            {/* Card 2: Controlled Inquiry */}
+            <div className="patient-capability-card">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '6px',
+                    background: '#e6f4ea',
+                    border: '1px solid #ceead6',
+                    color: '#137333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <MessageCircle size={15} />
+                  </div>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124' }}>
+                    {isEs ? '2. Comunicación Médica' : '2. Controlled Inquiry'}
+                  </span>
                 </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
-                  {isEs ? '2. Comunicación Médica' : '2. Controlled Inquiry'}
+                <span style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#e6f4ea',
+                  color: '#137333',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {isEs ? 'Canal Seguro' : 'Secure Channel'}
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: '#5f6368', lineHeight: 1.4 }}>
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45, paddingLeft: '38px' }}>
                 {isEs 
                   ? 'Canal seguro estructurado que adjunta automáticamente el código de receta para resolver dudas con el médico.'
                   : 'Structured channel pre-filled with patient and prescription code to clarify dosage without phone disruptions.'}
               </p>
             </div>
 
-            {/* Card 3: Refill Inteligente */}
-            <div style={{
-              background: '#f8f9fa',
-              border: '1px solid #dadce0',
-              borderRadius: '6px',
-              padding: '10px 12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: 26, height: 26, borderRadius: '4px', background: '#fef7e0', color: '#b06000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <RotateCcw size={14} />
+            {/* Card 3: 1-Click Treatment Refill */}
+            <div className="patient-capability-card">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '6px',
+                    background: '#fef7e0',
+                    border: '1px solid #feefc3',
+                    color: '#b06000',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <RotateCcw size={15} />
+                  </div>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124' }}>
+                    {isEs ? '3. Refill en 1-Clic' : '3. 1-Click Treatment Refill'}
+                  </span>
                 </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
-                  {isEs ? '3. Refill en 1-Clic' : '3. 1-Click Treatment Refill'}
+                <span style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#fef7e0',
+                  color: '#b06000',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {isEs ? 'Continuidad' : 'Auto-Refill'}
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: '#5f6368', lineHeight: 1.4 }}>
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45, paddingLeft: '38px' }}>
                 {isEs 
                   ? 'Al acercarse al fin del ciclo de tratamiento, el paciente puede solicitar la renovación inmediata de su fórmula.'
                   : 'When treatment is nearing completion, the patient can trigger a continuation refill request with 1 tap.'}
               </p>
             </div>
 
-            {/* Card 4: Trazabilidad Bipersonal */}
-            <div style={{
-              background: '#f8f9fa',
-              border: '1px solid #dadce0',
-              borderRadius: '6px',
-              padding: '10px 12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: 26, height: 26, borderRadius: '4px', background: '#f3e8fd', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Clock size={14} />
+            {/* Card 4: Dual Status Tracking */}
+            <div className="patient-capability-card">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '6px',
+                    background: '#f3e8fd',
+                    border: '1px solid #e9d5ff',
+                    color: '#7c3aed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Clock size={15} />
+                  </div>
+                  <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124' }}>
+                    {isEs ? '4. Trazabilidad de Estado' : '4. Dual Status Tracking'}
+                  </span>
                 </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#202124' }}>
-                  {isEs ? '4. Trazabilidad de Estado' : '4. Dual Status Tracking'}
+                <span style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  background: '#f3e8fd',
+                  color: '#7c3aed',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {isEs ? 'Tiempo Real' : 'Real-Time'}
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: '#5f6368', lineHeight: 1.4 }}>
+              <p style={{ margin: 0, fontSize: '0.73rem', color: '#5f6368', lineHeight: 1.45, paddingLeft: '38px' }}>
                 {isEs 
                   ? 'Médico y paciente conocen en tiempo real la fase exacta (Aprobada → En Formulación → Enviada → Entregada).'
                   : 'Both clinic and patient track the exact status in real-time, eliminating calls inquiring about delivery dates.'}

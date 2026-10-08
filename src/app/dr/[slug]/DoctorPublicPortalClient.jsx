@@ -1271,9 +1271,9 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   <span>Protocol Dossier</span>
                 </span>
               )}
-              {rx.posology && (
-                <span style={{ color: '#0d9488', fontWeight: 500 }}>
-                  {rx.posology.length > 32 ? `${rx.posology.slice(0, 32)}...` : rx.posology}
+              {rx.volume && (
+                <span style={{ fontSize: '0.68rem', background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                  {rx.volume}
                 </span>
               )}
             </div>
@@ -1318,7 +1318,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     {
       key: 'createdAt',
       header: 'Date',
-      width: '14%',
+      width: '12%',
       sortable: true,
       render: (rx) => (
         <div style={{ fontSize: '0.78rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -1330,27 +1330,27 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     {
       key: 'actions',
       header: 'Actions',
-      width: '14%',
+      width: '18%',
       align: 'right',
       render: (rx) => {
         const isPending = ['pending', 'draft'].includes((rx.status || rx.state || '').toLowerCase());
         const isSigning = signingTaskId === (rx.code || rx.id);
 
         return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
-            {isPending && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'flex-end', width: '100%' }} onClick={e => e.stopPropagation()}>
+            {isPending ? (
               <button
                 type="button"
                 disabled={isSigning}
                 onClick={(e) => handleSignOffPrescription(rx, e)}
                 style={{
-                  height: '30px',
-                  padding: '0 10px',
+                  height: '28px',
+                  padding: '0 8px',
                   borderRadius: '4px',
                   background: '#1a73e8',
                   border: '1px solid #1557b0',
                   color: '#ffffff',
-                  fontSize: '0.74rem',
+                  fontSize: '0.73rem',
                   fontWeight: 650,
                   cursor: isSigning ? 'wait' : 'pointer',
                   display: 'inline-flex',
@@ -1373,35 +1373,38 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   </>
                 )}
               </button>
+            ) : (
+              <Link
+                href={`/rx/${rx.code}`}
+                style={{
+                  height: '28px',
+                  padding: '0 8px',
+                  borderRadius: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #dadce0',
+                  color: '#1a73e8',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Open complete clinical monograph and posology dossier"
+              >
+                <span>Dossier</span>
+                <ExternalLink size={11} />
+              </Link>
             )}
-            <Link
-              href={`/rx/${rx.code}`}
-              style={{
-                height: '30px',
-                padding: '0 10px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                border: '1px solid #dadce0',
-                color: '#1a73e8',
-                fontSize: '0.76rem',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                textDecoration: 'none'
-              }}
-              title="Open complete clinical monograph and posology dossier"
-            >
-              <span>Dossier</span>
-              <ExternalLink size={12} />
-            </Link>
+
             <button
               type="button"
               onClick={() => handleOpenLabelsModal(rx)}
               title="View vector pharmacy compounding bottle label"
               style={{
-                height: '30px',
-                width: '30px',
+                height: '28px',
+                width: '28px',
                 borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #dadce0',
@@ -1410,11 +1413,12 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'background 0.12s'
+                flexShrink: 0
               }}
             >
               <Tag size={13} />
             </button>
+
             <button
               type="button"
               onClick={() => {
@@ -1424,8 +1428,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               }}
               title="Copy direct patient-facing prescription link"
               style={{
-                height: '30px',
-                width: '30px',
+                height: '28px',
+                width: '28px',
                 borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #dadce0',
@@ -1433,7 +1437,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexShrink: 0
               }}
             >
               <Share2 size={13} />
@@ -1659,94 +1664,82 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
 
   const sidebarNavGroups = useMemo(() => [
     {
-      groupTitle: 'CLINICAL WORKSPACE',
+      groupTitle: 'CLINICAL OPERATIONS',
       items: [
         {
           id: 'overview',
-          label: 'Overview & KPIs',
+          label: 'Panel General & KPIs',
           icon: BarChart3,
           badge: null
         },
         {
-          id: 'search',
-          label: 'Clinical Search',
-          icon: Search,
-          badge: searchQuery.trim() ? `${filteredPrescriptions.length + filteredTasks.length}` : null,
+          id: 'prescriptions',
+          label: 'Mis Prescripciones',
+          icon: Layers,
+          badge: filteredPrescriptions.length > 0 ? `${filteredPrescriptions.length}` : null,
           badgeColor: '#1a73e8'
         },
         {
           id: 'tasks',
-          label: 'Pending To-Do Queue',
+          label: 'Tareas Pendientes',
           icon: Clock,
           badge: filteredTasks.length > 0 ? `${filteredTasks.length}` : null,
           badgeColor: filteredTasks.length > 0 ? '#b06000' : '#5f6368'
-        },
-        {
-          id: 'prescriptions',
-          label: 'Prescriptions Dossier',
-          icon: Layers,
-          badge: filteredPrescriptions.length > 0 ? `${filteredPrescriptions.length}` : null
         }
       ]
     },
     {
-      groupTitle: 'CLINICAL REFERENCE',
+      groupTitle: 'FORMULARY & PROTOCOLS',
       items: [
         {
           id: 'protocols',
-          label: 'Clinical Protocols (77)',
+          label: 'Protocolos Médicos (77)',
           icon: BookOpen,
           action: () => setIsDiscoveryDrawerOpen(true),
           badge: filteredProtocols.length > 0 ? `${filteredProtocols.length}` : '77'
         },
         {
           id: 'formulary',
-          label: 'Compounding Pharmacopeia',
+          label: 'Farmacopea & APIs',
           icon: FlaskConical,
           action: () => setIsDiscoveryDrawerOpen(true),
           badge: filteredFormulary.length > 0 ? `${filteredFormulary.length}` : null
         },
         {
           id: 'diagnostics',
-          label: 'Diagnostic Panels (Bloodo™)',
+          label: 'Diagnóstico & Biomarcadores',
           icon: Activity,
           badge: '6 Tests'
         },
         {
           id: 'protocols_catalog',
-          label: 'Complete Catalog Directory',
+          label: 'Catálogo Digital Atlas',
           icon: ExternalLink,
           action: () => window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank'),
-          badge: 'Atlas'
+          badge: '↗'
         }
       ]
     },
     {
-      groupTitle: 'PRACTICE & RECOMMENDATIONS',
+      groupTitle: 'PRACTICE & TOOLS',
       items: [
         {
-          id: 'recommendations',
-          label: 'Peptide Formulations & AI Synergy',
-          icon: Sparkles,
-          badge: 'Atlas'
-        },
-        {
           id: 'intake',
-          label: 'Share Patient Intake',
+          label: 'Compartir Intake Paciente',
           icon: Share2,
           action: handleCopyIntakeLink,
           badge: '1-Click'
         },
         {
           id: 'credentials',
-          label: 'DHA License & Profile',
+          label: 'Licencia DHA & Perfil',
           icon: ShieldCheck,
           action: () => setIsCredentialsModalOpen(true),
-          badge: 'Verified'
+          badge: 'Verificado'
         }
       ]
     }
-  ], [filteredTasks.length, filteredPrescriptions.length, filteredPrescriptions, filteredFormulary.length, filteredProtocols.length, searchQuery]);
+  ], [filteredTasks.length, filteredPrescriptions.length, filteredFormulary.length, filteredProtocols.length]);
 
   const handleSidebarNavigate = (itemOrId) => {
     triggerHaptic('light');
@@ -1767,12 +1760,18 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       return;
     }
 
-    if (id === 'prescriptions') {
+    if (id === 'search' || id === 'prescriptions') {
       setQuickRxFilter('all');
       setStatusFilter('all');
       setPatientFilter('all');
       setTemporalFilter('all');
       setApiFilter(null);
+      setActiveAnchor('prescriptions');
+      if (isMobileSidebarOpen) setIsMobileSidebarOpen(false);
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
     }
     if (id === 'tasks') {
       setTaskFilter('all');
@@ -2040,7 +2039,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         doctorHomeHref={`/dr/${slug}`}
         doctorName={doctor.name}
         hideTier2={true}
-        hideImportRx={true}
+        hideImportRx={false}
         hideSearchButton={true}
         isDoctorView={true}
         onImportRx={() => setIsIntakeOpen(true)}
@@ -3110,6 +3109,31 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               >
                 <Download size={13} color="#5f6368" />
                 <span>Export CSV</span>
+              </button>
+
+              {/* Primary Action Button: Import / New Prescription (AI Intake) */}
+              <button
+                type="button"
+                onClick={() => setIsIntakeOpen(true)}
+                title="Import prescription document via Atlas AI Intake (Multi-format & 2-Phase SLA)"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  height: '28px',
+                  padding: '0 12px',
+                  borderRadius: '4px',
+                  border: '1px solid #1a73e8',
+                  background: '#1a73e8',
+                  color: '#ffffff',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(26,115,232,0.2)'
+                }}
+              >
+                <Plus size={13} />
+                <span>+ Import / New Rx (AI)</span>
               </button>
             </div>
           </div>
