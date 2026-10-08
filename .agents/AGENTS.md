@@ -466,3 +466,17 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   2. `git commit -m "feat/fix(...): descripción precisa"`
   3. `git push origin main`
 - **Propósito**: Dispara instantáneamente el pipeline optimizado de GitHub Actions en segundo plano sin que el usuario tenga que solicitarlo o recordarlo. Nunca dejes cambios aprobados pendientes de push en local.
+
+## 40. Ingesta Clínica de Prescripciones y Validación de Etiquetas (EU GMP Integrity Rule)
+- **Cero Contaminación Cruzada en Recetas Multifase**: Cuando una prescripción contenga múltiples frascos, fases o momentos de administración (ej. Mañana vs Noche, o Fase 1 vs Fase 2), cada fase DEBE tener su propio bloque completamente aislado de posología, lote, duración y excipientes. Prohibido arrastrar las instrucciones de la Fase 1 a la Fase 2.
+- **Aritmética Obligatoria de Unidades (Posology Math)**:
+  - Nunca asumir cantidades por defecto (como "90 cápsulas" o "1 cápsula diaria").
+  - Las unidades totales DEBEN calcularse matemáticamente: `Unidades = (Tomas al día) × (Días de tratamiento)`.
+  - Ejemplo: 2 tomas/día (almuerzo + cena) × 60 días = **120 cápsulas (2 Meses)**. 1 toma/día × 60 días = **60 cápsulas (2 Meses)**.
+- **Coherencia Temporal Regulatoria (EU GMP)**:
+  - La fecha de fabricación o dispensación (`Mfg Date`) NUNCA puede ser anterior a la fecha en que el médico firmó la receta (`Prescription Date`). Fabricar una fórmula magistral individualizada antes de la fecha de la receta es una infracción regulatoria grave.
+  - La fecha de caducidad (`Exp Date`) debe calcularse hacia adelante a partir de la fecha real de dispensación/elaboración (típicamente +1 año).
+- **Fidelidad de Excipientes y Requisitos de Formulación**:
+  - Si la prescripción estipula requisitos como *"Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives"*, este texto DEBE vincularse fielmente al campo `base` / `vehicle` de la etiqueta. Prohibido reemplazarlo por textos genéricos como *"Micronized Compounded Hard Capsules Base"*.
+- **Atribución Médica Exacta**:
+  - En informes genómicos o diagnósticos (como TrichoTest de Fagron), identificar siempre al médico prescriptor u ordenante real indicado en el informe (ej. Dr. Sezgin Cagatay en Hortman Clinics) con su número de licencia DHA, no al director de la clínica ni al personal de laboratorio.

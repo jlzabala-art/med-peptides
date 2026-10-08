@@ -177,16 +177,18 @@ export async function POST(request) {
                 description: 'Galenic archetype of this formulation block'
               },
               dispensingForm: { type: Type.STRING, description: 'Pharmaceutical form (e.g. Transdermal Liposomal Cream, Oral Capsules, Topical Pomade / Ointment, Topical Solution)' },
-              volume: { type: Type.STRING, description: 'Total volume or container size (e.g. 90ml, 90 capsules, 30g, 60ml, 100ml)' },
-              duration: { type: Type.STRING, description: 'Duration of treatment (e.g. 90 days, 3 months, 30 days)' },
-              treatmentDays: { type: Type.INTEGER, description: 'Total duration in numeric days (e.g. 90, 60, 30)' },
+              volume: { type: Type.STRING, description: 'Total volume or container size calculated mathematically (e.g. 60 capsules, 120 capsules, 90 ml, 30g)' },
+              duration: { type: Type.STRING, description: 'Duration of treatment (e.g. 2 months, 60 days, 3 months, 90 days)' },
+              treatmentDays: { type: Type.INTEGER, description: 'Total duration in numeric days (e.g. 60, 90, 30)' },
+              dailyDoses: { type: Type.INTEGER, description: 'Number of doses or administrations per day (e.g. 1 for morning only, 2 for lunch + dinner, 3 for tid)' },
+              formulationRequirements: { type: Type.STRING, description: 'Special formulation requirements or excipient constraints verbatim from the prescription (e.g. Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives)' },
               vehicleBase: {
                 type: Type.OBJECT,
                 description: 'Compounding vehicle, solvent, or pharmaceutical base',
                 properties: {
-                  name: { type: Type.STRING, description: 'Vehicle name (e.g. Pentravan Liposomal Transdermal Cream Base, Vegetarian HPMC Enteric Capsules, TrichoSol)' },
-                  type: { type: Type.STRING, description: 'Class: liposomal_cream, oral_capsule, hydrophilic_solution, lipidic_oil, ointment_base' },
-                  specifications: { type: Type.STRING, description: 'Pharmaceutical specs of the vehicle' }
+                  name: { type: Type.STRING, description: 'Vehicle name (e.g. Vegetable capsules. Gluten-free, lactose-free, colorant-free; Pentravan; TrichoSol)' },
+                  type: { type: Type.STRING, description: 'Class: oral_capsule, liposomal_cream, hydrophilic_solution, lipidic_oil, ointment_base' },
+                  specifications: { type: Type.STRING, description: 'Pharmaceutical specs and excipient constraints' }
                 }
               },
               packaging: {
@@ -302,7 +304,30 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
 
 7. FAGRON GENOMICS VS GENERAL CLINICAL COMPOUNDING (CRITICAL RULE):
    - ONLY classify as 'documentType': "FagronGenomics" or 'clinicalCategory': "nutrigen" / "trichotest" if the uploaded document is an official Fagron Genomics report/test containing explicit titles ("NutriGen", "TrichoTest", "TeloTest") or an official Fagron Box ID / Barcode (...AANUT..., ...AATRI..., ...AATEL...).
-   - Standard medical clinic prescriptions, doctor Rx pads, and compounded oral capsules (e.g. Ubiquinol, Saw Palmetto, Berberine, Red Yeast Rice from Nova Plastic Surgery Clinic, Dr. Marina Cordeiro Fernandes, Dra. Haydee Camacho, etc.) MUST be classified as 'documentType': "CompoundingFormula" (or "StandardPrescription") and 'clinicalCategory': "compounding" (or "standard"). NEVER associate standard clinical compounding prescriptions with NutriGen!`;
+   - Standard medical clinic prescriptions, doctor Rx pads, and compounded oral capsules (e.g. Ubiquinol, Saw Palmetto, Berberine, Red Yeast Rice from Nova Plastic Surgery Clinic, Dr. Marina Cordeiro Fernandes, Dra. Haydee Camacho, etc.) MUST be classified as 'documentType': "CompoundingFormula" (or "StandardPrescription") and 'clinicalCategory': "compounding" (or "standard"). NEVER associate standard clinical compounding prescriptions with NutriGen!
+
+8. ZERO CROSS-CONTAMINATION IN MULTI-PHASE PRESCRIPTIONS (GOLDEN RULE):
+   - In multi-part or multi-phase prescriptions (e.g. "1. Morning Formula | With Breakfast" and "2. Metabolic & Lipid Formula | With Lunch and Dinner"):
+     * EACH formulation block MUST have its OWN completely isolated 'posology', 'duration', and 'timeOfDay'.
+     * NEVER bleed or copy instructions from Phase 1 into Phase 2! If Phase 2 states "Take 1 dose with lunch and 1 dose with dinner", its posology MUST say exactly that. NEVER output "morning with breakfast" for Phase 2.
+
+9. EXACT POSOLOGY ARITHMETIC & UNIT / CAPSULE COUNT CALCULATION (GOLDEN RULE):
+   - NEVER assume a default of "90 capsules (3 months)" or "1 capsule daily" when not explicitly stated!
+   - You MUST calculate total pharmaceutical units mathematically:
+     * Formula: Total Units = (Daily Doses) × (Duration in Days).
+     * Example A: "Take 1 dose once daily with breakfast", Duration: 2 months (60 days) -> Exactly 60 capsules (2 Months).
+     * Example B: "Take 1 dose with lunch and 1 dose with dinner" (2 doses/day), Duration: 2 months (60 days) -> Exactly 120 capsules (2 Months).
+     * Example C: "1 capsule 3 times daily", Duration: 90 days -> 270 capsules (3 Months).
+     * In 'volume' and 'packaging.volume', state the exact count and duration: e.g. "60 Capsules (2 Months)" or "120 Capsules (2 Months)".
+
+10. EXPLICIT FORMULATION REQUIREMENTS & EXCIPIENTS (VEHICLE BINDING):
+    - When the prescription specifies "Formulation requirements:" or excipient constraints (such as "Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives"):
+      * You MUST extract this exact requirement verbatim into 'vehicleBase.specifications' and 'vehicleBase.name'.
+      * Do NOT replace it with generic terms like "Micronized Compounded Hard Capsules Base" or "Gelatin Capsules".
+
+11. TEMPORAL DATE VALIDITY (EU GMP COMPLIANCE):
+    - Extract 'prescriptionDate' accurately from the doctor's signature or document date.
+    - In an EU GMP licensed compounding dispensary, manufacturing/compounding cannot precede the prescription date. All compounding dates must be on or after 'prescriptionDate'.`;
 
     // Verified Google GenAI models for multimodal extraction
     const CANDIDATE_MODELS = [

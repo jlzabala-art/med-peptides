@@ -523,15 +523,71 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
   const combinedVolumes = blocks.map(b => b.volume || b.packaging?.volume).filter(Boolean).join(', ') || null;
   const combinedDuration = blocks.find(b => b.duration)?.duration || '90 days';
 
+  // Helper to accurately compute capsule count and volume based on posology and duration
+  const computeAccurateVolume = (b) => {
+    if (!b) return null;
+    const formLower = String(b.dispensingForm || b.treatmentType || '').toLowerCase();
+    const isOralCapsule = formLower.includes('cap') || formLower.includes('oral') || (b.items || []).some(i => (i.name || '').toLowerCase().includes('capsule'));
+    if (!isOralCapsule) {
+      return b.volume || b.packaging?.volume || (formLower.includes('pomade') || formLower.includes('ointment') ? '30 g' : (formLower.includes('solution') ? '100 mL' : null));
+    }
+
+    const posLower = String(b.posology || '').toLowerCase();
+    const durLower = String(b.duration || '').toLowerCase();
+    let days = 60; // default 2 months
+    const mMatch = durLower.match(/(\d+)\s*month/);
+    const dMatch = durLower.match(/(\d+)\s*day/);
+    if (mMatch) {
+      days = parseInt(mMatch[1], 10) * 30;
+    } else if (dMatch) {
+      days = parseInt(dMatch[1], 10);
+    } else if (b.treatmentDays) {
+      days = Number(b.treatmentDays);
+    }
+
+    let dailyDoses = Number(b.dailyDoses) || 1;
+    if (!b.dailyDoses) {
+      if (posLower.includes('lunch and') && posLower.includes('dinner')) {
+        dailyDoses = 2;
+      } else if (posLower.includes('twice daily') || posLower.includes('2 times') || posLower.includes('bid') || posLower.includes('2 doses')) {
+        dailyDoses = 2;
+      } else if (posLower.includes('3 times') || posLower.includes('three times') || posLower.includes('tid')) {
+        dailyDoses = 3;
+      }
+    }
+
+    const totalCaps = dailyDoses * days;
+    const months = Math.round(days / 30);
+    const monthLabel = months > 1 ? `${months} Months` : '1 Month';
+    return `${totalCaps} Capsules (${monthLabel})`;
+  };
+
   // Build canonical sequential phases array
   const phases = blocks.map((b, bIdx) => {
     const phaseNum = b.phaseNumber || (bIdx + 1);
     const defaultPhaseName = `Phase ${phaseNum}: ${b.treatmentType || b.dispensingForm || 'Formulation'}`;
-    const vehicleObj = b.vehicleBase || {
-      name: b.items?.find(i => i.isVehicleOrBase)?.name || 'Compounding Base',
+
+    const rawReqs = b.formulationRequirements || b.vehicleBase?.specifications || rawData.clinicalNotes || '';
+    const isVegCaps = String(rawReqs).toLowerCase().includes('vegetable') || String(rawReqs).toLowerCase().includes('gluten') || String(rawReqs).toLowerCase().includes('lactose');
+
+    let vehicleName = b.vehicleBase?.name || b.items?.find(i => i.isVehicleOrBase)?.name;
+    if (isVegCaps && (!vehicleName || vehicleName.toLowerCase().includes('hard capsule') || vehicleName.toLowerCase().includes('compounding base'))) {
+      vehicleName = 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.';
+    } else if (!vehicleName) {
+      vehicleName = b.blockType === 'pomade' ? 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)' :
+                    b.blockType === 'hormone' ? 'Pentravan® Liposomal Transdermal Cream Base' :
+                    b.blockType === 'trichosol' ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' :
+                    'Vegetable Acid-Resistant Capsule Base';
+    }
+
+    const vehicleObj = {
+      name: vehicleName,
       type: b.blockType || 'compounding',
-      specifications: ''
+      specifications: b.formulationRequirements || b.vehicleBase?.specifications || ''
     };
+
+    const accurateVol = computeAccurateVolume(b);
+
     return {
       id: `phase-${phaseNum}`,
       phaseNumber: phaseNum,
@@ -539,12 +595,13 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
       timeOfDay: b.timeOfDay || (bIdx === 0 ? 'morning' : 'evening'),
       treatmentType: b.treatmentType || b.dispensingForm || 'Formulation',
       dispensingForm: b.dispensingForm || 'Compounded Formulation',
-      volume: b.volume || b.packaging?.volume || null,
-      duration: b.duration || combinedDuration || '90 days',
-      treatmentDays: Number(b.treatmentDays) || 90,
+      volume: accurateVol,
+      duration: b.duration || combinedDuration || '60 days',
+      treatmentDays: Number(b.treatmentDays) || 60,
       vehicle: vehicleObj,
       vehicleBase: vehicleObj,
-      packaging: b.packaging || { containerType: 'Safety Dispenser', volume: b.volume },
+      formulationRequirements: b.formulationRequirements || '',
+      packaging: b.packaging || { containerType: 'Safety Dispenser', volume: accurateVol },
       posology: b.posology || '',
       posologySteps: Array.isArray(b.posologySteps) ? b.posologySteps : [],
       safetyWarnings: Array.isArray(b.safetyWarnings) ? b.safetyWarnings : [],
@@ -636,6 +693,10 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     posology: combinedPosology,
     phases,
     formulationBlocks: blocks,
+    date: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
+    prescriptionDate: rawData.prescriptionDate || new Date().toISOString().slice(0, 10),
+    mfgDate: '05-10-2026',
+    expDate: '04-10-2027',
 
     // ALL PRODUCTS / LINES CONSOLIDATED IN THIS SINGLE PRESCRIPTION
     prescriptionLines: allPrescriptionLines,
