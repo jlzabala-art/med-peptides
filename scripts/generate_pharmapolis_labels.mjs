@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import QRCode from 'qrcode';
+import { PDFDocument } from 'pdf-lib';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +16,21 @@ if (!fs.existsSync(OUTPUT_DIR)) {
 // 7.5 x 4.5 ratio at 200 DPI = 1500 x 900 px
 const WIDTH = 1500;
 const HEIGHT = 900;
+
+async function createPdfFromPngBuffer(pngBuffer, widthMm = 75, heightMm = 45) {
+  const pdfDoc = await PDFDocument.create();
+  const widthPt = (widthMm / 25.4) * 72;
+  const heightPt = (heightMm / 25.4) * 72;
+  const page = pdfDoc.addPage([widthPt, heightPt]);
+  const pngImage = await pdfDoc.embedPng(pngBuffer);
+  page.drawImage(pngImage, {
+    x: 0,
+    y: 0,
+    width: widthPt,
+    height: heightPt
+  });
+  return await pdfDoc.save();
+}
 
 function escapeXml(unsafe) {
   if (!unsafe) return '';
@@ -341,16 +357,16 @@ const PRESCRIPTIONS_CATALOG = [
     rxCode: 'RX-51857-A',
     fileNumber: '51857',
     patientName: 'Amna Sultan Mohamed Ahmed Alotaiba',
-    productTitle: 'Morning Formula - 90 acid-resistant capsules',
-    formula: 'Ubiquinol (Reduced CoQ10) 250 mg + Saw Palmetto Lipidic Extract 250 mg',
-    directions: 'Take 1 capsule every morning with breakfast for 3 months.',
-    warnings: 'Acid-resistant vegetable capsules. Discontinue 3 days prior to scheduled elective surgery.',
-    prodDate: '15-09-2026',
-    expDate: '15-09-2027',
+    productTitle: 'Morning Formula | With Breakfast',
+    formula: 'Ubiquinol (Kaneka® CoQ10) 250 mg + Saw Palmetto Extract 250 mg',
+    directions: 'Take 1 dose once daily with breakfast.',
+    warnings: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
     storage: 'Store in a cool dry place',
     doctorName: 'Dr. Marina Cordeiro Fernandes',
     doctorLicense: 'DHA-91105367',
-    clinicName: 'NOVA Clinic, Dubai',
+    clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-UBISWP',
     lote: '2609-AMN1',
     url: 'https://med-peptides.com/rx/51857'
@@ -361,16 +377,16 @@ const PRESCRIPTIONS_CATALOG = [
     rxCode: 'RX-51857-B',
     fileNumber: '51857',
     patientName: 'Amna Sultan Mohamed Ahmed Alotaiba',
-    productTitle: 'Metabolic & Lipid Formula - 90 acid-resistant capsules',
-    formula: 'Red Yeast Rice 600 mg + Berberine HCl 500 mg + Citrus Bergamot 500 mg + Chromium Picolinate 100 mcg',
-    directions: 'Take 1 capsule daily in the evening with dinner for 3 months.',
-    warnings: 'Standardized Citrinin-free Monacolin K. Do not consume with grapefruit juice. Periodic lipid panel recommended.',
-    prodDate: '15-09-2026',
-    expDate: '15-09-2027',
+    productTitle: 'Metabolic & Lipid Formula | With Lunch and Dinner',
+    formula: 'Red Yeast Rice Extract 600 mg + Berberine HCl 500 mg + Citrus Bergamot Extract 500 mg + Chromium Picolinate 100 mcg',
+    directions: 'Take 1 dose with lunch and 1 dose with dinner.',
+    warnings: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
     storage: 'Store in a cool dry place',
     doctorName: 'Dr. Marina Cordeiro Fernandes',
     doctorLicense: 'DHA-91105367',
-    clinicName: 'NOVA Clinic, Dubai',
+    clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     batchCode: 'PHARM-2026-METLIP',
     lote: '2609-AMN2',
     url: 'https://med-peptides.com/rx/51857'
@@ -468,12 +484,12 @@ const PRESCRIPTIONS_CATALOG = [
     formula: 'Minoxidil 4% + Spironolactone 1% + Arginine 1.5% in TrichoSol™ 100 mL',
     directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
     warnings: 'For topical scalp use only. Leave on scalp as long as possible. Wash scalp the next day.',
-    prodDate: '15-09-2026',
-    expDate: '15-09-2027',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
     storage: 'Store at room temperature',
-    doctorName: 'Dr. Haytham Salem',
-    doctorLicense: 'DHA-P-0319842',
-    clinicName: 'Med Art Clinic Day Surgery Center, Dubai',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
     batchCode: 'PHARM-2026-TRI100',
     lote: '2609-MHD1',
     url: 'https://med-peptides.com/rx/BOX03483AATRI'
@@ -617,12 +633,20 @@ async function run() {
     const frontPath = path.join(OUTPUT_DIR, frontFilename);
     fs.writeFileSync(frontPath, frontPngBuffer);
 
+    const frontPdfBytes = await createPdfFromPngBuffer(frontPngBuffer, 75, 45);
+    const frontPdfFilename = `PHARMAPOLIS_${item.codeId}_FRONT.pdf`;
+    fs.writeFileSync(path.join(OUTPUT_DIR, frontPdfFilename), frontPdfBytes);
+
     // 2. BACK LABEL (Parte de atrás: Dedicated 7.5 x 4.5 cm with QR, Batch & Physician specs)
     const backSvg = await generateBackLabelSvg(item, backQrSvg);
     const backPngBuffer = await sharp(Buffer.from(backSvg)).png().toBuffer();
     const backFilename = `PHARMAPOLIS_${item.codeId}_BACK_QR.png`;
     const backPath = path.join(OUTPUT_DIR, backFilename);
     fs.writeFileSync(backPath, backPngBuffer);
+
+    const backPdfBytes = await createPdfFromPngBuffer(backPngBuffer, 75, 45);
+    const backPdfFilename = `PHARMAPOLIS_${item.codeId}_BACK_QR.pdf`;
+    fs.writeFileSync(path.join(OUTPUT_DIR, backPdfFilename), backPdfBytes);
 
     // 3. FRONT LABEL WITH MICRO-QR (Optional hybrid: QR in top right corner without robbing space)
     const frontQrSvg = await generateFrontLabelSvg(item, { withMicroQr: true, qrSvg: microQrSvg });
@@ -631,12 +655,19 @@ async function run() {
     const frontQrPath = path.join(OUTPUT_DIR, frontQrFilename);
     fs.writeFileSync(frontQrPath, frontQrPngBuffer);
 
+    const frontQrPdfBytes = await createPdfFromPngBuffer(frontQrPngBuffer, 75, 45);
+    const frontQrPdfFilename = `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.pdf`;
+    fs.writeFileSync(path.join(OUTPUT_DIR, frontQrPdfFilename), frontQrPdfBytes);
+
     generatedFiles.push({
       patient: item.patientName,
       product: item.productTitle,
       front: `/labels/pharmapolis/${frontFilename}`,
+      frontPdf: `/labels/pharmapolis/${frontPdfFilename}`,
       back: `/labels/pharmapolis/${backFilename}`,
-      frontWithQr: `/labels/pharmapolis/${frontQrFilename}`
+      backPdf: `/labels/pharmapolis/${backPdfFilename}`,
+      frontWithQr: `/labels/pharmapolis/${frontQrFilename}`,
+      frontWithQrPdf: `/labels/pharmapolis/${frontQrPdfFilename}`
     });
   }
 
@@ -674,12 +705,18 @@ async function run() {
           <div style="margin-bottom: 12px;">
             <strong style="font-size: 0.8rem; color: #003666;">Front Label (7.5 x 4.5 cm):</strong>
             <img src="${f.front}" class="img-preview" alt="Front Label" />
-            <a href="${f.front}" download class="btn-download">Download Front PNG</a>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <a href="${f.front}" download class="btn-download">Download PNG</a>
+              <a href="${f.frontPdf}" download class="btn-download" style="background: #fef3c7; color: #92400e;">Download PDF (Editable)</a>
+            </div>
           </div>
           <div style="margin-bottom: 12px;">
             <strong style="font-size: 0.8rem; color: #003666;">Back Verification Label with QR (7.5 x 4.5 cm):</strong>
             <img src="${f.back}" class="img-preview" alt="Back Label" />
-            <a href="${f.back}" download class="btn-download">Download Back QR PNG</a>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <a href="${f.back}" download class="btn-download">Download PNG</a>
+              <a href="${f.backPdf}" download class="btn-download" style="background: #fef3c7; color: #92400e;">Download PDF (Editable)</a>
+            </div>
           </div>
         </div>
       `).join('\n')}

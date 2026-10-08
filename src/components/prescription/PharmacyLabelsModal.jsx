@@ -14,7 +14,9 @@ export default function PharmacyLabelsModal({
   const [selectedProductIdx, setSelectedProductIdx] = useState(initialLabelIndex || 0);
   const [activeVariant, setActiveVariant] = useState('backQr'); // 'front' | 'backQr' | 'frontWithQr'
   const [copiedLink, setCopiedLink] = useState(false);
+  const [exportFormat, setExportFormat] = useState('pdf'); // 'pdf' | 'png'
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [dpi, setDpi] = useState(300); // 300 | 600 | 1200
   const [showCutGuides, setShowCutGuides] = useState(false); // Scissor cut lines & crop marks toggle (default false for clean label)
   const [zoomLevel, setZoomLevel] = useState('fit'); // 'fit' | 1 | 1.5 | 2
@@ -146,6 +148,106 @@ export default function PharmacyLabelsModal({
     } catch (err) {
       console.error('Error generating PNG:', err);
       setIsGeneratingPng(false);
+    }
+  };
+
+  // High-Resolution 1:1 Physical Scaled PDF Generator (Editable & Vector Compatible)
+  const handleDownloadPdf = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      const svgElement = svgContainerRef.current?.querySelector('svg');
+      if (!svgElement) {
+        setIsGeneratingPdf(false);
+        return;
+      }
+
+      // Render at ultra-sharp resolution (600 DPI) for crisp physical printing
+      const pdfRenderDpi = Math.max(dpi, 600);
+      const widthPx = Math.round((dimensions.widthMm / 25.4) * pdfRenderDpi);
+      const heightPx = Math.round((dimensions.heightMm / 25.4) * pdfRenderDpi);
+
+      const clonedSvg = svgElement.cloneNode(true);
+      clonedSvg.setAttribute('width', `${widthPx}px`);
+      clonedSvg.setAttribute('height', `${heightPx}px`);
+
+      const svgXml = new XMLSerializer().serializeToString(clonedSvg);
+      const svgBlob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = async () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = widthPx;
+          canvas.height = heightPx;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, widthPx, heightPx);
+          ctx.drawImage(img, 0, 0, widthPx, heightPx);
+          URL.revokeObjectURL(svgUrl);
+
+          const imgData = canvas.toDataURL('image/png', 1.0);
+
+          const { jsPDF } = await import('jspdf');
+          const isLandscape = dimensions.widthMm >= dimensions.heightMm;
+          const pdf = new jsPDF({
+            orientation: isLandscape ? 'landscape' : 'portrait',
+            unit: 'mm',
+            format: [dimensions.widthMm, dimensions.heightMm],
+            compress: true
+          });
+
+          pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+
+          // Standardized Clinical File Naming Engine (Supplier + Rx + Part + Size + Specs)
+          const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
+          const supplierClean = rawSupplier.replace(/Compounding|Pharmacy|L\.?L\.?C\.?/gi, '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'PHARMAPOLIS';
+
+          const rxCodeClean = String(currentItem.fileNumber || currentItem.rxCode || currentItem.id || 'RX')
+            .trim()
+            .replace(/[^a-zA-Z0-9-]/g, '')
+            .toUpperCase();
+
+          const isMultiPart = labels.length > 1 || Boolean(currentItem.phaseNumber && currentItem.phaseNumber > 0);
+          const partTag = isMultiPart ? `PART-${currentItem.phaseNumber || (selectedProductIdx + 1)}` : '';
+
+          const rawVol = String(currentItem.volume || currentItem.size || currentItem.netContent || '').trim();
+          let sizeTag = '';
+          const volMatch = rawVol.match(/(\d+(?:\.\d+)?)\s*(ml|caps?|capsules?|g|mg)?/i);
+          if (volMatch) {
+            const num = volMatch[1];
+            let unit = (volMatch[2] || '').toUpperCase();
+            if (unit.startsWith('CAP')) unit = 'CAPS';
+            sizeTag = `${num}${unit}`;
+          } else if (rawVol) {
+            sizeTag = rawVol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+          }
+
+          const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : (activeVariant === 'frontWithQr' ? 'FRONT-QR' : 'FRONT');
+
+          const nameSegments = [supplierClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean].filter(Boolean);
+
+          pdf.setProperties({
+            title: nameSegments.join('_'),
+            subject: currentItem.productTitle || currentItem.productName || 'Pharmapolis Compounded Label',
+            author: 'Pharmapolis Dispensary / Atlas Clinical Services',
+            creator: 'Pharmapolis Digital Prescription Registry'
+          });
+
+          pdf.save(`${nameSegments.join('_')}.pdf`);
+        } catch (innerErr) {
+          console.error('Error generating PDF with jsPDF:', innerErr);
+        } finally {
+          setIsGeneratingPdf(false);
+        }
+      };
+      img.onerror = () => {
+        setIsGeneratingPdf(false);
+      };
+      img.src = svgUrl;
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -680,6 +782,38 @@ export default function PharmacyLabelsModal({
                 </select>
               </div>
 
+              {/* Field 5: Export Format Selector (PDF / PNG) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label htmlFor="gcp-label-format" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                  {isEs ? 'Formato:' : 'Format:'}
+                </label>
+                <select
+                  id="gcp-label-format"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  style={{
+                    height: 30,
+                    padding: '0 24px 0 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #1a73e8',
+                    background: '#f8fafd',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    color: '#1a73e8',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231a73e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 6px center',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="pdf">PDF (Editable 1:1)</option>
+                  <option value="png">PNG (Imagen HD)</option>
+                </select>
+              </div>
+
               {/* Field 5: Cut Guides (✂) Toggle */}
               <button
                 type="button"
@@ -895,24 +1029,69 @@ export default function PharmacyLabelsModal({
 
           {/* Action Buttons Group (Google Cloud UX Hierarchy) */}
           <div className="gcp-footer-actions-wrap">
-            {/* Primary Action: Download PNG */}
-            <button
-              type="button"
-              className="gcp-btn-primary"
-              onClick={handleDownloadPng}
-              disabled={isGeneratingPng}
-              style={{
-                cursor: isGeneratingPng ? 'wait' : 'pointer',
-                opacity: isGeneratingPng ? 0.75 : 1
-              }}
-            >
-              <Download size={16} />
-              <span>
-                {isGeneratingPng 
-                  ? (isEs ? 'Generando 300 DPI...' : 'Rendering 300 DPI...') 
-                  : (isEs ? 'Descargar PNG' : 'Download PNG')}
-              </span>
-            </button>
+            {/* Primary Action: Download based on selected format */}
+            {exportFormat === 'pdf' ? (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                style={{
+                  cursor: isGeneratingPdf ? 'wait' : 'pointer',
+                  opacity: isGeneratingPdf ? 0.75 : 1
+                }}
+              >
+                <Download size={16} />
+                <span>
+                  {isGeneratingPdf 
+                    ? (isEs ? 'Generando PDF...' : 'Creating PDF...') 
+                    : (isEs ? `Descargar PDF (${dimensions.widthMm}×${dimensions.heightMm}mm)` : `Download PDF (${dimensions.widthMm}×${dimensions.heightMm}mm)`)}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={handleDownloadPng}
+                disabled={isGeneratingPng}
+                style={{
+                  cursor: isGeneratingPng ? 'wait' : 'pointer',
+                  opacity: isGeneratingPng ? 0.75 : 1
+                }}
+              >
+                <Download size={16} />
+                <span>
+                  {isGeneratingPng 
+                    ? (isEs ? `Generando ${dpi} DPI...` : `Rendering ${dpi} DPI...`) 
+                    : (isEs ? `Descargar PNG (${dpi} DPI)` : `Download PNG (${dpi} DPI)`)}
+                </span>
+              </button>
+            )}
+
+            {/* Quick Alternate Format Action Button */}
+            {exportFormat === 'pdf' ? (
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={handleDownloadPng}
+                disabled={isGeneratingPng}
+                title={isEs ? 'Descargar como imagen PNG' : 'Download as PNG image'}
+              >
+                <Download size={14} />
+                <span>{isGeneratingPng ? 'PNG...' : 'PNG'}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="gcp-btn-secondary"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                title={isEs ? 'Descargar como PDF editable 1:1' : 'Download as editable 1:1 PDF'}
+              >
+                <Download size={14} />
+                <span>{isGeneratingPdf ? 'PDF...' : 'PDF'}</span>
+              </button>
+            )}
 
             {/* Secondary Symmetrical Actions */}
             <div
