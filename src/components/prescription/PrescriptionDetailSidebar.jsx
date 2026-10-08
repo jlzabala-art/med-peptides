@@ -215,10 +215,21 @@ export default function PrescriptionDetailSidebar({
             <div style={{ fontSize: '0.66rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               {isEs ? 'Paciente Registrado' : 'Registered Patient'}
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 750, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div 
+              title={patientName || 'Patient'}
+              style={{ 
+                fontSize: '0.88rem', 
+                fontWeight: 750, 
+                color: '#0f172a', 
+                whiteSpace: 'normal', 
+                wordBreak: 'break-word', 
+                lineHeight: 1.32,
+                marginTop: '1px'
+              }}
+            >
               {patientName || 'Patient'}
             </div>
-            <div style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+            <div style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
               <span>Ref: {prescriptionCode}</span>
             </div>
           </div>
@@ -258,9 +269,10 @@ export default function PrescriptionDetailSidebar({
                   key={sec.id}
                   type="button"
                   onClick={() => scrollTo(sec.id)}
+                  title={sec.label}
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'flex-start',
                     justifyContent: 'space-between',
                     width: '100%',
                     padding: '8px 10px',
@@ -268,233 +280,52 @@ export default function PrescriptionDetailSidebar({
                     border: 'none',
                     background: isActive ? '#f0f9ff' : 'transparent',
                     color: isActive ? '#0284c7' : '#475569',
-                    fontSize: '0.78rem',
-                    fontWeight: isActive ? 750 : 550,
                     textAlign: 'left',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.15s ease',
+                    gap: '6px'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
-                    <span style={{ fontSize: '0.70rem', color: isActive ? '#0284c7' : '#94a3b8', fontFamily: 'monospace' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', minWidth: 0, flex: 1 }}>
+                    <span style={{ fontSize: '0.70rem', color: isActive ? '#0284c7' : '#94a3b8', fontFamily: 'monospace', marginTop: '2px', flexShrink: 0 }}>
                       {idx + 1}
                     </span>
-                    <IconComp size={14} color={isActive ? (sec.accentColor || '#0284c7') : '#94a3b8'} style={{ flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {sec.label}
-                    </span>
+                    <IconComp size={15} color={isActive ? (sec.accentColor || '#0284c7') : '#94a3b8'} style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <span style={{ 
+                        fontSize: '0.78rem',
+                        fontWeight: isActive ? 750 : 550,
+                        color: isActive ? '#0284c7' : '#334155',
+                        lineHeight: 1.35,
+                        wordBreak: 'break-word',
+                        whiteSpace: 'normal'
+                      }}>
+                        {sec.label}
+                      </span>
+                      {sec.badge && (
+                        <span style={{
+                          alignSelf: 'flex-start',
+                          fontSize: '0.66rem',
+                          fontWeight: 650,
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          background: isActive ? '#e0f2fe' : '#f1f5f9',
+                          color: isActive ? '#0369a1' : '#64748b',
+                          lineHeight: 1.3
+                        }}>
+                          {sec.badge}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {sec.badge && (
-                    <span style={{
-                      fontSize: '0.66rem',
-                      fontWeight: 700,
-                      padding: '1px 6px',
-                      borderRadius: '4px',
-                      background: isActive ? '#e0f2fe' : '#f1f5f9',
-                      color: isActive ? '#0369a1' : '#64748b',
-                      marginLeft: '6px',
-                      flexShrink: 0
-                    }}>
-                      {sec.badge}
-                    </span>
-                  )}
-                  {isActive && <ChevronRight size={13} color="#0284c7" style={{ marginLeft: '4px', flexShrink: 0 }} />}
+                  {isActive && <ChevronRight size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Widget 2: Official Clinical Actions & Exports (GCP Standard) */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #dadce0',
-          padding: '1rem',
-          boxShadow: 'none'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '0.75rem',
-            paddingBottom: '0.5rem',
-            borderBottom: '1px solid #f1f3f4'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', fontWeight: 600, color: '#3c4043', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              <Download size={14} color="#1a73e8" />
-              <span>{isEs ? 'ACCIONES & DOCUMENTOS' : 'ACTIONS & DOCUMENTS'}</span>
-            </div>
-            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#1a73e8', background: '#e8f0fe', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
-              {prescriptionCode}
-            </span>
-          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {onOpenPdf && (
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  onOpenPdf();
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '7px 10px',
-                  borderRadius: '6px',
-                  background: '#f8fafd',
-                  color: '#1a73e8',
-                  border: '1px solid #d2e3fc',
-                  fontWeight: 600,
-                  fontSize: '0.76rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left'
-                }}
-                title={isEs ? 'Ver dossier y monografía clínica completa en PDF' : 'View full clinical monograph & dossier in PDF'}
-              >
-                <FileText size={15} color="#1a73e8" />
-                <span>{isEs ? 'Dossier Clínico (PDF)' : 'Clinical Dossier (PDF)'}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                window.print();
-              }}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '7px 10px',
-                borderRadius: '6px',
-                background: '#ffffff',
-                color: '#3c4043',
-                border: '1px solid #dadce0',
-                fontWeight: 500,
-                fontSize: '0.76rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                textAlign: 'left'
-              }}
-              title={isEs ? 'Imprimir expediente oficial' : 'Print official clinical dossier'}
-            >
-              <Printer size={15} color="#5f6368" />
-              <span>{isEs ? 'Imprimir Expediente' : 'Print Official Dossier'}</span>
-            </button>
-
-            {onExportExcel && (
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  onExportExcel();
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '7px 10px',
-                  borderRadius: '6px',
-                  background: '#ffffff',
-                  color: '#137333',
-                  border: '1px solid #dadce0',
-                  fontWeight: 500,
-                  fontSize: '0.76rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left'
-                }}
-                title={isEs ? 'Exportar fórmula galénica a Excel' : 'Export formulation specs to Excel'}
-              >
-                <FileSpreadsheet size={15} color="#137333" />
-                <span>{isEs ? 'Exportar Ficha (Excel)' : 'Export Specs (Excel)'}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                scrollTo('qr-card');
-              }}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '7px 10px',
-                borderRadius: '6px',
-                background: '#ffffff',
-                color: '#3c4043',
-                border: '1px solid #dadce0',
-                fontWeight: 500,
-                fontSize: '0.76rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                textAlign: 'left'
-              }}
-              title={isEs ? 'Verificación QR para dispensación' : 'QR Verification for pharmacy dispensing'}
-            >
-              <QrCode size={15} color="#1a73e8" />
-              <span>{isEs ? 'Código QR de Validación' : 'QR Validation Code'}</span>
-            </button>
-          </div>
-
-          {/* Compact Copy URL Row */}
-          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f3f4', display: 'flex', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={handleCopyPermanentUrl}
-              style={{
-                flex: 1,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '5px',
-                padding: '6px 10px',
-                borderRadius: '4px',
-                background: '#f8f9fa',
-                color: '#1a73e8',
-                border: '1px solid #dadce0',
-                fontWeight: 600,
-                fontSize: '0.74rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {copiedUrl ? <Check size={13} color="#137333" /> : <Copy size={13} />}
-              <span>{copiedUrl ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy Record Link')}</span>
-            </button>
-            <a
-              href={canonicalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px 9px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                color: '#5f6368',
-                border: '1px solid #dadce0',
-                textDecoration: 'none',
-                fontSize: '0.74rem'
-              }}
-              title={isEs ? 'Abrir enlace directo' : 'Open permanent link'}
-            >
-              <ExternalLink size={13} />
-            </a>
-          </div>
-        </div>
 
         {/* Widget 3: EU GMP Quality & Verification Seal (GCP Standard) */}
         <div style={{
@@ -643,9 +474,10 @@ export default function PrescriptionDetailSidebar({
                     key={sec.id}
                     type="button"
                     onClick={() => scrollTo(sec.id)}
+                    title={sec.label}
                     style={{
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: 'flex-start',
                       justifyContent: 'space-between',
                       padding: '10px 12px',
                       borderRadius: '8px',
@@ -653,20 +485,42 @@ export default function PrescriptionDetailSidebar({
                       borderColor: isActive ? '#bae6fd' : '#e2e8f0',
                       background: isActive ? '#f0f9ff' : '#ffffff',
                       color: isActive ? '#0284c7' : '#334155',
-                      fontSize: '0.84rem',
-                      fontWeight: isActive ? 750 : 550,
                       textAlign: 'left',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      gap: '8px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '0.74rem', color: isActive ? '#0284c7' : '#94a3b8', fontFamily: 'monospace' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: '0.74rem', color: isActive ? '#0284c7' : '#94a3b8', fontFamily: 'monospace', marginTop: '2px', flexShrink: 0 }}>
                         {idx + 1}
                       </span>
-                      <IconComp size={15} color={isActive ? '#0284c7' : '#64748b'} />
-                      <span>{sec.label}</span>
+                      <IconComp size={15} color={isActive ? '#0284c7' : '#64748b'} style={{ marginTop: '2px', flexShrink: 0 }} />
+                      <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{
+                          fontSize: '0.84rem',
+                          fontWeight: isActive ? 750 : 550,
+                          lineHeight: 1.35,
+                          wordBreak: 'break-word',
+                          whiteSpace: 'normal'
+                        }}>
+                          {sec.label}
+                        </span>
+                        {sec.badge && (
+                          <span style={{
+                            alignSelf: 'flex-start',
+                            fontSize: '0.68rem',
+                            fontWeight: 650,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            background: isActive ? '#e0f2fe' : '#f1f5f9',
+                            color: isActive ? '#0369a1' : '#64748b'
+                          }}>
+                            {sec.badge}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {isActive && <ChevronRight size={15} color="#0284c7" />}
+                    {isActive && <ChevronRight size={15} color="#0284c7" style={{ marginTop: '3px', flexShrink: 0 }} />}
                   </button>
                 );
               })}
@@ -702,7 +556,18 @@ export default function PrescriptionDetailSidebar({
                 <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
                   {isEs ? 'PACIENTE REGISTRADO' : 'REGISTERED PATIENT'}
                 </div>
-                <div style={{ fontSize: '0.90rem', fontWeight: 800, color: '#0f172a', marginTop: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div 
+                  title={patientName || 'Patient'}
+                  style={{ 
+                    fontSize: '0.90rem', 
+                    fontWeight: 800, 
+                    color: '#0f172a', 
+                    marginTop: '1px', 
+                    whiteSpace: 'normal', 
+                    wordBreak: 'break-word', 
+                    lineHeight: 1.32 
+                  }}
+                >
                   {patientName || 'Patient'}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '1px' }}>

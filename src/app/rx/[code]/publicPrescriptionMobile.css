@@ -708,13 +708,16 @@
 }
 
 /* ── GCP Sub-Tabs Strip (Hide native scrollbars across all browsers & OS) ── */
-.gcp-subtabs-strip {
+.gcp-subtabs-strip,
+.gcp-subtabs-strip * {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-.gcp-subtabs-strip::-webkit-scrollbar {
+.gcp-subtabs-strip::-webkit-scrollbar,
+.gcp-subtabs-strip *::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+  background: transparent !important;
 }

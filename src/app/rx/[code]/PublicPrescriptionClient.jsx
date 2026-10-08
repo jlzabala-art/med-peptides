@@ -599,7 +599,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
   const rxProgLower = String(rx.treatmentProgram || rx.program || '').toLowerCase();
   const rxTypeLower = String(rx.treatmentType || '').toLowerCase();
   const rxDispLower = String(rx.dispensingForm || '').toLowerCase();
-  const isNutrigen = prescriptionTypeInfo.key === 'nutrigen' || rxProgLower.includes('nutri') || rxTypeLower.includes('nutri') || String(rx.fagron?.testName || '').toLowerCase().includes('nutri');
+  const isNutrigen = prescriptionTypeInfo.key === 'nutrigen' || rxProgLower.includes('nutrigen') || rxTypeLower.includes('nutrigen') || String(rx.fagron?.testName || '').toLowerCase().includes('nutrigen');
   const isEntirelyOral = isNutrigen || rxDispLower.includes('capsule') || rxDispLower.includes('oral') || (Array.isArray(rx.prescriptionLines) && rx.prescriptionLines.length > 0 && rx.prescriptionLines.every(i => (i.route || '').toLowerCase().includes('oral')));
 
   const baseUrl = 'https://med-peptides.com';
@@ -2085,9 +2085,23 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
     if (compoundedFormulations.length > 1) {
       compoundedFormulations.forEach((form, idx) => {
         const phaseNum = form.index || (idx + 1);
+        const formTypeDesc = form.isOral 
+          ? (isEs ? 'Cápsulas Orales' : 'Oral Capsules')
+          : (form.id.includes('oil')
+              ? (isEs ? 'Aceite Folicular' : 'Scalp Oil')
+              : (form.id.includes('pomade')
+                  ? (isEs ? 'Pomada Tópica' : 'Topical Pomade')
+                  : (isEs ? 'Solución Tópica' : 'Scalp Solution')));
+
+        const cleanLabel = form.shortTitle || (
+          form.title && form.title.length <= 32
+            ? form.title 
+            : (isEs ? `Fase ${phaseNum}: ${formTypeDesc}` : `Phase ${phaseNum}: ${formTypeDesc}`)
+        );
+
         list.push({
           id: form.id,
-          label: form.shortTitle || form.title || (isEs ? `Fase ${phaseNum}: Formulación` : `Phase ${phaseNum}: Formulation`),
+          label: cleanLabel,
           category: 'formula',
           badge: form.volume || (form.apis ? `${form.apis.length} APIs` : null),
           accentColor: form.accentColor,
@@ -2126,7 +2140,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
       icon: 'shield'
     });
 
-    if (atlasRecs?.peptide || atlasRecs?.colway) {
+    if (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway) {
       list.push({ 
         id: 'atlas-recommendations-card', 
         label: isEs ? 'Recomendaciones Atlas' : 'Atlas Recommendations',
@@ -2529,26 +2543,37 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '8px',
-              borderBottom: '1px solid #e2e8f0',
+              border: '1px solid #dadce0',
               background: '#ffffff',
-              borderRadius: '12px',
-              padding: '6px 10px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+              borderRadius: '8px',
+              padding: '4px 6px',
+              boxShadow: '0 1px 3px rgba(60,64,67,0.06)',
               position: 'sticky',
               top: '72px',
               zIndex: 30,
               backdropFilter: 'blur(8px)',
               marginBottom: '0.75rem',
               overflowX: 'auto',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, width: '100%', overflowX: 'auto' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                flexShrink: 0,
+                width: '100%',
+                overflowX: 'auto',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}>
                 {[
-                  { id: 'treatment', label: isEs ? 'Prescripción & Posología' : 'Prescription & Posology', icon: Pill, count: compoundedFormulations.length },
-                  { id: 'roadmap', label: isEs ? 'Roadmap Secuencial' : 'Sequential Roadmap', icon: Layers, count: compoundedFormulations.length > 1 ? `${compoundedFormulations.length} ${isEs ? 'Fases' : 'Phases'}` : null },
-                  { id: 'traceability', label: isEs ? 'Calidad & Trazabilidad GMP' : 'Quality & Standards', icon: Factory },
+                  { id: 'treatment', label: isEs ? 'Prescripción' : 'Prescription', icon: Pill, count: compoundedFormulations.length },
+                  { id: 'roadmap', label: 'Roadmap', icon: Layers, count: compoundedFormulations.length > 1 ? `${compoundedFormulations.length} ${isEs ? 'Fases' : 'Phases'}` : null },
+                  { id: 'traceability', label: isEs ? 'Calidad GMP' : 'Quality GMP', icon: Factory },
                   { id: 'credentials', label: isEs ? 'Médico & Paciente' : 'Doctor & Patient', icon: Stethoscope },
-                  { id: 'patientSharing', label: isEs ? 'Contacto & Soporte' : 'Patient Care & Support', icon: Share2 }
+                  { id: 'patientSharing', label: isEs ? 'Soporte' : 'Support', icon: Share2 }
                 ].map(tab => {
                   const isActive = activeGcpTab === tab.id;
                   const IconCmp = tab.icon;
@@ -2568,22 +2593,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                           setExpandedSections(prev => ({ ...prev, [tab.id]: true }));
                         }
                       }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) e.currentTarget.style.background = '#f8fafd';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) e.currentTarget.style.background = 'transparent';
+                      }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        padding: '7px 14px',
+                        padding: '6px 12px',
                         borderRadius: '6px',
                         border: 'none',
                         background: isActive ? '#e8f0fe' : 'transparent',
                         color: isActive ? '#1a73e8' : '#5f6368',
-                        fontWeight: isActive ? 650 : 500,
+                        fontWeight: isActive ? 600 : 500,
                         fontSize: '0.80rem',
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
-                        transition: 'all 0.15s ease',
-                        borderBottom: isActive ? '2px solid #1a73e8' : '2px solid transparent'
+                        transition: 'background 0.15s ease, color 0.15s ease'
                       }}
                     >
                       <IconCmp size={15} style={{ color: isActive ? '#1a73e8' : '#5f6368', flexShrink: 0 }} />
@@ -3961,7 +3991,8 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
         )}
 
         {/* ── Atlas Clinical Recommendations (Bioactive Peptides & Colway Hair System) ── */}
-        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'recommendations') && (atlasRecs?.peptide || atlasRecs?.colway) && (
+        {/* ── Atlas Clinical Recommendations (Lotusland Peptides, UltraPerson & Bloodo) ── */}
+        {(activeGcpTab === 'all' || activeGcpTab === 'treatment' || activeGcpTab === 'recommendations') && (atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway) && (
           <div id="atlas-recommendations-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', scrollMarginTop: '100px' }}>
             {/* Section Accordion Trigger Header */}
             <div
@@ -3984,17 +4015,17 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '0.90rem', fontWeight: 500, color: '#202124' }}>
-                      {isEs ? '4. Recomendaciones Clínicas Atlas (Sinergias Coadyuvantes)' : '4. Atlas Clinical Recommendations & Adjuvant Care'}
+                    <span style={{ fontSize: '0.90rem', fontWeight: 600, color: '#202124' }}>
+                      {isEs ? '4. Recomendaciones Clínicas Atlas (Ecosistema Coadyuvante)' : '4. Atlas Clinical Recommendations & Adjuvant Care'}
                     </span>
                     <span style={{ fontSize: '0.68rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                      {isEs ? 'Basado en Evidencia' : 'Evidence-Based'}
+                      {isEs ? 'Basado en Evidencia · Tríada Sinérgica' : 'Evidence-Based · Synergistic Triad'}
                     </span>
                   </div>
                   <div style={{ fontSize: '0.74rem', color: '#5f6368' }}>
                     {isEs 
-                      ? 'Soporte folicular molecular y de barrera cutánea formulado a partir de los principios activos de esta receta'
-                      : 'Follicular signaling and scalp barrier support derived from the active APIs of this prescription'}
+                      ? 'Protocolo coadyuvante calibrado a partir del perfil farmacodinámico y los principios activos de esta receta'
+                      : 'Adjuvant biological protocol derived from the active APIs and therapeutic axis of this prescription'}
                   </div>
                 </div>
               </div>
@@ -4038,9 +4069,9 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                   </div>
                 )}
 
-                {/* 2-Column Responsive Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: atlasRecs.colway ? 'repeat(auto-fit, minmax(300px, 1fr))' : '1fr', gap: '14px' }}>
-                  {/* 1. Bioactive Biomimetic Peptide (Strictly NO Lotusland on screen) */}
+                {/* Multi-Pillar Responsive Grid (Lotusland + UltraPerson + Bloodo + Colway) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '14px' }}>
+                  {/* 1. Bioactive Biomimetic Peptide (Lotusland Research) */}
                   {atlasRecs.peptide && (
                     <div style={{
                       background: '#ffffff',
@@ -4055,7 +4086,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                           <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4338ca', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#e0e7ff', padding: '2px 8px', borderRadius: '4px' }}>
-                            {isEs ? 'Péptido Biorregulador Folicular' : 'Bioactive Peptide Signaler'}
+                            {isEs ? 'Péptido Biorregulador · Lotusland' : 'Bioactive Peptide · Lotusland'}
                           </span>
                           <span style={{ fontSize: '0.68rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
                             {atlasRecs.peptide.matchScore || 'High Synergy'}
@@ -4101,7 +4132,163 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                     </div>
                   )}
 
-                  {/* 2. Scalp Barrier & Extracellular Matrix Support (Colway Clinical Care) */}
+                  {/* 2. Precision Oral Nutraceutical (UltraPerson by PharmaPolis) */}
+                  {atlasRecs.supplement && (
+                    <div style={{
+                      background: '#ffffff',
+                      border: '1px solid #fed7aa',
+                      borderRadius: '8px',
+                      padding: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 1px 2px rgba(234, 88, 12, 0.04)'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#c2410c', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#ffedd5', padding: '2px 8px', borderRadius: '4px' }}>
+                            {isEs ? 'Suplementación Oral · UltraPerson' : 'Precision Nutraceutical · UltraPerson'}
+                          </span>
+                          <span style={{ fontSize: '0.68rem', color: '#c2410c', background: '#fff7ed', border: '1px solid #fed7aa', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                            {atlasRecs.supplement.matchScore || 'Metabolic Synergy'}
+                          </span>
+                        </div>
+                        <h4 style={{ margin: '0 0 3px 0', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                          {atlasRecs.supplement.productName}
+                        </h4>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '0.72rem', color: '#9a3412', fontWeight: 600 }}>
+                          {atlasRecs.supplement.subtitle || atlasRecs.supplement.category}
+                        </p>
+                        
+                        {/* Key Actives Pills */}
+                        {atlasRecs.supplement.keyActives && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
+                            {atlasRecs.supplement.keyActives.map((act, actIdx) => (
+                              <span key={actIdx} style={{ fontSize: '0.66rem', background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
+                                {act}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '8px' }}>
+                          <strong style={{ color: '#0f172a' }}>{isEs ? 'Justificación Clínica & Sinergia: ' : 'Clinical Rationale & Synergy: '}</strong>
+                          {atlasRecs.supplement.clinicalRationale}
+                        </div>
+
+                        {atlasRecs.supplement.routineAdvice && (
+                          <div style={{ fontSize: '0.72rem', color: '#475569', background: '#fff7ed', border: '1px solid #fed7aa', padding: '6px 8px', borderRadius: '6px', marginBottom: '8px' }}>
+                            <strong style={{ color: '#9a3412' }}>{isEs ? 'Pauta Coadyuvante Sugerida: ' : 'Suggested Dosing Schedule: '}</strong>
+                            {atlasRecs.supplement.routineAdvice}
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>
+                        <a
+                          href={atlasRecs.supplement.catalogUrl || `/p/${atlasRecs.supplement.catalogSlug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 650,
+                            color: '#c2410c',
+                            background: '#fff7ed',
+                            border: '1px solid #fed7aa',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>{isEs ? 'Ver Ficha UltraPerson' : 'View UltraPerson Datasheet'}</span>
+                          <ArrowUpRight size={11} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. Diagnostic Biomarker Monitoring (Bloodo Diagnostic Suite) */}
+                  {atlasRecs.diagnostic && (
+                    <div style={{
+                      background: '#ffffff',
+                      border: '1px solid #bae6fd',
+                      borderRadius: '8px',
+                      padding: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 1px 2px rgba(2, 132, 199, 0.04)'
+                    }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#e0f2fe', padding: '2px 8px', borderRadius: '4px' }}>
+                            {isEs ? 'Monitorización Analítica · Bloodo' : 'Diagnostic Biomarkers · Bloodo'}
+                          </span>
+                          <span style={{ fontSize: '0.68rem', color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                            {atlasRecs.diagnostic.matchScore || 'Analytical Synergy'}
+                          </span>
+                        </div>
+                        <h4 style={{ margin: '0 0 3px 0', fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
+                          {atlasRecs.diagnostic.testName}
+                        </h4>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>
+                          {atlasRecs.diagnostic.subtitle || atlasRecs.diagnostic.category}
+                        </p>
+
+                        {/* Biomarkers Tested Pills */}
+                        {atlasRecs.diagnostic.biomarkersTested && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
+                            {atlasRecs.diagnostic.biomarkersTested.map((bio, bIdx) => (
+                              <span key={bIdx} style={{ fontSize: '0.66rem', background: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0', padding: '1px 6px', borderRadius: '3px', fontWeight: 600 }}>
+                                {bio}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div style={{ fontSize: '0.74rem', color: '#334155', lineHeight: 1.45, background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #edf2f7', marginBottom: '8px' }}>
+                          <strong style={{ color: '#0f172a' }}>{isEs ? 'Objetivo Clínico de Monitorización: ' : 'Monitoring Objective: '}</strong>
+                          {atlasRecs.diagnostic.clinicalRationale}
+                        </div>
+
+                        {atlasRecs.diagnostic.timingRecommendation && (
+                          <div style={{ fontSize: '0.72rem', color: '#475569', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '6px 8px', borderRadius: '6px', marginBottom: '8px' }}>
+                            <strong style={{ color: '#0369a1' }}>{isEs ? 'Ventana Temporal Recomendada: ' : 'Recommended Test Window: '}</strong>
+                            {atlasRecs.diagnostic.timingRecommendation}
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>
+                        <a
+                          href={atlasRecs.diagnostic.catalogUrl || `/p/${atlasRecs.diagnostic.catalogSlug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 650,
+                            color: '#0284c7',
+                            background: '#f0f9ff',
+                            border: '1px solid #bae6fd',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>{isEs ? 'Ver Panel Bloodo' : 'View Bloodo Panel Specs'}</span>
+                          <ArrowUpRight size={11} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 4. Epicutaneous Barrier & ECM Support (Colway Clinical Care - Only if Topical Scalp) */}
                   {atlasRecs.colway && (
                     <div style={{
                       background: '#ffffff',
@@ -4116,7 +4303,7 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                           <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.04em', background: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>
-                            {isEs ? 'Soporte Barrera & Colágeno Colway' : 'Colway Scalp Care & ECM'}
+                            {isEs ? 'Soporte Barrera & Colágeno · Colway' : 'Scalp Barrier & ECM · Colway'}
                           </span>
                           <span style={{ fontSize: '0.68rem', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
                             {atlasRecs.colway.matchScore || 'Barrier Support'}
