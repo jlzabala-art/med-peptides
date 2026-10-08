@@ -737,7 +737,8 @@ export default function PrescriptionBrochureModal({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 16px;
+          flex-wrap: wrap;
+          gap: 12px;
           box-shadow: 0 -2px 6px rgba(60, 64, 67, 0.06);
           z-index: 10;
         }
@@ -745,28 +746,38 @@ export default function PrescriptionBrochureModal({
           display: flex;
           align-items: center;
           gap: 12px;
-          flex-wrap: nowrap;
+          flex-wrap: wrap;
+          min-width: 0;
         }
-        .gcp-doc-badge {
-          font-size: 0.74rem;
-          color: #5f6368;
-          display: flex;
+        .gcp-meta-chip {
+          display: inline-flex;
           align-items: center;
           gap: 6px;
+          height: 28px;
+          padding: 0 10px;
+          background: #f1f3f4;
+          border: 1px solid #dadce0;
+          border-radius: 14px;
+          font-size: 0.74rem;
+          font-weight: 500;
+          color: #3c4043;
           white-space: nowrap;
+          flex-shrink: 0;
+          letter-spacing: 0.1px;
         }
         .gcp-utility-actions {
           display: flex;
           align-items: center;
           gap: 8px;
-          flex-wrap: nowrap;
+          flex-wrap: wrap;
         }
         .gcp-footer-right {
           display: flex;
           align-items: center;
           gap: 10px;
-          flex-wrap: nowrap;
+          flex-wrap: wrap;
           margin-left: auto;
+          flex-shrink: 0;
         }
         .gcp-btn-primary {
           display: inline-flex;
@@ -853,6 +864,20 @@ export default function PrescriptionBrochureModal({
           border-color: #86efac;
           color: #137333;
         }
+        @media (max-width: 960px) {
+          .gcp-brochure-footer {
+            padding: 10px 16px;
+            gap: 10px;
+          }
+          .gcp-footer-left {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .gcp-footer-right {
+            width: 100%;
+            justify-content: flex-end;
+          }
+        }
         @media (max-width: 640px) {
           .gcp-brochure-footer {
             position: sticky;
@@ -860,10 +885,10 @@ export default function PrescriptionBrochureModal({
             left: 0;
             right: 0;
             width: 100%;
-            padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 8px)) 14px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 8px)) 12px;
             flex-direction: column;
             align-items: stretch;
-            gap: 10px;
+            gap: 8px;
             box-shadow: 0 -4px 18px rgba(60, 64, 67, 0.14);
             border-top: 1px solid #dadce0;
           }
@@ -871,15 +896,16 @@ export default function PrescriptionBrochureModal({
             width: 100%;
             display: flex;
             flex-direction: column;
+            align-items: stretch;
             gap: 8px;
           }
-          .gcp-doc-badge {
-            display: none;
+          .gcp-meta-chip {
+            align-self: center;
           }
           .gcp-utility-actions {
             width: 100%;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 8px;
           }
           .gcp-footer-right {
@@ -890,14 +916,14 @@ export default function PrescriptionBrochureModal({
             margin-left: 0;
           }
           .gcp-btn-primary {
-            height: 42px;
+            height: 44px;
             font-size: 0.86rem;
             width: 100%;
           }
           .gcp-btn-cancel,
           .gcp-btn-outlined {
-            height: 40px;
-            font-size: 0.78rem;
+            height: 42px;
+            font-size: 0.80rem;
             width: 100%;
           }
         }
@@ -1718,19 +1744,27 @@ export default function PrescriptionBrochureModal({
         <div className="gcp-brochure-footer">
           {/* Left Group: Document Specs & Secondary Utilities */}
           <div className="gcp-footer-left">
-            <span className="gcp-doc-badge">
-              Document layout: <strong>2 Pages (A4 Portrait)</strong> · Section-Based Print Break
-            </span>
+            <div 
+              className="gcp-meta-chip"
+              title={isPatientView ? 'Documento médico oficial en formato estándar A4' : 'A4 Multi-page Medical Layout'}
+            >
+              <FileText size={13} color="#5f6368" />
+              <span>{isPatientView ? 'A4 · 2 Páginas' : 'A4 Portrait · 2 Pages'}</span>
+            </div>
 
             <div className="gcp-utility-actions">
               <button
                 type="button"
                 onClick={handleSharePatient}
                 className={`gcp-btn-outlined ${copiedLink ? 'success' : ''}`}
-                title="Share patient link via WhatsApp or copy URL"
+                title={isPatientView ? 'Copiar enlace permanente de la receta o compartir' : 'Share patient link via WhatsApp or copy URL'}
               >
                 {copiedLink ? <Check size={14} color="#137333" /> : <Share2 size={14} color="#1a73e8" />}
-                <span>{copiedLink ? 'Link Copied ✓' : 'Share with Patient'}</span>
+                <span>
+                  {copiedLink 
+                    ? (isPatientView ? 'Enlace Copiado ✓' : 'Link Copied ✓') 
+                    : (isPatientView ? 'Compartir / Copiar Enlace' : 'Share with Patient')}
+                </span>
               </button>
 
               {!isPatientView && onOpenLabels && (
@@ -1757,7 +1791,7 @@ export default function PrescriptionBrochureModal({
               onClick={onClose}
               className="gcp-btn-cancel"
             >
-              Close
+              {isPatientView ? 'Cerrar' : 'Close'}
             </button>
 
             <button
@@ -1766,7 +1800,7 @@ export default function PrescriptionBrochureModal({
               className="gcp-btn-primary"
             >
               <Printer size={15} />
-              <span>Print / Save as PDF</span>
+              <span>{isPatientView ? 'Imprimir / Guardar PDF' : 'Print / Save as PDF'}</span>
             </button>
           </div>
         </div>

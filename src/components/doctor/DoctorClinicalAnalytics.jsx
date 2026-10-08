@@ -300,7 +300,73 @@ export default function DoctorClinicalAnalytics({
     };
   }, [isServerOptimized, serverAnalytics, prescriptions]);
 
-  // ── 4. Multi-Part Complexity ──────────────────────────────────────────────
+  // ── 4. Therapeutic Target Axis Distribution ─────────────────────────────────
+  const axisData = useMemo(() => {
+    if (!prescriptions || prescriptions.length === 0) {
+      return { total: 0, axes: [], slices: [] };
+    }
+
+    const counts = {
+      cellular: { id: 'cellular', label: 'Cellular Longevity & Mitochondria', count: 0, color: '#ea580c' },
+      neuro: { id: 'neuro', label: 'Neuro-Circadian & Sleep Balance', count: 0, color: '#6366f1' },
+      dermal: { id: 'dermal', label: 'Follicular & Dermal Regeneration', count: 0, color: '#0d9488' },
+      metabolic: { id: 'metabolic', label: 'Metabolic & Peptide Optimization', count: 0, color: '#1a73e8' },
+      repair: { id: 'repair', label: 'Tissue Repair & Musculoskeletal', count: 0, color: '#7c3aed' }
+    };
+
+    let classified = 0;
+    prescriptions.forEach((rx) => {
+      const text = `${rx.treatmentTitle || ''} ${rx.title || ''} ${rx.category || ''} ${rx.indication || ''} ${Array.isArray(rx.apis) ? rx.apis.join(' ') : ''} ${Array.isArray(rx.items) ? rx.items.map(i => i.name || '').join(' ') : ''}`.toLowerCase();
+
+      if (text.includes('coenzyme') || text.includes('ubiquinol') || text.includes('resveratrol') || text.includes('nad') || text.includes('epithalon') || text.includes('longevity') || text.includes('mitochondr')) {
+        counts.cellular.count += 1;
+        classified += 1;
+      } else if (text.includes('theanine') || text.includes('magnesium') || text.includes('glycine') || text.includes('melatonin') || text.includes('sleep') || text.includes('neuro') || text.includes('circadian')) {
+        counts.neuro.count += 1;
+        classified += 1;
+      } else if (text.includes('minoxidil') || text.includes('dutasteride') || text.includes('finasteride') || text.includes('ghk') || text.includes('hair') || text.includes('follic') || text.includes('dermal') || text.includes('latanoprost')) {
+        counts.dermal.count += 1;
+        classified += 1;
+      } else if (text.includes('tirzepatide') || text.includes('semaglutide') || text.includes('retatrutide') || text.includes('metformin') || text.includes('metabolic') || text.includes('weight')) {
+        counts.metabolic.count += 1;
+        classified += 1;
+      } else if (text.includes('bpc') || text.includes('tb-500') || text.includes('repair') || text.includes('musculo') || text.includes('joint')) {
+        counts.repair.count += 1;
+        classified += 1;
+      } else {
+        counts.cellular.count += 1;
+        classified += 1;
+      }
+    });
+
+    const total = Math.max(classified, 1);
+    const sortedAxes = Object.values(counts)
+      .filter(a => a.count > 0)
+      .map(a => ({
+        ...a,
+        pct: Math.round((a.count / total) * 100)
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    const slices = [];
+    let curAngle = 0;
+    sortedAxes.forEach(a => {
+      const angle = (a.pct / 100) * 360;
+      if (angle > 0) {
+        slices.push({
+          ...a,
+          path: getDonutSlice(curAngle, curAngle + angle, 36, 52, 60, 60),
+          startAngle: curAngle,
+          endAngle: curAngle + angle
+        });
+        curAngle += angle;
+      }
+    });
+
+    return { total: prescriptions.length, axes: sortedAxes, slices };
+  }, [prescriptions]);
+
+  // ── 5. Multi-Part Complexity ──────────────────────────────────────────────
   const complexityData = useMemo(() => {
     if (isServerOptimized && serverAnalytics?.complexityData) {
       return serverAnalytics.complexityData;
@@ -722,8 +788,8 @@ export default function DoctorClinicalAnalytics({
                         }}
                         title={`Click to filter prescriptions containing ${api.name}`}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
                             <span 
                               style={{
                                 width: '16px',
@@ -735,27 +801,45 @@ export default function DoctorClinicalAnalytics({
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                flexShrink: 0
                               }}
                             >
                               {index + 1}
                             </span>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#202124' }}>
+                            <span 
+                              style={{ 
+                                fontSize: '12.5px', 
+                                fontWeight: 600, 
+                                color: '#202124', 
+                                whiteSpace: 'nowrap', 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis',
+                                maxWidth: '170px'
+                              }} 
+                              title={api.name}
+                            >
                               {api.name}
                             </span>
                             <span 
                               style={{
-                                fontSize: '10px',
+                                fontSize: '9.5px',
                                 color: '#5f6368',
                                 backgroundColor: '#f1f3f4',
                                 padding: '1px 6px',
-                                borderRadius: '4px'
+                                borderRadius: '4px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                maxWidth: '140px',
+                                flexShrink: 1
                               }}
+                              title={api.meta.category}
                             >
                               {api.meta.category}
                             </span>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
+                          <div style={{ textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0, paddingLeft: '4px' }}>
                             <span style={{ fontSize: '12px', fontWeight: 700, color: api.meta.color }}>
                               {api.percentage}%
                             </span>
@@ -906,9 +990,130 @@ export default function DoctorClinicalAnalytics({
                 </div>
               </div>
             </div>
+
+            {/* ── CARD 4: Therapeutic Target Axes (Ejes Terapéuticos) ──────── */}
+            <div 
+              style={{
+                border: '1px solid #e8eaed',
+                borderRadius: '8px',
+                padding: '16px',
+                backgroundColor: '#ffffff',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div>
+                    <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: '#5f6368', letterSpacing: '0.4px' }}>
+                      Clinical Specialty
+                    </span>
+                    <h3 style={{ margin: '2px 0 0 0', fontSize: '14px', fontWeight: 600, color: '#202124' }}>
+                      Therapeutic Target Axes
+                    </h3>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a73e8' }}>
+                      {axisData.axes.length}
+                    </span>
+                    <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
+                      Active Axes
+                    </span>
+                  </div>
+                </div>
+
+                <p style={{ margin: '0 0 14px 0', fontSize: '12px', color: '#5f6368' }}>
+                  Distribution of personalized treatments across primary clinical objectives.
+                </p>
+              </div>
+
+              {/* Donut Chart + Legend */}
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  justifyContent: 'space-around'
+                }}
+              >
+                {/* SVG Donut */}
+                <div style={{ width: '120px', height: '120px', position: 'relative', flexShrink: 0 }}>
+                  <svg viewBox="0 0 120 120" style={{ width: '100%', height: '100%' }}>
+                    {axisData.slices.map((slice) => (
+                      <path
+                        key={slice.id}
+                        d={slice.path}
+                        fill={slice.color}
+                        stroke="#ffffff"
+                        strokeWidth="2"
+                      />
+                    ))}
+                  </svg>
+                  {/* Central Text */}
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      textAlign: 'center',
+                      pointerEvents: 'none'
+                    }}
+                  >
+                    <span style={{ display: 'block', fontSize: '16px', fontWeight: 800, color: '#202124', lineHeight: 1 }}>
+                      {axisData.total}
+                    </span>
+                    <span style={{ display: 'block', fontSize: '9px', color: '#5f6368', marginTop: '2px' }}>
+                      Total Rxs
+                    </span>
+                  </div>
+                </div>
+
+                {/* Axes Legend */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
+                  {axisData.axes.map((a) => (
+                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
+                        <span 
+                          style={{
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '2px',
+                            backgroundColor: a.color,
+                            flexShrink: 0
+                          }}
+                        />
+                        <span 
+                          style={{ 
+                            fontSize: '11px', 
+                            color: '#3c4043', 
+                            fontWeight: 500,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                          title={a.label}
+                        >
+                          {a.label}
+                        </span>
+                      </div>
+                      <div style={{ textAlign: 'right', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#202124' }}>
+                          {a.pct}%
+                        </span>
+                        <span style={{ fontSize: '10px', color: '#5f6368', marginLeft: '3px' }}>
+                          ({a.count})
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* ── CARD 4: Formulation Complexity Strip (Multi-Part vs Single-Part) ── */}
+          {/* ── CARD 5: Formulation Complexity Strip (Multi-Part vs Single-Part) ── */}
           <div 
             style={{
               marginTop: '16px',
@@ -923,22 +1128,22 @@ export default function DoctorClinicalAnalytics({
               gap: '12px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Layers size={16} color="#5f6368" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+              <Layers size={16} color="#5f6368" style={{ flexShrink: 0 }} />
               <div>
                 <span style={{ fontSize: '12px', fontWeight: 600, color: '#202124' }}>
                   Therapeutic Formulation Architecture:
                 </span>
                 <span style={{ fontSize: '12px', color: '#5f6368', marginLeft: '6px' }}>
-                  {complexityData.multiCount} of {complexityData.total} prescriptions ({complexityData.multiPct}%) utilize multi-phase compounded regimens (e.g., Dual Topical + Oral, Transdermal + Capsules).
+                  {complexityData.multiCount} of {complexityData.total} prescriptions ({complexityData.multiPct}%) utilize multi-phase compounded regimens.
                 </span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '220px', flex: '1 1 240px', maxWidth: '380px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '240px', flexShrink: 0 }}>
               <div 
                 style={{
-                  width: '100%',
+                  width: '120px',
                   height: '8px',
                   backgroundColor: '#e8eaed',
                   borderRadius: '4px',
@@ -964,12 +1169,12 @@ export default function DoctorClinicalAnalytics({
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', fontSize: '11px', whiteSpace: 'nowrap' }}>
+              <div style={{ display: 'flex', gap: '10px', fontSize: '11px', whiteSpace: 'nowrap' }}>
                 <span style={{ color: '#7c3aed', fontWeight: 600 }}>
-                  Multi-Phase ({complexityData.multiPct}%)
+                  Multi-Phase: {complexityData.multiPct}%
                 </span>
                 <span style={{ color: '#1a73e8', fontWeight: 600 }}>
-                  Single ({complexityData.singlePct}%)
+                  Single: {complexityData.singlePct}%
                 </span>
               </div>
             </div>

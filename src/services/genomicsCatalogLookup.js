@@ -149,7 +149,7 @@ export function resolveProgramSlug(programInput = '') {
   const low = String(programInput).toLowerCase();
   if (low.includes('telo') || low.includes('telotest')) return 'fagron-genomics-telotest';
   if (low.includes('tricho') || low.includes('trichotest')) return 'fagron-genomics-trichotest';
-  if (low.includes('nutri') || low.includes('nutrigen')) return 'fagron-genomics-nutrigen';
+  if (low.includes('nutrigen')) return 'fagron-genomics-nutrigen';
   if (low.includes('ultra') || low.includes('ultraperson')) return 'ultraperson';
   if (low.includes('eterna')) return 'eterna';
   return null;

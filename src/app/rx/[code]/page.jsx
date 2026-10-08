@@ -215,14 +215,20 @@ export async function generateMetadata({ params }) {
   const rawItems = rx?.items || rx?.compounds || [];
   if (rawItems.length > 0) {
     const activeItems = rawItems
-      .filter(i => i.itemType !== 'vehicle_base' && i.itemType !== 'consumable')
+      .filter(i => i && i.itemType !== 'vehicle_base' && i.itemType !== 'consumable')
       .map(i => {
+        const itemName = i.name || i.productName || i.activeIngredient || '';
         const conc = i.concentration || i.dosage || '';
-        return `${i.name}${conc && !i.name.includes(conc) ? ` ${conc}` : ''}`;
-      });
-    const vehicle = rawItems.find(i => i.itemType === 'vehicle_base');
-    const activeStr = activeItems.length > 0 ? activeItems.join(' + ') : rawItems.map(i => i.name).join(' + ');
-    formulaSummary = vehicle ? `${activeStr} in ${vehicle.name}` : activeStr;
+        if (!itemName) return conc || '';
+        return `${itemName}${conc && !itemName.includes(conc) ? ` ${conc}` : ''}`;
+      })
+      .filter(Boolean);
+    const vehicle = rawItems.find(i => i && i.itemType === 'vehicle_base');
+    const vehicleName = vehicle?.name || vehicle?.productName || vehicle?.activeIngredient || '';
+    const activeStr = activeItems.length > 0 
+      ? activeItems.join(' + ') 
+      : rawItems.map(i => i?.name || i?.productName || i?.activeIngredient || '').filter(Boolean).join(' + ');
+    formulaSummary = vehicleName ? `${activeStr} in ${vehicleName}` : activeStr;
   } else if (rx?.formulaName || rx?.title) {
     formulaSummary = rx.formulaName || rx.title;
   }

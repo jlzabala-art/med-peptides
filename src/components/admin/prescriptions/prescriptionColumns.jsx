@@ -302,7 +302,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'parts',
       header: 'Parts',
-      width: '10%',
+      width: '64px',
       render: (rx) => {
         let count = 1;
         if (rx._isSessionGroup) {
@@ -318,13 +318,16 @@ export const getPrescriptionColumns = (options = {}) => {
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span 
-              title={isMulti ? `Multi-part prescription (${count} compounded formulations)` : 'Single formulation'}
+              title={isMulti ? `Multi-part prescription: ${count} compounded formulations` : 'Single formulation (1 part)'}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
+                minWidth: '24px',
+                height: '22px',
+                padding: '0 6px',
                 fontSize: '0.74rem',
-                fontWeight: isMulti ? 600 : 500,
-                padding: '2px 8px',
+                fontWeight: 700,
                 borderRadius: '4px',
                 background: isMulti ? '#e8f0fe' : '#f1f3f4',
                 color: isMulti ? '#1a73e8' : '#5f6368',
@@ -332,7 +335,7 @@ export const getPrescriptionColumns = (options = {}) => {
                 whiteSpace: 'nowrap'
               }}
             >
-              {count} {count === 1 ? 'part' : 'parts'}
+              {count}
             </span>
           </div>
         );
@@ -341,9 +344,9 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'date',
       header: 'Date',
-      width: '12%',
+      width: '90px',
       render: (rx) => {
-        const formatAnyDate = (val) => {
+        const parseAnyDate = (val) => {
           if (!val) return null;
           let d = null;
           if (typeof val.toDate === 'function') d = val.toDate();
@@ -357,27 +360,42 @@ export const getPrescriptionColumns = (options = {}) => {
               d = new Date(val);
             }
           }
-          if (d && !isNaN(d.getTime())) {
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          }
+          if (d && !isNaN(d.getTime())) return d;
           return null;
         };
 
-        const dateStr = formatAnyDate(rx.date)
-          || formatAnyDate(rx.dateIssued)
-          || formatAnyDate(rx.createdAt)
-          || formatAnyDate(rx.createdAt_ts)
-          || formatAnyDate(rx.updatedAt)
-          || formatAnyDate(rx.fagron?.importedAt)
-          || formatAnyDate(rx.fagron?.reportDate)
-          || '—';
+        const dObj = parseAnyDate(rx.date)
+          || parseAnyDate(rx.dateIssued)
+          || parseAnyDate(rx.createdAt)
+          || parseAnyDate(rx.createdAt_ts)
+          || parseAnyDate(rx.updatedAt)
+          || parseAnyDate(rx.fagron?.importedAt)
+          || parseAnyDate(rx.fagron?.reportDate);
+
+        if (!dObj) {
+          return <span style={{ color: '#9aa0a6', fontSize: '0.78rem' }}>—</span>;
+        }
+
+        const fullDateStr = dObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const dayMonth = dObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const year = dObj.getFullYear();
 
         return (
           <div 
-            title={dateStr}
-            style={{ fontSize: '0.8125rem', color: '#5f6368', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            title={fullDateStr}
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              lineHeight: 1.25,
+              whiteSpace: 'nowrap'
+            }}
           >
-            {dateStr}
+            <span style={{ fontSize: '0.80rem', fontWeight: 600, color: '#202124' }}>
+              {dayMonth}
+            </span>
+            <span style={{ fontSize: '0.70rem', color: '#70757a', fontWeight: 500 }}>
+              {year}
+            </span>
           </div>
         );
       },

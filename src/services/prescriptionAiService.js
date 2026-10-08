@@ -151,7 +151,14 @@ export async function extractPrescriptionFromDocument(file) {
  */
 export async function normalizeExtractedPrescriptions(rawData, options = {}) {
   const { currentUser, context = {}, supplierHint = null } = options;
-  const isFagron = rawData.documentType === 'FagronGenomics' || rawData.fagronDetails?.isFagron || !!rawData.fagronDetails?.boxId;
+  const hasFagronMarkers = (
+    !!rawData.fagronDetails?.boxId ||
+    rawData.fagronDetails?.isFagron ||
+    /tricho|telo|nutrigen|acnetest/i.test(rawData.fagronDetails?.testName || '') ||
+    /tricho|telo|nutrigen/i.test(rawData.treatmentProgram || '') ||
+    /box\s*\d+/i.test(rawData.fagronDetails?.boxId || '')
+  );
+  const isFagron = (rawData.documentType === 'FagronGenomics' && hasFagronMarkers) || !!rawData.fagronDetails?.boxId || !!rawData.fagronDetails?.isFagron;
 
   // Extract formulation blocks
   let blocks = [];
@@ -545,13 +552,19 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
     };
   });
 
-  // Auto-detect clinical archetype category
-  const detectedCategory = rawData.clinicalCategory || (
+  // Auto-detect clinical archetype category:
+  // Strictly prevent false-positive NutriGen classification when not an explicit Fagron Genomics NutriGen test
+  let rawCategory = rawData.clinicalCategory;
+  if (rawCategory === 'nutrigen' && (!isFagron || !rawData.fagronDetails?.testName?.toLowerCase().includes('nutrigen'))) {
+    rawCategory = 'compounding';
+  }
+
+  const detectedCategory = rawCategory || (
     blocks.some(b => b.blockType === 'pomade' || (b.items || []).some(i => (i.name || '').toLowerCase().includes('diltiazem') || (i.name || '').toLowerCase().includes('pomade'))) ? 'compounding' :
     blocks.some(b => b.blockType === 'hormone' || (b.items || []).some(i => (i.name || '').toLowerCase().includes('pentravan') || (i.name || '').toLowerCase().includes('testosterone') || (i.name || '').toLowerCase().includes('estradiol'))) ? 'hormone' :
     (isFagron && (rawData.fagronDetails?.testName?.toLowerCase().includes('tricho') || blocks.some(b => (b.items || []).some(i => (i.name || '').toLowerCase().includes('trichosol'))))) ? 'trichotest' :
-    (isFagron && (rawData.fagronDetails?.testName?.toLowerCase().includes('nutri') || blocks.some(b => (b.items || []).some(i => (i.name || '').toLowerCase().includes('nattokinase'))))) ? 'nutrigen' :
-    'standard'
+    (isFagron && rawData.fagronDetails?.testName?.toLowerCase().includes('nutrigen')) ? 'nutrigen' :
+    'compounding'
   );
 
   const resolvedDispensingForm = dispensingForm !== 'Topical Solution' ? dispensingForm : (

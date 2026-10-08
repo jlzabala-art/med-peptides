@@ -83,6 +83,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const typeFilter = searchParams.get('type') || '';
   const doctorFilter = searchParams.get('doctor') || searchParams.get('doctorName') || '';
   const patientFilter = searchParams.get('patient') || '';
+  const assignmentFilter = searchParams.get('assignment') || '';
   const urlDoctorId = searchParams.get('doctorId') || '';
   const urlDoctorName = searchParams.get('doctorName') || '';
   const urlRxId = searchParams.get('id') || '';
@@ -280,13 +281,44 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       });
     }
 
-    // Filter by patient
+    // Filter by patient (including unassigned orphan cleanup)
     if (patientFilter) {
-      const patQ = patientFilter.toLowerCase();
-      rawData = rawData.filter(rx => {
-        const pName = (rx.patient?.name || rx.patientName || '').toLowerCase();
-        return pName.includes(patQ);
-      });
+      if (patientFilter === '__unassigned__' || patientFilter === 'unassigned') {
+        rawData = rawData.filter(rx => {
+          const pName = (rx.patient?.name || rx.patientName || '').trim().toLowerCase();
+          const hasNoPatientId = !rx.patientId && !rx.patient?.id;
+          return hasNoPatientId || !pName || ['unknown patient', 'unknown', 'unassigned', 'sin paciente', 'sin asignar', ''].includes(pName);
+        });
+      } else {
+        const patQ = patientFilter.toLowerCase();
+        rawData = rawData.filter(rx => {
+          const pName = (rx.patient?.name || rx.patientName || '').toLowerCase();
+          return pName.includes(patQ);
+        });
+      }
+    }
+
+    // Filter by assignment (Rule: Depuración de registros huérfanos)
+    if (assignmentFilter) {
+      if (assignmentFilter === 'unassigned_patient') {
+        rawData = rawData.filter(rx => {
+          const pName = (rx.patient?.name || rx.patientName || '').trim().toLowerCase();
+          const hasNoPatientId = !rx.patientId && !rx.patient?.id;
+          return hasNoPatientId || !pName || ['unknown patient', 'unknown', 'unassigned', 'sin paciente', 'sin asignar', ''].includes(pName);
+        });
+      } else if (assignmentFilter === 'unassigned_doctor') {
+        rawData = rawData.filter(rx => {
+          const docName = (rx.doctor?.name || rx.doctorName || rx.treatingDoctor || '').trim().toLowerCase();
+          const hasNoDoctorId = !rx.doctorId && !rx.doctor?.id;
+          return hasNoDoctorId || !docName || ['unknown doctor', 'unknown', 'unassigned', 'sin doctor', 'sin asignar', ''].includes(docName);
+        });
+      } else if (assignmentFilter === 'assigned') {
+        rawData = rawData.filter(rx => {
+          const pName = (rx.patient?.name || rx.patientName || '').trim();
+          const docName = (rx.doctor?.name || rx.doctorName || rx.treatingDoctor || '').trim();
+          return (rx.patientId || rx.patient?.id || pName) && (rx.doctorId || rx.doctor?.id || docName);
+        });
+      }
     }
 
     // Filter by status
@@ -364,7 +396,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     });
     
     return result;
-  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, patientFilter, statusFilter, rangeFilter, workspaceFilter, activeWsRxIds]);
+  }, [displayPrescriptions, algoliaHits, isAlgoliaActive, searchTerm, sourceFilter, typeFilter, doctorFilter, patientFilter, assignmentFilter, statusFilter, rangeFilter, workspaceFilter, activeWsRxIds]);
 
   const finalData = groupedData;
 
@@ -942,6 +974,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       }
     });
     const opts = [{ label: 'All Patients', value: '' }];
+    opts.push({ label: '⚠️ Sin Paciente Asignado (Depuración)', value: '__unassigned__' });
     Array.from(patMap.keys()).sort().forEach(p => {
       opts.push({ label: p, value: p });
     });
@@ -960,6 +993,20 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       options: [
         { label: 'All Prescriptions', value: '' },
         { label: `💼 In Active Workspace (${activeWsRxIds.length})`, value: '1' }
+      ]
+    },
+    {
+      key: 'assignment',
+      label: 'Assignment',
+      pluralLabel: 'Assignments',
+      multiSelect: false,
+      value: assignmentFilter,
+      onChange: (val) => updateUrlParam('assignment', val),
+      options: [
+        { label: 'All Assignments', value: '' },
+        { label: '⚠️ Sin Paciente Asignado (Depuración)', value: 'unassigned_patient' },
+        { label: '⚠️ Sin Doctor Asignado (Depuración)', value: 'unassigned_doctor' },
+        { label: '✓ Completamente Asignadas', value: 'assigned' }
       ]
     },
     {
@@ -1042,12 +1089,25 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         { label: 'Manual Entry', value: 'manual' }
       ]
     }
-  ], [workspaceFilter, activeWsRxIds.length, rangeFilter, typeFilter, statusFilter, doctorFilter, patientFilter, sourceFilter, doctorOptions, patientOptions, updateUrlParam]);
+  ], [workspaceFilter, activeWsRxIds.length, assignmentFilter, rangeFilter, typeFilter, statusFilter, doctorFilter, patientFilter, sourceFilter, doctorOptions, patientOptions, updateUrlParam]);
 
   const activeChips = useMemo(() => {
     const chips = [];
     if (workspaceFilter === '1' || workspaceFilter === 'true') {
       chips.push({ key: 'workspace', label: 'Workspace', value: 'In Active Workspace', onRemove: () => updateUrlParam('workspace', '') });
+    }
+    if (assignmentFilter) {
+      const assignMap = {
+        'unassigned_patient': '⚠️ Sin Paciente Asignado',
+        'unassigned_doctor': '⚠️ Sin Doctor Asignado',
+        'assigned': '✓ Completamente Asignadas'
+      };
+      chips.push({
+        key: 'assignment',
+        label: 'Assignment',
+        value: assignMap[assignmentFilter] || assignmentFilter,
+        onRemove: () => updateUrlParam('assignment', '')
+      });
     }
     if (statusFilter) {
       chips.push({ key: 'status', label: 'Status', value: statusFilter, onRemove: () => updateUrlParam('status', '') });
@@ -1060,7 +1120,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       chips.push({ key: 'doctor', label: 'Doctor', value: doctorFilter, onRemove: () => updateUrlParam('doctor', '') });
     }
     if (patientFilter) {
-      chips.push({ key: 'patient', label: 'Patient', value: patientFilter, onRemove: () => updateUrlParam('patient', '') });
+      const pLabel = patientFilter === '__unassigned__' ? '⚠️ Sin Paciente Asignado' : patientFilter;
+      chips.push({ key: 'patient', label: 'Patient', value: pLabel, onRemove: () => updateUrlParam('patient', '') });
     }
     if (typeFilter) {
       const typeLabel = PRESCRIPTION_TYPE_CONFIG[typeFilter]?.label || typeFilter;

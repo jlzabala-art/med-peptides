@@ -86,7 +86,7 @@ export async function POST(request) {
         clinicalCategory: {
           type: Type.STRING,
           enum: ['trichotest', 'nutrigen', 'hormone', 'peptide', 'compounding', 'standard'],
-          description: 'Clinical archetype: trichotest (scalp/hair), nutrigen (oral metabolic/capsules), hormone (BHRT/transdermal steroids), peptide (injectables), compounding (galenic pomades/ointments/creams), standard (general clinical medicine)'
+          description: 'Clinical archetype: trichotest (Fagron TrichoTest hair DNA test), nutrigen (Fagron Genomics NutriGen DNA test ONLY - NEVER use for general compounded oral capsules or supplements), hormone (BHRT/transdermal steroids), peptide (injectables), compounding (galenic oral capsules, pomades, ointments, creams, or custom clinic formulations), standard (general clinical medicine)'
         },
         confidenceScore: {
           type: Type.INTEGER,
@@ -281,7 +281,7 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
    - Strictly separate true Active Pharmaceutical Ingredients (APIs) from compounding vehicles/bases:
      * In Transdermal BHRT creams: APIs are Testosterone, 17β-Estradiol, Progesterone. The vehicle is Pentravan® Liposomal Transdermal Cream Base (set in vehicleBase, or mark isVehicleOrBase: true).
      * In Scalp lotions: APIs are Minoxidil, Latanoprost, Finasteride. The vehicle is TrichoSol™ or TrichoOil™.
-     * In Oral Nutrigenomics: APIs are Nattokinase, Serrapeptase, Alpha Lipoic Acid. The vehicle is Vegetarian HPMC Enteric Capsules.
+     * In Compounded Oral Capsules: APIs such as Ubiquinol, Saw Palmetto, Red Yeast Rice, Berberine, Citrus Bergamot, Chromium, CoQ10. The vehicle is Vegetarian / Gelatin Capsules. NOTE: Custom oral capsules from clinic doctors are 'compounding' (CompoundingFormula), NOT 'nutrigen'.
      * In Perianal/Topical Pomades: APIs are Diltiazem, Lidocaine. The vehicle is Hypoallergenic Pomade Base.
 
 4. STEP-BY-STEP POSOLOGY PROTOCOL:
@@ -294,11 +294,15 @@ CRITICAL CLINICAL EXTRACTION RULES LEARNED FROM REAL-WORLD CLINICAL AUDITS:
 5. CLINICIAN & CLINIC ATTRIBUTION:
    - Extract the prescribing physician name (e.g. "Dr. Marina Cordeiro Fernandes"), medical license (e.g. "DHA-P-03..."), clinic name (e.g. "Nova Plastic Surgery Clinic", "NOVA Clinic"), and address/city (e.g. "Dubai, UAE").
 
-5. FAGRON TELOTEST & TELOMERE REPORTS:
+6. FAGRON TELOTEST & TELOMERE REPORTS:
    - If the document contains "THE TELOTEST FORMULA™", "TeloTest", "Telomeres", or BOX ID with "...AATEL" (e.g. "BOX03049AATEL"):
      * Set 'documentType' to "FagronGenomics" and 'clinicalCategory' to "compounding" or "standard".
      * Set 'fagronDetails.testName' to "TeloTest" and extract the Box ID.
-     * Extract Part 1 (Transdermal Pentravan formula, e.g. Metformin, Testosterone, Astaxanthin) and Part 2 (Oral Capsules formula, e.g. Turmeric dry extract, Coenzyme Q10, N-Acetyl-L-Cysteine) as distinct sequential formulationBlocks!`;
+     * Extract Part 1 (Transdermal Pentravan formula, e.g. Metformin, Testosterone, Astaxanthin) and Part 2 (Oral Capsules formula, e.g. Turmeric dry extract, Coenzyme Q10, N-Acetyl-L-Cysteine) as distinct sequential formulationBlocks!
+
+7. FAGRON GENOMICS VS GENERAL CLINICAL COMPOUNDING (CRITICAL RULE):
+   - ONLY classify as 'documentType': "FagronGenomics" or 'clinicalCategory': "nutrigen" / "trichotest" if the uploaded document is an official Fagron Genomics report/test containing explicit titles ("NutriGen", "TrichoTest", "TeloTest") or an official Fagron Box ID / Barcode (...AANUT..., ...AATRI..., ...AATEL...).
+   - Standard medical clinic prescriptions, doctor Rx pads, and compounded oral capsules (e.g. Ubiquinol, Saw Palmetto, Berberine, Red Yeast Rice from Nova Plastic Surgery Clinic, Dr. Marina Cordeiro Fernandes, Dra. Haydee Camacho, etc.) MUST be classified as 'documentType': "CompoundingFormula" (or "StandardPrescription") and 'clinicalCategory': "compounding" (or "standard"). NEVER associate standard clinical compounding prescriptions with NutriGen!`;
 
     // Verified Google GenAI models for multimodal extraction
     const CANDIDATE_MODELS = [

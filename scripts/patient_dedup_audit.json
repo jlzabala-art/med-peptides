@@ -1,0 +1,314 @@
+{
+  "total": 27,
+  "alreadyInAtlas": [
+    {
+      "row": 21,
+      "originalPatient": "Roukiya M M AlMurja PRES #1",
+      "basePatientName": "Roukiya M M AlMurja",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/13yKjMw4jwQWvmxQn1f1nwL9iqtBqFU1d/view?usp=drive_link",
+      "alreadyInAtlas": true,
+      "matchedWith": {
+        "id": "RX-RMMA-2",
+        "name": "Roukiya M M Almurjan",
+        "source": "prescriptions_collection"
+      },
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 22,
+      "originalPatient": "Roukiya M M AlMurja PRES #2",
+      "basePatientName": "Roukiya M M AlMurja",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1pv9ylNvUCbGoEVX0HTG9S3gd5hg8yzxi/view?usp=drive_link",
+      "alreadyInAtlas": true,
+      "matchedWith": {
+        "id": "RX-RMMA-2",
+        "name": "Roukiya M M Almurjan",
+        "source": "prescriptions_collection"
+      },
+      "isRepeatedInBatch": true
+    }
+  ],
+  "duplicatesInsideBatch": [
+    {
+      "row": 61,
+      "originalPatient": "Maria Cecilia Reinaldo Santos Correa",
+      "basePatientName": "Maria Cecilia Reinaldo Santos Correa",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1ZxlbjRH7qrGo8F6mCGD22hJz_ch9hQcT/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": true
+    },
+    {
+      "row": 87,
+      "originalPatient": "Ghada Abdulaziz Ishaq",
+      "basePatientName": "Ghada Abdulaziz Ishaq",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1EUjoXvLixKNIQql2WF6V09-K1eKcv-Ux/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": true
+    }
+  ],
+  "eligibleNew": [
+    {
+      "row": 14,
+      "originalPatient": "Lucas De Morais Arruda",
+      "basePatientName": "Lucas De Morais Arruda",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1_A4UC51FxjuXdxiNwmzHBhPn8-Ve64AZ/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 16,
+      "originalPatient": "Fahad Jassim Al-Theyab",
+      "basePatientName": "Fahad Jassim Al-Theyab",
+      "doctor": "Raffanie Lucenio, The Masters",
+      "items": "5",
+      "signedPrescription": "https://drive.google.com/file/d/1E1bouG_v6CoJAuARAHL_npLirm9P2B88/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 20,
+      "originalPatient": "May Ali Khamis Almazrouei",
+      "basePatientName": "May Ali Khamis Almazrouei",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1kREPYOAA4N-vAGycz_rI2_OGub1Y31zi/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 27,
+      "originalPatient": "Hanaa Obaid Buti Almulla",
+      "basePatientName": "Hanaa Obaid Buti Almulla",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1c7XDYqklQCnHgYtLJXhPfjOjR_bpiuW5/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 32,
+      "originalPatient": "Maria Cecilia Reinaldo Santos Correa",
+      "basePatientName": "Maria Cecilia Reinaldo Santos Correa",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1ZxlbjRH7qrGo8F6mCGD22hJz_ch9hQcT/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 34,
+      "originalPatient": "Fatema Abdulaheed Ali Ahmed Alawadhi",
+      "basePatientName": "Fatema Abdulaheed Ali Ahmed Alawadhi",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1nNcF7FElp0CNJwZD-DPxW6mTrHKWfS5s/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 35,
+      "originalPatient": "Ranim Habib",
+      "basePatientName": "Ranim Habib",
+      "doctor": "Dr Khalid Shukri",
+      "items": "7",
+      "signedPrescription": "https://drive.google.com/file/d/151ai54OOwMhS_3i-slhwveYJF1qX-8pv/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 36,
+      "originalPatient": "Saeed Habib",
+      "basePatientName": "Saeed Habib",
+      "doctor": "Dr Khalid Shukri",
+      "items": "4",
+      "signedPrescription": "https://drive.google.com/file/d/1pbxDfmtQhnN1pijYaO3BRM4bkPpRjJwK/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 38,
+      "originalPatient": "Karim Fayed",
+      "basePatientName": "Karim Fayed",
+      "doctor": "Dr Sezgin Cagatay, Hortman",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1xkpgGoFPuzmK9Fxp-ZvgmUXQyJHHO2pX/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 39,
+      "originalPatient": "Ali Ahmad Al Mawlawi",
+      "basePatientName": "Ali Ahmad Al Mawlawi",
+      "doctor": "Raffanie Lucenio, The Masters",
+      "items": "6",
+      "signedPrescription": "https://drive.google.com/file/d/1bdCk6dlcXLuDudqH8J571xUSo701mk3F/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 40,
+      "originalPatient": "Fatima Yousef Al-mohannadi",
+      "basePatientName": "Fatima Yousef Al-mohannadi",
+      "doctor": "Raffanie Lucenio, The Masters",
+      "items": "4",
+      "signedPrescription": "https://drive.google.com/file/d/1DC_kC9AcDOhHe2n25I8fBLLNnIif_5lf/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 42,
+      "originalPatient": "Hala Falah Naser Alwasmi",
+      "basePatientName": "Hala Falah Naser Alwasmi",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "3",
+      "signedPrescription": "https://drive.google.com/file/d/1-f9s1UGQ4_cswcQjJmME0GxDavLD3JT6/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 43,
+      "originalPatient": "Noor Almutawa",
+      "basePatientName": "Noor Almutawa",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1HW5VPCsW4x8C3IalSzpYXNVoMCiGJUy_/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 45,
+      "originalPatient": "Sultan Al Maktoum",
+      "basePatientName": "Sultan Al Maktoum",
+      "doctor": "Dr Sobia, MLSC",
+      "items": "4",
+      "signedPrescription": "https://drive.google.com/file/d/1OwiZ9Uw5MjuJ_OT4cFCoCzMiRIih08XU/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 47,
+      "originalPatient": "Saeed Musallam Mefleh Khamis Almazrouei",
+      "basePatientName": "Saeed Musallam Mefleh Khamis Almazrouei",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/10Si0ru3OKxzaVkuS192AjCoSoOemYdIv/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 48,
+      "originalPatient": "Archana Sangaran",
+      "basePatientName": "Archana Sangaran",
+      "doctor": "Dr Sezgin Cagatay, Hortman",
+      "items": "3",
+      "signedPrescription": "https://drive.google.com/file/d/1SaMldicPVS7M1YoCx3y08mmWtSdG9RFv/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 50,
+      "originalPatient": "Issa Mohamad Ali Ahmad",
+      "basePatientName": "Issa Mohamad Ali Ahmad",
+      "doctor": "Dr Sobia, MLSC",
+      "items": "8",
+      "signedPrescription": "https://drive.google.com/file/d/165OkhLxKHRLV-lccvfx01gIa2-Qn2m6t/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 52,
+      "originalPatient": "Khaled Abdulhadi",
+      "basePatientName": "Khaled Abdulhadi",
+      "doctor": "Dr Fahed Abdulaziz Al Mutawah, My Skin KW",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1HO7w2SnBc-3euW_2Lsj70DKgAkJV-dcy/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 71,
+      "originalPatient": "Sallama Abbass Buhider",
+      "basePatientName": "Sallama Abbass Buhider",
+      "doctor": "Dr Sezgin Cagatay, Hortman",
+      "items": "3",
+      "signedPrescription": "https://drive.google.com/file/d/1kL3yKd7GtlKqkGlF0-A5b7TSoDIJG5ua/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 74,
+      "originalPatient": "Riyadh Swedaan",
+      "basePatientName": "Riyadh Swedaan",
+      "doctor": "Dr Sezgin Cagatay, Hortman",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1lRBTH2Qm-FUD-49LQjIoKQ_ifXvM68tX/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 75,
+      "originalPatient": "Salwa Saeed Alkubaisi",
+      "basePatientName": "Salwa Saeed Alkubaisi",
+      "doctor": "Raffanie Lucenio, The Masters",
+      "items": "2",
+      "signedPrescription": "https://drive.google.com/file/d/1lWAe3UnTH1NW7kDHJeVhZQAyOTEu_9H7/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 84,
+      "originalPatient": "George Mills",
+      "basePatientName": "George Mills",
+      "doctor": "Dr Sezgin Cagatay, Hortman",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1mDkcQb0X3atkicHGaRUW0Q2LfII36FmZ/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    },
+    {
+      "row": 86,
+      "originalPatient": "Ghada Abdulaziz Ishaq",
+      "basePatientName": "Ghada Abdulaziz Ishaq",
+      "doctor": "Dr Marina Cordeiro, Nova",
+      "items": "1",
+      "signedPrescription": "https://drive.google.com/file/d/1vMScaln6teXVgrxcncIjGgZ9Nss512md/view?usp=drive_link",
+      "alreadyInAtlas": false,
+      "matchedWith": null,
+      "isRepeatedInBatch": false
+    }
+  ]
+}

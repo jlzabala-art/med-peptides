@@ -95,11 +95,16 @@ export default function PharmapolisLabelSvg({
   const patientBoxY = isShort ? 140 : 166;
   const patientBoxHeight = isShort ? 64 : 76;
   const patientBoxBottom = patientBoxY + patientBoxHeight;
-  const patientFontSize = isShort ? 30 : 36; // ~10-10.5 pt
-  const patientTextY = isShort ? 42 : 50;
-
   // Extraction of clinical parameters with defensive fallbacks
   const patientName = (labelData.patientName || labelData.patient?.name || 'PATIENT RECORD').toUpperCase();
+  const patientLabelFontSize = isShort ? 25 : 30; // ~7.5-8.5 pt clean label
+  const nameLen = patientName.length;
+  // Patient name font: slightly smaller ("un poco más pequeña") with dynamic grace for long 30+ char names
+  const patientNameFontSize = isShort
+    ? (nameLen > 30 ? 21 : 24)
+    : (nameLen > 30 ? 26 : 29);
+  const patientFontSize = patientLabelFontSize;
+  const patientTextY = isShort ? 41 : 48;
   const fileNumber = labelData.fileNumber || labelData.fileNo || labelData.rxCode || labelData.id || '51857';
   const productTitle = labelData.productTitle || labelData.productName || 'Compounded Pharmaceutical Protocol';
   const formula = labelData.formula || '';
@@ -343,10 +348,10 @@ export default function PharmapolisLabelSvg({
         {/* ── PATIENT BOX ── */}
         <g transform={`translate(60, ${patientBoxY})`}>
           <rect x="0" y="0" width="1380" height={patientBoxHeight} fill="#f8fafc" stroke="#000000" strokeWidth="2.2" rx="4" />
-          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
-            PATIENT NAME: <tspan fontWeight="900">{patientName}</tspan>
+          <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
+            PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
           </text>
-          <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize} fontWeight="800" fill="#003666">
+          <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
             FILE #{fileNumber}
           </text>
         </g>
@@ -629,10 +634,10 @@ export default function PharmapolisLabelSvg({
       {/* ── PATIENT BOX ── */}
       <g transform={`translate(60, ${patientBoxY})`}>
         <rect x="0" y="0" width="1380" height={patientBoxHeight} fill="#f8fafc" stroke="#000000" strokeWidth="2.2" rx="4" />
-        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
-          PATIENT NAME: <tspan fontWeight="900">{patientName}</tspan>
+        <text x="24" y={patientTextY} fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="700" letterSpacing="0.4" fill="#000000">
+          PATIENT: <tspan fontWeight="800" fontSize={patientNameFontSize}>{patientName}</tspan>
         </text>
-        <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientFontSize} fontWeight="800" fill="#003666">
+        <text x="1356" y={patientTextY} textAnchor="end" fontFamily="Arial, Helvetica, sans-serif" fontSize={patientLabelFontSize} fontWeight="800" fill="#003666">
           RX #{fileNumber}
         </text>
       </g>

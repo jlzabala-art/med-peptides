@@ -291,11 +291,12 @@ export function detectFagronGenomicsTest(rx) {
     };
   }
 
-  // 2. NutriGen Match
+  // 2. NutriGen Match (Strictly require Fagron Genomics NutriGen, preventing false positives on generic nutriceuticals)
   if (
-    rawTestName.includes('nutri') ||
-    rawProgram.includes('nutri') ||
-    formulaStr.includes('nutrigen')
+    rawTestName.includes('nutrigen') ||
+    rawProgram.includes('nutrigen') ||
+    formulaStr.includes('nutrigen') ||
+    (rawBoxId && String(rawBoxId).toUpperCase().includes('AANUT'))
   ) {
     const test = FAGRON_GENOMICS_REGISTRY.nutrigen;
     return {

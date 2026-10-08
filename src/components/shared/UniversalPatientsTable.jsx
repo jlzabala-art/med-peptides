@@ -231,8 +231,17 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       });
     }
 
+    // Filter by prescription assignment status (Golden Rule: Depuración)
+    if (filters.prescriptionStatus) {
+      if (filters.prescriptionStatus === 'no_rx') {
+        list = list.filter(p => !p.prescriptionsCount || p.prescriptionsCount === 0 || (!p.prescriptions?.length && !p.activePrescriptions?.length));
+      } else if (filters.prescriptionStatus === 'has_rx') {
+        list = list.filter(p => (p.prescriptionsCount && p.prescriptionsCount > 0) || p.prescriptions?.length > 0 || p.activePrescriptions?.length > 0);
+      }
+    }
+
     return list;
-  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status, filters.physicianId, doctors]);
+  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status, filters.physicianId, filters.prescriptionStatus, doctors]);
 
   // Smart Auto-open Patient Detail Drawer if 1 match or openDetail=true
   const autoOpenedRef = React.useRef(false);
@@ -359,6 +368,17 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             ...(doctors || []).map(d => ({ label: d.name || d.email, value: d.id }))
           ],
           onChange: (val) => setFilters(prev => ({ ...prev, physicianId: val || undefined }))
+        },
+        {
+          key: 'prescriptionStatus',
+          label: 'Prescription Status (Depuración)',
+          value: filters.prescriptionStatus || '',
+          options: [
+            { label: 'All Patients', value: '' },
+            { label: '⚠️ Sin Prescripción Asignada (Depuración)', value: 'no_rx' },
+            { label: '✓ Con Prescripciones Asignadas', value: 'has_rx' }
+          ],
+          onChange: (val) => setFilters(prev => ({ ...prev, prescriptionStatus: val || undefined }))
         },
         {
           key: 'productCategory',

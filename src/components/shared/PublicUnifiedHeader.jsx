@@ -68,6 +68,8 @@ export default function PublicUnifiedHeader({
   customTier2 = null,
   // Hide contact / inquiry envelope button in Tier 1
   hideContactButton = false,
+  // Hide global catalog search button (⌘K) in Tier 1
+  hideSearchButton = false,
   // Doctor-only: enables Import Rx and Prescriptions Switcher buttons
   isDoctorView = false,
   hideImportRx = false,
@@ -306,19 +308,21 @@ export default function PublicUnifiedHeader({
             {/* Right: Actions & Tools */}
             <div className="puh-actions-group">
               {/* Quick Datasheet Search Trigger (Algolia Spotlight Switcher) */}
-              <button
-                type="button"
-                className="puh-btn puh-btn-search"
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setIsSearchModalOpen(true);
-                }}
-                title={isSpanish ? 'Buscar otros péptidos en el catálogo (⌘K)' : 'Search other peptides in catalog (⌘K)'}
-              >
-                <Search size={14} />
-                <span className="puh-btn-label">{isSpanish ? 'Buscar' : 'Search'}</span>
-                <kbd className="puh-kbd-hint">⌘K</kbd>
-              </button>
+              {!hideSearchButton && (
+                <button
+                  type="button"
+                  className="puh-btn puh-btn-search"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setIsSearchModalOpen(true);
+                  }}
+                  title={isSpanish ? 'Buscar otros péptidos en el catálogo (⌘K)' : 'Search other peptides in catalog (⌘K)'}
+                >
+                  <Search size={14} />
+                  <span className="puh-btn-label">{isSpanish ? 'Buscar' : 'Search'}</span>
+                  <kbd className="puh-kbd-hint">⌘K</kbd>
+                </button>
+              )}
 
               {/* Language Selector */}
               <select

@@ -80,6 +80,7 @@ const ROLE_ACTION_PERMISSIONS = Object.freeze({
   account_manager: [
     'view:admin',
     'view:prescriptions', 'create:prescriptions', 'edit:prescriptions', 'export:prescriptions',
+    'view:original_prescriptions',
   ],
 
   patient_coordinator: [
@@ -199,5 +200,16 @@ export function useRoleAccess() {
     return effectiveRole === normalised;
   }, [effectiveRole]);
 
-  return { can, feature, is, effectiveRole, permissions };
+  /**
+   * Check if current user is allowed to access original clinical prescription files (GCS).
+   * Doctors, clinics and patients are strictly prohibited.
+   */
+  const canViewOriginalPrescription = useCallback(() => {
+    if (effectiveRole === 'doctor' || effectiveRole === 'medical_director' || effectiveRole === 'clinic' || effectiveRole === 'patient') {
+      return false;
+    }
+    return can('view:original_prescriptions') || effectiveRole === 'admin';
+  }, [effectiveRole, can]);
+
+  return { can, feature, is, canViewOriginalPrescription, effectiveRole, permissions };
 }

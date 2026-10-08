@@ -176,6 +176,57 @@ export const KNOWN_DOCTORS_DIRECTORY = [
     website: 'https://dracamacho.com',
     license: 'COMB 46759',
     authority: 'COMB'
+  },
+  {
+    id: 'dr-khalid-shukri',
+    name: 'Dr. Khalid Shukri',
+    aliases: ['dr. khalid shukri', 'khalid shukri', 'dr khalid', 'khalid'],
+    title: 'Dr.',
+    specialty: 'Clinical Medicine & Wellness Specialist',
+    clinic: 'Dr. Khalid Shukri Clinic',
+    clinicName: 'Dr. Khalid Shukri Clinic',
+    clinicId: 'dr-khalid-shukri-clinic',
+    address: 'Dubai, UAE',
+    city: 'Dubai',
+    country: 'United Arab Emirates',
+    phone: '',
+    email: 'dr.khalid@shukriclinic.com',
+    license: 'DHA Registered',
+    authority: 'DHA'
+  },
+  {
+    id: 'dr-sobia',
+    name: 'Dr. Sobia',
+    aliases: ['dr. sobia', 'sobia', 'dr sobia', 'sobia mlsc'],
+    title: 'Dr.',
+    specialty: 'Longevity & Aesthetic Medicine Specialist',
+    clinic: 'Mediluxe Longevity Center (MLSC)',
+    clinicName: 'Mediluxe Longevity Center',
+    clinicId: 'mlsc-dubai',
+    address: 'Dubai, UAE',
+    city: 'Dubai',
+    country: 'United Arab Emirates',
+    phone: '',
+    email: 'dr.sobia@mediluxeme.com',
+    license: 'DHA Registered',
+    authority: 'DHA'
+  },
+  {
+    id: 'dr-fahed-al-mutawah',
+    name: 'Dr. Fahed Abdulaziz Al Mutawah',
+    aliases: ['dr. fahed abdulaziz al mutawah', 'dr fahed al mutawah', 'dr fahed', 'fahed al mutawah'],
+    title: 'Dr.',
+    specialty: 'Dermatologist & Laser Specialist',
+    clinic: 'My Skin Clinic (Kuwait)',
+    clinicName: 'My Skin Clinic',
+    clinicId: 'my-skin-kw',
+    address: 'Kuwait City, Kuwait',
+    city: 'Kuwait City',
+    country: 'Kuwait',
+    phone: '',
+    email: 'dr.fahed@myskin.com.kw',
+    license: 'MOH Registered',
+    authority: 'MOH'
   }
 ];
 
