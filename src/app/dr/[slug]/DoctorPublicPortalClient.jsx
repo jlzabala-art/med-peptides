@@ -7082,10 +7082,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
           <div
             style={{
               width: '100%',
-              maxWidth: '680px',
+              maxWidth: '620px',
               background: '#ffffff',
-              borderRadius: '12px',
-              boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08)',
+              borderRadius: '8px',
+              boxShadow: '0 4px 24px rgba(60,64,67,0.22), 0 0 0 1px #dadce0',
               padding: '24px',
               position: 'relative',
               display: 'flex',
@@ -7094,7 +7094,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button Top Right */}
+            {/* Close Button Top Right (Google Cloud Icon Button) */}
             <button
               type="button"
               onClick={() => setIsCredentialsModalOpen(false)}
@@ -7104,37 +7104,43 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 right: '16px',
                 width: '32px',
                 height: '32px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                background: '#f8fafc',
-                color: '#64748b',
+                borderRadius: '50%',
+                border: 'none',
+                background: 'transparent',
+                color: '#5f6368',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.15s'
+                transition: 'background 0.15s ease'
               }}
-              title="Close Popup"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f1f3f4';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+              title="Close"
             >
               <X size={18} />
             </button>
 
-            {/* Doctor Identity Card (Exact Layout from Screenshot) */}
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', paddingRight: '40px' }}>
+            {/* Doctor Identity Card (Google Cloud Platform UX) */}
+            <div style={{ display: 'flex', gap: '18px', alignItems: 'center', flexWrap: 'wrap', paddingRight: '36px' }}>
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '56px',
+                  height: '56px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #003666 0%, #0d9488 100%)',
+                  background: '#1a73e8',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.45rem',
-                  fontWeight: 700,
+                  fontSize: '1.35rem',
+                  fontWeight: 600,
                   flexShrink: 0,
-                  boxShadow: '0 2px 8px rgba(0,54,102,0.18)',
+                  boxShadow: '0 1px 3px rgba(60,64,67,0.20)',
                   position: 'relative'
                 }}
               >
@@ -7142,12 +7148,12 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 <span
                   style={{
                     position: 'absolute',
-                    bottom: '0px',
-                    right: '0px',
-                    width: '14px',
-                    height: '14px',
+                    bottom: '1px',
+                    right: '1px',
+                    width: '12px',
+                    height: '12px',
                     borderRadius: '50%',
-                    background: '#16a34a',
+                    background: '#1e8e3e',
                     border: '2px solid #ffffff'
                   }}
                   title="DHA Verified Active Practice"
@@ -7155,28 +7161,36 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </div>
 
               <div style={{ minWidth: 0, flex: 1 }}>
-                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
-                  {doctor.name}
-                </h2>
-                <p style={{ margin: '4px 0 8px 0', fontSize: '0.88rem', color: '#475569', fontWeight: 500, lineHeight: 1.35 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h2 style={{ fontSize: '1.20rem', fontWeight: 600, color: '#202124', margin: 0, letterSpacing: '-0.01em' }}>
+                    {doctor.name}
+                  </h2>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#137333', background: '#e6f4ea', border: '1px solid #ceead6', padding: '1px 7px', borderRadius: '4px' }}>
+                    DHA Verified
+                  </span>
+                </div>
+                <p style={{ margin: '4px 0 10px 0', fontSize: '0.84rem', color: '#5f6368', lineHeight: 1.4, fontWeight: 400 }}>
                   {doctor.specialty} • {doctor.clinic}
                 </p>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', fontSize: '0.80rem', color: '#64748b' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', fontSize: '0.78rem', color: '#5f6368' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ShieldCheck size={14} style={{ color: '#0d9488', flexShrink: 0 }} />
+                    <ShieldCheck size={14} style={{ color: '#1a73e8', flexShrink: 0 }} />
                     <span>Medical License:</span>
-                    <CopyableId value={doctor.license} iconOnly={false} />
+                    <span style={{ background: '#e8f0fe', color: '#1967d2', border: '1px solid #d2e3fc', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: 'monospace' }}>
+                      {doctor.license}
+                    </span>
+                    <CopyableId value={doctor.license} iconOnly={true} />
                   </div>
                   {doctor.location && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <MapPin size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={14} style={{ color: '#5f6368', flexShrink: 0 }} />
                       <span>{doctor.location}</span>
                     </div>
                   )}
                   {doctor.email && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Mail size={14} style={{ color: '#64748b', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Mail size={14} style={{ color: '#5f6368', flexShrink: 0 }} />
                       <span>{doctor.email}</span>
                     </div>
                   )}
@@ -7184,25 +7198,33 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               </div>
             </div>
 
-            {/* Action Buttons Row (Exact layout from screenshot with Copy Portal URL) */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+            {/* Action Buttons Row (Google Cloud Console Palette) */}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', paddingTop: '16px', borderTop: '1px solid #e8eaed' }}>
               <button
                 type="button"
                 onClick={handleShareDoctorPortal}
                 style={{
                   height: '36px',
                   padding: '0 14px',
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   border: '1px solid #dadce0',
                   background: '#ffffff',
                   color: '#3c4043',
                   fontSize: '0.80rem',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 1px 2px rgba(60,64,67,0.06)'
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8fafd';
+                  e.currentTarget.style.borderColor = '#c6c9cc';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
                 }}
               >
                 <Copy size={14} />
@@ -7215,16 +7237,23 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 style={{
                   height: '36px',
                   padding: '0 14px',
-                  borderRadius: '6px',
-                  border: '1px solid #1a73e8',
+                  borderRadius: '4px',
+                  border: '1px solid #dadce0',
                   background: '#e8f0fe',
                   color: '#1a73e8',
                   fontSize: '0.80rem',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#d2e3fc';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#e8f0fe';
                 }}
               >
                 <Share2 size={14} />
@@ -7240,47 +7269,29 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 style={{
                   height: '36px',
                   padding: '0 14px',
-                  borderRadius: '6px',
-                  border: '1px solid #bbf7d0',
-                  background: '#f0fdf4',
-                  color: '#15803d',
+                  borderRadius: '4px',
+                  border: '1px solid #dadce0',
+                  background: '#ffffff',
+                  color: '#137333',
                   fontSize: '0.80rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <MessageCircle size={14} color="#15803d" />
-                <span>Contact Atlas (+971 55 356 1058)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCredentialsModalOpen(false);
-                  setIsIntakeOpen(true);
-                }}
-                style={{
-                  height: '36px',
-                  padding: '0 16px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: '#003666',
-                  color: '#ffffff',
-                  fontSize: '0.80rem',
-                  fontWeight: 600,
+                  fontWeight: 500,
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  marginLeft: 'auto',
-                  boxShadow: '0 2px 4px rgba(0,54,102,0.18)'
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f0fdf4';
+                  e.currentTarget.style.borderColor = '#bbf7d0';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#dadce0';
                 }}
               >
-                <Sparkles size={14} />
-                <span>Submit Prescription</span>
+                <MessageCircle size={14} color="#16a34a" />
+                <span>WhatsApp Soporte Atlas</span>
               </button>
             </div>
           </div>
