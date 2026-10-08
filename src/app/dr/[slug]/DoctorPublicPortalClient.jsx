@@ -785,23 +785,23 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     if (!rx) return;
     triggerHaptic('light');
     const parts = resolvePrescriptionParts(rx);
-    const patientName = rx.patientName || 'Paciente';
-    let text = `Estimado/a ${patientName},\n\nLe compartimos la ficha de posología y modo de empleo de su tratamiento magistral prescrito por el Dr. ${doctor.name}:\n\n`;
-    text += `📋 *Tratamiento:* ${rx.treatmentTitle || 'Fórmula Magistral Personalizada'}\n`;
-    text += `🆔 *Referencia:* #${rx.code || rx.prescriptionNumber || rx.id}\n\n`;
+    const patientName = rx.patientName || 'Patient';
+    let text = `Dear ${patientName},\n\nHere is your treatment posology and administration guidance prescribed by Dr. ${doctor.name}:\n\n`;
+    text += `📋 *Treatment:* ${rx.treatmentTitle || 'Custom Compounded Formulation'}\n`;
+    text += `🆔 *Reference:* #${rx.code || rx.prescriptionNumber || rx.id}\n\n`;
     parts.forEach(p => {
-      text += `🔹 *${p.title}* (${p.volume || '60 mL'} - ${p.vehicle || 'Vehículo magistral'})\n`;
-      text += `   • *Pauta / Horario:* ${p.schedule || 'Aplicar según indicación médica'}\n`;
+      text += `🔹 *${p.title}* (${p.volume || '60 mL'} - ${p.vehicle || 'Compounded vehicle'})\n`;
+      text += `   • *Schedule:* ${p.schedule || 'Apply as directed by physician'}\n`;
       if (p.apis && p.apis.length > 0) {
-        text += `   • *Fórmula:* ${p.apis.map(a => `${a.name} ${a.concentration || a.dose || ''}`.trim()).join(', ')}\n`;
+        text += `   • *Formula:* ${p.apis.map(a => `${a.name} ${a.concentration || a.dose || ''}`.trim()).join(', ')}\n`;
       }
       text += `\n`;
     });
-    text += `⚠️ *Instrucciones clave:*\n`;
-    text += `• Aplicar sobre la piel limpia y seca.\n`;
-    text += `• Lavar bien las manos tras la aplicación.\n`;
-    text += `• Conservar a temperatura inferior a 25°C, protegido de la luz directa.\n\n`;
-    text += `Para cualquier duda médica, consulte con el Dr. ${doctor.name} o con el soporte clínico de dispensario Atlas (+971 55 356 1058).`;
+    text += `⚠️ *Key Instructions:*\n`;
+    text += `• Apply to clean and dry skin/scalp.\n`;
+    text += `• Wash hands thoroughly after application.\n`;
+    text += `• Store below 25°C, protected from direct sunlight.\n\n`;
+    text += `For medical inquiries, consult Dr. ${doctor.name} or Atlas Clinical Support on WhatsApp.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -826,7 +826,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
     const text = (queryText || aiInput).trim();
     if (!text) return;
     if (aiUsesRemaining <= 0) {
-      toast.error('Session quota of 5 clinical queries reached. Contact Atlas Support on WhatsApp (+971 55 356 1058).');
+      toast.error('Session quota of 5 clinical queries reached. Contact Atlas Support on WhatsApp.');
       return;
     }
 
@@ -870,7 +870,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       } else if (lower.includes('sign') || lower.includes('pend') || lower.includes('task') || lower.includes('tarea') || lower.includes('revis')) {
         response = `**Physician Task Status:**\n\nYou have **${pendingCount} pending task(s)** requiring physician sign-off or clinical verification.\n\nOnce reviewed, prescriptions transition to *Active / Dispensary Processing*. You can approve them directly from the table or inspection drawer.`;
       } else {
-        response = `**Clinical Analysis for ${doctor.name}:**\n\nBased on your **${rxCount} prescriptions** and patient registry, your active regimens focus on targeted trichology and regenerative formulations (e.g., dual-part liposomal solutions with TrichoSol™/TrichoOil™ vehicles).\n\nIf you require custom active ingredient titration, vehicle stabilization certificates, or batch logistics, you can also request dedicated liaison support with **Atlas Clinical Support on WhatsApp (+971 55 356 1058)**.`;
+        response = `**Clinical Analysis for ${doctor.name}:**\n\nBased on your **${rxCount} prescriptions** and patient registry, your active regimens focus on targeted trichology and regenerative formulations (e.g., dual-part liposomal solutions with TrichoSol™/TrichoOil™ vehicles).\n\nIf you require custom active ingredient titration, vehicle stabilization certificates, or batch logistics, you can also request dedicated liaison support with **Atlas Clinical Support on WhatsApp**.`;
       }
 
       const assistantMsg = {
@@ -1736,20 +1736,20 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       items: [
         {
           id: 'overview',
-          label: 'Panel General & KPIs',
+          label: 'Clinical Overview & KPIs',
           icon: BarChart3,
           badge: null
         },
         {
           id: 'prescriptions',
-          label: 'Mis Prescripciones',
+          label: 'My Prescriptions',
           icon: Layers,
           badge: filteredPrescriptions.length > 0 ? `${filteredPrescriptions.length}` : null,
           badgeColor: '#1a73e8'
         },
         {
           id: 'tasks',
-          label: 'Tareas Pendientes',
+          label: 'Pending Tasks',
           icon: Clock,
           badge: filteredTasks.length > 0 ? `${filteredTasks.length}` : null,
           badgeColor: filteredTasks.length > 0 ? '#b06000' : '#5f6368'
@@ -1761,21 +1761,21 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       items: [
         {
           id: 'protocols',
-          label: 'Protocolos Médicos (77)',
+          label: 'Medical Protocols (77)',
           icon: BookOpen,
           action: () => setIsDiscoveryDrawerOpen(true),
           badge: filteredProtocols.length > 0 ? `${filteredProtocols.length}` : '77'
         },
         {
           id: 'formulary',
-          label: 'Farmacopea & APIs',
+          label: 'Pharmacopeia & APIs',
           icon: FlaskConical,
           action: () => setIsDiscoveryDrawerOpen(true),
           badge: filteredFormulary.length > 0 ? `${filteredFormulary.length}` : null
         },
         {
           id: 'diagnostics',
-          label: 'Diagnóstico & Biomarcadores',
+          label: 'Diagnostics & Biomarkers',
           icon: Activity,
           badge: '6 Tests'
         },
@@ -1788,7 +1788,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         },
         {
           id: 'protocols_catalog',
-          label: 'Catálogo Digital Atlas',
+          label: 'Atlas Digital Catalog',
           icon: ExternalLink,
           action: () => window.open('https://med-peptides.com/c/CAT-MUWWS6JL', '_blank'),
           badge: '↗'
@@ -1800,17 +1800,17 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
       items: [
         {
           id: 'intake',
-          label: 'Compartir Intake Paciente',
+          label: 'Share Patient Intake',
           icon: Share2,
           action: handleCopyIntakeLink,
           badge: '1-Click'
         },
         {
           id: 'credentials',
-          label: 'Licencia DHA & Perfil',
+          label: 'DHA License & Profile',
           icon: ShieldCheck,
           action: () => setIsCredentialsModalOpen(true),
-          badge: 'Verificado'
+          badge: 'Verified'
         }
       ]
     }
@@ -3494,10 +3494,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                           alignItems: 'center',
                           gap: '5px'
                         }}
-                        title="Contact Atlas Clinical Support on WhatsApp (+971 55 356 1058)"
+                        title="Contact Atlas Clinical Support on WhatsApp"
                       >
                         <MessageCircle size={12} />
-                        <span>Contact Atlas</span>
+                        <span>Contact Atlas on WhatsApp</span>
                       </button>
 
                       <Link
@@ -3643,10 +3643,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                                 cursor: 'pointer',
                                 transition: 'all 0.15s ease'
                               }}
-                              title="Contact Atlas Clinical Support on WhatsApp (+971 55 356 1058)"
+                              title="Contact Atlas Clinical Support on WhatsApp"
                             >
                               <MessageCircle size={12} />
-                              <span>Contact Atlas</span>
+                              <span>Contact Atlas on WhatsApp</span>
                             </button>
 
                             <span style={{ fontSize: '0.74rem', color: '#475569', fontWeight: 500 }}>
@@ -4266,7 +4266,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               borderColor: '#c7d2fe',
               matchScore: '98% Synergy',
               target: 'Dermal Papilla Proliferation & TGF-β1 Catagen Blockade',
-              summary: 'Bioestimulador folicular de alta afinidad que estimula la proliferación de fibroblastos papilares, bloquea la miniaturización inducida por TGF-β1 y acelera la reentrada en fase anágena en sinergia con Minoxidil y antiandrógenos.',
+              summary: 'High-affinity follicular bioregulator stimulating dermal papilla fibroblasts, downregulating TGF-β1 miniaturization, and accelerating anagen re-entry in synergy with Minoxidil and antiandrogens.',
               synergisticApis: ['Minoxidil', 'Finasteride', 'Dutasteride', 'Spironolactone', 'Latanoprost', 'TrichoSol'],
               matchingItems: ghkMatches,
               protocolTitle: 'Melanogenesis & Density Protocol (ZT + GHK-Cu)',
@@ -4282,8 +4282,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               borderColor: '#bae6fd',
               matchScore: '99% Graft Synergy',
               target: 'Post-FUE Revascularization & Microvascular Graft Take',
-              summary: 'Complejo tri-peptídico biocompatible para la integración acelerada de injertos capilares, estabilidad microvascular vía óxido nítrico y migración temprana de queratinocitos hacia el lecho receptor.',
-              synergisticApis: ['PRP (Platelet-Rich Plasma)', 'Micro-injertos FUE', 'TrichoOil Lipids', 'L-Arginina', 'Vitamina E'],
+              summary: 'Biocompatible tri-peptide complex engineered for accelerated follicular graft revascularization, nitric oxide microvascular stability, and early keratinocyte migration into recipient beds.',
+              synergisticApis: ['PRP (Platelet-Rich Plasma)', 'FUE Micro-Grafts', 'TrichoOil Lipids', 'L-Arginine', 'Vitamin E'],
               matchingItems: glowMatches,
               protocolTitle: 'BPC-157 & TB-500 Tissue Repair Protocol',
               protocolUrl: '/proto/bpc-157-tb-500-protocol'
@@ -4298,8 +4298,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               borderColor: '#ddd6fe',
               matchScore: '99% Longevity Synergy',
               target: 'Telomerase Activation & Bulge Stem Cell Longevity',
-              summary: 'Péptido biomimético pineal que induce descondensación de heterocromatina y activa la transcripción de TERT, protegiendo las células madre del bulbo folicular contra la senescencia celular prematura.',
-              synergisticApis: ['Metformina', 'TeloTest™ Genomic Panels', 'CoQ10 / Ubiquinol', 'Trans-Resveratrol', 'NAC'],
+              summary: 'Pineal biomimetic peptide inducing heterochromatin de-condensation and TERT upregulation, protecting follicular bulge stem cells against premature replicative senescence.',
+              synergisticApis: ['Metformin', 'TeloTest™ Genomic Panels', 'CoQ10 / Ubiquinol', 'Trans-Resveratrol', 'NAC'],
               matchingItems: epithalonMatches,
               protocolTitle: 'Epithalon Telomere Extension Cycle',
               protocolUrl: '/proto/epithalon-telomere-extension'
@@ -4314,10 +4314,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               borderColor: '#a7f3d0',
               matchScore: '99% Barrier Support',
               target: 'Cuticular ECM Preservation & Vehicle Irritation Prevention',
-              summary: 'Tropocolágeno nativo biológicamente activo y flavonoides microcirculatorios (diosmina) diseñados para calmar el estrato córneo, sellar la cutícula y neutralizar la irritación o deslipidación inducida por vehículos hidroalcohólicos.',
-              synergisticApis: ['TrichoSol Base Magistral', 'Minoxidil Tópico', 'Inhibidores 5αR tópicos', 'TrichoOil'],
+              summary: 'Biologically active native tropocollagen and microcirculatory flavonoids (diosmin) engineered to calm the stratum corneum, seal cuticular scales, and counteract hydroalcoholic vehicle lipid depletion.',
+              synergisticApis: ['TrichoSol Vehicle Base', 'Topical Minoxidil', 'Topical 5αR Inhibitors', 'TrichoOil'],
               matchingItems: colwayMatches,
-              protocolTitle: 'Ver Ficha Técnica Colway (Champú & Acondicionador)',
+              protocolTitle: 'View Colway Clinical Datasheet (Shampoo & Conditioner)',
               protocolUrl: '/p/colway-strengthening-shampoo'
             }
           ];
@@ -4368,7 +4368,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     </h2>
                   </div>
                   <p style={{ margin: 0, fontSize: '0.84rem', color: '#5f6368', maxWidth: '780px', lineHeight: 1.5 }}>
-                    Catálogo maestro de coadyuvantes moleculares y cuidado de barrera cutánea. Consolida las 4 sinergias clave sin repeticiones, vinculadas automáticamente a las prescripciones activas de tu clínica.
+                    Master formulary of bioactive adjuvants and cuticular ECM barrier care. Consolidated across 4 core synergies matched to active prescriptions in your practice.
                   </p>
                 </div>
 
@@ -4386,10 +4386,10 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     gap: '6px'
                   }}>
                     <Users size={14} style={{ color: '#2563eb' }} />
-                    <span><strong>{totalCoveredRxs}</strong> de {allPrescriptions.length} recetas con sinergia</span>
+                    <span><strong>{totalCoveredRxs}</strong> of {allPrescriptions.length} prescriptions with synergy</span>
                   </div>
                   <span style={{ fontSize: '0.74rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '6px 12px', borderRadius: '6px', fontWeight: 650 }}>
-                    ✓ 4 Soluciones Maestras
+                    ✓ 4 Master Formulations
                   </span>
                 </div>
               </div>
@@ -4425,7 +4425,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    Todas ({masterSolutions.length})
+                    All ({masterSolutions.length})
                   </button>
                   <button
                     type="button"
@@ -4443,7 +4443,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    Péptidos Bioactivos (3)
+                    Bioactive Peptides (3)
                   </button>
                   <button
                     type="button"
@@ -4461,7 +4461,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    Barrera &amp; Colágeno ECM (1)
+                    Barrier &amp; Cuticular ECM (1)
                   </button>
                 </div>
 
@@ -4472,7 +4472,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                     type="text"
                     value={recSearchQuery}
                     onChange={(e) => setRecSearchQuery(e.target.value)}
-                    placeholder="Buscar por paciente, código o fármaco (ej. Minoxidil)..."
+                    placeholder="Search by patient name, code, or active API (e.g., Minoxidil)..."
                     style={{
                       width: '100%',
                       padding: '6px 30px 6px 30px',
@@ -4571,7 +4571,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                         {/* Synergistic APIs in Practice */}
                         <div style={{ marginBottom: '14px' }}>
                           <div style={{ fontSize: '0.70rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
-                            Sinergia comprobada con:
+                            Proven synergy with:
                           </div>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                             {sol.synergisticApis.map((api, aIdx) => (
@@ -4606,8 +4606,8 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                               <Users size={14} style={{ color: count > 0 ? '#2563eb' : '#94a3b8' }} />
                               <span>
                                 {count > 0 
-                                  ? `Aplica a ${count} paciente${count > 1 ? 's' : ''} en tu clínica`
-                                  : 'Sin pacientes activos vinculados actualmente'}
+                                  ? `Applies to ${count} patient${count > 1 ? 's' : ''} in your practice`
+                                  : 'No active patients currently matched'}
                               </span>
                             </div>
 
@@ -4629,7 +4629,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                                   borderRadius: '4px'
                                 }}
                               >
-                                <span>{isExpanded ? 'Ocultar' : `Ver lista (${count})`}</span>
+                                <span>{isExpanded ? 'Hide' : `View list (${count})`}</span>
                                 {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                               </button>
                             )}
@@ -4648,7 +4648,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                               gap: '5px'
                             }}>
                               {sol.matchingItems.map(({ rx }, pIdx) => {
-                                const patName = rx.patientName || 'Paciente';
+                                const patName = rx.patientName || 'Patient';
                                 const rxCode = rx.code || rx.id;
                                 return (
                                   <Link
@@ -4676,7 +4676,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                                     onMouseLeave={(e) => {
                                       e.currentTarget.style.background = '#ffffff';
                                     }}
-                                    title={`Abrir prescripción de ${patName}`}
+                                    title={`Open prescription for ${patName}`}
                                   >
                                     <span>👤 {patName}</span>
                                     <span style={{ color: '#64748b', fontSize: '0.65rem' }}>#{rxCode}</span>
@@ -4737,7 +4737,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   color: '#64748b'
                 }}>
                   <p style={{ margin: 0, fontSize: '0.85rem' }}>
-                    No se encontraron soluciones que coincidan con &ldquo;{recSearchQuery}&rdquo;.
+                    No clinical solutions found matching &ldquo;{recSearchQuery}&rdquo;.
                   </p>
                   <button
                     type="button"
@@ -4755,7 +4755,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       fontWeight: 650
                     }}
                   >
-                    Restablecer filtros
+                    Reset filters
                   </button>
                 </div>
               )}
@@ -5123,7 +5123,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   }}
                 >
                   <MessageCircle size={15} color="#16a34a" />
-                  <span>Contact Atlas (+971 55 356 1058)</span>
+                  <span>Contact Atlas on WhatsApp</span>
                 </button>
               </div>
             </div>
@@ -5361,7 +5361,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                       }}
                     >
                       <MessageCircle size={13} />
-                      <span>Contact Atlas (+971 55 356 1058)</span>
+                      <span>Contact Atlas on WhatsApp</span>
                     </button>
                   </div>
                 </div>
@@ -5418,7 +5418,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
             }}>
               <input
                 type="text"
-                placeholder={aiUsesRemaining > 0 ? "Ask Atlas AI about your patients, APIs, or formulas..." : "Session limit reached. Contact Atlas Support on WhatsApp (+971 55 356 1058)."}
+                placeholder={aiUsesRemaining > 0 ? "Ask Atlas AI about your patients, APIs, or formulas..." : "Session limit reached. Contact Atlas Support on WhatsApp."}
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -5570,7 +5570,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               gap: '6px'
             }}>
               <span>Attributed Physician: <strong style={{ color: '#202124' }}>{doctor.name}</strong></span>
-              <span>Liaison Channel: <strong style={{ color: '#137333' }}>Official WhatsApp (+971 55 356 1058)</strong></span>
+              <span>Liaison Channel: <strong style={{ color: '#137333' }}>Official WhatsApp</strong></span>
             </div>
 
             {/* Body */}
@@ -5756,7 +5756,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                   onMouseLeave={(e) => { e.currentTarget.style.background = '#25D366'; }}
                 >
                   <MessageCircle size={18} />
-                  <span>Send Inquiry via WhatsApp (+971 55 356 1058)</span>
+                  <span>Send Inquiry via WhatsApp</span>
                 </button>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -7291,7 +7291,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
                 }}
               >
                 <MessageCircle size={14} color="#16a34a" />
-                <span>WhatsApp Soporte Atlas</span>
+                <span>WhatsApp Atlas Support</span>
               </button>
             </div>
           </div>

@@ -21,6 +21,7 @@ import {
   CheckCircle2, 
   Eye, 
   ArrowLeft,
+  ArrowUpRight,
   Info,
   Maximize2,
   Sparkles,
