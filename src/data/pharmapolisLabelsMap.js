@@ -9,7 +9,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   {
     id: '51857-phase-1',
     prescriptionMatches: ['51857', 'RX-51857', 'RX-51857-A', 'RXG-51857-AMNA'],
-    patientMatches: ['amna sultan', 'alotaiba'],
+    patientMatches: ['amna sultan', 'amna alotaiba'],
     phaseNumber: 1,
     patientName: 'Amna Sultan Mohamed Ahmed Alotaiba',
     fileNumber: '51857',
@@ -29,7 +29,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     directions: 'Take 1 capsule once daily with breakfast.',
     warnings: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.',
     prodDate: '04-10-2026',
-    expDate: '03-10-2027',
+    expDate: '04-10-2027',
     storage: 'Store in a cool dry place',
     doctorName: 'Dr. Marina Cordeiro Fernandes',
     doctorLicense: 'DHA-91105367',
@@ -44,7 +44,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
   {
     id: '51857-phase-2',
     prescriptionMatches: ['51857', 'RX-51857', 'RX-51857-B', 'RXG-51857-AMNA'],
-    patientMatches: ['amna sultan', 'alotaiba'],
+    patientMatches: ['amna sultan', 'amna alotaiba'],
     phaseNumber: 2,
     patientName: 'Amna Sultan Mohamed Ahmed Alotaiba',
     fileNumber: '51857',
@@ -52,21 +52,21 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     productTitle: 'Metabolic & Lipid Optimization Evening Formula - 120 capsules',
     subTitle: 'Phase 2: Metabolic & Lipid Formula | With Lunch and Dinner',
     dosageForm: 'Oral Route (Vegetable Capsules)',
-    volume: '120 Caps for 2 Months',
+    volume: '120 Capsules, 1 Month Treatment',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'Red Yeast Rice Extract 600 mg + Berberine HCl 500 mg + Citrus Bergamot Extract 500 mg + Chromium Picolinate 100 mcg',
     apis: [
-      { name: 'Red Yeast Rice Extract', dose: '600 mg', dosage: '600 mg', activeIngredient: 'Monascus purpureus (Citrinin-Free Monacolin K)' },
+      { name: 'Red Yeast Rice Extract (Monascus purpureus)', dose: '600 mg', dosage: '600 mg', activeIngredient: 'Monascus purpureus (Citrinin-Free Monacolin K)' },
       { name: 'Berberine HCl', dose: '500 mg', dosage: '500 mg', activeIngredient: 'Berberine Hydrochloride 98%' },
       { name: 'Citrus Bergamot Extract', dose: '500 mg', dosage: '500 mg', activeIngredient: 'Bergamot Polyphenolic Fraction (BPF)' },
       { name: 'Chromium Picolinate', dose: '100 mcg', dosage: '100 mcg', activeIngredient: 'Chromium Tripicolinate' }
     ],
     vehicle: { name: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.', volume: '120 capsules' },
-    directions: 'Take 1 dose with lunch and 1 dose with dinner for 2 months.',
-    warnings: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 2 months.',
+    directions: 'Take 2 capsules with lunch and 2 capsules with dinner.',
+    warnings: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives. Duration: 1 month.',
     prodDate: '04-10-2026',
-    expDate: '03-10-2027',
+    expDate: '04-10-2027',
     storage: 'Store in a cool dry place',
     doctorName: 'Dr. Marina Cordeiro Fernandes',
     doctorLicense: 'DHA-91105367',
@@ -164,24 +164,24 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     productTitle: 'Morning Methylation & Mitochondrial Formula - 90 capsules',
     subTitle: 'Phase 1: Morning Mitochondrial & Hepatic Clearance',
     dosageForm: 'Oral Route (Plant-Based Capsules)',
-    volume: '90 Capsules (3 Months)',
+    volume: '180 Capsules, 2 Months Treatment',
     dimensions: '7.5 × 4.5 cm (1500 × 900 px)',
     pharmacy: 'Pharmapolis Compounding Pharmacy',
     formula: 'B12 500 mcg + P5P 25 mg + B2 10 mg + TMG 500 mg + Ubiquinol 200 mg + Resveratrol 250 mg + NAC 600 mg',
     apis: [
-      { name: 'Methylcobalamin (B12)', dose: '500 mcg', dosage: '500 mcg' },
-      { name: 'Pyridoxal-5\'-Phosphate (P5P)', dose: '25 mg', dosage: '25 mg' },
+      { name: 'Methylcobalamin (Vitamin B12)', dose: '500 mcg', dosage: '500 mcg' },
+      { name: 'Pyridoxal-5’-Phosphate (Active Vitamin B6)', dose: '25 mg', dosage: '25 mg' },
       { name: 'Riboflavin-5\'-Phosphate Sodium (B2)', dose: '10 mg', dosage: '10 mg' },
       { name: 'Trimethylglycine (TMG / Betaine)', dose: '500 mg', dosage: '500 mg' },
       { name: 'Ubiquinol', dose: '200 mg', dosage: '200 mg' },
       { name: 'Trans-Resveratrol', dose: '250 mg', dosage: '250 mg' },
       { name: 'N-Acetylcysteine (NAC)', dose: '600 mg', dosage: '600 mg' }
     ],
-    vehicle: { name: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.', volume: '90 capsules' },
-    directions: 'Take 3 capsules in the morning after breakfast for 3 months.',
+    vehicle: { name: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.', volume: '180 capsules' },
+    directions: 'Take 3 capsules in the morning after breakfast.',
     warnings: 'May cause harmless bright yellow urine discoloration. Take with adequate water and food.',
     prodDate: '04-10-2026',
-    expDate: '03-10-2027',
+    expDate: '04-10-2027',
     storage: 'Store in a cool dry place',
     doctorName: 'Dr. Marina Cordeiro Fernandes',
     doctorLicense: 'DHA-91105367',
@@ -217,7 +217,7 @@ export const PHARMAPOLIS_LABELS_REGISTRY = [
     directions: 'Take 2 capsules 30-60 minutes before bedtime with water for 3 months.',
     warnings: 'Non-habit forming. Promotes restorative slow-wave sleep architecture. Store tightly sealed.',
     prodDate: '04-10-2026',
-    expDate: '03-10-2027',
+    expDate: '04-10-2027',
     storage: 'Store in a cool dry place',
     doctorName: 'Dr. Marina Cordeiro Fernandes',
     doctorLicense: 'DHA-91105367',
@@ -1252,21 +1252,26 @@ export function getPharmapolisLabelsForPrescription(rx, explicitFormulations = n
       const phaseNum = form.index || (fIdx + 1);
       const partCode = form.extra?.partCode ? String(form.extra.partCode).toUpperCase() : null;
 
-      // Match by exact partCode first (e.g. RX-50957-A vs RX-50957-B), then by active ingredient overlap, then phaseNumber, then title
+      // Match by exact partCode first (e.g. RX-50957-A vs RX-50957-B), then by phaseNumber, then by active ingredient overlap, then title
       const regMatch = matches.find(m => 
         partCode && m.prescriptionMatches.some(pm => pm.toUpperCase() === partCode)
+      ) || matches.find(m => 
+        m.phaseNumber === phaseNum
       ) || matches.find(m => {
         if (!form.apis || !Array.isArray(form.apis) || !m.apis || !Array.isArray(m.apis)) return false;
         return m.apis.some(ma => {
-          const maName = (ma.name || ma.activeIngredient || '').toLowerCase();
+          const maName = (ma.name || ma.activeIngredient || '').toLowerCase().trim();
           return form.apis.some(fa => {
-            const faName = (fa.name || fa.activeIngredient || '').toLowerCase();
-            return maName && faName && (maName.includes(faName) || faName.includes(maName));
+            const faName = (fa.name || fa.activeIngredient || '').toLowerCase().trim();
+            if (!maName || !faName) return false;
+            if (maName === faName) return true;
+            const cleanM = maName.replace(/\(.*?\)/g, '').trim();
+            const cleanF = faName.replace(/\(.*?\)/g, '').trim();
+            if (cleanM === cleanF) return true;
+            return cleanM.startsWith(cleanF) || cleanF.startsWith(cleanM);
           });
         });
       }) || matches.find(m => 
-        m.phaseNumber === phaseNum
-      ) || matches.find(m => 
         m.productName && form.title && m.productName.toLowerCase().includes(form.title.toLowerCase().slice(0, 10))
       );
 
