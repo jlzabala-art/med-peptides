@@ -48,6 +48,112 @@ function generateBarcode1dSvg(codeText, width = 360, height = 48) {
   return `<svg width="${width}" height="${height}" viewBox="0 0 ${totalWidth} ${height}" xmlns="http://www.w3.org/2000/svg">${rects.join('')}</svg>`;
 }
 
+function estimateTextWidth(text, fontSize) {
+  let units = 0;
+  for (const char of String(text || '')) {
+    if ('MW'.includes(char)) units += 0.85;
+    else if ('I!|:;.\''.includes(char)) units += 0.28;
+    else if ('JL1- '.includes(char)) units += 0.42;
+    else if ('ABCDEFGHNOPQRSTUVXYZ023456789&'.includes(char)) units += 0.66;
+    else units += 0.6;
+  }
+  return units * fontSize;
+}
+
+function layoutSvgTitle(rawName, maxWidth = 640) {
+  const name = String(rawName || 'UNTITLED PRODUCT').trim().toUpperCase();
+  const words = name.split(/\s+/).filter(Boolean);
+
+  // 1. Single line: fits comfortably at strong headline size
+  for (let fs = 42; fs >= 32; fs -= 2) {
+    if (estimateTextWidth(name, fs) <= maxWidth) {
+      return {
+        lines: [name],
+        fontSize: fs,
+        lineHeight: 0,
+        startY: 170,
+        subtitleY: 202,
+        pillY: 222,
+      };
+    }
+  }
+
+  // 2. Multi-word: 2-line balanced wrap across word boundaries
+  if (words.length > 1) {
+    let bestSplit = null;
+    let bestScore = -Infinity;
+
+    for (let i = 1; i < words.length; i++) {
+      const l1 = words.slice(0, i).join(' ');
+      const l2 = words.slice(i).join(' ');
+
+      for (let fs = 34; fs >= 22; fs -= 2) {
+        const w1 = estimateTextWidth(l1, fs);
+        const w2 = estimateTextWidth(l2, fs);
+        if (w1 <= maxWidth && w2 <= maxWidth) {
+          const balance = 1 - Math.abs(w1 - w2) / maxWidth;
+          const fontScore = fs / 34;
+          const score = (fontScore * 2) + balance;
+          if (score > bestScore) {
+            bestScore = score;
+            bestSplit = {
+              lines: [l1, l2],
+              fontSize: fs,
+              lineHeight: Math.round(fs * 1.15),
+              startY: 146,
+              subtitleY: 208,
+              pillY: 226,
+            };
+          }
+          break;
+        }
+      }
+    }
+    if (bestSplit) return bestSplit;
+  }
+
+  // 3. Single ultra-long word (no spaces to break)
+  if (words.length <= 1) {
+    const fs = Math.max(16, Math.floor(maxWidth / (estimateTextWidth(name, 1) || 1)));
+    return {
+      lines: [name],
+      fontSize: fs,
+      lineHeight: 0,
+      startY: 170,
+      subtitleY: 202,
+      pillY: 222,
+    };
+  }
+
+  // 4. Fallback: 3-line wrap for composite names
+  const l1Words = [];
+  const l2Words = [];
+  const l3Words = [];
+  const fs = 20;
+  for (const w of words) {
+    const test1 = [...l1Words, w].join(' ');
+    if (estimateTextWidth(test1, fs) <= maxWidth && l2Words.length === 0) {
+      l1Words.push(w);
+    } else {
+      const test2 = [...l2Words, w].join(' ');
+      if (estimateTextWidth(test2, fs) <= maxWidth && l3Words.length === 0) {
+        l2Words.push(w);
+      } else {
+        l3Words.push(w);
+      }
+    }
+  }
+
+  return {
+    lines: [l1Words.join(' '), l2Words.join(' '), l3Words.join(' ')].filter(Boolean),
+    fontSize: fs,
+    lineHeight: 25,
+    startY: 138,
+    subtitleY: 212,
+    pillY: 228,
+  };
+}
+
 async function fetchProductData(slug) {
   const target = decodeURIComponent(slug).toLowerCase().trim();
   let data = null;
@@ -208,6 +314,9 @@ export async function GET(request, { params }) {
           ? 'Solid Dose Unit Formulation · Room Temperature 15°C–25°C'
           : 'Bacteriostatic Water (BAC 0.9%) · Cold-Chain 2°C–8°C (Do Not Freeze)';
 
+    // Compute generic typography and multi-line wrapping for product title
+    const titleLayout = layoutSvgTitle(product.name, 640);
+
     // 4. Compose Master SVG (1200x630) — served directly, no conversion needed
     const masterSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -223,6 +332,9 @@ export async function GET(request, { params }) {
     <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="110%">
       <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#002244" flood-opacity="0.08" />
     </filter>
+    <clipPath id="titleSafetyClip">
+      <rect x="55" y="105" width="675" height="115" />
+    </clipPath>
   </defs>
 
   <!-- Background Canvas -->
@@ -250,17 +362,20 @@ export async function GET(request, { params }) {
   </text>
 
   <!-- ── Left Column: Peptide Specs & 1D Barcode ── -->
-  <!-- Product Title -->
-  <text x="60" y="170" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="44" font-weight="900" fill="#0F172A" letter-spacing="-0.03em">
-    ${escapeXml(product.name.toUpperCase())}
-  </text>
-  <text x="60" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0284C7" letter-spacing="0.05em">
+  <!-- Product Title (Auto-wrapped, dynamic font sizing, strictly bounded) -->
+  <g clip-path="url(#titleSafetyClip)">
+    ${titleLayout.lines.map((line, idx) => {
+      const y = titleLayout.startY + (idx * titleLayout.lineHeight);
+      return `<text x="60" y="${y}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="${titleLayout.fontSize}" font-weight="900" fill="#0F172A" letter-spacing="-0.03em">${escapeXml(line)}</text>`;
+    }).join('\n    ')}
+  </g>
+  <text x="60" y="${titleLayout.subtitleY}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0284C7" letter-spacing="0.05em">
     ${escapeXml(presSubtitle)}
   </text>
 
   <!-- Analytical Purity Pill -->
-  <rect x="60" y="222" width="370" height="34" rx="8" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5" />
-  <text x="76" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#15803D" letter-spacing="0.03em">
+  <rect x="60" y="${titleLayout.pillY}" width="370" height="32" rx="8" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5" />
+  <text x="76" y="${titleLayout.pillY + 21}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#15803D" letter-spacing="0.03em">
     ✔ RP-HPLC PURITY ${escapeXml(product.purity.toUpperCase())}
   </text>
 
@@ -284,18 +399,18 @@ export async function GET(request, { params }) {
   </g>
 
   <!-- ── Right Column: High-Density QR Card ── -->
-  <g transform="translate(740, 130)">
+  <g transform="translate(745, 126)">
     <!-- White Enclosure Card -->
-    <rect x="0" y="0" width="396" height="425" rx="16" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2" />
+    <rect x="0" y="0" width="395" height="428" rx="16" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2" />
     
     <!-- Subtle Top Accent -->
-    <path d="M 0 16 A 16 16 0 0 1 16 0 L 380 0 A 16 16 0 0 1 396 16 L 396 38 L 0 38 Z" fill="#F1F5F9" />
-    <text x="198" y="25" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="800" fill="#475569" letter-spacing="0.08em">
+    <path d="M 0 16 A 16 16 0 0 1 16 0 L 379 0 A 16 16 0 0 1 395 16 L 395 38 L 0 38 Z" fill="#F1F5F9" />
+    <text x="197" y="25" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="800" fill="#475569" letter-spacing="0.08em">
       DIRECT MONOGRAPH SCANNER
     </text>
 
     <!-- Embedded QR Code -->
-    <g transform="translate(48, 55)">
+    <g transform="translate(47, 56)">
       <rect x="-10" y="-10" width="320" height="320" fill="#FFFFFF" />
       <svg width="300" height="300" viewBox="0 0 100 100">
         ${qrSvgContent}
@@ -303,7 +418,7 @@ export async function GET(request, { params }) {
     </g>
 
     <!-- QR Instruction Label -->
-    <text x="198" y="395" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#002244" letter-spacing="0.04em">
+    <text x="197" y="398" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="800" fill="#002244" letter-spacing="0.04em">
       SCAN WITH CAMERA TO OPEN SPECS
     </text>
   </g>
