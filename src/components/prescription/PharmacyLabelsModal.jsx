@@ -9,13 +9,17 @@ import PharmapolisLabelSvg from './PharmapolisLabelSvg';
 function formatApisForEditor(item) {
   if (!item) return '';
   if (Array.isArray(item.apis) && item.apis.length > 0) {
-    const list = item.apis.filter(a => !a.isVehicle && !a.isVehicleOrBase);
+    const list = item.apis.filter(a => {
+      if (typeof a === 'string') return Boolean(a.trim());
+      return !a.isVehicle && !a.isVehicleOrBase;
+    });
     if (list.length > 0) {
       return list.map(a => {
+        if (typeof a === 'string') return a.trim();
         const drug = a.drugName || a.drug || a.name || a.productName || '';
         const dose = a.dosage || a.dose || a.strength || '';
         return dose ? `${drug}: ${dose}` : drug;
-      }).join('\n');
+      }).filter(Boolean).join('\n');
     }
   }
   if (item.formula) {
@@ -45,9 +49,13 @@ function labelToMarkdown(item) {
 
   let apisText = '';
   if (Array.isArray(item.apis) && item.apis.length > 0) {
-    const list = item.apis.filter(a => !a.isVehicle && !a.isVehicleOrBase);
+    const list = item.apis.filter(a => {
+      if (typeof a === 'string') return Boolean(a.trim());
+      return !a.isVehicle && !a.isVehicleOrBase;
+    });
     if (list.length > 0) {
       apisText = list.map(a => {
+        if (typeof a === 'string') return `- ${a.replace(/^[*-]\s*/, '').trim()}`;
         const drug = a.drugName || a.drug || a.name || a.productName || '';
         const dose = a.dosage || a.dose || a.strength || '';
         return dose ? `- ${drug}: ${dose}` : `- ${drug}`;
@@ -102,10 +110,11 @@ function parseMarkdownToLabel(mdText, baseItem = {}) {
   const result = { ...baseItem };
   if (!mdText) return result;
 
-  const fmMatch = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
-  let body = mdText;
+  const cleanMd = mdText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const fmMatch = cleanMd.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+  let body = cleanMd;
   if (fmMatch) {
-    body = mdText.slice(fmMatch[0].length);
+    body = cleanMd.slice(fmMatch[0].length);
     const lines = fmMatch[1].split('\n');
     lines.forEach(line => {
       const idx = line.indexOf(':');
@@ -1262,7 +1271,7 @@ export default function PharmacyLabelsModal({
                 </select>
               </div>
 
-              {/* Field 5: Export Format Selector (PDF / PNG) */}
+              {/* Field 5: Export Format Selector (PDF / PNG / MD) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <label htmlFor="gcp-label-format" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
                   {isEs ? 'Formato:' : 'Format:'}
@@ -1275,22 +1284,23 @@ export default function PharmacyLabelsModal({
                     height: 30,
                     padding: '0 24px 0 8px',
                     borderRadius: '4px',
-                    border: '1px solid #1a73e8',
-                    background: '#f8fafd',
+                    border: '1px solid #dadce0',
+                    background: '#ffffff',
                     fontSize: '0.76rem',
-                    fontWeight: 700,
-                    color: '#1a73e8',
+                    fontWeight: 600,
+                    color: '#202124',
                     cursor: 'pointer',
                     appearance: 'none',
                     WebkitAppearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231a73e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'right 6px center',
                     outline: 'none'
                   }}
                 >
-                  <option value="pdf">PDF (Editable 1:1)</option>
+                  <option value="pdf">PDF (1:1)</option>
                   <option value="png">PNG (Imagen HD)</option>
+                  <option value="md">Markdown (.md)</option>
                 </select>
               </div>
 
@@ -1326,7 +1336,7 @@ export default function PharmacyLabelsModal({
                 }} />
               </button>
 
-              {/* Field 6: Online Label & Markdown Editor Toggle */}
+              {/* Field 6: Online Label Editor Toggle (Clean & Professional) */}
               <button
                 type="button"
                 onClick={() => setIsEditing(prev => !prev)}
@@ -1345,10 +1355,10 @@ export default function PharmacyLabelsModal({
                   gap: '6px',
                   transition: 'all 0.15s'
                 }}
-                title={isEs ? 'Editar campos de la etiqueta y formato Markdown con guardado en Firebase' : 'Edit label fields & Markdown with live Firebase sync'}
+                title={isEs ? 'Editar campos de la etiqueta' : 'Edit label fields'}
               >
                 <Edit3 size={13} />
-                <span>{isEs ? 'Editar / Markdown (.md)' : 'Edit / Markdown (.md)'}</span>
+                <span>{isEs ? 'Editar' : 'Edit'}</span>
                 <span style={{
                   width: 7,
                   height: 7,
@@ -1392,7 +1402,8 @@ export default function PharmacyLabelsModal({
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
-              marginBottom: '4px'
+              flexShrink: 0,
+              marginBottom: '6px'
             }}>
               {/* Editor Header Bar with Tabs and Actions */}
               <div style={{
@@ -1564,9 +1575,24 @@ export default function PharmacyLabelsModal({
               )}
 
               {/* Tab Body */}
-              <div style={{ padding: '12px', background: '#fafbfc', maxHeight: '280px', overflowY: 'auto' }}>
+              <div style={{
+                padding: '12px 14px',
+                background: '#fafbfc',
+                maxHeight: '340px',
+                minHeight: '220px',
+                overflowY: 'auto',
+                flexShrink: 0,
+                boxSizing: 'border-box',
+                width: '100%'
+              }}>
                 {editorTab === 'fields' ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                    gap: '10px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, color: '#5f6368', textTransform: 'uppercase', marginBottom: '3px' }}>
                         {isEs ? 'Nombre Paciente' : 'Patient Name'}
@@ -1891,10 +1917,22 @@ export default function PharmacyLabelsModal({
             </div>
           </div>
 
-          {/* Action Buttons Group (Google Cloud UX Hierarchy) */}
+            {/* Action Buttons Group (Google Cloud UX Hierarchy) */}
           <div className="gcp-footer-actions-wrap">
             {/* Primary Action: Download based on selected format */}
-            {exportFormat === 'pdf' ? (
+            {exportFormat === 'md' ? (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={handleDownloadMarkdown}
+                style={{ background: '#1a73e8' }}
+              >
+                <Download size={16} />
+                <span>
+                  {isEs ? 'Descargar Markdown (.md)' : 'Download Markdown (.md)'}
+                </span>
+              </button>
+            ) : exportFormat === 'pdf' ? (
               <button
                 type="button"
                 className="gcp-btn-primary"
@@ -1932,28 +1970,23 @@ export default function PharmacyLabelsModal({
               </button>
             )}
 
-            {/* Quick Alternate Format Action Button */}
-            {exportFormat === 'pdf' ? (
+            {/* Save to Firebase Action (visible when in Edit mode) */}
+            {isEditing && (
               <button
                 type="button"
                 className="gcp-btn-secondary"
-                onClick={handleDownloadPng}
-                disabled={isGeneratingPng}
-                title={isEs ? 'Descargar como imagen PNG' : 'Download as PNG image'}
+                onClick={handleSaveToFirebase}
+                disabled={isSavingToFirebase}
+                title={isEs ? 'Guardar cambios en Firebase' : 'Save changes to Firebase'}
+                style={{
+                  background: firebaseSaveSuccess ? '#e6f4ea' : '#ffffff',
+                  color: firebaseSaveSuccess ? '#137333' : '#1a73e8',
+                  border: firebaseSaveSuccess ? '1px solid #137333' : '1px solid #1a73e8',
+                  fontWeight: 600
+                }}
               >
-                <Download size={14} />
-                <span>{isGeneratingPng ? 'PNG...' : 'PNG'}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                onClick={handleDownloadPdf}
-                disabled={isGeneratingPdf}
-                title={isEs ? 'Descargar como PDF editable 1:1' : 'Download as editable 1:1 PDF'}
-              >
-                <Download size={14} />
-                <span>{isGeneratingPdf ? 'PDF...' : 'PDF'}</span>
+                {firebaseSaveSuccess ? <Check size={14} color="#137333" /> : <Database size={14} />}
+                <span>{firebaseSaveSuccess ? (isEs ? 'Guardado ✓' : 'Saved ✓') : (isSavingToFirebase ? (isEs ? 'Guardando...' : 'Saving...') : (isEs ? 'Guardar Cambios' : 'Save Changes'))}</span>
               </button>
             )}
 
