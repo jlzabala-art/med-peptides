@@ -938,28 +938,34 @@ export default function PharmacyLabelsModal({
           align-items: center;
           justify-content: center;
           padding: 16px;
+          overflow-y: auto;
+          box-sizing: border-box;
         }
         .gcp-labels-dialog {
           background: #ffffff;
           border-radius: 12px;
-          max-width: 920px;
+          max-width: 940px;
           width: 100%;
-          max-height: 94vh;
+          max-height: calc(100vh - 32px);
+          max-height: calc(100dvh - 32px);
           display: flex;
           flex-direction: column;
           box-shadow: 0 20px 48px -10px rgba(60, 64, 67, 0.28), 0 4px 12px rgba(60, 64, 67, 0.15);
           overflow: hidden;
           border: 1px solid #dadce0;
           position: relative;
+          margin: auto;
+          box-sizing: border-box;
         }
         .gcp-labels-header {
-          padding: 12px 18px;
+          padding: 10px 18px;
           border-bottom: 1px solid #dadce0;
           display: flex;
           align-items: center;
           justify-content: space-between;
           background: #ffffff;
           flex-shrink: 0;
+          box-sizing: border-box;
         }
         .gcp-labels-body {
           flex: 1 1 auto;
@@ -971,6 +977,7 @@ export default function PharmacyLabelsModal({
           gap: 10px;
           align-items: center;
           -webkit-overflow-scrolling: touch;
+          box-sizing: border-box;
         }
         .gcp-labels-sticky-footer {
           flex-shrink: 0;
@@ -980,14 +987,16 @@ export default function PharmacyLabelsModal({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 14px;
+          gap: 12px;
           z-index: 20;
           box-shadow: 0 -2px 6px rgba(60, 64, 67, 0.05);
+          box-sizing: border-box;
+          width: 100%;
         }
         .gcp-footer-desktop-specs {
           display: block;
           min-width: 0;
-          flex: 1 1 auto;
+          flex: 0 1 auto;
           overflow: hidden;
         }
         .gcp-footer-mobile-specs {
@@ -998,7 +1007,7 @@ export default function PharmacyLabelsModal({
           align-items: center;
           gap: 8px;
           flex-shrink: 0;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         }
         .gcp-footer-secondary-grid {
           display: flex;
@@ -1010,19 +1019,20 @@ export default function PharmacyLabelsModal({
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 7px;
-          height: 36px;
-          padding: 0 16px;
+          gap: 6px;
+          height: 34px;
+          padding: 0 14px;
           border-radius: 4px;
           background: #1a73e8;
           color: #ffffff;
-          font-size: 0.82rem;
+          font-size: 0.80rem;
           font-weight: 600;
           cursor: pointer;
           border: 1px solid #1a73e8;
           box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
           transition: background 0.15s, box-shadow 0.15s;
           white-space: nowrap;
+          flex-shrink: 0;
         }
         .gcp-btn-primary:hover:not(:disabled) {
           background: #1557b0;
@@ -1033,17 +1043,18 @@ export default function PharmacyLabelsModal({
           align-items: center;
           justify-content: center;
           gap: 6px;
-          height: 36px;
-          padding: 0 14px;
+          height: 34px;
+          padding: 0 12px;
           border-radius: 4px;
           background: #ffffff;
           border: 1px solid #dadce0;
           color: #1a73e8;
-          font-size: 0.80rem;
+          font-size: 0.78rem;
           font-weight: 600;
           cursor: pointer;
           transition: background 0.15s, border-color 0.15s;
           white-space: nowrap;
+          flex-shrink: 0;
         }
         .gcp-btn-secondary:hover {
           background: #f8fafd;
@@ -1057,61 +1068,14 @@ export default function PharmacyLabelsModal({
           color: #202124;
         }
 
-        /* ── Laptop Screen Breakpoint (641px - 1040px) ── */
-        @media (min-width: 641px) and (max-width: 1040px) {
-          .gcp-labels-dialog {
-            max-width: 96vw;
-            max-height: 94vh;
-          }
-          .gcp-labels-sticky-footer {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-            padding: 10px 16px;
-          }
-          .gcp-footer-desktop-specs {
-            text-align: center;
-            width: 100%;
-          }
-          .gcp-footer-desktop-specs > div {
-            justify-content: center;
-          }
-          .gcp-footer-actions-wrap {
-            width: 100%;
-            justify-content: center;
-            gap: 8px;
-          }
-        }
-
-        /* ── Compact Laptop Viewport Height (<= 850px) ── */
-        @media (max-height: 850px) {
-          .gcp-labels-dialog {
-            max-height: 96vh;
-          }
-          .gcp-labels-header {
-            padding: 8px 14px;
-          }
-          .gcp-labels-body {
-            padding: 8px 14px;
-            gap: 6px;
-          }
-          .gcp-labels-sticky-footer {
-            padding: 8px 14px;
-          }
-          .gcp-btn-primary, .gcp-btn-secondary {
-            height: 32px;
-            font-size: 0.78rem;
-          }
-        }
-
-        /* ── Responsive Mobile Rules (Google Cloud Mobile UX Standards) ── */
-        @media (max-width: 640px) {
+        /* ── Compact screens (<= 768px) ── */
+        @media (max-width: 768px) {
           .gcp-labels-backdrop {
-            padding: 0;
+            padding: 8px;
             align-items: flex-end;
           }
           .gcp-labels-dialog {
-            max-height: 100dvh;
+            max-height: calc(100dvh - 16px);
             height: 100%;
             border-radius: 14px 14px 0 0;
             border: none;
@@ -1125,11 +1089,6 @@ export default function PharmacyLabelsModal({
             gap: 8px;
           }
           .gcp-labels-sticky-footer {
-            position: sticky;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
             padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 8px)) 14px;
             flex-direction: column;
             align-items: stretch;
@@ -1151,25 +1110,24 @@ export default function PharmacyLabelsModal({
             padding: 0 2px;
           }
           .gcp-footer-actions-wrap {
-            display: flex;
+            width: 100%;
             flex-direction: column;
             gap: 8px;
-            width: 100%;
           }
           .gcp-btn-primary {
             width: 100%;
-            height: 42px;
-            font-size: 0.86rem;
+            height: 40px;
+            font-size: 0.84rem;
             border-radius: 6px;
           }
           .gcp-footer-secondary-grid {
-            display: grid;
+            display: flex;
             gap: 8px;
             width: 100%;
           }
           .gcp-btn-secondary {
-            width: 100%;
-            height: 38px;
+            flex: 1 1 auto;
+            height: 36px;
             font-size: 0.78rem;
             border-radius: 6px;
           }
@@ -2058,42 +2016,31 @@ export default function PharmacyLabelsModal({
 
         {/* ── GCP Sticky Action Footer / Mobile Dock Sticker ── */}
         <div className="gcp-labels-sticky-footer">
-          {/* Desktop Single-Line Specs & Direct Patient Link (No Redundant Titles) */}
-          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
+          {/* Desktop Single-Line Specs */}
+          <div className="gcp-footer-desktop-specs" style={{ minWidth: 0, flex: '0 1 auto', maxWidth: '340px', overflow: 'hidden' }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               fontSize: '0.78rem',
               color: '#5f6368',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
             }}>
-              <span style={{ fontWeight: 600, color: '#202124' }}>
-                {currentItem.dosageForm || 'Topical Scalp Solution'}
+              <span style={{ fontWeight: 600, color: '#202124', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={currentItem.dosageForm}>
+                {currentItem.dosageForm || 'Compounded Protocol'}
               </span>
-              <span style={{ color: '#dadce0' }}>•</span>
-              <span>{currentItem.volume || '100 mL'}</span>
-              {currentItem.targetRxUrl && (
+              <span style={{ color: '#dadce0', flexShrink: 0 }}>•</span>
+              <span style={{ flexShrink: 0, color: '#5f6368' }}>
+                {currentItem.volume || '100 mL'}
+              </span>
+              {labels.length > 1 && (
                 <>
-                  <span style={{ color: '#dadce0' }}>•</span>
-                  <a
-                    href={currentItem.targetRxUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: '#1a73e8',
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '3px'
-                    }}
-                  >
-                    <span>{isEs ? 'Ver Portal Paciente' : 'Patient View'}</span>
-                    <ExternalLink size={12} />
-                  </a>
+                  <span style={{ color: '#dadce0', flexShrink: 0 }}>•</span>
+                  <span style={{ background: '#e8f0fe', color: '#1a73e8', padding: '1px 6px', borderRadius: '4px', fontSize: '0.70rem', fontWeight: 600, flexShrink: 0 }}>
+                    {selectedProductIdx + 1} / {labels.length}
+                  </span>
                 </>
               )}
             </div>
@@ -2109,8 +2056,8 @@ export default function PharmacyLabelsModal({
             </div>
           </div>
 
-            {/* Action Buttons Group (Google Cloud UX Hierarchy) */}
-          <div className="gcp-footer-actions-wrap">
+          {/* Action Buttons Group (Google Cloud UX Hierarchy) */}
+          <div className="gcp-footer-actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, flexWrap: 'nowrap' }}>
             {/* Primary Action: Download based on selected format */}
             {exportFormat === 'md' ? (
               <button
@@ -2119,7 +2066,7 @@ export default function PharmacyLabelsModal({
                 onClick={handleDownloadMarkdown}
                 style={{ background: '#1a73e8' }}
               >
-                <Download size={16} />
+                <Download size={15} />
                 <span>
                   {isEs ? 'Descargar Markdown (.md)' : 'Download Markdown (.md)'}
                 </span>
@@ -2135,7 +2082,7 @@ export default function PharmacyLabelsModal({
                   opacity: isGeneratingPdf ? 0.75 : 1
                 }}
               >
-                <Download size={16} />
+                <Download size={15} />
                 <span>
                   {isGeneratingPdf 
                     ? (isEs ? 'Generando PDF...' : 'Creating PDF...') 
@@ -2153,11 +2100,11 @@ export default function PharmacyLabelsModal({
                   opacity: isGeneratingPdf ? 0.75 : 1
                 }}
               >
-                <Download size={16} />
+                <Download size={15} />
                 <span>
                   {isGeneratingPdf 
                     ? (isEs ? 'Generando PDF...' : 'Creating PDF...') 
-                    : (isEs ? `Descargar Todas (${labels.length} Etiquetas)` : `Download All (${labels.length} Labels)`)}
+                    : (isEs ? `Descargar Todas (${labels.length})` : `Download All (${labels.length})`)}
                 </span>
               </button>
             ) : exportFormat === 'pdf_a4' ? (
@@ -2171,11 +2118,11 @@ export default function PharmacyLabelsModal({
                   opacity: isGeneratingPdf ? 0.75 : 1
                 }}
               >
-                <Download size={16} />
+                <Download size={15} />
                 <span>
                   {isGeneratingPdf 
                     ? (isEs ? 'Generando Hoja A4...' : 'Creating A4 Sheet...') 
-                    : (isEs ? `Descargar Hoja A4 (${labels.length} Stickers · 2×5)` : `Download A4 Sheet (${labels.length} Stickers · 2×5)`)}
+                    : (isEs ? `Descargar Hoja A4 (${labels.length})` : `Download A4 Sheet (${labels.length})`)}
                 </span>
               </button>
             ) : (
@@ -2189,7 +2136,7 @@ export default function PharmacyLabelsModal({
                   opacity: isGeneratingPng ? 0.75 : 1
                 }}
               >
-                <Download size={16} />
+                <Download size={15} />
                 <span>
                   {isGeneratingPng 
                     ? (isEs ? `Generando ${dpi} DPI...` : `Rendering ${dpi} DPI...`) 
@@ -2219,12 +2166,7 @@ export default function PharmacyLabelsModal({
             )}
 
             {/* Secondary Symmetrical Actions */}
-            <div
-              className="gcp-footer-secondary-grid"
-              style={{
-                gridTemplateColumns: currentItem.targetRxUrl ? '1fr 1fr' : '1fr'
-              }}
-            >
+            <div className="gcp-footer-secondary-grid">
               <button
                 type="button"
                 className="gcp-btn-secondary"
