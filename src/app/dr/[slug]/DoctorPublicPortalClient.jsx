@@ -287,10 +287,88 @@ export function resolvePrescriptionParts(rx) {
   }];
 }
 
-export default function DoctorPublicPortalClient({ slug, initialData = null }) {
+export default function DoctorPublicPortalClient({
+  slug: propSlug,
+  initialData = null,
+  isCustomerAgent = false,
+  agentName = 'Atlas Concierge Care',
+  availableDoctors = []
+}) {
+  const [slug, setSlug] = useState(propSlug);
   const [data, setData] = useState(initialData || null);
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState(null);
+  const [agentDoctors, setAgentDoctors] = useState(availableDoctors || []);
+  const [isSwitchingDoctor, setIsSwitchingDoctor] = useState(false);
+
+  // Sync if propSlug changes externally
+  useEffect(() => {
+    if (propSlug && propSlug !== slug) {
+      setSlug(propSlug);
+    }
+  }, [propSlug]);
+
+  // Sync if initialData changes externally
+  useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+      setLoading(false);
+    }
+  }, [initialData]);
+
+  // Sync availableDoctors if provided or updated
+  useEffect(() => {
+    if (Array.isArray(availableDoctors) && availableDoctors.length > 0) {
+      setAgentDoctors(availableDoctors);
+    }
+  }, [availableDoctors]);
+
+  // Load prescribers list on mount if in agent mode and not provided
+  useEffect(() => {
+    if (isCustomerAgent && (!agentDoctors || agentDoctors.length === 0)) {
+      fetch('/api/prescriptions/doctors-list')
+        .then(res => res.json())
+        .then(res => {
+          if (res?.success && Array.isArray(res.doctors)) {
+            setAgentDoctors(res.doctors);
+          }
+        })
+        .catch(err => console.warn('Could not fetch prescribers list', err));
+    }
+  }, [isCustomerAgent, agentDoctors]);
+
+  const handleSelectDoctor = async (doc) => {
+    if (!doc) return;
+    const newSlug = doc.nameSlug || doc.opaqueCode || doc.id;
+    if (newSlug === slug) return;
+
+    triggerHaptic('selection');
+    setIsSwitchingDoctor(true);
+    setSlug(newSlug);
+
+    // Update URL query parameter smoothly without page reload
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('dr', newSlug);
+      window.history.pushState({}, '', url.toString());
+    }
+
+    try {
+      const res = await fetch(`/api/doctor/${encodeURIComponent(newSlug)}`);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setData(json);
+        toast.success(`Active physician switched to ${doc.name} (${doc.rxCount || 0} Rx) ✓`);
+      } else {
+        toast.error('Could not load physician profile');
+      }
+    } catch (err) {
+      console.error('Error switching doctor:', err);
+      toast.error('Network error loading physician');
+    } finally {
+      setIsSwitchingDoctor(false);
+    }
+  };
 
   // Search & Filter State (Google Cloud UX Golden Rules #7, #24, #29)
   const [searchQuery, setSearchQuery] = useState('');
@@ -2207,13 +2285,141 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
         }
       `}</style>
 
+      {/* ── Customer Agent Concierge Physician Switcher Bar (Google Cloud Console UX) ── */}
+      {isCustomerAgent && (
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 60,
+          background: '#0f172a',
+          color: '#ffffff',
+          borderBottom: '1px solid #1e293b',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+          padding: '8px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          {/* Agent Identity & Role Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#0284c7',
+              color: '#ffffff',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase'
+            }}>
+              <Users size={14} />
+              <span>Customer Agent</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
+                {agentName}
+              </span>
+              <span style={{ fontSize: '0.70rem', color: '#94a3b8' }}>
+                {lang === 'es' ? 'Portal de Gestión y Atención al Paciente' : 'Clinical Prescriptions & Care Concierge Desk'}
+              </span>
+            </div>
+          </div>
+
+          {/* Physician Switcher (Select from prescribers) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 auto', maxWidth: '560px', minWidth: '280px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              {lang === 'es' ? 'Médico Activo:' : 'Active Physician:'}
+            </span>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <select
+                value={slug}
+                onChange={(e) => {
+                  const targetVal = e.target.value;
+                  const docObj = agentDoctors.find(d => (d.nameSlug === targetVal || d.opaqueCode === targetVal || d.id === targetVal));
+                  if (docObj) handleSelectDoctor(docObj);
+                  else handleSelectDoctor({ nameSlug: targetVal, name: targetVal });
+                }}
+                disabled={isSwitchingDoctor}
+                style={{
+                  width: '100%',
+                  height: 36,
+                  padding: '0 32px 0 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #334155',
+                  background: '#1e293b',
+                  color: '#f8fafc',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: isSwitchingDoctor ? 'wait' : 'pointer',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 10px center',
+                  outline: 'none',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                }}
+              >
+                {agentDoctors.map((doc) => {
+                  const val = doc.nameSlug || doc.opaqueCode || doc.id;
+                  return (
+                    <option key={doc.id || doc.opaqueCode} value={val} style={{ background: '#0f172a', color: '#f8fafc' }}>
+                      👨‍⚕️ {doc.name} — {doc.clinic || 'Partner Clinic'} ({doc.rxCount || 0} Prescriptions)
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            {isSwitchingDoctor && (
+              <Loader2 size={16} className="animate-spin" color="#38bdf8" />
+            )}
+          </div>
+
+          {/* Quick Actions (Copy Link, Direct URL) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                const docUrl = `${window.location.origin}/dr/${doctor?.opaqueCode || slug}`;
+                navigator?.clipboard?.writeText(docUrl);
+                toast.success(lang === 'es' ? 'Enlace del médico copiado ✓' : 'Public doctor URL copied to clipboard ✓');
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: 32,
+                padding: '0 10px',
+                borderRadius: '5px',
+                border: '1px solid #334155',
+                background: '#1e293b',
+                color: '#38bdf8',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+              title="Copy public link to this doctor's portal"
+            >
+              <ExternalLink size={13} />
+              <span>{lang === 'es' ? 'Ver /dr/' : 'View /dr/'}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Unified Public Header (Homogeneous with /rx/[code] & GCP Standards) ── */}
       <PublicUnifiedHeader
         track="protocols"
         lang={lang}
         onLangChange={setLang}
-        brandHref={`/dr/${slug}`}
-        doctorHomeHref={`/dr/${slug}`}
+        brandHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
+        doctorHomeHref={isCustomerAgent ? `/agent?dr=${slug}` : `/dr/${slug}`}
         doctorName={doctor.name}
         hideTier2={true}
         hideImportRx={false}

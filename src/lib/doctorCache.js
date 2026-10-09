@@ -8,6 +8,10 @@ export const DOCTOR_DIRECTORY_CACHE = {
   expiresAt: 0,
   doctors: []
 };
+export const DOCTORS_WITH_RX_CACHE = {
+  expiresAt: 0,
+  doctors: []
+};
 
 export const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -16,6 +20,8 @@ export function invalidateDoctorCache(slugOrId = null) {
     DOCTOR_RAM_CACHE.clear();
     DOCTOR_DIRECTORY_CACHE.expiresAt = 0;
     DOCTOR_DIRECTORY_CACHE.doctors = [];
+    DOCTORS_WITH_RX_CACHE.expiresAt = 0;
+    DOCTORS_WITH_RX_CACHE.doctors = [];
   } else {
     const key = String(slugOrId).toLowerCase().trim();
     DOCTOR_RAM_CACHE.delete(key);
@@ -174,6 +180,95 @@ async function getCachedDoctorDirectory() {
   DOCTOR_DIRECTORY_CACHE.doctors = doctors;
   DOCTOR_DIRECTORY_CACHE.expiresAt = now + (15 * 60 * 1000);
   return doctors;
+}
+
+/**
+ * Fetches all physicians who have active/issued prescriptions in the system.
+ * Cached in RAM with 10-minute TTL.
+ */
+export async function getDoctorsWithPrescriptions({ forceRefresh = false } = {}) {
+  const now = Date.now();
+  if (!forceRefresh && DOCTORS_WITH_RX_CACHE.expiresAt > now && DOCTORS_WITH_RX_CACHE.doctors.length > 0) {
+    return DOCTORS_WITH_RX_CACHE.doctors;
+  }
+
+  if (!adminDb) return [];
+
+  const directory = await getCachedDoctorDirectory();
+  const rxSnap = await adminDb.collection('prescriptions').limit(500).get();
+
+  // Aggregate prescriptions by doctor
+  const docCounts = new Map(); // key -> { count, docId, docName, clinic }
+
+  rxSnap.forEach((doc) => {
+    const d = doc.data();
+    const docId = d.treatingDoctor?.id || d.treatingDoctorId || d.doctorId || d.doctor?.id;
+    const docName = d.treatingDoctor?.name || (typeof d.treatingDoctor === 'string' ? d.treatingDoctor : null) || d.doctorName || d.doctor?.name || d.prescribingDoctor;
+    const clinic = d.clinic || d.clinicName || d.treatingDoctor?.clinic || '';
+
+    if (docId || docName) {
+      const key = (docId || slugify(docName)).toLowerCase();
+      const current = docCounts.get(key) || { count: 0, docId, docName, clinic };
+      current.count += 1;
+      if (!current.docName && docName) current.docName = docName;
+      if (!current.clinic && clinic) current.clinic = clinic;
+      docCounts.set(key, current);
+    }
+  });
+
+  const result = [];
+  const matchedDirectoryKeys = new Set();
+
+  // Cross-reference with known directory
+  for (const dirDoc of directory) {
+    const keyById = (dirDoc.id || '').toLowerCase();
+    const keyByName = slugify(dirDoc.name);
+
+    let count = 0;
+    if (docCounts.has(keyById)) {
+      count = docCounts.get(keyById).count;
+      matchedDirectoryKeys.add(keyById);
+    } else if (docCounts.has(keyByName)) {
+      count = docCounts.get(keyByName).count;
+      matchedDirectoryKeys.add(keyByName);
+    }
+
+    if (count > 0) {
+      result.push({
+        id: dirDoc.id,
+        name: dirDoc.name,
+        clinic: dirDoc.data?.clinic || dirDoc.data?.clinicName || 'Atlas Partner Clinic',
+        specialty: dirDoc.data?.specialty || 'Regenerative Medicine',
+        nameSlug: dirDoc.nameSlug,
+        opaqueCode: dirDoc.opaqueCode,
+        rxCount: count
+      });
+    }
+  }
+
+  // Also include any doctors with prescriptions that might not be in directory yet
+  for (const [key, val] of docCounts.entries()) {
+    if (!matchedDirectoryKeys.has(key) && val.count > 0 && val.docName) {
+      const slug = slugify(val.docName);
+      result.push({
+        id: val.docId || slug,
+        name: val.docName,
+        clinic: val.clinic || 'Dispensary Partner',
+        specialty: 'Clinical Medicine',
+        nameSlug: slug,
+        opaqueCode: `DR-${(val.docId || slug).slice(0, 8).toUpperCase()}`,
+        rxCount: val.count
+      });
+    }
+  }
+
+  // Sort descending by prescription count
+  result.sort((a, b) => b.rxCount - a.rxCount);
+
+  DOCTORS_WITH_RX_CACHE.doctors = result;
+  DOCTORS_WITH_RX_CACHE.expiresAt = now + (10 * 60 * 1000);
+
+  return result;
 }
 
 /**

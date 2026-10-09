@@ -37,9 +37,11 @@ import { exportToCSV, triggerServerExport } from '../../utils/universalExporter'
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import PatientAdministrationGuideModal from '../doctor/PatientAdministrationGuideModal';
+import { usePharmacyLabels } from '../../hooks/usePharmacyLabels';
 
 export default function UniversalPrescriptionsTable({ doctorId, patientId, readOnly = false, hideHeader = false, title = 'Prescriptions', subtitle = 'System of record for all patient prescriptions and recommendations.', serverKPIs, enableAskAtlas = false, initialData }) {
   const { openDrawer } = useDrawer();
+  const { openLabels, LabelsModal } = usePharmacyLabels();
   const [selectedItem, setSelectedItem] = useState(null);
   const [mobileActionRx, setMobileActionRx] = useState(null);
 
@@ -924,29 +926,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
       actions.push({
         label: 'Pharmapolis Stickers',
         icon: Tag,
-        onClick: async (selectedRows) => {
+        onClick: (selectedRows) => {
           if (!selectedRows || selectedRows.length === 0) return;
-          const toastId = toast.loading('Generating bulk Pharmapolis stickers…');
-          try {
-            const { generatePharmapolisStickersPDF } = await import('../../services/pharmapolisLabelService');
-            const first = selectedRows[0];
-            const patientObj = first.patient || {
-              name: first.patientName || 'Multiple Patients',
-              dob: first.patientDob || first.dob || '—',
-              fileNumber: first.fileNumber || first.patientId || first.id?.slice(0, 8),
-            };
-            await generatePharmapolisStickersPDF(patientObj, selectedRows);
-            toast.success(`Pharmapolis stickers generated for ${selectedRows.length} prescriptions`, { id: toastId });
-          } catch (err) {
-            console.error('Bulk sticker generation error:', err);
-            toast.error('Failed to generate stickers: ' + err.message, { id: toastId });
-          }
+          openLabels(selectedRows);
         }
       });
     }
 
     return actions;
-  }, [canGenerateLabels]);
+  }, [canGenerateLabels, openLabels, refresh]);
 
   // Dynamic filter options based on prescriptions in the database
   const doctorOptions = useMemo(() => {
@@ -1618,6 +1606,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           }}
           rx={selectedShareRx}
         />
+
+        <LabelsModal />
       </DataModule>
     </>
   );

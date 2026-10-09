@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, Printer, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database } from '@/lib/icons';
+import { X, Download, Printer, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye } from '@/lib/icons';
 import { db } from '@/firebase';
 import { doc, updateDoc, getDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
@@ -584,6 +584,44 @@ export default function PharmacyLabelsModal({
     }
   };
 
+  // High-Precision SVG-to-Canvas rasterizer at specified physical DPI
+  const svgElementToImageData = async (svgEl, widthMm, heightMm, targetDpi = 600) => {
+    const widthPx = Math.round((widthMm / 25.4) * targetDpi);
+    const heightPx = Math.round((heightMm / 25.4) * targetDpi);
+    const clonedSvg = svgEl.cloneNode(true);
+    clonedSvg.setAttribute('width', `${widthPx}px`);
+    clonedSvg.setAttribute('height', `${heightPx}px`);
+
+    const svgXml = new XMLSerializer().serializeToString(clonedSvg);
+    const svgBlob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = widthPx;
+          canvas.height = heightPx;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, widthPx, heightPx);
+          ctx.drawImage(img, 0, 0, widthPx, heightPx);
+          URL.revokeObjectURL(svgUrl);
+          resolve(canvas.toDataURL('image/png', 1.0));
+        } catch (err) {
+          URL.revokeObjectURL(svgUrl);
+          reject(err);
+        }
+      };
+      img.onerror = (err) => {
+        URL.revokeObjectURL(svgUrl);
+        reject(err);
+      };
+      img.src = svgUrl;
+    });
+  };
+
   // High-Resolution 1:1 Physical Scaled PDF Generator (Editable & Vector Compatible)
   const handleDownloadPdf = async () => {
     try {
@@ -594,106 +632,242 @@ export default function PharmacyLabelsModal({
         return;
       }
 
-      // Render at ultra-sharp resolution (600 DPI) for crisp physical printing
-      const pdfRenderDpi = Math.max(dpi, 600);
-      const widthPx = Math.round((dimensions.widthMm / 25.4) * pdfRenderDpi);
-      const heightPx = Math.round((dimensions.heightMm / 25.4) * pdfRenderDpi);
+      const imgData = await svgElementToImageData(svgElement, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
 
-      const clonedSvg = svgElement.cloneNode(true);
-      clonedSvg.setAttribute('width', `${widthPx}px`);
-      clonedSvg.setAttribute('height', `${heightPx}px`);
+      const { jsPDF } = await import('jspdf');
+      const isLandscape = dimensions.widthMm >= dimensions.heightMm;
+      const pdf = new jsPDF({
+        orientation: isLandscape ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [dimensions.widthMm, dimensions.heightMm],
+        compress: true
+      });
 
-      const svgXml = new XMLSerializer().serializeToString(clonedSvg);
-      const svgBlob = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
+      pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
 
-      const img = new Image();
-      img.onload = async () => {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = widthPx;
-          canvas.height = heightPx;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, widthPx, heightPx);
-          ctx.drawImage(img, 0, 0, widthPx, heightPx);
-          URL.revokeObjectURL(svgUrl);
+      // Standardized Clinical File Naming Engine (Supplier + Patient + Rx + Part + Size + Specs)
+      const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
+      const supplierClean = rawSupplier.replace(/Compounding|Pharmacy|L\.?L\.?C\.?/gi, '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'PHARMAPOLIS';
 
-          const imgData = canvas.toDataURL('image/png', 1.0);
+      const rawPatient = currentItem.patientName || currentItem.patient?.name || currentItem.patient || '';
+      const patientClean = rawPatient.trim().replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
 
-          const { jsPDF } = await import('jspdf');
-          const isLandscape = dimensions.widthMm >= dimensions.heightMm;
-          const pdf = new jsPDF({
-            orientation: isLandscape ? 'landscape' : 'portrait',
-            unit: 'mm',
-            format: [dimensions.widthMm, dimensions.heightMm],
-            compress: true
-          });
+      const rxCodeClean = String(currentItem.fileNumber || currentItem.rxCode || currentItem.id || 'RX')
+        .trim()
+        .replace(/[^a-zA-Z0-9-]/g, '')
+        .toUpperCase();
 
-          pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+      const isMultiPart = labels.length > 1 || Boolean(currentItem.phaseNumber && currentItem.phaseNumber > 0);
+      const partTag = isMultiPart ? `PART-${currentItem.phaseNumber || (selectedProductIdx + 1)}` : '';
 
-          // Standardized Clinical File Naming Engine (Supplier + Patient + Rx + Part + Size + Specs)
-          const rawSupplier = currentItem.pharmacy || currentItem.supplier || 'Pharmapolis';
-          const supplierClean = rawSupplier.replace(/Compounding|Pharmacy|L\.?L\.?C\.?/gi, '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'PHARMAPOLIS';
+      const rawVol = String(currentItem.volume || currentItem.size || currentItem.netContent || '').trim();
+      let sizeTag = '';
+      const volMatch = rawVol.match(/(\d+(?:\.\d+)?)\s*(ml|caps?|capsules?|g|mg)?/i);
+      if (volMatch) {
+        const num = volMatch[1];
+        let unit = (volMatch[2] || '').toUpperCase();
+        if (unit.startsWith('CAP')) unit = 'CAPS';
+        sizeTag = `${num}${unit}`;
+      } else if (rawVol) {
+        sizeTag = rawVol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+      }
 
-          const rawPatient = currentItem.patientName || currentItem.patient?.name || currentItem.patient || '';
-          const patientClean = rawPatient.trim().replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : (activeVariant === 'frontWithQr' ? 'FRONT-QR' : 'FRONT');
 
-          const rxCodeClean = String(currentItem.fileNumber || currentItem.rxCode || currentItem.id || 'RX')
-            .trim()
-            .replace(/[^a-zA-Z0-9-]/g, '')
-            .toUpperCase();
+      const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean].filter(Boolean);
 
-          const isMultiPart = labels.length > 1 || Boolean(currentItem.phaseNumber && currentItem.phaseNumber > 0);
-          const partTag = isMultiPart ? `PART-${currentItem.phaseNumber || (selectedProductIdx + 1)}` : '';
+      pdf.setProperties({
+        title: nameSegments.join('_'),
+        subject: currentItem.productTitle || currentItem.productName || 'Pharmapolis Compounded Label',
+        author: 'Pharmapolis Dispensary / Atlas Clinical Services',
+        creator: 'Pharmapolis Digital Prescription Registry'
+      });
 
-          const rawVol = String(currentItem.volume || currentItem.size || currentItem.netContent || '').trim();
-          let sizeTag = '';
-          const volMatch = rawVol.match(/(\d+(?:\.\d+)?)\s*(ml|caps?|capsules?|g|mg)?/i);
-          if (volMatch) {
-            const num = volMatch[1];
-            let unit = (volMatch[2] || '').toUpperCase();
-            if (unit.startsWith('CAP')) unit = 'CAPS';
-            sizeTag = `${num}${unit}`;
-          } else if (rawVol) {
-            sizeTag = rawVol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+      pdf.save(`${nameSegments.join('_')}.pdf`);
+    } catch (innerErr) {
+      console.error('Error generating PDF with jsPDF:', innerErr);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  // Bulk High-Precision PDF Generator (Supports 1:1 Multi-Page Roll & A4 10-Sticker Sheets)
+  const handleDownloadAllPdf = async (mode = 'individual') => {
+    try {
+      setIsGeneratingPdf(true);
+      const { jsPDF } = await import('jspdf');
+
+      if (mode === 'a4_sheet') {
+        // European standard A4 Sticker Sheet (210 × 297 mm, 2 columns × 5 rows = 10 stickers, 75 × 45 mm)
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const STICKER_W = 75;
+        const STICKER_H = 45;
+        const MARGIN_LEFT = 25;
+        const MARGIN_TOP = 25;
+        const COL_GAP = 10;
+        const ROW_GAP = 5;
+        const COLS = 2;
+        const ROWS = 5;
+        const STICKERS_PER_PAGE = COLS * ROWS;
+
+        const totalPages = Math.max(1, Math.ceil(labels.length / STICKERS_PER_PAGE));
+
+        for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+          if (pageIdx > 0) pdf.addPage('a4', 'portrait');
+
+          // Header
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(8);
+          pdf.setTextColor(71, 85, 105);
+          pdf.text(`PHARMAPOLIS COMPOUNDING PHARMACY — A4 PRESCRIPTION LABELS (75 × 45 mm) | Sheet ${pageIdx + 1}/${totalPages}`, MARGIN_LEFT, 14);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(7);
+          pdf.setTextColor(148, 163, 184);
+          pdf.text(`EU GMP Vector Standard • High-Precision Resolution (600 DPI) • Generated ${new Date().toLocaleDateString('en-GB')}`, MARGIN_LEFT, 18);
+
+          const pageLabels = labels.slice(pageIdx * STICKERS_PER_PAGE, (pageIdx + 1) * STICKERS_PER_PAGE);
+
+          for (let i = 0; i < pageLabels.length; i++) {
+            const globalIdx = pageIdx * STICKERS_PER_PAGE + i;
+            const col = i % COLS;
+            const row = Math.floor(i / COLS);
+            const x = MARGIN_LEFT + col * (STICKER_W + COL_GAP);
+            const y = MARGIN_TOP + row * (STICKER_H + ROW_GAP);
+
+            const container = document.getElementById(`pharmapolis-bulk-label-${globalIdx}`);
+            const svgEl = container?.querySelector('svg');
+            if (svgEl) {
+              const imgData = await svgElementToImageData(svgEl, STICKER_W, STICKER_H, 600);
+              pdf.addImage(imgData, 'PNG', x, y, STICKER_W, STICKER_H, undefined, 'SLOW');
+              pdf.setDrawColor(226, 232, 240);
+              pdf.setLineWidth(0.2);
+              pdf.roundedRect(x, y, STICKER_W, STICKER_H, 1.5, 1.5, 'S');
+            }
           }
-
-          const variantClean = activeVariant === 'backQr' ? 'BACK-QR' : (activeVariant === 'frontWithQr' ? 'FRONT-QR' : 'FRONT');
-
-          const nameSegments = [supplierClean, patientClean, rxCodeClean, partTag, sizeTag, `${dimensions.widthMm}x${dimensions.heightMm}mm`, variantClean].filter(Boolean);
-
-          pdf.setProperties({
-            title: nameSegments.join('_'),
-            subject: currentItem.productTitle || currentItem.productName || 'Pharmapolis Compounded Label',
-            author: 'Pharmapolis Dispensary / Atlas Clinical Services',
-            creator: 'Pharmapolis Digital Prescription Registry'
-          });
-
-          pdf.save(`${nameSegments.join('_')}.pdf`);
-        } catch (innerErr) {
-          console.error('Error generating PDF with jsPDF:', innerErr);
-        } finally {
-          setIsGeneratingPdf(false);
         }
-      };
-      img.onerror = () => {
-        setIsGeneratingPdf(false);
-      };
-      img.src = svgUrl;
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        pdf.save(`PHARMAPOLIS_A4_STICKERS_SHEET_${labels.length}_LABELS_${dateStr}.pdf`);
+      } else {
+        // Individual 1:1 Scale Multi-page PDF for Thermal Label / Roll Printers
+        const isLandscape = dimensions.widthMm >= dimensions.heightMm;
+        const pdf = new jsPDF({
+          orientation: isLandscape ? 'landscape' : 'portrait',
+          unit: 'mm',
+          format: [dimensions.widthMm, dimensions.heightMm],
+          compress: true
+        });
+
+        for (let idx = 0; idx < labels.length; idx++) {
+          if (idx > 0) {
+            pdf.addPage([dimensions.widthMm, dimensions.heightMm], isLandscape ? 'landscape' : 'portrait');
+          }
+          const container = document.getElementById(`pharmapolis-bulk-label-${idx}`);
+          const svgEl = container?.querySelector('svg');
+          if (svgEl) {
+            const imgData = await svgElementToImageData(svgEl, dimensions.widthMm, dimensions.heightMm, Math.max(dpi, 600));
+            pdf.addImage(imgData, 'PNG', 0, 0, dimensions.widthMm, dimensions.heightMm, undefined, 'SLOW');
+          }
+        }
+
+        const dateStr = new Date().toISOString().slice(0, 10);
+        pdf.save(`PHARMAPOLIS_LABELS_BULK_${labels.length}_ITEMS_${dimensions.widthMm}x${dimensions.heightMm}mm_${dateStr}.pdf`);
+      }
     } catch (err) {
-      console.error('Error generating PDF:', err);
+      console.error('Error generating bulk PDF:', err);
+    } finally {
       setIsGeneratingPdf(false);
     }
   };
 
   // High-Precision Vector Print Engine
   const handlePrint = () => {
-    const svgElement = svgContainerRef.current?.querySelector('svg');
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const svgHtml = svgElement ? svgElement.outerHTML : '';
+    if (exportFormat === 'pdf_a4' && labels.length > 1) {
+      // Print as A4 2x5 Grid Sheet
+      const COLS = 2;
+      const ROWS = 5;
+      const STICKERS_PER_PAGE = COLS * ROWS;
+      const totalPages = Math.max(1, Math.ceil(labels.length / STICKERS_PER_PAGE));
+      let pagesHtml = '';
+
+      for (let p = 0; p < totalPages; p++) {
+        let gridItems = '';
+        const pageLabels = labels.slice(p * STICKERS_PER_PAGE, (p + 1) * STICKERS_PER_PAGE);
+        for (let i = 0; i < pageLabels.length; i++) {
+          const globalIdx = p * STICKERS_PER_PAGE + i;
+          const container = document.getElementById(`pharmapolis-bulk-label-${globalIdx}`);
+          const svgEl = container?.querySelector('svg');
+          const svgHtml = svgEl ? svgEl.outerHTML : '';
+          gridItems += `<div class="sticker-cell">${svgHtml}</div>`;
+        }
+        pagesHtml += `<div class="a4-sheet"><div class="grid">${gridItems}</div></div>`;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Pharmapolis Stickers A4 Sheet (${labels.length} Labels)</title>
+            <style>
+              @page { size: A4 portrait; margin: 0; }
+              * { box-sizing: border-box; }
+              body { margin: 0; padding: 0; background: #fff; }
+              .a4-sheet {
+                width: 210mm;
+                height: 297mm;
+                padding: 25mm;
+                page-break-after: always;
+                box-sizing: border-box;
+              }
+              .grid {
+                display: grid;
+                grid-template-columns: 75mm 75mm;
+                grid-template-rows: repeat(5, 45mm);
+                column-gap: 10mm;
+                row-gap: 5mm;
+              }
+              .sticker-cell {
+                width: 75mm;
+                height: 45mm;
+                border: 0.5px dashed #cbd5e1;
+                border-radius: 4px;
+                overflow: hidden;
+              }
+              .sticker-cell svg { width: 75mm !important; height: 45mm !important; display: block; }
+            </style>
+          </head>
+          <body>
+            ${pagesHtml}
+            <script>
+              window.onload = function() {
+                setTimeout(function() { window.print(); window.close(); }, 300);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      return;
+    }
+
+    // Individual label(s) print (thermal / roll / 1:1)
+    const itemsToPrint = (exportFormat === 'pdf_all' && labels.length > 1)
+      ? labels.map((_, i) => document.getElementById(`pharmapolis-bulk-label-${i}`)?.querySelector('svg')).filter(Boolean)
+      : [svgContainerRef.current?.querySelector('svg')].filter(Boolean);
+
+    let pagesHtml = '';
+    itemsToPrint.forEach(svgEl => {
+      pagesHtml += `<div class="print-label">${svgEl.outerHTML}</div>`;
+    });
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -709,12 +883,15 @@ export default function PharmacyLabelsModal({
             body {
               margin: 0;
               padding: 0;
+              background: #fff;
+            }
+            .print-label {
               width: ${dimensions.widthMm}mm;
               height: ${dimensions.heightMm}mm;
+              page-break-after: always;
               display: flex;
               align-items: center;
               justify-content: center;
-              background: #fff;
               overflow: hidden;
             }
             svg {
@@ -725,7 +902,7 @@ export default function PharmacyLabelsModal({
           </style>
         </head>
         <body>
-          ${svgHtml}
+          ${pagesHtml}
           <script>
             window.onload = function() {
               setTimeout(function() {
@@ -1082,11 +1259,11 @@ export default function PharmacyLabelsModal({
             boxSizing: 'border-box'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-              {/* Field 1: Preparation / Phase (if multi-product) */}
+              {/* Field 1: Preparation / Phase (if multi-product or bulk) */}
               {labels.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <label htmlFor="gcp-label-phase" style={{ fontSize: '0.70rem', fontWeight: 600, color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-                    {isEs ? 'Fase:' : 'Phase:'}
+                    {isEs ? 'Etiqueta:' : 'Label:'}
                   </label>
                   <select
                     id="gcp-label-phase"
@@ -1094,6 +1271,7 @@ export default function PharmacyLabelsModal({
                     onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
                     style={{
                       height: 30,
+                      maxWidth: '260px',
                       padding: '0 24px 0 8px',
                       borderRadius: '4px',
                       border: '1px solid #dadce0',
@@ -1107,14 +1285,22 @@ export default function PharmacyLabelsModal({
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
                       backgroundRepeat: 'no-repeat',
                       backgroundPosition: 'right 6px center',
-                      outline: 'none'
+                      outline: 'none',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap'
                     }}
                   >
-                    {labels.map((lbl, idx) => (
-                      <option key={lbl.id || idx} value={idx}>
-                        Phase {lbl.phaseNumber || idx + 1}: {lbl.productName}
-                      </option>
-                    ))}
+                    {labels.map((lbl, idx) => {
+                      const prefix = lbl.patientName ? `${lbl.patientName} — ` : '';
+                      const part = lbl.phaseNumber ? `Phase ${lbl.phaseNumber}: ` : `${idx + 1}. `;
+                      const title = lbl.productName || lbl.productTitle || 'Compounded Protocol';
+                      return (
+                        <option key={lbl.id || idx} value={idx}>
+                          {prefix}{part}{title}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}
@@ -1298,8 +1484,14 @@ export default function PharmacyLabelsModal({
                     outline: 'none'
                   }}
                 >
-                  <option value="pdf">PDF (1:1)</option>
-                  <option value="png">PNG (Imagen HD)</option>
+                  <option value="pdf">{isEs ? `PDF (Esta Etiqueta · ${dimensions.widthMm}×${dimensions.heightMm}mm)` : `PDF (Current Label · ${dimensions.widthMm}×${dimensions.heightMm}mm)`}</option>
+                  {labels.length > 1 && (
+                    <>
+                      <option value="pdf_all">{isEs ? `PDF (Todas · ${labels.length} Etiquetas)` : `PDF (All ${labels.length} Labels)`}</option>
+                      <option value="pdf_a4">{isEs ? `Hoja A4 (10 por hoja · 2×5 Grid)` : `A4 Sheet (10 per page · 2×5 Grid)`}</option>
+                    </>
+                  )}
+                  <option value="png">{isEs ? 'PNG (Imagen HD)' : 'PNG (HD Image)'}</option>
                   <option value="md">Markdown (.md)</option>
                 </select>
               </div>
@@ -1950,6 +2142,42 @@ export default function PharmacyLabelsModal({
                     : (isEs ? `Descargar PDF (${dimensions.widthMm}×${dimensions.heightMm}mm)` : `Download PDF (${dimensions.widthMm}×${dimensions.heightMm}mm)`)}
                 </span>
               </button>
+            ) : exportFormat === 'pdf_all' ? (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={() => handleDownloadAllPdf('individual')}
+                disabled={isGeneratingPdf}
+                style={{
+                  cursor: isGeneratingPdf ? 'wait' : 'pointer',
+                  opacity: isGeneratingPdf ? 0.75 : 1
+                }}
+              >
+                <Download size={16} />
+                <span>
+                  {isGeneratingPdf 
+                    ? (isEs ? 'Generando PDF...' : 'Creating PDF...') 
+                    : (isEs ? `Descargar Todas (${labels.length} Etiquetas)` : `Download All (${labels.length} Labels)`)}
+                </span>
+              </button>
+            ) : exportFormat === 'pdf_a4' ? (
+              <button
+                type="button"
+                className="gcp-btn-primary"
+                onClick={() => handleDownloadAllPdf('a4_sheet')}
+                disabled={isGeneratingPdf}
+                style={{
+                  cursor: isGeneratingPdf ? 'wait' : 'pointer',
+                  opacity: isGeneratingPdf ? 0.75 : 1
+                }}
+              >
+                <Download size={16} />
+                <span>
+                  {isGeneratingPdf 
+                    ? (isEs ? 'Generando Hoja A4...' : 'Creating A4 Sheet...') 
+                    : (isEs ? `Descargar Hoja A4 (${labels.length} Stickers · 2×5)` : `Download A4 Sheet (${labels.length} Stickers · 2×5)`)}
+                </span>
+              </button>
             ) : (
               <button
                 type="button"
@@ -2026,6 +2254,27 @@ export default function PharmacyLabelsModal({
           </div>
         </div>
       </div>
+
+      {/* Hidden offscreen vector container for bulk PDF and A4 grid generation */}
+      {labels.length > 1 && (
+        <div
+          style={{ position: 'fixed', left: '-9999px', top: '-9999px', opacity: 0, pointerEvents: 'none' }}
+          aria-hidden="true"
+        >
+          {labels.map((item, idx) => (
+            <div key={item.id || idx} id={`pharmapolis-bulk-label-${idx}`}>
+              <PharmapolisLabelSvg
+                data={editedOverrides[idx] || item}
+                variant={activeVariant}
+                widthMm={exportFormat === 'pdf_a4' ? 75 : dimensions.widthMm}
+                heightMm={exportFormat === 'pdf_a4' ? 45 : dimensions.heightMm}
+                dpi={Math.max(dpi, 300)}
+                showCutGuides={showCutGuides}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

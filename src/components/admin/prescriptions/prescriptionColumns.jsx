@@ -483,6 +483,15 @@ export const getPrescriptionColumns = (options = {}) => {
               window.dispatchEvent(new CustomEvent('OPEN_SHARE_PUBLIC_PAGE', { detail: { rx } }));
             }
           },
+          // ── QUICK ACTION 3: Pharmapolis Labels (Directly Visible & Public Module Parity) ───
+          {
+            type: 'action',
+            label: 'Pharmapolis Labels',
+            icon: Tag,
+            onClick: () => {
+              window.dispatchEvent(new CustomEvent('OPEN_PHARMAPOLIS_LABELS', { detail: { rx } }));
+            }
+          },
           // ── OVERFLOW ACTIONS (in ··· menu) ──────────────────────────────
           {
             type: 'action',
@@ -713,43 +722,14 @@ export const getPrescriptionColumns = (options = {}) => {
               }
             }
           },
-          // Pharmapolis sticker exports — only relevant for compounding/injectable prescriptions
+          // Pharmapolis labels & vector sticker studio (public module parity)
           ...(isPharmopolisSupplier && canGenerateLabels ? [
             {
               type: 'action',
-              label: 'Pharmapolis A4 stickers (PDF)',
+              label: 'Pharmapolis Labels & Stickers',
               icon: Tag,
-              onClick: async () => {
-                const toastId = toast.loading('Generating A4 stickers…');
-                try {
-                  const { generatePharmapolisStickersPDF } = await import('../../../services/pharmapolisLabelService');
-                  const patientObj = rx.patient || { name: rx.patientName || 'Patient', dob: rx.patientDob || rx.dob || '—', fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8) };
-                  await generatePharmapolisStickersPDF(patientObj, [rx]);
-                  toast.success('Stickers downloaded', { id: toastId });
-                } catch (err) {
-                  toast.error('Failed: ' + err.message, { id: toastId });
-                }
-              }
-            },
-            {
-              type: 'action',
-              label: 'Pharmapolis sticker (PNG)',
-              icon: Download,
-              onClick: async () => {
-                const toastId = toast.loading('Generating sticker PNG…');
-                try {
-                  const { generatePharmapolisStickerPNG } = await import('../../../services/pharmapolisLabelService');
-                  const patientObj = rx.patient || { name: rx.patientName || 'Patient', dob: rx.patientDob || rx.dob || '—', fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8) };
-                  const dataUrl = await generatePharmapolisStickerPNG(patientObj, rx);
-                  const link = document.createElement('a');
-                  link.href = dataUrl;
-                  const slug = (patientObj.name || 'patient').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                  link.download = `pharmapolis_${slug}_${rx.id?.slice(0, 6)}.png`;
-                  document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                  toast.success('PNG downloaded', { id: toastId });
-                } catch (err) {
-                  toast.error('Failed: ' + err.message, { id: toastId });
-                }
+              onClick: () => {
+                window.dispatchEvent(new CustomEvent('OPEN_PHARMAPOLIS_LABELS', { detail: { rx } }));
               }
             }
           ] : []),
