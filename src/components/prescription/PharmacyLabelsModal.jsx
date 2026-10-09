@@ -983,7 +983,7 @@ export default function PharmacyLabelsModal({
         /* ── Google Cloud Resource Selector (Dedicated Full-Width Banner) ── */
         .gcp-resource-selector-card {
           width: 100%;
-          max-width: 760px;
+          max-width: 860px;
           background: #ffffff;
           border: 1px solid #c2e7ff;
           border-left: 4px solid #1a73e8;
@@ -1064,7 +1064,8 @@ export default function PharmacyLabelsModal({
           border-radius: 6px;
           border: 1.5px solid #1a73e8;
           background: #ffffff;
-          font-size: 0.88rem;
+          font-size: 0.83rem;
+          letter-spacing: -0.01em;
           font-weight: 600;
           color: #202124;
           cursor: pointer;
@@ -1117,27 +1118,59 @@ export default function PharmacyLabelsModal({
           font-weight: 700;
         }
 
-        /* ── Controls Toolbar ── */
+        /* ── Controls Toolbar (Structured 2-Row Layout) ── */
         .gcp-controls-toolbar {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          background: #ffffff;
+          padding: 10px 14px;
+          border-radius: 8px;
+          border: 1px solid #dadce0;
+          width: 100%;
+          max-width: 860px;
+          box-sizing: border-box;
+          box-shadow: 0 1px 3px rgba(60, 64, 67, 0.06);
+        }
+        .gcp-toolbar-row-top {
           display: flex;
           align-items: center;
           justify-content: space-between;
           flex-wrap: wrap;
-          gap: 8px;
-          background: #f8fafc;
-          padding: 8px 12px;
-          border-radius: 6px;
-          border: 1px solid #dadce0;
+          gap: 8px 14px;
           width: 100%;
-          maxWidth: 760px;
-          box-sizing: border-box;
         }
-        .gcp-toolbar-items-wrap {
+        .gcp-toolbar-group {
           display: flex;
           align-items: center;
-          gap: 8px;
           flex-wrap: wrap;
-          flex: 1;
+          gap: 8px 12px;
+          flex: 1 1 auto;
+          min-width: 0;
+        }
+        .gcp-toolbar-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.72rem;
+          color: #1a73e8;
+          background: #e8f0fe;
+          border: 1px solid #d2e3fc;
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-weight: 600;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .gcp-toolbar-row-bottom {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          flex-wrap: wrap;
+          gap: 8px;
+          width: 100%;
+          padding-top: 8px;
+          border-top: 1px dashed #e8eaed;
         }
         .gcp-toolbar-control {
           display: flex;
@@ -1146,7 +1179,7 @@ export default function PharmacyLabelsModal({
         }
         .gcp-toolbar-label {
           font-size: 0.70rem;
-          font-weight: 600;
+          font-weight: 700;
           color: #5f6368;
           text-transform: uppercase;
           letter-spacing: 0.04em;
@@ -1168,10 +1201,14 @@ export default function PharmacyLabelsModal({
           background-repeat: no-repeat;
           background-position: right 6px center;
           outline: none;
+          transition: border-color 0.15s;
+        }
+        .gcp-toolbar-select:focus {
+          border-color: #1a73e8;
         }
         .gcp-toolbar-btn {
           height: 32px;
-          padding: 0 10px;
+          padding: 0 12px;
           border-radius: 4px;
           border: 1px solid #dadce0;
           background: #ffffff;
@@ -1183,6 +1220,10 @@ export default function PharmacyLabelsModal({
           align-items: center;
           gap: 6px;
           transition: all 0.15s;
+        }
+        .gcp-toolbar-btn:hover {
+          border-color: #1a73e8;
+          color: #1a73e8;
         }
 
         /* ── Responsive 12-Column Google Cloud Editor Form (NO INNER SCROLL TRAP) ── */
@@ -1371,7 +1412,7 @@ export default function PharmacyLabelsModal({
           }
           .gcp-resource-select {
             height: 44px !important;
-            font-size: 15px !important;
+            font-size: 13.5px !important;
             border-radius: 6px !important;
           }
           .gcp-resource-nav-btn {
@@ -1555,13 +1596,12 @@ export default function PharmacyLabelsModal({
                   className="gcp-resource-select"
                 >
                   {labels.map((lbl, idx) => {
-                    const prefix = lbl.patientName ? `${lbl.patientName} — ` : '';
                     const phase = lbl.phaseNumber ? `Phase ${lbl.phaseNumber}: ` : `${idx + 1}. `;
                     const title = lbl.productName || lbl.productTitle || 'Compounded Formula';
                     const vol = lbl.volume ? ` (${lbl.volume})` : '';
                     return (
                       <option key={lbl.id || idx} value={idx}>
-                        {prefix}{phase}{title}{vol}
+                        {phase}{title}{vol}
                       </option>
                     );
                   })}
@@ -1598,136 +1638,149 @@ export default function PharmacyLabelsModal({
             </div>
           </div>
 
-          {/* Google Cloud Compact Controls Toolbar (Dropdown Fields) */}
+          {/* Google Cloud Compact Controls Toolbar (Structured 2-Row Layout) */}
           <div className="gcp-controls-toolbar">
-            <div className="gcp-toolbar-items-wrap">
-              {/* Field 1: Label Variant (Type) */}
-              <div className="gcp-toolbar-control">
-                <label htmlFor="gcp-label-variant" className="gcp-toolbar-label">
-                  {isEs ? 'Tipo:' : 'Label:'}
-                </label>
-                <select
-                  id="gcp-label-variant"
-                  value={activeVariant}
-                  onChange={(e) => setActiveVariant(e.target.value)}
-                  className="gcp-toolbar-select"
-                >
-                  <option value="backQr">{isEs ? 'Reverso con QR (Trazabilidad)' : 'Back Label with QR (Traceability)'}</option>
-                  <option value="front">{isEs ? 'Frontal Estándar' : 'Front Label (Standard)'}</option>
-                  <option value="frontWithQr">{isEs ? 'Frontal con Micro-QR' : 'Front Label with Micro-QR'}</option>
-                </select>
-              </div>
-
-              {/* Field 2: Label Size / Format */}
-              <div className="gcp-toolbar-control">
-                <label htmlFor="gcp-label-size" className="gcp-toolbar-label">
-                  {isEs ? 'Medida:' : 'Size:'}
-                </label>
-                <select
-                  id="gcp-label-size"
-                  value={selectedPreset}
-                  onChange={(e) => {
-                    const p = PRESETS.find(x => x.id === e.target.value);
-                    if (p) handleSelectPreset(p);
-                  }}
-                  className="gcp-toolbar-select"
-                >
-                  {PRESETS.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.label} ({p.sub})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Custom mm Inputs if Custom is selected */}
-              {selectedPreset === 'custom' && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                    <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>W:</span>
-                    <input
-                      type="number"
-                      min="25"
-                      max="250"
-                      value={customWidth}
-                      onChange={(e) => handleCustomWidthChange(e.target.value)}
-                      style={{
-                        width: '42px',
-                        height: 28,
-                        padding: '0 3px',
-                        fontSize: '0.76rem',
-                        border: '1px solid #dadce0',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                        fontWeight: 600
-                      }}
-                    />
-                  </div>
-                  <span style={{ fontSize: '0.70rem', color: '#94a3b8' }}>×</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                    <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>H:</span>
-                    <input
-                      type="number"
-                      min="20"
-                      max="200"
-                      value={customHeight}
-                      onChange={(e) => handleCustomHeightChange(e.target.value)}
-                      style={{
-                        width: '42px',
-                        height: 28,
-                        padding: '0 3px',
-                        fontSize: '0.76rem',
-                        border: '1px solid #dadce0',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                        fontWeight: 600
-                      }}
-                    />
-                  </div>
-                  <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>mm</span>
+            {/* Top Row: Configuration Selectors + Active Output Resolution Badge */}
+            <div className="gcp-toolbar-row-top">
+              <div className="gcp-toolbar-group">
+                {/* Field 1: Label Variant (Type) */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-variant" className="gcp-toolbar-label">
+                    {isEs ? 'Tipo:' : 'Label:'}
+                  </label>
+                  <select
+                    id="gcp-label-variant"
+                    value={activeVariant}
+                    onChange={(e) => setActiveVariant(e.target.value)}
+                    className="gcp-toolbar-select"
+                  >
+                    <option value="backQr">{isEs ? 'Reverso con QR (Trazabilidad)' : 'Back Label with QR (Traceability)'}</option>
+                    <option value="front">{isEs ? 'Frontal Estándar' : 'Front Label (Standard)'}</option>
+                    <option value="frontWithQr">{isEs ? 'Frontal con Micro-QR' : 'Front Label with Micro-QR'}</option>
+                  </select>
                 </div>
-              )}
 
-              {/* Field 3: Print Resolution / DPI */}
-              <div className="gcp-toolbar-control">
-                <label htmlFor="gcp-label-dpi" className="gcp-toolbar-label">
-                  DPI:
-                </label>
-                <select
-                  id="gcp-label-dpi"
-                  value={dpi}
-                  onChange={(e) => setDpi(Number(e.target.value))}
-                  className="gcp-toolbar-select"
-                >
-                  <option value={300}>300 DPI (Standard)</option>
-                  <option value={600}>600 DPI (Micro-Print)</option>
-                  <option value={1200}>1200 DPI (Ultra HD)</option>
-                </select>
+                {/* Field 2: Label Size / Format */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-size" className="gcp-toolbar-label">
+                    {isEs ? 'Medida:' : 'Size:'}
+                  </label>
+                  <select
+                    id="gcp-label-size"
+                    value={selectedPreset}
+                    onChange={(e) => {
+                      const p = PRESETS.find(x => x.id === e.target.value);
+                      if (p) handleSelectPreset(p);
+                    }}
+                    className="gcp-toolbar-select"
+                  >
+                    {PRESETS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label} ({p.sub})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Custom mm Inputs if Custom is selected */}
+                {selectedPreset === 'custom' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>W:</span>
+                      <input
+                        type="number"
+                        min="25"
+                        max="250"
+                        value={customWidth}
+                        onChange={(e) => handleCustomWidthChange(e.target.value)}
+                        style={{
+                          width: '42px',
+                          height: 28,
+                          padding: '0 3px',
+                          fontSize: '0.76rem',
+                          border: '1px solid #dadce0',
+                          borderRadius: '4px',
+                          textAlign: 'center',
+                          fontWeight: 600
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: '0.70rem', color: '#94a3b8' }}>×</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <span style={{ fontSize: '0.70rem', color: '#5f6368' }}>H:</span>
+                      <input
+                        type="number"
+                        min="20"
+                        max="200"
+                        value={customHeight}
+                        onChange={(e) => handleCustomHeightChange(e.target.value)}
+                        style={{
+                          width: '42px',
+                          height: 28,
+                          padding: '0 3px',
+                          fontSize: '0.76rem',
+                          border: '1px solid #dadce0',
+                          borderRadius: '4px',
+                          textAlign: 'center',
+                          fontWeight: 600
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: '0.70rem', color: '#5f6368', fontWeight: 600 }}>mm</span>
+                  </div>
+                )}
+
+                {/* Field 3: Print Resolution / DPI */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-dpi" className="gcp-toolbar-label">
+                    DPI:
+                  </label>
+                  <select
+                    id="gcp-label-dpi"
+                    value={dpi}
+                    onChange={(e) => setDpi(Number(e.target.value))}
+                    className="gcp-toolbar-select"
+                  >
+                    <option value={300}>300 DPI (Standard)</option>
+                    <option value={600}>600 DPI (Micro-Print)</option>
+                    <option value={1200}>1200 DPI (Ultra HD)</option>
+                  </select>
+                </div>
+
+                {/* Field 4: Export Format Selector (PDF / PNG / MD) */}
+                <div className="gcp-toolbar-control">
+                  <label htmlFor="gcp-label-format" className="gcp-toolbar-label">
+                    {isEs ? 'Formato:' : 'Format:'}
+                  </label>
+                  <select
+                    id="gcp-label-format"
+                    value={exportFormat}
+                    onChange={(e) => setExportFormat(e.target.value)}
+                    className="gcp-toolbar-select"
+                  >
+                    <option value="pdf">{isEs ? `PDF (Esta Etiqueta · ${dimensions.widthMm}×${dimensions.heightMm}mm)` : `PDF (Current Label · ${dimensions.widthMm}×${dimensions.heightMm}mm)`}</option>
+                    {labels.length > 1 && (
+                      <>
+                        <option value="pdf_all">{isEs ? `PDF (Todas · ${labels.length} Etiquetas)` : `PDF (All ${labels.length} Labels)`}</option>
+                        <option value="pdf_a4">{isEs ? `Hoja A4 (10 por hoja · 2×5 Grid)` : `A4 Sheet (10 per page · 2×5 Grid)`}</option>
+                      </>
+                    )}
+                    <option value="png">{isEs ? 'PNG (Imagen HD)' : 'PNG (HD Image)'}</option>
+                    <option value="md">Markdown (.md)</option>
+                  </select>
+                </div>
               </div>
 
-              {/* Field 4: Export Format Selector (PDF / PNG / MD) */}
-              <div className="gcp-toolbar-control">
-                <label htmlFor="gcp-label-format" className="gcp-toolbar-label">
-                  {isEs ? 'Formato:' : 'Format:'}
-                </label>
-                <select
-                  id="gcp-label-format"
-                  value={exportFormat}
-                  onChange={(e) => setExportFormat(e.target.value)}
-                  className="gcp-toolbar-select"
-                >
-                  <option value="pdf">{isEs ? `PDF (Esta Etiqueta · ${dimensions.widthMm}×${dimensions.heightMm}mm)` : `PDF (Current Label · ${dimensions.widthMm}×${dimensions.heightMm}mm)`}</option>
-                  {labels.length > 1 && (
-                    <>
-                      <option value="pdf_all">{isEs ? `PDF (Todas · ${labels.length} Etiquetas)` : `PDF (All ${labels.length} Labels)`}</option>
-                      <option value="pdf_a4">{isEs ? `Hoja A4 (10 por hoja · 2×5 Grid)` : `A4 Sheet (10 per page · 2×5 Grid)`}</option>
-                    </>
-                  )}
-                  <option value="png">{isEs ? 'PNG (Imagen HD)' : 'PNG (HD Image)'}</option>
-                  <option value="md">Markdown (.md)</option>
-                </select>
+              {/* Active Output Pixel Resolution Badge */}
+              <div className="gcp-toolbar-badge">
+                <span>{exportWidthPx} × {exportHeightPx} px</span>
+                <span>·</span>
+                <span>{dpi} DPI</span>
               </div>
+            </div>
 
+            {/* Bottom Row: Tool Actions (Cut Guides, Edit, Share) */}
+            <div className="gcp-toolbar-row-bottom">
               {/* Field 5: Cut Guides (✂) Toggle */}
               <button
                 type="button"
@@ -1751,7 +1804,7 @@ export default function PharmacyLabelsModal({
                 }} />
               </button>
 
-              {/* Field 6: Online Label Editor Toggle (Clean & Professional) */}
+              {/* Field 6: Online Label Editor Toggle */}
               <button
                 type="button"
                 onClick={() => setIsEditing(prev => !prev)}
@@ -1790,32 +1843,13 @@ export default function PharmacyLabelsModal({
                 <span>{copiedShareLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Compartir' : 'Share')}</span>
               </button>
             </div>
-
-            {/* Active Output Pixel Resolution Badge */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.70rem',
-              color: '#1a73e8',
-              background: '#e8f0fe',
-              border: '1px solid #d2e3fc',
-              padding: '3px 8px',
-              borderRadius: '4px',
-              fontWeight: 600,
-              whiteSpace: 'nowrap'
-            }}>
-              <span>{exportWidthPx} × {exportHeightPx} px</span>
-              <span>·</span>
-              <span>{dpi} DPI</span>
-            </div>
           </div>
 
           {/* Online Label Editor & Markdown Sync Panel */}
           {isEditing && (
             <div style={{
               width: '100%',
-              maxWidth: '760px',
+              maxWidth: '860px',
               background: '#ffffff',
               border: '1px solid #1a73e8',
               borderRadius: '8px',
@@ -2022,6 +2056,7 @@ export default function PharmacyLabelsModal({
               <div className="gcp-editor-container">
                 {editorTab === 'fields' ? (
                   <div className="gcp-editor-fields-grid">
+                    {/* Row 1: Patient Name (6 cols) | Dispensing Batch (3 cols) | Net Quantity (3 cols) */}
                     <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
                         {isEs ? 'Nombre Paciente' : 'Patient Name'}
@@ -2032,32 +2067,6 @@ export default function PharmacyLabelsModal({
                         onChange={(e) => handleFieldChange('patientName', e.target.value)}
                         className="gcp-form-input"
                         placeholder="e.g. Amna Sultan Mohamed Ahmed Alotaiba"
-                      />
-                    </div>
-
-                    <div className="gcp-col-6 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        {isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}
-                      </label>
-                      <input
-                        type="text"
-                        value={currentItem.productTitle || currentItem.productName || ''}
-                        onChange={(e) => handleFieldChange('productTitle', e.target.value)}
-                        className="gcp-form-input"
-                        placeholder="e.g. Phase 1: Morning Formula | With Breakfast"
-                      />
-                    </div>
-
-                    <div className="gcp-col-3 gcp-field-wrap">
-                      <label className="gcp-form-label">
-                        {isEs ? 'Cantidad Neta' : 'Net Quantity'}
-                      </label>
-                      <input
-                        type="text"
-                        value={currentItem.volume || currentItem.size || currentItem.netContent || ''}
-                        onChange={(e) => handleFieldChange('volume', e.target.value)}
-                        className="gcp-form-input"
-                        placeholder="60 Caps / 100 mL"
                       />
                     </div>
 
@@ -2076,6 +2085,34 @@ export default function PharmacyLabelsModal({
 
                     <div className="gcp-col-3 gcp-field-wrap">
                       <label className="gcp-form-label">
+                        {isEs ? 'Cantidad Neta' : 'Net Quantity'}
+                      </label>
+                      <input
+                        type="text"
+                        value={currentItem.volume || currentItem.size || currentItem.netContent || ''}
+                        onChange={(e) => handleFieldChange('volume', e.target.value)}
+                        className="gcp-form-input"
+                        placeholder="60 Caps / 100 mL"
+                      />
+                    </div>
+
+                    {/* Row 2: Product Title / Formula (12 cols - full width so complete formula title is 100% visible) */}
+                    <div className="gcp-col-12 gcp-field-wrap">
+                      <label className="gcp-form-label">
+                        {isEs ? 'Título Producto / Fórmula' : 'Product Title / Formula'}
+                      </label>
+                      <input
+                        type="text"
+                        value={currentItem.productTitle || currentItem.productName || ''}
+                        onChange={(e) => handleFieldChange('productTitle', e.target.value)}
+                        className="gcp-form-input"
+                        placeholder="e.g. Phase 2: Metabolic & Lipid Optimization Evening Formula"
+                      />
+                    </div>
+
+                    {/* Row 3: Prescribing Doctor (6 cols) & Clinic (6 cols) -> generous width, zero truncation */}
+                    <div className="gcp-col-6 gcp-field-wrap">
+                      <label className="gcp-form-label">
                         {isEs ? 'Médico Prescriptor' : 'Prescribing Doctor'}
                       </label>
                       <input
@@ -2087,7 +2124,7 @@ export default function PharmacyLabelsModal({
                       />
                     </div>
 
-                    <div className="gcp-col-3 gcp-field-wrap">
+                    <div className="gcp-col-6 gcp-field-wrap">
                       <label className="gcp-form-label">
                         {isEs ? 'Clínica' : 'Clinic'}
                       </label>
