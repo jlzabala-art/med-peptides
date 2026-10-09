@@ -217,6 +217,79 @@ async function generateBackLabelSvg(data, qrSvg) {
     <g transform="translate(560, 250)">
       <rect x="0" y="0" width="880" height="455" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" rx="8" />
       
+      ${data.apis && data.apis.length > 0 ? `
+      <!-- ROW 1: NET QUANTITY & DISPENSING BATCH -->
+      <g transform="translate(30, 40)">
+        <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="800" fill="#64748b" letter-spacing="0.8">NET QUANTITY &amp; DISPENSING BATCH</text>
+        <text x="0" y="28" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="900" fill="#000000">${escapeXml(data.productTitle)}</text>
+        <text x="0" y="56" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#003666">Batch: <tspan font-family="monospace">${escapeXml(data.batchCode || 'PHARM-2026-B948')}</tspan> • Lote Control: <tspan font-family="monospace">${escapeXml(data.lote || '2609-PLV')}</tspan></text>
+        <line x1="0" y1="70" x2="820" y2="70" stroke="#e2e8f0" stroke-width="1.5" />
+      </g>
+
+      <!-- ROW 2: ACTIVE COMPOUNDED INGREDIENTS AND STRENGTH -->
+      <g transform="translate(30, 130)">
+        <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="900" fill="#0284c7" letter-spacing="0.8">ACTIVE COMPOUNDED INGREDIENTS AND STRENGTH</text>
+        ${data.apis.map((ing, idx) => {
+          const ingText = typeof ing === 'string' ? ing : `${ing.name || ing.activeIngredient || ''}${ing.dose || ing.dosage ? ' ' + (ing.dose || ing.dosage) : ''}`.trim();
+          return `<text x="0" y="${24 + (idx * 24)}" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800" fill="#0f172a">• ${escapeXml(ingText)}</text>`;
+        }).join('')}
+        ${(() => {
+          const vehRaw = data.vehicle || data.base;
+          if (!vehRaw) return '';
+          let vehText = typeof vehRaw === 'string' ? vehRaw : (vehRaw.name || '');
+          let prefix = 'Compounding Vehicle:';
+          const vLower = vehText.toLowerCase();
+          if (vLower.includes('capsule')) {
+            prefix = 'Compounding Vehicle / Shell:';
+          } else if (vLower.includes('ointment') || vLower.includes('pomade')) {
+            prefix = 'Compounding Base:';
+          }
+          if (vehText.toLowerCase().startsWith('compounding vehicle:')) {
+            vehText = vehText.slice(20).trim();
+          } else if (vehText.toLowerCase().startsWith('compounding base:')) {
+            vehText = vehText.slice(17).trim();
+          } else if (vehText.toLowerCase().startsWith('base:')) {
+            vehText = vehText.slice(5).trim();
+          }
+          if (vehText.toLowerCase().includes('trichosol')) {
+            vehText = vehText
+              .replace(/\bliposomal\s+hydrophilic\s+base\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
+              .replace(/\bhydrophilic\s+base\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
+              .replace(/\bpatented\s+hydrophilic\s+vehicle\s+for\s+scalp\s+retention\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
+              .replace(/\bbase\b/gi, 'Compounding Vehicle');
+          }
+          if (vehText.toLowerCase().includes('trichooil')) {
+            vehText = vehText
+              .replace(/\bbase\b/gi, 'Compounding Vehicle')
+              .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
+          }
+          const fullVehDisplay = `${prefix} ${vehText}`;
+          return `
+            <text x="0" y="${24 + (data.apis.length * 24) + 2}" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#0369a1">${escapeXml(fullVehDisplay)}</text>
+          `;
+        })()}
+        <line x1="0" y1="${24 + (data.apis.length * 24) + ((data.base || data.vehicle) ? 18 : 10)}" x2="820" y2="${24 + (data.apis.length * 24) + ((data.base || data.vehicle) ? 18 : 10)}" stroke="#e2e8f0" stroke-width="1.5" />
+      </g>
+
+      <!-- ROW 3: DIRECTIONS FOR USE / PRESCRIBED POSOLOGY -->
+      <g transform="translate(30, 258)">
+        <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="900" fill="#0284c7" letter-spacing="0.8">DIRECTIONS FOR USE / PRESCRIBED POSOLOGY</text>
+        ${(() => {
+          const pLines = wrapText(data.directions || 'Apply or take as prescribed by physician.', 70);
+          return pLines.slice(0, 2).map((pLine, pIdx) => `
+            <text x="0" y="${22 + (pIdx * 22)}" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#0f172a">${escapeXml(pLine)}</text>
+          `).join('');
+        })()}
+        <line x1="0" y1="68" x2="820" y2="68" stroke="#e2e8f0" stroke-width="1.5" />
+      </g>
+
+      <!-- ROW 4: PRESCRIBING PHYSICIAN & CLINIC -->
+      <g transform="translate(30, 348)">
+        <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="800" fill="#64748b" letter-spacing="0.8">PRESCRIBING PHYSICIAN &amp; CLINIC</text>
+        <text x="0" y="24" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#1e293b">Rx: ${escapeXml(data.doctorName || 'Dr. Sezgin Cagatay')} • ${escapeXml(data.clinicName || 'Hortman Clinics, Dubai')} (${escapeXml(data.doctorLicense || 'DHA-00013060-006')})</text>
+        <text x="0" y="46" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="800" fill="#b91c1c" letter-spacing="0.4">${escapeXml(data.warnings || 'CAUTION: FOR CLINICAL USE ONLY • KEEP OUT OF REACH OF CHILDREN')}</text>
+      </g>
+      ` : `
       <!-- ROW 1: PRODUCT & BATCH -->
       <g transform="translate(30, 45)">
         <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="800" fill="#64748b" letter-spacing="0.8">FORMULATION CODE &amp; BATCH</text>
@@ -245,6 +318,7 @@ async function generateBackLabelSvg(data, qrSvg) {
         <text x="0" y="78" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#0f172a">• HPLC Verified Raw Materials &gt; 98.5% Active Pharmaceutical Purity.</text>
         <text x="0" y="104" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#16a34a">✓ Tamper-evident seal intact upon dispensary release.</text>
       </g>
+      `}
     </g>
 
     <!-- DASHED DIVIDER -->
@@ -476,13 +550,19 @@ const PRESCRIPTIONS_CATALOG = [
     url: 'https://med-peptides.com/rx/51861'
   },
 
-  // 11. Mohammed Ahmad Aishehhi - TrichoTest Solution (RX-BOX03483AATRI)
+  // 11. Mohammed Ahmad Aishehhi - TrichoSol 100ml (RX-BOX03483AATRI)
   {
     codeId: 'box03483_trichotest_100ml',
     rxCode: 'BOX03483AATRI',
     fileNumber: 'BOX03483AATRI',
     patientName: 'Mohammed Ahmad Aishehhi',
-    productTitle: 'TrichoTest™ Precision Topical Scalp Solution - 100 mL',
+    productTitle: 'TrichoSol 100ml',
+    apis: [
+      'Minoxidil 4%',
+      'Spironolactone 1%',
+      'Arginine 1.5%'
+    ],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
     formula: 'Minoxidil 4% + Spironolactone 1% + Arginine 1.5% in TrichoSol™ 100 mL',
     directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
     warnings: 'For topical scalp use only. Leave on scalp as long as possible. Wash scalp the next day.',
@@ -497,13 +577,19 @@ const PRESCRIPTIONS_CATALOG = [
     url: 'https://med-peptides.com/rx/BOX03483AATRI'
   },
 
-  // 12. Julien Boiteux - TrichoTest Solution 100 mL (BOX03529AATRI - Part 1)
+  // 12. Julien Boiteux - TrichoSol 100ml (BOX03529AATRI - Part 1)
   {
     codeId: 'box03529_trichosol_100ml',
     rxCode: 'BOX03529AATRI',
     fileNumber: 'BOX03529AATRI',
     patientName: 'Julien Boiteux',
-    productTitle: 'TrichoTest™ Precision Topical Scalp Solution - 100 mL',
+    productTitle: 'TrichoSol 100ml',
+    apis: [
+      'Minoxidil 4%',
+      'Spironolactone 1%',
+      'Arginine 1.5%'
+    ],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
     formula: 'Minoxidil 4% + Spironolactone 1% + Arginine 1.5% in TrichoSol™ 100 mL',
     directions: 'Apply at night before bedtime. Leave the solution on your scalp for as long as possible. Wash your scalp the next day.',
     warnings: 'For topical scalp use only. Leave on scalp as long as possible. Wash scalp the next day.',
@@ -517,13 +603,19 @@ const PRESCRIPTIONS_CATALOG = [
     lote: '2609-JB1',
     url: 'https://med-peptides.com/rx/BOX03529AATRI'
   },
-  // 13. Julien Boiteux - TrichoOil 30 mL (BOX03529AATRI - Part 2)
+  // 13. Julien Boiteux - TrichoOil 30ml (BOX03529AATRI - Part 2)
   {
     codeId: 'box03529_trichooil_30ml',
     rxCode: 'BOX03529AATRI',
     fileNumber: 'BOX03529AATRI',
     patientName: 'Julien Boiteux',
-    productTitle: 'Scalp Care and Hygiene Lipid Elixir (TrichoOil™) - 30 mL',
+    productTitle: 'TrichoOil 30ml',
+    apis: [
+      'Ginseng 2%',
+      'Ginkgo biloba 2.5%',
+      'Vitamin E (Tocopherol) 5%'
+    ],
+    base: 'TrichoOil™ 30 mL (100% Natural Scalp Compounding Vehicle)',
     formula: 'Ginseng 2% + Ginkgo biloba 2.5% + Vitamin E (Tocopherol) 5% in TrichoOil™ 30 mL',
     directions: '1-2 times / week, massage for 3-5 minutes and leave it on for 10 min before washing your hair.',
     warnings: 'For topical scalp use only. Store away from direct sunlight.',
@@ -545,6 +637,8 @@ const PRESCRIPTIONS_CATALOG = [
     fileNumber: 'RX-MS-0903',
     patientName: 'Mangesh Sakharkar',
     productTitle: 'TrichoSol - 100 ml',
+    apis: ['Latanoprost 0.005 %', 'Dutasteride 0.25 %', 'TrichoXidil 4 %'],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
     formula: 'Latanoprost 0.005 % + Dutasteride 0.25 % + TrichoXidil 4 %',
     directions: 'Apply at night before bedtime. Leave on scalp overnight. Wash next day. Massage gently.',
     warnings: 'For topical use only. Avoid contact with eyes and mucous membranes.',
@@ -558,13 +652,15 @@ const PRESCRIPTIONS_CATALOG = [
     lote: '2609-MS1',
     url: 'https://med-peptides.com/rx/RX-MS-0903'
   },
-  // 13. Mangesh Sakharkar - Oral Minoxidil (RX-MS-0903)
+  // 15. Mangesh Sakharkar - Oral Minoxidil (RX-MS-0903)
   {
     codeId: 'mangesh_oral_90caps',
     rxCode: 'RX-MS-0903',
     fileNumber: 'RX-MS-0903',
     patientName: 'Mangesh Sakharkar',
     productTitle: 'Oral Treatment - 90 Capsules (3 Months)',
+    apis: ['Oral Minoxidil 3.5 mg', 'Selenium yeast 80 mg'],
+    base: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
     formula: 'Oral Minoxidil (man) 3.5 mg + Selenium yeast 80 mg',
     directions: 'Take 1 capsule per day with food. 90 capsules for 3 months course.',
     warnings: 'Take with food. Do not exceed prescribed dose. Keep out of reach of children.',
@@ -579,13 +675,15 @@ const PRESCRIPTIONS_CATALOG = [
     url: 'https://med-peptides.com/rx/RX-MS-0903'
   },
 
-  // 14. Matthew Taylor - TrichoSol (RX-MT-0903)
+  // 16. Matthew Taylor - TrichoSol (RX-MT-0903)
   {
     codeId: 'matthew_trichosol_100ml',
     rxCode: 'RX-MT-0903',
     fileNumber: 'RX-MT-0903',
     patientName: 'Matthew Taylor',
     productTitle: 'TrichoSol - 100ml',
+    apis: ['Latanoprost 0.005 %', 'Dutasteride 0.25 %'],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
     formula: 'Latanoprost Fagron 0.005 % + Dutasteride 0.25 %',
     directions: 'Apply at night before bedtime. Leave on scalp overnight. Wash next day. Massage gently.',
     warnings: 'For topical use only. Avoid contact with eyes and mucous membranes.',
@@ -599,14 +697,16 @@ const PRESCRIPTIONS_CATALOG = [
     lote: '2609-MT1',
     url: 'https://med-peptides.com/rx/RX-MT-0903'
   },
-  // 15. Matthew Taylor - TrichoOil (RX-MT-0903)
+  // 17. Matthew Taylor - TrichoOil (RX-MT-0903)
   {
     codeId: 'matthew_trichooil_30ml',
     rxCode: 'RX-MT-0903',
     fileNumber: 'RX-MT-0903',
     patientName: 'Matthew Taylor',
     productTitle: 'TrichoOil - 30ml',
-    formula: 'Vitamin E (Tocoferol) 5 % in TrichoOil vehicle',
+    formula: 'Vitamin E (Tocoferol) 5 % in TrichoOil',
+    apis: ['Vitamin E (Tocopherol) 5%'],
+    base: 'TrichoOil™ 30 mL (100% Natural Scalp Compounding Vehicle)',
     directions: '1-2 times / week, massage 3-5 min, leave 10 min before washing.',
     warnings: 'For topical scalp use only. Store away from direct sunlight.',
     prodDate: '03-09-2026',
@@ -619,7 +719,8 @@ const PRESCRIPTIONS_CATALOG = [
     lote: '2609-MT2',
     url: 'https://med-peptides.com/rx/RX-MT-0903'
   },
-  // 16. Aamer Reza Habib - Diltiazem 2% + Lidocaine 2% Pomade - 30 g (RX-51245)
+
+  // 18. Aamer Reza Habib - Diltiazem 2% + Lidocaine 2% Pomade - 30 g (RX-51245)
   {
     codeId: '51245_diltiazem_30g',
     rxCode: 'RX-51245',
@@ -643,6 +744,303 @@ const PRESCRIPTIONS_CATALOG = [
     batchCode: 'PHARM-2026-DL30G',
     lote: '2609-HAB1',
     url: 'https://med-peptides.com/rx/RX-51245'
+  },
+
+  // ── SPREADSHEET AUDIT PRESCRIPTIONS (NEW EN ALTAS) ──
+
+  // 19. Noura Majed Mohamed Alfuttaim - Personalized Evening Formula (RX-NMMA-2)
+  {
+    codeId: 'nmma_evening_formula_90caps',
+    rxCode: 'RX-NMMA-2',
+    fileNumber: 'RX-NMMA-2',
+    patientName: 'Noura Majed Mohamed Alfuttaim',
+    productTitle: 'Personalized Evening Formula - 90 capsules',
+    apis: [
+      'Ashwagandha (KSM-66) 600 mg',
+      'Citrus sinensis extract 500 mg',
+      'Magnesium Glycinate 400 mg',
+      'L-Tryptophan 400 mg',
+      'L-Theanine 200 mg',
+      'GABA 200 mg',
+      'Pyridoxal-5-Phosphate (P5P) 20 mg',
+      'Melatonin 5 mg',
+      'L-Methylfolate 400 mcg'
+    ],
+    base: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free.',
+    formula: 'Personalized Evening Formula (Ashwagandha, Citrus, Mg Glycinate, Tryptophan, Theanine, GABA, P5P, Melatonin, Folate)',
+    directions: 'Take 3 capsules 30-45 minutes before bedtime with water for 1 month.',
+    warnings: 'Promotes restorative sleep & metabolic recovery. Store tightly sealed.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store in a cool dry place',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic, Dubai',
+    batchCode: 'PHARM-2026-NMMA-EVE',
+    lote: '2609-NOU1',
+    url: 'https://med-peptides.com/rx/rx_nmma_2'
+  },
+
+  // 20. Daria Grek - TrichoSol 100ml (RX-20261001-SW8B - Part 1)
+  {
+    codeId: 'daria_trichosol_100ml',
+    rxCode: 'RX-20261001-SW8B',
+    fileNumber: 'SW8B',
+    patientName: 'Daria Grek',
+    productTitle: 'TrichoSol 100ml',
+    apis: [
+      'Minoxidil 3%',
+      'Spironolactone 2.5%',
+      'Arginine 1.5%'
+    ],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
+    formula: 'Minoxidil 3% + Spironolactone 2.5% + Arginine 1.5% in TrichoSol™ 100 mL',
+    directions: 'Apply at night before bedtime. Leave on scalp as long as possible. Wash scalp the next day.',
+    warnings: 'For topical scalp use only. Keep out of reach of children.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-DG-TR1',
+    lote: '2609-DG1',
+    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+  },
+  // 21. Daria Grek - Capsules (RX-20261001-SW8B - Part 2)
+  {
+    codeId: 'daria_capsules_90caps',
+    rxCode: 'RX-20261001-SW8B',
+    fileNumber: 'SW8B',
+    patientName: 'Daria Grek',
+    productTitle: 'Oral Hair Vitality Formula - 90 capsules',
+    apis: [
+      'Turmeric Dry Extract 200 mg',
+      'Coenzyme Q10 45 mg',
+      'N-Acetyl-L-Cysteine 138 mg',
+      'Biotin 1,000 mcg',
+      'Zinc 12 mg',
+      'Iron Bisglycinate 50 mg'
+    ],
+    base: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
+    formula: 'Oral Hair Vitality Complex (Turmeric, CoQ10, NAC, Biotin, Zinc, Iron)',
+    directions: 'Take 1 capsule 3 times daily with meals for 3 months.',
+    warnings: 'Oral dietary supplement. Store in a cool dry place.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store in a cool dry place',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-DG-CAP',
+    lote: '2609-DG2',
+    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+  },
+  // 22. Daria Grek - TrichoOil 30ml (RX-20261001-SW8B - Part 3)
+  {
+    codeId: 'daria_trichooil_30ml',
+    rxCode: 'RX-20261001-SW8B',
+    fileNumber: 'SW8B',
+    patientName: 'Daria Grek',
+    productTitle: 'TrichoOil 30ml',
+    apis: [
+      'Ginseng 2.5%',
+      'Ginkgo biloba 1%',
+      'Vitamin E (Tocopherol) 5%'
+    ],
+    base: 'TrichoOil™ 30 mL (100% Natural Scalp Compounding Vehicle)',
+    formula: 'Ginseng 2.5% + Ginkgo biloba 1% + Vitamin E (Tocopherol) 5% in TrichoOil™ 30 mL',
+    directions: '1-2 times / week, massage 3-5 min, leave 10 min before washing your hair.',
+    warnings: 'For topical scalp use only. Store away from direct sunlight.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-DG-OIL',
+    lote: '2609-DG3',
+    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+  },
+  // 23. Daria Grek - TrichoWash 250ml (RX-20261001-SW8B - Part 4)
+  {
+    codeId: 'daria_trichowash_250ml',
+    rxCode: 'RX-20261001-SW8B',
+    fileNumber: 'SW8B',
+    patientName: 'Daria Grek',
+    productTitle: 'TrichoWash 250ml',
+    apis: [
+      'Salicylic Acid 2%',
+      'Ketoconazole 2%',
+      'TrichoWash Cleansing Base q.s. 250 mL'
+    ],
+    base: '',
+    formula: 'Salicylic Acid 2% + Ketoconazole 2% in TrichoWash™ Cleansing Shampoo Base 250 mL',
+    directions: 'Apply to wet scalp 2-3 times weekly, lather, leave for 2-3 minutes, rinse thoroughly.',
+    warnings: 'For external scalp wash only. Avoid contact with eyes.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-DG-WASH',
+    lote: '2609-DG4',
+    url: 'https://med-peptides.com/rx/CfOwJCEFcnwmww0TjtZ5'
+  },
+
+  // 24. Ghada Abdulaziz Ishaq - Formula Estradiol Transdermal (RX-51253)
+  {
+    codeId: '51253_estradiol_60ml',
+    rxCode: 'RX-51253',
+    fileNumber: '51253',
+    patientName: 'Ghada Abdulaziz Ishaq',
+    productTitle: 'Formula Estradiol (Transdermal) - 60 mL',
+    apis: [
+      'Estradiol (micronized, bioidentical) 1 mg/mL'
+    ],
+    base: 'Pentravan® Liposomal Vehicle Base q.s.p. 1 mL',
+    formula: '17β-Estradiol Micronized Bioidentical 1 mg/mL in Pentravan® Base 1 mL',
+    directions: 'Apply 1 mL transdermally before bedtime to clean, dry, hairless skin of inner thigh.',
+    warnings: 'For transdermal use only. Do not apply to breasts. Wash hands after application.',
+    prodDate: '06-10-2026',
+    expDate: '05-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic · Dubai Healthcare City',
+    batchCode: 'PHARM-2026-GHA-EST',
+    lote: '2609-GHA1',
+    url: 'https://med-peptides.com/rx/RX-51253'
+  },
+  // 25. Ghada Abdulaziz Ishaq - Dehydroepiandrosterone (DHEA) 5 mg (RX-51253-B)
+  {
+    codeId: '51253_dhea_60caps',
+    rxCode: 'RX-51253-B',
+    fileNumber: '51253',
+    patientName: 'Ghada Abdulaziz Ishaq',
+    productTitle: 'Dehydroepiandrosterone (DHEA) 5 mg - 60 capsules',
+    apis: [
+      'Dehydroepiandrosterone (DHEA) 5 mg'
+    ],
+    base: 'Vegetable capsules. Gluten-free, lactose-free, colorant-free.',
+    formula: 'Dehydroepiandrosterone (DHEA) USP 5 mg in vegetable capsules',
+    directions: 'Take 1 capsule once daily in the morning with breakfast with water.',
+    warnings: 'Oral route only. Keep out of reach of children. Store tightly closed.',
+    prodDate: '06-10-2026',
+    expDate: '05-10-2027',
+    storage: 'Store in a cool dry place',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic · Dubai Healthcare City',
+    batchCode: 'PHARM-2026-GHA-DHEA',
+    lote: '2609-GHA2',
+    url: 'https://med-peptides.com/rx/RX-51253-B'
+  },
+
+  // 26. Reem F M Alghanim - Bioidentical Hormone Cream (RX-RFMA-2)
+  {
+    codeId: 'rfma_hormone_cream_60ml',
+    rxCode: 'RX-RFMA-2',
+    fileNumber: '51855',
+    patientName: 'Reem F M Alghanim',
+    productTitle: 'Bioidentical Hormone Cream - 60 mL',
+    apis: [
+      'Testosterone (Micronized) 1 mg/mL',
+      'Estradiol (Micronized) 2 mg/mL'
+    ],
+    base: 'Pentravan® Liposomal Micronized Base q.s. 1 mL',
+    formula: 'Testosterone Micronized 1 mg + Estradiol Micronized 2 mg in Pentravan® Base',
+    directions: 'Apply 1 pump (1 mL) once daily in morning to clean skin of inner forearm or thigh.',
+    warnings: 'For transdermal use only. Wash hands thoroughly after application.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Marina Cordeiro Fernandes',
+    doctorLicense: 'DHA-91105367',
+    clinicName: 'NOVA Clinic, Dubai',
+    batchCode: 'PHARM-2026-RFMA-CRM',
+    lote: '2609-RFM1',
+    url: 'https://med-peptides.com/rx/rx_rfma_2'
+  },
+
+  // 27. George Mills - TrichoSol 100ml (RX-518134)
+  {
+    codeId: '518134_trichosol_100ml',
+    rxCode: 'RX-518134',
+    fileNumber: '518134',
+    patientName: 'George Mills',
+    productTitle: 'TrichoSol 100ml',
+    apis: [
+      'Minoxidil 5%',
+      'Finasteride 0.1%'
+    ],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
+    formula: 'Minoxidil 5% + Finasteride 0.1% in TrichoSol™ 100 mL',
+    directions: 'Apply 1 mL once daily at night before bedtime to scalp. Wash next day.',
+    warnings: 'For topical scalp use only. Keep out of reach of children.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-GM-TRI',
+    lote: '2609-GM1',
+    url: 'https://med-peptides.com/rx/RX-518134'
+  },
+
+  // 28. Sara Khalid Al-Meadadi - Pentravan (BOX03049AATEL - Part 1)
+  {
+    codeId: 'box03049_pentravan_30g',
+    rxCode: 'BOX03049AATEL',
+    fileNumber: 'BOX03049AATEL',
+    patientName: 'Sara Khalid Al-Meadadi',
+    productTitle: 'Cellular Longevity Transdermal Cream (Pentravan) - 30 g',
+    apis: [
+      'Metformin 88 mg',
+      'Testosterone 3 mg',
+      'Astaxanthin 17 mg'
+    ],
+    base: 'Pentravan® Liposomal Transdermal Vehicle Base q.s. 30 g',
+    formula: 'Metformin 88 mg + Testosterone 3 mg + Astaxanthin 17 mg in Pentravan® Base 30 g',
+    directions: 'Apply 1 dose daily to clean inner thigh or forearm skin as directed.',
+    warnings: 'For transdermal use only. Wash hands after application.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store at room temperature',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-SKA-PEN',
+    lote: '2609-SKA1',
+    url: 'https://med-peptides.com/rx/BOX03049AATEL'
+  },
+  // 29. Sara Khalid Al-Meadadi - Capsules (BOX03049AATEL - Part 2)
+  {
+    codeId: 'box03049_capsules_90caps',
+    rxCode: 'BOX03049AATEL',
+    fileNumber: 'BOX03049AATEL',
+    patientName: 'Sara Khalid Al-Meadadi',
+    productTitle: 'Mitochondrial & Telomere Oral Formula - 90 capsules',
+    apis: [
+      'Turmeric Dry Extract 200 mg',
+      'Coenzyme Q10 45 mg',
+      'N-Acetyl-L-Cysteine 138 mg'
+    ],
+    base: 'Vegetable capsules. Gluten-free, lactose-free.',
+    formula: 'Turmeric Dry Extract 200 mg + CoQ10 45 mg + N-Acetyl-L-Cysteine 138 mg',
+    directions: 'Take 1 capsule 3 times daily with meals for 3 months.',
+    warnings: 'Oral dietary supplement. Store in a cool dry place.',
+    prodDate: '05-10-2026',
+    expDate: '04-10-2027',
+    storage: 'Store in a cool dry place',
+    doctorName: 'Dr. Sezgin Cagatay',
+    doctorLicense: 'DHA-00013060-006',
+    clinicName: 'Hortman Clinics, Dubai',
+    batchCode: 'PHARM-2026-SKA-CAP',
+    lote: '2609-SKA2',
+    url: 'https://med-peptides.com/rx/BOX03049AATEL'
   }
 ];
 
@@ -669,57 +1067,61 @@ async function run() {
     const backQrSvg = rawQrSvg.replace(/<\?xml.*?\?>/g, '').replace(/<svg\s+/, '<svg x="70" y="25" width="320" height="320" ');
     const microQrSvg = rawQrSvg.replace(/<\?xml.*?\?>/g, '').replace(/<svg\s+/, '<svg x="0" y="0" width="120" height="120" ');
 
+    // Sanitize patient name for clear, identifiable file naming
+    const patientSlug = (item.patientName || 'PATIENT')
+      .toUpperCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^A-Z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+
     // 1. FRONT LABEL (Exact Match to User's Pharmapolis template)
     const frontSvg = await generateFrontLabelSvg(item, { withMicroQr: false });
     const frontPngBuffer = await sharp(Buffer.from(frontSvg)).png().toBuffer();
-    const frontFilename = `PHARMAPOLIS_${item.codeId}_FRONT.png`;
+    const frontFilename = `PHARMAPOLIS_${patientSlug}_${item.codeId}_FRONT.png`;
     const frontPath = path.join(OUTPUT_DIR, frontFilename);
     fs.writeFileSync(frontPath, frontPngBuffer);
 
     const frontPdfBytes = await createPdfFromPngBuffer(frontPngBuffer, 75, 45);
-    const frontPdfFilename = `PHARMAPOLIS_${item.codeId}_FRONT.pdf`;
+    const frontPdfFilename = `PHARMAPOLIS_${patientSlug}_${item.codeId}_FRONT.pdf`;
     fs.writeFileSync(path.join(OUTPUT_DIR, frontPdfFilename), frontPdfBytes);
 
     // 2. BACK LABEL (Parte de atrás: Dedicated 7.5 x 4.5 cm with QR, Batch & Physician specs)
     const backSvg = await generateBackLabelSvg(item, backQrSvg);
     const backPngBuffer = await sharp(Buffer.from(backSvg)).png().toBuffer();
-    const backFilename = `PHARMAPOLIS_${item.codeId}_BACK_QR.png`;
+    const backFilename = `PHARMAPOLIS_${patientSlug}_${item.codeId}_BACK_QR.png`;
     const backPath = path.join(OUTPUT_DIR, backFilename);
     fs.writeFileSync(backPath, backPngBuffer);
 
     const backPdfBytes = await createPdfFromPngBuffer(backPngBuffer, 75, 45);
-    const backPdfFilename = `PHARMAPOLIS_${item.codeId}_BACK_QR.pdf`;
+    const backPdfFilename = `PHARMAPOLIS_${patientSlug}_${item.codeId}_BACK_QR.pdf`;
     fs.writeFileSync(path.join(OUTPUT_DIR, backPdfFilename), backPdfBytes);
 
     // 3. FRONT LABEL WITH MICRO-QR (Optional hybrid: QR in top right corner without robbing space)
     const frontQrSvg = await generateFrontLabelSvg(item, { withMicroQr: true, qrSvg: microQrSvg });
     const frontQrPngBuffer = await sharp(Buffer.from(frontQrSvg)).png().toBuffer();
-    const frontQrFilename = `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.png`;
+    const frontQrFilename = `PHARMAPOLIS_${patientSlug}_${item.codeId}_FRONT_WITH_QR.png`;
     fs.writeFileSync(path.join(OUTPUT_DIR, frontQrFilename), frontQrPngBuffer);
     const frontQrPdfBytes = await createPdfFromPngBuffer(frontQrPngBuffer, 75, 45);
-    const frontQrPdfFilename = `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.pdf`;
+    const frontQrPdfFilename = `PHARMAPOLIS_${patientSlug}_${item.codeId}_FRONT_WITH_QR.pdf`;
     fs.writeFileSync(path.join(OUTPUT_DIR, frontQrPdfFilename), frontQrPdfBytes);
+
+    // Write backwards-compatible legacy files without slug
+    fs.writeFileSync(path.join(OUTPUT_DIR, `PHARMAPOLIS_${item.codeId}_FRONT.png`), frontPngBuffer);
+    fs.writeFileSync(path.join(OUTPUT_DIR, `PHARMAPOLIS_${item.codeId}_FRONT.pdf`), frontPdfBytes);
+    fs.writeFileSync(path.join(OUTPUT_DIR, `PHARMAPOLIS_${item.codeId}_BACK_QR.png`), backPngBuffer);
+    fs.writeFileSync(path.join(OUTPUT_DIR, `PHARMAPOLIS_${item.codeId}_BACK_QR.pdf`), backPdfBytes);
+    fs.writeFileSync(path.join(OUTPUT_DIR, `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.png`), frontQrPngBuffer);
+    fs.writeFileSync(path.join(OUTPUT_DIR, `PHARMAPOLIS_${item.codeId}_FRONT_WITH_QR.pdf`), frontQrPdfBytes);
 
     // Export copies directly to ~/Downloads for immediate client use
     const DOWNLOADS_DIR = '/Users/joseluiszabala/Downloads';
-    if (fs.existsSync(DOWNLOADS_DIR) && (item.fileNumber === 'BOX03529AATRI' || item.patientName === 'Julien Boiteux')) {
-      const partTag = item.codeId.includes('trichosol') ? 'PART-1_TRICHOSOL_100ML' : 'PART-2_TRICHOOIL_30ML';
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT.png`), frontPngBuffer);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT.pdf`), frontPdfBytes);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_BACK_QR.png`), backPngBuffer);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_BACK_QR.pdf`), backPdfBytes);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT_WITH_QR.png`), frontQrPngBuffer);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03529AATRI_${partTag}_FRONT_WITH_QR.pdf`), frontQrPdfBytes);
-      console.log(`📥 [Downloads] Copied Julien Boiteux labels (${partTag}) to ~/Downloads`);
-    }
-    if (fs.existsSync(DOWNLOADS_DIR) && (item.fileNumber === 'BOX03483AATRI' || item.patientName.includes('Aishehhi'))) {
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT.png`), frontPngBuffer);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT.pdf`), frontPdfBytes);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_BACK_QR.png`), backPngBuffer);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_BACK_QR.pdf`), backPdfBytes);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT_WITH_QR.png`), frontQrPngBuffer);
-      fs.writeFileSync(path.join(DOWNLOADS_DIR, `PHARMAPOLIS_BOX03483AATRI_TRICHOSOL_100ML_FRONT_WITH_QR.pdf`), frontQrPdfBytes);
-      console.log(`📥 [Downloads] Copied Mohammed Ahmad Aishehhi labels (BOX03483AATRI) to ~/Downloads`);
+    if (fs.existsSync(DOWNLOADS_DIR)) {
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, frontFilename), frontPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, frontPdfFilename), frontPdfBytes);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, backFilename), backPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, backPdfFilename), backPdfBytes);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, frontQrFilename), frontQrPngBuffer);
+      fs.writeFileSync(path.join(DOWNLOADS_DIR, frontQrPdfFilename), frontQrPdfBytes);
     }
 
     generatedFiles.push({

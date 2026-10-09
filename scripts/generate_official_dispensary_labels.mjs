@@ -98,8 +98,18 @@ async function renderLabelSvg(item) {
   }
 
   const baseStartY = 28 + (ingCount * ingLineGap) + 4;
-  const baseLines = wrapLines(`Base: ${item.base}`, 75);
-  const baseFontSize = item.base.length > 55 ? 15 : 17;
+  let vehiclePrefix = 'Compounding Vehicle:';
+  const vLower = (item.base || '').toLowerCase();
+  if (vLower.includes('capsule')) {
+    vehiclePrefix = 'Compounding Vehicle / Shell:';
+  } else if (vLower.includes('ointment') || vLower.includes('pomade')) {
+    vehiclePrefix = 'Compounding Base:';
+  }
+  let cleanVeh = (item.base || '').trim();
+  if (cleanVeh.toLowerCase().startsWith('compounding vehicle:')) cleanVeh = cleanVeh.slice(20).trim();
+  if (cleanVeh.toLowerCase().startsWith('base:')) cleanVeh = cleanVeh.slice(5).trim();
+  const baseLines = cleanVeh ? wrapLines(`${vehiclePrefix} ${cleanVeh}`, 75) : [];
+  const baseFontSize = cleanVeh.length > 55 ? 15 : 17;
   const baseLineGap = 20;
   const b2TotalHeight = baseStartY + (baseLines.length * baseLineGap);
 
@@ -157,10 +167,10 @@ async function renderLabelSvg(item) {
     <g transform="translate(550, ${colY})">
       <rect x="0" y="0" width="890" height="${colHeight}" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" rx="8" />
 
-      <!-- Block 1: Dispensing Batch & Net Quantity / Size -->
+      <!-- Block 1: Net Quantity & Dispensing Batch -->
       <g transform="translate(32, ${b1Y})">
         <text x="0" y="0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="800" fill="#64748b" letter-spacing="0.8">
-          DISPENSING BATCH &amp; NET QUANTITY
+          NET QUANTITY &amp; DISPENSING BATCH
         </text>
         <text x="0" y="${b1SizeY}" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="900" fill="#000000" letter-spacing="0.3">
           Net Content / Size: ${escapeXml(item.volume)}
@@ -282,6 +292,7 @@ async function main() {
   };
 
   const svgPart1 = await renderLabelSvg(part1);
+  await exportBoth(svgPart1, 'PHARMAPOLIS_AMNA_SULTAN_MOHAMED_AHMED_ALOTAIBA_51857_PART-1_60CAPS_75x45mm_BACK-QR_300DPI');
   await exportBoth(svgPart1, 'PHARMAPOLIS_51857_PART-1_60CAPS_75x45mm_BACK-QR_300DPI');
   await exportBoth(svgPart1, 'PHARMAPOLIS_51857_PART-1_60CAPS_75x45mm_BACK-QR');
 
@@ -306,12 +317,83 @@ async function main() {
   };
 
   const svgPart2 = await renderLabelSvg(part2);
+  await exportBoth(svgPart2, 'PHARMAPOLIS_AMNA_SULTAN_MOHAMED_AHMED_ALOTAIBA_51857_PART-2_120CAPS_75x45mm_BACK-QR_300DPI');
   await exportBoth(svgPart2, 'PHARMAPOLIS_51857_PART-2_120CAPS_75x45mm_BACK-QR_300DPI');
   await exportBoth(svgPart2, 'PHARMAPOLIS_51857_PART-2_120CAPS_75x45mm_BACK-QR');
-  // Also provide with old name so replacing it is seamless
-  await exportBoth(svgPart2, 'PHARMAPOLIS_51857_PART-2_90CAPS_75x45mm_BACK-QR_300DPI');
 
-  console.log('🎉 Done! All requested files generated and ready for Katarzyna.');
+  // 3. Mohammed Ahmad Aishehhi (BOX03483AATRI)
+  const aishehhi = {
+    patientName: 'MOHAMMED AHMAD AISHEHHI',
+    fileNumber: 'BOX03483AATRI',
+    volume: 'TrichoSol 100ml',
+    batchCode: 'PHARM-2026-TRI100',
+    lote: '2609-MHD1',
+    apis: [
+      'Minoxidil 4%',
+      'Spironolactone 1%',
+      'Arginine 1.5%'
+    ],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
+    directions: 'Apply at night before bedtime. Leave on scalp as long as possible. Wash scalp the next day.',
+    caution: 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN',
+    rxLine: 'Rx: Dr. Sezgin Cagatay • Hortman Clinics, Dubai (DHA-00013060-006)',
+    mfg: '05/10/26',
+    exp: '04/10/27',
+    storage: 'Store at room temperature',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX03483AATRI'
+  };
+  const svgAishehhi = await renderLabelSvg(aishehhi);
+  await exportBoth(svgAishehhi, 'PHARMAPOLIS_MOHAMMED_AHMAD_AISHEHHI_BOX03483AATRI_TRICHOSOL_100ML_75x45mm_BACK-QR_300DPI');
+
+  // 4. Julien Boiteux Part 1 (BOX03529AATRI) - TrichoSol 100ml
+  const julienPart1 = {
+    patientName: 'JULIEN BOITEUX',
+    fileNumber: 'BOX03529AATRI',
+    volume: 'TrichoSol 100ml',
+    batchCode: 'PHARM-2026-TRI-BOX03529',
+    lote: '2609-JB1',
+    apis: [
+      'Minoxidil 4%',
+      'Spironolactone 1%',
+      'Arginine 1.5%'
+    ],
+    base: 'TrichoSol™ 100 mL (Alcohol-Free Hydrophilic Compounding Vehicle)',
+    directions: 'Apply at night before bedtime. Leave on scalp as long as possible. Wash scalp the next day.',
+    caution: 'CAUTION: FOR TOPICAL SCALP USE ONLY • KEEP OUT OF REACH OF CHILDREN',
+    rxLine: 'Rx: Dr. Sezgin Cagatay • Hortman Clinics, Dubai (DHA-00013060-006)',
+    mfg: '05/10/26',
+    exp: '04/10/27',
+    storage: 'Store at room temperature',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+  };
+  const svgJulien1 = await renderLabelSvg(julienPart1);
+  await exportBoth(svgJulien1, 'PHARMAPOLIS_JULIEN_BOITEUX_BOX03529AATRI_PART-1_TRICHOSOL_100ML_75x45mm_BACK-QR_300DPI');
+
+  // 5. Julien Boiteux Part 2 (BOX03529AATRI) - TrichoOil 30ml
+  const julienPart2 = {
+    patientName: 'JULIEN BOITEUX',
+    fileNumber: 'BOX03529AATRI',
+    volume: 'TrichoOil 30ml',
+    batchCode: 'PHARM-2026-OIL-BOX03529',
+    lote: '2609-JB2',
+    apis: [
+      'Ginseng 2%',
+      'Ginkgo biloba 2.5%',
+      'Vitamin E (Tocopherol) 5%'
+    ],
+    base: 'TrichoOil™ 30 mL (100% Natural Scalp Compounding Vehicle)',
+    directions: '1-2 times / week, massage for 3-5 minutes and leave on for 10 min before washing.',
+    caution: 'CAUTION: FOR TOPICAL SCALP USE ONLY • STORE AWAY FROM DIRECT SUNLIGHT',
+    rxLine: 'Rx: Dr. Sezgin Cagatay • Hortman Clinics, Dubai (DHA-00013060-006)',
+    mfg: '05/10/26',
+    exp: '04/10/27',
+    storage: 'Store at room temperature',
+    targetRxUrl: 'https://med-peptides.com/rx/BOX03529AATRI'
+  };
+  const svgJulien2 = await renderLabelSvg(julienPart2);
+  await exportBoth(svgJulien2, 'PHARMAPOLIS_JULIEN_BOITEUX_BOX03529AATRI_PART-2_TRICHOOIL_30ML_75x45mm_BACK-QR_300DPI');
+
+  console.log('🎉 Done! All requested files generated with patient names in filename.');
 }
 
 main().catch(console.error);

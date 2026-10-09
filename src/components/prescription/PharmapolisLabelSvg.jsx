@@ -157,7 +157,7 @@ export default function PharmapolisLabelSvg({
       const filtered = labelData.apis.filter(a => {
         const n = (a.drugName || a.drug || a.name || a.productName || a.activeIngredient || '').toLowerCase();
         const f = (a.dosageForm || a.form || '').toLowerCase();
-        const isVeh = a.isVehicle || a.isVehicleOrBase || a._isVehicleOrBase || a.itemType === 'vehicle_base' || f.includes('vehicle') || n.includes('vehicle') || n.includes('trichosol') || n.includes('pentravan') || n.includes('pomade base') || n.includes('ointment base');
+        const isVeh = a.isVehicle || a.isVehicleOrBase || a._isVehicleOrBase || a.itemType === 'vehicle_base' || f.includes('vehicle') || n.includes('vehicle') || n.includes('trichosol') || n.includes('trichooil') || n.includes('pentravan') || n.includes('pomade base') || n.includes('ointment base');
         return !isVeh;
       });
       if (filtered.length > 0) {
@@ -199,7 +199,7 @@ export default function PharmapolisLabelSvg({
     }
     if (formula) {
       const parts = formula.split(/\s*(?:\+|\bin\b)\s*/i).map(p => p.trim()).filter(Boolean);
-      const nonVehParts = parts.filter(p => !p.toLowerCase().includes('vehicle') && !p.toLowerCase().includes('trichosol') && !p.toLowerCase().includes('pentravan') && !p.toLowerCase().includes('base'));
+      const nonVehParts = parts.filter(p => !p.toLowerCase().includes('vehicle') && !p.toLowerCase().includes('trichosol') && !p.toLowerCase().includes('trichooil') && !p.toLowerCase().includes('pentravan') && !p.toLowerCase().includes('base'));
       if (nonVehParts.length > 0) {
         return nonVehParts.map(p => p.replace(/Tópico/gi, 'Topical').replace(/Oral/gi, 'Oral'));
       }
@@ -217,10 +217,10 @@ export default function PharmapolisLabelSvg({
 
   let vehicleName = (typeof labelData.vehicle === 'string' ? labelData.vehicle : labelData.vehicle?.name) || 
                       (labelData.apis?.find(a => a.itemType === 'vehicle_base' || a.isVehicleOrBase)?.name) ||
-                      (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)' :
-                      (isHormone ? 'Pentravan® Liposomal Transdermal Cream Base' :
-                      (formulaLower.includes('trichosol') ? 'TrichoSol™ Liposomal Hydrophilic Base (100 mL)' : 
-                      (formulaLower.includes('trichooil') ? 'TrichoOil™ Natural Lipidic Carrier (30 mL)' : 
+                      (isPomadeOrOintment ? 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)' :
+                      (isHormone ? 'Pentravan® Liposomal Transdermal Cream Vehicle' :
+                      (formulaLower.includes('trichosol') || pNameLower.includes('trichosol') ? `TrichoSol™ (Alcohol-Free Hydrophilic Compounding Vehicle${volume ? `, ${volume}` : ''})` : 
+                      (formulaLower.includes('trichooil') || pNameLower.includes('trichooil') ? `TrichoOil™ (100% Natural Scalp Compounding Vehicle${volume ? `, ${volume}` : ''})` : 
                       (isOral ? 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.' : 'Galenic Compounding Vehicle q.s.')))));
 
   if (isOral && vehicleName.toLowerCase().includes('micronized compounded hard capsules')) {
@@ -231,7 +231,7 @@ export default function PharmapolisLabelSvg({
   if (isPomadeOrOintment && vehicleName) {
     const vLower = vehicleName.toLowerCase();
     if (!vLower.includes('fragrance') || !vLower.includes('alcohol')) {
-      vehicleName = 'Hypoallergenic Non-Irritating Ointment Base (Fragrance & Alcohol Free, q.s. 30 g)';
+      vehicleName = 'Hypoallergenic Non-Irritating Base (Fragrance & Alcohol Free, q.s. 30 g)';
     }
   }
 
@@ -409,10 +409,10 @@ export default function PharmapolisLabelSvg({
         <g transform={`translate(550, ${colY})`}>
           <rect x="0" y="0" width="890" height={colHeight} fill="#ffffff" stroke="#cbd5e1" strokeWidth="2" rx="8" />
 
-          {/* Block 1: Dispensing Batch & Net Quantity / Size */}
+          {/* Block 1: Net Quantity & Dispensing Batch */}
           <g transform={`translate(32, ${b1Y})`}>
             <text x="0" y="0" fontFamily="Arial, Helvetica, sans-serif" fontSize={isShort ? 12 : 14} fontWeight="800" fill="#64748b" letterSpacing="0.8">
-              DISPENSING BATCH &amp; NET QUANTITY
+              NET QUANTITY &amp; DISPENSING BATCH
             </text>
             <text
               x="0"
@@ -444,9 +444,45 @@ export default function PharmapolisLabelSvg({
               ingLineGap = isShort ? 21 : 25;
             }
 
+            let vehiclePrefix = 'Compounding Vehicle:';
+            const vLower = (vehicleName || '').toLowerCase();
+            if (isOral || vLower.includes('capsule')) {
+              vehiclePrefix = 'Compounding Vehicle / Shell:';
+            } else if (isPomadeOrOintment || vLower.includes('ointment') || vLower.includes('pomade')) {
+              vehiclePrefix = 'Compounding Base:';
+            } else {
+              vehiclePrefix = 'Compounding Vehicle:';
+            }
+
+            let cleanVehicleDisplay = vehicleName;
+            if (cleanVehicleDisplay.toLowerCase().startsWith('compounding vehicle:')) {
+              cleanVehicleDisplay = cleanVehicleDisplay.slice(20).trim();
+            } else if (cleanVehicleDisplay.toLowerCase().startsWith('compounding vehicle / shell:')) {
+              cleanVehicleDisplay = cleanVehicleDisplay.slice(28).trim();
+            } else if (cleanVehicleDisplay.toLowerCase().startsWith('compounding base:')) {
+              cleanVehicleDisplay = cleanVehicleDisplay.slice(17).trim();
+            } else if (cleanVehicleDisplay.toLowerCase().startsWith('base:')) {
+              cleanVehicleDisplay = cleanVehicleDisplay.slice(5).trim();
+            } else if (cleanVehicleDisplay.toLowerCase().startsWith('vehicle:')) {
+              cleanVehicleDisplay = cleanVehicleDisplay.slice(8).trim();
+            }
+
+            if (cleanVehicleDisplay.toLowerCase().includes('trichosol')) {
+              cleanVehicleDisplay = cleanVehicleDisplay
+                .replace(/\bliposomal\s+hydrophilic\s+base\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
+                .replace(/\bhydrophilic\s+base\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
+                .replace(/\bpatented\s+hydrophilic\s+vehicle\s+for\s+scalp\s+retention\b/gi, 'Alcohol-Free Hydrophilic Compounding Vehicle')
+                .replace(/\bbase\b/gi, 'Compounding Vehicle');
+            }
+            if (cleanVehicleDisplay.toLowerCase().includes('trichooil')) {
+              cleanVehicleDisplay = cleanVehicleDisplay
+                .replace(/\bbase\b/gi, 'Compounding Vehicle')
+                .replace(/\bnatural\s+lipidic\s+carrier\b/gi, '100% Natural Scalp Compounding Vehicle');
+            }
+
             const baseStartY = (isShort ? 22 : 28) + (ingCount * ingLineGap) + (isShort ? 2 : 4);
-            const baseLines = wrapLines(`Base: ${vehicleName}`, isShort ? 65 : 88);
-            const baseFontSize = isShort ? (vehicleName.length > 40 ? 13 : 15) : (vehicleName.length > 55 ? 15 : 17);
+            const baseLines = wrapLines(`${vehiclePrefix} ${cleanVehicleDisplay}`, isShort ? 65 : 88);
+            const baseFontSize = isShort ? (cleanVehicleDisplay.length > 40 ? 13 : 15) : (cleanVehicleDisplay.length > 55 ? 15 : 17);
             const baseLineGap = isShort ? 16 : 20;
             const b2TotalHeight = baseStartY + (baseLines.length * baseLineGap);
 

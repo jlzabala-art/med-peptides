@@ -2584,14 +2584,14 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                 {[
                   { id: 'treatment', label: isEs ? 'Prescripción' : 'Prescription', icon: Pill, count: compoundedFormulations.length },
                   ...(atlasRecs?.peptide || atlasRecs?.supplement || atlasRecs?.diagnostic || atlasRecs?.colway ? [
-                    { id: 'recommendations', label: isEs ? 'Recomendaciones' : 'Recommendations', icon: Sparkles, count: 'Atlas AI' }
+                    { id: 'recommendations', label: 'Atlas AI', icon: Sparkles }
                   ] : []),
-                  { id: 'roadmap', label: 'Roadmap', icon: Layers, count: compoundedFormulations.length > 1 ? `${compoundedFormulations.length} ${isEs ? 'Fases' : 'Phases'}` : null },
+                  { id: 'roadmap', label: 'Roadmap', icon: Layers },
                   { id: 'traceability', label: isEs ? 'Calidad GMP' : 'Quality GMP', icon: Factory },
-                  { id: 'credentials', label: isEs ? 'Médico & Paciente' : 'Doctor & Patient', icon: Stethoscope },
+                  { id: 'credentials', label: isEs ? 'Médico' : 'Doctor', icon: Stethoscope },
                   { id: 'patientSharing', label: isEs ? 'Soporte' : 'Support', icon: Share2 },
                   ...(!isPatientView ? [
-                    { id: 'quotation', label: isEs ? 'Cotización Atlas' : 'Compounding Quote', icon: FileText }
+                    { id: 'quotation', label: isEs ? 'Cotización' : 'Quote', icon: FileText }
                   ] : [])
                 ].map(tab => {
                   const isActive = activeGcpTab === tab.id;
@@ -2633,27 +2633,27 @@ export default function PublicPrescriptionClient({ rx, embedded = false, onBackT
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 12px',
+                        gap: '5px',
+                        padding: '5px 8px',
                         borderRadius: '6px',
                         border: 'none',
                         background: isActive ? '#e8f0fe' : 'transparent',
                         color: isActive ? '#1a73e8' : '#5f6368',
                         fontWeight: isActive ? 600 : 500,
-                        fontSize: '0.80rem',
+                        fontSize: '0.76rem',
                         cursor: 'pointer',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
                         transition: 'background 0.15s ease, color 0.15s ease'
                       }}
                     >
-                      <IconCmp size={15} style={{ color: isActive ? '#1a73e8' : '#5f6368', flexShrink: 0 }} />
+                      <IconCmp size={14} style={{ color: isActive ? '#1a73e8' : '#5f6368', flexShrink: 0 }} />
                       <span>{tab.label}</span>
                       {tab.count !== undefined && tab.count !== null && (
                         <span style={{
-                          fontSize: '0.66rem',
+                          fontSize: '0.64rem',
                           fontWeight: 700,
-                          padding: '1px 6px',
+                          padding: '1px 5px',
                           borderRadius: '10px',
                           background: isActive ? '#1a73e8' : '#f1f3f4',
                           color: isActive ? '#ffffff' : '#5f6368'
