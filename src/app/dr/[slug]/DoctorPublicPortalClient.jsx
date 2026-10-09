@@ -6135,7 +6135,7 @@ export default function DoctorPublicPortalClient({ slug, initialData = null }) {
               style={{
                 flexShrink: 0,
                 padding: '16px 20px',
-                borderBottom: '1px solid #dad'ce0,
+                borderBottom: '1px solid #dadce0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
