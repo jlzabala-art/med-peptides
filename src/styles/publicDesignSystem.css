@@ -938,6 +938,59 @@
   }
 }
 
+/* ── Google Cloud UX Linear Detail Rows (Key-Value Specifications) ── */
+.gcp-detail-rows-list {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  width: 100%;
+}
+
+.gcp-detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.gcp-detail-row:last-child {
+  border-bottom: none;
+}
+
+.gcp-detail-row:hover {
+  background-color: #f8fafc;
+}
+
+.gcp-detail-label {
+  width: 250px;
+  min-width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gcp-detail-value {
+  flex: 1;
+  font-size: 0.8rem;
+  color: #475569;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .gcp-detail-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.875rem 1rem;
+  }
+  .gcp-detail-label {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* ── Google Cloud Console Dynamic Dual Navigation Layout (Main Stream + Sticky TOC Sidebar) ── */
 .pds-content-with-sidebar {
   display: block;

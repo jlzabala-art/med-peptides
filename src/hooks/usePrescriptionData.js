@@ -333,6 +333,46 @@ export function usePrescriptionData(rx = {}, { lang = 'en', isEs = false, isPati
       };
     };
 
+    // If the prescription explicitly defines multi-part sequential phases (e.g., rx.parts with length > 1)
+    if (Array.isArray(rx.parts) && rx.parts.length > 1) {
+      return rx.parts.map((p, idx) => {
+        const rawPartApis = p.apis || p.items || [];
+        const partApis = rawPartApis.map(a => ({
+          ...a,
+          name: a.name || a.drugName || a.productName || a.activeIngredient || 'Active API',
+          dose: a.dose || a.dosage || a.strength || '—',
+          dosage: a.dosage || a.dose || a.strength || '—'
+        }));
+
+        const vehicleData = buildVehicleData({
+          index: p.partNumber || idx + 1,
+          totalCount: p.totalParts || rx.parts.length,
+          vehicleName: p.vehicle || rx.vehicle || 'Vegetable capsules. Gluten-free, lactose-free, colorant-free, and without unnecessary additives.',
+          treatmentTitle: p.title || (isEs ? `Fórmula Fase ${idx + 1}` : `Formula Phase ${idx + 1}`),
+          dosageForm: p.format || p.dosageForm || (isEs ? 'Cápsulas Orales (Vegetales)' : 'Oral Capsules (Vegetable)'),
+          route: p.route || (isEs ? 'Vía Oral' : 'Oral Route'),
+          volume: p.volume || rx.volume,
+          customPosology: p.directions || p.posology || rx.dosageInstructions,
+          apis: partApis
+        });
+
+        if (p.accentColor) vehicleData.accentColor = p.accentColor;
+        if (p.accentBg) vehicleData.accentBg = p.accentBg;
+        if (p.borderAccent) vehicleData.borderAccent = p.borderAccent;
+        if (p.badge) vehicleData.badgeText = p.badge;
+        if (p.title) {
+          vehicleData.title = p.title;
+          vehicleData.shortTitle = p.title.split('·')[0].trim();
+        }
+        if (p.directions || p.posology) {
+          vehicleData.posology.regimen = p.directions || p.posology;
+          vehicleData.posology.timing = p.directions || p.posology;
+        }
+
+        return vehicleData;
+      });
+    }
+
     const activeBlocks = [];
     const solItems = [];
     const trichoOilItems = [];

@@ -105,72 +105,80 @@ export default function ProductRegulatoryWarningsSection({
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem' }}>
-          <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.86rem', color: '#134e4a', lineHeight: 1.6, fontWeight: 500 }}>
+        <div style={{ background: '#ffffff' }}>
+          <p style={{ margin: 0, padding: '0.875rem 1.5rem', fontSize: '0.84rem', color: '#134e4a', lineHeight: 1.6, fontWeight: 500, borderBottom: '1px solid #ccfbf1', background: '#f0fdfa' }}>
             {isEs 
               ? 'Formulado y envasado bajo estándares europeos de buenas prácticas de fabricación cosmética (ISO 22716). Producto para el cuidado y revitalización del cuero cabelludo y tallo capilar sin principios medicamentosos de prescripción ni esteroides.'
               : 'Formulated and packaged in compliance with European Cosmetic Good Manufacturing Practices (ISO 22716). Indicated for scalp and hair shaft revitalization, free from prescription drug agents and hormonal corticosteroids.'}
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+          <div className="gcp-detail-rows-list">
             {/* Warning 1: External Use & Eye Contact */}
-            <div style={{ background: '#ffffff', border: '1px solid #ccfbf1', borderRadius: '10px', padding: '1rem', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Droplets size={16} color="#0d9488" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Droplets size={16} color="#0d9488" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Uso Exclusivamente Tópico' : 'For External Topical Use Only'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Aplicar únicamente sobre piel intacta y cuero cabelludo. Evitar el contacto directo con ojos y mucosas. En caso de contacto accidental, aclarar inmediatamente con abundante agua templada.'
                   : 'Apply solely to intact scalp and hair surfaces. Avoid direct contact with eyes and mucous membranes. If accidental contact occurs, rinse thoroughly with copious warm water.'}
-              </p>
+              </div>
             </div>
 
             {/* Warning 2: Patch Testing */}
-            <div style={{ background: '#ffffff', border: '1px solid #ccfbf1', borderRadius: '10px', padding: '1rem', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Sparkles size={16} color="#0d9488" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Sparkles size={16} color="#0d9488" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Test de Tolerancia Cutánea' : 'Dermatological Patch Testing'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Testado dermatológicamente. En pieles atópicas o con historial de alergias de contacto, se recomienda realizar un patch test en el antebrazo 24–48 h antes del primer uso. Suspender ante irritación.'
                   : 'Dermatologically evaluated. In individuals with atopic tendency or known contact allergies, an occlusive patch test on the inner forearm is advised 24–48 hours prior to initial application.'}
-              </p>
+              </div>
             </div>
 
             {/* Warning 3: Storage & PAO */}
-            <div style={{ background: '#ffffff', border: '1px solid #ccfbf1', borderRadius: '10px', padding: '1rem', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Clock size={16} color="#0d9488" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Clock size={16} color="#0d9488" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Conservación & PAO (12 Meses)' : 'Storage & PAO (12 Months)'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Conservar entre 15°C y 25°C, protegido de la radiación solar directa. Periodo tras apertura recomendado (PAO): 12 meses. Mantener el envase cerrado y fuera del alcance de los niños.'
                   : 'Store between 15°C and 25°C away from direct sunlight and heat sources. Period After Opening (PAO): 12 months. Keep bottle tightly closed and out of reach of young children.'}
-              </p>
+              </div>
             </div>
 
             {/* Warning 4: Clean Formulation Safeguards */}
-            <div style={{ background: '#ffffff', border: '1px solid #ccfbf1', borderRadius: '10px', padding: '1rem', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <CheckCircle2 size={16} color="#0d9488" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <CheckCircle2 size={16} color="#0d9488" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Garantía de Pureza & Trazabilidad' : 'Clean Formula & Batch Traceability'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Libre de parabenos agresivos, sulfatos irritantes (SLS/SLES) y colorantes sintéticos. Cada lote cuenta con trazabilidad europea directa mediante código QR en el envase.'
                   : 'Free from aggressive parabens, harsh SLS/SLES sulfates, and synthetic dyes. Every production lot provides verifiable batch tracking accessible via packaging QR code.'}
-              </p>
+              </div>
             </div>
           </div>
         </div>
@@ -247,72 +255,80 @@ export default function ProductRegulatoryWarningsSection({
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem' }}>
-          <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.86rem', color: '#0369a1', lineHeight: 1.6, fontWeight: 500 }}>
+        <div style={{ background: '#ffffff' }}>
+          <p style={{ margin: 0, padding: '0.875rem 1.5rem', fontSize: '0.84rem', color: '#0369a1', lineHeight: 1.6, fontWeight: 500, borderBottom: '1px solid #e0f2fe', background: '#f0f9ff' }}>
             {isEs 
               ? 'Dispositivo de diagnóstico in vitro (IVD) con marcado CE. Los resultados analíticos cuantitativos son emitidos por laboratorios clínicos acreditados y están destinados a respaldar la evaluación clínica realizada por un profesional sanitario colegiado.'
               : 'CE-IVD marked in vitro diagnostic medical device. Quantitative analytical reports are generated by accredited clinical reference laboratories and are intended to assist registered healthcare professionals in clinical decision-making.'}
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+          <div className="gcp-detail-rows-list">
             {/* Warning 1: Clinical Guidance, Not Final Diagnosis */}
-            <div style={{ background: '#ffffff', border: '1px solid #e0f2fe', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Info size={16} color="#0284c7" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Info size={16} color="#0284c7" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Interpretación Médica Requerida' : 'Physician Consultation Required'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Este análisis proporciona biomarcadores cuantitativos de precisión pero no sustituye el juicio médico integral, anamnesis ni exploraciones diagnósticas complementarias.'
                   : 'This assay delivers precision quantitative biomarker data but does not substitute for comprehensive physician consultation, clinical history, or specialized clinical workup.'}
-              </p>
+              </div>
             </div>
 
             {/* Warning 2: DBS Collection & Asepsis */}
-            <div style={{ background: '#ffffff', border: '1px solid #e0f2fe', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Droplets size={16} color="#0284c7" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Droplets size={16} color="#0284c7" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Muestreo Capilar Aséptico (DBS)' : 'Aseptic Capillary Sampling'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Utilizar exclusivamente la lanceta retráctil estéril monouso. Limpiar la zona con toallita alcohólica, desechar la primera gota y llenar los círculos sin tocar el papel filtro.'
                   : 'Use only single-use sterile retractable lancets. Sanitize skin, wipe away the first blood droplet, and allow successive droplets to soak Whatman 903 circles without touching the paper.'}
-              </p>
+              </div>
             </div>
 
             {/* Warning 3: 3-Hour Drying Protocol */}
-            <div style={{ background: '#ffffff', border: '1px solid #e0f2fe', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Clock size={16} color="#0284c7" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Clock size={16} color="#0284c7" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Secado Obligatorio (Mínimo 3 Horas)' : 'Mandatory 3-Hour Air Drying'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'La tarjeta Whatman 903 debe secar en posición horizontal al aire libre durante un mínimo de 3 h antes de guardarla en la bolsa desecante. Muestras húmedas serán invalidadas.'
                   : 'Allow the Whatman 903 collection card to dry flat at room temperature for at least 3 hours before inserting into the foil desiccant pouch. Moist samples will be rejected.'}
-              </p>
+              </div>
             </div>
 
             {/* Warning 4: Accredited Central Laboratory */}
-            <div style={{ background: '#ffffff', border: '1px solid #e0f2fe', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Building2 size={16} color="#0284c7" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Building2 size={16} color="#0284c7" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Cadena de Custodia Acreditada' : 'Accredited Chain of Custody'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Procesamiento en LifeLab1 (Vilnius, Lituania) bajo ISO 15189 y metodología CE-IVDR. Entrega de informe seguro en 3–5 días laborables mediante portal digital encriptado.'
                   : 'Processed by LifeLab1 (Vilnius, Lithuania) under ISO 15189 accreditation and CE-IVDR certified protocols. Secure encrypted delivery within 3–5 business days.'}
-              </p>
+              </div>
             </div>
           </div>
         </div>
@@ -385,48 +401,54 @@ export default function ProductRegulatoryWarningsSection({
           </div>
         </div>
 
-        <div style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <ShieldAlert size={16} color="#d97706" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+        <div style={{ background: '#ffffff' }}>
+          <div className="gcp-detail-rows-list">
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <ShieldAlert size={16} color="#d97706" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Conservante Alcohol Bencílico 0.9%' : '0.9% Benzyl Alcohol Preservative'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Contiene alcohol bencílico como agente bacteriostático. No apto para administración intratecal, epidural ni para uso en neonatos o lactantes.'
                   : 'Formulated with 0.9% benzyl alcohol as antimicrobial agent. Not for intrathecal, epidural, or neonatal administration.'}
-              </p>
+              </div>
             </div>
 
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Clock size={16} color="#2563eb" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Clock size={16} color="#2563eb" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Límite de Uso Multidosis (28 Días)' : '28-Day Multi-Dose Limit'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Desechar el vial transcurridos 28 días desde la primera punción del tapón. Desinfectar el septo de goma con alcohol isopropílico antes de cada extracción.'
                   : 'Discard remaining contents 28 days following initial rubber septum puncture. Sanitize septum with 70% isopropyl alcohol prior to each aspiration.'}
-              </p>
+              </div>
             </div>
 
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Thermometer size={16} color="#0d9488" />
-                <h4 style={{ margin: 0, fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+            <div className="gcp-detail-row">
+              <div className="gcp-detail-label">
+                <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Thermometer size={16} color="#0d9488" />
+                </div>
+                <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                   {isEs ? 'Condiciones de Almacenamiento' : 'Temperature Governance'}
                 </h4>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.55 }}>
+              <div className="gcp-detail-value">
                 {isEs 
                   ? 'Conservar a 15°C–25°C antes de su apertura. Tras la primera perforación, conservar en refrigeración entre 2°C y 8°C protegido de la luz.'
                   : 'Store at 15°C–25°C prior to opening. Following initial puncture, maintain refrigerated at 2°C–8°C away from direct light.'}
-              </p>
+              </div>
             </div>
           </div>
         </div>
@@ -570,73 +592,73 @@ export default function ProductRegulatoryWarningsSection({
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1px', background: '#e2e8f0' }}>
-          {/* Col 1: Dosificación Diaria */}
-          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="gcp-detail-rows-list">
+          {/* Row 1: Dosificación Diaria */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <CheckCircle2 size={16} color="#16a34a" />
               </div>
-              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                 {isEs ? 'Posología & Dosis Diaria' : 'Recommended Daily Serving'}
               </h4>
             </div>
-            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            <div className="gcp-detail-value">
               {isEs 
                 ? 'No superar la dosis diaria expresamente recomendada en la etiqueta. Ingerir con un vaso de agua, preferentemente junto a comidas o según indicación del profesional sanitario.'
                 : 'Do not exceed the recommended daily dose stated on the packaging. Take with a glass of water, preferably alongside meals or as directed by a healthcare practitioner.'}
-            </p>
+            </div>
           </div>
 
-          {/* Col 2: Conservación */}
-          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Row 2: Conservación */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Clock size={16} color="#2563eb" />
               </div>
-              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                 {isEs ? 'Conservación & Caducidad' : 'Storage & Stability'}
               </h4>
             </div>
-            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            <div className="gcp-detail-value">
               {isEs 
                 ? 'Conservar en un lugar fresco y seco, protegido de la luz solar directa y por debajo de 25°C. Mantener el frasco herméticamente cerrado tras cada uso.'
                 : 'Store in a cool, dry place away from direct sunlight and below 25°C. Keep container tightly sealed after each use.'}
-            </p>
+            </div>
           </div>
 
-          {/* Col 3: Precauciones Especiales */}
-          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Row 3: Precauciones Especiales */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <AlertTriangle size={16} color="#d97706" />
               </div>
-              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                 {isEs ? 'Precauciones & Embarazo' : 'Precautions & Pregnancy'}
               </h4>
             </div>
-            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            <div className="gcp-detail-value">
               {isEs 
                 ? 'Mantener fuera del alcance de los niños más pequeños. Consultar con su médico en caso de embarazo, lactancia o toma simultánea de medicación anticoagulante/hipoglucemiante.'
                 : 'Keep out of reach of young children. Consult a physician prior to use if pregnant, lactating, or currently taking anticoagulants/hypoglycemic medication.'}
-            </p>
+            </div>
           </div>
 
-          {/* Col 4: Calidad y Pureza */}
-          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Row 4: Calidad y Pureza */}
+          <div className="gcp-detail-row">
+            <div className="gcp-detail-label">
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <ShieldCheck size={16} color="#7c3aed" />
               </div>
-              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
                 {isEs ? 'Garantía Analítica de Calidad' : 'Analytical Quality Guarantee'}
               </h4>
             </div>
-            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+            <div className="gcp-detail-value">
               {isEs 
                 ? `Lotes analizados por laboratorios independientes para garantizar la ausencia de metales pesados, pesticidas y microorganismos patógenos. Distribución autorizada por ${supplierName || 'Pharmapolis'}.`
                 : `Third-party batch certified for absent heavy metals, pesticide residues, and microbial pathogens. Sourced through authorized partner ${supplierName || 'Pharmapolis'}.`}
-            </p>
+            </div>
           </div>
         </div>
       </section>
@@ -733,79 +755,74 @@ export default function ProductRegulatoryWarningsSection({
         </span>
       </div>
 
-      {/* ── GCP 4-Column Balanced Property Ribbon ── */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', 
-        gap: '1px',
-        background: '#f1f5f9'
-      }}>
-        {/* Column 1: Prescriber Supervision */}
-        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* ── Google Cloud UX Linear Detail Rows (Key-Value Specifications) ── */}
+      <div className="gcp-detail-rows-list">
+        {/* Row 1: Prescriber Supervision */}
+        <div className="gcp-detail-row">
+          <div className="gcp-detail-label">
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ShieldAlert size={16} color="#dc2626" />
             </div>
-            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
               {isEs ? 'Prescripción & Supervisión' : 'Prescription & Oversight'}
             </h4>
           </div>
-          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+          <div className="gcp-detail-value">
             {isEs 
               ? 'La administración, ajuste de dosis y seguimiento clínico deben realizarse bajo la supervisión de un médico o especialista colegiado tras evaluación de marcadores de base.'
               : 'Administration, dosing titration, and clinical monitoring must be conducted under the direct supervision of a licensed physician following baseline lab workup.'}
-          </p>
+          </div>
         </div>
 
-        {/* Column 2: Cold Chain & Asepsis */}
-        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Row 2: Cold Chain & Asepsis */}
+        <div className="gcp-detail-row">
+          <div className="gcp-detail-label">
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Thermometer size={16} color="#0284c7" />
             </div>
-            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
               {isEs ? 'Reconstitución & Cadena 2–8°C' : 'Reconstitution & 2–8°C'}
             </h4>
           </div>
-          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+          <div className="gcp-detail-value">
             {isEs 
               ? 'Reconstituir con solvente bacteriostático estéril en condiciones higiénicas estrictas. Mantener en refrigeración constante (2°C–8°C) y consumir antes de 28–30 días.'
               : 'Reconstitute using sterile bacteriostatic solvent under strict hygienic technique. Maintain constant cold-chain refrigeration (2°C–8°C) and consume within 28–30 days.'}
-          </p>
+          </div>
         </div>
 
-        {/* Column 3: Key Contraindications */}
-        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Row 3: Key Contraindications */}
+        <div className="gcp-detail-row">
+          <div className="gcp-detail-label">
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <AlertTriangle size={16} color="#d97706" />
             </div>
-            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
               {isEs ? 'Contraindicaciones Mayores' : 'Major Contraindications'}
             </h4>
           </div>
-          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+          <div className="gcp-detail-value">
             {isEs 
               ? 'Contraindicado en neoplasias activas o antecedentes oncológicos dependientes de receptores, embarazo, lactancia o insuficiencia hepática/renal severa no compensada.'
               : 'Contraindicated in active malignancy, receptor-dependent oncological history, pregnancy, lactation, or severe uncompensated hepatic/renal dysfunction.'}
-          </p>
+          </div>
         </div>
 
-        {/* Column 4: Batch Release Verification */}
-        <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Row 4: Batch Release Verification */}
+        <div className="gcp-detail-row">
+          <div className="gcp-detail-label">
+            <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#ecfdf5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Beaker size={16} color="#059669" />
             </div>
-            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+            <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
               {isEs ? 'Control Analítico de Lote' : 'Batch Release QC'}
             </h4>
           </div>
-          <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+          <div className="gcp-detail-value">
             {isEs 
               ? `Pureza certificada ≥ 99.0% por RP-HPLC de doble columna y masa molecular comprobada por LC-MS con control de endotoxinas (<0.25 EU/mg) por ${supplierName || 'laboratorio clínico certificado'}.`
               : `Certified ≥ 99.0% purity via dual-column RP-HPLC with LC-MS identity confirmation and strict endotoxin control (<0.25 EU/mg) sourced through ${supplierName || 'certified clinical laboratory'}.`}
-          </p>
+          </div>
         </div>
       </div>
     </section>
