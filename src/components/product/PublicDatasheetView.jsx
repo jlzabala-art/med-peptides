@@ -53,6 +53,7 @@ import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import SolventTechnicalSpecs from './SolventTechnicalSpecs';
 import CosmeticTechnicalSpecs from './CosmeticTechnicalSpecs';
+import SupplementTechnicalSpecs from './SupplementTechnicalSpecs';
 import HairProtocolsSidebarWidget from './HairProtocolsSidebarWidget';
 import DiagnosticTestTechnicalSpecs from './DiagnosticTestTechnicalSpecs';
 import BloodoRelatedPeptidesSection from './BloodoRelatedPeptidesSection';
@@ -279,73 +280,6 @@ export default function PublicDatasheetView({
     return [];
   }, [product]);
 
-  const handleCopyMonographSpecs = async () => {
-    const isEs = lang === 'es';
-    const prodName = product?.canonicalName || product?.name || name;
-    const prodCat = category || 'Therapeutic Peptide';
-    const prodTarget = targetSystem || 'Cellular Receptor Signaling';
-    const purity = '≥ 99.0% (RP-HPLC Dual-Column Analytical Grade)';
-    const cas = product?.cas || product?.casNumber || 'Verified CAS Registry';
-    const mw = product?.molecularWeight || 'Calculated Theoretical Mass';
-    const formula = product?.formula || product?.empiricalFormula || 'Synthetic Polypeptide Chain';
-    const reconVol = activeStrengthObj ? getReconstitutionVolume(activeStrengthObj.name) : { volume: '2.0', concentration: '5.0' };
-    const protocolsList = (associatedProtocols || []).slice(0, 3).map(p => `  • ${p.name || p.title}`).join('\n');
-
-    const text = `*ATLAS HEALTH CLINICAL API MONOGRAPH*\n` +
-      `Compound: ${prodName}\n` +
-      `Category: ${prodCat}\n` +
-      `Target Axis: ${prodTarget}\n` +
-      `----------------------------------------\n` +
-      `*ANALYTICAL SPECIFICATIONS:*\n` +
-      `• Purity: ${purity}\n` +
-      `• CAS Registry: ${cas}\n` +
-      `• Molecular Weight: ${mw}\n` +
-      `• Empirical Formula: ${formula}\n\n` +
-      `*RECONSTITUTION & STORAGE:*\n` +
-      `• Recommended Diluent: ${reconVol.volume} mL Bacteriostatic Water USP\n` +
-      `• In-Use Concentration: ${reconVol.concentration} mg/mL\n` +
-      `• Storage: 2°C – 8°C Refrigerated (Do Not Freeze) · 28-Day Stability\n\n` +
-      (protocolsList ? `*ASSOCIATED CLINICAL BLUEPRINTS:*\n${protocolsList}\n\n` : '') +
-      `Official Verification: https://med-peptides.com/p/${slug}\n` +
-      `_Atlas Services · SSOT Clinical Intelligence Standard_`;
-
-    let success = false;
-    if (navigator?.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-        success = true;
-      } catch (err) {
-        console.warn('Clipboard writeText failed, trying fallback:', err);
-      }
-    }
-
-    if (!success && typeof document !== 'undefined') {
-      try {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        success = document.execCommand('copy');
-        document.body.removeChild(textarea);
-      } catch (fallbackErr) {
-        console.error('Fallback copy failed:', fallbackErr);
-      }
-    }
-
-    if (success) {
-      setCopiedMonograph(true);
-      triggerHaptic('success');
-      toast.success(isEs ? 'Ficha técnica copiada al portapapeles ✓' : 'Technical monograph copied to clipboard ✓');
-      setTimeout(() => setCopiedMonograph(false), 2500);
-    } else {
-      toast.error(isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard');
-    }
-  };
-
   // Sync language with URL param, initialLang param, or localStorage preference
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -522,11 +456,37 @@ export default function PublicDatasheetView({
     );
   }, [product, slug]);
 
-  const isPeptideCompound = useMemo(() => {
-    return !isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isSolventProduct;
-  }, [isCorporateService, isDiagnosticKit, isCosmeticProduct, isSolventProduct]);
+  const isSupplementProduct = useMemo(() => {
+    const pSlug = (product?.slug || product?.id || slug || '').toLowerCase();
+    const cat = (product?.category || product?.therapeutic_category || '').toLowerCase();
+    const pt = (product?.productType || product?.product_type || product?.type || '').toLowerCase();
+    const pName = (product?.name || product?.title || product?.canonicalName || '').toLowerCase();
+    const pres = (product?.presentation || '').toLowerCase();
+    const fmt = (product?.format || '').toLowerCase();
+    const brand = (product?.brand || product?.supplier || '').toLowerCase();
+    return Boolean(
+      product?.is_supplement ||
+      product?.isSupplement ||
+      cat === 'supplements' ||
+      cat === 'oral_supplements' ||
+      cat === 'clinical_supplements' ||
+      cat.includes('supplement') ||
+      pt === 'supplement' ||
+      pt === 'oral_supplement' ||
+      pSlug.includes('ultraperson') ||
+      pName.includes('ultraperson') ||
+      brand.includes('ultraperson') ||
+      pres.includes('caps') ||
+      pres.includes('bottle_(') ||
+      fmt === 'capsules'
+    );
+  }, [product, slug]);
 
-  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : 'Clinical Peptide')))));
+  const isPeptideCompound = useMemo(() => {
+    return !isCorporateService && !isDiagnosticKit && !isCosmeticProduct && !isSolventProduct && !isSupplementProduct;
+  }, [isCorporateService, isDiagnosticKit, isCosmeticProduct, isSolventProduct, isSupplementProduct]);
+
+  const name = product?.name || product?.displayName || (isSolventProduct ? 'Bacteriostatic Water (BAC)' : (isEternaDiagnostic ? (product?.name || 'ETERNA™ Saliva DNA & Epigenetics') : (isDiagnosticKit ? 'Bloodo™ Clinical Diagnostic Test' : (isIvDrip ? (product?.title || 'Master IV Drip Formulation') : (isCosmeticProduct ? (product?.canonicalName || 'Colway Cosmeceutical Formulation') : (isSupplementProduct ? (product?.name || 'UltraPerson Clinical Supplement') : 'Clinical Peptide'))))));
   const category = isCosmeticProduct
     ? (lang === 'es' ? 'Cosmecéutica y Cuidado Capilar' : 'Hair & Scalp Cosmeceuticals')
     : isSolventProduct 
@@ -535,6 +495,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Diagnóstico Clínico y Biomarcadores' : 'Clinical Diagnostics & Biomarkers')
     : isIvDrip
     ? (lang === 'es' ? 'Terapia Intravenosa y Nutrición Parenteral' : 'Sterile IV Infusion & Micronutrient Formulation')
+    : isSupplementProduct
+    ? (lang === 'es' ? 'Suplementación Clínica Avanzada' : 'Advanced Clinical Supplementation')
     : getLocalizedCategory(product?.category || product?.therapeutic_category || 'Peptide', lang);
   const casNumber = isCosmeticProduct
     ? (lang === 'es' ? 'Reglamento Cosmético UE 1223/2009' : 'EU Cosmetics Reg. 1223/2009 (CPNP)')
@@ -544,6 +506,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Directiva CE-IVDR (UE 2017/746)' : 'CE-IVDR Directive (EU 2017/746)')
     : isIvDrip
     ? 'USP <797> Compounded Parenteral'
+    : isSupplementProduct
+    ? (lang === 'es' ? 'Directiva UE 2002/46/CE · Sin Fármacos' : 'EU Directive 2002/46/EC · Drug-Free')
     : (product?.casNumber || product?.cas || 'Documented on Monograph');
   const formula = isCosmeticProduct
     ? (lang === 'es' ? `Complejo Bioactivo (${product?.ingredients?.length || '15+'} Activos INCI)` : `Bioactive Multi-Complex (${product?.ingredients?.length || '15+'} INCI Actives)`)
@@ -553,6 +517,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Matriz: Sangre Capilar Seca (DBS)' : 'Matrix: Dried Blood Spot (DBS)')
     : isIvDrip
     ? `${product?.ingredients?.length || 12} Active Compounds (${product?.volume_ml || 50} mL)`
+    : isSupplementProduct
+    ? (lang === 'es' ? `Fórmula Multi-Activa (${product?.ingredients?.length || '6+'} Activos Clave)` : `Multi-Active Matrix (${product?.ingredients?.length || '6+'} Key Actives)`)
     : (product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null);
   const mw = isCosmeticProduct
     ? (lang === 'es' ? 'Formulación Tópica: pH 4.5–5.5' : 'Topical Cosmeceutical: pH 4.5–5.5')
@@ -562,6 +528,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Laboratorio Central: LifeLab1' : 'Central Laboratory: LifeLab1')
     : isIvDrip
     ? `Total Actives: ${(product?.totalActiveMg || 10000).toLocaleString()} mg`
+    : isSupplementProduct
+    ? (lang === 'es' ? 'Cápsulas HPMC Gastrorresistentes' : 'Acid-Resistant HPMC Delayed-Release')
     : (product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null);
   const purity = isCosmeticProduct
     ? (lang === 'es' ? 'Dermatológicamente Testado · Sin Sulfatos' : 'Dermatologically Tested · Sulphate-Free')
@@ -571,8 +539,10 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Precisión CV ≤ 6.6% (LoD 0.23 µmol/L)' : 'Precision CV ≤ 6.6% (LoD 0.23 µmol/L)')
     : isIvDrip
     ? 'USP <797> Sterile / ISO Class 5 Certified'
+    : isSupplementProduct
+    ? (lang === 'es' ? 'Grado Farmacéutico EU GMP · 100% Vegano' : 'EU GMP Certified · 100% Vegan')
     : (product?.purity || '≥ 99.4% (RP-HPLC)');
-  const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip || isCosmeticProduct) ? null : (product?.sequence || product?.molecular?.sequence || null);
+  const sequence = (isSolventProduct || isDiagnosticKit || isIvDrip || isCosmeticProduct || isSupplementProduct) ? null : (product?.sequence || product?.molecular?.sequence || null);
   const targetSystem = isCosmeticProduct
     ? (lang === 'es' ? 'Folículo Piloso, Matriz Dérmica y Fase Anágena' : 'Hair Follicle, Scalp Dermal Matrix & Anagen Phase')
     : isSolventProduct
@@ -581,6 +551,8 @@ export default function PublicDatasheetView({
     ? (lang === 'es' ? 'Monitoreo Cuantitativo de Biomarcadores y Longevidad Celular' : 'Cellular Longevity & Quantitative Biomarker Monitoring')
     : isIvDrip
     ? (lang === 'es' ? 'Optimización Celular, Inmunidad y Longevidad Intravenosa' : 'Parenteral Cellular Optimization, Immunity & Longevity')
+    : isSupplementProduct
+    ? (lang === 'es' ? (product?.targetSystem || 'Optimización Metabólica, Mitocondrial y Celular') : (product?.targetSystem || 'Mitochondrial, Metabolic & Cellular Optimization'))
     : getLocalizedTargetSystem(product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis', lang);
   const description = dynamicTranslations[lang]?.description
     || getLocalizedField(product, 'description', lang) 
@@ -735,7 +707,7 @@ export default function PublicDatasheetView({
     const mg = parseNum(strengthName);
     if (mg <= 0 || isNaN(mg)) return { volume: '2.0', concentration: '5.0' };
 
-    let volumeNum = 2.0;
+    let volumeNum;
     const strLower = String(strengthName || '').toLowerCase();
     const isBlendStrength = strLower.includes('+') 
       || strLower.includes('|') 
@@ -852,29 +824,6 @@ export default function PublicDatasheetView({
     }
   };
 
-  const handleSelectVariant = useCallback(({ strengthId, formatId, supplierId, strengthName }) => {
-    triggerHaptic('selection');
-    if (supplierId && supplierId !== 'all') {
-      setActiveSupplierId(supplierId);
-    }
-    if (formatId) {
-      setActiveFormatId(formatId);
-    }
-    if (strengthId) {
-      setSelectedStrengthId(strengthId);
-    } else if (strengthName) {
-      const cleanS = String(strengthName).toLowerCase().replace(/[-_\s]+/g, '');
-      const found = sortedStrengths.find(s => {
-        const sc = String(s.name || s.id).toLowerCase().replace(/[-_\s]+/g, '');
-        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
-      });
-      if (found) {
-        setSelectedStrengthId(found.id);
-      }
-    }
-    toast.success(lang === 'es' ? 'Presentación clínica activa actualizada ✓' : 'Active clinical presentation updated ✓');
-  }, [sortedStrengths, lang]);
-
   const filteredStrengths = useMemo(() => {
     if (activeSupplierId !== 'all' && activeSupplierObj?.formatStrengths) {
       const allowedStrengthIds = activeSupplierObj.formatStrengths[activeFormatId] || [];
@@ -915,6 +864,96 @@ export default function PublicDatasheetView({
       || sortedStrengths[0] 
       || null;
   }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
+
+  const handleSelectVariant = useCallback(({ strengthId, formatId, supplierId, strengthName }) => {
+    triggerHaptic('selection');
+    if (supplierId && supplierId !== 'all') {
+      setActiveSupplierId(supplierId);
+    }
+    if (formatId) {
+      setActiveFormatId(formatId);
+    }
+    if (strengthId) {
+      setSelectedStrengthId(strengthId);
+    } else if (strengthName) {
+      const cleanS = String(strengthName).toLowerCase().replace(/[-_\s]+/g, '');
+      const found = sortedStrengths.find(s => {
+        const sc = String(s.name || s.id).toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+      });
+      if (found) {
+        setSelectedStrengthId(found.id);
+      }
+    }
+    toast.success(lang === 'es' ? 'Presentación clínica activa actualizada ✓' : 'Active clinical presentation updated ✓');
+  }, [sortedStrengths, lang, setActiveSupplierId, setActiveFormatId, setSelectedStrengthId]);
+
+  const handleCopyMonographSpecs = async () => {
+    const isEs = lang === 'es';
+    const prodName = product?.canonicalName || product?.name || name;
+    const prodCat = category || 'Therapeutic Peptide';
+    const prodTarget = targetSystem || 'Cellular Receptor Signaling';
+    const purity = '≥ 99.0% (RP-HPLC Dual-Column Analytical Grade)';
+    const cas = product?.cas || product?.casNumber || 'Verified CAS Registry';
+    const mw = product?.molecularWeight || 'Calculated Theoretical Mass';
+    const formula = product?.formula || product?.empiricalFormula || 'Synthetic Polypeptide Chain';
+    const reconVol = selectedStrength ? getReconstitutionVolume(selectedStrength.name) : { volume: '2.0', concentration: '5.0' };
+    const protocolsList = (associatedProtocols || []).slice(0, 3).map(p => `  • ${p.name || p.title}`).join('\n');
+
+    const text = `*ATLAS HEALTH CLINICAL API MONOGRAPH*\n` +
+      `Compound: ${prodName}\n` +
+      `Category: ${prodCat}\n` +
+      `Target Axis: ${prodTarget}\n` +
+      `----------------------------------------\n` +
+      `*ANALYTICAL SPECIFICATIONS:*\n` +
+      `• Purity: ${purity}\n` +
+      `• CAS Registry: ${cas}\n` +
+      `• Molecular Weight: ${mw}\n` +
+      `• Empirical Formula: ${formula}\n\n` +
+      `*RECONSTITUTION & STORAGE:*\n` +
+      `• Recommended Diluent: ${reconVol.volume} mL Bacteriostatic Water USP\n` +
+      `• In-Use Concentration: ${reconVol.concentration} mg/mL\n` +
+      `• Storage: 2°C – 8°C Refrigerated (Do Not Freeze) · 28-Day Stability\n\n` +
+      (protocolsList ? `*ASSOCIATED CLINICAL BLUEPRINTS:*\n${protocolsList}\n\n` : '') +
+      `Official Verification: https://med-peptides.com/p/${slug}\n` +
+      `_Atlas Services · SSOT Clinical Intelligence Standard_`;
+
+    let success = false;
+    if (navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        success = true;
+      } catch (err) {
+        console.warn('Clipboard writeText failed, trying fallback:', err);
+      }
+    }
+
+    if (!success && typeof document !== 'undefined') {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr);
+      }
+    }
+
+    if (success) {
+      setCopiedMonograph(true);
+      triggerHaptic('success');
+      toast.success(isEs ? 'Ficha técnica copiada al portapapeles ✓' : 'Technical monograph copied to clipboard ✓');
+      setTimeout(() => setCopiedMonograph(false), 2500);
+    } else {
+      toast.error(isEs ? 'No se pudo copiar al portapapeles' : 'Could not copy to clipboard');
+    }
+  };
 
   // Resolve current active variant from hierarchy or product.variants
   const currentVariant = useMemo(() => {
@@ -1038,6 +1077,19 @@ export default function PublicDatasheetView({
       ];
     }
 
+    if (isSupplementProduct) {
+      return [
+        { id: 'overview', label: lang === 'es' ? 'Perfil Nutracéutico y Clínico' : 'Nutraceutical & Clinical Overview', icon: FileText },
+        { id: 'reconstitution-section', label: lang === 'es' ? 'Pauta de Administración y Posología' : 'Dosage & Administration Protocol', icon: ClipboardList },
+        { id: 'presentations-matrix', label: lang === 'es' ? 'Lotes y Presentaciones' : 'Batch & Presentations', icon: Layers },
+        { id: 'specs-section', label: lang === 'es' ? 'Certificado de Calidad (CoA)' : 'Certificate of Analysis (CoA)', icon: ShieldCheck },
+        { id: 'publications-section', label: lang === 'es' ? 'Respaldos Científicos' : 'Scientific Evidence & Trials', icon: FileText },
+        { id: 'contraindications-section', label: lang === 'es' ? 'Seguridad y Precauciones' : 'Safety & Precautions', icon: ShieldCheck },
+        { id: 'labels-section', label: lang === 'es' ? 'Etiquetas de Farmacia' : 'Compounding Pharmacy Labels', icon: Tag },
+        { id: 'related-peptides-section', label: lang === 'es' ? 'Sinergias y Protocolos' : 'Synergies & Protocols', icon: FlaskConical }
+      ];
+    }
+
     // Default therapeutic peptide monograph
     return [
       { id: 'overview', label: lang === 'es' ? 'Perfil Farmacológico' : 'Pharmacological Profile', icon: FileText },
@@ -1052,7 +1104,7 @@ export default function PublicDatasheetView({
       ] : []),
       { id: 'related-peptides-section', label: lang === 'es' ? 'Protocolos Clínicos' : 'Clinical Protocols', icon: FlaskConical }
     ];
-  }, [isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, isCosmeticProduct, product, lang]);
+  }, [isDiagnosticKit, isCorporateService, isPenOrCart, isSprayFormat, isSolventProduct, isCosmeticProduct, isSupplementProduct, product, lang]);
 
   // Deterministic discreet batch code fallback
   const effectiveBatchCode = useMemo(() => {
@@ -1108,7 +1160,9 @@ export default function PublicDatasheetView({
         if (currentPathAndQuery !== targetPathAndQuery) {
           window.history.replaceState({}, '', targetPathAndQuery);
         }
-      } catch {}
+      } catch (_err) {
+        // Ignore URL parsing errors
+      }
     }
   }, [dynamicPublicUrl]);
 
@@ -1289,37 +1343,43 @@ export default function PublicDatasheetView({
             ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
             : isDiagnosticKit
               ? (lang === 'es' ? 'Kit Todo Incluido (Lancetas + Tarjeta DBS)' : 'Self-Contained Kit (Lancets + DBS Card)')
-              : isPenOrCart 
-                ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
-                : isOral 
-                  ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                  : isSpray
-                    ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
-                    : `${recon.volume} mL BAC Water`;
+              : isSupplementProduct
+                ? (lang === 'es' ? 'Cápsula HPMC Oral (Sin reconstitución)' : 'Oral HPMC Capsule (No reconstitution)')
+                : isPenOrCart 
+                  ? (lang === 'es' ? 'Solución Precargada (Sin mezcla)' : 'Pre-filled Solution (Zero mixing)')
+                  : isOral 
+                    ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                    : isSpray
+                      ? (lang === 'es' ? 'Solución Intranasal Dosificada' : 'Pre-metered Intranasal Solution')
+                      : `${recon.volume} mL BAC Water`;
 
           const concText = isSolventProduct
             ? '0.9% Benzyl Alcohol USP'
             : isDiagnosticKit
               ? (lang === 'es' ? 'Rango: 5.0–60.0 µmol/L (LoD 0.23)' : 'Range: 5.0–60.0 µmol/L (LoD 0.23)')
-              : isPenOrCart 
-                ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
-                : isOral 
-                  ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                  : isSpray
-                    ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
-                    : `${recon.concentration} mg/mL`;
+              : isSupplementProduct
+                ? (st.name || (lang === 'es' ? 'Fórmula Multi-Activa' : 'Multi-Active Formula'))
+                : isPenOrCart 
+                  ? (lang === 'es' ? 'Solución Calibrada en Pluma' : 'Calibrated Pen Solution')
+                  : isOral 
+                    ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                    : isSpray
+                      ? (lang === 'es' ? 'Unidad de Spray Dosificado' : 'Metered Spray Unit')
+                      : `${recon.concentration} mg/mL`;
 
           const adminText = isSolventProduct
             ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
             : isDiagnosticKit
               ? (lang === 'es' ? 'Punción Capilar (DBS Yema de Dedo)' : 'Capillary Fingerstick (DBS Card)')
-              : isPenOrCart 
-                ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                : isOral 
-                  ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                  : isSpray
-                    ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
-                    : 'Subcutaneous / IM (U-100)';
+              : isSupplementProduct
+                ? (lang === 'es' ? 'Vía Oral (Con agua / Comida)' : 'Oral Route (With water / Food)')
+                : isPenOrCart 
+                  ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+                  : isOral 
+                    ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                    : isSpray
+                      ? (lang === 'es' ? 'Mucosa Intranasal' : 'Intranasal Mucosal')
+                      : 'Subcutaneous / IM (U-100)';
 
           rows.push({
             key: `${activeSupplierObj.id}-${fmt.id}-${st.id}`,
@@ -1335,8 +1395,8 @@ export default function PublicDatasheetView({
             isOral,
             isSpray,
             isCurrentlyActive,
-            purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : '≥ 99.0% (RP-HPLC)')),
-            supplierName: activeSupplierObj.name || 'Lotusland Limited',
+            purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : isSupplementProduct ? (lang === 'es' ? 'EU GMP Farmacéutico · Vegano' : 'EU GMP Certified · Vegan') : '≥ 99.0% (RP-HPLC)')),
+            supplierName: activeSupplierObj.name || (isSupplementProduct ? 'Pharmapolis' : 'Lotusland Limited'),
             supplierId: activeSupplierObj.id
           });
         });
@@ -1365,43 +1425,49 @@ export default function PublicDatasheetView({
               ? (lang === 'es' ? 'Solvente Puro (Vehículo de Reconstitución)' : 'Pure Diluent (Reconstitution Solvent)')
               : isDiagnosticKit
                 ? (lang === 'es' ? 'Kit Todo Incluido (Lancetas + Tarjeta DBS)' : 'Self-Contained Kit (Lancets + DBS Card)')
-                : isPen
-                  ? (lang === 'es' ? 'Solución Precargada (Sin BAC · Cero mezcla)' : 'Pre-filled Solution (Zero BAC mixing)')
-                  : isCart
-                    ? (lang === 'es' ? 'Cartucho 3 mL Recambio (Sin BAC)' : '3 mL Refill Cartridge (Zero BAC)')
-                    : isOral 
-                      ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
-                      : isSpray
-                        ? (lang === 'es' ? 'Solución Intranasal Tamponada (Sin BAC)' : 'Pre-metered Buffered Solution (Zero BAC)')
-                        : `${recon.volume} mL BAC Water`;
+                : isSupplementProduct
+                  ? (lang === 'es' ? 'Cápsula HPMC Oral (Sin diluyente)' : 'Oral HPMC Capsule (No diluent)')
+                  : isPen
+                    ? (lang === 'es' ? 'Solución Precargada (Sin BAC · Cero mezcla)' : 'Pre-filled Solution (Zero BAC mixing)')
+                    : isCart
+                      ? (lang === 'es' ? 'Cartucho 3 mL Recambio (Sin BAC)' : '3 mL Refill Cartridge (Zero BAC)')
+                      : isOral 
+                        ? (lang === 'es' ? 'Dosis Oral Sólida (Sin diluyente)' : 'Solid Oral Dose (No diluent)')
+                        : isSpray
+                          ? (lang === 'es' ? 'Solución Intranasal Tamponada (Sin BAC)' : 'Pre-metered Buffered Solution (Zero BAC)')
+                          : `${recon.volume} mL BAC Water`;
 
             const concText = isSolventProduct
               ? '0.9% Benzyl Alcohol USP'
               : isDiagnosticKit
                 ? (lang === 'es' ? 'Rango: 5.0–60.0 µmol/L (LoD 0.23)' : 'Range: 5.0–60.0 µmol/L (LoD 0.23)')
-                : isPen
-                  ? (lang === 'es' ? '3.0 mL (Multidosis Calibrada)' : '3.0 mL (Calibrated Multi-dose)')
-                  : isCart
-                    ? (lang === 'es' ? '3.0 mL (Cartucho Borosilicato Tipo I)' : '3.0 mL (Borosilicate Refill)')
-                    : isOral 
-                      ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
-                      : isSpray
-                        ? (lang === 'es' ? '10 mL (~100 sprays · 0.1 mL/puff)' : '10 mL (~100 sprays · 0.1 mL/puff)')
-                        : `${recon.concentration} mg/mL`;
+                : isSupplementProduct
+                  ? (st.name || (lang === 'es' ? 'Fórmula Multi-Activa' : 'Multi-Active Formula'))
+                  : isPen
+                    ? (lang === 'es' ? '3.0 mL (Multidosis Calibrada)' : '3.0 mL (Calibrated Multi-dose)')
+                    : isCart
+                      ? (lang === 'es' ? '3.0 mL (Cartucho Borosilicato Tipo I)' : '3.0 mL (Borosilicate Refill)')
+                      : isOral 
+                        ? (lang === 'es' ? 'Unidad Sólida Oral' : 'Dry Oral Solid Unit')
+                        : isSpray
+                          ? (lang === 'es' ? '10 mL (~100 sprays · 0.1 mL/puff)' : '10 mL (~100 sprays · 0.1 mL/puff)')
+                          : `${recon.concentration} mg/mL`;
 
             const adminText = isSolventProduct
               ? (lang === 'es' ? 'Vehículo Reconstitución Multidosis' : 'Multi-Dose Reconstitution Vehicle')
               : isDiagnosticKit
                 ? (lang === 'es' ? 'Punción Capilar (DBS Yema de Dedo)' : 'Capillary Fingerstick (DBS Card)')
-                : isPen
-                  ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
-                  : isCart
-                    ? (lang === 'es' ? 'Recambio 3 mL para Pluma' : '3 mL Reusable Pen Refill')
-                    : isOral 
-                      ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
-                      : isSpray
-                        ? (lang === 'es' ? 'Mucosa Intranasal (Sin Agujas)' : 'Intranasal Mucosal (Needle-Free)')
-                        : 'Subcutaneous / IM (U-100)';
+                : isSupplementProduct
+                  ? (lang === 'es' ? 'Vía Oral (Con agua / Comida)' : 'Oral Route (With water / Food)')
+                  : isPen
+                    ? (lang === 'es' ? 'Subcutánea Pluma Multidosis' : 'Subcutaneous Pen Multi-dose')
+                    : isCart
+                      ? (lang === 'es' ? 'Recambio 3 mL para Pluma' : '3 mL Reusable Pen Refill')
+                      : isOral 
+                        ? (lang === 'es' ? 'Unidad Oral Entérica' : 'Oral Enteric Unit')
+                        : isSpray
+                          ? (lang === 'es' ? 'Mucosa Intranasal (Sin Agujas)' : 'Intranasal Mucosal (Needle-Free)')
+                          : 'Subcutaneous / IM (U-100)';
 
             rows.push({
               key: `${supp.id}-${fId}-${st.id}`,
@@ -1419,7 +1485,7 @@ export default function PublicDatasheetView({
               isOral,
               isSpray,
               isCurrentlyActive,
-              purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : '≥ 99.0% (RP-HPLC)')),
+              purity: v?.purity || (isSolventProduct ? 'USP Grade (Sterile)' : (isDiagnosticKit ? 'CE-IVDR · LifeLab1 (CV 6.6%)' : isSupplementProduct ? (lang === 'es' ? 'EU GMP Farmacéutico · Vegano' : 'EU GMP Certified · Vegan') : '≥ 99.0% (RP-HPLC)')),
               supplierName: supp.name || supp.id,
               supplierId: supp.id
             });
@@ -2131,7 +2197,7 @@ export default function PublicDatasheetView({
           </div>
 
           {/* Packaging / Volume Tier Selector (Verified Lotusland 10-Unit Kit Specification) */}
-          {!isCorporateService && !isDiagnosticKit && !isSolventProduct && (
+          {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isSupplementProduct && (
             <div className="pds-pack-tier-section" style={{
               marginTop: '1.15rem',
               padding: '0.95rem 1rem',
@@ -2332,13 +2398,13 @@ export default function PublicDatasheetView({
           <div className="pds-selected-detail-card">
             <div className="pds-detail-grid">
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Contenido del Kit' : 'Kit Contents') : isCosmeticProduct ? (lang === 'es' ? 'Volumen y Envase' : 'Volume & Packaging') : (t.activeContent || 'Active Content')}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Contenido del Kit' : 'Kit Contents') : isCosmeticProduct ? (lang === 'es' ? 'Volumen y Envase' : 'Volume & Packaging') : isSupplementProduct ? (lang === 'es' ? 'Contenido Neto / Envase' : 'Net Content / Packaging') : (t.activeContent || 'Active Content')}</span>
                 <span className="pds-dval font-bold text-sky-950">
-                  {selectedStrength?.name || (isCosmeticProduct ? '250 mL' : isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : '10 mg')}
+                  {selectedStrength?.name || (isCosmeticProduct ? '250 mL' : isSolventProduct ? '30 mL' : isDiagnosticKit ? '1 Test / Kit' : isSupplementProduct ? '60 Cápsulas HPMC' : '10 mg')}
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : (t.adminRoute || 'Administration Route')}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Toma de Muestra' : 'Sample Collection') : isSupplementProduct ? (lang === 'es' ? 'Vía y Posología' : 'Route & Administration') : (t.adminRoute || 'Administration Route')}</span>
                 <span className="pds-dval">
                   {isCosmeticProduct
                     ? (lang === 'es' ? 'Uso Tópico Capilar (Cuero Cabelludo y Tallo)' : 'Topical Cosmeceutical (Scalp & Hair Shaft)')
@@ -2346,13 +2412,15 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? 'Vehículo de Reconstitución (No Inyección Directa)' : 'Reconstitution Vehicle (Not for Direct Injection)')
                     : isDiagnosticKit
                       ? (lang === 'es' ? 'Punción Capilar en Dedo (3 gotas en tarjeta DBS)' : 'Capillary Fingerstick (3 spots on DBS Card)')
-                      : isSprayFormat
-                        ? (lang === 'es' ? 'Atomización Transmucosa Intranasal (Sin Agujas)' : 'Intranasal Transmucosal Atomization (Needle-Free)')
-                        : isCartridgeFormat
-                          ? (lang === 'es' ? 'Cartucho de Recambio 3 mL (Bolígrafo Reutilizable)' : '3 mL Refill Cartridge (Reusable Dial Pen)')
-                          : isPenFormat
-                            ? (lang === 'es' ? 'Inyección Subcutánea Micro-Dial (Selector Clics)' : 'Subcutaneous Micro-Dial Injection (Click Dial)')
-                            : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
+                      : isSupplementProduct
+                        ? (lang === 'es' ? 'Vía Oral · Ingesta con Agua (Junto a comidas)' : 'Oral Route · Take with Water (With meals)')
+                        : isSprayFormat
+                          ? (lang === 'es' ? 'Atomización Transmucosa Intranasal (Sin Agujas)' : 'Intranasal Transmucosal Atomization (Needle-Free)')
+                          : isCartridgeFormat
+                            ? (lang === 'es' ? 'Cartucho de Recambio 3 mL (Bolígrafo Reutilizable)' : '3 mL Refill Cartridge (Reusable Dial Pen)')
+                            : isPenFormat
+                              ? (lang === 'es' ? 'Inyección Subcutánea Micro-Dial (Selector Clics)' : 'Subcutaneous Micro-Dial Injection (Click Dial)')
+                              : (t.subqPeriumbilical || 'Subcutaneous (SubQ) Periumbilical')}
                 </span>
               </div>
               <div className="pds-detail-col">
@@ -2363,13 +2431,15 @@ export default function PublicDatasheetView({
                     ? (lang === 'es' ? 'Función Diluyente' : 'Diluent Function')
                     : isDiagnosticKit
                       ? (lang === 'es' ? 'Metodología Analítica' : 'Analytical Methodology')
-                      : isSprayFormat
-                        ? (lang === 'es' ? 'Mecanismo de Atomización' : 'Atomization Mechanism')
-                        : isCartridgeFormat
-                          ? (lang === 'es' ? 'Compatibilidad de Recambio' : 'Refill Compatibility')
-                          : isPenFormat
-                            ? (t.deviceDelivery || 'Device Delivery') 
-                            : (t.recommendedRecon || 'Recommended Reconstitution')}
+                      : isSupplementProduct
+                        ? (lang === 'es' ? 'Formato y Liberación' : 'Capsule Delivery')
+                        : isSprayFormat
+                          ? (lang === 'es' ? 'Mecanismo de Atomización' : 'Atomization Mechanism')
+                          : isCartridgeFormat
+                            ? (lang === 'es' ? 'Compatibilidad de Recambio' : 'Refill Compatibility')
+                            : isPenFormat
+                              ? (t.deviceDelivery || 'Device Delivery') 
+                              : (t.recommendedRecon || 'Recommended Reconstitution')}
                 </span>
                 <span className="pds-dval">
                   {isCosmeticProduct ? (
@@ -2391,6 +2461,13 @@ export default function PublicDatasheetView({
                       {lang === 'es' ? 'Ensayo Cíclico Enzimático (Espectrofotometría)' : 'Enzymatic Cyclic Assay (Spectrophotometry)'}
                       <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
                         → {lang === 'es' ? 'Rango Lineal 5.0–60.0 µmol/L · LoD: 0.23 µmol/L' : 'Linear Range 5.0–60.0 µmol/L · LoD: 0.23 µmol/L'}
+                      </span>
+                    </>
+                  ) : isSupplementProduct ? (
+                    <>
+                      {lang === 'es' ? 'Cápsulas Gastrorresistentes HPMC' : 'Acid-Resistant Delayed-Release HPMC'}
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {lang === 'es' ? 'Sin reconstitución · Absorción entérica protegida' : 'Zero reconstitution · Enteric protected absorption'}
                       </span>
                     </>
                   ) : isSprayFormat ? (
@@ -2425,19 +2502,21 @@ export default function PublicDatasheetView({
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Regulación y Calidad' : 'Regulatory Standard') : (t.lyophilizationExcipient || 'Lyophilization / Excipient')}</span>
+                <span className="pds-dlabel">{isDiagnosticKit ? (lang === 'es' ? 'Regulación y Calidad' : 'Regulatory Standard') : isSupplementProduct ? (lang === 'es' ? 'Excipientes y Pureza' : 'Vehicle & Quality') : (t.lyophilizationExcipient || 'Lyophilization / Excipient')}</span>
                 <span className="pds-dval">
                   {isSolventProduct
                     ? '0.9% Benzyl Alcohol USP (Antimicrobial Preservative)'
                     : isDiagnosticKit
                       ? 'CE-IVDR (UE 2017/746) · ISO 15189'
-                      : isSprayFormat
-                        ? (lang === 'es' ? 'Solución Tamponada Isotónica Estéril (pH 6.8–7.4)' : 'Sterile Buffered Isotonic Solution (pH 6.8–7.4)')
-                        : isCartridgeFormat
-                          ? (lang === 'es' ? 'Vidrio Borosilicato Tipo I · Émbolo Teflón' : 'Type I Borosilicate Glass · Teflon Plunger')
-                          : isPenFormat
-                            ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
-                            : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
+                      : isSupplementProduct
+                        ? (lang === 'es' ? '100% Vegano · Sin Gluten · Sin Lactosa' : '100% Vegan · Gluten-Free · Lactose-Free')
+                        : isSprayFormat
+                          ? (lang === 'es' ? 'Solución Tamponada Isotónica Estéril (pH 6.8–7.4)' : 'Sterile Buffered Isotonic Solution (pH 6.8–7.4)')
+                          : isCartridgeFormat
+                            ? (lang === 'es' ? 'Vidrio Borosilicato Tipo I · Émbolo Teflón' : 'Type I Borosilicate Glass · Teflon Plunger')
+                            : isPenFormat
+                              ? (t.sterileIsotonicSolution || 'Sterile Isotonic Solution (pH 6.8–7.4)')
+                              : (t.dMannitol || 'D-Mannitol (USP / EP Grade)')}
                 </span>
               </div>
               <div className="pds-detail-col">
@@ -2474,6 +2553,7 @@ export default function PublicDatasheetView({
             </div>
 
             <div className="pds-table-responsive">
+                {/* eslint-disable-next-line no-restricted-syntax */}
                 <table className="pds-strengths-table">
                   <thead>
                     <tr>
@@ -2605,6 +2685,13 @@ export default function PublicDatasheetView({
             ) : isCosmeticProduct ? (
               <CosmeticTechnicalSpecs
                 product={product}
+                lang={lang}
+                onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
+              />
+            ) : isSupplementProduct ? (
+              <SupplementTechnicalSpecs
+                product={product}
+                selectedStrength={selectedStrength}
                 lang={lang}
                 onOpenInquiry={() => setIsInquiryDrawerOpen(true)}
               />
@@ -2878,7 +2965,7 @@ export default function PublicDatasheetView({
         )}
 
         {/* ── Block 4.5: Analytical Quality Verification & Clinical Dosing Parameters (EQNO Inspired) ── */}
-        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && (
+        {!isCorporateService && !isDiagnosticKit && !isSolventProduct && !isCosmeticProduct && !isSupplementProduct && (
           <PeptideAnalyticalSpecsCard
             product={product}
             selectedStrength={selectedStrength}
@@ -2913,6 +3000,7 @@ export default function PublicDatasheetView({
           isDiagnosticKit={isDiagnosticKit || isBloodoDiagnostic}
           isSolventProduct={isSolventProduct}
           isCorporateService={isCorporateService}
+          isSupplementProduct={isSupplementProduct}
           supplierName={supplierName}
         />
 
@@ -2940,6 +3028,13 @@ export default function PublicDatasheetView({
                   {lang === 'es'
                     ? `Diluyente estéril preparado bajo estándares de Farmacopea Europea (Ph. Eur.) y cGMP para reconstitución de péptidos liofilizados. Control de endotoxinas (<0.25 EU/mL) con 0.9% de alcohol bencílico como conservante bacteriostático. Uso en reconstitución clínica y farmacia de compounding.`
                     : `Pharmaceutical-grade sterile bacteriostatic diluent manufactured under EU GMP / cGMP standards. Multi-dose vial preserved with 0.9% benzyl alcohol. Endotoxin tested (<0.25 EU/mL). Intended for aseptic peptide and lyophilized compound reconstitution.`}
+                </>
+              ) : isSupplementProduct ? (
+                <>
+                  <strong>{lang === 'es' ? 'Gobernanza y Regulación de Suplementos Clínicos:' : 'Clinical Supplement Quality & Regulatory Governance:'}</strong>{' '}
+                  {lang === 'es'
+                    ? `Fabricado y envasado bajo normativa europea de complementos alimenticios (Directiva 2002/46/CE) y directrices cGMP / ISO 22000. Cápsulas vegetales gastrorresistentes HPMC sin gluten, sin lactosa y libres de alérgenos. Lotes analizados por terceros para pureza, metales pesados y ausencia de contaminantes microbiológicos. Formulado para profesionales sanitarios y optimización metabólica.`
+                    : `Manufactured and packaged in strict compliance with EU Dietary Supplements Directive 2002/46/EC and cGMP / ISO 22000 standards. Acid-resistant HPMC vegetable capsules, gluten-free, lactose-free, and allergen-free. Third-party tested for purity, heavy metals, and microbiological safety. Intended for healthcare practitioners and clinical nutritional optimization.`}
                 </>
               ) : isCorporateService ? (
                 <>
@@ -2990,6 +3085,7 @@ export default function PublicDatasheetView({
             isCosmeticProduct={isCosmeticProduct}
             isSolventProduct={isSolventProduct}
             isCorporateService={isCorporateService}
+            isSupplementProduct={isSupplementProduct}
             hideFloatingTrigger={true}
           />
         </div>

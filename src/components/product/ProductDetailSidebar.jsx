@@ -16,6 +16,7 @@ import PeptideVialWidget from './widgets/PeptideVialWidget';
 import DiagnosticTestWidget from './widgets/DiagnosticTestWidget';
 import SolventReconWidget from './widgets/SolventReconWidget';
 import CorporateServiceWidget from './widgets/CorporateServiceWidget';
+import SupplementSidebarWidget from './widgets/SupplementSidebarWidget';
 import FdaApprovedPeptidesNetworkWidget from './FdaApprovedPeptidesNetworkWidget';
 import { isFdaApprovedPeptide } from '@/data/fdaPeptidesRegistry';
 import { QRCodeSVG } from 'qrcode.react';
@@ -31,6 +32,7 @@ import './PublicDatasheetTableOfContents.css';
  *  - Cosmeceuticals & Hair -> CosmeticsSidebarWidget (Colway 2-Step Routine, CPNP 1223/2009)
  *  - Sterile Solvents -> SolventReconWidget (28-day rule, Benzyl alcohol 0.9%, Endotoxins)
  *  - Corporate Services -> CorporateServiceWidget (Law 14/2013, 20-day UGE-CE, Schengen)
+ *  - Oral Supplements -> SupplementSidebarWidget (HPMC delayed release, EU GMP, Vegan)
  */
 export default function ProductDetailSidebar({
   sections = [],
@@ -47,6 +49,7 @@ export default function ProductDetailSidebar({
   isCosmeticProduct = false,
   isSolventProduct = false,
   isCorporateService = false,
+  isSupplementProduct = false,
   hideFloatingTrigger = true
 }) {
   const isEs = lang === 'es';
@@ -193,6 +196,20 @@ export default function ProductDetailSidebar({
           product={product}
           slug={slug}
           lang={lang}
+          onOpenInquiry={onOpenInquiry}
+        />
+      );
+    }
+
+    if (isSupplementProduct) {
+      return (
+        <SupplementSidebarWidget
+          product={product}
+          slug={slug}
+          effectiveBatchCode={effectiveBatchCode}
+          lang={lang}
+          onOpenPreviewModal={onOpenPreviewModal}
+          onOpenCoaModal={onOpenCoaModal}
           onOpenInquiry={onOpenInquiry}
         />
       );
@@ -456,7 +473,7 @@ export default function ProductDetailSidebar({
               </ul>
 
               {/* Product Type Specific Widget */}
-              {renderProductTypeWidget()}
+              {renderContextualWidget()}
 
               {/* Associated Clinical Protocols */}
               {!isCosmeticProduct && !isCorporateService && Array.isArray(associatedProtocols) && associatedProtocols.length > 0 && (

@@ -9,6 +9,7 @@ import PublicDatasheetView from '../../../components/product/PublicDatasheetView
 import AestheticInjectableDetail from '../../../components/product/layouts/AestheticInjectableDetail';
 import CosmeticsDetail from '../../../components/product/layouts/CosmeticsDetail';
 import RawApiDatasheetView from '../../../components/product/layouts/RawApiDatasheetView';
+import { getClinicalSupplementBySlug } from '../../../data/clinicalSupplementsRegistry';
 
 export const revalidate = 3600; // ISR: regenerate at most every 60 min
 export const dynamicParams = true; // Allow slugs not in generateStaticParams
@@ -73,7 +74,27 @@ async function getPublicProduct(slug, supplierFilter = null) {
     if (byPrefix && !byPrefix.empty) doc = byPrefix.docs[0];
   }
 
-  if (!doc) return null;
+  if (!doc) {
+    const supplement = getClinicalSupplementBySlug(target);
+    if (supplement) {
+      const sanitized = sanitizePublicProduct(supplement, supplement.variants || []);
+      const processedHierarchy = processProductVariants(sanitized.variants || supplement.variants || []);
+      const suppResult = {
+        ...supplement,
+        ...sanitized,
+        isSingleSupplierLocked: true,
+        availableSuppliers: [{ id: 'supplier-pharmapolis', name: 'Pharmapolis Compounding Pharmacy', isPen: false, isSpray: false }],
+        activeSupplierId: 'supplier-pharmapolis',
+        processedHierarchy,
+      };
+      PUBLIC_PRODUCT_RAM_CACHE.set(cacheKey, {
+        data: suppResult,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+      return suppResult;
+    }
+    return null;
+  }
 
   const raw = { id: doc.id, ...doc.data() };
   raw.slug = raw.slug || doc.id || slug;

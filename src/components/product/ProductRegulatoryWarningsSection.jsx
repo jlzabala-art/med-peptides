@@ -25,12 +25,13 @@ import {
  * - Peptides / Vials: Physician supervision, sterile SubQ reconstitution, 2-8°C cold chain, RP-HPLC release.
  */
 export default function ProductRegulatoryWarningsSection({
-  product,
+  _product,
   lang = 'en',
   isCosmeticProduct = false,
   isDiagnosticKit = false,
   isSolventProduct = false,
   isCorporateService = false,
+  isSupplementProduct = false,
   supplierName = 'Atlas Synthesis Partner'
 }) {
   const isEs = lang === 'es';
@@ -481,7 +482,169 @@ export default function ProductRegulatoryWarningsSection({
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 5. THERAPEUTIC PEPTIDES / STERILE VIALS (Default)
+  // 5. CLINICAL SUPPLEMENTS (UltraPerson, Pharmapolis)
+  // ─────────────────────────────────────────────────────────────
+  if (isSupplementProduct) {
+    return (
+      <section 
+        id="regulatory-warnings" 
+        className="pds-section-card"
+        style={{
+          border: '1px solid #bbf7d0',
+          borderLeft: '4px solid #16a34a',
+          background: '#ffffff',
+          borderRadius: '10px',
+          overflow: 'hidden',
+          marginBottom: '2rem',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)'
+        }}
+      >
+        <div 
+          className="pds-section-header" 
+          style={{ 
+            background: '#f0fdf4',
+            borderBottom: '1px solid #bbf7d0',
+            padding: '1rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: '8px',
+              background: '#dcfce7',
+              border: '1px solid #bbf7d0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <ShieldCheck size={20} color="#16a34a" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.67rem', fontWeight: 800, color: '#166534', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                {isEs ? 'SEGURIDAD NUTRACÉUTICA & GOBERNANZA REGULATORIA' : 'NUTRACEUTICAL SAFETY & REGULATORY GOVERNANCE'}
+              </div>
+              <h3 style={{ margin: '2px 0 0 0', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Directiva Europea de Complementos Alimenticios 2002/46/CE' : 'EU Food Supplements Directive 2002/46/EC'}
+              </h3>
+            </div>
+          </div>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: '#ffffff',
+            border: '1px solid #86efac',
+            borderRadius: '99px',
+            padding: '4px 12px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#166534'
+          }}>
+            <Sparkles size={13} color="#16a34a" />
+            <span>{isEs ? 'Certificación cGMP & ISO 22000' : 'cGMP & ISO 22000 Certified'}</span>
+          </div>
+        </div>
+
+        <div style={{
+          padding: '0.75rem 1.5rem',
+          background: '#f8fafc',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: '#334155',
+          fontSize: '0.82rem',
+          lineHeight: 1.5
+        }}>
+          <Info size={16} color="#0284c7" style={{ flexShrink: 0 }} />
+          <span>
+            {isEs 
+              ? 'Los complementos alimenticios no deben utilizarse como sustitutos de una dieta equilibrada ni de un estilo de vida saludable. Formulación para soporte nutricional y metabólico.'
+              : 'Food supplements should not be used as a substitute for a varied, balanced diet and a healthy lifestyle. Formulated for clinical metabolic and nutritional support.'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1px', background: '#e2e8f0' }}>
+          {/* Col 1: Dosificación Diaria */}
+          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle2 size={16} color="#16a34a" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Posología & Dosis Diaria' : 'Recommended Daily Serving'}
+              </h4>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+              {isEs 
+                ? 'No superar la dosis diaria expresamente recomendada en la etiqueta. Ingerir con un vaso de agua, preferentemente junto a comidas o según indicación del profesional sanitario.'
+                : 'Do not exceed the recommended daily dose stated on the packaging. Take with a glass of water, preferably alongside meals or as directed by a healthcare practitioner.'}
+            </p>
+          </div>
+
+          {/* Col 2: Conservación */}
+          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Clock size={16} color="#2563eb" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Conservación & Caducidad' : 'Storage & Stability'}
+              </h4>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+              {isEs 
+                ? 'Conservar en un lugar fresco y seco, protegido de la luz solar directa y por debajo de 25°C. Mantener el frasco herméticamente cerrado tras cada uso.'
+                : 'Store in a cool, dry place away from direct sunlight and below 25°C. Keep container tightly sealed after each use.'}
+            </p>
+          </div>
+
+          {/* Col 3: Precauciones Especiales */}
+          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertTriangle size={16} color="#d97706" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Precauciones & Embarazo' : 'Precautions & Pregnancy'}
+              </h4>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+              {isEs 
+                ? 'Mantener fuera del alcance de los niños más pequeños. Consultar con su médico en caso de embarazo, lactancia o toma simultánea de medicación anticoagulante/hipoglucemiante.'
+                : 'Keep out of reach of young children. Consult a physician prior to use if pregnant, lactating, or currently taking anticoagulants/hypoglycemic medication.'}
+            </p>
+          </div>
+
+          {/* Col 4: Calidad y Pureza */}
+          <div style={{ background: '#ffffff', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '6px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheck size={16} color="#7c3aed" />
+              </div>
+              <h4 style={{ margin: 0, fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                {isEs ? 'Garantía Analítica de Calidad' : 'Analytical Quality Guarantee'}
+              </h4>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#475569', lineHeight: 1.55 }}>
+              {isEs 
+                ? `Lotes analizados por laboratorios independientes para garantizar la ausencia de metales pesados, pesticidas y microorganismos patógenos. Distribución autorizada por ${supplierName || 'Pharmapolis'}.`
+                : `Third-party batch certified for absent heavy metals, pesticide residues, and microbial pathogens. Sourced through authorized partner ${supplierName || 'Pharmapolis'}.`}
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 6. THERAPEUTIC PEPTIDES / STERILE VIALS (Default)
   // ─────────────────────────────────────────────────────────────
   return (
     <section 

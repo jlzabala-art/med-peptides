@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Download, Printer, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye } from '@/lib/icons';
+import { X, Download, QrCode, ExternalLink, Check, Maximize2, Edit3, FileText, Copy, RotateCcw, Database, Eye } from '@/lib/icons';
 import { db } from '@/firebase';
 import { doc, updateDoc, getDoc, collection, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import PharmapolisLabelSvg from './PharmapolisLabelSvg';
@@ -221,6 +221,7 @@ export default function PharmacyLabelsModal({
   // Sync selected index when opened or changed from outside
   React.useEffect(() => {
     if (initialLabelIndex != null && initialLabelIndex >= 0 && labels && initialLabelIndex < labels.length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedProductIdx(initialLabelIndex);
     }
   }, [initialLabelIndex, labels]);
@@ -238,6 +239,7 @@ export default function PharmacyLabelsModal({
     if (!isOpen || !labels || labels.length === 0) return;
     const active = editedOverrides[selectedProductIdx] || labels[selectedProductIdx] || labels[0];
     if (active) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMarkdownText(labelToMarkdown(active));
     }
   }, [isOpen, selectedProductIdx, labels, editedOverrides]);
@@ -342,7 +344,9 @@ export default function PharmacyLabelsModal({
             targetDocRef = directRef;
             existingData = snap.data();
           }
-        } catch (_) {}
+        } catch (err) {
+          console.warn('[PharmacyLabelsModal] Direct lookup fallback:', err);
+        }
       }
 
       // 2. Query fallback across identifiers
@@ -786,137 +790,6 @@ export default function PharmacyLabelsModal({
     }
   };
 
-  // High-Precision Vector Print Engine
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    if (exportFormat === 'pdf_a4' && labels.length > 1) {
-      // Print as A4 2x5 Grid Sheet
-      const COLS = 2;
-      const ROWS = 5;
-      const STICKERS_PER_PAGE = COLS * ROWS;
-      const totalPages = Math.max(1, Math.ceil(labels.length / STICKERS_PER_PAGE));
-      let pagesHtml = '';
-
-      for (let p = 0; p < totalPages; p++) {
-        let gridItems = '';
-        const pageLabels = labels.slice(p * STICKERS_PER_PAGE, (p + 1) * STICKERS_PER_PAGE);
-        for (let i = 0; i < pageLabels.length; i++) {
-          const globalIdx = p * STICKERS_PER_PAGE + i;
-          const container = document.getElementById(`pharmapolis-bulk-label-${globalIdx}`);
-          const svgEl = container?.querySelector('svg');
-          const svgHtml = svgEl ? svgEl.outerHTML : '';
-          gridItems += `<div class="sticker-cell">${svgHtml}</div>`;
-        }
-        pagesHtml += `<div class="a4-sheet"><div class="grid">${gridItems}</div></div>`;
-      }
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Pharmapolis Stickers A4 Sheet (${labels.length} Labels)</title>
-            <style>
-              @page { size: A4 portrait; margin: 0; }
-              * { box-sizing: border-box; }
-              body { margin: 0; padding: 0; background: #fff; }
-              .a4-sheet {
-                width: 210mm;
-                height: 297mm;
-                padding: 25mm;
-                page-break-after: always;
-                box-sizing: border-box;
-              }
-              .grid {
-                display: grid;
-                grid-template-columns: 75mm 75mm;
-                grid-template-rows: repeat(5, 45mm);
-                column-gap: 10mm;
-                row-gap: 5mm;
-              }
-              .sticker-cell {
-                width: 75mm;
-                height: 45mm;
-                border: 0.5px dashed #cbd5e1;
-                border-radius: 4px;
-                overflow: hidden;
-              }
-              .sticker-cell svg { width: 75mm !important; height: 45mm !important; display: block; }
-            </style>
-          </head>
-          <body>
-            ${pagesHtml}
-            <script>
-              window.onload = function() {
-                setTimeout(function() { window.print(); window.close(); }, 300);
-              };
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      return;
-    }
-
-    // Individual label(s) print (thermal / roll / 1:1)
-    const itemsToPrint = (exportFormat === 'pdf_all' && labels.length > 1)
-      ? labels.map((_, i) => document.getElementById(`pharmapolis-bulk-label-${i}`)?.querySelector('svg')).filter(Boolean)
-      : [svgContainerRef.current?.querySelector('svg')].filter(Boolean);
-
-    let pagesHtml = '';
-    itemsToPrint.forEach(svgEl => {
-      pagesHtml += `<div class="print-label">${svgEl.outerHTML}</div>`;
-    });
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${currentItem.productName || 'Pharmapolis Label'} - ${dimensions.widthMm}x${dimensions.heightMm}mm</title>
-          <style>
-            @page {
-              size: ${dimensions.widthMm}mm ${dimensions.heightMm}mm;
-              margin: 0;
-            }
-            * { box-sizing: border-box; }
-            body {
-              margin: 0;
-              padding: 0;
-              background: #fff;
-            }
-            .print-label {
-              width: ${dimensions.widthMm}mm;
-              height: ${dimensions.heightMm}mm;
-              page-break-after: always;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              overflow: hidden;
-            }
-            svg {
-              width: ${dimensions.widthMm}mm !important;
-              height: ${dimensions.heightMm}mm !important;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          ${pagesHtml}
-          <script>
-            window.onload = function() {
-              setTimeout(function() {
-                window.print();
-                window.close();
-              }, 250);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
-
   const handleCopyLink = () => {
     if (currentItem.targetRxUrl) {
       navigator.clipboard.writeText(currentItem.targetRxUrl);
@@ -1229,7 +1102,8 @@ export default function PharmacyLabelsModal({
                     onChange={(e) => setSelectedProductIdx(Number(e.target.value))}
                     style={{
                       height: 30,
-                      maxWidth: '260px',
+                      minWidth: '220px',
+                      maxWidth: '480px',
                       padding: '0 24px 0 8px',
                       borderRadius: '4px',
                       border: '1px solid #dadce0',
@@ -2165,18 +2039,9 @@ export default function PharmacyLabelsModal({
               </button>
             )}
 
-            {/* Secondary Symmetrical Actions */}
-            <div className="gcp-footer-secondary-grid">
-              <button
-                type="button"
-                className="gcp-btn-secondary"
-                onClick={handlePrint}
-              >
-                <Printer size={15} />
-                <span>{isEs ? 'Imprimir' : 'Print Label'}</span>
-              </button>
-
-              {currentItem.targetRxUrl && (
+            {/* Secondary Actions */}
+            {currentItem.targetRxUrl && (
+              <div className="gcp-footer-secondary-grid">
                 <button
                   type="button"
                   className="gcp-btn-secondary gcp-btn-copy"
@@ -2191,8 +2056,8 @@ export default function PharmacyLabelsModal({
                   {copiedLink ? <Check size={14} color="#137333" /> : <ExternalLink size={14} />}
                   <span>{copiedLink ? (isEs ? 'Copiado ✓' : 'Copied ✓') : (isEs ? 'Copiar Enlace' : 'Copy QR Link')}</span>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

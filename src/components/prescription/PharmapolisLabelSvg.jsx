@@ -101,8 +101,8 @@ export default function PharmapolisLabelSvg({
   const nameLen = patientName.length;
   // Patient name font: slightly smaller ("un poco más pequeña") with dynamic grace for long 30+ char names
   const patientNameFontSize = isShort
-    ? (nameLen > 30 ? 21 : 24)
-    : (nameLen > 30 ? 26 : 29);
+    ? (nameLen > 36 ? 19 : nameLen > 28 ? 21 : 24)
+    : (nameLen > 36 ? 23 : nameLen > 28 ? 26 : 29);
   const patientFontSize = patientLabelFontSize;
   const patientTextY = isShort ? 41 : 48;
   const fileNumber = labelData.fileNumber || labelData.fileNo || labelData.rxCode || labelData.id || '51857';
@@ -450,8 +450,6 @@ export default function PharmapolisLabelSvg({
               vehiclePrefix = 'Compounding Vehicle / Shell:';
             } else if (isPomadeOrOintment || vLower.includes('ointment') || vLower.includes('pomade')) {
               vehiclePrefix = 'Compounding Base:';
-            } else {
-              vehiclePrefix = 'Compounding Vehicle:';
             }
 
             let cleanVehicleDisplay = vehicleName;
