@@ -224,18 +224,19 @@ export default function PharmacyLabelsModal({
 
   const svgContainerRef = useRef(null);
 
-  if (!isOpen || !labels || labels.length === 0) return null;
-
-  const baseItem = labels[selectedProductIdx] || labels[0];
-  const currentItem = editedOverrides[selectedProductIdx] || baseItem;
-
-  // Keep markdown text synced when selected product changes
+  // Keep markdown text synced when selected product changes (must run unconditionally before any early returns)
   React.useEffect(() => {
+    if (!isOpen || !labels || labels.length === 0) return;
     const active = editedOverrides[selectedProductIdx] || labels[selectedProductIdx] || labels[0];
     if (active) {
       setMarkdownText(labelToMarkdown(active));
     }
-  }, [selectedProductIdx, labels]);
+  }, [isOpen, selectedProductIdx, labels, editedOverrides]);
+
+  if (!isOpen || !labels || labels.length === 0) return null;
+
+  const baseItem = labels[selectedProductIdx] || labels[0];
+  const currentItem = editedOverrides[selectedProductIdx] || baseItem;
 
   const handleFieldChange = (key, val) => {
     const updated = { ...currentItem, [key]: val };
