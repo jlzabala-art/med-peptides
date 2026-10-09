@@ -113,6 +113,12 @@ export default function DoctorClinicalAnalytics({
   onSelectApi = null,
   selectedApiFilter = null,
   onClearApiFilter = null,
+  onSelectMonth = null,
+  selectedMonthFilter = null,
+  onSelectCohort = null,
+  selectedCohortFilter = null,
+  onSelectAxis = null,
+  selectedAxisFilter = null,
   isFiltered = false
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -555,13 +561,27 @@ export default function DoctorClinicalAnalytics({
                       Monthly Prescription Volume
                     </h3>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a73e8' }}>
-                      {avgMonthlyRx}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span 
+                      style={{
+                        fontSize: '11px',
+                        color: '#1a73e8',
+                        backgroundColor: '#e8f0fe',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                        fontWeight: 600
+                      }}
+                    >
+                      Click to filter
                     </span>
-                    <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
-                      Avg. / Month
-                    </span>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a73e8' }}>
+                        {avgMonthlyRx}
+                      </span>
+                      <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
+                        Avg. / Month
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -589,13 +609,16 @@ export default function DoctorClinicalAnalytics({
                         const barHeight = Math.max(8, (m.count / maxMonthlyCount) * 70);
                         const y = 90 - barHeight;
                         const isHovered = hoveredBar === idx;
+                        const isSelected = selectedMonthFilter === m.key;
 
                         return (
                           <g 
                             key={m.key} 
+                            onClick={() => onSelectMonth && onSelectMonth(m.key, m.label)}
                             onMouseEnter={() => setHoveredBar(idx)} 
                             onMouseLeave={() => setHoveredBar(null)}
                             style={{ cursor: 'pointer' }}
+                            title={`Click to filter prescriptions issued in ${m.label}`}
                           >
                             {/* Bar rectangle */}
                             <rect
@@ -604,7 +627,7 @@ export default function DoctorClinicalAnalytics({
                               width={barWidth}
                               height={barHeight}
                               rx={4}
-                              fill={isHovered ? '#1557b0' : '#1a73e8'}
+                              fill={isSelected ? '#003666' : isHovered ? '#1557b0' : '#1a73e8'}
                               style={{ transition: 'all 0.2s ease' }}
                             />
 
@@ -848,13 +871,28 @@ export default function DoctorClinicalAnalytics({
                       Patient Prescription Frequency
                     </h3>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#0d9488' }}>
-                      {cohortData.totalPatients}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span 
+                      style={{
+                        fontSize: '10px',
+                        color: '#0d9488',
+                        backgroundColor: '#f0fdfa',
+                        border: '1px solid #ccfbf1',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                        fontWeight: 600
+                      }}
+                    >
+                      Click to filter
                     </span>
-                    <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
-                      Patients
-                    </span>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#0d9488' }}>
+                        {cohortData.totalPatients}
+                      </span>
+                      <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
+                        Patients
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -882,6 +920,8 @@ export default function DoctorClinicalAnalytics({
                         fill={slice.color}
                         stroke="#ffffff"
                         strokeWidth="2"
+                        style={{ cursor: 'pointer', transition: 'transform 0.15s ease' }}
+                        onClick={() => onSelectCohort && onSelectCohort(slice.id, slice.label)}
                       />
                     ))}
                   </svg>
@@ -908,7 +948,21 @@ export default function DoctorClinicalAnalytics({
                 {/* Cohort Legend */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                   {cohortData.cohorts.map((c) => (
-                    <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div 
+                      key={c.id} 
+                      onClick={() => onSelectCohort && onSelectCohort(c.id, c.label)}
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        padding: '2px 4px',
+                        borderRadius: '4px',
+                        transition: 'background 0.12s'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span 
                           style={{
@@ -961,13 +1015,28 @@ export default function DoctorClinicalAnalytics({
                       Therapeutic Target Axes
                     </h3>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a73e8' }}>
-                      {axisData.axes.length}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span 
+                      style={{
+                        fontSize: '10px',
+                        color: '#1a73e8',
+                        backgroundColor: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                        fontWeight: 600
+                      }}
+                    >
+                      Click to filter
                     </span>
-                    <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
-                      Active Axes
-                    </span>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a73e8' }}>
+                        {axisData.axes.length}
+                      </span>
+                      <span style={{ display: 'block', fontSize: '10px', color: '#5f6368' }}>
+                        Active Axes
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -995,6 +1064,8 @@ export default function DoctorClinicalAnalytics({
                         fill={slice.color}
                         stroke="#ffffff"
                         strokeWidth="2"
+                        style={{ cursor: 'pointer', transition: 'transform 0.15s ease' }}
+                        onClick={() => onSelectAxis && onSelectAxis(slice.id, slice.label)}
                       />
                     ))}
                   </svg>
@@ -1021,7 +1092,22 @@ export default function DoctorClinicalAnalytics({
                 {/* Axes Legend */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: 0 }}>
                   {axisData.axes.map((a) => (
-                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                    <div 
+                      key={a.id} 
+                      onClick={() => onSelectAxis && onSelectAxis(a.id, a.label)}
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between', 
+                        gap: '6px',
+                        cursor: 'pointer',
+                        padding: '2px 4px',
+                        borderRadius: '4px',
+                        transition: 'background 0.12s'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
                         <span 
                           style={{

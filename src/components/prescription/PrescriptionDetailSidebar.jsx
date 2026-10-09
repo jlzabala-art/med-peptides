@@ -59,6 +59,8 @@ export default function PrescriptionDetailSidebar({
   onOpenPdf = null,
   onExportExcel = null,
   onAssignDoctor = null,
+  activeGcpTab = '',
+  onSelectTab = null,
   lang = 'en'
 }) {
   const isEs = lang === 'es';
@@ -67,6 +69,27 @@ export default function PrescriptionDetailSidebar({
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
 
+  const SECTION_TO_TAB = useMemo(() => ({
+    'formula-card': 'treatment',
+    'genomics-card': 'treatment',
+    'milestones-card': 'roadmap',
+    'quality-card': 'traceability',
+    'atlas-recommendations-card': 'recommendations',
+    'doctor-patient-credentials': 'credentials',
+    'patient-sharing-card': 'patientSharing',
+    'atlas-quotation-card': 'quotation'
+  }), []);
+
+  const TAB_TO_DEFAULT_SECTION = useMemo(() => ({
+    treatment: 'formula-card',
+    roadmap: 'milestones-card',
+    traceability: 'quality-card',
+    recommendations: 'atlas-recommendations-card',
+    credentials: 'doctor-patient-credentials',
+    patientSharing: 'patient-sharing-card',
+    quotation: 'atlas-quotation-card'
+  }), []);
+
   const canonicalUrl = publicUrl || (typeof window !== 'undefined' 
     ? `${window.location.origin}/rx/${rxId}` 
     : `https://med-peptides.com/rx/${rxId}`);
@@ -74,6 +97,15 @@ export default function PrescriptionDetailSidebar({
   const availableSections = useMemo(() => {
     return sections.filter(sec => sec && sec.id);
   }, [sections]);
+
+  // Sync active section when activeGcpTab changes from parent
+  useEffect(() => {
+    if (!activeGcpTab) return;
+    const defaultSec = TAB_TO_DEFAULT_SECTION[activeGcpTab];
+    if (defaultSec) {
+      setActiveId(defaultSec);
+    }
+  }, [activeGcpTab, TAB_TO_DEFAULT_SECTION]);
 
   // Support external trigger from PublicStickyActionBar ("Sections" button)
   useEffect(() => {
@@ -116,6 +148,13 @@ export default function PrescriptionDetailSidebar({
 
   const scrollTo = (id) => {
     triggerHaptic('selection');
+
+    // Switch tab if clicking a section belonging to a different tab
+    const targetTab = SECTION_TO_TAB[id] || (availableSections.find(s => s.id === id)?.category === 'formula' ? 'treatment' : null);
+    if (targetTab && onSelectTab && activeGcpTab !== targetTab) {
+      onSelectTab(targetTab);
+    }
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('OPEN_RX_SECTION', { detail: { id } }));
     }

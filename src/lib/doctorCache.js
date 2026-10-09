@@ -511,6 +511,7 @@ export async function getDoctorPortalData(slug, { forceRefresh = false } = {}) {
     license: doctorDoc.licenseNumber || doctorDoc.dhaLicense || doctorDoc.germanMedicalId || 'DHA-P-0319842',
     email: doctorDoc.email || '',
     phone: doctorDoc.phone || doctorDoc.mobile || '',
+    mobile: doctorDoc.mobile || doctorDoc.phone || '',
     location: doctorDoc.location || doctorDoc.city || 'Dubai, UAE',
     subscriptionTier: doctorDoc.subscriptionTier || 'basic',
     slug: opaqueCode, // Codified opaque URL (e.g. "DR-XIHVYF56")
@@ -1152,7 +1153,8 @@ export async function updateDoctorProfile(slug, updates = {}) {
       clinicName: updates.clinic || updates.clinicName || '',
       licenseNumber: updates.license || updates.licenseNumber || '',
       license: updates.license || updates.licenseNumber || '',
-      phone: updates.phone || '',
+      phone: updates.phone || updates.mobile || '',
+      mobile: updates.mobile || updates.phone || '',
       email: updates.email || '',
       location: updates.location || '',
       title: updates.title || 'Dr.',
@@ -1162,6 +1164,11 @@ export async function updateDoctorProfile(slug, updates = {}) {
 
     // Update in Firestore users collection
     await adminDb.collection('users').doc(docId).set(payload, { merge: true });
+
+    // Also update doctors collection if present
+    try {
+      await adminDb.collection('doctors').doc(docId).set(payload, { merge: true });
+    } catch (_) {}
 
     // Invalidate caches
     invalidateDoctorCache();
