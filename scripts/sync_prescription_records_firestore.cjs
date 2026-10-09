@@ -77,9 +77,12 @@ async function runSync() {
     },
     clinicName: 'NOVA Plastic Surgery Clinic, Dubai',
     clinic: 'NOVA Plastic Surgery Clinic, Dubai',
-    treatmentTitle: 'Red Yeast Rice Extract 600 mg',
+    treatmentTitle: 'Metabolic & Lipid Optimization Formula',
     items: [
-      { name: 'Red Yeast Rice Extract', dose: '600 mg', strength: '600 mg' }
+      { name: 'Red Yeast Rice Extract', dose: '600 mg', strength: '600 mg' },
+      { name: 'Berberine HCl', dose: '500 mg', strength: '500 mg' },
+      { name: 'Citrus Bergamot Extract', dose: '500 mg', strength: '500 mg' },
+      { name: 'Chromium Picolinate', dose: '100 mcg', strength: '100 mcg' }
     ],
     duration: '1 month',
     quantity: '120 capsules (1 Month)',
