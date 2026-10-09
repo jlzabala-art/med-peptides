@@ -214,7 +214,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'patient',
       header: 'Patient & Doctor',
-      width: '36%',
+      width: '38%',
       render: (rx) => {
         const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const patientId = rx.patientId || (rx.patient && rx.patient.id) || null;
@@ -225,70 +225,70 @@ export const getPrescriptionColumns = (options = {}) => {
         const clinicName = treatingDocClinic || rx.doctor?.clinic || rx.clinic || rx.clinicName || (String(doctor).toLowerCase().includes('haytham') || String(doctor).toLowerCase().includes('heytham') ? 'Arthregen Clinic' : null);
 
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0, overflow: 'hidden' }}>
-            {/* Primary line: Patient Name (Strict 1 line, native tooltip, copy icon) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0, padding: '2px 0' }}>
+            {/* Primary line: Patient Name (Google Cloud UX: full name visible with natural wrapping) */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', minWidth: 0 }}>
               <span 
                 title={patient}
                 style={{ 
-                  overflow: 'hidden', 
-                  textOverflow: 'ellipsis', 
-                  whiteSpace: 'nowrap',
                   fontWeight: 600, 
                   color: '#202124', 
-                  fontSize: '0.88rem'
+                  fontSize: '0.88rem',
+                  lineHeight: 1.35,
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal'
                 }}
               >
                 {patient}
               </span>
-              {patientId && <CopyableId value={patientId} iconOnly={true} />}
+              {patientId && (
+                <div style={{ flexShrink: 0, marginTop: '2px' }}>
+                  <CopyableId value={patientId} iconOnly={true} />
+                </div>
+              )}
             </div>
 
-            {/* Secondary line: Doctor Name */}
+            {/* Secondary line: Doctor Name (Google Cloud UX: full doctor name visible, wrap allowed) */}
             <div style={{ 
-              fontSize: '0.78rem', 
+              fontSize: '0.80rem', 
               color: '#3c4043', 
               display: 'flex', 
-              alignItems: 'center', 
-              gap: '5px', 
+              alignItems: 'flex-start', 
+              gap: '6px', 
               minWidth: 0,
-              overflow: 'hidden',
-              whiteSpace: 'nowrap'
+              lineHeight: 1.35
             }}>
-              <Stethoscope size={12} color="#5f6368" style={{ flexShrink: 0 }} />
+              <Stethoscope size={13} style={{ color: '#1a73e8', flexShrink: 0, marginTop: '2px' }} />
               <span 
                 title={formattedDoc}
                 style={{ 
                   fontWeight: 500, 
                   color: '#202124',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal'
                 }}
               >
                 {formattedDoc}
               </span>
             </div>
 
-            {/* Tertiary line: Clinic (On its own distinct line) */}
+            {/* Tertiary line: Clinic (On its own distinct line, full text visible) */}
             {clinicName && (
               <div style={{ 
-                fontSize: '0.72rem', 
+                fontSize: '0.73rem', 
                 color: '#5f6368', 
                 display: 'flex', 
-                alignItems: 'center', 
-                gap: '4px', 
+                alignItems: 'flex-start', 
+                gap: '5px', 
                 minWidth: 0,
-                overflow: 'hidden',
-                whiteSpace: 'nowrap'
+                lineHeight: 1.35
               }}>
-                <Building2 size={11} color="#5f6368" style={{ flexShrink: 0 }} />
+                <Building2 size={12} style={{ color: '#5f6368', flexShrink: 0, marginTop: '2px' }} />
                 <span 
                   title={clinicName}
                   style={{ 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    whiteSpace: 'nowrap'
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal'
                   }}
                 >
                   {clinicName}
